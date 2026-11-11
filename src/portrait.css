@@ -108,3 +108,9 @@ body[data-screen=home] .profile-bg{display:none}
 .collection-grid .art>.raised-wing-pair,#modalBody>.art>.raised-wing-pair{height:auto;aspect-ratio:1100/563;max-height:none}
 .hero-visual .avatar-wings[data-tier="2"]{--wing-width:410px}.hero-visual .avatar-wings[data-tier="3"]{--wing-width:460px}
 @media(max-width:600px){.hero-visual .avatar-wings[data-tier="2"]{--wing-width:355px}.hero-visual .avatar-wings[data-tier="3"]{--wing-width:400px}}
+/* Wing roots attach to the back, below the shoulder line, rather than the head. */
+.hero-visual .avatar-wings{top:calc(250px - var(--wing-width)*.235)}
+.bag-wings{--back-wing-width:300px;width:var(--back-wing-width);height:calc(var(--back-wing-width)*.512);top:calc(42% - var(--back-wing-width)*.235);z-index:1}
+.bag-wings[data-tier="1"]{--back-wing-width:360px}.bag-wings[data-tier="2"]{--back-wing-width:420px}.bag-wings[data-tier="3"]{--back-wing-width:470px}
+.bag-wings .raised-wing-pair{transform:scaleY(.86);transform-origin:50% 46%}
+@media(max-width:600px){.hero-visual .avatar-wings{top:calc(224px - var(--wing-width)*.235)}.bag-wings{--back-wing-width:230px}.bag-wings[data-tier="1"]{--back-wing-width:270px}.bag-wings[data-tier="2"]{--back-wing-width:300px}.bag-wings[data-tier="3"]{--back-wing-width:330px}}
