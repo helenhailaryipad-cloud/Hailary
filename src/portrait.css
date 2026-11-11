@@ -66,3 +66,18 @@ main .topline{margin:0 0 18px}.topline .eyebrow{display:none}.topline h1,.bag-to
 .toast{bottom:calc(108px + env(safe-area-inset-bottom));max-width:min(90vw,700px)}
 @media(max-width:600px){nav button{font-size:16px!important}.hero-stage{height:420px;min-height:420px}.hero-stage>.avatar{height:370px}.game-layout .controls{grid-template-columns:1fr}.simple-menu>button{padding:20px}.wallet span{font-size:21px!important}.realm-caption p{font-size:20px!important}.realm-avatar strong{font-size:20px}.realm-avatar small{font-size:18px!important}}
 .realm-bots .realm-avatar{transform:none!important;width:100%;height:auto;max-width:none;margin:0;padding:4px;left:auto!important;top:auto!important}.realm-bots .realm-avatar:hover{transform:none!important}.realm-avatar strong{font-family:inherit!important;font-weight:850}.companion>span{display:none}
+/* Separate the full character from her nameplate so neither can crop the other. */
+.hero-stage{display:flex;flex-direction:column;height:auto;min-height:0;gap:0;overflow:hidden}
+.hero-visual{position:relative;width:100%;height:420px;flex:none;display:flex;align-items:center;justify-content:center}
+.hero-visual>.avatar{position:absolute;inset:24px 10%;width:80%;height:calc(100% - 48px);max-height:none;max-width:80%;margin:0;object-fit:contain;object-position:center;transform:none;animation:hero-idle-safe 4s ease-in-out infinite;filter:drop-shadow(0 7px 3px #5a9d8255)}
+.hero-stage .character-label{position:relative;inset:auto;bottom:auto;left:auto;right:auto;width:calc(100% - 24px);margin:0 12px 12px;flex:none;padding:8px 12px;box-shadow:none}
+.hero-visual .avatar-wings{top:40px;height:260px}.hero-visual .companion{bottom:20px;right:4%}.hero-visual .stage-halo{bottom:18px}
+@keyframes hero-idle-safe{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+header{height:148px;gap:6px;padding:5px 14px 9px}
+main,body[data-screen=home] main{top:152px}
+.brand{height:82px;min-height:82px;background:none;border:0;border-radius:0;box-shadow:none;padding:0;gap:0;justify-content:center;text-shadow:none;flex:none;max-width:100%}
+.logo-wordmark{display:flex;flex-direction:column;align-items:center;line-height:.92;white-space:nowrap;padding:0 5px;filter:drop-shadow(0 2px 0 #874c23) drop-shadow(0 3px 4px #466e7366)}
+.logo-wordmark>span{font-family:Georgia,'Times New Roman',serif;font-weight:900;background:linear-gradient(#fffde4 0%,#ffe6a2 25%,#eeb74e 55%,#fff4b6 72%,#d69032 100%);background-clip:text;-webkit-background-clip:text;color:transparent;-webkit-text-stroke:.6px #9e6328;letter-spacing:1.5px}
+.logo-upper{font-size:29px}.logo-upper i{font-size:22px;font-weight:600}.logo-lower{font-size:43px}.logo-wing{width:76px;height:72px;flex:none;filter:drop-shadow(0 2px 0 #a16b30) drop-shadow(0 3px 4px #528c8566)}.logo-wing-right{transform:scaleX(-1)}
+@media(max-width:600px){.hero-visual{height:390px}.hero-visual>.avatar{inset:24px 7%;width:86%;max-width:86%;height:calc(100% - 48px)}.logo-wing{width:53px;height:61px}.logo-upper{font-size:26px}.logo-lower{font-size:38px}.logo-wordmark>span{letter-spacing:1px}.hero-stage .character-label strong{font-size:30px}.hero-stage .character-label small{font-size:20px!important}}
+@media(prefers-reduced-motion:reduce){.hero-visual>.avatar{animation:none;transform:none}}
