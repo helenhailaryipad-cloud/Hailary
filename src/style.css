@@ -11,3 +11,53 @@
 @media(max-width:650px){header{flex-wrap:nowrap;min-width:620px}.brand{font-size:14px}.brand small{display:none}.wallet{width:auto}.wallet span{flex:none;min-width:85px}.profile{min-width:640px;grid-template-columns:150px minmax(240px,1fr) 180px}.profile-panel{padding:12px}.profile .hero-stage{min-height:0}.stat{font-size:10px}.avatar{max-height:none}.character-label strong{font-size:25px}.location-badge{font-size:9px;left:20px}body[data-screen=home] main{overflow-x:auto}.split{grid-template-columns:1fr}.collection-grid{grid-template-columns:1fr 1fr}.collection-grid .art{height:140px}nav{gap:0}nav button{width:20%;font-size:10px;padding:5px}.topline .badge{display:none}.game-layout .controls{grid-template-columns:1fr 1fr}.game-layout{grid-template-columns:1fr}.topline h1{font-size:26px}.adventure-card{min-height:400px}}
 
 .avatar-wings{filter:drop-shadow(0 0 12px #eedfff55)}.avatar-wings img{filter:none}.hero-stage>.avatar{height:calc(100% - 70px);transform:translateY(-20px)}
+/* Growth is visible: modest first companions, radiant advanced wonders. */
+.avatar-wings {
+  --wing-width:clamp(190px,28vw,340px);
+  width:var(--wing-width);
+  max-width:92%;
+  height:330px;
+  top:calc(24% - 165px);
+  filter:none;
+}
+.avatar-wings[data-tier="1"] { --wing-width:clamp(235px,34vw,420px); }
+.avatar-wings[data-tier="2"] { --wing-width:clamp(280px,41vw,500px); }
+.avatar-wings[data-tier="3"] { --wing-width:clamp(325px,47vw,580px); }
+.avatar-wings img { position:relative;z-index:1; }
+.avatar-wings[data-tier="2"]:before,
+.avatar-wings[data-tier="3"]:before {
+  content:'';position:absolute;inset:20% -8%;pointer-events:none;
+  background:radial-gradient(ellipse,#b8b2ee38,transparent 68%);
+  animation:wonder-glow 4s ease-in-out infinite;
+}
+.avatar-wings[data-tier="3"]:before {
+  inset:8% -12%;background:radial-gradient(ellipse,#ffe6a54d,#dfb8f422 38%,transparent 70%);
+}
+.companion {
+  --dragon-size:clamp(85px,9vw,110px);
+  width:var(--dragon-size);height:var(--dragon-size);
+  bottom:5%;right:-8px;
+}
+.companion[data-tier="1"] { --dragon-size:clamp(115px,12vw,155px); }
+.companion[data-tier="2"] { --dragon-size:clamp(145px,15vw,200px); }
+.companion[data-tier="3"] { --dragon-size:clamp(180px,18vw,245px); }
+.companion img { position:relative;z-index:1;height:85%; }
+.companion span { position:relative;z-index:2;white-space:nowrap;font-size:12px; }
+.companion[data-tier="2"]:before,
+.companion[data-tier="3"]:before {
+  content:'';position:absolute;inset:12% -12% 5%;border-radius:50%;pointer-events:none;
+  background:radial-gradient(ellipse,#b3a1ef33,transparent 70%);
+  animation:wonder-glow 4s ease-in-out infinite;
+}
+.companion[data-tier="3"]:before { background:radial-gradient(ellipse,#f8e3a85c,#acdede22 35%,transparent 70%); }
+.collection-grid .art>.wing-sprite,
+.collection-grid .art>.dragon-sprite,
+#modalBody>.art>.wing-sprite,
+#modalBody>.art>.dragon-sprite {
+  width:calc(55% + var(--visual-tier)*15%);
+  height:calc(55% + var(--visual-tier)*15%);
+}
+@keyframes wonder-glow { 0%,100% { opacity:.45; } 50% { opacity:1; } }
+@media(prefers-reduced-motion:reduce) {
+  .avatar-wings,.avatar-wings:before,.companion:before { animation:none; }
+}
