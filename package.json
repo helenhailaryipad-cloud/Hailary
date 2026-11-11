@@ -1,1 +1,1 @@
-{"name":"wings-of-wonder","version":"0.2.0","type":"module","scripts":{"dev":"node scripts/preview.mjs","build":"node scripts/build.mjs","test":"node scripts/test.mjs"}}
+{"name":"wings-of-wonder","version":"0.3.0","type":"module","scripts":{"dev":"node scripts/preview.mjs","build":"node scripts/build.mjs","test":"node scripts/test.mjs"}}

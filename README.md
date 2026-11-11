@@ -14,6 +14,14 @@ Six named AI adventurers have distinct roles, personalities, independent simulat
 
 Mistwood Hollow, Moonfall Ruins and Emberpeak Sanctum each have three encounters ending in a boss. Battles combine automatic basic attacks with Celestial Arrow, Healing Bloom and Windstep. Telegraphs signal power strikes. Cooldowns use paused game time. No entry currency or daily limit. Victory and partial-clear rewards are guarded against duplicate claims. Existing Castle Defense and Dragon Merge remain available in Adventures. Save version 1 remains backward compatible; dungeonWins and sparWins are optional counters validated by client and server.
 
+## Individual equipment and the Bag
+
+An original painted 4×3 equipment atlas supplies ten equipment slots and crafting materials. The landscape Bag surrounds the ranger with equipped items and provides a six-column inventory. Every item has its own stable instance ID, independent enhancement level (0–20), stars (0–5), gem sockets (0–3), and tier (1/3/5/8). Clicking any piece opens its individual stat, comparison and development window. Duplicate pieces remain independent. Equip, enhancement, stars, sockets, crafting, sorting, best-equipment selection and confirmed spare salvage are functional. Crafting preserves instance identity and all progress.
+
+Legacy six-slot upgrades are inherited by their matching starter pieces. Legacy and materialized state calculate through the same pure `gear-data.js` rules, with no second legacy contribution. Client and cloud use identical validation and power calculations; equipment state is optional for backward-compatible version-1 saves. Invalid template IDs, duplicate instance IDs and wrong-slot assignments are rejected. Dungeon victories drop gear; dungeons and mini-games award materials at completed checkpoints. Full bags convert new gear to crystals. The free test chest provides prototype materials and an Epic spare item.
+
+Equipment adds real Armor Piercing, DMG Bonus, DMG Reduction, Block and Adventure EXP effects. Result windows display awarded experience after the bonus and the actual crafting materials received. Tier colors, stars, enhancement levels and socket indicators are visible on the gear frames. Fortune and Guardian ring instances have separate slots and progress. The character illustration remains the original ranger painting; individual wearable-art transformations are future work.
+
 ## Development
 
 `npm run dev -- --port 4173` serves a local UI preview. Its API returns 503 intentionally, so local testing does not impersonate an account.
