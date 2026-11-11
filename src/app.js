@@ -19,7 +19,7 @@ const item=id=>ITEMS.find(i=>i.id===id),level=()=>1+Math.floor(S.xp/150),gearLev
 function stats(){return globalThis.WonderGear.stats(S)}
 function toast(t){$('#toast').textContent=t;$('#toast').classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('#toast').classList.remove('show'),3000)}
 function save(){S.updated=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch{toast('Device storage is unavailable. Export a backup.')}wallet();if(cloudReady&&!cloudBlocked){clearTimeout(saveTimer);saveTimer=setTimeout(syncCloud,900)}}
-function wallet(){$('#gold').innerHTML='<i>◈</i>'+fmt(S.gold)+' <small>gold</small>';$('#tickets').innerHTML='<i>✧</i>'+fmt(S.tickets)+' <small>wishes</small>';$('#scales').innerHTML='<i>◇</i>'+fmt(S.scales)+' <small>scales</small>'}
+function wallet(){const compact=n=>n>=1000?new Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:1}).format(n):fmt(n);for(const [id,value,icon,label] of [['gold',S.gold,'◈','gold'],['tickets',S.tickets,'✧','wishes'],['scales',S.scales,'◇','scales']]){const cell=$('#'+id);cell.innerHTML='<i>'+icon+'</i>'+compact(value)+' <small>'+label+'</small>';cell.title=fmt(value)+' '+label;cell.setAttribute('aria-label',fmt(value)+' '+label)}}
 function gain(g,t,x){const awardedXP=Math.floor(x*(1+stats().expBonus/100));S.gold+=g;S.tickets+=t;S.xp+=awardedXP;save();return {gold:g,wishes:t,xp:awardedXP}}
 function modal(html){$('#modal').classList.remove('gear-modal');$('#modalBody').innerHTML=html;$('#modal').showModal();$('#modal').scrollTop=0}
 function esc(t){return String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}

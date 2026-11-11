@@ -163,3 +163,20 @@ body[data-screen=home] .hero-stage .character-label strong,body[data-screen=home
 @keyframes wing-left-flutter{0%,100%{transform:rotate(28deg) scaleX(.94)}50%{transform:rotate(41deg) scaleX(1.03)}}
 @keyframes wing-right-flutter{0%,100%{transform:rotate(-28deg) scaleX(.94)}50%{transform:rotate(-41deg) scaleX(1.03)}}
 @media(prefers-reduced-motion:reduce){.world-atmosphere>.godrays,.scene-atmosphere .godrays,.raised-left,.raised-right{animation:none!important}.raised-left{transform:rotate(36deg)}.raised-right{transform:rotate(-36deg)}}
+/* Corner HUD frees more vertical space for the hero and larger back-mounted wings. */
+header{height:92px;min-width:0;display:flex;flex-direction:row;align-items:flex-start;justify-content:space-between;padding:8px 14px;gap:14px}
+.brand{height:72px;min-height:72px;justify-content:flex-start;max-width:46%;gap:0}
+.logo-wing{width:44px;height:58px}.logo-wordmark{padding:0 2px}.logo-upper{font-size:23px}.logo-upper i{font-size:17px}.logo-lower{font-size:32px}
+.wallet{width:auto;display:flex;justify-content:flex-end;align-items:center;gap:8px;flex:none;padding-top:8px}
+.wallet span{flex:none;min-width:94px;max-width:none;font-size:23px!important;padding:10px 9px;text-align:center}.wallet i{margin-right:5px}.wallet small{display:none}
+main,body[data-screen=home] main{top:96px}
+body[data-screen=home] .hero-visual>.avatar{inset:8px 3% 44px;width:94%;max-width:94%;height:calc(100% - 52px)}
+body[data-screen=home] .hero-visual:after{bottom:37px}
+body[data-screen=home] .hero-visual .avatar-wings{--wing-width:400px;--wing-height-limit:95cqh;width:min(var(--wing-width),var(--wing-height-limit),96cqw);max-width:96%;top:42%;filter:drop-shadow(0 1px 2px #2c6c80cc) drop-shadow(0 0 7px #f6e3a477)}
+body[data-screen=home] .hero-visual .avatar-wings[data-tier="1"]{--wing-width:480px;--wing-height-limit:112cqh}
+body[data-screen=home] .hero-visual .avatar-wings[data-tier="2"]{--wing-width:560px;--wing-height-limit:128cqh}
+body[data-screen=home] .hero-visual .avatar-wings[data-tier="3"]{--wing-width:640px;--wing-height-limit:144cqh}
+@media(max-width:600px){header{height:88px;padding:6px 10px;gap:8px}.brand{height:70px;min-height:70px;max-width:45%}.logo-wing{width:26px;height:42px}.logo-upper{font-size:18px}.logo-upper i{font-size:15px}.logo-lower{font-size:26px}.logo-wordmark>span{letter-spacing:.3px}.wallet{gap:4px;padding-top:8px}.wallet span{font-size:20px!important;padding:9px 5px;min-width:61px;border-radius:12px}.wallet i{margin-right:2px}main,body[data-screen=home] main{top:92px}}
+@media(max-width:380px){.logo-wing{display:none}.brand{max-width:35%}.wallet span{font-size:19px!important;min-width:58px}}
+@media(max-width:600px){.logo-wing{display:none}.brand{max-width:33%}.wallet span{min-width:0;width:72px;font-size:20px!important;padding:9px 3px}.wallet i{display:block;font-size:17px;line-height:1;margin:0 0 3px}.wallet{padding-top:2px}.logo-lower{font-size:27px}}
+@media(max-width:380px){.wallet span{width:66px;font-size:19px!important}.logo-lower{font-size:24px}.logo-upper{font-size:17px}}
