@@ -258,3 +258,5 @@ body[data-screen=intro] .world-depth{background-position:center calc(50% + var(-
 .logo-wordmark>span{background:linear-gradient(#fff9ba 0%,#ffe26a 23%,#ffc526 47%,#e8a415 58%,#fff39c 74%,#d38a09 100%);background-clip:text;-webkit-background-clip:text;-webkit-text-stroke:.6px #985e09;color:transparent}
 .logo-wordmark{filter:drop-shadow(0 2px 0 #83501a) drop-shadow(0 0 5px #fff2a0) drop-shadow(0 0 11px #ffd345b3)}
 .logo-wing{filter:drop-shadow(0 2px 0 #a16b30) drop-shadow(0 0 6px #ffe576a6)}
+/* Keep the full-screen blurred fill covered while the foreground moves down. */
+body[data-screen=intro] .world-depth{inset:calc(-20px - var(--intro-drop,0px));background-repeat:no-repeat;background-position:center calc(50% + var(--intro-drop,0px))}
