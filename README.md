@@ -47,3 +47,5 @@ Future scope: original class options, more distinct item art, animation sets, re
 Portrait iPad layout: Hero shows the character and readable stats; Equipment is a dedicated tab with all ten slots, independent upgrade windows, inventory, wings and dragon links. Portrait navigation stays visible in two rows.
 
 The whole game now uses one centered portrait interface in every orientation. Five navigation tabs: Hero, Equipment, Play, Wonders, More. More opens Realm, Wishes and Journal; Wonders also links to Wishes. All existing gameplay, individual gear upgrades and saves are retained.
+
+Home is a fixed portrait composition: stationary hero on a layered pedestal, lightly translucent Attributes panel, no scrolling. Short screens collapse Attributes into the accessible power button, opening the full stats dialog. Atmosphere uses CSS godrays, two mist layers, 18 bounded depth particles and pointer parallax coalesced into one requested frame, with reduced motion and hidden-page handling.
