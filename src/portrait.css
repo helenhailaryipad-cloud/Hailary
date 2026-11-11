@@ -192,7 +192,7 @@ body[data-screen=home] .stats-panel{padding-top:10px;padding-bottom:10px}
 .gear-stars,.compact-cell .gear-stars,.doll-slot .gear-stars{font-size:15px;min-height:20px;padding:2px;top:3px;left:3px}.gear-gems,.compact-cell .gear-gems,.doll-slot .gear-gems{font-size:14px}
 @media(max-width:600px){body[data-screen=home] .hero-stage .character-label{gap:4px 12px}body[data-screen=home] .hero-stage .character-label strong{font-size:27px}}
 /* Give the wings a clearly visible span around the full-size heroine. */
-body[data-screen=home] .hero-visual .avatar-wings{--wing-width:600px;--wing-height-limit:125cqh;--render-wing-width:min(var(--wing-width),var(--wing-height-limit),calc(100vw - 28px));width:var(--render-wing-width);height:calc(var(--render-wing-width)*.512);max-width:none;aspect-ratio:auto;top:42%;filter:drop-shadow(0 2px 2px #37647dcc) drop-shadow(0 0 7px #d7bb6c99)}
+body[data-screen=home] .hero-visual .avatar-wings{--wing-width:600px;--wing-height-limit:125cqh;--render-wing-width:min(var(--wing-width),var(--wing-height-limit),96cqw,calc(100vw - 28px));width:var(--render-wing-width);height:calc(var(--render-wing-width)*.512);max-width:none;aspect-ratio:auto;top:42%;filter:drop-shadow(0 2px 2px #37647dcc) drop-shadow(0 0 7px #d7bb6c99)}
 body[data-screen=home] .hero-visual .avatar-wings[data-tier="1"]{--wing-width:720px;--wing-height-limit:145cqh}
 body[data-screen=home] .hero-visual .avatar-wings[data-tier="2"]{--wing-width:820px;--wing-height-limit:165cqh}
 body[data-screen=home] .hero-visual .avatar-wings[data-tier="3"]{--wing-width:920px;--wing-height-limit:180cqh}
