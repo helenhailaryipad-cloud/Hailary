@@ -92,3 +92,19 @@ body[data-screen=home] .profile-bg{display:none}
 .stats-panel:before{content:'Attributes';display:block;grid-column:1/-1;font-size:29px;font-weight:850;position:static;background:none;border:0;transform:none;width:auto;height:auto;color:#fff;margin:0 0 8px}
 .stats-panel .power{margin:0 0 6px;padding:0 0 18px}.stats-panel .stat{padding:10px 0}
 @media(max-width:600px){.hero-visual{height:520px}.hero-visual>.avatar{inset:28px 4%;width:92%;max-width:92%;height:calc(100% - 56px)}.hero-visual .avatar-wings{top:65px;height:285px}.hero-stage .character-label{padding:10px 8px}.hero-stage .character-label small{font-size:20px!important}.stats-panel{padding:22px}.hero-visual .companion{right:2%;bottom:34px}}
+/* Lift both wing tips toward the sky, with the roots behind the shoulders. */
+.raised-wing-pair{display:block;position:relative;overflow:visible;flex:none}
+.raised-half{display:block;position:absolute;inset:0;background:url('assets/wings.webp') center/100% 100% no-repeat;transform-origin:50% 46%;pointer-events:none}
+.raised-left{clip-path:inset(0 50% 0 0);transform:rotate(36deg)}
+.raised-right{clip-path:inset(0 0 0 50%);transform:rotate(-36deg)}
+.hero-visual .avatar-wings{--wing-width:300px;width:var(--wing-width);height:calc(var(--wing-width)*.512);max-width:96%;top:calc(175px - var(--wing-width)*.235);left:50%;z-index:2;opacity:1;animation:wingfloat 4s ease-in-out infinite}
+.hero-visual .avatar-wings[data-tier="1"]{--wing-width:370px}.hero-visual .avatar-wings[data-tier="2"]{--wing-width:440px}.hero-visual .avatar-wings[data-tier="3"]{--wing-width:510px}
+.hero-visual>.avatar{z-index:3}
+.bag-wings{width:300px;height:154px;top:12%;max-width:150%}
+.bag-wings[data-tier="1"]{width:360px;height:184px}.bag-wings[data-tier="2"]{width:420px;height:215px}.bag-wings[data-tier="3"]{width:470px;height:241px}
+.art>.raised-wing-pair,.tiny-art>.raised-wing-pair{aspect-ratio:1100/563;height:auto;max-height:75%}
+@media(max-width:600px){.hero-visual .avatar-wings{--wing-width:260px;top:calc(157px - var(--wing-width)*.235)}.hero-visual .avatar-wings[data-tier="1"]{--wing-width:310px}.hero-visual .avatar-wings[data-tier="2"]{--wing-width:355px}.hero-visual .avatar-wings[data-tier="3"]{--wing-width:400px}.bag-wings{max-width:none;width:230px;height:118px}.bag-wings[data-tier="1"]{width:270px;height:138px}.bag-wings[data-tier="2"]{width:300px;height:154px}.bag-wings[data-tier="3"]{width:330px;height:169px}}
+.hero-visual .raised-wing-pair{transform:scaleY(.86);transform-origin:50% 46%}
+.collection-grid .art>.raised-wing-pair,#modalBody>.art>.raised-wing-pair{height:auto;aspect-ratio:1100/563;max-height:none}
+.hero-visual .avatar-wings[data-tier="2"]{--wing-width:410px}.hero-visual .avatar-wings[data-tier="3"]{--wing-width:460px}
+@media(max-width:600px){.hero-visual .avatar-wings[data-tier="2"]{--wing-width:355px}.hero-visual .avatar-wings[data-tier="3"]{--wing-width:400px}}
