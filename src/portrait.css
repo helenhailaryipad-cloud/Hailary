@@ -1,0 +1,51 @@
+/* Equipment lives in its own tab. The hero screen has room to breathe. */
+.profile{grid-template-columns:280px minmax(0,1fr);max-width:1080px;margin:auto}
+.hero-equipment-link{width:100%;margin-top:20px}
+.equipment-companions{display:flex;gap:18px;grid-column:1/-1;grid-row:2}
+.equipment-companions .equip-special{flex:1;min-width:0;margin:0;background:#387fa8;border:2px solid #efffff;border-radius:20px;min-height:92px;padding:12px}
+.equipment-companions .tiny-art{width:90px;height:64px;flex:none}
+.equipment-companions .equip-special small{font-size:20px!important}
+.bag-layout{height:auto;align-items:start}
+.inventory-panel{grid-column:2;grid-row:1;min-width:0}
+.portrait-tip{display:none!important}
+@media(orientation:portrait){
+ .app{max-width:900px;margin:auto}
+ header{height:126px;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:10px;padding:8px 16px}
+ .brand{font-size:23px;min-height:44px;padding:4px 15px;gap:8px}.brand small{display:none}.crest{font-size:28px}
+ .wallet{display:flex;justify-content:center;gap:12px;width:100%}.wallet span{min-width:0;flex:1;max-width:220px;text-align:center;font-size:24px!important;padding:8px 12px}.wallet small{display:none}
+ main,body[data-screen=home] main{inset:130px 0 calc(168px + env(safe-area-inset-bottom));padding:12px 20px 24px;overflow-y:auto;overflow-x:hidden}
+ nav{height:calc(168px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(2,70px);gap:7px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));align-content:center;background:linear-gradient(#4baabfe8,#3595a9);border-top:2px solid #ecfff1}
+ nav button{width:100%;min-width:0;min-height:70px;height:70px;font-size:20px!important;padding:5px 3px;border-radius:16px;line-height:1.25}nav .navico{font-size:25px;line-height:1;margin:0 0 5px}
+ .profile{display:flex;flex-direction:column;gap:18px;height:auto;min-width:0;padding:0;overflow:visible}
+ .hero-stage{order:0;width:100%;height:490px;min-height:490px;flex:none;border:2px solid #effff4;border-radius:26px;overflow:hidden;background:linear-gradient(#b7eee50a,#2c95ae33)}
+ .profile-bg{border-radius:26px}.hero-stage>.avatar{height:435px;max-height:none;max-width:78%;object-fit:contain;align-self:flex-start;margin-top:15px}
+ .avatar-wings{top:4%;height:300px;--wing-width:240px;max-width:90%}.avatar-wings[data-tier="1"]{--wing-width:310px}.avatar-wings[data-tier="2"]{--wing-width:390px}.avatar-wings[data-tier="3"]{--wing-width:460px}
+ .companion{right:4%;bottom:120px;width:180px;height:140px}.companion span{font-size:22px!important}
+ .character-label{bottom:12px;left:12px;right:12px;width:auto}.character-label>span{display:none}.character-label strong{font-size:36px}.character-label small{font-size:21px!important}
+ .stats-panel{order:1;width:100%;max-height:none;overflow:visible;display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;padding:24px}
+ .stats-panel>.eyebrow,.stats-panel>h2,.stats-panel>.level-pill,.stats-panel>.progress,.stats-panel>.xp{display:none}
+ .power{grid-column:1/-1;margin:0 0 8px;padding:0 0 16px}.power strong{font-size:40px}.power small{font-size:20px!important}
+ .stat{min-width:0;margin:0;padding:8px 0;gap:8px}.stat,.stat span,.stat b{font-size:24px!important}.hero-equipment-link{margin:8px 0 0;grid-column:1/-1}
+ .bag-top{margin-bottom:18px;gap:12px}.bag-top h1{font-size:34px!important}
+ .bag-layout{display:flex;flex-direction:column;gap:20px;min-width:0;min-height:0}
+ .doll-panel{width:100%;min-height:780px;height:780px;flex:none;--doll-cell:100px}
+ .doll-name{left:115px;right:115px}.doll-left,.doll-right{top:110px;bottom:90px;width:100px;gap:12px}.doll-slot .equipment-cell{height:100px;width:100px;min-height:100px}
+ .bag-doll{inset:120px 105px 90px}.doll-actions{bottom:16px}
+ .equipment-companions{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:14px}.equipment-companions .equip-special{font-size:23px!important}.equipment-companions .tiny-art{width:70px}
+ .inventory-panel{width:100%;min-height:700px}.inventory-materials{grid-template-columns:repeat(2,minmax(0,1fr))}.inventory-scroll{max-height:none;overflow:visible}.inventory-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .collection-grid,.settings,.split,.adventure-grid,.grid{grid-template-columns:1fr}.topline{gap:12px;flex-wrap:wrap}.topline h1{font-size:34px!important}.topline .badge{display:none}.tabs{flex-wrap:wrap}
+ .realm-layout,.realm-layout>aside{grid-template-columns:1fr}.realm-scene{height:470px}.dungeon-grid{grid-template-columns:1fr}.dungeon-party{align-items:start}
+ .game-layout{grid-template-columns:1fr}.game-layout>.panel{height:auto;min-height:320px}.game-layout .controls{max-height:380px}.canvas-wrap{min-width:0}canvas{width:100%;max-width:100%}
+ .toast{bottom:calc(180px + env(safe-area-inset-bottom));font-size:23px}
+ .gear-modal{width:96vw;max-height:92dvh}.gear-detail-header h2{overflow-wrap:anywhere}.gear-detail-header{padding:20px 80px 20px 20px;gap:16px}.detail-item-icon{width:100px;height:100px}
+}
+@media(orientation:portrait) and (max-width:600px){
+ main,body[data-screen=home] main{padding:10px 12px 20px}.wallet span{font-size:21px!important;padding:7px 5px}.wallet{gap:6px}
+ nav button{font-size:16px!important}.hero-stage{height:455px;min-height:455px}.hero-stage>.avatar{height:400px}.companion{width:135px;right:0;bottom:115px}
+ .stats-panel{grid-template-columns:1fr;padding:20px}.stat,.stat span,.stat b{font-size:24px!important}
+ .doll-panel{min-height:760px;height:760px}.doll-left,.doll-right{width:84px}.doll-slot .equipment-cell{width:84px;height:84px;min-height:84px}.doll-name{left:85px;right:85px}.doll-name strong{font-size:26px}.doll-name>span{font-size:20px!important}.bag-doll{inset:130px 76px 90px}
+ .equipment-companions{grid-template-columns:1fr}.inventory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.inventory-panel{padding:16px}.bag-tabs{gap:6px}.bag-tabs button{min-width:0;flex:1;font-size:21px!important;padding:10px}
+ .gear-detail-header{padding-left:14px;gap:10px}.detail-item-icon{width:72px;height:72px}.gear-detail-header h2{font-size:25px!important}.gear-detail-header p{font-size:20px!important}.gear-detail-body{padding:8px 16px 20px}.gear-stat-line,.gear-stat-line span,.gear-stat-line b{font-size:23px!important}
+}
+@media(orientation:portrait){.companion{--dragon-size:110px;width:var(--dragon-size);height:var(--dragon-size)}.companion[data-tier="1"]{--dragon-size:145px}.companion[data-tier="2"]{--dragon-size:185px}.companion[data-tier="3"]{--dragon-size:225px}}
+@media(orientation:portrait) and (max-width:600px){.companion{--dragon-size:85px}.companion[data-tier="1"]{--dragon-size:110px}.companion[data-tier="2"]{--dragon-size:140px}.companion[data-tier="3"]{--dragon-size:170px}}

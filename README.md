@@ -43,3 +43,5 @@ The combat side panel keeps Help, Pause/Resume and Finish outside its scrollable
 Original generated environment, ranger, feather wings and dragon art are included as WebP. The available image generation interface cannot select or attest a model specifically named GPT Image 2.6. Color variations currently share the base dragon and wing paintings; more species silhouettes and individual outfit art can replace these assets. The sprite rendering and data-driven item catalog are the starting point for a later 3D renderer. Account data can keep the same shape while the display engine changes.
 
 Future scope: original class options, more distinct item art, animation sets, real multiplayer sessions, server-authoritative progression and mobile performance profiling on physical iPads. No claim is made that current prototype balance matches Huntopia.
+
+Portrait iPad layout: Hero shows the character and readable stats; Equipment is a dedicated tab with all ten slots, independent upgrade windows, inventory, wings and dragon links. Portrait navigation stays visible in two rows.
