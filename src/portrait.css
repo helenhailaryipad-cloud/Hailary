@@ -153,3 +153,13 @@ body[data-screen=home] .scene-atmosphere{border-radius:0}
 body[data-screen=home] .hero-visual:after{content:'';position:absolute;left:36%;bottom:48px;width:28%;height:13px;border-radius:50%;background:#5f624340;filter:blur(5px);z-index:2;pointer-events:none}
 body[data-screen=home] .world-depth{inset:0;background-size:auto var(--garden-height,150vh);background-position:center var(--garden-top,-20vh);background-repeat:no-repeat;transform:none;will-change:auto}
 body[data-screen=home] .hero-stage .character-label strong,body[data-screen=home] .hero-stage .character-label small{text-shadow:0 2px 3px #244f72,0 0 7px #244f72,1px 0 #244f72,-1px 0 #244f72}
+/* Visible moving sunbeams and living wings, while Reyna stays planted. */
+.world-atmosphere>.godrays{inset:-20%;background:repeating-conic-gradient(from 142deg at 77% -8%,transparent 0deg 6deg,#fff3bba6 8deg 11deg,transparent 14deg 24deg);mask-image:linear-gradient(#000 0%,#000b 48%,transparent 94%);transform-origin:77% 0%;animation:sunbeam-sweep 9s ease-in-out infinite alternate;mix-blend-mode:screen}
+.scene-atmosphere .godrays{background:repeating-linear-gradient(112deg,transparent 0 68px,#fff5c54d 85px,#fff8d97a 105px,transparent 140px 205px);mask-image:linear-gradient(#000a,transparent 95%);animation:near-sunbeam-sweep 8s ease-in-out infinite alternate;opacity:.7}
+@keyframes sunbeam-sweep{0%{transform:translate(calc(var(--parallax-x,0px)*-.3),calc(var(--parallax-y,0px)*-.3)) rotate(-6deg);opacity:.52}100%{transform:translate(calc(var(--parallax-x,0px)*-.3 + 24px),calc(var(--parallax-y,0px)*-.3)) rotate(7deg);opacity:.92}}
+@keyframes near-sunbeam-sweep{from{transform:translateX(-40px);opacity:.4}to{transform:translateX(40px);opacity:.72}}
+.hero-visual .avatar-wings{filter:drop-shadow(0 1px 1px #357589bb) drop-shadow(0 0 5px #e6efc777)}
+.raised-left{animation:wing-left-flutter 3.2s ease-in-out infinite}.raised-right{animation:wing-right-flutter 3.2s ease-in-out infinite}
+@keyframes wing-left-flutter{0%,100%{transform:rotate(28deg) scaleX(.94)}50%{transform:rotate(41deg) scaleX(1.03)}}
+@keyframes wing-right-flutter{0%,100%{transform:rotate(-28deg) scaleX(.94)}50%{transform:rotate(-41deg) scaleX(1.03)}}
+@media(prefers-reduced-motion:reduce){.world-atmosphere>.godrays,.scene-atmosphere .godrays,.raised-left,.raised-right{animation:none!important}.raised-left{transform:rotate(36deg)}.raised-right{transform:rotate(-36deg)}}
