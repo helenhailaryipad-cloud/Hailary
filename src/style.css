@@ -67,3 +67,32 @@
 @media(orientation:landscape) and (max-height:800px){.portal-scene{height:170px}.portal-ring{height:135px;width:105px}.portal-ring span{font-size:45px}.portal-content{padding:18px}.portal-content h2{font-size:27px}.realm-scene{height:280px}.realm-caption p{font-size:10px}.realm-caption h2{font-size:27px}.realm-avatar{padding:4px}.bot-row{min-height:61px}.realm-party{padding:17px}.dungeon-feature{padding:19px 24px}}
 @media(orientation:portrait){.realm-layout{grid-template-columns:1fr}.realm-layout>aside{display:grid;grid-template-columns:1fr 1.5fr;gap:15px}.realm-feed{margin:0}.realm-scene{height:330px}.dungeon-grid{grid-template-columns:1fr}.dungeon-portal{display:grid;grid-template-columns:220px 1fr}.portal-scene{height:100%}.portal-content>p:not(.eyebrow){min-height:0}.dungeon-party{flex-wrap:wrap}.dungeon-party>.rules{text-align:left;max-width:none}}
 @media(max-width:650px){nav button{width:16.666%;min-width:0}.bot-activity{display:none}.realm-avatar{min-width:50px}.realm-avatar strong{font-size:10px}.bot-emblem{height:36px;width:36px;font-size:19px}.realm-avatar small{font-size:7px}.realm-caption{max-width:240px}.realm-layout>aside{grid-template-columns:1fr}.dungeon-feature{display:block}.dungeon-feature button{margin-top:15px}.dungeon-portal{display:block}.portal-scene{height:180px}.dungeon-party{gap:12px}.dungeon-party>.rules{display:none}}
+/* Brighter interactive foreground, with the scene kept atmospheric. */
+.hero-stage>.avatar{filter:brightness(1.1) saturate(1.12) contrast(1.04) drop-shadow(0 1px 2px #d8f0e9aa) drop-shadow(0 12px 15px #091e3f99)}
+button{background:linear-gradient(180deg,#365e70,#1d3f55);border-color:#c6b78a99;color:#fff0cb;box-shadow:inset 0 1px #ddf6ef26,0 2px 7px #05152655}
+button.primary,.primary{background:linear-gradient(180deg,#64bbae,#337e84);border-color:#ffe2a7;color:#fff9df;text-shadow:0 1px 2px #164854;box-shadow:inset 0 1px #f1fff577,0 0 16px #7de3d42b,0 3px 8px #051a2e66}
+button:hover:not(:disabled){filter:brightness(1.14);border-color:#ffe8b5}
+button:focus-visible{outline:2px solid #fff0ba;outline-offset:3px}
+.gear{background:radial-gradient(ellipse at 50% 25%,#507c7980,#15394c 76%);border-color:#dcc59188;box-shadow:inset 0 1px #efffe322,0 2px 8px #061c3033}
+.gear-icon{color:#ffe09a;text-shadow:0 0 11px #ffe7ad66,0 1px 2px #112b3d;font-size:30px}
+.gear small,.equip-special small{color:#bfd8d6}
+.equip-special{background:linear-gradient(100deg,#365d6588,#1b3c50cc);border-color:#d0bb8588}
+.stat span{color:#c6ddda}.stat b{color:#fff0c7}.power strong{color:#ffe6a2;text-shadow:0 0 16px #f4d78b55}
+nav button{background:transparent;border-color:transparent;box-shadow:none;color:#d1e5e0}
+nav .navico{color:#ffe2a5;text-shadow:0 1px 2px #05172b,0 0 12px #f9db8d55}
+nav button.active{background:radial-gradient(ellipse at center,#6dbfc044,transparent 72%);color:#fff3cd}
+.realm-avatar{background:transparent;box-shadow:none;border-color:transparent}
+.bot-emblem,.bot-dot{box-shadow:0 0 0 1px #e7edbc55,0 0 19px color-mix(in srgb,var(--bot-color) 32%,transparent),inset 0 0 0 3px #0b283d77}
+.bot-row{background:linear-gradient(100deg,#285367df,#133348e8);border-color:#c6ba8799}
+.bot-row strong{color:#fff0c8}.bot-activity{color:#e0ecd1}
+.portal-ring{border-width:3px;background:radial-gradient(ellipse,#9de3dd75,#183a58 75%);box-shadow:0 0 0 5px #0a253655,0 0 31px color-mix(in srgb,var(--portal-color) 62%,transparent),inset 0 0 24px #c8f4ef55}
+.portal-ring:before{border-color:#f4f6ceaa}.portal-ring span{color:#fff1bf;text-shadow:0 0 16px var(--portal-color),0 0 4px #fff8dc}
+.portal-level{color:#f1edd2;text-shadow:0 1px 3px #0a2337}
+.portal-rewards span{padding:5px 7px;background:#38606088;border:1px solid #e0c58c55;border-radius:4px;color:#fff0bf}
+.collection-grid .card .rarity{color:#ffe1a1}.collection-grid .selected{border-color:#ffe1a1;box-shadow:inset 0 0 24px #a5d6b80d,0 0 15px #e8c68035}
+.game-hud span{background:#234a5ade;border-color:#cebb8199;color:#fff1c9}
+.controls button{border-color:#dfc48da6}.controls button small{color:#c1dedb}
+#skillBurst:not(:disabled){box-shadow:inset 0 1px #fff2cc66,0 0 20px #f4da6c40;border-color:#ffe3a2}
+#skillHeal:not(:disabled){background:linear-gradient(180deg,#3d8c77,#245d56);border-color:#b4f1cb}
+#skillDodge:not(:disabled){background:linear-gradient(180deg,#467ea6,#2b4d79);border-color:#bfe7ff}
+.egg-preview{border-color:#fff8db;box-shadow:inset 6px 7px 12px #fff9,0 0 15px #d7f5dc44}
