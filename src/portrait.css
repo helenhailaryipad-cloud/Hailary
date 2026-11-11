@@ -260,3 +260,10 @@ body[data-screen=intro] .world-depth{background-position:center calc(50% + var(-
 .logo-wing{filter:drop-shadow(0 2px 0 #a16b30) drop-shadow(0 0 6px #ffe576a6)}
 /* Keep the full-screen blurred fill covered while the foreground moves down. */
 body[data-screen=intro] .world-depth{inset:calc(-20px - var(--intro-drop,0px));background-repeat:no-repeat;background-position:center calc(50% + var(--intro-drop,0px))}
+/* The logo and balances sit directly on the same scene, without separate HUD cards. */
+header,body[data-screen=intro] header,body[data-screen=home] header{background:none;border:0;box-shadow:none;backdrop-filter:none}
+header:before,header:after{display:none}
+header .brand{background:none;border:0;box-shadow:none;backdrop-filter:none}
+header .wallet{background:none;border:0;box-shadow:none;backdrop-filter:none}
+header .wallet>span{background:none;border:0;border-radius:0;box-shadow:none;backdrop-filter:none;color:#fff;text-shadow:0 2px 3px #244f72,0 0 6px #244f72,1px 0 #244f72,-1px 0 #244f72}
+header .wallet i{color:#ffe475;text-shadow:0 1px 2px #6d5520,0 0 5px #ffd56577}
