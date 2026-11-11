@@ -51,3 +51,5 @@ The whole game now uses one centered portrait interface in every orientation. Fi
 Home is a fixed portrait composition: stationary hero on a layered pedestal, lightly translucent Attributes panel, no scrolling. Short screens collapse Attributes into the accessible power button, opening the full stats dialog. Atmosphere uses CSS godrays, two mist layers, 18 bounded depth particles and pointer parallax coalesced into one requested frame, with reduced motion and hidden-page handling.
 
 Optional 3D art intro: original pre-rendered REINA splash (not an interactive 3D model). Enter garden opens the existing game. Back to 2D skips the intro on future visits on this device. More > 3D intro reopens the comparison. Presentation choice uses its own local key, never changes game saves or equipment.
+
+The 3D-rendered intro now uses one seamless full-screen garden composition, with the hero and pedestal integrated into the environment. Live HUD and translucent stats overlay the quiet foreground. The original 2D game remains accessible with Back to 2D.
