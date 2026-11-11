@@ -237,7 +237,7 @@ body[data-screen=intro] .wallet{display:flex}body[data-screen=intro] main{top:96
 @media(max-height:750px){.intro-screen{gap:6px}.intro-stats-grid>div{padding:2px 0;line-height:1.3}.intro-stats-heading{margin-bottom:2px}.intro-footer{padding:7px 12px}.intro-attributes{padding-top:7px;padding-bottom:7px}}
 /* One continuous 3D-rendered scene, with live UI layered above it. */
 body[data-screen=intro] .app{background:transparent;box-shadow:none}
-body[data-screen=intro] .world-depth{inset:-20px;background-image:url('assets/reina-3d-world.webp');background-position:center;background-size:cover;transform:none;filter:blur(14px);opacity:1}
+body[data-screen=intro] .world-depth{inset:-20px;background-image:url('assets/reina-3d-world-soft.webp');background-position:center;background-size:cover;transform:none;filter:blur(14px);opacity:1}
 body[data-screen=intro] header{background:linear-gradient(#5a9bb522,transparent)}
 body[data-screen=intro] main{inset:0;padding:0 16px max(12px,env(safe-area-inset-bottom));overflow:hidden;isolation:isolate}
 body[data-screen=intro] .intro-screen{justify-content:flex-end;height:100%;gap:10px}
