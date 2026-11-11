@@ -113,3 +113,80 @@ nav button.active{background:radial-gradient(ellipse at center,#6dbfc044,transpa
 .inventory-piece>small{font-size:9px;min-height:28px}.doll-slot>small{font-size:8px;line-height:1.4}@media(max-width:1100px){.inventory-piece>small{font-size:8px}.doll-slot>small{font-size:7px}}
 
 .slot-spiritluck .equipment-art{filter:hue-rotate(140deg) saturate(1.18) drop-shadow(0 2px 3px #061c3688)}
+/* Square item art and readable tier / enhancement badges on iPad. */
+.equipment-cell{aspect-ratio:1;min-height:0;height:auto}
+.equipment-cell .equipment-art{position:absolute;inset:auto;top:50%;left:50%;width:calc(100% - 12px);height:auto;aspect-ratio:1;transform:translate(-50%,-50%)}
+.gear-tier{top:3px;right:3px;min-width:32px;min-height:23px;display:flex;align-items:center;justify-content:center;padding:3px 5px;border:1px solid #f8dfaaad;border-radius:4px;background:#06182ff2;color:#fff3c9;font:800 16px/1 Manrope,system-ui,sans-serif;letter-spacing:0;white-space:nowrap;box-shadow:0 1px 4px #0008}
+.gear-enhance{bottom:3px;right:3px;min-width:29px;min-height:20px;display:flex;align-items:center;justify-content:center;padding:3px 4px;background:#071a30ed;border:1px solid #e5cf936b;border-radius:3px;font-size:13px;line-height:1;color:#fff4c5;letter-spacing:0}
+.gear-stars{top:4px;left:3px;font-size:11px;letter-spacing:1px;color:#fff1a6;filter:drop-shadow(0 1px 1px #07172f)}
+.gear-gems{bottom:5px;left:4px;font-size:11px}.worn-dot{bottom:5px;left:5px;font-size:10px}
+.equipment-home-grid{--home-cell:clamp(48px,calc((100dvh - 430px)/5),70px);grid-template-columns:repeat(2,minmax(0,1fr));justify-items:center;gap:7px}
+.equipment-home-grid .compact-cell{width:var(--home-cell);height:var(--home-cell);min-height:0;aspect-ratio:1;padding:5px}
+.equipment-home-grid .compact-cell .gear-tier{font-size:15px;min-width:30px;min-height:22px}
+.equipment-home-grid .compact-cell .gear-enhance{font-size:12px;min-width:27px;min-height:18px}
+.equipment-home-grid .compact-cell .gear-stars{font-size:10px}
+.equipment-panel h3{display:none}
+.inventory-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:15px 10px}
+.inventory-piece>.equipment-cell{height:auto;min-height:0;aspect-ratio:1}
+.inventory-piece>small{font-size:10px;line-height:1.45;min-height:29px}
+.doll-panel{--doll-cell:clamp(48px,calc((100dvh - 440px)/5),72px)}
+.doll-left,.doll-right{width:var(--doll-cell)}
+.doll-slot .equipment-cell{width:var(--doll-cell);height:var(--doll-cell);min-height:0;aspect-ratio:1}
+.doll-slot>small{font-size:8px;line-height:1.3}
+.detail-item-icon{width:96px;height:96px;aspect-ratio:1}
+.detail-item-icon>span:last-child{top:3px;right:3px;min-width:34px;min-height:25px;padding:4px 5px;border-radius:4px;background:#06182ff2;border:1px solid #f8dfaaad;font:800 17px/1 Manrope,system-ui,sans-serif;display:flex;align-items:center;justify-content:center}
+@media(max-width:1100px){.equipment-home-grid{--home-cell:clamp(48px,calc((100dvh - 430px)/5),62px)}.inventory-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:13px 8px}.inventory-piece>small{font-size:9px}.doll-slot .gear-tier{font-size:14px;min-width:29px;min-height:21px}.doll-slot .gear-enhance{font-size:12px;min-width:26px;min-height:18px}}
+@media(orientation:landscape) and (max-height:800px){.equipment-home-grid .compact-cell{width:var(--home-cell);height:var(--home-cell);min-height:0}.doll-slot .equipment-cell{min-height:0}.equipment-panel h3{display:none}}
+@media(max-width:650px){.inventory-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.inventory-piece>small{font-size:9px}.detail-item-icon{width:82px;height:82px}}
+/* Bright, substantial game typography instead of faint miniature captions. */
+:root{--ink:#fff5df;--muted:#d4e6e2}
+body{font-size:14px;font-weight:500;color:#fff5df}
+p,.rules{color:#d8e8e3}
+button{font-weight:700;color:#fff5dc}
+button:disabled{opacity:.62}
+h1,h2,h3{color:#fff0c7;font-weight:600}
+.eyebrow,.profile .eyebrow{font-size:10px;color:#ffe2a2;font-weight:800;letter-spacing:1.5px}
+.brand small{font-size:9px;letter-spacing:1.1px;color:#e6e2c9;opacity:1}
+.wallet span{font-size:14px}.wallet small{font-size:11px;color:#e1ede5}
+.badge{font-size:11px;color:#eff2dc;letter-spacing:.5px}
+.stat{font-size:13px}.stat span{color:#e1eeea}.stat b{color:#fff0b8;font-weight:800}
+.level-pill,.xp{font-size:11px;color:#d6f4e6;font-weight:700}
+.power small{font-size:10px;color:#ffe4a6;font-weight:800;letter-spacing:1px}
+.power strong{color:#ffe4a1;font-weight:600}
+.profile-note{font-size:11px;color:#d2e5e0}
+.character-label span{font-size:10px;color:#fff0ca;letter-spacing:1.5px}.character-label small{font-size:12px;color:#ecf5e9;font-weight:600}
+.equip-special{font-size:12px;color:#fff0c8}.equip-special small{font-size:11px;color:#d2e8df;font-weight:500}
+.equipment-panel .armory-open{font-size:12px}
+nav button{font-size:13px;font-weight:700;color:#e1eee5}nav button.active{color:#fff0b5}nav .navico{font-size:29px}
+.bag-top .eyebrow{font-size:10px}.bag-top>button{font-size:12px}.doll-name>span{font-size:12px;font-weight:700;color:#f4edc6}
+.doll-slot>small{font-size:10px;color:#f0f3df;line-height:1.4;text-shadow:0 1px 3px #03152b;font-weight:600}
+.inventory-head>span{font-size:11px;color:#dceadd}.inventory-materials b{font-size:15px;color:#ffe4a5}.inventory-materials small{font-size:11px;color:#e2efe7}
+.inventory-materials>span{grid-template-columns:30px 1fr;grid-template-rows:21px 16px}.inventory-materials .equipment-art{width:30px;height:30px}
+.bag-tabs button{font-size:12px}.inventory-piece>small{font-size:11px;line-height:1.5;min-height:33px;color:#e6eee2;font-weight:600}
+.inventory-footer>span{font-size:11px;color:#d7e7df;line-height:1.5}.inventory-footer button{font-size:12px}
+.material-cell>small{font-size:11px;color:#e0eee9}.material-cell>b{font-size:15px}
+.gear-detail-header p{font-size:12px;color:#edf5df}.gear-detail-header p strong{color:#c4ffab}.equip-label{font-size:11px;color:#f3fff1;font-weight:700}
+.gear-detail-section h3{font-size:14px;color:#ffe4a8}.gear-stat-line{font-size:13px}.gear-stat-line span{color:#deece7}.gear-stat-line b{font-weight:800;color:#fff2cf}
+.enhance-stats .gear-stat-line b{color:#a7ffba}.perfect-stats .gear-stat-line b{color:#e7baff}.gem-stats .gear-stat-line b{color:#abf0ff}
+.gear-empty{font-size:12px;color:#c4d9d8}.compare-row{font-size:12px;line-height:1.5}.compare-row>span:first-child{color:#e0ebe0}
+.equipment-upgrade-actions strong{font-size:14px}.equipment-upgrade-actions small{font-size:12px;color:#e4f1e5;line-height:1.6}.equipment-upgrade-actions span{font-size:11px;line-height:1.5}.equipment-upgrade-actions button{min-height:108px}
+.gear-detail-bottom>span,.gear-detail-bottom>b,.gear-detail-bottom>button{font-size:12px}.gear-detail-bottom>span{color:#e8dcc0}
+.gear-stars,.compact-cell .gear-stars,.equipment-home-grid .compact-cell .gear-stars{writing-mode:horizontal-tb;top:4px;left:4px;font-size:11px;letter-spacing:0;line-height:1.1;padding:2px 3px;border-radius:3px;background:#07192ee6;border:1px solid #e6d18b66;color:#ffed95}
+.realm-caption p,.realm-party p,.realm-feed>.rules{font-size:12px;color:#d8e9e1}.realm-avatar strong{font-size:15px}.realm-avatar small{font-size:11px;color:#e0f2e3}
+.bot-row strong{font-size:14px}.bot-row small{font-size:11px;color:#cee2df}.bot-activity{font-size:12px;color:#f0f0d3}
+.feed-entry strong{font-size:13px}.feed-entry>span{font-size:12px;color:#d5e7e3}.feed-entry>small{font-size:10px;color:#c5dcd9}
+.dungeon-feature p,.adventure-card p{font-size:13px;color:#d9e9e4}.dungeon-party strong{font-size:13px}.dungeon-party small,.dungeon-party>.rules{font-size:11px;color:#d4e6e0}
+.portal-level{font-size:11px;color:#fff1cf}.portal-content>.eyebrow{font-size:10px;letter-spacing:1px}.portal-content>p:not(.eyebrow){font-size:13px;color:#dbe9e3}.boss-line{font-size:12px}.portal-rewards{font-size:12px}
+.game-hud span{font-size:12px;font-weight:700}.controls button{font-size:13px}.controls button small{font-size:11px;color:#d6eae5}.game-layout .rules,.battle-ally small,.battle-log{font-size:11px;color:#d3e7e1;line-height:1.6}.battle-log>div:first-child{color:#ffebad;font-weight:700}.battle-ally strong{font-size:13px}.battle-ally .eyebrow{font-size:10px}
+.location-badge small{font-size:10px;color:#e1ecdb}.inventory-count{color:#dfecde;font-size:12px}
+@media(max-width:1100px){.wallet span{font-size:13px}.wallet small{font-size:11px}.inventory-materials>span{grid-template-columns:24px 1fr;gap:0 3px;padding:4px}.inventory-materials .equipment-art{width:24px;height:24px}.inventory-materials small{font-size:10px}.inventory-materials b{font-size:13px}.inventory-piece>small{font-size:11px}.inventory-footer>span{display:none}.inventory-footer .row{width:100%;justify-content:space-between}.doll-slot>small{font-size:10px}.gear-detail-header h2{font-size:25px}nav button{font-size:12px}.realm-avatar strong{font-size:14px}.realm-avatar small{font-size:10px}.bot-row small{font-size:11px}.bot-activity{font-size:11px}}
+@media(orientation:landscape) and (max-height:800px){.equipment-panel .eyebrow,.profile .eyebrow{font-size:10px}.doll-left,.doll-right{top:59px;bottom:52px;gap:4px}.doll-panel{--doll-cell:clamp(44px,calc((100dvh - 455px)/5),64px)}.doll-slot>small{font-size:9px;line-height:1.3;margin-top:3px}.equipment-panel .equip-special{min-height:39px}.equipment-panel .equip-special small{font-size:10px}.portal-content>.eyebrow{font-size:10px}.game-layout .rules{font-size:11px}.game-layout .controls button{min-height:48px}}
+@media(max-width:650px){nav button{font-size:11px}.brand small{display:none}.gear-detail-header h2{font-size:23px}.gear-stat-line{font-size:13px}.equipment-upgrade-actions button{min-height:120px}.doll-slot>small{font-size:10px}}
+/* Keep maximum-progress badges separate, including on compact slots. */
+.equipment-home-grid{--home-cell:clamp(62px,calc((100dvh - 430px)/5),70px)}
+.doll-panel{--doll-cell:clamp(62px,calc((100dvh - 455px)/5),72px);min-height:520px}
+.compact-cell .gear-stars,.equipment-home-grid .compact-cell .gear-stars,.doll-slot .gear-stars{top:27px;left:3px;font-size:10px;line-height:11px;padding:1px 2px;letter-spacing:0}
+.compact-cell .gear-enhance,.equipment-home-grid .compact-cell .gear-enhance,.doll-slot .gear-enhance{font-size:12px;line-height:12px;padding:2px;min-width:27px;min-height:18px}
+.compact-cell .gear-gems,.doll-slot .gear-gems{font-size:11px;left:4px;bottom:5px;line-height:11px}
+.equipment-panel{max-height:calc(100dvh - 165px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:#d3bb8666 transparent}
+@media(max-width:1100px){.equipment-home-grid{--home-cell:62px}}
