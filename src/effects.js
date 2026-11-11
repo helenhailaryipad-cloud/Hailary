@@ -1,0 +1,8 @@
+/* Small shared pool of decorative effects; game simulation owns its own RAF. */
+(()=>{
+const reduced=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+const ambient=document.createElement('div');ambient.className='ambient-sparkles';ambient.setAttribute('aria-hidden','true');
+for(let i=0;i<14;i++){const s=document.createElement('span');s.style.setProperty('--x',(7+i*17)%100+'%');s.style.setProperty('--y',(13+i*23)%90+'%');s.style.setProperty('--delay',-(i%7)+'s');s.style.setProperty('--duration',(6+i%4)+'s');ambient.appendChild(s)}document.body.appendChild(ambient);
+const pool=new Set();window.WonderEffects={clear(){for(const p of pool)p.remove();pool.clear()}};document.addEventListener('pointerdown',event=>{if(document.hidden||reduced())return;const button=event.target.closest?.('button');if(!button||button.disabled)return;const palette=['#fff8be','#bef6df','#f8c7e2','#c3edff'];for(let i=0;i<7&&pool.size<42;i++){const p=document.createElement('span'),angle=i*Math.PI*2/7;p.className='tap-spark';p.setAttribute('aria-hidden','true');p.style.left=event.clientX+'px';p.style.top=event.clientY+'px';p.style.setProperty('--dx',Math.cos(angle)*(27+i%3*12)+'px');p.style.setProperty('--dy',Math.sin(angle)*(27+i%3*12)-12+'px');p.style.setProperty('--spark-color',palette[i%palette.length]);pool.add(p);document.body.appendChild(p);p.addEventListener('animationend',()=>{p.remove();pool.delete(p)},{once:true});setTimeout(()=>{p.remove();pool.delete(p)},850)}},{passive:true});
+document.addEventListener('visibilitychange',()=>{document.body.classList.toggle('app-hidden',document.hidden);if(document.hidden){for(const p of pool)p.remove();pool.clear()}});
+})();

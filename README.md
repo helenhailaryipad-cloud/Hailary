@@ -22,6 +22,14 @@ Legacy six-slot upgrades are inherited by their matching starter pieces. Legacy 
 
 Equipment adds real Armor Piercing, DMG Bonus, DMG Reduction, Block and Adventure EXP effects. Result windows display awarded experience after the bonus and the actual crafting materials received. Tier colors, stars, enhancement levels and socket indicators are visible on the gear frames. Fortune and Guardian ring instances have separate slots and progress. The character illustration remains the original ranger painting; individual wearable-art transformations are future work.
 
+## Sunny cartoon presentation and large-print UI
+
+The current visual direction uses original sunny cartoon garden, smiling elf ranger and rounded baby-dragon sprites. White bold functional text uses 24px primary and 20px secondary scales, with large tier badges and a three-column inventory. Large item dialogs stack their attributes vertically with a sticky close control and scroll rather than shrink. Original art is retained in source as earlier assets.
+
+CSS supplies gentle character breathing, wing drift, pet bobbing, portal shimmer and dialog transitions. A single bounded DOM effect pool provides up to 42 tap sparkles, plus 14 ambient fireflies. It clears when changing screens and pauses while hidden. Merge bursts are bounded to 72 particles and spell effects to 12, driven by the existing game RAF and paused game time. OS reduced-motion settings disable decorative animations and canvas bursts.
+
+The combat side panel keeps Help, Pause/Resume and Finish outside its scrollable controls. Help opens readable instructions and pauses the game; Resume is explicit. Canvas aspect ratio and pointer coordinate conversion are unchanged. No extra per-effect animation loops or external AI services run during play.
+
 ## Development
 
 `npm run dev -- --port 4173` serves a local UI preview. Its API returns 503 intentionally, so local testing does not impersonate an account.
