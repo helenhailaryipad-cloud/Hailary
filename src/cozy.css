@@ -105,3 +105,10 @@ canvas{max-width:calc((100dvh - 400px)*1.3846);height:auto;aspect-ratio:720/520}
 .gear-stat-line span,.gear-stat-line b{padding:0}
 .gear-detail-bottom>span{flex-basis:auto}
 .gear-detail-bottom>b{min-height:0}
+/* Scarlet equipment tiles keep every item clear against the sunny garden. */
+.equipment-cell,.equipment-cell.rarity-2,.equipment-cell.rarity-3{background:radial-gradient(ellipse at 45% 28%,#ff9b7d,#e65360 56%,#b92e50);border-color:#ffe2a5;box-shadow:inset 0 3px #fff2d577,inset 0 0 15px #ffb69d55,0 4px #9f294d88,0 0 11px #ffb49b44}
+.equipment-cell:hover:not(:disabled){border-color:#fff5d6;box-shadow:inset 0 3px #fff5d588,0 6px #9f294d88,0 0 18px #ffd1a77a}
+.equipment-cell .equipment-art{filter:drop-shadow(0 2px 2px #75253f88)}
+.gear-tier,.equipment-home-grid .compact-cell .gear-tier,.doll-slot .gear-tier,.gear-enhance,.compact-cell .gear-enhance,.equipment-home-grid .compact-cell .gear-enhance,.doll-slot .gear-enhance{background:#9b294b;border-color:#ffecc6;color:#fff}
+.detail-item-icon{background:radial-gradient(ellipse at 45% 28%,#ff9b7d,#e65360 56%,#b92e50);border-color:#ffe2a5;box-shadow:inset 0 3px #fff2d577,0 4px #9f294d88}
+.detail-item-icon>span:last-child{background:#9b294b;border-color:#ffecc6;color:#fff}
