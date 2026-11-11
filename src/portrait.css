@@ -220,3 +220,18 @@ main .intro-caption{font-size:20px!important;letter-spacing:1px;margin:0 0 12px;
 main .intro-footer>small{font-size:18px!important;display:block;margin-top:12px;line-height:1.4;color:#fff}
 @media(max-width:600px){body[data-screen=intro] .logo-wing{width:42px;height:52px}body[data-screen=intro] .logo-upper{font-size:24px}body[data-screen=intro] .logo-lower{font-size:34px}body[data-screen=intro] main{padding:0 10px}.intro-footer{padding:12px}.intro-actions{gap:9px}.intro-actions>button{font-size:21px!important;padding:10px 6px}.intro-art>img{border-radius:16px}}
 @media(max-height:750px){body[data-screen=intro] header{height:70px}body[data-screen=intro] .brand{height:62px;min-height:62px}body[data-screen=intro] main{top:74px}.intro-footer{padding:8px 12px}.intro-actions>button{min-height:50px}.intro-footer>small{display:none!important}main .intro-caption{font-size:18px!important;margin-bottom:8px}}
+/* Keep the 3D preview balanced with the full game HUD and real saved attributes. */
+body[data-screen=intro] header{height:92px;justify-content:space-between;align-items:flex-start;padding:8px 14px;gap:14px}
+body[data-screen=intro] .brand{height:72px;min-height:72px;max-width:46%;justify-content:flex-start}
+body[data-screen=intro] .logo-wing{width:44px;height:58px}body[data-screen=intro] .logo-upper{font-size:23px}body[data-screen=intro] .logo-lower{font-size:32px}
+body[data-screen=intro] .wallet{display:flex}body[data-screen=intro] main{top:96px}
+.intro-screen{gap:10px}.intro-art{overflow:hidden}.intro-art>img{object-fit:contain;max-height:100%;border-radius:16px}
+.intro-attributes{flex:none;background:linear-gradient(145deg,#287baab5,#24648db5);border:2px solid #edfff1a6;border-radius:20px;padding:12px 20px;backdrop-filter:blur(8px)}
+.intro-stats-heading{display:flex;justify-content:space-between;gap:12px;font-size:22px;line-height:1.4;margin-bottom:7px}
+.intro-power{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;min-height:44px;border:0;border-radius:0;background:none;box-shadow:none;padding:5px 0 8px;font-size:22px!important;border-bottom:1px solid #d5f5ed88}
+.intro-power:hover:not(:disabled){transform:none;box-shadow:none;background:#4ca2b944}.intro-power b{font-size:27px}.intro-power span{font-size:21px}
+.intro-stats-grid{display:grid;grid-template-columns:1fr 1fr;column-gap:24px}.intro-stats-grid>div{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid #c5f0e54d;padding:5px 0;min-width:0;font-size:22px;line-height:1.4}
+.intro-footer{padding:9px 14px 12px}main .intro-caption{font-size:17px!important;margin-bottom:8px}.intro-actions>button{min-height:52px;font-size:23px!important}
+@media(max-width:600px){body[data-screen=intro] header{height:88px;padding:6px 10px;gap:8px}body[data-screen=intro] .brand{height:70px;min-height:70px;max-width:33%}body[data-screen=intro] .logo-wing{display:none}body[data-screen=intro] .logo-upper{font-size:18px}body[data-screen=intro] .logo-lower{font-size:27px}body[data-screen=intro] main{top:92px}.intro-attributes{padding:10px 13px}.intro-stats-heading{font-size:19px}.intro-power span{font-size:19px}.intro-stats-grid{column-gap:14px}.intro-stats-grid>div{font-size:20px}.intro-actions>button{font-size:21px!important}}
+@media(max-width:380px){body[data-screen=intro] .logo-upper{font-size:17px}body[data-screen=intro] .logo-lower{font-size:24px}}
+@media(max-height:750px){.intro-screen{gap:6px}.intro-stats-grid>div{padding:2px 0;line-height:1.3}.intro-stats-heading{margin-bottom:2px}.intro-footer{padding:7px 12px}.intro-attributes{padding-top:7px;padding-bottom:7px}}
