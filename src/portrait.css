@@ -251,3 +251,10 @@ body[data-screen=intro] .intro-footer{background:none;border:0;box-shadow:none;b
 @media(max-height:750px){body[data-screen=intro] .intro-screen{gap:7px}body[data-screen=intro] .intro-actions>button{min-height:48px}}
 @media(prefers-reduced-motion:reduce){body[data-screen=intro] .intro-art:after{animation:none}}
 @media(max-height:750px){body[data-screen=intro] .intro-art{top:64px}}
+/* Bring the pedestal toward Attributes instead of leaving empty paving below it. */
+body[data-screen=intro] .intro-art>img{transform:translateY(var(--intro-drop,0px))}
+body[data-screen=intro] .world-depth{background-position:center calc(50% + var(--intro-drop,0px))}
+/* Rich gold lettering and a soft luminous edge, without moving the logo. */
+.logo-wordmark>span{background:linear-gradient(#fff9ba 0%,#ffe26a 23%,#ffc526 47%,#e8a415 58%,#fff39c 74%,#d38a09 100%);background-clip:text;-webkit-background-clip:text;-webkit-text-stroke:.6px #985e09;color:transparent}
+.logo-wordmark{filter:drop-shadow(0 2px 0 #83501a) drop-shadow(0 0 5px #fff2a0) drop-shadow(0 0 11px #ffd345b3)}
+.logo-wing{filter:drop-shadow(0 2px 0 #a16b30) drop-shadow(0 0 6px #ffe576a6)}
