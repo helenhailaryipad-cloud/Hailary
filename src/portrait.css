@@ -273,3 +273,21 @@ body[data-screen=intro] .intro-art>img{inset:0;width:100%;height:100%;object-fit
 body[data-screen=intro] .world-depth{inset:-20px;background-position:center;background-repeat:no-repeat}
 body[data-screen=intro] header{background:none;isolation:auto}
 @media(max-height:750px){body[data-screen=intro] .intro-art{top:0}body[data-screen=intro] .intro-art>img{object-fit:contain}body[data-screen=intro] .intro-stats-grid,body[data-screen=intro] .intro-stats-heading{display:none}body[data-screen=intro] .intro-power{border-bottom:0;padding-bottom:4px}}
+/* The uploaded GLB is now the actual 3D hero view, sharing the game's HUD. */
+body.is-3d .app{background:transparent;box-shadow:none}
+body.is-3d main{inset:0 0 calc(98px + env(safe-area-inset-bottom));padding:0 16px 4px;overflow:hidden;isolation:isolate}
+body.is-3d .intro-screen{height:100%;display:flex;flex-direction:column;justify-content:flex-end;gap:5px}
+.live-three-scene{position:fixed;top:0;bottom:0;left:50%;width:min(100vw,760px);height:100dvh;transform:translateX(-50%);z-index:0;touch-action:none;background:#bedfe9}
+.live-three-scene canvas.reina-webgl{display:block;position:absolute;inset:0;width:100%!important;height:100%!important;max-width:none;aspect-ratio:auto;margin:0;outline:none;touch-action:none}
+.live-three-scene canvas:focus-visible{outline:3px solid #ffe5a0;outline-offset:-4px}
+body.is-3d .intro-attributes,body.is-3d .intro-footer{position:relative;z-index:2}
+body.is-3d .intro-attributes{background:linear-gradient(145deg,#287baaa8,#24648da8);padding:12px 20px}
+body.is-3d .intro-footer{background:none;box-shadow:none;border:0;backdrop-filter:none;padding:0}
+main .model-hint{font-size:18px!important;line-height:1.3;margin:4px 0;text-align:center;text-shadow:0 1px 3px #244f72;color:#fff}
+.view-mode{font-size:19px!important;min-height:44px;min-width:52px;padding:5px 10px;line-height:1.2;border-radius:12px;box-shadow:0 2px #216a8199}
+.intro-stats-heading .view-mode{margin-top:-5px;margin-bottom:-4px}
+.model-status{position:absolute;z-index:3;top:32%;left:10%;right:10%;padding:20px;text-align:center;font-size:23px;font-weight:800;background:#377e9de8;border:2px solid #fff3c8;border-radius:20px;color:#fff;line-height:1.5}
+.model-status[hidden]{display:none}.model-status button{margin-top:14px}
+body.is-3d.three-loaded .world-depth{background:none;filter:none}
+@media(max-width:600px){body.is-3d main{padding-left:10px;padding-right:10px}body.is-3d .intro-attributes{padding:10px 13px}main .model-hint{font-size:17px!important}}
+@media(max-height:750px){body.is-3d .intro-stats-grid{display:none}body.is-3d .intro-attributes{padding:8px 14px}body.is-3d .intro-power{border-bottom:0;padding-bottom:0}body.is-3d .intro-stats-heading{margin-bottom:2px}}
