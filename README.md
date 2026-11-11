@@ -45,3 +45,5 @@ Original generated environment, ranger, feather wings and dragon art are include
 Future scope: original class options, more distinct item art, animation sets, real multiplayer sessions, server-authoritative progression and mobile performance profiling on physical iPads. No claim is made that current prototype balance matches Huntopia.
 
 Portrait iPad layout: Hero shows the character and readable stats; Equipment is a dedicated tab with all ten slots, independent upgrade windows, inventory, wings and dragon links. Portrait navigation stays visible in two rows.
+
+The whole game now uses one centered portrait interface in every orientation. Five navigation tabs: Hero, Equipment, Play, Wonders, More. More opens Realm, Wishes and Journal; Wonders also links to Wishes. All existing gameplay, individual gear upgrades and saves are retained.

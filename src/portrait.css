@@ -8,7 +8,7 @@
 .bag-layout{height:auto;align-items:start}
 .inventory-panel{grid-column:2;grid-row:1;min-width:0}
 .portrait-tip{display:none!important}
-@media(orientation:portrait){
+@media(min-width:0px){
  .app{max-width:900px;margin:auto}
  header{height:126px;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:10px;padding:8px 16px}
  .brand{font-size:23px;min-height:44px;padding:4px 15px;gap:8px}.brand small{display:none}.crest{font-size:28px}
@@ -39,7 +39,7 @@
  .toast{bottom:calc(180px + env(safe-area-inset-bottom));font-size:23px}
  .gear-modal{width:96vw;max-height:92dvh}.gear-detail-header h2{overflow-wrap:anywhere}.gear-detail-header{padding:20px 80px 20px 20px;gap:16px}.detail-item-icon{width:100px;height:100px}
 }
-@media(orientation:portrait) and (max-width:600px){
+@media(max-width:600px){
  main,body[data-screen=home] main{padding:10px 12px 20px}.wallet span{font-size:21px!important;padding:7px 5px}.wallet{gap:6px}
  nav button{font-size:16px!important}.hero-stage{height:455px;min-height:455px}.hero-stage>.avatar{height:400px}.companion{width:135px;right:0;bottom:115px}
  .stats-panel{grid-template-columns:1fr;padding:20px}.stat,.stat span,.stat b{font-size:24px!important}
@@ -47,5 +47,22 @@
  .equipment-companions{grid-template-columns:1fr}.inventory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.inventory-panel{padding:16px}.bag-tabs{gap:6px}.bag-tabs button{min-width:0;flex:1;font-size:21px!important;padding:10px}
  .gear-detail-header{padding-left:14px;gap:10px}.detail-item-icon{width:72px;height:72px}.gear-detail-header h2{font-size:25px!important}.gear-detail-header p{font-size:20px!important}.gear-detail-body{padding:8px 16px 20px}.gear-stat-line,.gear-stat-line span,.gear-stat-line b{font-size:23px!important}
 }
-@media(orientation:portrait){.companion{--dragon-size:110px;width:var(--dragon-size);height:var(--dragon-size)}.companion[data-tier="1"]{--dragon-size:145px}.companion[data-tier="2"]{--dragon-size:185px}.companion[data-tier="3"]{--dragon-size:225px}}
-@media(orientation:portrait) and (max-width:600px){.companion{--dragon-size:85px}.companion[data-tier="1"]{--dragon-size:110px}.companion[data-tier="2"]{--dragon-size:140px}.companion[data-tier="3"]{--dragon-size:170px}}
+@media(min-width:0px){.companion{--dragon-size:110px;width:var(--dragon-size);height:var(--dragon-size)}.companion[data-tier="1"]{--dragon-size:145px}.companion[data-tier="2"]{--dragon-size:185px}.companion[data-tier="3"]{--dragon-size:225px}}
+@media(max-width:600px){.companion{--dragon-size:85px}.companion[data-tier="1"]{--dragon-size:110px}.companion[data-tier="2"]{--dragon-size:140px}.companion[data-tier="3"]{--dragon-size:170px}}
+/* One portrait layout for the entire game, in every device orientation. */
+.app{max-width:760px;width:100%;height:100dvh;margin:0 auto;background:#72c5cb11;box-shadow:0 0 55px #24758a33}
+header{height:114px;padding:7px 14px;gap:6px}.brand{font-size:21px;min-height:40px}.crest{font-size:26px}.wallet span{font-size:24px!important;padding:7px 10px}
+main,body[data-screen=home] main{inset:118px 0 calc(98px + env(safe-area-inset-bottom));padding:12px 18px 24px;overflow-x:hidden;overflow-y:auto}
+nav{height:calc(94px + env(safe-area-inset-bottom));grid-template-columns:repeat(5,minmax(0,1fr));grid-template-rows:76px;gap:6px;padding:7px 9px calc(7px + env(safe-area-inset-bottom));align-content:start}
+nav button{height:76px;min-height:76px;font-size:20px!important;padding:7px 2px}.navico{font-size:28px!important}
+main .topline{margin:0 0 18px}.topline .eyebrow{display:none}.topline h1,.bag-top h1{font-size:34px!important;margin:0}
+.hero-stage{height:440px;min-height:440px}.hero-stage>.avatar{height:390px}.avatar-wings{height:270px}.character-label strong{font-size:32px}.companion{bottom:110px}
+.stats-panel{gap:6px 20px}.stats-panel .hero-equipment-link{display:none}.power{padding-bottom:12px}.stat{padding:6px 0}
+.simple-menu{display:flex;flex-direction:column;gap:20px}.simple-menu>button{display:grid;grid-template-columns:1fr 30px;gap:9px;text-align:left;padding:24px;min-height:130px}.simple-menu strong{font-size:28px}.simple-menu small{grid-column:1;font-size:22px!important}.simple-menu b{grid-column:2;grid-row:1/3;align-self:center;font-size:34px}
+.wishes-link{width:100%;margin-bottom:4px}.collection-grid{gap:22px}.collection-grid .art{height:240px}.collection-grid h3{font-size:30px!important}
+.dungeon-feature{display:flex;flex-direction:column;align-items:stretch;gap:14px;padding:24px}.dungeon-feature .eyebrow,.adventure-card .eyebrow{display:none}.dungeon-feature h2{margin-bottom:8px}.dungeon-feature p{margin-bottom:5px}.dungeon-feature>button{width:100%}.adventure-card{min-height:0}.adventure-card .adventure-visual{height:170px}.adventure-card>button{width:100%}.adventure-card .rules{font-size:20px!important}
+.game-layout{gap:14px}.game-layout>.panel{min-height:0;padding:16px;overflow:visible}.game-layout .controls{display:grid;grid-template-columns:1fr 1fr;max-height:none;overflow:visible;gap:12px;padding:0}.game-layout .controls>div{grid-column:1/-1}.controls button{min-height:72px!important;font-size:23px!important;padding:12px!important}.controls button small{font-size:19px!important}.game-panel-actions{margin-top:14px;padding-top:14px}.game-panel-actions>button{min-height:54px;font-size:22px!important}canvas{max-width:100%;width:100%;height:auto}.game-hud{flex-wrap:wrap;gap:8px}.game-hud span{font-size:21px!important}
+.realm-caption{max-width:none;left:18px;right:18px}.realm-caption h2{font-size:28px!important}.realm-caption p{font-size:21px!important}.realm-bots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;position:absolute;inset:230px 18px 16px}.realm-avatar{position:static!important;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center}.realm-avatar strong{font-size:23px}.realm-avatar small{font-size:20px!important}.realm-avatar .bot-emblem{width:42px;height:42px;font-size:25px}
+.toast{bottom:calc(108px + env(safe-area-inset-bottom));max-width:min(90vw,700px)}
+@media(max-width:600px){nav button{font-size:16px!important}.hero-stage{height:420px;min-height:420px}.hero-stage>.avatar{height:370px}.game-layout .controls{grid-template-columns:1fr}.simple-menu>button{padding:20px}.wallet span{font-size:21px!important}.realm-caption p{font-size:20px!important}.realm-avatar strong{font-size:20px}.realm-avatar small{font-size:18px!important}}
+.realm-bots .realm-avatar{transform:none!important;width:100%;height:auto;max-width:none;margin:0;padding:4px;left:auto!important;top:auto!important}.realm-bots .realm-avatar:hover{transform:none!important}.realm-avatar strong{font-family:inherit!important;font-weight:850}.companion>span{display:none}
