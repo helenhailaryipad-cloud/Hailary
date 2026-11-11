@@ -14,6 +14,7 @@ export function prepareActor(gltf) {
     bounds.union(new THREE.Box3().setFromObject(model));
   }
   mixer.setTime(0);
+  if (action) action.paused = true;
   model.updateMatrixWorld(true);
   const size = bounds.getSize(new THREE.Vector3());
   if (!Number.isFinite(size.y) || size.y <= 0) throw new Error('Invalid model bounds');

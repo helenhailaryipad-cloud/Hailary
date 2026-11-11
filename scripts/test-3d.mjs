@@ -15,6 +15,10 @@ assert.equal(doc.images.length,2);assert.ok(doc.images.every(i=>i.bufferView!==u
 const gltf=await new GLTFLoader().parseAsync(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength),'');
 const bow=gltf.scene.getObjectByName('Bow'),bowScale=bow.scale.clone();
 const state=prepareActor(gltf);assert.equal(state.clip.name,'Idle');assert.ok(Math.abs(state.clip.duration-11.3)<.001);
+assert.equal(state.action.paused,true);
+state.mixer.update(1);
+assert.equal(state.action.time,0,'REINA stays in a fixed pose');
+state.action.paused=false;
 assert.equal(state.action.loop,THREE.LoopRepeat);assert.equal(state.action.repetitions,Infinity);
 assert.ok(Math.abs(state.size.y-3.6)<.0001);assert.ok(state.size.x<5&&state.size.z<4);assert.ok(bow.scale.equals(bowScale));
 const wing=gltf.scene.getObjectByName('WingL'),hip=gltf.scene.getObjectByName('Hips');
@@ -33,4 +37,4 @@ const worker=(await import('../dist/server/index.js?3dtest')).default;
 const response=await worker.fetch(new Request('https://test.local/assets/angel-archer-v2.glb'),{});
 assert.equal(response.status,200);assert.equal(response.headers.get('content-type'),'model/gltf-binary');
 const served=Buffer.from(await response.arrayBuffer());assert.equal(Buffer.compare(served,bytes),0,'Worker must serve the exact corrected GLB');
-console.log('PASS: corrected GLB, embedded textures, quantized skin, Idle loop, unchanged bow transforms, four camera sizes, exact binary delivery.');
+console.log('PASS: corrected GLB, embedded textures, quantized skin, static default pose, embedded Idle integrity, unchanged bow transforms, four camera sizes, exact binary delivery.');

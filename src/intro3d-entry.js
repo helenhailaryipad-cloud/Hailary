@@ -156,7 +156,7 @@ function mount(host) {
     on(canvas,'webglcontextlost',event=>{event.preventDefault();contextLost=true;controller.abort();stop();setStatus('3D paused. Tap Retry to reload the model.',true);});
     const draw=now=>{if(disposed||document.hidden)return;frame=requestAnimationFrame(draw);if(now-lastDraw<1000/30)return;
       const dt=previous?Math.min((now-previous)/1000,.06):0;previous=now;lastDraw=now;
-      if(motion){elapsed+=dt;state?.mixer.update(dt);}controls.update();mana.update(elapsed,glow);
+      if(motion) elapsed+=dt;controls.update();mana.update(elapsed,glow);
       if(bloom)bloom.enabled=glow;
       try{if(composer)composer.render(dt);else renderer.render(scene,camera);}catch{contextLost=true;controller.abort();stop();setStatus('3D rendering stopped. Please try again.',true);}
     };
