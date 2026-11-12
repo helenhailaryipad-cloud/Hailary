@@ -5116,3 +5116,17 @@ body[data-screen=games] #stage .portal-game-info > button { min-height: 43px; ma
   border-color: var(--star-color);
   background: var(--star-tint);
 }
+
+/* Currency artwork is slightly larger beside the balance. */
+body:not([data-playing]) #stage .wallet > span > .gpt-icon {
+  width: clamp(28px,3.8vmin,40px);
+  height: clamp(28px,3.8vmin,40px);
+  flex-basis: clamp(28px,3.8vmin,40px);
+}
+@media(orientation:portrait) {
+  body:not([data-playing]) #stage .wallet > span > .gpt-icon {
+    width: 32px;
+    height: 32px;
+    flex-basis: 32px;
+  }
+}
