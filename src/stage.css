@@ -5204,3 +5204,28 @@ body[data-screen=bag] #stage .bag-doll > .bag-wings { --render-wing-width:min(va
 #stage :is(.controls > button,.row > button,.bag-tabs button,.ranking-tabs button,.doll-actions button,.primary,.inventory-footer button,.scene-pagination button) > .gpt-icon {
   margin:0; width:26px; height:26px; min-width:26px; align-self:center;
 }
+
+body[data-screen=collection] #stage .collection-grid { grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr)); }
+body[data-screen=collection] #stage .collection-grid .card { display:flex; flex-direction:column; height:auto; min-height:0; overflow:hidden; }
+#stage .wonder-card-status { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:5px 12px; min-height:28px; }
+#stage .wonder-card-status :is(.rarity,.equipped) { position:static; inset:auto; margin:0; transform:none; font-size:13px; line-height:1.25; }
+body[data-screen=collection] #stage .collection-grid .art { position:relative; flex:none; display:grid; place-items:center; width:100%; height:180px; margin:8px 0; overflow:hidden; }
+body[data-screen=collection] #stage .collection-grid .art > .animated-dragon { position:static; width:170px; height:170px; max-width:100%; margin:0; transform:none; }
+body[data-screen=rankings] #stage .ranking-row {
+  display:grid; height:auto; min-height:100px; max-height:none; overflow:visible;
+}
+body[data-screen=rankings] #stage .ranking-row > div { position:static; align-self:center; overflow-wrap:anywhere; }
+body[data-screen=rankings] #stage .ranking-row > div > strong { display:block; height:auto; white-space:normal; }
+body[data-screen=rankings] #stage .ranking-row small { display:block; position:static; height:auto; white-space:normal; }
+body[data-screen=rankings] #stage .ranking-row .player-kind { display:inline-block; }
+body[data-screen=rankings] #stage .ranking-row > b { position:static; text-align:right; align-self:center; white-space:nowrap; }
+body[data-screen=rankings] #stage .ranking-panel { display:block; }
+@container game-stage (max-width:600px) {
+  body[data-screen=rankings] #stage .ranking-row { grid-template-columns:25px 44px minmax(0,1fr); gap:8px; padding:10px 3px; }
+  body[data-screen=rankings] #stage .ranking-row .portrait-badge { width:44px; height:44px; }
+  body[data-screen=rankings] #stage .ranking-row > b { grid-column:3; text-align:left; font-size:22px; }
+  body[data-screen=rankings] #stage .ranking-row strong { font-size:18px; }
+}
+body[data-screen=collection] #stage .collection-grid { grid-auto-rows:max-content; }
+body[data-screen=collection] #stage .collection-grid .card { min-height:410px; max-height:none; }
+body[data-screen=collection] #stage .collection-grid .item-footer { position:static; display:flex; flex-wrap:wrap; gap:8px; margin-top:auto; }
