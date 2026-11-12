@@ -1,8 +1,10 @@
 'use strict';
 const CRAWL_ROOMS=['Outer Gate','Guardian Hall','Boss Sanctum'];
 const BOSS_STANDOFF = 265;
+// This lane leaves room above a fully extended wing and below the boss's feet.
+const BOSS_LANE = {right:520, top:358, bottom:390};
 function setupCrawl(g){g.crawl={hero:{x:118,y:330,tx:285,ty:310},enemy:{x:520,y:300},engaged:false,exitReady:false,shots:[],danger:null,roomTime:0};}
-function crawlRoom(g){const a=g.crawl;a.hero={x:118,y:330,tx:285,ty:310};a.enemy={x:520,y:g.stage===2?315:300};a.engaged=false;a.exitReady=false;a.shots=[];a.danger=null;a.roomTime=0;g.transition=0;}
+function crawlRoom(g){const a=g.crawl;a.hero={x:118,y:330,tx:285,ty:310};a.enemy={x:520,y:g.stage===2?BOSS_LANE.top:300};a.engaged=false;a.exitReady=false;a.shots=[];a.danger=null;a.roomTime=0;g.transition=0;}
 function moveRanger(x,y){const g=game;if(!g?.crawl||g.ended||gamePaused||!Number.isFinite(x)||!Number.isFinite(y))return;g.crawl.hero.tx=Math.max(84,Math.min(640,x));g.crawl.hero.ty=Math.max(235,Math.min(406,y));}
 function walkDungeon(){const g=game;if(!g?.crawl||g.ended||gamePaused)return;if(g.crawl.exitReady)moveRanger(639,316);else moveRanger(Math.max(100,g.crawl.enemy.x-(g.enemy.boss ? BOSS_STANDOFF : 195)),g.crawl.enemy.y);}
 function bindCrawlInput(canvas){canvas.tabIndex=0;canvas.setAttribute('aria-label','Dungeon room. Tap the floor to move, tap an enemy to attack. Arrow keys move, E follows the path.');let pointer=null;const point=e=>{const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)*720/r.width,y:(e.clientY-r.top)*520/r.height};};canvas.addEventListener('pointerdown',e=>{if(game?.kind!=='battle'||!game.crawl||game.ended||gamePaused||pointer!==null)return;pointer=e.pointerId;canvas.setPointerCapture?.(pointer);const p=point(e),a=game.crawl;if(!a.exitReady&&hitsDungeonEnemy(game,p.x,p.y)){walkDungeon();battleSkill('burst');}else moveRanger(p.x,p.y);});canvas.addEventListener('pointermove',e=>{if(e.pointerId===pointer&&game?.crawl){const p=point(e);moveRanger(p.x,p.y);}});for(const event of ['pointerup','pointercancel'])canvas.addEventListener(event,()=>{pointer=null;});canvas.addEventListener('keydown',e=>{const g=game;if(!g?.crawl||g.ended||gamePaused)return;const delta={ArrowLeft:[-75,0],ArrowRight:[75,0],ArrowUp:[0,-55],ArrowDown:[0,55],a:[-75,0],d:[75,0],w:[0,-55],s:[0,55]}[e.key];if(delta){e.preventDefault();moveRanger(g.crawl.hero.x+delta[0],g.crawl.hero.y+delta[1]);}else if(e.key.toLowerCase()==='e'){e.preventDefault();walkDungeon();}});}
@@ -14,8 +16,8 @@ if(a.exitReady){if(h.x>610&&Math.abs(h.y-316)<65){g.stage++;crawlRoom(g);battleE
 let gap=Math.hypot(h.x-a.enemy.x,h.y-a.enemy.y);if(gap<310)a.engaged=true;if(!a.engaged)return true;
 if(g.telegraph<=0 && g.enemy.boss){
   // Keep the entire boss silhouette clear of the archer, including across lanes.
-  const targetX=Math.max(390,Math.min(555,h.x+BOSS_STANDOFF));
-  const targetY=Math.max(310,Math.min(350,h.y));
+  const targetX=Math.max(390,Math.min(BOSS_LANE.right,h.x+BOSS_STANDOFF));
+  const targetY=Math.max(BOSS_LANE.top,Math.min(BOSS_LANE.bottom,h.y));
   const dx=targetX-a.enemy.x,dy=targetY-a.enemy.y;
   const distance=Math.hypot(dx,dy);
   if(distance>0){
@@ -45,7 +47,7 @@ c.save();
 c.shadowColor='rgba(40,31,48,.78)';
 c.shadowBlur=3;
 c.shadowOffsetY=1;
-drawReina(c,g,h.x,h.y+5,150,200);
+drawReina(c,g,h.x,h.y+5,135,180);
 c.restore();
 if(g.expRun?.party.length>1){const ally=ADVENTURERS.find(b=>b.id===g.expRun.party[1]);drawArtSprite(c,ally.id,h.x+55,h.y,65,105);}if(g.ally){drawArtSprite(c,g.ally.id,h.x-55,h.y,65,105);}
 for(const p of a.shots){if(!p.enemy&&p.life>.37)continue;const t=p.enemy?1-p.life/p.max:Math.max(0,1-p.life/.37),x=p.x+(p.tx-p.x)*t,y=p.y+(p.ty-p.y)*t;drawSpell(c,p.enemy?'fire':'arrow',x,y,70,45,g.clock,Math.atan2(p.ty-p.y,p.tx-p.x));}
