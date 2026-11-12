@@ -5469,3 +5469,19 @@ body[data-screen=warehouse] #main .gear-workspace {
 }
 .warehouse-pane h2 { margin:0; }
 .warehouse-pane .work-grid { min-height:0; overflow:auto; overscroll-behavior:contain; padding:3px; }
+
+body[data-screen=home] #stage header > #profileReadout {
+  display:flex; align-items:center; position:static; flex:0 0 auto; gap:5px;
+  color:#fff8df; font-variant-numeric:tabular-nums; text-shadow:0 1px 2px #291e15;
+}
+.profile-face { display:grid; justify-items:center; position:relative; padding-bottom:5px; }
+.profile-face .gpt-icon { width:clamp(42px,6vw,62px); height:auto; aspect-ratio:1; margin:0; }
+.profile-face b { position:absolute; bottom:0; padding:0 5px; border-radius:5px; background:#433629; font-size:13px; white-space:nowrap; }
+.profile-vitals { display:grid; gap:3px; padding:3px 6px; background:linear-gradient(90deg,#28241ce8,#322d22b8); border-radius:6px; }
+.profile-vitals strong { display:flex; align-items:center; gap:4px; color:#ffe699; font-size:clamp(16px,2vw,22px); }
+.profile-vitals .gpt-icon { width:20px; height:20px; margin:0; }
+.profile-hp { padding:1px 5px; border-radius:4px; background:linear-gradient(#456e43,#255837); border-bottom:3px solid #93d983; font-size:13px; line-height:1.25; }
+body[data-screen=home]:not([data-playing]) #stage header .brand { width:min(21vw,170px); height:60px; align-self:center; }
+@media(max-width:600px) {
+  body[data-screen=home]:not([data-playing]) #stage header .brand { display:none; }
+}
