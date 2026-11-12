@@ -5427,24 +5427,12 @@ body[data-screen=bag] #stage .doll-slot .gear-illustration,
   #stage #modal.gear-modal .gear-detail-body { overflow: visible; }
 }
 
-/* Anchor the readout to the loadout itself, outside the portrait layers. */
-body[data-screen=bag] #stage .doll-panel > .hero-status-chip,
-body[data-screen=home] #stage .hero-stage > .hero-status-chip {
-  position:absolute; inset:auto auto 5px 8px; z-index:9;
-  padding:3px 12px 3px 6px; border:0; border-radius:0; box-shadow:none;
-  background:linear-gradient(90deg,#242018db 0%,#31291edb 82%,transparent);
-  font-size:clamp(17px,2vw,22px); line-height:1.18; color:#fff9e8;
-  text-shadow:0 1px 2px #211809; white-space:nowrap; font-variant-numeric:tabular-nums;
+body[data-screen=bag] #stage .doll-panel > .doll-actions { bottom:4px; }
+body[data-screen=bag] #stage .doll-panel > :is(.doll-left,.doll-right) {
+  bottom:62px; --stage-cell:min(85px,calc((100cqh - 144px)/5),19cqw);
 }
-#stage .hero-status-chip > strong { font-size:inherit; color:#ffe49c; }
-body[data-screen=bag] #stage :is(.doll-left,.doll-right) {
-  bottom:38px; --stage-cell:min(85px,calc((100cqh - 116px)/5),19cqw);
-}
-@container (max-width: 720px) {
-  body[data-screen=bag] #stage .doll-panel > .doll-actions { bottom:38px; }
-  body[data-screen=bag] #stage .doll-panel > .bag-doll { bottom:90px; }
-}
-
+body[data-screen=bag] #stage header .brand { display:none; }
+body[data-screen=bag] #stage header .profile-face .gpt-icon { width:42px; }
 #profileReadout { display:none; }
 body[data-screen=home] #stage header .wallet { position:relative; }
 body[data-screen=home] #profileReadout {
@@ -5470,7 +5458,7 @@ body[data-screen=warehouse] #main .gear-workspace {
 .warehouse-pane h2 { margin:0; }
 .warehouse-pane .work-grid { min-height:0; overflow:auto; overscroll-behavior:contain; padding:3px; }
 
-body[data-screen=home] #stage header > #profileReadout {
+body:is([data-screen=home],[data-screen=bag]) #stage header > #profileReadout {
   display:flex; align-items:center; position:static; flex:0 0 auto; gap:5px;
   color:#fff8df; font-variant-numeric:tabular-nums; text-shadow:0 1px 2px #291e15;
 }
