@@ -29,7 +29,7 @@ nav button.active:before{display:none}
 .level-pill,.xp{font-size:21px!important}.power small{font-size:20px!important}.power strong{font-size:46px;color:#fff}.power{border-color:#dbf4d488}
 .character-label{background:#3387a5e8;border:2px solid #fff5c9;border-radius:18px;padding:8px 18px;bottom:0;box-shadow:0 4px #2d718950}.character-label strong{font-size:31px}.character-label small{font-size:20px!important;text-shadow:none}
 .hero-stage>.avatar{filter:drop-shadow(0 7px 3px #5a9d8255);animation:cozy-breathe 4s ease-in-out infinite;transform-origin:50% 90%}
-.companion{animation:pet-bob 3.5s ease-in-out infinite;filter:none}.companion span{font-size:20px;font-weight:850;color:#fff;background:#3e96b0;border:2px solid #efffff;border-radius:14px;padding:4px 12px;text-shadow:0 1px #276b8d}
+.companion{animation:pet-bob 3.5s ease-in-out infinite;filter:none}.companion span:not(.animated-dragon){font-size:20px;font-weight:850;color:#fff;background:#3e96b0;border:2px solid #efffff;border-radius:14px;padding:4px 12px;text-shadow:0 1px #276b8d}
 .avatar-wings{animation:wingfloat 4s ease-in-out infinite}.stage-halo{border:3px solid #fffbd9;box-shadow:0 0 28px #fff7bd88,inset 0 0 28px #e9ffff77;background:#baf8df55}
 .equipment-home-grid{--home-cell:100px;gap:14px 10px}.equipment-home-grid .compact-cell{width:100px;height:100px;min-height:100px}
 .equipment-panel .armory-open{font-size:22px!important;min-height:60px}.equipment-panel .equip-special{min-height:77px;font-size:21px!important;background:#397fa7;border:2px solid #bdeff0;border-radius:16px}.equipment-panel .equip-special small{font-size:20px!important}.equipment-panel .tiny-art{height:56px;width:60px}
