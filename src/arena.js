@@ -12,6 +12,13 @@ const ART_FX={arrow:0,impact:1,heal:2,wind:3,fire:4,claw:5,victory:6,wheel:7};
 function drawRasterFX(c,name,x,y,width,height=width,angle=0){const im=artBitmap('combat-fx');if(!im?.complete||!im.naturalWidth)return false;const n=ART_FX[name]??0,w=im.naturalWidth/4,h=im.naturalHeight/2;c.save();c.translate(x,y);c.rotate(angle);c.globalCompositeOperation='lighter';c.shadowColor='#ffe2aa';c.shadowBlur=16;c.drawImage(im,(n%4)*w,Math.floor(n/4)*h,w,h,-width/2,-height/2,width,height);c.restore();return true;}
 function reinaFrame(g){const h=g.crawl?.hero,moving=!!h&&Math.hypot(h.tx-h.x,h.ty-h.y)>2,age=(g.clock||0)-(g.heroShotAt??-100);return {moving,shooting:age>=0&&age<.6,id:moving?'reina-walk':'reina-shoot',frame:moving?Math.floor((g.clock||0)*9)%6:Math.min(5,Math.floor(Math.max(0,age)/.1))};}
 function reinaSpriteBox(rect,width,height,referenceHeight=rect[3]){const scale=Math.min(height,width*1.6)/referenceHeight;return {w:rect[2]*scale,h:rect[3]*scale};}
+// Pixels above the crown in each shooting frame belong to the raised bow.
+const reinaBowOverhead=[32,32,30,33,32,0];
+function dungeonReinaBox(pose,rect,width,height){
+ const overhead=pose.id==='reina-shoot'?reinaBowOverhead[pose.frame]:0;
+ // Match the standing figure's existing crown-to-sole height, anchored at the feet.
+ return reinaSpriteBox(rect,width,height*339/371,rect[3]-overhead);
+}
 function drawReina(c,g,x,floor,width,height){const pose=reinaFrame(g),costume=equippedRanger();
  if(costume!=='reina'){
   const lift=motionAllowed()&&pose.moving?Math.abs(Math.sin(g.clock*9))*3:0;
@@ -20,7 +27,7 @@ function drawReina(c,g,x,floor,width,height){const pose=reinaFrame(g),costume=eq
   if(motionAllowed()&&pose.shooting)c.rotate(Math.sin(pose.frame*Math.PI/5)*-.035);
   const drawn=drawArtSprite(c,costume,0,0,width,height);c.restore();if(drawn)return true;
  }
- if(!motionAllowed()||(!pose.moving&&!pose.shooting)){if(!g.spriteIdle&&!g.crawl)return drawArtSprite(c,'reina',x,floor,width,height);pose.id='reina-shoot';pose.frame=0;}const im=artBitmap(pose.id),m=globalThis.WonderArtMeta?.[pose.id],rect=m?.frames?.[pose.frame];if(!im?.complete||!im.naturalWidth||!rect)return drawArtSprite(c,'reina',x,floor,width,height);const box=reinaSpriteBox(rect,width,height,g.crawl ? rect[3] : m.maxFrameHeight);c.save();c.translate(x,floor);if(pose.moving&&g.crawl.hero.tx<x)c.scale(-1,1);if(g.evade>0)c.globalAlpha=.55;c.drawImage(im,...rect,-box.w/2,-box.h,box.w,box.h);c.restore();return true;}
+ if(!motionAllowed()||(!pose.moving&&!pose.shooting)){if(!g.spriteIdle&&!g.crawl)return drawArtSprite(c,'reina',x,floor,width,height);pose.id='reina-shoot';pose.frame=0;}const im=artBitmap(pose.id),m=globalThis.WonderArtMeta?.[pose.id],rect=m?.frames?.[pose.frame];if(!im?.complete||!im.naturalWidth||!rect)return drawArtSprite(c,'reina',x,floor,width,height);const box=g.crawl?dungeonReinaBox(pose,rect,width,height):reinaSpriteBox(rect,width,height,m.maxFrameHeight);c.save();c.translate(x,floor);if(pose.moving&&g.crawl.hero.tx<x)c.scale(-1,1);if(g.evade>0)c.globalAlpha=.55;c.drawImage(im,...rect,-box.w/2,-box.h,box.w,box.h);c.restore();return true;}
 function drawMotionSprite(c,id,row,x,floor,width,height,clock=0,cols=4,rows=3){const im=artBitmap(id);if(!im?.complete||!im.naturalWidth)return false;const frame=motionAllowed()?Math.floor(clock*7)%cols:0,sw=im.naturalWidth/cols,sh=im.naturalHeight/rows,scale=Math.min(width/sw,height/sh),w=sw*scale,h=sh*scale;c.drawImage(im,frame*sw,row*sh,sw,sh,x-w/2,floor-h,w,h);return true;}
 function drawManaFireball(c,x,y,width,height,clock,angle) {
   const image=artBitmap('fire-mana-motion');
