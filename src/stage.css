@@ -5176,3 +5176,31 @@ body[data-screen=bag] #stage .bag-top .hero-status-chip { margin-right:auto; }
 }
 
 @media(prefers-reduced-motion:reduce){ #stage button:not(:disabled,.equipment-cell,.material-cell,.material-summary,.storage-slot,.boss-gate-portrait,.hero-attribute)::before, #stage button:not(:disabled,.equipment-cell,.material-cell,.material-summary,.storage-slot,.boss-gate-portrait,.hero-attribute)::after { animation:none; } }
+
+/* Keep a compact game stage on tablets and fit the wardrobe to its window. */
+#stage { position:relative; width:min(100%,100dvh); margin-inline:auto; container:game-stage / inline-size; }
+body[data-screen=home] #stage .hero-visual > .avatar { object-fit:contain; object-position:center bottom; max-width:100%; }
+body[data-screen=home] #stage .hero-visual .avatar-wings { --render-wing-width:min(var(--wing-width),var(--wing-height-limit),88cqw); }
+body[data-screen=bag] #stage .doll-panel { container-type:size; }
+body[data-screen=bag] #stage .doll-left,
+body[data-screen=bag] #stage .doll-right { --stage-cell:min(72px,calc((100cqh - 70px)/5)); top:8px; bottom:52px; }
+body[data-screen=bag] #stage .doll-slot .equipment-cell { width:var(--stage-cell); max-width:var(--stage-cell); height:var(--stage-cell); }
+body[data-screen=bag] #stage .bag-doll { inset:10px 65px 54px; }
+body[data-screen=bag] #stage .bag-avatar { width:100%; height:100%; max-width:100%; max-height:100%; object-fit:contain; object-position:center bottom; }
+body[data-screen=bag] #stage .bag-doll > .bag-wings { --render-wing-width:min(var(--back-wing-width),88cqw); width:var(--render-wing-width); }
+@container game-stage (max-width:800px) {
+  body[data-screen=bag] #stage .bag-layout { grid-template-columns:1fr; grid-template-rows:minmax(230px,1.2fr) 48px minmax(0,1fr); gap:6px; }
+  body[data-screen=bag] #stage .doll-panel { grid-column:1; grid-row:1; }
+  body[data-screen=bag] #stage .equipment-companions { grid-column:1; grid-row:2; }
+  body[data-screen=bag] #stage .inventory-panel { grid-column:1; grid-row:3; }
+}
+
+#stage :is(.controls > button,.row > button,.bag-tabs button,.ranking-tabs button,.doll-actions button,.primary,.inventory-footer button,.scene-pagination button):has(> .gpt-icon):not(.defender-choice) {
+  display:inline-flex; flex-direction:row; align-items:center; justify-content:center; gap:6px;
+}
+#stage button > .gpt-icon {
+  position:static; vertical-align:middle; flex-shrink:0; margin-block:0; transform:none;
+}
+#stage :is(.controls > button,.row > button,.bag-tabs button,.ranking-tabs button,.doll-actions button,.primary,.inventory-footer button,.scene-pagination button) > .gpt-icon {
+  margin:0; width:26px; height:26px; min-width:26px; align-self:center;
+}
