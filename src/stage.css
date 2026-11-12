@@ -5531,8 +5531,12 @@ body[data-screen=bag] #profileReadout .profile-hp {
   background:linear-gradient(#458d78,#226351); color:white;
   box-shadow:inset 0 1px #abe2b8; text-shadow:0 1px 2px #194337;
 }
-body[data-screen=bag]:not([data-playing]) #stage > header { height:78px; }
-body[data-screen=bag]:not([data-playing]) #stage #main { top:calc(env(safe-area-inset-top) + 78px); }
+body[data-screen=bag] #stage {
+  --crest-width:clamp(102px,15vw,160px);
+  --gear-header:calc(var(--crest-width) * .8 + 8px);
+}
+body[data-screen=bag]:not([data-playing]) #stage > header { height:var(--gear-header); }
+body[data-screen=bag]:not([data-playing]) #stage #main { top:calc(env(safe-area-inset-top) + var(--gear-header)); }
 
 body:is([data-screen=bag],[data-screen=inventory],[data-screen=forge],[data-screen=warehouse]):not([data-playing]) #stage:has(#nav .section-tabs) {
   --menu-nav:clamp(125px,14vmin,145px);
@@ -5548,25 +5552,25 @@ body:is([data-screen=bag],[data-screen=inventory],[data-screen=forge],[data-scre
 /* Emerald crest loadout: the painted frames carry live values and tab labels. */
 body[data-screen=bag] #stage #profileReadout { gap:0; }
 body[data-screen=bag] #stage #profileReadout .profile-face {
-  width:clamp(68px,8vw,96px); aspect-ratio:255/204;
+  width:var(--crest-width); aspect-ratio:255/204;
   display:block; background:url(assets/generated/emerald-portrait.webp) center/contain no-repeat;
 }
 body[data-screen=bag] #profileReadout .profile-face img { opacity:0; }
 body[data-screen=bag] #profileReadout .profile-face b {
   position:absolute; inset:74% 12% auto; text-align:center; line-height:1.1;
-  font-size:clamp(10px,1.3vw,14px); color:#fff8dc; border:0; background:none; padding:0; margin:0;
+  font-size:clamp(13px,1.9vw,20px); color:#fff8dc; border:0; background:none; padding:0; margin:0;
 }
-body[data-screen=bag] #stage #profileReadout .profile-vitals { width:clamp(105px,15vw,170px); gap:1px; background:none; }
+body[data-screen=bag] #stage #profileReadout .profile-vitals { width:clamp(118px,19vw,208px); gap:2px; background:none; }
 body[data-screen=bag] #stage #profileReadout .profile-vitals :is(strong,.profile-hp) {
   display:flex; align-items:center; justify-content:center; width:100%; margin:0; padding:2px 12px;
   border:0; border-radius:0; box-shadow:none; white-space:nowrap;
   background: url(assets/generated/emerald-power.webp) center/100% 100% no-repeat;
-  color:#503315; font-size:clamp(13px,1.7vw,20px); line-height:1.35; min-height:24px;
+  color:#503315; font-size:clamp(15px,2vw,24px); line-height:1.35; min-height:24px;
 }
 body[data-screen=bag] #profileReadout .profile-vitals .gpt-icon { display:none; }
 body[data-screen=bag] #stage #profileReadout .profile-vitals .profile-hp {
   background-image:url(assets/generated/emerald-health.webp); color:#fff8dc;
-  font-size:clamp(12px,1.5vw,17px); text-shadow:0 1px 2px #16392c;
+  font-size:clamp(14px,1.8vw,21px); text-shadow:0 1px 2px #16392c;
 }
 body:is([data-screen=bag],[data-screen=inventory],[data-screen=forge],[data-screen=warehouse]):not([data-playing]) #stage #nav .section-tabs button {
   border:0; box-shadow:none; border-radius:0;
@@ -5575,4 +5579,13 @@ body:is([data-screen=bag],[data-screen=inventory],[data-screen=forge],[data-scre
 }
 body:is([data-screen=bag],[data-screen=inventory],[data-screen=forge],[data-screen=warehouse]):not([data-playing]) #stage #nav .section-tabs button[aria-current=page] {
   background-image:url(assets/generated/emerald-selected.webp);color:#4c2c0b;text-shadow:0 1px #ffe5a2;
+}
+
+@media (max-width:520px) {
+  body[data-screen=bag] #stage { --gear-header:calc(var(--crest-width) * .8 + 34px); }
+  body[data-screen=bag]:not([data-playing]) #stage > header {
+    display:grid; grid-template-columns:1fr; grid-template-rows:28px 1fr; gap:0;
+  }
+  body[data-screen=bag] #stage > header .wallet { grid-area:1 / 1; justify-self:end; }
+  body[data-screen=bag] #stage header > #profileReadout { grid-area:2 / 1; justify-self:start; }
 }
