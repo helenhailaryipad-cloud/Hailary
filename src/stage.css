@@ -5486,3 +5486,14 @@ body[data-screen=home]:not([data-playing]) #stage header .brand { width:min(21vw
     grid-column:2; grid-row:1 / 3; margin-top:60px; height:calc(100% - 60px);
   }
 }
+
+#profileReadout .profile-face { padding:0; grid-template-rows:auto auto; gap:0; }
+#profileReadout .profile-face img {
+  display:block; width:clamp(38px,5vw,52px); height:auto; aspect-ratio:1;
+  object-fit:cover; border:2px solid #f5ce80; border-radius:50%; box-shadow:0 1px 4px #30201399;
+}
+#profileReadout .profile-face b { position:static; line-height:1; }
+#profileReadout .profile-vitals strong small { color:#ffedc5; font-size:.72em; }
+body[data-screen=bag]:not([data-playing]) #stage > header { height:60px; }
+body[data-screen=bag]:not([data-playing]) #stage #main { top:calc(env(safe-area-inset-top) + 60px); }
+body[data-screen=bag] #profileReadout .profile-face img { width:40px; }
