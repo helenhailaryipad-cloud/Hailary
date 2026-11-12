@@ -1,5 +1,5 @@
 import fs from 'node:fs';import vm from 'node:vm';import assert from 'node:assert/strict';import {DatabaseSync} from 'node:sqlite';
-const elements=new Map();function el(key){if(!elements.has(key))elements.set(key,{innerHTML:'',textContent:'',value:'',disabled:false,setAttribute(name,value){this[name]=String(value)},classList:{add(){},remove(){},toggle(){}},close(){this.open=false},showModal(){this.open=true},addEventListener(){},getBoundingClientRect(){return {left:0,top:0,width:720,height:520}}});return elements.get(key)}
+const elements=new Map();function el(key){if(!elements.has(key))elements.set(key,{innerHTML:'',textContent:'',value:'',disabled:false,style:{setProperty(){}},setAttribute(name,value){this[name]=String(value)},classList:{add(){},remove(){},toggle(){}},close(){this.open=false},showModal(){this.open=true},addEventListener(){},getBoundingClientRect(){return {left:0,top:0,width:720,height:520}}});return elements.get(key)}
 const context={console,Math,Date,JSON,Number,String,Array,Object,Set,Blob,URL,Promise,document:{body:{dataset:{},classList:{add(){},remove(){},contains(){return false}}},querySelector:el,addEventListener(){},createElement:()=>({click(){}})},localStorage:{getItem(){return null},setItem(){}},window:{scrollTo(){}},fetch:async()=>({ok:false}),setTimeout:()=>0,clearTimeout(){},setInterval:()=>0,clearInterval(){},requestAnimationFrame:()=>1,cancelAnimationFrame(){}};vm.createContext(context);
 vm.runInContext(fs.readFileSync('src/art-meta.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/generated-art.js','utf8'),context);
@@ -13,6 +13,7 @@ vm.runInContext(fs.readFileSync('src/dungeon-crawl.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/exp-dungeon.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/world.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/arena.js','utf8'),context);
+vm.runInContext(fs.readFileSync('src/game-polish.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/app.js','utf8'),context);
 vm.runInContext(`
 const namedLegacy={...defaults(),name:'Reyna',gold:1234,xp:456};const legacyBefore=JSON.stringify({...namedLegacy,name:'REINA'});correctHeroName(namedLegacy);if(JSON.stringify(namedLegacy)!==legacyBefore)throw Error('Name correction must preserve progress');if(correctHeroName({...defaults(),name:'Nyra'}).name!=='Nyra')throw Error('Keep custom hero names');if(comparable({...defaults(),name:'REINA'})!==comparable(correctHeroName({...defaults(),name:'Reyna'})))throw Error('Name correction must not create cloud conflict');
@@ -141,3 +142,11 @@ rankingMode='merge';rankingMarkup(true);if(rankingMode!=='merge')throw Error('Jo
 globalThis.Image=function(){};const drawCalls=[],paint={save(){},restore(){},translate(){},scale(){},drawImage(...a){drawCalls.push(a)}};for(const id of ['reina-walk','reina-shoot'])ART_IMAGE_CACHE.set(id,{complete:true,naturalWidth:1200,naturalHeight:800});const animState={clock:0,heroShotAt:-100,crawl:{hero:{x:0,y:0,tx:100,ty:0}}};const beforeAnimation=JSON.stringify(animState);drawReina(paint,animState,100,300,150,200);animState.clock=.2;drawReina(paint,animState,100,300,150,200);if(drawCalls.length!==2||drawCalls[0][1]===drawCalls[1][1]&&drawCalls[0][2]===drawCalls[1][2])throw Error('Walk frames do not advance');animState.clock=0;if(JSON.stringify(animState)!==beforeAnimation)throw Error('Rendering mutated state');animState.crawl=null;animState.heroShotAt=0;drawReina(paint,animState,100,300,150,200);animState.clock=.45;drawReina(paint,animState,100,300,150,200);if(drawCalls[2][1]===drawCalls[3][1]&&drawCalls[2][2]===drawCalls[3][2])throw Error('Shooting frames do not advance');ART_IMAGE_CACHE.clear();delete globalThis.Image;
 `,context);
 console.log('PASS: same-name players, private self marker, category isolation and changing walk/shoot frames without state mutation.');
+
+vm.runInContext(`
+{const fake={crawl:{enemy:{x:520,y:400}},enemy:{boss:true,hp:100}};if(!hitsDungeonEnemy(fake,520,170)||hitsDungeonEnemy(fake,200,170)||hitsDungeonEnemy(fake,520,450))throw Error('Boss body hit bounds');
+const reward=mergeReward({score:4000,won:true});if(reward.gold!==1700||reward.wishes!==400||reward.xp!==120)throw Error('Merge reward preview mismatch');
+const g={towers:[{type:0,level:2}],selected:0,choice:0,energy:89,ended:false};gamePaused=false;if(defenseControlState(g).canUpgrade)throw Error('Unaffordable upgrade');g.energy=90;if(!defenseControlState(g).canUpgrade||defenseControlState(g).cost!==90)throw Error('Upgrade price');g.towers[0].level=4;if(!defenseControlState(g).max||defenseControlState(g).canUpgrade)throw Error('Max upgrade');
+const currentGold=S.gold;game={kind:'battle',ended:false};const original=game;requestFinish();if(!gamePaused||game.ended)throw Error('Retreat must pause');cancelFinish();if(gamePaused||game.ended||S.gold!==currentGold)throw Error('Cancel retreat must preserve run');requestFinish();game={kind:'merge',ended:false};confirmFinish();if(game.ended)throw Error('Stale retreat ended another run');game=null;gamePaused=false;}
+`,context);
+console.log('PASS: full boss body hitbox, exact merge preview, affordable/MAX upgrades and cancellable identity-safe retreat.');
