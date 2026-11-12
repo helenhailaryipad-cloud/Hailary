@@ -5397,3 +5397,8 @@ body #stage .gear-workspace .storage-slot[data-tier] .gear-illustration,
 body #stage .gear-detail-header[data-tier] .gear-illustration {
   filter:drop-shadow(0 1px 1px #39291f) drop-shadow(0 0 1px #fff4c9);
 }
+
+body[data-screen=bag] #stage .doll-slot .gear-illustration,
+#stage .inventory-grid .equipment-cell .gear-illustration {
+  width:100%; height:100%; background-size:contain;
+}
