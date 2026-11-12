@@ -29,6 +29,31 @@ function drawReina(c,g,x,floor,width,height){const pose=reinaFrame(g),costume=eq
  }
  if(!motionAllowed()||(!pose.moving&&!pose.shooting)){if(!g.spriteIdle&&!g.crawl)return drawArtSprite(c,'reina',x,floor,width,height);pose.id='reina-shoot';pose.frame=0;}const im=artBitmap(pose.id),m=globalThis.WonderArtMeta?.[pose.id],rect=m?.frames?.[pose.frame];if(!im?.complete||!im.naturalWidth||!rect)return drawArtSprite(c,'reina',x,floor,width,height);const box=g.crawl?dungeonReinaBox(pose,rect,width,height):reinaSpriteBox(rect,width,height,m.maxFrameHeight);c.save();c.translate(x,floor);if(pose.moving&&g.crawl.hero.tx<x)c.scale(-1,1);if(g.evade>0)c.globalAlpha=.55;c.drawImage(im,...rect,-box.w/2,-box.h,box.w,box.h);c.restore();return true;}
 function drawMotionSprite(c,id,row,x,floor,width,height,clock=0,cols=4,rows=3){const im=artBitmap(id);if(!im?.complete||!im.naturalWidth)return false;const frame=motionAllowed()?Math.floor(clock*7)%cols:0,sw=im.naturalWidth/cols,sh=im.naturalHeight/rows,scale=Math.min(width/sw,height/sh),w=sw*scale,h=sh*scale;c.drawImage(im,frame*sw,row*sh,sw,sh,x-w/2,floor-h,w,h);return true;}
+function drawGoldenArrow(c,x,y,width,angle){
+ c.save();
+ c.translate(x,y);
+ c.rotate(angle);
+ c.scale(width/70,width/70);
+ c.globalCompositeOperation='lighter';
+ c.shadowColor='#ffc746';
+ c.shadowBlur=6;
+ const trail=c.createLinearGradient(-54,0,-16,0);
+ trail.addColorStop(0,'rgba(255,192,44,0)');
+ trail.addColorStop(1,'rgba(255,208,83,.9)');
+ c.fillStyle=trail;
+ c.fillRect(-54,-1,38,2);
+ c.strokeStyle='#ffe17a';
+ c.lineWidth=2.4;
+ c.beginPath();c.moveTo(-24,0);c.lineTo(22,0);c.stroke();
+ c.fillStyle='#fff0a8';
+ c.beginPath();c.moveTo(32,0);c.lineTo(17,-5);c.lineTo(20,0);c.lineTo(17,5);c.closePath();c.fill();
+ c.fillStyle='#ffcb53';
+ for(const side of [-1,1]){
+  c.beginPath();c.moveTo(-14,0);c.lineTo(-22,side*5);c.lineTo(-29,side*5);c.lineTo(-24,0);c.closePath();c.fill();
+ }
+ c.restore();
+ return true;
+}
 function drawManaFireball(c,x,y,width,height,clock,angle) {
   const image=artBitmap('fire-mana-motion');
   if(!image?.complete || !image.naturalWidth) return false;
@@ -57,7 +82,7 @@ function drawManaFireball(c,x,y,width,height,clock,angle) {
   c.restore();
   return true;
 }
-function drawSpell(c,name,x,y,w,h,clock,angle=0){if(name==='fire'&&drawManaFireball(c,x,y,w,h,clock,angle))return true;const row={arrow:0,fire:1,heal:2,wind:3}[name],im=artBitmap('spell-motion');if(row===undefined||!im?.complete||!im.naturalWidth)return drawRasterFX(c,name,x,y,w,h,angle);const sw=im.naturalWidth/4,sh=im.naturalHeight/4,frame=motionAllowed()?Math.floor(clock*12)%4:0;c.save();c.translate(x,y);c.rotate(angle);c.globalCompositeOperation='lighter';c.shadowBlur=24;c.shadowColor=row===0?'#ffe18b':row===1?'#ff9854':row===2?'#9dffc3':'#b2f4ff';const glow=c.createRadialGradient(0,0,0,0,0,Math.max(w,h)*.6);glow.addColorStop(0,c.shadowColor+'66');glow.addColorStop(1,c.shadowColor+'00');c.fillStyle=glow;c.fillRect(-w*.7,-h*.7,w*1.4,h*1.4);c.drawImage(im,frame*sw,row*sh,sw,sh,-w/2,-h/2,w,h);c.restore();return true;}
+function drawSpell(c,name,x,y,w,h,clock,angle=0){if(name==='arrow')return drawGoldenArrow(c,x,y,w,angle);if(name==='fire'&&drawManaFireball(c,x,y,w,h,clock,angle))return true;const row={arrow:0,fire:1,heal:2,wind:3}[name],im=artBitmap('spell-motion');if(row===undefined||!im?.complete||!im.naturalWidth)return drawRasterFX(c,name,x,y,w,h,angle);const sw=im.naturalWidth/4,sh=im.naturalHeight/4,frame=motionAllowed()?Math.floor(clock*12)%4:0;c.save();c.translate(x,y);c.rotate(angle);c.globalCompositeOperation='lighter';c.shadowBlur=24;c.shadowColor=row===0?'#ffe18b':row===1?'#ff9854':row===2?'#9dffc3':'#b2f4ff';const glow=c.createRadialGradient(0,0,0,0,0,Math.max(w,h)*.6);glow.addColorStop(0,c.shadowColor+'66');glow.addColorStop(1,c.shadowColor+'00');c.fillStyle=glow;c.fillRect(-w*.7,-h*.7,w*1.4,h*1.4);c.drawImage(im,frame*sw,row*sh,sw,sh,-w/2,-h/2,w,h);c.restore();return true;}
 function softLight(c,x,y,r,color,alpha=1){
  c.save();c.globalCompositeOperation='lighter';c.globalAlpha*=alpha;
  const gradient=c.createRadialGradient(x,y,0,x,y,r);

@@ -8,7 +8,17 @@ function crawlRoom(g){const a=g.crawl;a.hero={x:118,y:330,tx:285,ty:310};a.enemy
 function moveRanger(x,y){const g=game;if(!g?.crawl||g.ended||gamePaused||!Number.isFinite(x)||!Number.isFinite(y))return;g.crawl.hero.tx=Math.max(84,Math.min(640,x));g.crawl.hero.ty=Math.max(235,Math.min(406,y));}
 function walkDungeon(){const g=game;if(!g?.crawl||g.ended||gamePaused)return;if(g.crawl.exitReady)moveRanger(639,316);else moveRanger(Math.max(100,g.crawl.enemy.x-(g.enemy.boss ? BOSS_STANDOFF : 195)),g.crawl.enemy.y);}
 function bindCrawlInput(canvas){canvas.tabIndex=0;canvas.setAttribute('aria-label','Dungeon room. Tap the floor to move, tap an enemy to attack. Arrow keys move, E follows the path.');let pointer=null;const point=e=>{const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)*720/r.width,y:(e.clientY-r.top)*520/r.height};};canvas.addEventListener('pointerdown',e=>{if(game?.kind!=='battle'||!game.crawl||game.ended||gamePaused||pointer!==null)return;pointer=e.pointerId;canvas.setPointerCapture?.(pointer);const p=point(e),a=game.crawl;if(!a.exitReady&&hitsDungeonEnemy(game,p.x,p.y)){walkDungeon();battleSkill('burst');}else moveRanger(p.x,p.y);});canvas.addEventListener('pointermove',e=>{if(e.pointerId===pointer&&game?.crawl){const p=point(e);moveRanger(p.x,p.y);}});for(const event of ['pointerup','pointercancel'])canvas.addEventListener(event,()=>{pointer=null;});canvas.addEventListener('keydown',e=>{const g=game;if(!g?.crawl||g.ended||gamePaused)return;const delta={ArrowLeft:[-75,0],ArrowRight:[75,0],ArrowUp:[0,-55],ArrowDown:[0,55],a:[-75,0],d:[75,0],w:[0,-55],s:[0,55]}[e.key];if(delta){e.preventDefault();moveRanger(g.crawl.hero.x+delta[0],g.crawl.hero.y+delta[1]);}else if(e.key.toLowerCase()==='e'){e.preventDefault();walkDungeon();}});}
-function crawlShot(g,enemy=false){const a=g.crawl;if(!enemy)g.heroShotAt=g.clock;if(!a||!motionAllowed())return;const from=enemy?a.enemy:a.hero,to=enemy?a.hero:a.enemy;a.shots.push({x:from.x,y:from.y-55,tx:to.x,ty:to.y-55,life:enemy?.45:.75,max:enemy?.45:.75,enemy});a.shots=a.shots.slice(-18);}
+function crawlShot(g,enemy=false,burst=false){
+ const a=g.crawl;
+ if(!enemy)g.heroShotAt=g.clock;
+ if(!a||!motionAllowed())return;
+ const h=a.hero,e=a.enemy;
+ const from=enemy?(g.enemy.boss?bossMouthPosition(g):{x:e.x,y:e.y-90}):{x:h.x+52,y:h.y-115};
+ const to=enemy?{x:h.x,y:h.y-88}:{x:e.x,y:e.y-(g.enemy.boss?120:85)};
+ const life=enemy?.45:.75;
+ a.shots.push({...from,tx:to.x,ty:to.y,life,max:life,enemy,burst});
+ a.shots=a.shots.slice(-18);
+}
 function updateCrawl(g,dt){const a=g.crawl;a.roomTime+=dt;for(const p of a.shots)p.life-=dt;a.shots=a.shots.filter(p=>p.life>0);const h=a.hero;
 if(g.enemy.boss && g.enemy.hp>0 && !a.exitReady) h.tx=Math.min(h.tx,a.enemy.x-BOSS_STANDOFF);
 const dist=Math.hypot(h.tx-h.x,h.ty-h.y),step=Math.min(dist,180*dt);if(dist>.5){h.x+=(h.tx-h.x)/dist*step;h.y+=(h.ty-h.y)/dist*step;}
@@ -55,7 +65,7 @@ c.shadowOffsetY=1;
 drawReina(c,g,h.x,h.y+5,135,180);
 c.restore();
 if(g.expRun?.party.length>1){const ally=ADVENTURERS.find(b=>b.id===g.expRun.party[1]);drawArtSprite(c,ally.id,h.x+55,h.y,65,105);}if(g.ally){drawArtSprite(c,g.ally.id,h.x-55,h.y,65,105);}
-for(const p of a.shots){if(!p.enemy&&p.life>.37)continue;const t=p.enemy?1-p.life/p.max:Math.max(0,1-p.life/.37),x=p.x+(p.tx-p.x)*t,y=p.y+(p.ty-p.y)*t;drawSpell(c,p.enemy?'fire':'arrow',x,y,70,45,g.clock,Math.atan2(p.ty-p.y,p.tx-p.x));}
+for(const p of a.shots){if(!p.enemy&&p.life>.37)continue;const t=p.enemy?1-p.life/p.max:Math.max(0,1-p.life/.37),x=p.x+(p.tx-p.x)*t,y=p.y+(p.ty-p.y)*t;drawSpell(c,p.enemy?'fire':'arrow',x,y,p.burst?98:70,45,g.clock,Math.atan2(p.ty-p.y,p.tx-p.x));}
 for(const fx of motionAllowed()?g.effects:[]){c.save();c.globalAlpha=Math.min(1,fx.life*2);if(fx.type==='beam'){drawSpell(c,'arrow',(h.x+e.x)/2,(h.y+e.y)/2-65,150,60,g.clock);drawRasterFX(c,'impact',e.x,e.y-60,100);}else drawSpell(c,fx.type==='heal'?'heal':'wind',h.x,h.y-45,150,130,g.clock);c.restore();}paintImpacts(c,g);drawBattleAtmosphere(c,g);c.globalAlpha=1;
 if(a.danger&&g.telegraph>0){
  c.save();c.font='bold 18px WonderStory';c.textAlign='center';c.lineWidth=3;
