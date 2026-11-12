@@ -1,15 +1,33 @@
 'use strict';
 const CRAWL_ROOMS=['Outer Gate','Guardian Hall','Boss Sanctum'];
+const BOSS_STANDOFF = 265;
 function setupCrawl(g){g.crawl={hero:{x:118,y:330,tx:285,ty:310},enemy:{x:520,y:300},engaged:false,exitReady:false,shots:[],danger:null,roomTime:0};}
 function crawlRoom(g){const a=g.crawl;a.hero={x:118,y:330,tx:285,ty:310};a.enemy={x:520,y:g.stage===2?315:300};a.engaged=false;a.exitReady=false;a.shots=[];a.danger=null;a.roomTime=0;g.transition=0;}
 function moveRanger(x,y){const g=game;if(!g?.crawl||g.ended||gamePaused||!Number.isFinite(x)||!Number.isFinite(y))return;g.crawl.hero.tx=Math.max(84,Math.min(640,x));g.crawl.hero.ty=Math.max(235,Math.min(406,y));}
-function walkDungeon(){const g=game;if(!g?.crawl||g.ended||gamePaused)return;if(g.crawl.exitReady)moveRanger(639,316);else moveRanger(Math.max(100,g.crawl.enemy.x-195),g.crawl.enemy.y);}
+function walkDungeon(){const g=game;if(!g?.crawl||g.ended||gamePaused)return;if(g.crawl.exitReady)moveRanger(639,316);else moveRanger(Math.max(100,g.crawl.enemy.x-(g.enemy.boss ? BOSS_STANDOFF : 195)),g.crawl.enemy.y);}
 function bindCrawlInput(canvas){canvas.tabIndex=0;canvas.setAttribute('aria-label','Dungeon room. Tap the floor to move, tap an enemy to attack. Arrow keys move, E follows the path.');let pointer=null;const point=e=>{const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)*720/r.width,y:(e.clientY-r.top)*520/r.height};};canvas.addEventListener('pointerdown',e=>{if(game?.kind!=='battle'||!game.crawl||game.ended||gamePaused||pointer!==null)return;pointer=e.pointerId;canvas.setPointerCapture?.(pointer);const p=point(e),a=game.crawl;if(!a.exitReady&&hitsDungeonEnemy(game,p.x,p.y)){walkDungeon();battleSkill('burst');}else moveRanger(p.x,p.y);});canvas.addEventListener('pointermove',e=>{if(e.pointerId===pointer&&game?.crawl){const p=point(e);moveRanger(p.x,p.y);}});for(const event of ['pointerup','pointercancel'])canvas.addEventListener(event,()=>{pointer=null;});canvas.addEventListener('keydown',e=>{const g=game;if(!g?.crawl||g.ended||gamePaused)return;const delta={ArrowLeft:[-75,0],ArrowRight:[75,0],ArrowUp:[0,-55],ArrowDown:[0,55],a:[-75,0],d:[75,0],w:[0,-55],s:[0,55]}[e.key];if(delta){e.preventDefault();moveRanger(g.crawl.hero.x+delta[0],g.crawl.hero.y+delta[1]);}else if(e.key.toLowerCase()==='e'){e.preventDefault();walkDungeon();}});}
 function crawlShot(g,enemy=false){const a=g.crawl;if(!enemy)g.heroShotAt=g.clock;if(!a||!motionAllowed())return;const from=enemy?a.enemy:a.hero,to=enemy?a.hero:a.enemy;a.shots.push({x:from.x,y:from.y-55,tx:to.x,ty:to.y-55,life:enemy?.45:.75,max:enemy?.45:.75,enemy});a.shots=a.shots.slice(-18);}
-function updateCrawl(g,dt){const a=g.crawl;a.roomTime+=dt;for(const p of a.shots)p.life-=dt;a.shots=a.shots.filter(p=>p.life>0);const h=a.hero,dist=Math.hypot(h.tx-h.x,h.ty-h.y),step=Math.min(dist,180*dt);if(dist>.5){h.x+=(h.tx-h.x)/dist*step;h.y+=(h.ty-h.y)/dist*step;}
+function updateCrawl(g,dt){const a=g.crawl;a.roomTime+=dt;for(const p of a.shots)p.life-=dt;a.shots=a.shots.filter(p=>p.life>0);const h=a.hero;
+if(g.enemy.boss && g.enemy.hp>0 && !a.exitReady) h.tx=Math.min(h.tx,a.enemy.x-BOSS_STANDOFF);
+const dist=Math.hypot(h.tx-h.x,h.ty-h.y),step=Math.min(dist,180*dt);if(dist>.5){h.x+=(h.tx-h.x)/dist*step;h.y+=(h.ty-h.y)/dist*step;}
 if(a.exitReady){if(h.x>610&&Math.abs(h.y-316)<65){g.stage++;crawlRoom(g);battleEnemy();battleLog(g.stage===2?'The final door opens. The boss awaits!':'A new hall opens before you.');}return true;}
 let gap=Math.hypot(h.x-a.enemy.x,h.y-a.enemy.y);if(gap<310)a.engaged=true;if(!a.engaged)return true;
-if(g.telegraph<=0&&gap>145){const speed=g.enemy.boss?42:58,travel=Math.min(Math.max(0,gap-145),speed*dt);a.enemy.x+=(h.x-a.enemy.x)/gap*travel;a.enemy.y+=(h.y-a.enemy.y)/gap*travel;if(g.enemy.boss){a.enemy.x=Math.max(165,Math.min(555,a.enemy.x));a.enemy.y=Math.max(310,Math.min(350,a.enemy.y));}}
+if(g.telegraph<=0 && g.enemy.boss){
+  // Keep the entire boss silhouette clear of the archer, including across lanes.
+  const targetX=Math.max(390,Math.min(555,h.x+BOSS_STANDOFF));
+  const targetY=Math.max(310,Math.min(350,h.y));
+  const dx=targetX-a.enemy.x,dy=targetY-a.enemy.y;
+  const distance=Math.hypot(dx,dy);
+  if(distance>0){
+    const step=Math.min(1,42*dt/distance);
+    a.enemy.x+=dx*step;
+    a.enemy.y+=dy*step;
+  }
+}else if(g.telegraph<=0 && gap>145){
+  const travel=Math.min(gap-145,58*dt);
+  a.enemy.x+=(h.x-a.enemy.x)/gap*travel;
+  a.enemy.y+=(h.y-a.enemy.y)/gap*travel;
+}
 return false;}
 function crawlHUD(g){const a=g.crawl;if(!a)return;const btn=$('#dungeonWalk');if(btn){btn.disabled=g.ended;paintGameHTML('#dungeonWalk',a.exitReady?uiIcon('play')+'Next hall<small>Walk through the open doorway</small>':uiIcon('walk')+'Approach enemy<small>Or tap the floor to move freely</small>');}
 const route=$('#dungeonRoute');if(route)paintGameHTML('#dungeonRoute',CRAWL_ROOMS.map((label,i)=>`<span class="${i===g.stage?'current':i<g.stage?'cleared':''}">${i<g.stage?uiIcon('check'):i+1} ${label}</span>`).join('<b>›</b>'));const objective=$('#dungeonObjective');if(objective)objective.textContent=g.ended?(g.won?'Boss defeated! Your treasure is ready.':'Retreat, upgrade and try again.'):a.exitReady?'Hall cleared! Tap the glowing doorway or Next hall.':g.stage===2?'Final boss: '+g.enemy.name+' · Dodge the red danger circle!':a.engaged?'Defeat the guardian to open the next hall.':'Explore the hall. Tap the floor to guide REINA.';}
