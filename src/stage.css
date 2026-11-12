@@ -5473,3 +5473,16 @@ body[data-screen=home]:not([data-playing]) #stage header .brand { width:min(21vw
 @media(max-width:600px) {
   body[data-screen=home]:not([data-playing]) #stage header .brand { display:none; }
 }
+
+/* Tablet loadout keeps the character and the browsable inventory side by side. */
+@container game-stage (min-width: 680px) {
+  body[data-screen=bag] #stage .bag-layout {
+    grid-template-columns:minmax(0,.95fr) minmax(0,1.2fr);
+    grid-template-rows:minmax(0,1fr) 60px;
+  }
+  body[data-screen=bag] #stage .doll-panel { grid-area:1 / 1; }
+  body[data-screen=bag] #stage .equipment-companions { grid-area:2 / 1; }
+  body[data-screen=bag] #stage .inventory-panel {
+    grid-column:2; grid-row:1 / 3; margin-top:60px; height:calc(100% - 60px);
+  }
+}
