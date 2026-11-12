@@ -38,9 +38,14 @@ drawArtScene(c,'battle-dungeon',720,520,1);
 // Soften the painted scenery before drawing the combatants and effects.
 c.fillStyle='rgba(33,48,58,.08)';c.fillRect(0,77,720,375);
 // End doorway opens only after the guardian is defeated.
+c.save();
+if(a.exitReady){
+  c.shadowColor='#ffcf60';
+  c.shadowBlur=motionAllowed()?12+3*Math.sin(g.clock*3):12;
+}
 drawAtlasIcon(c,a.exitReady?'play':'lock',649,316,62);
+c.restore();
 if(a.danger&&g.telegraph>0){c.fillStyle='#ff496e55';c.strokeStyle='#ff547c';c.lineWidth=4;c.beginPath();c.ellipse(a.danger.x,a.danger.y,a.danger.r,a.danger.r*.55,0,0,Math.PI*2);c.fill();c.stroke();c.fillStyle='#fff';c.font='bold 18px WonderStory';c.textAlign='center';c.fillText('DODGE!',a.danger.x,a.danger.y+5);}
-if(Math.hypot(h.tx-h.x,h.ty-h.y)>12){c.strokeStyle='#fff1ae';c.lineWidth=3;c.beginPath();c.ellipse(h.tx,h.ty,17,8,0,0,Math.PI*2);c.stroke();}
 if(g.enemy.hp>0){c.save();c.translate(e.x,e.y);c.scale(g.enemy.boss?.88:.68,g.enemy.boss?.88:.68);c.translate(-520,-290);drawDungeonCreature(c,{...g,clock:motionAllowed()?g.clock:0});c.restore();if(!g.enemy.boss){c.fillStyle='#193444';c.fillRect(e.x-52,e.y-175,104,7);c.fillStyle=color;c.fillRect(e.x-52,e.y-175,104*g.enemy.hp/g.enemy.maxhp,7);}if(g.telegraph>0){c.strokeStyle='#ffce7a';c.lineWidth=4;c.beginPath();c.ellipse(e.x,e.y,75,35,0,0,Math.PI*2);c.stroke();}}
 c.fillStyle='#173e5466';c.beginPath();c.ellipse(h.x,h.y,29,11,0,0,Math.PI*2);c.fill();
 c.save();
