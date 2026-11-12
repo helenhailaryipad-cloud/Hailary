@@ -65,7 +65,7 @@ function gearWorkspace(){
  const titles={inventory:'Bag',forge:'Gear Crafting',warehouse:'Warehouse'};
  const pieces=eq.items.filter(e=>!e.stored);
  const card=e=>`<div class="inventory-piece">${equipmentCell(e,{equipped:r.equipped(eq,e.uid)})}<small>${r.catalog[e.template].name}</small></div>`;
- const storage=(e,stored)=>`<button class="storage-slot" onclick="transferGear(${e.uid},${!stored})">${equipmentIcon(r.catalog[e.template].icon)}<strong>${r.catalog[e.template].name}</strong><small>${stored?'Withdraw':'Deposit'}</small></button>`;
+ const storage=(e,stored)=>`<button class="storage-slot" aria-label="${stored?'Withdraw':'Deposit'} ${r.catalog[e.template].name}" title="${r.catalog[e.template].name}" onclick="transferGear(${e.uid},${!stored})">${equipmentIcon(r.catalog[e.template].icon)}<strong>${r.catalog[e.template].name}</strong><small>${stored?'Withdraw':'Deposit'}</small></button>`;
  let content='';
  if(screen==='warehouse'){
   const stored=eq.items.filter(e=>e.stored),spares=pieces.filter(e=>!r.equipped(eq,e.uid));
