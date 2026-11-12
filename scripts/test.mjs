@@ -5,6 +5,7 @@ vm.runInContext(fs.readFileSync('src/gear-data.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/gear-ui.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/adventure-data.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/adventure-ui.js','utf8'),context);
+vm.runInContext(fs.readFileSync('src/boss-art.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/dungeon-crawl.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/world.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/app.js','utf8'),context);
