@@ -5402,3 +5402,27 @@ body[data-screen=bag] #stage .doll-slot .gear-illustration,
 #stage .inventory-grid .equipment-cell .gear-illustration {
   width:100%; height:100%; background-size:contain;
 }
+
+/* Keep the item heading and dismiss target outside the scrolling stat list. */
+#stage #modal.gear-modal #modalBody {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+#stage #modal.gear-modal .gear-detail-header {
+  position: relative;
+  flex: 0 0 auto;
+}
+#stage #modal.gear-modal .gear-detail-body {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+#stage #modal.gear-modal .gear-detail-bottom {
+  position: static;
+}
+@media (max-height: 480px) {
+  #stage #modal.gear-modal[open] { padding-top: 52px; }
+  #stage #modal.gear-modal #modalBody { display: block; overflow: auto; }
+  #stage #modal.gear-modal .gear-detail-body { overflow: visible; }
+}
