@@ -4798,3 +4798,75 @@ body[data-screen=bag] #stage .inventory-panel { align-self: stretch; height: 100
 #stage .equipment-cell .gear-stars { font-size: 9px; min-height: 12px; padding: 1px; top: 2px; left: 2px; }
 #stage .equipment-cell .gear-enhance { font-size: 9px; min-width: 17px; min-height: 12px; padding: 1px 2px; bottom: 2px; right: 2px; }
 #stage .equipment-cell .badge-icon { width: 9px; height: 9px; }
+
+/* Unframed item artwork, with details available on selection. */
+#stage { --gear-cell-size: 72px; }
+#stage .equipment-cell,
+#stage .equipment-cell:hover:not(:disabled),
+#stage .material-cell,
+#stage .material-cell:hover,
+#stage .inventory-materials .material-summary,
+#stage .gear-workspace .storage-slot {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  outline-offset: 2px;
+}
+#stage .equipment-cell::before,
+#stage .equipment-cell::after,
+#stage .material-cell::before,
+#stage .material-cell::after,
+#stage .material-summary::before,
+#stage .material-summary::after,
+#stage .storage-slot::before,
+#stage .storage-slot::after { display: none; }
+#stage .equipment-cell :is(.gear-tier,.gear-enhance,.gear-stars,.gear-gems,.worn-dot) { display: none; }
+#stage .equipment-cell .equipment-art { width: 100%; height: 100%; }
+#stage .inventory-grid .material-cell,
+#stage .gear-workspace .material-cell,
+#stage .inventory-materials .material-summary {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--gear-cell-size);
+  height: var(--gear-cell-size);
+  min-height: 0;
+  min-width: 0;
+  padding: 0;
+}
+#stage .inventory-grid .material-cell > .equipment-art,
+#stage .gear-workspace .storage-slot .equipment-art,
+#stage .inventory-materials .material-summary > .equipment-art { width: 100%; height: 100%; }
+#stage .material-cell > :is(small,strong),
+#stage .inventory-materials small { display: none; }
+#stage .material-cell > b,
+#stage .gear-workspace .material-cell > small,
+#stage .inventory-materials .material-summary > b {
+  display: block;
+  position: absolute;
+  bottom: 0;
+  right: 2px;
+  font-size: 15px;
+  line-height: 1;
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 1px 3px #17251c, 0 0 4px #17251c;
+}
+#stage .inventory-materials { grid-template-columns: repeat(4, var(--gear-cell-size)); justify-content: start; gap: 8px; }
+#stage .gear-workspace .storage-slot { padding: 0; }
+#stage .equipment-cell:focus-visible,
+#stage .material-cell:focus-visible,
+#stage .material-summary:focus-visible { outline: 2px solid #ffe08a; }
+@media (max-width: 380px) {
+  #stage .inventory-materials { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  #stage .inventory-materials .material-summary { width: 100%; max-width: var(--gear-cell-size); aspect-ratio: 1; height: auto; }
+}
+body[data-screen=bag] #stage .doll-left,
+body[data-screen=bag] #stage .doll-right {
+  justify-content: flex-start;
+  gap: 6px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+body[data-screen=bag] #stage .doll-slot { flex: 0 0 var(--gear-cell-size); }
