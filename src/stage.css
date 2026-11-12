@@ -5333,3 +5333,47 @@ body[data-screen=bag] #stage :is(.doll-left,.doll-right) .equipment-cell {
   box-shadow:0 2px 4px #48372256;
 }
 body[data-screen=bag] #stage .doll-slot .gear-illustration { filter:drop-shadow(0 1px 2px #44392c80); }
+
+/* Equipment loadout: let the portrait rise between the title and back control. */
+body[data-screen=bag]:not([data-playing]) #stage #main { top:calc(env(safe-area-inset-top) + 48px); }
+body[data-screen=bag] #stage .bag-top { position:absolute; inset:15px 8px auto; z-index:5; pointer-events:none; }
+body[data-screen=bag] #stage .bag-top button { pointer-events:auto; }
+body[data-screen=bag] #stage .bag-doll { inset:3px min(16%,76px) 58px; }
+body[data-screen=bag] #stage .doll-panel { isolation:isolate; }
+body[data-screen=bag] #stage :is(.doll-left,.doll-right) {
+  top:67px; bottom:55px; --stage-cell:min(76px,calc((100cqh - 140px)/5));
+}
+body[data-screen=bag] #stage .doll-slot .equipment-cell {
+  border:2px solid var(--star-color,#f2d28e); border-radius:12px;
+  background:radial-gradient(ellipse at 42% 35%,#fff6d7 0%,#e4c899 60%,#a57d54 100%);
+  box-shadow:inset 0 0 0 1px #ffedba,0 2px 5px #43312470;
+}
+body[data-screen=bag] #stage .doll-slot .gear-illustration { width:94%; height:94%; }
+body[data-screen=bag] #stage .doll-slot :is(.gear-tier,.gear-stars,.gear-enhance,.gear-gems) {
+  background:#3d2c2a; color:#fff5cf; border-radius:4px; line-height:1.1;
+}
+body[data-screen=bag] #stage .doll-actions { inset:auto 5px 4px; gap:8px; }
+body[data-screen=bag] #stage .doll-actions button,
+body[data-screen=bag] #stage .equipment-companions .equip-special {
+  border:1px solid #ffdb87; background:linear-gradient(160deg,#485b55,#233d41 70%);
+  color:#fff6db; box-shadow:inset 0 0 0 2px #b69a654d,0 2px 5px #35251866;
+  text-shadow:0 1px 2px #182623;
+}
+body[data-screen=bag] #stage .doll-actions button { min-height:47px; padding:5px 12px; min-width:min(39%,146px); font-size:clamp(16px,2vw,21px); }
+body[data-screen=bag] #stage .doll-actions button:first-child { background:linear-gradient(145deg,#ffebbb,#d2a35b); color:#32231a; text-shadow:none; }
+body[data-screen=bag] #stage .equipment-companions { max-width:650px; justify-self:center; }
+body[data-screen=bag] #stage .equipment-companions .equip-special { justify-content:center; gap:7px; padding:2px 5px; }
+body[data-screen=bag] #stage .equip-special > .gpt-icon { display:none; }
+body[data-screen=bag] #stage .equip-special .companion-caption { display:grid; gap:1px; text-align:left; min-width:0; }
+body[data-screen=bag] #stage .equip-special .companion-caption small { color:#efcf8a; font-size:12px; line-height:1.05; }
+body[data-screen=bag] #stage .equip-special .companion-caption strong { color:#fff7dd; font-size:clamp(15px,2vw,20px); line-height:1.1; }
+body[data-screen=bag] #stage .equip-special > b { position:static; margin:0 2px; color:#ffe0a1; }
+@container game-stage (max-width:800px) {
+  body[data-screen=bag] #stage .bag-layout { grid-template-rows:minmax(255px,1.85fr) 56px minmax(0,1fr); }
+}
+@container game-stage (min-width:801px) {
+  body[data-screen=bag] #stage .inventory-panel { margin-top:60px; height:calc(100% - 60px); }
+}
+body[data-screen=bag]:not([data-playing]) #stage > header { height:48px; padding-block:1px; }
+body[data-screen=bag]:not([data-playing]) #stage .brand { height:46px; }
+body[data-screen=bag]:not([data-playing]) #stage .wallet > span { flex-direction:row; padding-block:0; }
