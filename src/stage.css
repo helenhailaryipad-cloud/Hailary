@@ -5033,7 +5033,7 @@ body[data-screen=games] #stage .portal-game-info > button { min-height: 43px; ma
   position: relative;
   isolation: isolate;
 }
-#stage button:not(:disabled):not(.equipment-cell,.material-cell,.material-summary,.storage-slot,.boss-gate-portrait,.hero-attribute)::before {
+#stage button.button-lit::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -5045,9 +5045,9 @@ body[data-screen=games] #stage .portal-game-info > button { min-height: 43px; ma
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
-  animation: button-edge-light 5.5s linear infinite;
+  animation: button-edge-light 1.15s linear both;
 }
-#stage button:not(:disabled):not(.equipment-cell,.material-cell,.material-summary,.storage-slot,.boss-gate-portrait,.hero-attribute)::after {
+#stage button.button-lit::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -5059,7 +5059,7 @@ body[data-screen=games] #stage .portal-game-info > button { min-height: 43px; ma
   background-repeat: no-repeat;
   mix-blend-mode: screen;
   pointer-events: none;
-  animation: button-face-light 7s ease-in-out infinite;
+  animation: button-face-light 1.15s ease-in-out both;
 }
 @keyframes button-edge-light { to { --button-light-angle: 360deg; } }
 @keyframes button-face-light { 0%,25% { background-position: 150% 0; opacity: 0; } 35% { opacity:.8; } 65% { background-position: -50% 0; opacity:.8; } 75%,100% { background-position:-50% 0; opacity:0; } }
@@ -5130,3 +5130,26 @@ body:not([data-playing]) #stage .wallet > span > .gpt-icon {
     flex-basis: 32px;
   }
 }
+
+#stage button.button-lit::before, #stage button.button-lit::after { inset: 0; width: auto; height: auto; transform: none; }
+#stage .booth-title span { display:block; color:#fff1cb; font-size:14px; line-height:1.3; }
+body[data-screen=games] #stage .portal-game-info > button { position:static; flex:none; }
+#stage :is(.dungeon-back,.game-panel-actions button,.game-info-button,.portal-game-info button,#waveBtn,#mergeBreeze,#upgradeTower) {
+  display:inline-flex; align-items:center; justify-content:center; gap:5px;
+}
+#stage :is(.dungeon-back,.game-panel-actions button,.game-info-button,.portal-game-info button,#waveBtn,#mergeBreeze,#upgradeTower) > .gpt-icon {
+  display:block; position:static; width:24px; height:24px; min-width:24px; flex:0 0 24px; margin:0; transform:none; align-self:center;
+}
+body[data-playing] #stage #main .controls .defender-choice {
+  display:grid; grid-column:1/-1; grid-template-columns:40px minmax(0,1fr) auto;
+  grid-template-rows:auto; align-items:center; justify-items:start; height:auto; min-height:50px; padding:4px 8px; gap:5px;
+}
+body[data-playing] #stage #main .defender-choice .portrait-badge { width:40px; height:40px; grid-area:auto; margin:0; }
+body[data-playing] #stage #main .defender-choice strong { white-space:normal; line-height:1.12; }
+body[data-playing] #stage #main .defender-choice > span:last-child { display:inline-flex; align-items:center; justify-content:center; gap:2px; margin:0; }
+@media(orientation:portrait){
+  body[data-playing] #stage #main .controls .defender-choice { grid-column:span 1; grid-template-columns:minmax(0,1fr); grid-template-rows:32px auto auto; justify-items:center; gap:2px; padding:4px 2px; }
+  body[data-playing] #stage #main .defender-choice .portrait-badge { width:32px; height:32px; }
+}
+body[data-playing] #stage #main .controls #upgradeTower { grid-column:1/-1; width:100%; }
+body[data-playing] #stage #upgradeTower > span:not(.gpt-icon) { min-width:0; white-space:normal; }

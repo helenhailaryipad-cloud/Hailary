@@ -13,3 +13,31 @@ document.addEventListener('pointermove',e=>{if(reduced()||document.hidden)return
 const screenAnimations=new Set();const enterScreen=()=>{for(const animation of screenAnimations)animation.cancel();screenAnimations.clear();if(reduced()||document.hidden)return;const children=[...document.querySelector('main').children].slice(0,8);children.forEach((node,i)=>{if(typeof node.animate!=='function')return;const animation=node.animate([{opacity:0,translate:screen==='home'?'0 0':'0 7px'},{opacity:1,translate:'0 0'}],{duration:220,delay:Math.min(i*25,75),easing:'cubic-bezier(.2,.7,.25,1)',fill:'backwards'});screenAnimations.add(animation);animation.onfinish=()=>screenAnimations.delete(animation);});};const pool=new Set();window.WonderEffects={enter:enterScreen,clear(){for(const p of pool)p.remove();pool.clear()}};document.addEventListener('pointerdown',event=>{if(document.hidden||reduced())return;const button=event.target.closest?.('button');if(!button||button.disabled)return;const palette=['#fff8be','#bef6df','#f8c7e2','#c3edff'];for(let i=0;i<7&&pool.size<42;i++){const p=document.createElement('span'),angle=i*Math.PI*2/7;p.className='tap-spark';p.setAttribute('aria-hidden','true');p.style.left=event.clientX+'px';p.style.top=event.clientY+'px';p.style.setProperty('--dx',Math.cos(angle)*(27+i%3*12)+'px');p.style.setProperty('--dy',Math.sin(angle)*(27+i%3*12)-12+'px');p.style.setProperty('--spark-color',palette[i%palette.length]);pool.add(p);document.body.appendChild(p);p.addEventListener('animationend',()=>{p.remove();pool.delete(p)},{once:true});setTimeout(()=>{p.remove();pool.delete(p)},850)}},{passive:true});
 document.addEventListener('visibilitychange',()=>{document.body.classList.toggle('app-hidden',document.hidden);if(document.hidden){for(const p of pool)p.remove();pool.clear()}});
 })();
+
+// Give the edge glint and face shine to one visible action at a time.
+(()=>{
+  const stage=document.getElementById('stage');
+  const motion=window.matchMedia('(prefers-reduced-motion: reduce)');
+  const selector='button:not(:disabled,.equipment-cell,.material-cell,.material-summary,.storage-slot,.boss-gate-portrait,.hero-attribute)';
+  let current=null,timer=0;
+  function advance(){
+    current?.classList.remove('button-lit');
+    const root=stage.querySelector('dialog[open]')||stage;
+    const visible=Array.from(root.querySelectorAll(selector)).filter(button=>{
+      const r=button.getBoundingClientRect();
+      return r.width>0 && r.height>0 && button.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));
+    });
+    current=visible[(visible.indexOf(current)+1)%visible.length];
+    current?.classList.add('button-lit');
+    timer=setTimeout(advance,1420);
+  }
+  function restart(){
+    clearTimeout(timer);
+    current?.classList.remove('button-lit');
+    current=null;
+    if(!document.hidden&&!motion.matches) advance();
+  }
+  motion.addEventListener('change',restart);
+  document.addEventListener('visibilitychange',restart);
+  restart();
+})();
