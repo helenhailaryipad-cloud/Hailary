@@ -5267,3 +5267,40 @@ body[data-screen=games] #stage .game-portals { grid-auto-rows:max-content; }
 body[data-playing=vale] #stage #hud { display:flex; justify-content:space-evenly; color:#fff2c7; }
 body[data-playing=vale] #stage #valeStatus { grid-column:1/-1; text-align:center; margin:0; padding:8px; }
 .vale-victory-crown { display:block; width:72px; height:56px; object-fit:contain; margin:0 auto; }
+
+/* The close control stays reachable while the dialog body scrolls. */
+#stage #modal[open] { padding-top:52px; }
+#stage #modal.gear-modal[open] { padding-top:0; }
+#stage #modal > .dialog-dismiss {
+  position:absolute; inset:6px 6px auto auto; z-index:20; display:grid;
+  place-items:center; width:44px; min-width:44px; height:44px; min-height:44px;
+  padding:0; margin:0; border:0; background:transparent; box-shadow:none;
+}
+#stage #modal > .dialog-dismiss .gpt-icon { width:35px; height:35px; margin:0; }
+#stage #modal .gear-detail-header {
+  display:grid; grid-template-columns:clamp(54px,11vw,92px) minmax(0,1fr);
+  align-items:start; gap:12px; padding:14px 56px 14px 14px;
+}
+#stage #modal .detail-item-icon { width:100%; height:auto; aspect-ratio:1; margin:0; }
+#stage #modal .gear-heading { min-width:0; display:flex; flex-direction:column; align-items:flex-start; gap:3px; }
+#stage #modal .gear-heading h2 { order:-1; margin:0; font-size:clamp(18px,3.2vw,28px); line-height:1.1; overflow-wrap:anywhere; }
+#stage #modal .gear-heading h2 b { font-size:.72em; white-space:nowrap; }
+#stage #modal .gear-heading p { font-size:clamp(14px,2.1vw,18px); line-height:1.25; margin:2px 0 0; }
+body:not([data-playing]) #stage > header .wallet {
+  margin-inline-start:auto; width:max-content; max-width:65%; flex:0 1 auto;
+  grid-template-columns:repeat(3,max-content); gap:clamp(6px,1.6vw,18px); justify-content:end;
+}
+body[data-screen=home] #stage .hero-stage .hero-status-chip {
+  inset:auto auto 8px 8px; padding:0; border:0; border-radius:0; box-shadow:none;
+  background:transparent; color:#fff9e5; text-shadow:0 1px 3px #231a12,0 0 4px #281e19;
+}
+body[data-screen=home] #stage .hero-visual > .avatar {
+  top:calc(var(--menu-header)*.68); height:calc(100% - var(--menu-header)*.68 - 12px);
+}
+body[data-screen=bag] #stage .bag-doll { top:7%; }
+#stage :is(.hero-visual .companion,.bag-doll .bag-pet) .animated-dragon::before { transform:scaleX(-1); }
+body[data-screen=bag] #stage .bag-doll .hero-status-chip {
+  position:absolute; inset:auto auto 2px 0; z-index:5;
+  padding:0; border:0; background:transparent; box-shadow:none;
+  color:#fff9e5; text-shadow:0 1px 3px #231a12,0 0 4px #281e19;
+}
