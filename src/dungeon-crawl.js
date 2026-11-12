@@ -13,7 +13,7 @@ function crawlShot(g,enemy=false,burst=false){
  if(!enemy)g.heroShotAt=g.clock;
  if(!a||!motionAllowed())return;
  const h=a.hero,e=a.enemy;
- const from=enemy?(g.enemy.boss?bossMouthPosition(g):{x:e.x,y:e.y-90}):{x:h.x+52,y:h.y-115};
+ const from=enemy?(g.enemy.boss?bossMouthPosition(g):{x:e.x,y:e.y-90}):dungeonBowAim(g);
  const to=enemy?{x:h.x,y:h.y-88}:{x:e.x,y:e.y-(g.enemy.boss?120:85)};
  const life=enemy?.45:.75;
  a.shots.push({...from,tx:to.x,ty:to.y,life,max:life,enemy,burst});
@@ -22,6 +22,12 @@ function crawlShot(g,enemy=false,burst=false){
 function updateCrawl(g,dt){const a=g.crawl;a.roomTime+=dt;for(const p of a.shots)p.life-=dt;a.shots=a.shots.filter(p=>p.life>0);const h=a.hero;
 if(g.enemy.boss && g.enemy.hp>0 && !a.exitReady) h.tx=Math.min(h.tx,a.enemy.x-BOSS_STANDOFF);
 const dist=Math.hypot(h.tx-h.x,h.ty-h.y),step=Math.min(dist,180*dt);if(dist>.5){h.x+=(h.tx-h.x)/dist*step;h.y+=(h.ty-h.y)/dist*step;}
+for(const shot of a.shots){
+ if(shot.enemy||shot.released)continue;
+ const aim=dungeonBowAim(g);
+ Object.assign(shot,{x:aim.x,y:aim.y,tx:aim.tx,ty:aim.ty});
+ if(shot.life<=.37)shot.released=true;
+}
 if(a.exitReady){if(h.x>610&&Math.abs(h.y-316)<65){g.stage++;crawlRoom(g);battleEnemy();battleLog(g.stage===2?'The final door opens. The boss awaits!':'A new hall opens before you.');}return true;}
 let gap=Math.hypot(h.x-a.enemy.x,h.y-a.enemy.y);if(gap<310)a.engaged=true;if(!a.engaged)return true;
 if(g.telegraph<=0 && g.enemy.boss){
@@ -66,7 +72,7 @@ drawReina(c,g,h.x,h.y+5,135,180);
 c.restore();
 if(g.expRun?.party.length>1){const ally=ADVENTURERS.find(b=>b.id===g.expRun.party[1]);drawArtSprite(c,ally.id,h.x+55,h.y,65,105);}if(g.ally){drawArtSprite(c,g.ally.id,h.x-55,h.y,65,105);}
 for(const p of a.shots){if(!p.enemy&&p.life>.37)continue;const t=p.enemy?1-p.life/p.max:Math.max(0,1-p.life/.37),x=p.x+(p.tx-p.x)*t,y=p.y+(p.ty-p.y)*t;drawSpell(c,p.enemy?'fire':'arrow',x,y,p.burst?98:70,45,g.clock,Math.atan2(p.ty-p.y,p.tx-p.x));}
-for(const fx of motionAllowed()?g.effects:[]){c.save();c.globalAlpha=Math.min(1,fx.life*2);if(fx.type==='beam'){drawSpell(c,'arrow',(h.x+e.x)/2,(h.y+e.y)/2-65,150,60,g.clock);drawRasterFX(c,'impact',e.x,e.y-60,100);}else drawSpell(c,fx.type==='heal'?'heal':'wind',h.x,h.y-45,150,130,g.clock);c.restore();}paintImpacts(c,g);drawBattleAtmosphere(c,g);c.globalAlpha=1;
+for(const fx of motionAllowed()?g.effects:[]){c.save();c.globalAlpha=Math.min(1,fx.life*2);if(fx.type==='beam'){drawRasterFX(c,'impact',e.x,e.y-60,100);}else drawSpell(c,fx.type==='heal'?'heal':'wind',h.x,h.y-45,150,130,g.clock);c.restore();}paintImpacts(c,g);drawBattleAtmosphere(c,g);c.globalAlpha=1;
 for(const p of g.particles){
  if(p.bossDamage){
   const age=1-p.life, moving=motionAllowed();
