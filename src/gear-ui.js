@@ -75,7 +75,7 @@ function gearWorkspace(){
  let content='';
  if(screen==='warehouse'){
   const stored=eq.items.filter(e=>e.stored),spares=pieces.filter(e=>!r.equipped(eq,e.uid));
-  content=`<h2>Stored gear · ${stored.length}</h2><div class="work-grid">${stored.map(storage).join('')||'<p>Your vault is empty.</p>'}</div><h2>Spare gear · ${spares.length}</h2><div class="work-grid">${spares.map(storage).join('')||'<p>No spare gear to deposit.</p>'}</div>`;
+  content=`<section class="warehouse-pane"><h2>Stored gear · ${stored.length}</h2><div class="work-grid">${stored.map(storage).join('')||'<p>Your vault is empty.</p>'}</div></section><section class="warehouse-pane"><h2>Bag · ${spares.length}</h2><div class="work-grid">${spares.map(storage).join('')||'<p>No spare gear to deposit.</p>'}</div></section>`;
  }else{
   content=(screen==='forge'?`<p>Hero level ${level()} · T${r.unlockedTier(S)} unlocked${r.unlockedTier(S)<r.maxTier?' · Next tier at level '+r.requiredLevel(r.unlockedTier(S)+1):' · Maximum tier'}</p>`:'')+'<div class="work-grid">'+pieces.map(card).join('')+'</div>';
   if(screen==='inventory')content+='<h2>Materials</h2><div class="work-grid">'+r.materialDefs.map(m=>`<button class="storage-slot material-cell" aria-label="${m.name}, ${fmt(eq.materials[m.id])}" onclick="materialInfo('${m.id}')">${equipmentIcon(m.icon)}<strong>${m.name}</strong><small>${fmt(eq.materials[m.id])}</small></button>`).join('')+'</div>';

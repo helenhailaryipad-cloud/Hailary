@@ -5444,3 +5444,28 @@ body[data-screen=bag] #stage :is(.doll-left,.doll-right) {
   body[data-screen=bag] #stage .doll-panel > .doll-actions { bottom:38px; }
   body[data-screen=bag] #stage .doll-panel > .bag-doll { bottom:90px; }
 }
+
+#profileReadout { display:none; }
+body[data-screen=home] #stage header .wallet { position:relative; }
+body[data-screen=home] #profileReadout {
+  display:block; position:absolute; top:calc(100% + 5px); right:0;
+}
+body[data-screen=home] #stage #profileReadout .hero-status-chip {
+  padding:3px 8px; border:0; background:linear-gradient(90deg,#33271fc2,#31261bd9);
+  border-radius:5px; color:#fff6df; font-size:clamp(17px,2vw,23px);
+  white-space:nowrap; text-shadow:0 1px 2px #281a12;
+}
+body[data-screen=home]:not([data-playing]) #stage .brand {
+  width:clamp(138px,28vw,290px); max-width:38%; height:clamp(74px,10vw,108px);
+  align-self:flex-start;
+}
+body[data-screen=warehouse] #main .gear-workspace {
+  display:grid; grid-template-rows:repeat(2,minmax(0,1fr)); gap:8px;
+  overflow:hidden; background:none; border:0; padding:0;
+}
+.warehouse-pane {
+  min-height:0; display:flex; flex-direction:column; gap:6px;
+  padding:10px; border:1px solid #be9c61; border-radius:12px; background:#1e322deb;
+}
+.warehouse-pane h2 { margin:0; }
+.warehouse-pane .work-grid { min-height:0; overflow:auto; overscroll-behavior:contain; padding:3px; }
