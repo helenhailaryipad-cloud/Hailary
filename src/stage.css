@@ -5589,3 +5589,17 @@ body:is([data-screen=bag],[data-screen=inventory],[data-screen=forge],[data-scre
   body[data-screen=bag] #stage > header .wallet { grid-area:1 / 1; justify-self:end; }
   body[data-screen=bag] #stage header > #profileReadout { grid-area:2 / 1; justify-self:start; }
 }
+
+body[data-playing] .crawl-actions{
+ position:absolute; left:calc((100% - min(100cqw,138.46cqh))/2 + 6px);
+ bottom:calc((100% - min(100cqh,72.22cqw))/2 + 6px);
+ max-width:calc(min(100cqw,138.46cqh) - 12px);pointer-events:none;
+ display:grid;justify-items:start;gap:4px;
+}
+.crawl-actions #crawlCue{background:#20372ff2;color:#fff3d3;border-radius:6px;padding:3px 8px;font-size:clamp(12px,2cqw,17px);line-height:1.25}
+.crawl-actions>div{display:flex;gap:4px;flex-wrap:wrap}
+body[data-playing] #main .crawl-actions button{pointer-events:auto;position:relative;display:grid;place-content:center;justify-items:center;min-width:48px;min-height:44px;gap:1px;padding:3px 7px;border-radius:9px;line-height:1.05}
+body[data-playing] #main .crawl-actions button strong{font-size:clamp(12px,2.1cqw,17px)}
+body[data-playing] #main .crawl-actions button small{font-size:10px;line-height:1}
+body[data-playing] #main .crawl-actions button .ui-icon{width:16px;height:16px}
+.crawl-actions #skillDodge[data-warning=true]:enabled{outline:2px solid #ffe995;box-shadow:0 0 10px #ffce53}
