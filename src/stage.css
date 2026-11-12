@@ -5086,3 +5086,33 @@ body[data-screen=games] #stage .portal-game-info > button { min-height: 43px; ma
   background: linear-gradient(145deg,#f9e3a026,#142c2950);
 }
 #stage .equipment-cell.is-worn { border-color: #f0d19db3; }
+
+/* Star quality is consistent across loadout, bag, forge and storage. */
+#stage [data-stars="0"] { --star-color: #bac6ce; --star-tint: #bac6ce18; }
+#stage [data-stars="1"] { --star-color: #75dda0; --star-tint: #49b77330; }
+#stage [data-stars="2"] { --star-color: #73bcff; --star-tint: #348cdb38; }
+#stage [data-stars="3"] { --star-color: #c49aff; --star-tint: #9256dd3d; }
+#stage [data-stars="4"] { --star-color: #ffcf63; --star-tint: #dca93b40; }
+#stage [data-stars="5"] { --star-color: #ff91cb; --star-tint: #e857a347; }
+#stage .equipment-cell[data-stars],
+#stage .equipment-cell[data-stars].is-worn,
+#stage .gear-workspace .storage-slot[data-stars] {
+  border-color: var(--star-color);
+  background: linear-gradient(145deg,var(--star-tint),#142c2940);
+  box-shadow: inset 0 0 12px var(--star-tint);
+}
+#stage .equipment-cell[data-stars]:hover:not(:disabled),
+#stage .gear-workspace .storage-slot[data-stars]:hover {
+  border-color: var(--star-color);
+  background: linear-gradient(145deg,var(--star-tint),#36534780);
+  box-shadow: inset 0 0 18px var(--star-tint);
+}
+#stage .equipment-cell[data-stars] .gear-stars { color: var(--star-color); }
+#stage .gear-detail-header[data-stars] {
+  border-bottom: 2px solid var(--star-color);
+  background: linear-gradient(135deg,var(--star-tint),#243c32eb);
+}
+#stage .gear-detail-header[data-stars] .detail-item-icon {
+  border-color: var(--star-color);
+  background: var(--star-tint);
+}
