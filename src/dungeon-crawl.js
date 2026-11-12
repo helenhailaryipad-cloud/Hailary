@@ -33,12 +33,20 @@ function crawlHUD(g){const a=g.crawl;if(!a)return;const btn=$('#dungeonWalk');if
 const route=$('#dungeonRoute');if(route)paintGameHTML('#dungeonRoute',CRAWL_ROOMS.map((label,i)=>`<span class="${i===g.stage?'current':i<g.stage?'cleared':''}">${i<g.stage?uiIcon('check'):i+1} ${label}</span>`).join('<b>›</b>'));const objective=$('#dungeonObjective');if(objective)objective.textContent=g.ended?(g.won?'Boss defeated! Your treasure is ready.':'Retreat, upgrade and try again.'):a.exitReady?'Hall cleared! Tap the glowing doorway or Next hall.':g.stage===2?'Final boss: '+g.enemy.name+' · Dodge the red danger circle!':a.engaged?'Defeat the guardian to open the next hall.':'Explore the hall. Tap the floor to guide REINA.';}
 function drawCrawl(c,g){const a=g.crawl,h=a.hero,e=a.enemy,index=Math.max(0,DUNGEONS.findIndex(d=>d.id===g.source)),color=g.dungeon.color; c.clearRect(0,0,720,520);const bg=c.createLinearGradient(0,0,0,520);bg.addColorStop(0,['#416b74','#626783','#925c68'][index%3]);bg.addColorStop(1,'#233e59');c.fillStyle=bg;c.fillRect(0,0,720,520);
 drawArtScene(c,'battle-dungeon',720,520,1);
+// Soften the painted scenery before drawing the combatants and effects.
+c.fillStyle='rgba(33,48,58,.08)';c.fillRect(0,77,720,375);
 // End doorway opens only after the guardian is defeated.
 drawAtlasIcon(c,a.exitReady?'play':'lock',649,316,62);
 if(a.danger&&g.telegraph>0){c.fillStyle='#ff496e55';c.strokeStyle='#ff547c';c.lineWidth=4;c.beginPath();c.ellipse(a.danger.x,a.danger.y,a.danger.r,a.danger.r*.55,0,0,Math.PI*2);c.fill();c.stroke();c.fillStyle='#fff';c.font='bold 18px WonderStory';c.textAlign='center';c.fillText('DODGE!',a.danger.x,a.danger.y+5);}
 if(Math.hypot(h.tx-h.x,h.ty-h.y)>12){c.strokeStyle='#fff1ae';c.lineWidth=3;c.beginPath();c.ellipse(h.tx,h.ty,17,8,0,0,Math.PI*2);c.stroke();}
 if(g.enemy.hp>0){c.save();c.translate(e.x,e.y);c.scale(g.enemy.boss?.88:.68,g.enemy.boss?.88:.68);c.translate(-520,-290);drawDungeonCreature(c,{...g,clock:motionAllowed()?g.clock:0});c.restore();if(!g.enemy.boss){c.fillStyle='#193444';c.fillRect(e.x-52,e.y-175,104,7);c.fillStyle=color;c.fillRect(e.x-52,e.y-175,104*g.enemy.hp/g.enemy.maxhp,7);}if(g.telegraph>0){c.strokeStyle='#ffce7a';c.lineWidth=4;c.beginPath();c.ellipse(e.x,e.y,75,35,0,0,Math.PI*2);c.stroke();}}
-c.fillStyle='#173e5466';c.beginPath();c.ellipse(h.x,h.y,29,11,0,0,Math.PI*2);c.fill();drawReina(c,g,h.x,h.y+5,150,200);
+c.fillStyle='#173e5466';c.beginPath();c.ellipse(h.x,h.y,29,11,0,0,Math.PI*2);c.fill();
+c.save();
+c.shadowColor='rgba(40,31,48,.78)';
+c.shadowBlur=3;
+c.shadowOffsetY=1;
+drawReina(c,g,h.x,h.y+5,150,200);
+c.restore();
 if(g.expRun?.party.length>1){const ally=ADVENTURERS.find(b=>b.id===g.expRun.party[1]);drawArtSprite(c,ally.id,h.x+55,h.y,65,105);}if(g.ally){drawArtSprite(c,g.ally.id,h.x-55,h.y,65,105);}
 for(const p of a.shots){if(!p.enemy&&p.life>.37)continue;const t=p.enemy?1-p.life/p.max:Math.max(0,1-p.life/.37),x=p.x+(p.tx-p.x)*t,y=p.y+(p.ty-p.y)*t;drawSpell(c,p.enemy?'fire':'arrow',x,y,70,45,g.clock,Math.atan2(p.ty-p.y,p.tx-p.x));}
 for(const fx of motionAllowed()?g.effects:[]){c.save();c.globalAlpha=Math.min(1,fx.life*2);if(fx.type==='beam'){drawSpell(c,'arrow',(h.x+e.x)/2,(h.y+e.y)/2-65,150,60,g.clock);drawRasterFX(c,'impact',e.x,e.y-60,100);}else drawSpell(c,fx.type==='heal'?'heal':'wind',h.x,h.y-45,150,130,g.clock);c.restore();}paintImpacts(c,g);drawBattleAtmosphere(c,g);c.globalAlpha=1;
