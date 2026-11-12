@@ -5045,7 +5045,7 @@ body[data-screen=games] #stage .portal-game-info > button { min-height: 43px; ma
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
-  animation: button-edge-light 5.5s linear infinite;
+  animation: button-edge-light 2.8s linear infinite;
 }
 #stage button:not(:disabled,.equipment-cell,.material-cell,.material-summary,.storage-slot,.boss-gate-portrait,.hero-attribute)::after {
   content: '';
@@ -5059,10 +5059,10 @@ body[data-screen=games] #stage .portal-game-info > button { min-height: 43px; ma
   background-repeat: no-repeat;
   mix-blend-mode: screen;
   pointer-events: none;
-  animation: button-face-light 7s ease-in-out infinite;
+  animation: button-face-light 2.8s ease-in-out infinite;
 }
 @keyframes button-edge-light { to { --button-light-angle: 360deg; } }
-@keyframes button-face-light { 0%,25% { background-position: 150% 0; opacity: 0; } 35% { opacity:.8; } 65% { background-position: -50% 0; opacity:.8; } 75%,100% { background-position:-50% 0; opacity:0; } }
+@keyframes button-face-light { 0% { background-position: 150% 0; opacity: 0; } 14% { opacity:.8; } 82% { background-position: -50% 0; opacity:.8; } 95%,100% { background-position:-50% 0; opacity:0; } }
 #stage :is(.avatar-wings,.bag-wings,.godrays) { filter: drop-shadow(0 0 7px #f8e8b080); }
 #stage :is(.godrays,.stage-halo,.scene-atmosphere) { mix-blend-mode: screen; }
 @media(prefers-reduced-motion:reduce) {
@@ -5229,3 +5229,22 @@ body[data-screen=rankings] #stage .ranking-panel { display:block; }
 body[data-screen=collection] #stage .collection-grid { grid-auto-rows:max-content; }
 body[data-screen=collection] #stage .collection-grid .card { min-height:410px; max-height:none; }
 body[data-screen=collection] #stage .collection-grid .item-footer { position:static; display:flex; flex-wrap:wrap; gap:8px; margin-top:auto; }
+
+#stage .gear-illustration { background-size:contain; background-position:center; background-repeat:no-repeat; filter:none; }
+body[data-screen=bag] #stage .doll-panel { background:transparent; border-color:transparent; box-shadow:none; }
+body[data-screen=bag] #stage .bag-doll { inset:12% min(18%,84px) 52px; }
+body[data-screen=bag] #stage .bag-avatar { object-position:center; }
+body[data-screen=bag] #stage .bag-doll > .bag-wings { --render-wing-width:min(var(--back-wing-width),78cqw,calc((var(--wing-root-y,25cqh) + 10cqh) / .65)); }
+body[data-screen=bag] #stage :is(.doll-left,.doll-right) {
+  --stage-cell:min(80px,calc((100cqh - 70px)/5 - 4px));
+  top:8px; bottom:62px; width:var(--stage-cell); display:grid;
+  grid-template-rows:repeat(5,minmax(0,1fr)); gap:4px; overflow:visible; align-items:center;
+}
+body[data-screen=bag] #stage .doll-slot { display:grid; place-items:center; width:100%; min-height:0; height:100%; }
+body[data-screen=bag] #stage .doll-slot .equipment-cell { background:linear-gradient(140deg,#54272b,#251924); border:1.5px solid var(--star-color,#d8af72); overflow:hidden; }
+body[data-screen=bag] #stage .doll-slot .gear-illustration { width:85%; height:85%; }
+body[data-screen=bag] #stage .doll-slot .worn-dot { display:none; }
+body[data-screen=bag] #stage .doll-actions { left:calc(min(18%,84px) + 3px); right:calc(min(18%,84px) + 3px); }
+@media(prefers-reduced-motion:no-preference){
+  #stage button.equipment-cell::after { content:''; position:absolute; inset:0; pointer-events:none; border-radius:inherit; background:linear-gradient(115deg,transparent 44%,#fff4c552 50%,transparent 56%) 0 0/300% 100% no-repeat; animation:button-face-light 2.8s ease-in-out infinite; z-index:3; }
+}
