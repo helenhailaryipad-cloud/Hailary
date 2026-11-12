@@ -39,3 +39,25 @@ body[data-screen=merge] #game{touch-action:none}
 body:is([data-screen=merge],[data-screen=defense]) .game-layout{gap:8px}
 @media(max-height:900px){body:is([data-screen=merge],[data-screen=defense]) .topline{margin-block:2px}body:is([data-screen=merge],[data-screen=defense]) .canvas-wrap{width:min(100%,max(310px,62dvh));margin-inline:auto}}
 body[data-screen=home] .companion>.animated-dragon{display:grid!important;width:100%;height:100%;min-width:0;min-height:0}
+
+/* Attributes use the same gold and emerald palette as the equipment screen. */
+body .hero-stats-dialog{max-width:700px;margin:auto}
+body .hero-stats-dialog h2{font-size:clamp(24px,4vw,34px)!important;margin:8px 0 16px}
+body .hero-stats-power{display:flex;align-items:center;gap:10px;border-block:1px solid #e1be7477;padding:12px 0;margin-bottom:18px;color:#fff3c4;font-size:20px}
+body .hero-stats-power b{margin-left:auto;font-size:30px;font-family:var(--font-display)}
+body .hero-attribute-tabs{display:flex;gap:8px;margin-bottom:12px}
+body .hero-attribute-tabs button{flex:1;min-width:0;font-size:18px!important;padding:12px 8px!important;min-height:48px}
+body .hero-attribute-tabs button[aria-selected=true]{background:linear-gradient(#b49451,#70542e);border-color:#ffe6a7;box-shadow:inset 0 0 12px #ffecc433}
+body .hero-attribute-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px 14px;padding:4px 10px;border:1px solid #e3c98b55;border-radius:14px;background:#102e2666}
+body .hero-attribute-grid .hero-attribute{display:flex;align-items:center;justify-content:space-between;gap:8px;background:transparent;border:0;border-radius:0;border-bottom:1px solid #e2cb9330;box-shadow:none;padding:12px 0!important;min-height:58px;color:#fff;font-size:18px!important}
+body .hero-attribute span{display:flex;align-items:center;gap:7px;text-align:left}
+body .hero-attribute b{color:#fff4c9;font-variant-numeric:tabular-nums;white-space:nowrap;font-size:19px}
+body .hero-attribute .stat-art{width:27px;height:27px}
+body .hero-stat-explanation{min-height:74px;padding:14px 4px;font-size:17px;color:#f9ebc9;line-height:1.45}
+body .hero-stat-explanation strong{display:block;color:#ffe5a7;margin-bottom:4px}
+body .hero-stats-dialog .rules{font-size:15px!important;margin-bottom:0}
+@media(max-width:520px){body .hero-attribute-grid{column-gap:10px;padding:4px 8px}body .hero-attribute-grid .hero-attribute{font-size:15px!important;gap:4px}body .hero-attribute b{font-size:17px}body .hero-attribute .stat-art{width:22px;height:22px}body .hero-attribute-tabs button{font-size:16px!important}body .hero-attribute span{gap:4px}}
+body .hero-attribute-tabs button[aria-selected=true]{background:linear-gradient(#b49451,#70542e)!important;border-color:#ffe6a7!important;box-shadow:inset 0 0 12px #ffecc455,0 0 8px #ffd47033!important}
+body .hero-attribute-grid .hero-attribute{background:transparent!important;border:0!important;border-bottom:1px solid #e2cb9330!important;border-radius:0!important;box-shadow:none!important}
+body .hero-attribute-tabs button::before,body .hero-attribute::before{content:none!important;display:none!important}
+body .hero-attribute-grid .hero-attribute:hover{background:#fff0bd0d!important}

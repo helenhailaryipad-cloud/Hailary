@@ -165,3 +165,17 @@ console.log('PASS: TD six poses/size, projectile arrival and no orphan payouts, 
 
 vm.runInContext(`{const b={x:360,y:470,r:17,k:0,vx:100,vy:0,squash:0};for(let i=0;i<7;i++)constrainEgg(b);if(b.vx!==100)throw Error('Boundary solver must not multiply floor friction');}`,context);
 vm.runInContext(`{const root=rangerBackAnchor({left:100,top:20,width:200,height:600},720,1080,{left:100,top:0});if(root.x!==100||Math.abs(root.y-266)>0.001)throw Error('Contained wing back anchor');}`,context);
+
+vm.runInContext(`
+stopGame();S=defaults();S.equipment=WonderGear.fresh(S);const extended=stats();
+for(const key of ['accuracy','dodge','critDamage','critResistance','shieldHealth','elementalAttack','elementalDefense','armor','attackInterval','healing'])if(!Number.isFinite(extended[key]))throw Error('Missing advanced stat '+key);
+const gearBefore=JSON.stringify(S);openHeroStats();showHeroStatTab('advanced');explainHeroStat('armor');if(JSON.stringify(S)!==gearBefore)throw Error('Inspecting stats changed save');
+const savedRandom=Math.random;Math.random=()=>.99;
+launchBattle('dungeon','mistwood');game.enemy.attack=100;game.stats.defense=0;game.stats.damageReduction=0;game.stats.block=0;game.stats.dodge=0;game.stats.critResistance=100;game.shield=60;const hpBefore=game.hp;
+enemyStrike(1);if(game.shield!==0||game.hp!==hpBefore-40)throw Error('Barrier must absorb once and pass remainder to HP');
+game.stage=1;battleEnemy();if(game.shield!==0)throw Error('New hall refilled barrier');
+game.stats.dodge=100;const dodgeHP=game.hp;Math.random=()=>0;enemyStrike(1);if(game.hp!==dodgeHP)throw Error('Dodge stat inactive');
+game.stats.dodge=0;game.stats.critResistance=30;game.stats.elementalDefense=100;game.stats.defense=0;game.stats.block=0;game.stats.damageReduction=0;game.enemy.attack=100;const elementalHP=game.hp;enemyStrike(1,true);if(elementalHP-game.hp!==Math.round(100*100/135))throw Error('Elemental DEF must apply only to power strikes');
+Math.random=savedRandom;stopGame();
+`,context);
+console.log('PASS: advanced stats, read-only inspection, shield spillover and no hall refill, passive dodge and elemental defense.');
