@@ -7,7 +7,7 @@ const ART_IMAGE_CACHE=new Map();
 function equippedRanger(){
  const gear=S.equipment;
  const armor=gear?.items.find(entry=>entry.uid===gear.equipped.armor);
- return ({'armor-t3':'reina-t3','armor-t4':'reina-t3','armor-t5':'reina-t5','armor-t6':'reina-t5','armor-t7':'reina-t5','armor-t8':'reina-t8'})[armor?.template] || 'reina';
+ return ({'armor-t3':'reina-t3','armor-t4':'reina-t3','armor-t5':'reina-t5','armor-t6':'reina-t5','armor-t7':'reina-t5','armor-t8':'reina-t8'})['armor-t'+(armor?WonderGear.artTier(WonderGear.catalog[armor.template].tier):1)] || 'reina';
 }
 function artPath(id){return id==='reina'?'assets/ranger-cartoon.webp':'assets/generated/'+id+'.webp';}
 function artImage(id,alt='',cls=''){return `<img class="generated-image ${cls}" src="${artPath(id)}" alt="${alt}" loading="lazy" decoding="async">`;}

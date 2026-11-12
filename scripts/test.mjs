@@ -42,7 +42,7 @@ const oldSave=defaults();delete oldSave.dungeonWins;delete oldSave.sparWins;if(!
 
 vm.runInContext(`
 S=defaults();S.upgrades.bow=7;S.upgrades.ring=3;const r=globalThis.WonderGear,legacyStats=r.stats(S),eq=r.fresh(S);if(eq.items.find(i=>i.uid===eq.equipped.bow).enhance!==7||eq.items.find(i=>i.uid===eq.equipped.spiritluck).enhance!==3)throw Error('Legacy enhancements lost');S.equipment=eq;if(JSON.stringify(r.stats(S))!==JSON.stringify(legacyStats))throw Error('Migration doubled stats');if(!valid(S))throw Error('Gear save invalid');
-const uid=eq.equipped.bow,spare=eq.items.find(i=>i.template==='bow-t3');r.perform(S,spare.uid,'equip');if(eq.equipped.bow!==spare.uid)throw Error('Equip did not replace slot');
+S.xp=99*150;const uid=eq.equipped.bow,spare=eq.items.find(i=>i.template==='bow-t3');r.perform(S,spare.uid,'equip');if(eq.equipped.bow!==spare.uid)throw Error('Equip did not replace slot');
 r.perform(S,uid,'equip');const oldGold=S.gold,stones=eq.materials.stone;const p=r.cost(eq.items.find(i=>i.uid===uid),'enhance');if(!r.perform(S,uid,'enhance').ok||S.gold!==oldGold-p.gold||eq.materials.stone!==stones-p.stone)throw Error('Enhancement cost');if(eq.items.find(i=>i.uid===spare.uid).enhance!==0)throw Error('Independent enhancement');
 S.gold=100000;eq.materials={stone:1000,shard:1000,gem:1000,essence:1000};r.perform(S,uid,'star');r.perform(S,uid,'gem');const upgraded=eq.items.find(i=>i.uid===uid),stamp=[upgraded.enhance,upgraded.stars,upgraded.gems].join();if(!r.perform(S,uid,'craft').ok||upgraded.template!=='bow-t2'||[upgraded.enhance,upgraded.stars,upgraded.gems].join()!==stamp||eq.equipped.bow!==uid)throw Error('Craft progression transfer');
 S.gold=0;const poor=JSON.stringify(S);if(r.perform(S,uid,'enhance').ok||JSON.stringify(S)!==poor)throw Error('Unaffordable action mutated save');S.gold=100000;if(r.salvage(S,uid).ok)throw Error('Equipped salvage allowed');if(!r.salvage(S,spare.uid).ok||eq.items.some(i=>i.uid===spare.uid))throw Error('Spare salvage failed');
@@ -187,7 +187,7 @@ S=JSON.parse(JSON.stringify(S));
 if (!WonderGear.valid(S.equipment)||!S.equipment.items.find(i=>i.uid===11).stored) throw Error('Warehouse reload');
 if (WonderGear.perform(S,11,'equip').ok||WonderGear.salvage(S,11).ok) throw Error('Stored item protection');
 transferGear(11,false);
-if (!WonderGear.perform(S,11,'equip').ok) throw Error('Withdrawn item must be usable');
+S.xp=99*150;if (!WonderGear.perform(S,11,'equip').ok) throw Error('Withdrawn item must be usable');
 transferGear(11,true);
 if (S.equipment.items.find(i=>i.uid===11).stored) throw Error('Equipped item deposit');
 for(const section of Object.keys(sectionPages)){
