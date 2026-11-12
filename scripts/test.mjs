@@ -196,3 +196,18 @@ for(const section of Object.keys(sectionPages)){
 }
 `,context);
 console.log('PASS: six sections with detail pages, warehouse persistence and equipped item protection.');
+
+vm.runInContext(`
+S=defaults(); startMerge();
+const originalDrawEgg=drawEgg, aimDraws=[];
+drawEgg=(...args)=>aimDraws.push(args);
+const aimCanvas={save(){},restore(){},setLineDash(){},beginPath(){},moveTo(){},lineTo(){},stroke(){},arc(){}};
+drawNestAim(aimCanvas,game);
+if(aimDraws.length!==1||aimDraws[0][2]!==64)throw Error('Aim must show one ready egg and no ghost egg');
+mergeDrop();mergeDrop();
+if(game.balls.length!==1)throw Error('Repeated drop creates duplicate eggs');
+aimDraws.length=0;drawNestAim(aimCanvas,game);
+if(aimDraws.length)throw Error('Ready egg overlaps the dropped egg during cooldown');
+drawEgg=originalDrawEgg;stopGame();
+`,context);
+console.log('PASS: one egg per drop, no ghost egg at landing and no overlapping preview during release.');
