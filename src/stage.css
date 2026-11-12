@@ -5070,3 +5070,19 @@ body[data-screen=games] #stage .portal-game-info > button { min-height: 43px; ma
 }
 
 #stage .generated-egg-preview { filter: brightness(1.22) contrast(1.12) saturate(1.15); }
+
+/* Subtle individual frames separate equipment without covering its artwork. */
+#stage .equipment-cell,
+#stage .equipment-cell:hover:not(:disabled),
+#stage .gear-workspace .storage-slot:not(.material-cell) {
+  border: 1px solid #e5c88b88;
+  border-radius: 9px;
+  background: linear-gradient(145deg,#f9e3a014,#142c2940);
+  box-shadow: inset 0 0 0 1px #fff4ce0a;
+}
+#stage .equipment-cell:hover:not(:disabled),
+#stage .gear-workspace .storage-slot:not(.material-cell):hover {
+  border-color: #ffe4a9;
+  background: linear-gradient(145deg,#f9e3a026,#142c2950);
+}
+#stage .equipment-cell.is-worn { border-color: #f0d19db3; }
