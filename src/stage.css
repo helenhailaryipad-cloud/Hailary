@@ -5153,3 +5153,15 @@ body[data-playing] #stage #main .defender-choice > span:last-child { display:inl
 }
 body[data-playing] #stage #main .controls #upgradeTower { grid-column:1/-1; width:100%; }
 body[data-playing] #stage #upgradeTower > span:not(.gpt-icon) { min-width:0; white-space:normal; }
+
+/* Hero identity stays beside the scene, clear of the face and wings. */
+#stage .hero-status-chip {
+  display:flex; align-items:center; gap:10px; width:max-content; max-width:100%;
+  padding:5px 10px; border:1px solid #d9b56f88; border-radius:12px;
+  background:#17383fd9; color:#fff6dc; font-size:16px; line-height:1.2;
+  pointer-events:none;
+}
+#stage .hero-status-chip strong { display:inline-flex; align-items:center; gap:4px; color:#ffe08a; font-size:18px; }
+#stage .hero-status-chip .gpt-icon { display:block; position:static; width:25px; height:25px; min-width:25px; margin:0; }
+body[data-screen=home] #stage .hero-stage .hero-status-chip { position:absolute; top:10px; left:10px; z-index:4; }
+body[data-screen=bag] #stage .bag-top .hero-status-chip { margin-right:auto; }
