@@ -179,3 +179,20 @@ game.stats.dodge=0;game.stats.critResistance=30;game.stats.elementalDefense=100;
 Math.random=savedRandom;stopGame();
 `,context);
 console.log('PASS: advanced stats, read-only inspection, shield spillover and no hall refill, passive dodge and elemental defense.');
+
+vm.runInContext(`
+S=defaults(); screen='warehouse';
+transferGear(11,true);
+S=JSON.parse(JSON.stringify(S));
+if (!WonderGear.valid(S.equipment)||!S.equipment.items.find(i=>i.uid===11).stored) throw Error('Warehouse reload');
+if (WonderGear.perform(S,11,'equip').ok||WonderGear.salvage(S,11).ok) throw Error('Stored item protection');
+transferGear(11,false);
+if (!WonderGear.perform(S,11,'equip').ok) throw Error('Withdrawn item must be usable');
+transferGear(11,true);
+if (S.equipment.items.find(i=>i.uid===11).stored) throw Error('Equipped item deposit');
+for(const section of Object.keys(sectionPages)){
+ screen=section; nav();
+ if(!sectionPages[section].every(([,label])=>document.querySelector('#nav').innerHTML.includes('>'+label+'</button>')))throw Error('Missing section page in '+section);
+}
+`,context);
+console.log('PASS: six sections with detail pages, warehouse persistence and equipped item protection.');
