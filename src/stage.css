@@ -5477,7 +5477,7 @@ body[data-screen=home]:not([data-playing]) #stage header .brand { width:min(21vw
 /* Tablet loadout keeps the character and the browsable inventory side by side. */
 @container game-stage (min-width: 680px) {
   body[data-screen=bag] #stage .bag-layout {
-    grid-template-columns:minmax(0,.95fr) minmax(0,1.2fr);
+    grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);
     grid-template-rows:minmax(0,1fr) 60px;
   }
   body[data-screen=bag] #stage .doll-panel { grid-area:1 / 1; }
@@ -5603,3 +5603,15 @@ body[data-playing] #main .crawl-actions button strong{font-size:clamp(12px,2.1cq
 body[data-playing] #main .crawl-actions button small{font-size:10px;line-height:1}
 body[data-playing] #main .crawl-actions button .ui-icon{width:16px;height:16px}
 .crawl-actions #skillDodge[data-warning=true]:enabled{outline:2px solid #ffe995;box-shadow:0 0 10px #ffce53}
+
+body[data-screen=bag] #stage .bag-layout > .inventory-panel {
+  background:linear-gradient(155deg,rgba(94,123,108,.97),rgba(67,96,85,.97));
+}
+body[data-screen=bag] #stage .doll-actions > button {
+  display:inline-flex; flex-direction:column; justify-content:center; align-items:center;
+  width:clamp(68px,8.4vw,90px); min-width:0; height:auto; aspect-ratio:1.1;
+  padding:4px; gap:3px; line-height:1.1; font-size:clamp(13px,1.6vw,16px);
+}
+body[data-screen=bag] #stage .doll-actions > button > .gpt-icon {
+  width:clamp(23px,3vw,32px);height:clamp(23px,3vw,32px);min-width:0;
+}
