@@ -5262,3 +5262,8 @@ body[data-playing] #stage #eggJourney { display:grid; grid-template-columns:repe
 body[data-playing] #stage :is(#eggJourney,#nextEgg) .generated-egg-preview { width:clamp(32px,6vmin,62px); height:auto; aspect-ratio:1; max-width:100%; max-height:none; }
 body[data-playing] #stage #game { image-rendering:auto; }
 .depth-particle,.ambient-sparkles span { border-radius:50%; background:radial-gradient(circle,#fff3b9a6 0%,#ffdc9273 20%,#ffc87122 47%,transparent 71%); box-shadow:none; }
+
+body[data-screen=games] #stage .game-portals { grid-auto-rows:max-content; }
+body[data-playing=vale] #stage #hud { display:flex; justify-content:space-evenly; color:#fff2c7; }
+body[data-playing=vale] #stage #valeStatus { grid-column:1/-1; text-align:center; margin:0; padding:8px; }
+.vale-victory-crown { display:block; width:72px; height:56px; object-fit:contain; margin:0 auto; }
