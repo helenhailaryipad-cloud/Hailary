@@ -5341,7 +5341,7 @@ body[data-screen=bag] #stage .bag-top button { pointer-events:auto; }
 body[data-screen=bag] #stage .bag-doll { inset:3px min(16%,76px) 58px; }
 body[data-screen=bag] #stage .doll-panel { isolation:isolate; }
 body[data-screen=bag] #stage :is(.doll-left,.doll-right) {
-  top:67px; bottom:55px; --stage-cell:min(76px,calc((100cqh - 140px)/5));
+  top:64px; bottom:24px; gap:3px; --stage-cell:min(85px,calc((100cqh - 100px)/5),19cqw);
 }
 body[data-screen=bag] #stage .doll-slot .equipment-cell {
   border:2px solid var(--star-color,#f2d28e); border-radius:12px;
