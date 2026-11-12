@@ -5033,7 +5033,7 @@ body[data-screen=games] #stage .portal-game-info > button { min-height: 43px; ma
   position: relative;
   isolation: isolate;
 }
-#stage button.button-lit::before {
+#stage button:not(:disabled,.equipment-cell,.material-cell,.material-summary,.storage-slot,.boss-gate-portrait,.hero-attribute)::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -5045,9 +5045,9 @@ body[data-screen=games] #stage .portal-game-info > button { min-height: 43px; ma
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
-  animation: button-edge-light 1.15s linear both;
+  animation: button-edge-light 5.5s linear infinite;
 }
-#stage button.button-lit::after {
+#stage button:not(:disabled,.equipment-cell,.material-cell,.material-summary,.storage-slot,.boss-gate-portrait,.hero-attribute)::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -5059,7 +5059,7 @@ body[data-screen=games] #stage .portal-game-info > button { min-height: 43px; ma
   background-repeat: no-repeat;
   mix-blend-mode: screen;
   pointer-events: none;
-  animation: button-face-light 1.15s ease-in-out both;
+  animation: button-face-light 7s ease-in-out infinite;
 }
 @keyframes button-edge-light { to { --button-light-angle: 360deg; } }
 @keyframes button-face-light { 0%,25% { background-position: 150% 0; opacity: 0; } 35% { opacity:.8; } 65% { background-position: -50% 0; opacity:.8; } 75%,100% { background-position:-50% 0; opacity:0; } }
@@ -5131,7 +5131,7 @@ body:not([data-playing]) #stage .wallet > span > .gpt-icon {
   }
 }
 
-#stage button.button-lit::before, #stage button.button-lit::after { inset: 0; width: auto; height: auto; transform: none; }
+#stage button:not(:disabled,.equipment-cell,.material-cell,.material-summary,.storage-slot,.boss-gate-portrait,.hero-attribute)::before, #stage button:not(:disabled,.equipment-cell,.material-cell,.material-summary,.storage-slot,.boss-gate-portrait,.hero-attribute)::after { inset: 0; width: auto; height: auto; transform: none; }
 #stage .booth-title span { display:block; color:#fff1cb; font-size:14px; line-height:1.3; }
 body[data-screen=games] #stage .portal-game-info > button { position:static; flex:none; }
 #stage :is(.dungeon-back,.game-panel-actions button,.game-info-button,.portal-game-info button,#waveBtn,#mergeBreeze,#upgradeTower) {
@@ -5174,3 +5174,5 @@ body[data-screen=bag] #stage .bag-top .hero-status-chip { margin-right:auto; }
 #stage button:disabled:not(.equipment-cell,.material-cell,.material-summary,.storage-slot,.boss-gate-portrait,.hero-attribute) {
   outline-color:#ad9c70;
 }
+
+@media(prefers-reduced-motion:reduce){ #stage button:not(:disabled,.equipment-cell,.material-cell,.material-summary,.storage-slot,.boss-gate-portrait,.hero-attribute)::before, #stage button:not(:disabled,.equipment-cell,.material-cell,.material-summary,.storage-slot,.boss-gate-portrait,.hero-attribute)::after { animation:none; } }
