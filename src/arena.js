@@ -14,5 +14,33 @@ function reinaFrame(g){const h=g.crawl?.hero,moving=!!h&&Math.hypot(h.tx-h.x,h.t
 function reinaSpriteBox(rect,width,height,referenceHeight=rect[3]){const scale=Math.min(height,width*1.6)/referenceHeight;return {w:rect[2]*scale,h:rect[3]*scale};}
 function drawReina(c,g,x,floor,width,height){const pose=reinaFrame(g);if(!motionAllowed()||(!pose.moving&&!pose.shooting)){if(!g.spriteIdle)return drawArtSprite(c,'reina',x,floor,width,height);pose.id='reina-shoot';pose.frame=0;}const im=artBitmap(pose.id),m=globalThis.WonderArtMeta?.[pose.id],rect=m?.frames?.[pose.frame];if(!im?.complete||!im.naturalWidth||!rect)return drawArtSprite(c,'reina',x,floor,width,height);const box=reinaSpriteBox(rect,width,height,m.maxFrameHeight);c.save();c.translate(x,floor);if(pose.moving&&g.crawl.hero.tx<x)c.scale(-1,1);if(g.evade>0)c.globalAlpha=.55;c.drawImage(im,...rect,-box.w/2,-box.h,box.w,box.h);c.restore();return true;}
 function drawMotionSprite(c,id,row,x,floor,width,height,clock=0,cols=4,rows=3){const im=artBitmap(id);if(!im?.complete||!im.naturalWidth)return false;const frame=motionAllowed()?Math.floor(clock*7)%cols:0,sw=im.naturalWidth/cols,sh=im.naturalHeight/rows,scale=Math.min(width/sw,height/sh),w=sw*scale,h=sh*scale;c.drawImage(im,frame*sw,row*sh,sw,sh,x-w/2,floor-h,w,h);return true;}
-function drawSpell(c,name,x,y,w,h,clock,angle=0){const row={arrow:0,fire:1,heal:2,wind:3}[name],im=artBitmap('spell-motion');if(row===undefined||!im?.complete||!im.naturalWidth)return drawRasterFX(c,name,x,y,w,h,angle);const sw=im.naturalWidth/4,sh=im.naturalHeight/4,frame=motionAllowed()?Math.floor(clock*12)%4:0;c.save();c.translate(x,y);c.rotate(angle);c.globalCompositeOperation='lighter';c.shadowBlur=24;c.shadowColor=row===0?'#ffe18b':row===1?'#ff9854':row===2?'#9dffc3':'#b2f4ff';const glow=c.createRadialGradient(0,0,0,0,0,Math.max(w,h)*.6);glow.addColorStop(0,c.shadowColor+'66');glow.addColorStop(1,c.shadowColor+'00');c.fillStyle=glow;c.fillRect(-w*.7,-h*.7,w*1.4,h*1.4);c.drawImage(im,frame*sw,row*sh,sw,sh,-w/2,-h/2,w,h);c.restore();return true;}
+function drawManaFireball(c,x,y,width,height,clock,angle) {
+  const image=artBitmap('fire-mana-motion');
+  if(!image?.complete || !image.naturalWidth) return false;
+  const moving=motionAllowed();
+  const frame=moving ? Math.floor(clock*12)%4 : 0;
+  const cell=image.naturalWidth/2;
+  const size=Math.min(width*1.15,height*2);
+  c.save();
+  c.translate(x,y);
+  c.rotate(angle);
+  c.globalCompositeOperation='lighter';
+  c.shadowColor='#ff813f';
+  c.shadowBlur=7;
+  c.drawImage(image,(frame%2)*cell,Math.floor(frame/2)*cell,cell,cell,-size*.79,-size*.52,size,size);
+  if(moving) {
+    c.shadowColor='#ab75ff';
+    for(let i=0;i<6;i++) {
+      const phase=(clock*1.8+i/6)%1;
+      const drift=Math.sin(i*2.4+phase*4)*phase*size*.13;
+      c.fillStyle=i%2 ? '#d2aaff' : '#ffcd71';
+      c.beginPath();
+      c.arc(-size*(.25+phase*.7),drift,Math.max(.3,1.9*(1-phase)),0,Math.PI*2);
+      c.fill();
+    }
+  }
+  c.restore();
+  return true;
+}
+function drawSpell(c,name,x,y,w,h,clock,angle=0){if(name==='fire'&&drawManaFireball(c,x,y,w,h,clock,angle))return true;const row={arrow:0,fire:1,heal:2,wind:3}[name],im=artBitmap('spell-motion');if(row===undefined||!im?.complete||!im.naturalWidth)return drawRasterFX(c,name,x,y,w,h,angle);const sw=im.naturalWidth/4,sh=im.naturalHeight/4,frame=motionAllowed()?Math.floor(clock*12)%4:0;c.save();c.translate(x,y);c.rotate(angle);c.globalCompositeOperation='lighter';c.shadowBlur=24;c.shadowColor=row===0?'#ffe18b':row===1?'#ff9854':row===2?'#9dffc3':'#b2f4ff';const glow=c.createRadialGradient(0,0,0,0,0,Math.max(w,h)*.6);glow.addColorStop(0,c.shadowColor+'66');glow.addColorStop(1,c.shadowColor+'00');c.fillStyle=glow;c.fillRect(-w*.7,-h*.7,w*1.4,h*1.4);c.drawImage(im,frame*sw,row*sh,sw,sh,-w/2,-h/2,w,h);c.restore();return true;}
 function drawBattleAtmosphere(c,g){if(!motionAllowed())return;c.save();c.globalCompositeOperation='screen';for(let i=0;i<16;i++){const x=(i*103+g.clock*(5+i%3))%720,y=100+((i*71-g.clock*(8+i%4))%340+340)%340;c.globalAlpha=.15+.2*(.5+.5*Math.sin(g.clock*1.6+i));drawRasterFX(c,'impact',x,y,9+i%4*2);}c.restore();}

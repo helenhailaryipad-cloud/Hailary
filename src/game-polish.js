@@ -13,7 +13,19 @@ function updateDefenseControls(){const g=game;if(!g||g.kind!=='defense')return;c
 function updateMergeControls(){const g=game;if(!g||g.kind!=='merge')return;const drop=$('#dropEgg'),breeze=$('#mergeBreeze');if(drop){drop.disabled=g.ended||gamePaused||g.cooldown>0;paintGameHTML('#dropEgg',uiIcon('dragon')+(g.cooldown>0?'Ready in '+g.cooldown.toFixed(1)+'s':'Drop egg'));}if(breeze){breeze.disabled=g.ended||gamePaused||g.nudged;paintGameHTML('#mergeBreeze',uiIcon('wind')+(g.nudged?'Breeze used':'Breeze · 1 left'));}const reward=mergeReward(g);paintGameHTML('#finishBtn',uiIcon('gold')+'Collect · '+fmt(reward.gold));const highest=Math.max(0,...g.balls.map(b=>b.k));paintGameHTML('#eggJourney',EGGS.map((egg,k)=>`<span class="evolution-egg ${k<=highest?'discovered':''}" title="${egg.name}"><span class="generated-egg-preview" style="--egg-col:${k%4};--egg-row:${Math.floor(k/4)}"></span><small>${k+1}</small></span>`).join(''));}
 function addImpact(g,x,y,color='#ffe0a0',kind='impact'){if(!motionAllowed())return;g.hitFX=g.hitFX||[];g.hitFX.push({x,y,color,kind,life:.4});if(g.hitFX.length>16)g.hitFX.splice(0,g.hitFX.length-16);}
 function tickImpacts(g,dt){if(g.hitFX)g.hitFX=g.hitFX.filter(p=>(p.life-=dt)>0);}
-function paintImpacts(c,g){if(!motionAllowed())return;c.save();c.globalCompositeOperation='screen';for(const p of g.hitFX||[]){c.globalAlpha=Math.min(1,p.life*4);const size=40+(1-p.life/.4)*55;c.shadowColor=p.color;c.shadowBlur=14;drawRasterFX(c,p.kind,p.x,p.y,size);}c.restore();}
+function paintImpacts(c,g){if(!motionAllowed())return;c.save();c.globalCompositeOperation='screen';for(const p of g.hitFX||[]){c.globalAlpha=Math.min(1,p.life*4);const size=40+(1-p.life/.4)*55;c.shadowColor=p.color;c.shadowBlur=14;drawRasterFX(c,p.kind,p.x,p.y,size);
+    if(p.kind==='impact'){
+      const progress=1-p.life/.4;
+      c.fillStyle=p.color;
+      c.globalCompositeOperation='lighter';
+      for(let i=0;i<7;i++){
+        const angle=i*Math.PI*2/7+p.x*.03;
+        const radius=(10+i%3*5)*progress;
+        c.beginPath();
+        c.arc(p.x+Math.cos(angle)*radius,p.y+Math.sin(angle)*radius,2.3*(1-progress)+.3,0,Math.PI*2);
+        c.fill();
+      }
+    }}c.restore();}
 function canvasPill(c,text,x,y,width=190,color='#513724e8'){c.save();c.fillStyle=color;c.fillRect(x-width/2,y-19,width,36);c.strokeStyle='#f4d28c';c.lineWidth=1;c.strokeRect(x-width/2,y-19,width,36);c.font='bold 17px WonderStory';c.textAlign='center';c.fillStyle='#fff3cc';c.fillText(text,x,y+5,width-12);c.restore();}
 // The back anchor follows the actual contained image, never viewport percentages.
 function rangerBackAnchor(imageBox,naturalWidth,naturalHeight,stageBox){const scale=Math.min(imageBox.width/naturalWidth,imageBox.height/naturalHeight),w=naturalWidth*scale,h=naturalHeight*scale;return {x:imageBox.left-stageBox.left+(imageBox.width-w)/2+w*.5,y:imageBox.top-stageBox.top+(imageBox.height-h)/2+h*.32};}
