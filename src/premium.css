@@ -29,3 +29,13 @@ body .doll-panel{border-color:#dfbd78!important;box-shadow:inset 0 0 0 3px #ffe6
 @media(max-width:420px){body .collection-grid .card{padding:10px!important}body .collection-grid .art{height:155px!important}body .collection-grid h3{font-size:22px!important}body .collection-grid .item-footer{flex-wrap:wrap}body .bot-roster{grid-template-columns:1fr}}
 body .game-section-title{display:grid!important;grid-template-columns:46px minmax(0,1fr)!important;gap:2px 12px!important;justify-content:stretch!important;text-align:left!important}body .game-section-title>.gpt-icon{grid-row:1/3!important}body .game-section-title h1{width:auto!important;max-width:none!important;white-space:nowrap!important;grid-column:2!important;text-align:left!important}body .game-section-title>span:not(.gpt-icon){grid-column:2!important;text-align:left!important;text-shadow:0 1px 3px #1f3b31}body .game-section-title:after{grid-column:1/-1!important;max-width:none!important;width:100%!important;height:27px!important;margin:0!important}
 body .defense-vitals{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;border-bottom:1px solid #d7ba6e66;padding-bottom:7px}body .defense-vitals .hud-metric{gap:5px}body .defense-vitals .hud-metric>.gpt-icon{width:27px;height:27px}body .defense-vitals .hud-metric small{font-size:12px!important}body .defense-vitals .hud-metric b{font-size:18px!important}
+
+/* The slot follows the card. The painted sprite always has square cells. */
+body .animated-dragon{container-type:size;display:grid!important;place-items:center;min-width:0;min-height:0;background:none;animation:none;will-change:auto}
+body .animated-dragon::before{content:"";display:block;width:min(100cqw,100cqh);aspect-ratio:1;background:url('assets/generated/companion-poses.webp') 0 calc(var(--dragon-row)*100%/3)/400% 400% no-repeat;animation:dragonFrames 1.1s steps(1,end) infinite}
+body[data-screen=home] .hero-visual .animated-dragon::before{transform:scaleX(-1)}
+@media(prefers-reduced-motion:reduce){body .animated-dragon::before{animation:none}}
+body[data-screen=merge] #game{touch-action:none}
+body:is([data-screen=merge],[data-screen=defense]) .game-layout{gap:8px}
+@media(max-height:900px){body:is([data-screen=merge],[data-screen=defense]) .topline{margin-block:2px}body:is([data-screen=merge],[data-screen=defense]) .canvas-wrap{width:min(100%,max(310px,62dvh));margin-inline:auto}}
+body[data-screen=home] .companion>.animated-dragon{display:grid!important;width:100%;height:100%;min-width:0;min-height:0}
