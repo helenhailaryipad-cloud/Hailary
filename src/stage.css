@@ -5304,3 +5304,5 @@ body[data-screen=bag] #stage .bag-doll .hero-status-chip {
   padding:0; border:0; background:transparent; box-shadow:none;
   color:#fff9e5; text-shadow:0 1px 3px #231a12,0 0 4px #281e19;
 }
+body[data-playing=vale] #stage #valeUpgrade { grid-column:1/-1; justify-self:center; min-width:min(210px,90%); }
+body[data-playing=vale] #stage #valeUpgrade[hidden] { display:none; }
