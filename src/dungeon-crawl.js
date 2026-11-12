@@ -25,7 +25,7 @@ const dist=Math.hypot(h.tx-h.x,h.ty-h.y),step=Math.min(dist,180*dt);if(dist>.5){
 for(const shot of a.shots){
  if(shot.enemy||shot.released)continue;
  const aim=dungeonBowAim(g);
- Object.assign(shot,{x:aim.x,y:aim.y,tx:aim.tx,ty:aim.ty});
+ Object.assign(shot,{x:aim.x,y:aim.y,tx:a.enemy.x,ty:a.enemy.y-(g.enemy.boss?120:85)});
  if(shot.life<=.37)shot.released=true;
 }
 if(a.exitReady){if(h.x>610&&Math.abs(h.y-316)<65){g.stage++;crawlRoom(g);battleEnemy();battleLog(g.stage===2?'The final door opens. The boss awaits!':'A new hall opens before you.');}return true;}
@@ -77,7 +77,7 @@ c.shadowOffsetY=1;
 drawReina(c,g,h.x,h.y+5,135,180);
 c.restore();
 if(g.expRun?.party.length>1){const ally=ADVENTURERS.find(b=>b.id===g.expRun.party[1]);drawArtSprite(c,ally.id,h.x+55,h.y,65,105);}if(g.ally){drawArtSprite(c,g.ally.id,h.x-55,h.y,65,105);}
-for(const p of a.shots){if(!p.enemy&&p.life>.37)continue;const t=p.enemy?1-p.life/p.max:Math.max(0,1-p.life/.37),x=p.x+(p.tx-p.x)*t,y=p.y+(p.ty-p.y)*t;drawSpell(c,p.enemy?'fire':'arrow',x,y,p.burst?98:70,45,g.clock,Math.atan2(p.ty-p.y,p.tx-p.x));}
+for(const p of a.shots){if(!p.enemy&&p.life>.37)continue;const t=p.enemy?1-p.life/p.max:Math.max(0,1-p.life/.37),x=p.x+(p.tx-p.x)*t,dy=p.ty-p.y,initial=bowSlope*Math.abs(p.tx-p.x),y=p.y+(p.enemy?dy*t:initial*t+(dy-initial)*t*t);drawSpell(c,p.enemy?'fire':'arrow',x,y,p.burst?98:70,45,g.clock,Math.atan2(p.enemy?dy:initial+2*(dy-initial)*t,p.tx-p.x));}
 for(const fx of motionAllowed()?g.effects:[]){c.save();c.globalAlpha=Math.min(1,fx.life*2);if(fx.type==='beam'){drawRasterFX(c,'impact',e.x,e.y-60,100);}else drawSpell(c,fx.type==='heal'?'heal':'wind',h.x,h.y-45,150,130,g.clock);c.restore();}paintImpacts(c,g);drawBattleAtmosphere(c,g);c.globalAlpha=1;
 for(const p of g.particles){
  if(p.text==='EVADED'||p.text==='DODGED')continue;
