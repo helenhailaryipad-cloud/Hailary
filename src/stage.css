@@ -5426,3 +5426,21 @@ body[data-screen=bag] #stage .doll-slot .gear-illustration,
   #stage #modal.gear-modal #modalBody { display: block; overflow: auto; }
   #stage #modal.gear-modal .gear-detail-body { overflow: visible; }
 }
+
+/* Anchor the readout to the loadout itself, outside the portrait layers. */
+body[data-screen=bag] #stage .doll-panel > .hero-status-chip,
+body[data-screen=home] #stage .hero-stage > .hero-status-chip {
+  position:absolute; inset:auto auto 5px 8px; z-index:9;
+  padding:3px 12px 3px 6px; border:0; border-radius:0; box-shadow:none;
+  background:linear-gradient(90deg,#242018db 0%,#31291edb 82%,transparent);
+  font-size:clamp(17px,2vw,22px); line-height:1.18; color:#fff9e8;
+  text-shadow:0 1px 2px #211809; white-space:nowrap; font-variant-numeric:tabular-nums;
+}
+#stage .hero-status-chip > strong { font-size:inherit; color:#ffe49c; }
+body[data-screen=bag] #stage :is(.doll-left,.doll-right) {
+  bottom:38px; --stage-cell:min(85px,calc((100cqh - 116px)/5),19cqw);
+}
+@container (max-width: 720px) {
+  body[data-screen=bag] #stage .doll-panel > .doll-actions { bottom:38px; }
+  body[data-screen=bag] #stage .doll-panel > .bag-doll { bottom:90px; }
+}
