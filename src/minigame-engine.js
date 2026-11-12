@@ -4,7 +4,31 @@ function miniEvent(g,x,y,text,color='#fff0bc'){if(!motionAllowed())return;g.mini
 function tickMiniFX(g,dt){tickImpacts(g,dt);g.miniFX=(g.miniFX||[]).filter(p=>(p.life-=dt)>0);if(g.banner)g.banner.life=Math.max(0,g.banner.life-dt);}
 function drawMiniFX(c,g){paintImpacts(c,g);if(!motionAllowed())return;c.save();c.textAlign='center';c.font='bold 19px WonderStory';for(const p of g.miniFX||[]){c.globalAlpha=Math.min(1,p.life*3);c.lineWidth=4;c.strokeStyle='#26362c';c.fillStyle=p.color;const y=p.y-35-(.85-p.life)*32;c.strokeText(p.text,p.x,y);c.fillText(p.text,p.x,y);}c.restore();}
 function defenseHit(g,shot){const target=g.enemies.find(e=>e.id===shot.target&&e.hp>0&&!e.escaped);if(!target)return;target.hp-=shot.damage;target.hurt=.16;addImpact(g,target.x,target.y-24,shot.color,shot.type===2?'fire':'impact');miniEvent(g,target.x,target.y-25,String(Math.round(shot.damage)),shot.color);if(shot.type===1)target.slow=2.8;if(shot.type===2){for(const e of g.enemies){if(e!==target&&e.hp>0&&Math.hypot(e.x-target.x,e.y-target.y)<60){e.hp-=shot.damage*.55;e.hurt=.16;}}}}
-function updateDefense(dt){const g=game;if(!g||g.ended||gamePaused)return;g.clock+=dt;tickMiniFX(g,dt);if(g.active&&g.left>0){g.incomingLane??=Math.floor(Math.random()*3);g.spawn-=dt;if(g.spawn<=0){const boss=g.wave===8&&g.left===1,maxhp=(45+g.wave*17)*(boss?4:1);g.enemies.push({id:++g.id,x:745,y:150+g.incomingLane*130,hp:maxhp,maxhp,speed:17+g.wave*2.8,slow:0,boss,hurt:0});g.left--;g.incomingLane=null;g.spawn=.7+Math.random()*.7;}}
+function tickGroveSun(g,dt){
+ if(g.sun){
+  g.sun.age+=dt;
+  g.sun.y=Math.min(g.sun.floor,88+g.sun.age*29);
+  if(g.sun.age>=10)g.sun=null;
+ }else if(g.active){
+  g.sunDelay=(g.sunDelay??3)-dt;
+  if(g.sunDelay<=0){
+   g.sun={x:420+Math.random()*225,y:88,floor:225+Math.random()*105,age:0};
+   g.sunDelay=6+Math.random()*5;
+  }
+ }
+}
+function collectGroveSun(g,x,y){
+ const sun=g.sun;
+ if(g.ended||gamePaused||!sun||Math.hypot(x-sun.x,y-sun.y)>38)return false;
+ g.sun=null;g.energy+=25;miniEvent(g,sun.x,sun.y,'+25 energy','#ffe391');updateDefenseHUD();return true;
+}
+function drawGroveSun(c,g){
+ if(!g.sun||g.ended)return;
+ const {x,y,age}=g.sun;softLight(c,x,y,41,'255,185,68',.48);
+ c.save();c.globalAlpha=age>9?Math.max(.35,10-age):1;
+ drawArtSprite(c,'grove-sun',x,y+27,54,54);c.restore();
+}
+function updateDefense(dt){const g=game;if(!g||g.ended||gamePaused)return;g.clock+=dt;tickGroveSun(g,dt);tickMiniFX(g,dt);if(g.active&&g.left>0){g.incomingLane??=Math.floor(Math.random()*3);g.spawn-=dt;if(g.spawn<=0){const boss=g.wave===8&&g.left===1,maxhp=(45+g.wave*17)*(boss?4:1);g.enemies.push({id:++g.id,x:745,y:150+g.incomingLane*130,hp:maxhp,maxhp,speed:17+g.wave*2.8,slow:0,boss,hurt:0});g.left--;g.incomingLane=null;g.spawn=.7+Math.random()*.7;}}
 for(const e of g.enemies){e.hurt=Math.max(0,(e.hurt||0)-dt);e.slow=Math.max(0,e.slow-dt);if(e.hp>0){e.x-=e.speed*dt*(e.slow>0?.45:1);if(e.x<70){e.hp=0;e.escaped=true;g.hp-=e.boss?3:1;g.crystalFlash=.35;miniEvent(g,64,e.y,'−'+(e.boss?3:1),'#ff9d8c');}}}g.crystalFlash=Math.max(0,(g.crystalFlash||0)-dt);
 // Hits settle on arrival, once per projectile, before choosing fresh targets.
 for(const shot of g.shots){shot.elapsed=(shot.elapsed||0)+dt;const target=g.enemies.find(e=>e.id===shot.target&&e.hp>0);if(target){shot.x2=target.x;shot.y2=target.y-22;}if(shot.elapsed>=shot.duration)defenseHit(g,shot);}g.shots=g.shots.filter(s=>s.elapsed<s.duration);
@@ -31,7 +55,7 @@ c.save();c.shadowColor=g.crystalFlash>0?'#ff6b68':'#e6ffb4';c.shadowBlur=g.cryst
 for(let i=0;i<g.towers.length;i++){const t=g.towers[i],age=g.clock-(t.shotAt??-100);if(i===g.selected){c.strokeStyle='#fff2b7';c.lineWidth=3;c.beginPath();c.ellipse(t.x,t.y+21,39,16,0,0,Math.PI*2);c.stroke();}if(t.type===0)drawReina(c,{clock:g.clock,heroShotAt:t.shotAt??-100,spriteIdle:true},t.x,t.y+16,72,105);else{const cast=motionAllowed()&&age>=0&&age<.45;c.save();if(cast){c.shadowColor=TOWERS[t.type].color;c.shadowBlur=18;drawSpell(c,t.type===1?'wind':'fire',t.x+20,t.y-44,65,65,g.clock);}drawArtSprite(c,['reina','nyra','kael'][t.type],t.x,t.y+16,70,105);c.restore();}c.fillStyle='#473221e8';c.fillRect(t.x-22,t.y+22,44,20);c.fillStyle='#fff3c6';c.font='bold 15px WonderStory';c.fillText('Lv.'+t.level,t.x,t.y+37);}
 for(const e of g.enemies){c.save();c.fillStyle='#20342b35';c.beginPath();c.ellipse(e.x,e.y+20,e.boss?37:25,9,0,0,Math.PI*2);c.fill();const walk=motionAllowed()?Math.sin(g.clock*9+e.id)*1.5:0;if(e.hurt>0){c.shadowBlur=13;c.shadowColor='#ffedb2';}if(e.boss)drawArtSprite(c,'emberpeak',e.x,e.y+20+walk,110,105);else if(!drawMotionSprite(c,'enemy-motion',g.wave%3,e.x,e.y+20+walk,85,83,g.clock+e.id*.17))drawArtSprite(c,['guard-forest','guard-astral','guard-ember'][g.wave%3],e.x,e.y+20,75,80);c.restore();const width=e.boss?66:44,y=e.y-(e.boss?94:70);c.fillStyle='#283e31';c.fillRect(e.x-width/2,y,width,7);c.fillStyle=e.boss?'#ffbd76':'#b4ef93';c.fillRect(e.x-width/2+1,y+1,(width-2)*Math.max(0,e.hp/e.maxhp),5);if(e.slow>0)drawSpell(c,'wind',e.x,e.y+8,55,35,g.clock);}
 for(const s of g.shots){if(s.elapsed<s.windup)continue;const t=Math.min(1,(s.elapsed-s.windup)/(s.duration-s.windup)),arc=s.type===2?Math.sin(t*Math.PI)*35:0,x=s.x1+(s.x2-s.x1)*t,y=s.y1+(s.y2-s.y1)*t-arc,angle=Math.atan2(s.y2-s.y1-(s.type===2?Math.cos(t*Math.PI)*35*Math.PI:0),s.x2-s.x1);if(motionAllowed()){c.save();c.globalAlpha=.22;drawSpell(c,s.type===2?'fire':s.type===1?'wind':'arrow',x-15,y+5,60,28,g.clock,angle);c.restore();}drawSpell(c,s.type===2?'fire':s.type===1?'wind':'arrow',x,y,s.type===0?70:55,38,g.clock,angle);}
-drawMiniFX(c,g);drawBattleAtmosphere(c,g);c.fillStyle='#543b28eb';c.fillRect(0,0,720,60);c.fillStyle='#fff1ca';c.font='bold 23px WonderStory';c.fillText(g.banner?.life>0?g.banner.text:'THE WHISPERING GROVE',360,25);c.font='bold 18px WonderStory';c.fillText(g.active?'Wave '+g.wave+' · '+(g.left+g.enemies.length)+' enemies remaining':'Choose a defender, then tap a golden platform',360,49);if(g.ended){c.fillStyle='#183629b0';c.fillRect(0,0,720,520);canvasPill(c,g.won?'THE GROVE IS SAFE':'A BRAVE LITTLE STAND',360,270,400);}}
+drawGroveSun(c,g);drawMiniFX(c,g);drawBattleAtmosphere(c,g);c.fillStyle='#543b28eb';c.fillRect(0,0,720,60);c.fillStyle='#fff1ca';c.font='bold 23px WonderStory';c.fillText(g.banner?.life>0?g.banner.text:'THE WHISPERING GROVE',360,25);c.font='bold 18px WonderStory';c.fillText(g.active?'Wave '+g.wave+' · '+(g.left+g.enemies.length)+' enemies remaining':'Choose a defender, then tap a golden platform',360,49);if(g.ended){c.fillStyle='#183629b0';c.fillRect(0,0,720,520);canvasPill(c,g.won?'THE GROVE IS SAFE':'A BRAVE LITTLE STAND',360,270,400);}}
 const MERGE_STEP=1/120;
 function constrainEgg(b){if(b.x-b.r<102){b.x=102+b.r;if(b.vx<0)b.vx=-b.vx*.25;}if(b.x+b.r>618){b.x=618-b.r;if(b.vx>0)b.vx=-b.vx*.25;}if(b.y+b.r>487){const impact=b.vy;b.y=487-b.r;if(b.vy>0)b.vy=impact>70?-impact*.18:0;if(impact>70)b.squash=Math.min(.2,impact/1800);}}
 function mergePair(g,a,b){const k=a.k+1,r=EGGS[k].r,egg={x:(a.x+b.x)/2,y:(a.y+b.y)/2,k,r,vx:(a.vx+b.vx)*.35,vy:Math.min(-28,(a.vy+b.vy)*.2),age:0,angle:((a.angle||0)+(b.angle||0))/2,spin:0,squash:.2};constrainEgg(egg);g.balls=g.balls.filter(v=>v!==a&&v!==b);g.balls.push(egg);const points=2**k*10;g.score+=points;g.combo=(g.clock-(g.lastMergeAt??-100)<1.4?(g.combo||0)+1:1);g.lastMergeAt=g.clock;miniEvent(g,egg.x,egg.y,'+'+points+(g.combo>1?' · CHAIN '+g.combo:''),EGGS[k].c);addImpact(g,egg.x,egg.y,EGGS[k].c,'heal');if(motionAllowed()){g.fx=g.fx||[];for(let i=0;i<10&&g.fx.length<64;i++){const angle=i*Math.PI/5;g.fx.push({x:egg.x,y:egg.y,vx:Math.cos(angle)*65,vy:Math.sin(angle)*65,color:EGGS[k].c,life:.65});}}if(k===7){endMerge(true);return true;}return false;}
@@ -54,4 +78,4 @@ function drawNestAim(c,g){
 }
 function drawMerge(){const c=$('#game').getContext('2d'),g=game;c.fillStyle='#17493d';c.fillRect(0,0,720,520);drawArtScene(c,'battle-merge',720,520,1);
 if(!g.ended)drawNestAim(c,g);
-for(const b of g.balls){c.save();c.translate(b.x,b.y);const squash=motionAllowed()?(b.squash||0):0;c.rotate(motionAllowed()?Math.max(-.35,Math.min(.35,b.angle||0)):0);c.scale(1+squash,1-squash);drawEgg(c,0,0,b.r,b.k);c.restore();}c.save();c.globalCompositeOperation='screen';for(const p of motionAllowed()?(g.fx||[]):[]){c.globalAlpha=Math.min(1,p.life*1.7);drawRasterFX(c,'impact',p.x,p.y,18);}c.restore();drawMiniFX(c,g);drawBattleAtmosphere(c,g);if(g.overflow>0)canvasPill(c,'NEST FULL · '+Math.max(0,2-g.overflow).toFixed(1)+'s',360,119,220,'#822f38ed');if(g.ended){c.fillStyle='#16382ab0';c.fillRect(0,0,720,520);canvasPill(c,g.won?'A CELESTIAL WONDER WAS BORN':'A NEST FULL OF DREAMS',360,255,410);}}
+for(const b of g.balls){c.save();c.translate(b.x,b.y);const squash=motionAllowed()?(b.squash||0):0;c.rotate(motionAllowed()?Math.max(-.35,Math.min(.35,b.angle||0)):0);c.scale(1+squash,1-squash);drawEgg(c,0,0,b.r,b.k);c.restore();}c.save();c.globalCompositeOperation='screen';for(const p of motionAllowed()?(g.fx||[]):[]){c.globalAlpha=Math.min(1,p.life*1.7);softLight(c,p.x,p.y,8,'255,218,158');}c.restore();drawMiniFX(c,g);drawBattleAtmosphere(c,g);if(g.overflow>0)canvasPill(c,'NEST FULL · '+Math.max(0,2-g.overflow).toFixed(1)+'s',360,119,220,'#822f38ed');if(g.ended){c.fillStyle='#16382ab0';c.fillRect(0,0,720,520);canvasPill(c,g.won?'A CELESTIAL WONDER WAS BORN':'A NEST FULL OF DREAMS',360,255,410);}}

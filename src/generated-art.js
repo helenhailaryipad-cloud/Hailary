@@ -4,6 +4,11 @@ const ART_ICON_INDEX={hero:0,equipment:1,dungeons:2,castle:3,dragon:4,more:5,gol
 const UTILITY_ICONS={settings:0,ranking:1,power:2,pause:3,play:4,close:5,back:6,check:7,enhance:8,star:9,gem:10,craft:11,upload:12,download:13,gift:14,refresh:15};
 const STAT_ICONS={attack:0,health:1,defense:2,accuracy:3,penetration:4,crit:5,speed:6,resistance:7,potion:8,scales:9,chest:10,lock:11,plus:12,pointer:13,laurel:14,walk:15};
 const ART_IMAGE_CACHE=new Map();
+function equippedRanger(){
+ const gear=S.equipment;
+ const armor=gear?.items.find(entry=>entry.uid===gear.equipped.armor);
+ return ({'armor-t3':'reina-t3','armor-t5':'reina-t5','armor-t8':'reina-t8'})[armor?.template] || 'reina';
+}
 function artPath(id){return id==='reina'?'assets/ranger-cartoon.webp':'assets/generated/'+id+'.webp';}
 function artImage(id,alt='',cls=''){return `<img class="generated-image ${cls}" src="${artPath(id)}" alt="${alt}" loading="lazy" decoding="async">`;}
 function sectionArtwork(id,alt){return `<div class="section-artwork">${artImage(id,alt)}</div>`;}

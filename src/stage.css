@@ -5248,3 +5248,17 @@ body[data-screen=bag] #stage .doll-actions { left:calc(min(18%,84px) + 3px); rig
 @media(prefers-reduced-motion:no-preference){
   #stage button.equipment-cell::after { content:''; position:absolute; inset:0; pointer-events:none; border-radius:inherit; background:linear-gradient(115deg,transparent 44%,#fff4c552 50%,transparent 56%) 0 0/300% 100% no-repeat; animation:button-face-light 2.8s ease-in-out infinite; z-index:3; }
 }
+
+body[data-screen=home]:not([data-playing]) #stage #main { top:env(safe-area-inset-top,0px); }
+body[data-screen=home] #stage > header { background:transparent; backdrop-filter:none; box-shadow:none; border:0; z-index:6; }
+body[data-screen=home] #stage .hero-stage .hero-status-chip { top:var(--menu-header); }
+body[data-screen=home] #stage .hero-visual > .avatar { top:var(--menu-header); height:calc(100% - var(--menu-header) - 32px); object-position:center; }
+body[data-screen=home] #stage .hero-visual .avatar-wings { --render-wing-width:min(var(--wing-width),var(--wing-height-limit),88cqw,calc((var(--wing-root-y,30cqh) - 6px) / .65)); }
+#stage #nav .section-tabs { display:flex; align-items:stretch; gap:4px; padding-inline:3px; box-sizing:border-box; }
+#stage #nav .section-tabs button { flex:1 1 0; display:grid; place-items:center; margin:0; padding-inline:2px; }
+body[data-playing] #stage #eggJourney { display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); align-items:center; gap:2px; }
+#stage #eggJourney .evolution-egg { display:grid; justify-items:center; opacity:.72; }
+#stage #eggJourney .discovered { opacity:1; }
+body[data-playing] #stage :is(#eggJourney,#nextEgg) .generated-egg-preview { width:clamp(32px,6vmin,62px); height:auto; aspect-ratio:1; max-width:100%; max-height:none; }
+body[data-playing] #stage #game { image-rendering:auto; }
+.depth-particle,.ambient-sparkles span { border-radius:50%; background:radial-gradient(circle,#fff3b9a6 0%,#ffdc9273 20%,#ffc87122 47%,transparent 71%); box-shadow:none; }
