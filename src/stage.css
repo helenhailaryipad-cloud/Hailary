@@ -5063,8 +5063,10 @@ body[data-screen=games] #stage .portal-game-info > button { min-height: 43px; ma
 }
 @keyframes button-edge-light { to { --button-light-angle: 360deg; } }
 @keyframes button-face-light { 0%,25% { background-position: 150% 0; opacity: 0; } 35% { opacity:.8; } 65% { background-position: -50% 0; opacity:.8; } 75%,100% { background-position:-50% 0; opacity:0; } }
-#stage :is(.avatar-wings,.bag-wings,.generated-egg-preview,.godrays) { filter: drop-shadow(0 0 7px #f8e8b080); }
+#stage :is(.avatar-wings,.bag-wings,.godrays) { filter: drop-shadow(0 0 7px #f8e8b080); }
 #stage :is(.godrays,.stage-halo,.scene-atmosphere) { mix-blend-mode: screen; }
 @media(prefers-reduced-motion:reduce) {
   #stage button::before,#stage button::after { animation: none; }
 }
+
+#stage .generated-egg-preview { filter: brightness(1.22) contrast(1.12) saturate(1.15); }

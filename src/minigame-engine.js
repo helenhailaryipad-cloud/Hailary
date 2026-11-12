@@ -48,14 +48,9 @@ function eggLanding(g){const r=EGGS[g.next].r,x=Math.max(102+r,Math.min(618-r,g.
  return {x,y:Math.max(80,y),r,blocked:y<80,match:contact?.k===g.next?contact:null};
 }
 function drawNestAim(c,g){
- const aim=eggLanding(g);
- const color=aim.blocked?'#ff9d9d':aim.match?'#fff3ac':'#d1f3dc';
- c.save();c.strokeStyle=color;c.lineWidth=2;c.setLineDash([3,7]);
- c.beginPath();c.moveTo(aim.x,70+aim.r);c.lineTo(aim.x,aim.y-aim.r);c.stroke();
- c.setLineDash([]);
- c.globalAlpha=.9;c.beginPath();c.arc(aim.x,aim.y,aim.r+2,0,2*Math.PI);c.stroke();
- if(aim.match&&!aim.blocked){c.lineWidth=3;c.beginPath();c.arc(aim.match.x,aim.match.y,aim.match.r+3,0,2*Math.PI);c.stroke();}
- c.restore();if(g.cooldown<=0)drawEgg(c,aim.x,64,aim.r,g.next);
+ if(g.cooldown>0)return;
+ const r=EGGS[g.next].r,x=Math.max(102+r,Math.min(618-r,g.dropX));
+ drawEgg(c,x,64,r,g.next);
 }
 function drawMerge(){const c=$('#game').getContext('2d'),g=game;c.fillStyle='#17493d';c.fillRect(0,0,720,520);drawArtScene(c,'battle-merge',720,520,1);const bg=c.createLinearGradient(0,138,0,490);bg.addColorStop(0,'#26544aa8');bg.addColorStop(1,'#0c372ed4');c.fillStyle=bg;c.fillRect(100,138,520,350);c.strokeStyle='#fff0b8';c.lineWidth=4;c.beginPath();c.moveTo(100,138);c.lineTo(100,490);c.lineTo(620,490);c.lineTo(620,138);c.stroke();c.save();c.setLineDash([8,8]);c.lineWidth=g.overflow>0?4:2;c.strokeStyle=g.overflow>0?'#ff7985':'#e8db9c99';c.beginPath();c.moveTo(103,140);c.lineTo(617,140);c.stroke();c.restore();
 if(!g.ended)drawNestAim(c,g);
