@@ -13,7 +13,7 @@ const slots=[
 {id:'spiritluck',name:'Fortune Ring',item:'Spirit Ring',icon:8,base:{crit:2,health:30},enhance:{crit:2}}
 ];
 const tiers=[
-  {tier:1,rarity:'Rare',color:'#bcc3c8',prefix:'Dewlight',factor:1,grade:0},
+  {tier:1,rarity:'Common',color:'#bcc3c8',prefix:'Dewlight',factor:1,grade:0},
   {tier:2,rarity:'Rare',color:'#79e7a0',prefix:'Fernsilver',factor:1.35,grade:0},
   {tier:3,rarity:'Epic',color:'#65b5ff',prefix:'Moonveil',factor:1.7,grade:1},
   {tier:4,rarity:'Epic',color:'#ba89ff',prefix:'Tideglass',factor:2.1,grade:1},
@@ -39,22 +39,30 @@ const materialDefs=[{id:'stone',name:'Enhancement Crystal',icon:9,color:'#69dfff
 const round=n=>Math.round(n*100)/100;
 function fresh(save){const eq={version:1,nextId:15,items:[],equipped:{},materials:{stone:60,shard:12,gem:4,essence:8,synthesis:0}};for(let i=0;i<slots.length;i++){const slot=slots[i],legacy={bow:'bow',crown:'crown',armor:'armor',boots:'boots',spiritluck:'ring',amulet:'charm'}[slot.id];const entry={uid:i+1,template:slot.id+'-t1',enhance:legacy?(save.upgrades?.[legacy]||0):0,stars:0,gems:0};eq.items.push(entry);eq.equipped[slot.id]=entry.uid}for(const [j,id]of ['bow-t3','boots-t3','spiritguard-t3','spiritluck-t1'].entries())eq.items.push({uid:11+j,template:id,enhance:0,stars:0,gems:0});return eq}
 function valid(eq){if(eq===undefined)return true;return !!eq&&eq.version===1&&Number.isSafeInteger(eq.nextId)&&eq.nextId>0&&eq.nextId<1e9&&Array.isArray(eq.items)&&eq.items.length<=80+slots.length&&new Set(eq.items.map(i=>i?.uid)).size===eq.items.length&&eq.items.every(i=>i&&(i.stored===undefined||typeof i.stored==='boolean')&&Number.isSafeInteger(i.uid)&&i.uid>0&&i.uid<eq.nextId&&typeof i.template==='string'&&Object.hasOwn(catalog,i.template)&&Number.isInteger(i.enhance)&&i.enhance>=0&&i.enhance<=20&&Number.isInteger(i.stars)&&i.stars>=0&&i.stars<=5&&Number.isInteger(i.gems)&&i.gems>=0&&i.gems<=3)&&!!eq.equipped&&Object.keys(eq.equipped).length===10&&slots.every(slot=>eq.equipped[slot.id]===null||eq.items.some(i=>!i.stored&&i.uid===eq.equipped[slot.id]&&catalog[i.template].slot===slot.id))&&!!eq.materials&&materialDefs.every(m=>(m.id==='synthesis'&&eq.materials.synthesis===undefined)||Number.isSafeInteger(eq.materials[m.id])&&eq.materials[m.id]>=0&&eq.materials[m.id]<=1e9)}
+function equipBasicSlot(eq,slot){
+ const template=slot.id+'-t1';
+ const current=eq.items.find(i=>i.uid===eq.equipped[slot.id]);
+ if(current?.template===template)return;
+ let basic=eq.items.find(i=>i.template===template&&!i.stored)||eq.items.find(i=>i.template===template);
+ if(!basic){
+  basic={uid:eq.nextId++,template,enhance:0,stars:0,gems:0,starter:true};
+  eq.items.push(basic);
+ }
+ if(basic.stored)basic.stored=false;
+ eq.equipped[slot.id]=basic.uid;
+}
+function equipBasicSet(save){
+ const eq=state(save);
+ for(const slot of slots)equipBasicSlot(eq,slot);
+ save.equipment=eq;
+}
 function repairLoadout(save){
  const eq=save.equipment;
  if(!eq)return;
  const limit=unlockedTier(save);
  for(const slot of slots){
   const worn=eq.items.find(i=>i.uid===eq.equipped[slot.id]);
-  if(!worn||catalog[worn.template].tier<=limit)continue;
-  const eligible=eq.items.filter(i=>catalog[i.template].slot===slot.id&&catalog[i.template].tier<=limit);
-  eligible.sort((a,b)=>Number(!!a.stored)-Number(!!b.stored)||detail(b).power-detail(a).power);
-  let replacement=eligible[0];
-  if(!replacement){
-   replacement={uid:eq.nextId++,template:slot.id+'-t1',enhance:0,stars:0,gems:0};
-   eq.items.push(replacement);
-  }
-  if(replacement.stored)replacement.stored=false;
-  eq.equipped[slot.id]=replacement.uid;
+  if(!worn||catalog[worn.template].tier>limit)equipBasicSlot(eq,slot);
  }
 }
 function state(save){const eq=save.equipment||fresh(save);eq.materials.synthesis??=0;return eq}
@@ -70,9 +78,10 @@ function cost(entry,action){const t=catalog[entry.template];if(action==='enhance
 function equipped(eq,uid){return Object.values(eq.equipped).includes(uid)}
 const starGearCount=4;
 function starDonors(eq,item){
- return eq.items.filter(e=>e.uid!==item.uid&&!e.stored&&!equipped(eq,e.uid)&&catalog[e.template].tier===catalog[item.template].tier);
+ return eq.items.filter(e=>e.uid!==item.uid&&!e.starter&&!e.stored&&!equipped(eq,e.uid)&&catalog[e.template].tier===catalog[item.template].tier);
 }
 function perform(save,uid,action,donors=[]){const eq=state(save);const i=eq.items.find(e=>e.uid===uid);if(!i)return {ok:false,error:'Item not found.'};if(i.stored)return {ok:false,error:'Withdraw this item first.'};if(action==='equip'||action==='craft'||action==='star'){
+ if(action==='craft'&&i.starter)return {ok:false,error:'Use a spare item for tier synthesis.'};
  const target=catalog[i.template].tier+(action==='craft'?1:0);
  if(target<=maxTier&&target>unlockedTier(save))return {ok:false,error:'T'+target+' unlocks at hero level '+requiredLevel(target)+'.'};
 }if(action==='equip'){const t=catalog[i.template];if(eq.equipped[t.slot]===uid)return {ok:false,error:'Already equipped.'};save.equipment=eq;eq.equipped[t.slot]=uid;return {ok:true,entry:i}}const price=cost(i,action);if(!price)return {ok:false,error:'This upgrade is already complete.'};if((price.gold||0)>save.gold||materialDefs.some(m=>(price[m.id]||0)>eq.materials[m.id]))return {ok:false,error:'Not enough gold or materials.'};if(action==='star'){
@@ -80,7 +89,7 @@ function perform(save,uid,action,donors=[]){const eq=state(save);const i=eq.item
  if(!Array.isArray(donors)||donors.length!==starGearCount||new Set(donors).size!==starGearCount||donors.some(id=>!eligible.has(id)))return {ok:false,error:'Select four spare items of the same tier.'};
  eq.items=eq.items.filter(e=>!donors.includes(e.uid));
 }save.equipment=eq;save.gold-=price.gold||0;for(const m of materialDefs)eq.materials[m.id]-=price[m.id]||0;if(action==='enhance')i.enhance++;else if(action==='star')i.stars++;else if(action==='gem')i.gems++;else if(action==='craft'){const t=catalog[i.template];i.template=t.slot+'-t'+(t.tier+1)}return {ok:true,entry:i}}
-function salvage(save,uid){const eq=state(save),i=eq.items.find(e=>e.uid===uid);if(i?.stored)return {ok:false,error:'Withdraw this item first.'};if(!i||equipped(eq,uid))return {ok:false,error:'Equipped items cannot be salvaged.'};const t=catalog[i.template];save.equipment=eq;eq.items=eq.items.filter(e=>e.uid!==uid);eq.materials.stone+=3+t.grade*3+i.enhance;eq.materials.shard+=i.stars;eq.materials.gem+=i.gems;save.gold+=50*(t.grade+1);return {ok:true}}
+function salvage(save,uid){const eq=state(save),i=eq.items.find(e=>e.uid===uid);if(i?.starter)return {ok:false,error:'Keep your basic equipment set.'};if(i?.stored)return {ok:false,error:'Withdraw this item first.'};if(!i||equipped(eq,uid))return {ok:false,error:'Equipped items cannot be salvaged.'};const t=catalog[i.template];save.equipment=eq;eq.items=eq.items.filter(e=>e.uid!==uid);eq.materials.stone+=3+t.grade*3+i.enhance;eq.materials.shard+=i.stars;eq.materials.gem+=i.gems;save.gold+=50*(t.grade+1);return {ok:true}}
 function addDrop(save,tier=1,slotId=null){const eq=state(save);if(eq.items.length>=80){save.equipment=eq;eq.materials.stone+=5;return {converted:true}}const allowed=tiers.filter(t=>t.tier<=tier),t=allowed[allowed.length-1],slot=slots.find(s=>s.id===slotId)||slots[Math.floor(Math.random()*slots.length)],entry={uid:eq.nextId++,template:slot.id+'-t'+t.tier,enhance:0,stars:0,gems:0};save.equipment=eq;eq.items.push(entry);return entry}
 const bossLootTables={
 mistwood:{slots:['bow','boots','bracers'],enhance:1,stars:1,stone:12,shard:3,gem:1,essence:2},
@@ -131,5 +140,5 @@ function rollBossTier(save,random){
 }
 function bossLoot(save,id,random=Math.random){const table=bossLootTables[id];if(!table)return null;const eq=state(save);save.equipment=eq;const materials=Object.fromEntries(materialDefs.map(m=>[m.id,table[m.id]||0]));for(const m of materialDefs)eq.materials[m.id]+=materials[m.id];const tier=rollBossTier(save,random),slot=table.slots[Math.min(table.slots.length-1,Math.max(0,Math.floor(random()*table.slots.length)))],drop=addDrop(save,tier,slot);if(drop.converted){eq.materials.stone+=15;materials.stone+=20;}else{drop.enhance=table.enhance;drop.stars=table.stars;}return {...materials,entry:drop.converted?null:drop,converted:!!drop.converted};}
 function grant(save,type,won,score=0){const eq=state(save);save.equipment=eq;let stones=type==='dungeon'?(won?12:3):type==='defense'?(won?8:2):type==='spar'?(won?2:0):Math.min(7,Math.floor(score/180));eq.materials.stone+=stones;let shard=won&&(type==='dungeon'||type==='defense')?3:0;eq.materials.shard+=shard;if(won&&type==='dungeon'){eq.materials.essence+=2;eq.materials.gem+=1}return {stone:stones,shard,gem:won&&type==='dungeon'?1:0,essence:won&&type==='dungeon'?2:0}}
-return Object.freeze({slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,starGearCount,starDonors,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
+return Object.freeze({slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,starGearCount,starDonors,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
 })();
