@@ -38,7 +38,7 @@ const sectionPages={
 home:[['home','Profile'],['attributes','Attributes']],
 bag:[['bag','Loadout'],['inventory','Bag'],['forge','Crafting'],['warehouse','Warehouse']],
 dungeons:[['dungeons','Bosses'],['expLobby','EXP Dungeon']],
-games:[['games','Festival'],['defense','Castle Defense'],['merge','Dragon Merge'],['vale','Crownfall Vale']],
+games:[['games','Festival'],['fishing','Fishing'],['defense','Castle Defense'],['merge','Dragon Merge'],['vale','Crownfall Vale']],
 collection:[['collection','Dragons'],['wings','Wings'],['wish','Wishes']],
 more:[['more','Menu'],['world','Realm'],['rankings','Rankings'],['quests','Quests'],['settings','Journal']]
 };

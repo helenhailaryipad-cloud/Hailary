@@ -5735,3 +5735,20 @@ body[data-screen=collection] #stage .collection-grid .art > .raised-wing-pair { 
 #stage #modal.gear-modal .equipment-upgrade-actions {grid-template-columns:1fr;gap:4px}
 #stage #modal.gear-modal .equipment-upgrade-actions button {min-height:44px;padding:6px}
 #stage #modal.gear-modal .equipment-upgrade-actions :is(strong,small,span),#stage #modal.gear-modal .gear-detail-bottom {font-size:14px}
+
+#stage #modal.gear-modal[open]{width:min(430px,92vw);max-height:calc(100dvh - 12px);height:fit-content;gap:0}
+#stage #modal.gear-modal #modalBody{padding:0;max-height:none;overflow:visible}
+#stage #modal.gear-modal .gear-detail-header{position:relative;grid-template-columns:46px 1fr;padding:9px 46px 8px 12px}
+#stage #modal.gear-modal .gear-heading h2{font-size:16px;line-height:1.15}
+#stage #modal.gear-modal .gear-heading p{font-size:12px}
+#stage #modal.gear-modal .item-sheet{padding:8px 12px 10px;color:#fff4df;font:normal 13px/1.25 Georgia,serif}
+.item-sheet :is(.sheet-controls,.sheet-pager,.sheet-actions){display:flex;align-items:center;gap:8px}
+.sheet-controls{justify-content:space-between;margin-bottom:6px}
+#stage #modal .item-sheet :is(button,select){font:700 13px/1.15 Georgia,serif;min-width:0;min-height:32px;height:auto;margin:0;padding:4px 10px;border-radius:7px}
+.item-sheet select{max-width:60%;background:#213b35;color:#fff2ce;border:1px solid #baa171}
+#stage #modal .item-sheet :is(.gear-stat-line,.compare-row){display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:13px;line-height:1.2;margin:0;padding:3px 0;min-height:21px}
+#stage #modal .item-sheet :is(.gear-stat-line,.compare-row) :is(span,b,em){font-size:inherit;line-height:inherit}
+#stage #modal .item-sheet .stat-art{width:15px;height:15px}
+#stage #modal .item-sheet p{font-size:13px;margin:5px 0}
+.sheet-actions{border-top:1px solid #bca47066;padding-top:7px;margin-top:6px}
+@media(max-height:430px){#stage #modal.gear-modal .gear-detail-header{padding-block:5px}#stage #modal.gear-modal .item-sheet{padding-block:4px}}
