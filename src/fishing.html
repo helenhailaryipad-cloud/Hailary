@@ -191,6 +191,7 @@ const dailyLimit=10;
 const quotaKey='moonwater-daily-casts';
 function usedCasts(day){
  const saved=JSON.parse(localStorage.getItem(quotaKey)||'null');
+ if(day==='2026-11-13' && !saved?.afterTestRefill)return 0;
  return saved?.day===day ? saved.used : 0;
 }
 function refreshQuota(){
@@ -297,7 +298,7 @@ function startCast(){
  try{
   const used=usedCasts(t.day);
   if(used>=dailyLimit){refreshQuota();return}
-  localStorage.setItem(quotaKey,JSON.stringify({day:t.day,used:used+1}));
+  localStorage.setItem(quotaKey,JSON.stringify({day:t.day,used:used+1,afterTestRefill:t.day==='2026-11-13'}));
  }catch{refreshQuota();return}
  castDay=t.live?t.day:'';phase='wait';time=progress=0;pos=target=steeringGoal=.5;seed=Math.random()*6;renderDial();last=performance.now();renderCatch();el('status').textContent='Watching the float…';el('castLabel').textContent='Line cast';controls();requestAnimationFrame(tick)};
 el('cast').onclick=()=>navigator.locks ? navigator.locks.request(quotaKey,startCast) : startCast();
