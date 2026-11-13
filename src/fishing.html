@@ -1,0 +1,40 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Moonwater Fishing</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#102344;color:#fff4d6;font:17px Georgia,serif}main{position:relative;isolation:isolate;margin:auto;max-width:1050px;min-height:100svh;overflow:hidden;background:linear-gradient(180deg,#162456ad,#25387260 42%,#067487 58%,#084558 78%,#142b40),url(assets/sunny-garden.webp) center 30%/cover}header,footer{position:relative;z-index:2;padding:clamp(16px,4vw,34px)}header{display:flex;justify-content:space-between;align-items:start;gap:12px;text-shadow:0 2px 5px #091833}h1{margin:0;font-size:clamp(24px,6vw,46px)}button{font:700 17px Georgia;color:#342113;border:1px solid #ffe7ac;background:linear-gradient(#ffdf95,#dca651);border-radius:12px;padding:11px 18px;min-height:44px;touch-action:manipulation;cursor:pointer}button:disabled{opacity:.55}.water{position:absolute;top:50%;bottom:0;width:100%;background:repeating-radial-gradient(ellipse at 50% 0%,transparent 0 27px,#a2f6e921 30px,transparent 32px 62px);pointer-events:none}.float{position:absolute;left:55%;top:53%;width:12px;height:22px;border-radius:60%;background:linear-gradient(#fff4b8 48%,#ed684b 50%);box-shadow:0 3px 12px #c6fff8;animation:bob 2s ease-in-out infinite}.float:after{content:'';position:absolute;left:-16px;top:16px;width:43px;height:8px;border:1px solid #c7f4e9;border-radius:50%}@keyframes bob{50%{transform:translateY(4px)}}footer{position:absolute;bottom:0;width:100%;text-align:center;background:linear-gradient(transparent,#081d34ed 36%)}.meter{position:relative;margin:15px auto;width:min(300px,82%);height:14px;border-radius:9px;background:#17283a;border:1px solid #ecc789}.zone{position:absolute;width:30%;height:100%;background:#63dea1;border-radius:8px}.needle{position:absolute;top:-6px;width:5px;height:24px;background:#fff3ca;box-shadow:0 0 7px #ffe695;border-radius:4px}.controls{display:flex;justify-content:center;align-items:center;gap:14px}.controls button{min-width:54px}.status{margin:0;min-height:2.4em;text-shadow:0 2px 4px #071323}progress{accent-color:#70deb4;width:min(160px,45%);height:8px}dialog{max-width:85%;width:320px;max-height:72svh;overflow:auto;color:#fff2cc;background:#14394b;border:1px solid #dbc18a;border-radius:15px;padding:22px;text-align:center}dialog::backdrop{background:#08132463}dialog h2{margin:0 0 12px}svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}button:focus-visible{outline:3px solid white}
+</style><main><header><div><h1>Moonwater Fishing</h1><span id="best"></span></div><button id="basket">Fish basket</button></header><div class="water"></div><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M8 74 Q20 49 34 36" fill="none" stroke="#d9b36c" stroke-width=".62"/><path d="M34 36 Q42 45 55.6 54" fill="none" stroke="#fff4cd" stroke-width=".14"/></svg><div class="float"></div><footer><p class="status" id="status" role="status">Cast your line into the lagoon.</p><div class="meter"><span class="zone"></span><i class="needle"></i></div><div class="controls"><button id="left" aria-label="Pull left">◀</button><button id="cast">Cast line</button><button id="right" aria-label="Pull right">▶</button></div><progress id="fill" max="1" value="0" aria-label="Catch progress"></progress></footer></main><dialog><h2 id="title"></h2><p id="message"></p><button id="close">Continue</button></dialog><script>
+const el=id=>document.getElementById(id),dialog=document.querySelector('dialog');
+const fish=[['Silver Minnow',.2,1.6],['Moonfin Trout',1.3,8],['Jade Carp',3,16],['Star Sailfish',14,75]];
+const key='wonder-fishing-records-v1';let records={};
+try{records=JSON.parse(localStorage.getItem(key))||{}}catch{}
+function best(){el('best').textContent='Personal best · '+Math.max(0,...fish.map(([name])=>records[name]?.kg||0)).toFixed(2)+' kg'}
+function popup(title,message){el('title').textContent=title;el('message').textContent=message;dialog.showModal()}
+let phase='idle',pos=.5,target=.5,progress=0,time=0,last=0,seed=0;
+function controls(){el('cast').disabled=phase!=='idle';el('left').disabled=el('right').disabled=phase!=='reel';el('basket').disabled=phase!=='idle'}
+function finish(won){
+ phase='idle';controls();el('cast').textContent='Cast again';el('status').textContent='Cast your line into the lagoon.';
+ if(!won){popup('The fish slipped away','Cast again and keep the marker inside the green band.');return}
+ const [name,low,high]=fish[Math.floor(Math.random()**1.7*fish.length)];
+ const kg=+(low+(high-low)*Math.random()).toFixed(2),old=records[name]||{count:0,kg:0};
+ records[name]={count:old.count+1,kg:Math.max(old.kg,kg)};
+ try{localStorage.setItem(key,JSON.stringify(records))}catch{}
+ best();popup(name,kg.toFixed(2)+' kg · '+(kg>old.kg?'New personal record!':'Species record '+old.kg.toFixed(2)+' kg'));
+}
+function tick(now){
+ if(document.hidden){last=now;requestAnimationFrame(tick);return}
+ const dt=Math.min(.06,(now-last)/1000);last=now;time+=dt;
+ if(phase==='wait'&&time>1.4){phase='reel';time=0;controls();el('status').textContent='A bite! Tap left or right to stay in the green band.';el('cast').textContent='Reeling'}
+ if(phase==='reel'){
+ target=.5+.22*Math.sin(time*.95);pos=Math.max(.02,Math.min(.98,pos+dt*.102*Math.sin(time*1.4+seed)));
+ progress=Math.max(0,Math.min(1,progress+(Math.abs(target-pos)<.15?.32:-.11)*dt));
+ document.querySelector('.zone').style.left=(target-.15)*100+'%';document.querySelector('.needle').style.left=pos*100+'%';el('fill').value=progress;
+ if(progress>=1||time>=15){finish(progress>=1);return}
+ }
+ requestAnimationFrame(tick)
+}
+el('cast').onclick=()=>{if(phase!=='idle')return;phase='wait';time=progress=0;pos=.5;seed=Math.random()*6;last=performance.now();el('fill').value=0;el('status').textContent='Watching the float…';el('cast').textContent='Line cast';controls();requestAnimationFrame(tick)};
+function pull(direction){if(phase==='reel')pos=Math.max(.02,Math.min(.98,pos+.073*direction))}
+el('left').onclick=()=>pull(-1);el('right').onclick=()=>pull(1);
+onkeydown=e=>{if(phase==='reel'&&['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();pull(e.key==='ArrowLeft'?-1:1)}};
+el('basket').onclick=()=>popup('Fish basket',fish.filter(([name])=>records[name]).map(([name])=>name+' × '+records[name].count+' · '+records[name].kg.toFixed(2)+' kg').join(' / ')||'Your first catch goes here.');
+el('close').onclick=()=>dialog.close();best();controls();document.querySelector('.zone').style.left='35%';document.querySelector('.needle').style.left='50%';
+</script></html>
