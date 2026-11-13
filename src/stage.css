@@ -5821,3 +5821,18 @@ body[data-screen=fishing] #stage img{-webkit-user-drag:none}
 #stage .pet-portrait{display:block;width:100%;height:100%;max-height:100%;overflow:visible;filter:drop-shadow(0 3px 2px #3d342944)}
 #stage .collection-grid .art>.pet-portrait{position:static;width:90%;height:90%;margin:auto}
 #stage .pet-upgrade{min-height:44px;width:100%;margin-top:6px}
+
+#stage .pet-gallery{box-sizing:border-box;width:min(100%,900px);margin:auto;padding:clamp(12px,2.5vw,26px);display:grid;gap:12px;color:#fff5da;border:1px solid #bd9b69;border-radius:18px;background:radial-gradient(ellipse at 50% 45%,#47596c,#20384c 55%,#14273a);text-align:center}
+#stage .pet-gallery header,#stage .pet-gallery-panel,#stage .pet-gallery-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+#stage .pet-gallery header{position:static;background:none;text-align:left;padding:0;color:#fff4d0}
+#stage .pet-gallery h1{margin:2px 0;font-size:clamp(27px,4vw,44px)}
+#stage .pet-gallery header small{color:var(--pet-color);font-weight:bold}
+#stage .pet-gallery-stage{height:clamp(136px,31dvh,330px);display:grid;place-items:center;background:radial-gradient(ellipse closest-side,color-mix(in srgb,var(--pet-color) 35%,transparent),transparent)}
+#stage .pet-gallery-stage svg{position:static;width:auto;height:90%;max-width:96%}
+#stage .pet-gallery-panel{padding:10px;border-block:1px solid #ceb67a66;font-size:21px}
+#stage .pet-gallery-panel em{color:#afe8ad;font-style:normal}
+#stage .pet-gallery-roster{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(4px,1vw,12px)}
+#stage .pet-gallery-roster .pet-choice{display:grid;justify-items:center;gap:2px;min-width:0;height:auto;padding:5px 2px;background:linear-gradient(145deg,#273749,color-mix(in srgb,var(--pet-color) 30%,#142637));border:2px solid var(--pet-color);color:#fff4df}
+#stage .pet-choice svg{position:static;width:100%;height:clamp(40px,8dvh,78px)}
+#stage .pet-choice strong{font-size:clamp(11px,1.7vw,18px);overflow-wrap:anywhere}
+#stage .pet-choice[aria-pressed=true]{outline:3px solid #ffd478;outline-offset:-3px}
