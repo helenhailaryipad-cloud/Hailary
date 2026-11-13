@@ -5378,16 +5378,18 @@ body[data-screen=bag]:not([data-playing]) #stage > header { height:48px; padding
 body[data-screen=bag]:not([data-playing]) #stage .brand { height:46px; }
 body[data-screen=bag]:not([data-playing]) #stage .wallet > span { flex-direction:row; padding-block:0; }
 
-/* Tier illuminates the socket; the independent star rating colors its trim. */
+/* One tier accent shared by the frame, tier badge, and item details. */
+body #stage [data-tier][data-stars] {
+  --star-color:var(--rarity);
+  --star-tint:color-mix(in srgb,var(--rarity) 14%,transparent);
+}
 body #stage button.equipment-cell[data-tier][data-stars],
 body #stage .gear-workspace button.storage-slot[data-tier][data-stars],
 body #stage .gear-detail-header[data-tier][data-stars] .detail-item-icon {
-  border:2px solid var(--star-color);
-  box-shadow:inset 0 0 0 1px #fff9eb,
-             inset 0 0 0 4px var(--rarity),
-             inset 0 0 0 5px #392d42,
-             0 0 0 1px #433445,0 0 6px 1px var(--rarity);
+  border:3px solid var(--rarity);
+  box-shadow:0 0 4px color-mix(in srgb,var(--rarity) 55%,transparent);
 }
+body #stage .equipment-cell[data-tier][data-stars] .gear-stars {color:#fff3da}
 body #stage button.equipment-cell[data-tier] .gear-tier {
   background:#202332; color:var(--rarity); text-shadow:0 1px 2px #101218;
 }

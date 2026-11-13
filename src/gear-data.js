@@ -13,10 +13,10 @@ const slots=[
 {id:'spiritluck',name:'Fortune Ring',item:'Spirit Ring',icon:8,base:{crit:2,health:30},enhance:{crit:2}}
 ];
 const tiers=[
-  {tier:1,rarity:'Rare',color:'#69cfff',prefix:'Dewlight',factor:1,grade:0},
+  {tier:1,rarity:'Rare',color:'#bcc3c8',prefix:'Dewlight',factor:1,grade:0},
   {tier:2,rarity:'Rare',color:'#79e7a0',prefix:'Fernsilver',factor:1.35,grade:0},
-  {tier:3,rarity:'Epic',color:'#c693ff',prefix:'Moonveil',factor:1.7,grade:1},
-  {tier:4,rarity:'Epic',color:'#50e4d6',prefix:'Tideglass',factor:2.1,grade:1},
+  {tier:3,rarity:'Epic',color:'#65b5ff',prefix:'Moonveil',factor:1.7,grade:1},
+  {tier:4,rarity:'Epic',color:'#ba89ff',prefix:'Tideglass',factor:2.1,grade:1},
   {tier:5,rarity:'Legendary',color:'#ffc15a',prefix:'Sunforge',factor:2.5,grade:2},
   {tier:6,rarity:'Legendary',color:'#ff8c70',prefix:'Emberthorn',factor:2.85,grade:2},
   {tier:7,rarity:'Legendary',color:'#889dff',prefix:'Starfall',factor:3.2,grade:2},
