@@ -5715,3 +5715,23 @@ body[data-screen=collection] #stage .collection-grid .art > .raised-wing-pair { 
 @keyframes wheel-prize-pop {0%{scale:1} 38%{scale:1.24;filter:drop-shadow(0 0 7px #ffd562)} 100%{scale:1}}
 @keyframes wheel-reward-reveal {0%{scale:.96} 42%{scale:1.055;text-shadow:0 0 8px #f5cb72} 100%{scale:1}}
 @media(prefers-reduced-motion:reduce){.boss-wheel-wrap .wheel-winner .wheel-reward-icon,.wheel-result.wheel-reveal{animation:none}}
+
+#stage #modal.gear-modal[open] {
+  box-sizing:border-box;position:fixed;inset:0;margin:auto;padding:0;
+  width:min(350px,86vw);min-width:0;height:fit-content;min-height:0;
+  max-height:min(56dvh,390px);border:1px solid #cab37c;border-radius:12px;
+  background:#34463e;color:#fff5db;box-shadow:0 8px 30px #18231d55;
+}
+#stage #modal.gear-modal::backdrop {background:rgb(20 30 23 / 14%);backdrop-filter:none}
+#stage #modal.gear-modal #modalBody {max-height:inherit;display:block;overflow:auto;overscroll-behavior:contain}
+#stage #modal.gear-modal .gear-detail-header {position:sticky;top:0;z-index:3;background:#394e42;grid-template-columns:46px 1fr;gap:8px;padding:9px 47px 8px 10px}
+#stage #modal.gear-modal .gear-heading h2 {font-size:17px}
+#stage #modal.gear-modal .gear-heading :is(p,.equip-label,.detail-stars) {font-size:13px;line-height:1.2;margin:0}
+#stage #modal.gear-modal .gear-detail-body {padding:0 8px 8px;overflow:visible}
+#stage #modal.gear-modal .gear-detail-columns {display:block}
+#stage #modal.gear-modal .gear-detail-section {padding:5px 4px}
+#stage #modal.gear-modal .gear-stat-line {min-height:20px;font-size:14px}
+#stage #modal.gear-modal .item-upgrades summary {cursor:pointer;padding:9px 4px}
+#stage #modal.gear-modal .equipment-upgrade-actions {grid-template-columns:1fr;gap:4px}
+#stage #modal.gear-modal .equipment-upgrade-actions button {min-height:44px;padding:6px}
+#stage #modal.gear-modal .equipment-upgrade-actions :is(strong,small,span),#stage #modal.gear-modal .gear-detail-bottom {font-size:14px}
