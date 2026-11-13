@@ -5844,3 +5844,14 @@ body[data-screen=fishing] #stage img{-webkit-user-drag:none}
 #stage .ember-forms{display:flex;justify-content:center;gap:18px}
 #stage .ember-forms figure{margin:0}
 #stage .ember-forms svg{position:static;width:88px;height:88px}
+
+#stage img.pet-portrait{object-fit:contain;display:block}
+#stage .pet-gallery-stage img.pet-portrait{max-width:100%;width:auto;height:95%;margin:auto}
+#stage .pet-choice img.pet-portrait{width:100%;height:clamp(50px,9dvh,88px)}
+#stage .pet-filter,#stage .pet-draw{display:flex;justify-content:center;gap:6px;flex-wrap:wrap}
+#stage .pet-filter button[aria-pressed=true]{outline:2px solid #ffce73}
+#stage .pet-draw details{width:100%}
+#stage .pet-results{display:grid;grid-template-columns:repeat(auto-fit,minmax(95px,1fr));gap:6px}
+#stage .pet-results figure{margin:0;padding:5px;text-align:center;background:#273749;border:2px solid var(--pet-color);border-radius:8px}
+#stage .pet-results img{width:100%;height:86px}
+#stage .pet-results small{display:block}

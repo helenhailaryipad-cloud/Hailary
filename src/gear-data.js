@@ -72,6 +72,19 @@ function attributePower(t){return (t.accuracy||0)*12+(t.dodge||0)*18+(t.critDama
 function detail(entry){const t=catalog[entry.template],base={},enhancement={},star={},gem={},perfect={};for(const [key,n]of Object.entries(t.base)){base[key]=round(n*t.factor);star[key]=round(base[key]*entry.stars*.12)}for(const [key,n]of Object.entries(t.enhanceBonus))enhancement[key]=round(n*entry.enhance);if(entry.gems){const key=t.offense?'attack':'health';gem[key]=entry.gems*(t.offense?18:75);gem[t.offense?'penetration':'defense']=entry.gems*(t.offense?4:9)}if(t.grade){if(t.offense){perfect.attackPercent=round(t.grade*1.5);perfect.damageBonus=t.grade}else{perfect.healthPercent=round(t.grade*1.2);perfect.defensePercent=round(t.grade*1.5);perfect.damageReduction=round(t.grade*.6)}}if(t.slot==='spiritguard')perfect.expBonus=entry.stars*3;if(t.slot==='crown'&&t.grade>=2)perfect.block=t.grade*1.5;const total={};for(const section of [base,enhancement,star,gem,perfect])for(const [key,n]of Object.entries(section))total[key]=round((total[key]||0)+n);return {template:t,base,enhancement,star,gem,perfect,total,power:Math.round((total.attack||0)*5+(total.defense||0)*4+(total.health||0)/3+(total.crit||0)*10+(total.speed||0)+(total.penetration||0)*3+(total.attackPercent||0)*20+(total.healthPercent||0)*10+(total.defensePercent||0)*15+(total.damageBonus||0)*20+(total.damageReduction||0)*25+(total.block||0)*15+attributePower(total))}}
 function bonuses(save){const eq=state(save),sum={};for(const slot of slots){const uid=eq.equipped[slot.id];const e=eq.items.find(i=>i.uid===uid);if(e&&catalog[e.template].tier<=unlockedTier(save))for(const [key,n]of Object.entries(detail(e).total))sum[key]=round((sum[key]||0)+n)}return sum}
 const petStarts={d0:1,d1:3,d2:5,d3:8};
+const familiarGroups=[
+ ['Common','#9bcda1',1,65,'Leafcurl|Cinderpip|Shellkin|Ripplefin|Plumwing|Bellvine|Mossprism|Sandfrill|Coralfan|Pebbledrake'],
+ ['Rare','#7cbfee',3,135,'Coaljaw|Frostglass|Thorncoil|Stormimp|Lavacrest|Runewing|Copperjaw|Moonshade|Venomfrill|Comettail'],
+ ['Epic','#bd9be5',5,195,'Crescentwing|Quartz Hydra|Riftclaw|Bloomwing|Tideglass|Cinder Crown|Hourglass Wisp|Lanternjaw|Glyphwing|Mirrorwyrm'],
+ ['Super Rare','#f3bf70',8,285,'Eclipse Halo|Nebula Leviathan|Pearl Seraph|Inferno Mask|Emerald Void|Amethyst Hydra|Mooncoil|Obsidian Flare|Aurora Ribbon|Starborn'],
+ ['Fairies','#c5aced',3,145,'Bluebell|Firefly Pixie|Dreamveil|Bubblewing|Leafmask|Wishstar|Frost Sylph|Lunamoth|Rosewing|Prism Fae']
+];
+const familiars=familiarGroups.flatMap(([family,color,start,base,names],group)=>names.split('|').map((name,i)=>{
+ const index=4+group*10+i,id='d'+index;
+ petStarts[id]=start;
+ return {id,name,family,color,type:'dragon',title:group===4?'FAE SPIRIT':'DRAGON SPIRIT',accent:color,rarity:group===4?'Rare':family,power:base+i*2,cost:800+base*12+i*30,portrait:'assets/generated/familiar-'+index+'.webp'};
+}));
+const familiarById=Object.fromEntries(familiars.map(p=>[p.id,p]));
 const petCap=20;
 function petLevel(s,id){return s.petLevels?.[id]??petStarts[id]}
 function emberCost(s){return s.owned.includes('d1')?10*(1+(s.emberStars||0)):50}
@@ -82,7 +95,7 @@ function evolveEmber(s){
  if(s.owned.includes('d1'))s.emberStars=stars+1;else s.owned.push('d1');
  return true;
 }
-function petAttack(s,id){return [60,150,190,280][Number(id[1])]+12*(petLevel(s,id)-petStarts[id])+(id==='d1'?30*(s.emberStars||0):0)}
+function petAttack(s,id){return (familiarById[id]?.power??[60,150,190,280][Number(id.slice(1))])+12*(petLevel(s,id)-petStarts[id])+(id==='d1'?30*(s.emberStars||0):0)}
 function validPets(s){
  if(s.emberShards!==undefined&&(!Number.isSafeInteger(s.emberShards)||s.emberShards<0))return false;
  if(s.emberStars!==undefined&&(!Number.isInteger(s.emberStars)||s.emberStars<0||s.emberStars>6||!s.owned?.includes('d1')))return false;
@@ -164,5 +177,5 @@ function rollBossTier(save,random){
 }
 function bossLoot(save,id,random=Math.random){const table=bossLootTables[id];if(!table)return null;const eq=state(save);save.equipment=eq;const materials=Object.fromEntries(materialDefs.map(m=>[m.id,table[m.id]||0]));for(const m of materialDefs)eq.materials[m.id]+=materials[m.id];const tier=rollBossTier(save,random),slot=table.slots[Math.min(table.slots.length-1,Math.max(0,Math.floor(random()*table.slots.length)))],drop=addDrop(save,tier,slot);if(drop.converted){eq.materials.stone+=15;materials.stone+=20;}else{drop.enhance=table.enhance;drop.stars=table.stars;}return {...materials,entry:drop.converted?null:drop,converted:!!drop.converted};}
 function grant(save,type,won,score=0){const eq=state(save);save.equipment=eq;let stones=type==='dungeon'?(won?12:3):type==='defense'?(won?8:2):type==='spar'?(won?2:0):Math.min(7,Math.floor(score/180));eq.materials.stone+=stones;let shard=won&&(type==='dungeon'||type==='defense')?3:0;eq.materials.shard+=shard;if(won&&type==='dungeon'){eq.materials.essence+=2;eq.materials.gem+=1}return {stone:stones,shard,gem:won&&type==='dungeon'?1:0,essence:won&&type==='dungeon'?2:0}}
-return Object.freeze({emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,starGearCount,starDonors,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
+return Object.freeze({familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,starGearCount,starDonors,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
 })();
