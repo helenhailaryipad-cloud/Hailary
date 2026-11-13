@@ -5803,3 +5803,7 @@ body[data-screen=fishing] #stage img{-webkit-user-drag:none}
 #stage #modal.gear-modal .detail-item-icon > span:last-child {
   position:static; min-width:0; min-height:0; padding:2px 7px; font-size:14px;
 }
+
+#stage #modal.gear-modal .gear-heading .item-power {font-size:22px;color:#ffdd91}
+#stage #modal.gear-modal .quick-gear-links {display:flex;gap:10px;margin-top:10px}
+#stage #modal.gear-modal .quick-gear-links button {flex:1}

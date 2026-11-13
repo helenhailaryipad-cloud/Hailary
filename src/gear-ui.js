@@ -27,7 +27,7 @@ function statValue(key,value){return fmt(Math.round(value*100)/100)+(eqRules().p
 function statLines(values){return Object.entries(values).filter(([,n])=>n!==0).map(([key,n])=>`<div class="gear-stat-line"><span>${statIcon(key,'stat-art')}${eqRules().labels[key]||key}</span><b>+${Number.isInteger(n)?fmt(n):n.toFixed(2)}${eqRules().percentKeys.has(key)?'%':''}</b></div>`).join('')||'<p class="gear-empty">No bonus yet.</p>'}
 function equipmentCompare(eq,entry){const t=eqRules().catalog[entry.template],current=stats(),candidate=eqRules().stats({...S,equipment:{...eq,equipped:{...eq.equipped,[t.slot]:entry.uid}}});const rows=['power','attack','defense','health','crit','speed','penetration','damageBonus','damageReduction','block','expBonus','accuracy','dodge','critDamage','critResistance','shieldHealth','elementalAttack','elementalDefense'].filter(k=>candidate[k]!==current[k]).map(k=>{const diff=Math.round((candidate[k]-current[k])*100)/100;return `<div class="compare-row ${diff>0?'better':'worse'}"><span>${statIcon(k,'stat-art')}${k==='power'?'Hero Power':eqRules().labels[k]||k}</span><span>${heroStatValue(k,current)} → <b>${heroStatValue(k,candidate)}</b></span><em>${diff>0?'+':''}${Number.isInteger(diff)?fmt(diff):diff}${eqRules().percentKeys.has(k)?' pp':''}</em></div>`});return rows.length?rows:['<p class="gear-empty">Same total hero stats as your current item.</p>']}
 function priceText(price){if(!price)return 'Maximum reached';const r=eqRules();return Object.entries(price).map(([key,n])=>`${fmt(n)} ${key==='gold'?'gold':r.materialDefs.find(m=>m.id===key)?.name.toLowerCase()}`).join(' + ')}
-function openEquipment(uid, view='total', page=0){
+function openEquipment(uid, view='summary', page=0){
  const rules=eqRules(), eq=rules.state(S), item=eq.items.find(entry=>entry.uid===uid);
  if(!item)return;
  const detail=rules.detail(item), template=detail.template, worn=rules.equipped(eq,uid);
@@ -38,9 +38,12 @@ function openEquipment(uid, view='total', page=0){
  }
  if(!worn&&allowed)groups.compare='Compare equipped';
  groups.upgrades='Upgrade options';
- if(!Object.hasOwn(groups,view))view='total';
+ if(view!=='summary'&&!Object.hasOwn(groups,view))view='summary';
  let content='',pages=1;
- if(view==='upgrades'){
+ if(view==='summary'){
+  const primary=Object.keys(detail.base).filter(key=>detail.base[key]).slice(0,2);
+  content=primary.map(key=>statLines({[key]:detail.total[key]})).join('');
+ }else if(view==='upgrades'){
   const options=[['enhance','Enhance'],['star','Add star'],['gem','Socket gem'],['craft','Craft next tier']];
   pages=options.length;
   page=Math.max(0,Math.min(page,pages-1));
@@ -64,11 +67,20 @@ function openEquipment(uid, view='total', page=0){
   <button aria-label="Next" ${page===pages-1?'disabled':''} onclick="openEquipment(${uid},'${view}',${page+1})">›</button></div>`:'';
  const heading=`<div class="gear-detail-header" data-tier="${template.tier}" data-stars="${item.stars}" style="--rarity:${template.color}">
   <div class="detail-item-icon slot-${template.slot}">${gearArt(template)}<span>T${template.tier}</span></div>
-  <div class="gear-heading"><h2>${template.name} +${item.enhance}</h2>
+  <div class="gear-heading"><h2>${template.name}${item.enhance?' +'+item.enhance:''}</h2>
   <p>${worn?'Equipped · ':''}${template.rarity} · ${item.stars}/5 stars</p>
-  <p>Power ${fmt(detail.power)} · Requires Lv. ${Math.max(1,rules.requiredLevel(template.tier))}</p></div></div>`;
+  <p class="item-power">Power <strong>${fmt(detail.power)}</strong></p></div></div>`;
  const actions=worn?'':`<div class="sheet-actions"><button ${allowed?'':'disabled'} onclick="equipmentAction(${uid},'equip','${stamp}')">${allowed?'Equip item':'Requires Lv. '+rules.requiredLevel(template.tier)}</button>
  <button onclick="confirmSalvage(${uid})">Salvage</button></div>`;
+ if(view==='summary'){
+  modal(`<section class="sheet-card">${heading}<div class="item-sheet">
+   <div class="sheet-values">${content}</div>${actions}
+   <div class="quick-gear-links"><button onclick="openEquipment(${uid},'total')">Details</button>
+   <button onclick="openEquipment(${uid},'upgrades')">Upgrade</button></div>
+   </div></section>`);
+  $('#modal').classList.add('gear-modal');
+  return;
+ }
  const menu=`<div class="sheet-menu" id="gearSections" role="group" aria-label="Item details" hidden>
   ${Object.entries(groups).map(([key,label])=>`<button type="button" aria-pressed="${key===view}" onclick="openEquipment(${uid},'${key}');document.getElementById('gearSectionButton').focus()">${label}</button>`).join('')}</div>`;
  const trigger=`<button type="button" id="gearSectionButton" aria-expanded="false" aria-controls="gearSections" onclick="toggleEquipmentMenu()">${groups[view]} <span aria-hidden="true">▴</span></button>`;
