@@ -12,7 +12,7 @@ for(const fish of globalThis.MoonwaterFish.species){
 for(const file of fs.readdirSync(path.join(src,'assets/fonts')).filter(f=>f.endsWith('.woff'))){ASSETS['/assets/fonts/'+file]={type:'font/woff',base64:true,content:fs.readFileSync(path.join(src,'assets/fonts',file)).toString('base64')};}
 // Preserve artwork URLs in existing saves and serve compact image payloads.
 for (const [url, asset] of Object.entries(ASSETS)) {
-  if (asset.type !== 'image/webp') continue;
+  if (asset.type !== 'image/webp' || url.startsWith('/assets/generated/gear-')) continue;
   const compact = path.join('scripts/hosting-art', path.basename(url, '.webp') + '.avif');
   if (!fs.existsSync(compact)) continue;
   asset.type = 'image/avif';

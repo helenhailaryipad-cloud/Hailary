@@ -5787,3 +5787,19 @@ body[data-screen=fishing],body[data-screen=fishing] #stage *{
  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent
 }
 body[data-screen=fishing] #stage img{-webkit-user-drag:none}
+
+#stage img.gear-illustration {
+  display:block; width:100%; height:100%; object-fit:contain; object-position:center;
+  margin:auto; border:0; background:none; box-shadow:none; pointer-events:none;
+}
+#stage :is(.equipment-cell,.storage-slot) > img.gear-illustration {
+  position:absolute; inset:0; transform:none;
+}
+#stage #modal.gear-modal .detail-item-icon {
+  display:grid; grid-template-rows:minmax(0,1fr) auto; justify-items:center;
+  width:100%; height:auto; aspect-ratio:auto; padding:0;
+}
+#stage #modal.gear-modal .detail-item-icon img {width:100%;height:auto;aspect-ratio:1}
+#stage #modal.gear-modal .detail-item-icon > span:last-child {
+  position:static; min-width:0; min-height:0; padding:2px 7px; font-size:14px;
+}

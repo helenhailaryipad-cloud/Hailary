@@ -4,7 +4,7 @@ const eqRules=()=>globalThis.WonderGear;
 function equipmentStamp(e){return [e.template,e.enhance,e.stars,e.gems].join(':')}
 function equipmentIcon(index,extra=''){return `<span class="equipment-art ${extra}" style="--icon-x:${(index%4)*100/3}%;--icon-y:${Math.floor(index/4)*50}%"></span>`}
 function gearArt(template){
-  return `<span class="equipment-art gear-illustration" style="background-image:url(assets/generated/gear-${template.slot}-t${eqRules().artTier(template.tier)}.webp)"></span>`;
+  return `<img class="gear-illustration" alt="" src="assets/generated/gear-${template.slot}-t${eqRules().artTier(template.tier)}.webp?v=2">`;
 }
 function equipmentCell(entry,{compact=false,equipped=false,warehouse=false,forge=false}={}){const r=eqRules(),t=r.catalog[entry.template];
  const action=forge?`selectForgePiece(${entry.uid})`:warehouse?`transferGear(${entry.uid},${!entry.stored})`:`openEquipment(${entry.uid})`;
