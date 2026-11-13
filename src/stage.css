@@ -5857,7 +5857,7 @@ body[data-screen=fishing] #stage img{-webkit-user-drag:none}
 #stage .pet-results small{display:block}
 
 body[data-screen=home] #stage .hero-visual > .avatar {
-  scale:.48; transform-origin:center bottom;
+  scale:.408; transform-origin:center bottom;
 }
 body[data-screen=home] #stage .hero-visual > .mounted-reina {
   scale:.36;
