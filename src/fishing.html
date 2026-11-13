@@ -4,9 +4,9 @@
 #cup{position:relative;z-index:1;margin:0 clamp(16px,4vw,34px);width:fit-content;max-width:85%;background:#102e47ed;border:1px solid #ae9868;border-radius:10px;padding:9px 12px;font:15px Georgia}#cup summary{cursor:pointer}#cup ol{padding-left:23px;margin:8px 0 0}#cup li{padding:2px}#cup .self{color:#ffe49d}@media(max-height:450px){#cup{max-height:22vh;overflow:auto}}
 footer{padding:10px max(12px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom));background:linear-gradient(transparent,#102d3cee 16%);display:grid;justify-items:center;gap:6px}
 footer .status{min-height:0;font-size:clamp(15px,2.1vw,20px);line-height:1.2;margin:4px 0}
-footer{
- -webkit-user-select:none;user-select:none;-webkit-touch-callout:none
-}
+html,body,body *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+img,svg{-webkit-user-drag:none}
+.controls,.compass,.lagoon{touch-action:none}
 .controls{display:flex;width:min(94%,480px);margin:0 auto;justify-content:center;gap:clamp(12px,3vw,24px)}
 .controls button{
  display:inline-flex;align-items:center;justify-content:center;gap:12px;min-width:0;
@@ -14,7 +14,13 @@ footer{
  border:2px solid #efcb88;border-radius:18px;font:700 clamp(19px,3vw,25px)/1.12 Georgia,serif;
  box-shadow:inset 0 1px #ffe7b9,0 3px 0 #463626,0 4px 12px #09374799
 }
-.controls #cast{min-width:min(244px,90%)}
+.controls #cast{
+ min-width:min(244px,90%);gap:12px;padding:6px 22px 6px 14px;border:2px solid #edcc82;border-radius:100px;
+ color:#fff4cf;background:linear-gradient(180deg,#357678,#184850 55%,#12313f);text-shadow:0 1px 2px #102b33;
+ box-shadow:inset 0 0 0 2px #725a37,inset 0 0 0 3px #e9cf8b80,0 3px 0 #49391f,0 4px 9px #071e2e90
+}
+#cast .cast-icon{position:static;display:block;width:clamp(37px,5.6vw,48px);height:auto;flex:none}
+#cast:disabled{opacity:.8}
 .controls button[hidden],.controls:not(:has(button:not([hidden]))){display:none}
 .controls :is(#left,#right){
  width:clamp(72px,10.4vw,95px);min-height:0;aspect-ratio:1;padding:0;border:0;border-radius:50%;
@@ -85,10 +91,19 @@ body[data-phase=landed] .float-value{background:#684b1b;color:#fff9d9}
  </svg>
 </div>
 <div class="controls">
- <button id="left" aria-label="Pull left" title="Pull left" hidden></button><button id="cast">Cast line</button>
+ <button id="left" aria-label="Pull left" title="Pull left" hidden></button><button id="cast" type="button">
+  <svg class="cast-icon" viewBox="0 0 52 52" aria-hidden="true" focusable="false">
+   <defs><linearGradient id="castGold" x2=".35" y2="1"><stop stop-color="#fff3c6"/><stop offset=".46" stop-color="#dcab59"/><stop offset=".72" stop-color="#fff1b2"/><stop offset="1" stop-color="#b07b36"/></linearGradient></defs>
+   <circle cx="26" cy="26" r="23" fill="#102f40" stroke="url(#castGold)" stroke-width="2.7"/><circle cx="26" cy="26" r="20.5" fill="none" stroke="#8c7549" stroke-width=".8"/>
+   <path d="M12 38Q22 12 36 12" fill="none" stroke="url(#castGold)" stroke-linecap="round" stroke-width="2.5"/>
+   <path d="m12 38 4-8" stroke="#ffdf95" stroke-width="4.4" stroke-linecap="round"/>
+   <circle cx="19" cy="30" r="3" fill="#398b80" stroke="#ffe4a7" stroke-width="1.5"/>
+   <path d="M36 12q6 6 0 15m-1 4v4c0 5-7 5-7 0v-3l2 2" fill="none" stroke="#fff1c5" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/>
+   <path d="M35.5 23q-6.5 6-.5 10 6-4 .5-10Z" fill="#70e8c1" stroke="#efcc86" stroke-width="1.4"/>
+  </svg><span id="castLabel">Cast line</span></button>
  <button id="right" aria-label="Pull right" title="Pull right" hidden></button>
 </div>
-</footer></main><dialog><img id="caughtArt" alt="" hidden><h2 id="title"></h2><p id="message"></p><button id="openCatchCard" type="button" hidden>View card</button> <button id="close">Continue</button></dialog>
+</footer></main><dialog><img draggable="false" id="caughtArt" alt="" hidden><h2 id="title"></h2><p id="message"></p><button id="openCatchCard" type="button" hidden>View card</button> <button id="close">Continue</button></dialog>
 <script src="fish-catalog.js"></script><script>
 const el=id=>document.getElementById(id),dialog=document.querySelector('dialog');
 const fish=MoonwaterFish.species;
@@ -183,12 +198,31 @@ function renderDial(){
  band.setAttribute('stroke-dasharray',`0 ${start} ${greenArcWidth*100} 100`);
  needle.setAttribute('transform','rotate('+((pos-.5)*156)+' 160 99)');
 }
-let arrowPointer=null,arrowDirection=0,repeatAfter=0;
-const fishingFooter=document.querySelector('footer');
-for(const type of ['selectstart','contextmenu']){
- fishingFooter.addEventListener(type,event=>event.preventDefault());
+// The most recent finger steers. Lifting it returns control to the other held arrow.
+const presses=new Map();
+let steeringGoal=.5,heldDirection=0;
+const tapDistance=.065,holdSpeed=.46,response=15;
+function steer(key,direction){
+ if(phase!=='reel'||presses.has(key))return;
+ if((steeringGoal-pos)*direction<0)steeringGoal=pos;
+ presses.set(key,direction);heldDirection=direction;
+ steeringGoal=clampNeedle(steeringGoal+tapDistance*direction);
 }
-function stopArrow(){arrowPointer=null;arrowDirection=0}
+function release(key){
+ if(!presses.delete(key))return;
+ const remaining=Array.from(presses.values()).pop()||0;
+ if(remaining && remaining!==heldDirection)steeringGoal=pos;
+ heldDirection=remaining;
+}
+function stopArrow(){presses.clear();heldDirection=0;steeringGoal=pos}
+function clampNeedle(value){return Math.max(.02,Math.min(.98,value))}
+for(const type of ['selectstart','dragstart','contextmenu']){
+ document.addEventListener(type,event=>event.preventDefault(),true);
+}
+// Some iPad browsers start a native selection when the second contact lands.
+document.addEventListener('touchstart',event=>{
+ if(event.touches.length>1 && event.cancelable)event.preventDefault();
+},{capture:true,passive:false});
 
 function controls(){
  document.body.dataset.phase=phase;
@@ -202,8 +236,9 @@ function controls(){
  if(phase==='idle')el('status').textContent='Cast your line to start fishing.';
 }
 window.addEventListener('blur',stopArrow);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)stopArrow()});
 function finish(won){
- phase=won?'landed':'idle';stopArrow();controls();el('cast').textContent='Cast again';
+ phase=won?'landed':'idle';stopArrow();controls();el('castLabel').textContent='Cast again';
  if(!won){popup('The fish slipped away','Cast again and keep the marker inside the green band.');return}
  const {id,name,min:low,max:high,bonus}=fish[Math.floor(Math.random()**1.7*fish.length)];
  const kg=+(low+(high-low)*Math.random()).toFixed(2),old=album.catch(id,kg);
@@ -225,12 +260,12 @@ function finish(won){
 function tick(now){
  if(document.hidden){last=now;requestAnimationFrame(tick);return}
  const dt=Math.min(.06,(now-last)/1000);last=now;time+=dt;
- if(phase==='wait'&&time>1.4){phase='reel';time=0;controls();el('status').textContent='Use the arrows to keep the needle in green.';el('cast').textContent='Reeling'}
+ if(phase==='wait'&&time>1.4){phase='reel';time=0;controls();el('status').textContent='Use the arrows to keep the needle in green.';el('castLabel').textContent='Reeling'}
  if(phase==='reel'){
  target=.5+.22*Math.sin(time*.95);
  const drift=.102*Math.sin(time*1.4+seed);
- pos=Math.max(.02,Math.min(.98,pos+dt*drift));
- if(arrowDirection&&now>=repeatAfter){pull(arrowDirection);repeatAfter=now+150}
+ steeringGoal=clampNeedle(steeringGoal+(drift+heldDirection*holdSpeed)*dt);
+ pos+=(steeringGoal-pos)*(-Math.expm1(-response*dt));
  const inGreen=Math.abs(target-pos)<=greenArcWidth/2;
  progress=Math.max(0,Math.min(1,progress+(inGreen ? .32 : -.11)*dt));
  renderDial();renderCatch();
@@ -238,21 +273,26 @@ function tick(now){
  }
  requestAnimationFrame(tick)
 }
-el('cast').onclick=()=>{if(phase!=='idle')return;const t=eventTime();castDay=t.live?t.day:'';phase='wait';time=progress=0;pos=target=.5;seed=Math.random()*6;renderDial();last=performance.now();renderCatch();el('status').textContent='Watching the float…';el('cast').textContent='Line cast';controls();requestAnimationFrame(tick)};
-function pull(direction){if(phase==='reel')pos=Math.max(.02,Math.min(.98,pos+.073*direction))}
+el('cast').onclick=()=>{if(phase!=='idle')return;const t=eventTime();castDay=t.live?t.day:'';phase='wait';time=progress=0;pos=target=steeringGoal=.5;seed=Math.random()*6;renderDial();last=performance.now();renderCatch();el('status').textContent='Watching the float…';el('castLabel').textContent='Line cast';controls();requestAnimationFrame(tick)};
 for(const [id,direction] of [['left',-1],['right',1]]){
  const button=el(id);
  button.onpointerdown=event=>{
-  if(phase!=='reel'||event.button!==0||arrowPointer!==null)return;
-  arrowPointer=event.pointerId;arrowDirection=direction;repeatAfter=performance.now()+320;
-  button.setPointerCapture(event.pointerId);pull(direction);
+  if(phase!=='reel'||event.button!==0)return;
+  event.preventDefault();
+  button.setPointerCapture(event.pointerId);
+  steer(event.pointerId,direction);
  };
- button.onpointerup=button.onpointercancel=button.onlostpointercapture=event=>{
-  if(event.pointerId===arrowPointer)stopArrow();
+ button.onpointerup=button.onpointercancel=button.onlostpointercapture=event=>release(event.pointerId);
+ button.onclick=event=>{
+  if(event.detail===0){steer('activate',direction);release('activate')}
  };
- button.onclick=event=>{if(event.detail===0)pull(direction)};
 }
-onkeydown=e=>{if(phase==='reel'&&['ArrowLeft','ArrowRight'].includes(e.key)){e.preventDefault();pull(e.key==='ArrowLeft'?-1:1)}};
+const keyDirections={ArrowLeft:-1,ArrowRight:1};
+window.addEventListener('keydown',event=>{
+ if(phase!=='reel'||!Object.hasOwn(keyDirections,event.key))return;
+ event.preventDefault();steer(event.key,keyDirections[event.key]);
+});
+window.addEventListener('keyup',event=>release(event.key));
 el('basket').onclick=()=>{
  const records=album.read();
  const total=Object.values(records).reduce((count,r)=>count+r.count,0);
@@ -260,7 +300,7 @@ el('basket').onclick=()=>{
 };
 dialog.addEventListener('close',()=>{
  if(phase==='landed'){phase='idle';controls()}
- if(phase==='idle'){progress=0;pos=target=.5;renderCatch();renderDial()}
+ if(phase==='idle'){progress=0;pos=target=steeringGoal=.5;renderCatch();renderDial()}
 });
 el('close').onclick=()=>dialog.close();best();controls();renderDial();
 </script></html>

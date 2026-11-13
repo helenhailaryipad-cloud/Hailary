@@ -5784,3 +5784,9 @@ body[data-screen=collection] #stage .collection-grid .art > .raised-wing-pair { 
 }
 
 body[data-screen=cards] #stage .album-frame{display:block;flex:1 1 auto;width:100%;min-height:0;border:0;border-radius:12px;background:#efe4cc}
+
+/* Keep iPad touches on the fishing iframe from selecting the surrounding stage. */
+body[data-screen=fishing],body[data-screen=fishing] #stage *{
+ -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent
+}
+body[data-screen=fishing] #stage img{-webkit-user-drag:none}
