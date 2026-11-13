@@ -284,7 +284,7 @@ function tick(now){
  steeringGoal=clampNeedle(steeringGoal+(drift+heldDirection*holdSpeed)*dt);
  pos+=(steeringGoal-pos)*(-Math.expm1(-response*dt));
  const inGreen=Math.abs(target-pos)<=greenArcWidth/2;
- progress=Math.max(0,Math.min(1,progress+(inGreen ? .32 : -.11)*dt));
+ progress=Math.max(0,Math.min(1,progress+(inGreen ? .24 : -.11)*dt));
  renderDial();renderCatch();
  if(progress>=1||time>=15){finish(progress>=1);return}
  }
