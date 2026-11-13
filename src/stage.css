@@ -5222,12 +5222,12 @@ body[data-screen=bag] #stage .bag-doll > .bag-wings { --render-wing-width:min(va
   margin:0; width:26px; height:26px; min-width:26px; align-self:center;
 }
 
-body[data-screen=collection] #stage .collection-grid { grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr)); }
+body[data-screen=collection] #stage .collection-grid { width:100%;box-sizing:border-box;grid-template-columns:repeat(2,minmax(0,1fr)); }
 body[data-screen=collection] #stage .collection-grid .card { display:flex; flex-direction:column; height:auto; min-height:0; overflow:hidden; }
 #stage .wonder-card-status { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:5px 12px; min-height:28px; }
 #stage .wonder-card-status :is(.rarity,.equipped) { position:static; inset:auto; margin:0; transform:none; font-size:13px; line-height:1.25; }
-body[data-screen=collection] #stage .collection-grid .art { position:relative; flex:none; display:grid; place-items:center; width:100%; height:180px; margin:8px 0; overflow:hidden; }
-body[data-screen=collection] #stage .collection-grid .art > .animated-dragon { position:static; width:170px; height:170px; max-width:100%; margin:0; transform:none; }
+body[data-screen=collection] #stage .collection-grid .art { position:relative; flex:none; display:grid; place-items:center; width:100%; height:clamp(88px,17cqw,144px); margin:4px 0; overflow:hidden; }
+body[data-screen=collection] #stage .collection-grid .art > .animated-dragon { position:static; width:auto; height:100%; aspect-ratio:1; max-width:100%; margin:0; transform:none; }
 body[data-screen=rankings] #stage .ranking-row {
   display:grid; height:auto; min-height:100px; max-height:none; overflow:visible;
 }
@@ -5244,7 +5244,7 @@ body[data-screen=rankings] #stage .ranking-panel { display:block; }
   body[data-screen=rankings] #stage .ranking-row strong { font-size:18px; }
 }
 body[data-screen=collection] #stage .collection-grid { grid-auto-rows:max-content; }
-body[data-screen=collection] #stage .collection-grid .card { min-height:410px; max-height:none; }
+body[data-screen=collection] #stage .collection-grid .card { min-height:0; min-width:0; max-height:none; }
 body[data-screen=collection] #stage .collection-grid .item-footer { position:static; display:flex; flex-wrap:wrap; gap:8px; margin-top:auto; }
 
 #stage .gear-illustration { background-size:contain; background-position:center; background-repeat:no-repeat; filter:none; }
@@ -5448,7 +5448,7 @@ body[data-screen=bag] #stage .doll-slot .gear-illustration,
 
 body[data-screen=bag] #stage .doll-panel > .doll-actions { bottom:4px; }
 body[data-screen=bag] #stage .doll-panel > :is(.doll-left,.doll-right) {
-  bottom:62px; --stage-cell:min(85px,calc((100cqh - 144px)/5),19cqw);
+  top:clamp(20px,9cqh,64px); bottom:clamp(6px,3cqh,24px); --stage-cell:clamp(32px,min(calc((100cqh - clamp(20px,9cqh,64px) - clamp(6px,3cqh,24px) - 16px)/5),19cqw),85px);
 }
 body[data-screen=bag] #stage header .brand { display:none; }
 body[data-screen=bag] #stage header .profile-face .gpt-icon { width:42px; }
@@ -5696,3 +5696,6 @@ body[data-screen=bag] #stage .inventory-materials .material-summary {
 .boss-wheel-wrap .wheel-pointer{inset:0;background:var(--frame) center/100% 100%;clip-path:polygon(calc(var(--cx) - 4.6%) 9%,var(--cx) 1%,calc(var(--cx) + 4.6%) 9%,var(--cx) 22.5%);pointer-events:none}
 
 @media(prefers-reduced-motion:reduce){.boss-wheel-wrap .boss-wheel{transition:none}}
+
+body[data-screen=bag] #stage .doll-panel { align-self:stretch; }
+body[data-screen=collection] #stage .collection-grid .art > .raised-wing-pair { width:min(95%,220px); max-height:100%; }
