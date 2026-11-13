@@ -69,10 +69,37 @@ function openEquipment(uid, view='total', page=0){
   <p>Power ${fmt(detail.power)} · Requires Lv. ${Math.max(1,rules.requiredLevel(template.tier))}</p></div></div>`;
  const actions=worn?'':`<div class="sheet-actions"><button ${allowed?'':'disabled'} onclick="equipmentAction(${uid},'equip','${stamp}')">${allowed?'Equip item':'Requires Lv. '+rules.requiredLevel(template.tier)}</button>
  <button onclick="confirmSalvage(${uid})">Salvage</button></div>`;
- modal(heading+`<div class="item-sheet"><div class="sheet-controls"><select aria-label="Item details" onchange="openEquipment(${uid},this.value)">${Object.entries(groups).map(([key,label])=>`<option value="${key}" ${key===view?'selected':''}>${label}</option>`).join('')}</select>${pager}</div>
- <div class="sheet-values">${content}</div>${actions}</div>`);
+ const menu=`<div class="sheet-menu" id="gearSections" role="group" aria-label="Item details" hidden>
+  ${Object.entries(groups).map(([key,label])=>`<button type="button" aria-pressed="${key===view}" onclick="openEquipment(${uid},'${key}');document.getElementById('gearSectionButton').focus()">${label}</button>`).join('')}</div>`;
+ const trigger=`<button type="button" id="gearSectionButton" aria-expanded="false" aria-controls="gearSections" onclick="toggleEquipmentMenu()">${groups[view]} <span aria-hidden="true">▴</span></button>`;
+ modal(menu+`<section class="sheet-card">${heading}<div class="item-sheet"><div class="sheet-controls">${trigger}${pager}</div>
+ <div class="sheet-values">${content}</div>${actions}</div></section>`);
  $('#modal').classList.add('gear-modal');
 }
+function toggleEquipmentMenu(){
+ const menu=$('#gearSections'),trigger=$('#gearSectionButton');
+ menu.hidden=!menu.hidden;
+ trigger.setAttribute('aria-expanded',String(!menu.hidden));
+ if(menu.hidden)trigger.focus();
+ else menu.querySelector('[aria-pressed="true"]').focus({preventScroll:true});
+}
+const gearDialog=document.querySelector('#modal');
+let gearPressOutside=false;
+gearDialog.addEventListener('pointerdown',event=>{
+ gearPressOutside=!event.target.closest('.sheet-card,.sheet-menu');
+});
+gearDialog.addEventListener('click',event=>{
+ if(!gearDialog.classList.contains('gear-modal'))return;
+ if(gearPressOutside&&!event.target.closest('.sheet-card,.sheet-menu'))gearDialog.close();
+ else if(event.target.closest('.sheet-card')&&!event.target.closest('button')&&!$('#gearSections').hidden)toggleEquipmentMenu();
+ gearPressOutside=false;
+});
+gearDialog.addEventListener('cancel',event=>{
+ if(gearDialog.classList.contains('gear-modal')&&!$('#gearSections').hidden){
+  event.preventDefault();
+  toggleEquipmentMenu();
+ }
+});
 function refreshEquipmentSurface(){if(['inventory','forge','warehouse'].includes(screen))gearWorkspace();else if(screen==='bag')bag();else if(screen==='home')home();wallet()}
 function equipmentAction(uid,action,expected){if(gearActionLock)return;if(action==='star'){$('#modal').close();openStarForge(uid);return}const eq=eqRules().state(S),entry=eq.items.find(i=>i.uid===uid);if(!entry||equipmentStamp(entry)!==expected){toast('This item changed. Open it again.');return}gearActionLock=true;try{const result=eqRules().perform(S,uid,action);if(!result.ok){toast(result.error);return}save();refreshEquipmentSurface();$('#modal').close();openEquipment(uid);toast(action==='equip'?'Item equipped':action==='craft'?'Next tier crafted. All upgrades kept.':'Equipment improved')}finally{setTimeout(()=>gearActionLock=false,220)}}
 function autoEquipBest(){const r=eqRules(),eq=r.state(S),changed=new Set();for(let pass=0;pass<3;pass++){let improved=false;for(const slot of r.slots){let bestUid=eq.equipped[slot.id],bestPower=r.stats({...S,equipment:eq}).power;for(const candidate of eq.items.filter(i=>!i.stored&&r.catalog[i.template].tier<=r.unlockedTier(S)&&r.catalog[i.template].slot===slot.id)){const power=r.stats({...S,equipment:{...eq,equipped:{...eq.equipped,[slot.id]:candidate.uid}}}).power;if(power>bestPower){bestPower=power;bestUid=candidate.uid}}if(bestUid!==eq.equipped[slot.id]){eq.equipped[slot.id]=bestUid;changed.add(slot.id);improved=true}}if(!improved)break}if(changed.size){S.equipment=eq;save();bag();toast(changed.size+' equipment slots improved')}else {const locked=eq.items.filter(i=>!i.stored&&r.catalog[i.template].tier>r.unlockedTier(S)).map(i=>r.catalog[i.template].tier);toast(locked.length?'Best available gear equipped. T'+Math.min(...locked)+' requires Lv. '+r.requiredLevel(Math.min(...locked))+'.':'Your strongest items are already equipped')}}
