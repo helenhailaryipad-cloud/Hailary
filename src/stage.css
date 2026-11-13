@@ -3723,6 +3723,23 @@ body[data-screen=home] .stats-panel .stat {  font-size: 24px ;}
   .wallet span {    font-size: 19px ;}}
 .hero-stage .character-label small {  font-size: 20px ;}
 body[data-screen=home] .hero-visual > .avatar {  animation: none ;  transform: none ;  transition: none ;}
+@media (prefers-reduced-motion: no-preference) {
+  body[data-screen=home] .world-depth {
+    inset: -8px;
+    background-position: center calc(var(--garden-top,-20vh) + 8px);
+    transform: translate(calc(var(--parallax-x,0px) * .55), calc(var(--parallax-y,0px) * .55));
+    will-change: transform;
+  }
+  body[data-screen=home] .hero-visual > .avatar {
+    transform-origin: 50% 100%;
+    animation: ranger-idle-breath 5s ease-in-out infinite;
+  }
+}
+@keyframes ranger-idle-breath {
+  0%, 100% { scale: 1 1; }
+  45% { scale: 1.002 1.004; }
+}
+
 .bag-avatar {  animation: none ;  transform: none ;  transition: none ;}
 main .intro-caption {  font-size: 20px ;}
 .intro-actions > button {  font-size: 24px ;}
