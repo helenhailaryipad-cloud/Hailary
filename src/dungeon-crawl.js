@@ -8,20 +8,22 @@ function crawlRoom(g){const a=g.crawl;a.hero={x:118,y:330,tx:285,ty:310};a.enemy
 function moveRanger(x,y){const g=game;if(!g?.crawl||g.ended||gamePaused||!Number.isFinite(x)||!Number.isFinite(y))return;g.crawl.hero.tx=Math.max(84,Math.min(640,x));g.crawl.hero.ty=Math.max(235,Math.min(406,y));}
 function walkDungeon(){const g=game;if(!g?.crawl||g.ended||gamePaused)return;if(g.crawl.exitReady)moveRanger(639,316);else moveRanger(Math.max(100,g.crawl.enemy.x-(g.enemy.boss ? BOSS_STANDOFF : 195)),g.crawl.enemy.y);}
 function bindCrawlInput(canvas){canvas.tabIndex=0;canvas.setAttribute('aria-label','Dungeon room. Tap the floor to move, tap an enemy to attack. Arrow keys move, E follows the path.');let pointer=null;const point=e=>{const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)*720/r.width,y:(e.clientY-r.top)*520/r.height};};canvas.addEventListener('pointerdown',e=>{if(game?.kind!=='battle'||!game.crawl||game.ended||gamePaused||pointer!==null)return;pointer=e.pointerId;canvas.setPointerCapture?.(pointer);const p=point(e),a=game.crawl;if(a.exitReady&&Math.hypot(p.x-649,p.y-316)<43){walkDungeon();return;}if(!a.exitReady&&hitsDungeonEnemy(game,p.x,p.y)){walkDungeon();battleSkill('burst');}else moveRanger(p.x,p.y);});canvas.addEventListener('pointermove',e=>{if(e.pointerId===pointer&&game?.crawl){const p=point(e);moveRanger(p.x,p.y);}});for(const event of ['pointerup','pointercancel'])canvas.addEventListener(event,()=>{pointer=null;});canvas.addEventListener('keydown',e=>{const g=game;if(!g?.crawl||g.ended||gamePaused)return;const delta={ArrowLeft:[-75,0],ArrowRight:[75,0],ArrowUp:[0,-55],ArrowDown:[0,55],a:[-75,0],d:[75,0],w:[0,-55],s:[0,55]}[e.key];if(delta){e.preventDefault();moveRanger(g.crawl.hero.x+delta[0],g.crawl.hero.y+delta[1]);}else if(e.key.toLowerCase()==='e'){e.preventDefault();walkDungeon();}});}
-function crawlShot(g,enemy=false,burst=false){
+function crawlShot(g,enemy=false,burst=false,strike=null){
  const a=g.crawl;
  if(!enemy)g.heroShotAt=g.clock;
- if(!a||!motionAllowed())return;
+ if(!a||(!strike&&!motionAllowed()))return;
  const h=a.hero,e=a.enemy;
  const from=enemy?(g.enemy.boss?bossMouthPosition(g):{x:e.x,y:e.y-90}):dungeonBowAim(g);
- const to=enemy?{x:h.x,y:h.y-88}:{x:e.x,y:e.y-(g.enemy.boss?120:85)};
+ const target=strike?.danger||h;
+ const to=enemy?{x:target.x,y:target.y-88}:{x:e.x,y:e.y-(g.enemy.boss?120:85)};
  const life=enemy?.45:.75;
- a.shots.push({...from,tx:to.x,ty:to.y,life,max:life,enemy,burst});
- a.shots=a.shots.slice(-18);
+ a.shots.push({...from,tx:to.x,ty:to.y,life,max:life,enemy,burst,strike});
+ 
 }
-function updateCrawl(g,dt){const a=g.crawl;a.roomTime+=dt;for(const p of a.shots)p.life-=dt;a.shots=a.shots.filter(p=>p.life>0);const h=a.hero;
+function updateCrawl(g,dt){const a=g.crawl;a.roomTime+=dt;for(const p of a.shots)p.life-=dt;const impacts=a.shots.filter(p=>p.strike&&p.life<=0);a.shots=a.shots.filter(p=>p.life>0);const h=a.hero;
 if(g.enemy.boss && g.enemy.hp>0 && !a.exitReady) h.tx=Math.min(h.tx,a.enemy.x-BOSS_STANDOFF);
 const dist=Math.hypot(h.tx-h.x,h.ty-h.y),step=Math.min(dist,180*dt);if(dist>.5){h.x+=(h.tx-h.x)/dist*step;h.y+=(h.ty-h.y)/dist*step;}
+for(const p of impacts){if(!a.exitReady)enemyStrike(p.strike.multiplier,p.strike.special,p.strike.danger);if(g.ended)return true;}
 for(const shot of a.shots){
  if(shot.enemy||shot.released)continue;
  const aim=dungeonBowAim(g);
@@ -77,7 +79,7 @@ c.shadowOffsetY=1;
 drawReina(c,g,h.x,h.y+5,135,180);
 c.restore();
 if(g.expRun?.party.length>1){const ally=ADVENTURERS.find(b=>b.id===g.expRun.party[1]);drawArtSprite(c,ally.id,h.x+55,h.y,65,105);}if(g.ally){drawArtSprite(c,g.ally.id,h.x-55,h.y,65,105);}
-for(const p of a.shots){if(!p.enemy&&p.life>.37)continue;const t=p.enemy?1-p.life/p.max:Math.max(0,1-p.life/.37),x=p.x+(p.tx-p.x)*t,dy=p.ty-p.y,initial=bowSlope*Math.abs(p.tx-p.x),y=p.y+(p.enemy?dy*t:initial*t+(dy-initial)*t*t);drawSpell(c,p.enemy?'fire':'arrow',x,y,p.burst?98:70,45,g.clock,Math.atan2(p.enemy?dy:initial+2*(dy-initial)*t,p.tx-p.x));}
+for(const p of motionAllowed()?a.shots:[]){if(!p.enemy&&p.life>.37)continue;const t=p.enemy?1-p.life/p.max:Math.max(0,1-p.life/.37),x=p.x+(p.tx-p.x)*t,dy=p.ty-p.y,initial=bowSlope*Math.abs(p.tx-p.x),y=p.y+(p.enemy?dy*t:initial*t+(dy-initial)*t*t);drawSpell(c,p.enemy?'fire':'arrow',x,y,p.burst?98:70,45,g.clock,Math.atan2(p.enemy?dy:initial+2*(dy-initial)*t,p.tx-p.x));}
 for(const fx of motionAllowed()?g.effects:[]){if(fx.type==='dodge')continue;c.save();c.globalAlpha=Math.min(1,fx.life*2);if(fx.type==='beam'){drawRasterFX(c,'impact',e.x,e.y-60,100);}else drawSpell(c,fx.type==='heal'?'heal':'wind',h.x,h.y-45,150,130,g.clock);c.restore();}paintImpacts(c,g);drawBattleAtmosphere(c,g);c.globalAlpha=1;
 for(const p of g.particles){
  if(p.text==='EVADED'||p.text==='DODGED')continue;
