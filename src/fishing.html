@@ -7,7 +7,7 @@ footer .status{min-height:0;font-size:clamp(15px,2.1vw,20px);line-height:1.2;mar
 html,body,body *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 img,svg{-webkit-user-drag:none}
 .controls,.compass,.lagoon{touch-action:none}
-.controls{display:flex;width:min(94%,480px);margin:0 auto;justify-content:center;gap:clamp(12px,3vw,24px)}
+.controls{display:flex;width:100%;margin:0 auto;justify-content:center;padding-inline:clamp(4px,2vw,24px)}
 .controls button{
  display:inline-flex;align-items:center;justify-content:center;gap:12px;min-width:0;
  min-height:clamp(64px,7.8vw,80px);padding:8px 18px;touch-action:none;
@@ -36,9 +36,10 @@ header{padding-bottom:8px}
 .lagoon{position:relative;flex:1 0 125px;min-height:125px}
 .lagoon .water{inset:16% 0 0;background:repeating-radial-gradient(ellipse at 57% 68%,transparent 0 29px,#b3fffa1b 30px,transparent 32px 70px),linear-gradient(transparent 33%,#147a8e88 58%,#075467 100%)}
 footer{position:relative;flex:none;padding-top:12px;gap:4px;background:linear-gradient(transparent,#102d3cf0 36%)}
-.compass{width:min(97%,536px);height:clamp(138px,29.5svh,212px);position:relative}
+.compass{width:min(100%,600px);height:clamp(154px,33svh,238px);position:relative}
 .compass svg{position:static;display:block}
-.controls{gap:clamp(48px,14vw,120px)}
+.controls #left{margin-right:auto}
+.controls #right{margin-left:auto}
 .float{--size:clamp(54px,8vw,68px);position:absolute;left:57%;top:51%;width:var(--size);transform:translate(-50%,-7%);pointer-events:none;text-align:center}
 .float-ripple{position:absolute;left:50%;bottom:11%;width:117%;height:13%;transform:translateX(-50%);border:1px solid #cffef6ac;border-radius:50%;box-shadow:0 0 0 4px #def9f414}
 .float-art{height:auto;width:100%;display:block;position:relative;animation:bob-lake 2.2s ease-in-out infinite;filter:drop-shadow(0 2px 3px #09253499)}
@@ -49,7 +50,7 @@ body[data-phase=landed] .float-art{filter:drop-shadow(0 0 8px #ffdd77)}
 body[data-phase=landed] .float-value{background:#684b1b;color:#fff9d9}
 @keyframes bob-lake{50%{transform:translateY(2px) rotate(2deg)}}
 @media(prefers-reduced-motion:reduce){.float-art{animation:none}}
-@media(max-height:540px){header{padding:7px 12px}h1{font-size:24px}footer{padding-top:4px;gap:2px}.compass{height:105px}.controls :is(#left,#right){width:63px}.controls button{min-height:42px}.float{--size:46px}.lagoon{min-height:110px;flex-basis:110px}}
+@media(max-height:540px){header{padding:7px 12px}h1{font-size:24px}footer{padding-top:4px;gap:2px}.compass{height:118px}.controls :is(#left,#right){width:63px}.controls button{min-height:42px}.float{--size:46px}.lagoon{min-height:110px;flex-basis:110px}}
 </style><main><header><div><button type="button" id="exitFishing">‹ Mini Games</button><h1>Moonwater Fishing</h1><span id="best"></span><span id="dailyCasts" style="display:block"></span></div><button id="basket">Fish basket</button></header><details id="cup"><summary id="cupTitle"></summary><ol id="ranks"></ol><p id="cupPrize">First prize · Moonwater Pearl</p></details><div class="lagoon">
  <div class="water"></div>
  <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M3 100 Q18 31 34 10" fill="none" stroke="#d9b36c" stroke-width="3" vector-effect="non-scaling-stroke"/><path d="M34 10 Q43 39 57 51" fill="none" stroke="#fff4cd" stroke-width="1.3" vector-effect="non-scaling-stroke"/></svg>
