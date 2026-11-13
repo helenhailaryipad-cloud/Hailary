@@ -5857,17 +5857,13 @@ body[data-screen=fishing] #stage img{-webkit-user-drag:none}
 #stage .pet-results small{display:block}
 
 body[data-screen=home] #stage .hero-visual > .avatar {
-  scale:.8; transform-origin:center bottom;
+  scale:.48; transform-origin:center bottom;
 }
 body[data-screen=home] #stage .hero-visual > .mounted-reina {
-  scale:.60;
+  scale:.36;
 }
 body[data-screen=home] #stage .hero-visual .mount-toggle {
   position:absolute; right:max(10px,env(safe-area-inset-right)); bottom:12px; z-index:8;
   pointer-events:auto; min-height:44px; padding:6px 12px;
   color:#fff2ca; background:#294d42; border:2px solid #dcb96c; border-radius:10px;
 }
-#modal .mount-choice {display:flex;align-items:center;gap:12px;width:100%;text-align:left;}
-#modal .mount-choice img {width:60px;height:60px;object-fit:contain;}
-#modal .mount-choice span {flex:1;}
-#modal .mount-choice small {display:block;}
