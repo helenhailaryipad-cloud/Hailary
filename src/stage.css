@@ -5706,3 +5706,5 @@ body[data-screen=collection] #stage .collection-grid .art > .raised-wing-pair { 
 #stage #modal.gear-modal .gear-detail-section {padding:8px 12px;margin:0}
 #stage #modal.gear-modal .gear-detail-section h3 {font-size:16px;margin:4px 0}
 #stage #modal.gear-modal .gear-stat-line {font-size:15px;min-height:24px;padding:2px 0}
+
+.empty-gear-slot{display:grid;place-items:center;width:100%;max-width:var(--stage-cell,64px);aspect-ratio:1;border:1px solid #d6c79c;border-radius:9px;background:#30443ec9;color:#fff7dc;font:600 11px/1.15 Georgia;text-align:center;overflow-wrap:anywhere}
