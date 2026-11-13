@@ -1,12 +1,9 @@
 <!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Moonwater Fishing</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#102344;color:#fff4d6;font:17px Georgia,serif}main{position:relative;isolation:isolate;margin:auto;max-width:1050px;min-height:100svh;overflow:hidden;background:linear-gradient(180deg,#162456ad,#25387260 42%,#067487 58%,#084558 78%,#142b40),url(assets/sunny-garden.webp) center 30%/cover}header,footer{position:relative;z-index:2;padding:clamp(16px,4vw,34px)}header{display:flex;justify-content:space-between;align-items:start;gap:12px;text-shadow:0 2px 5px #091833}h1{margin:0;font-size:clamp(24px,6vw,46px)}button{font:700 17px Georgia;color:#342113;border:1px solid #ffe7ac;background:linear-gradient(#ffdf95,#dca651);border-radius:12px;padding:11px 18px;min-height:44px;touch-action:manipulation;cursor:pointer}button:disabled{opacity:.55}.water{position:absolute;top:50%;bottom:0;width:100%;background:repeating-radial-gradient(ellipse at 50% 0%,transparent 0 27px,#a2f6e921 30px,transparent 32px 62px);pointer-events:none}.float{position:absolute;left:55%;top:53%;width:12px;height:22px;border-radius:60%;background:linear-gradient(#fff4b8 48%,#ed684b 50%);box-shadow:0 3px 12px #c6fff8;animation:bob 2s ease-in-out infinite}.float:after{content:'';position:absolute;left:-16px;top:16px;width:43px;height:8px;border:1px solid #c7f4e9;border-radius:50%}@keyframes bob{50%{transform:translateY(4px)}}footer{position:absolute;bottom:0;width:100%;text-align:center;background:linear-gradient(transparent,#081d34ed 36%)}.meter{position:relative;margin:15px auto;width:min(300px,82%);height:14px;border-radius:9px;background:#17283a;border:1px solid #ecc789}.zone{position:absolute;width:30%;height:100%;background:#63dea1;border-radius:8px}.needle{position:absolute;top:-6px;width:5px;height:24px;background:#fff3ca;box-shadow:0 0 7px #ffe695;border-radius:4px}.controls{display:flex;justify-content:center;align-items:center;gap:14px}.controls button{min-width:54px}.status{margin:0;min-height:2.4em;text-shadow:0 2px 4px #071323}dialog{max-width:85%;width:320px;max-height:72svh;overflow:auto;color:#fff2cc;background:#14394b;border:1px solid #dbc18a;border-radius:15px;padding:22px;text-align:center}dialog::backdrop{background:#08132463}dialog h2{margin:0 0 12px}svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}button:focus-visible{outline:3px solid white}
+*{box-sizing:border-box}body{margin:0;background:#102344;color:#fff4d6;font:17px Georgia,serif}main{position:relative;isolation:isolate;margin:auto;max-width:1050px;min-height:100svh;overflow:hidden;background:linear-gradient(180deg,#162456ad,#25387260 42%,#067487 58%,#084558 78%,#142b40),url(assets/sunny-garden.webp) center 30%/cover}header,footer{position:relative;z-index:2;padding:clamp(16px,4vw,34px)}header{display:flex;justify-content:space-between;align-items:start;gap:12px;text-shadow:0 2px 5px #091833}h1{margin:0;font-size:clamp(24px,6vw,46px)}button{font:700 17px Georgia;color:#342113;border:1px solid #ffe7ac;background:linear-gradient(#ffdf95,#dca651);border-radius:12px;padding:11px 18px;min-height:44px;touch-action:manipulation;cursor:pointer}button:disabled{opacity:.55}.water{position:absolute;top:50%;bottom:0;width:100%;background:repeating-radial-gradient(ellipse at 50% 0%,transparent 0 27px,#a2f6e921 30px,transparent 32px 62px);pointer-events:none}footer{position:absolute;bottom:0;width:100%;text-align:center;background:linear-gradient(transparent,#081d34ed 36%)}.controls{display:flex;justify-content:center;align-items:center;gap:14px}.controls button{min-width:54px}.status{margin:0;min-height:2.4em;text-shadow:0 2px 4px #071323}dialog{max-width:85%;width:320px;max-height:72svh;overflow:auto;color:#fff2cc;background:#14394b;border:1px solid #dbc18a;border-radius:15px;padding:22px;text-align:center}dialog::backdrop{background:#08132463}dialog h2{margin:0 0 12px}svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}button:focus-visible{outline:3px solid white}
 #cup{position:relative;z-index:1;margin:0 clamp(16px,4vw,34px);width:fit-content;max-width:85%;background:#102e47ed;border:1px solid #ae9868;border-radius:10px;padding:9px 12px;font:15px Georgia}#cup summary{cursor:pointer}#cup ol{padding-left:23px;margin:8px 0 0}#cup li{padding:2px}#cup .self{color:#ffe49d}@media(max-height:450px){#cup{max-height:22vh;overflow:auto}}
 footer{padding:10px max(12px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom));background:linear-gradient(transparent,#102d3cee 16%);display:grid;justify-items:center;gap:6px}
 footer .status{min-height:0;font-size:clamp(15px,2.1vw,20px);line-height:1.2;margin:4px 0}
-.meter{width:min(88%,510px);height:38px;margin:5px auto;border:2px solid #e3c78c;background:linear-gradient(#163749,#235665);box-shadow:inset 0 2px 5px #0c2436;border-radius:24px;touch-action:none}
-.zone{background:linear-gradient(90deg,#268a70,#71e2ac 50%,#268a70);border-inline:2px solid #b6ffd2;border-radius:20px}
-.needle{width:23px;height:23px;top:50%;transform:translate(-50%,-50%);border-radius:50%;border:2px solid #ffe4a5;background:radial-gradient(circle at 36% 28%,white,#fff4d8 36%,#d9aa5a 75%);box-shadow:0 1px 5px #203a38;pointer-events:none}
 footer{
  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none
 }
@@ -17,40 +14,19 @@ footer{
  border:2px solid #efcb88;border-radius:18px;font:700 clamp(19px,3vw,25px)/1.12 Georgia,serif;
  box-shadow:inset 0 1px #ffe7b9,0 3px 0 #463626,0 4px 12px #09374799
 }
-.controls :is(#left,#right,#hold){flex:1;color:#fff6d6;background:linear-gradient(#2c7869,#174a44)}
-.controls :is(#left,#right)::before{
- content:"";width:.55em;height:.55em;flex:none;border:solid #fff2c1;border-width:0 4px 4px 0;
- transform:rotate(135deg)
-}
-.controls #right::before{order:1;transform:rotate(-45deg)}
+ .controls #hold{color:#fff6d6;background:linear-gradient(#2c7869,#174a44)}
 .controls #cast{min-width:min(220px,90%)}
-.controls button:active:not(:disabled){transform:translateY(2px);box-shadow:inset 0 2px 5px #15392e77}
-.controls button[hidden],.controls:not(:has(button:not([hidden]),#catchMedal:not([hidden]))){display:none}
-.controls button:disabled{opacity:.85}
+.controls button[hidden],.controls:not(:has(button:not([hidden]))){display:none}
+.controls :is(#left,#right){
+ width:clamp(62px,9vw,82px);min-height:0;aspect-ratio:1;padding:0;border:0;border-radius:50%;
+ background-image:url("assets/generated/fishing-design-compass.webp");background-size:410% auto;
+ background-position:22.9% 91.8%;box-shadow:0 2px 8px #071f34b0
+}
+.controls #right{background-position-x:75.8%}
+.controls button:active:not(:disabled){transform:translateY(2px);filter:brightness(1.12)}
 .mode-choice{font-size:15px;display:flex;align-items:center;gap:8px}
-#catchMedal{
- --size:clamp(72px,10vw,94px);
- position:relative;flex:0 0 var(--size);width:var(--size);height:var(--size);
- border:2px solid #ffe4a5;border-radius:50%;overflow:hidden;
- background:radial-gradient(ellipse at 34% 22%,#427879,#173d4b 64%,#0c2836);
- box-shadow:0 0 0 1px #765029,inset 0 0 0 3px #716044,inset 0 0 0 4px #e7bd72,0 2px 8px #072b3a;
- pointer-events:none
-}
-#catchMedal svg{inset:6%;width:88%;height:88%}
-#catchMedal .gold-layer{position:absolute;inset:0;background:linear-gradient(to top,#b07b3c88,#f5c66c55);clip-path:inset(calc(100% - var(--catch-fill,0%)) 0 0)}
-#catchPercent{
- position:absolute;bottom:9%;left:0;width:100%;font:700 clamp(14px,2vw,18px)/1 Georgia,serif;
- font-variant-numeric:tabular-nums;color:#fff7d9;text-shadow:0 1px 3px #102c32,0 0 3px #102c32
-}
-body[data-phase=landed] #catchMedal{box-shadow:0 0 16px #ffe49b,inset 0 0 0 3px #bf9858;animation:catch-glow .55s ease-out}
-@keyframes catch-glow{40%{transform:scale(1.07);box-shadow:0 0 25px #ffde83,inset 0 0 0 3px #ffe1a0}}
-@media(prefers-reduced-motion:reduce){body[data-phase=landed] #catchMedal{animation:none}}
-@media(max-width:370px){.controls{gap:8px}.controls :is(#left,#right){padding:8px;gap:7px}}
 .mode-choice select{background:#1f484d;color:#fff1cd;font:inherit;border:1px solid #ceb47d;border-radius:8px;padding:4px 10px;min-height:44px}
 body:not([data-phase=idle]) .mode-choice{display:none}
-body[data-mode=drag] .meter{cursor:ew-resize;height:54px}
-.needle{width:29px;height:29px}
-@media(max-height:440px){header{padding:8px 14px}h1{font-size:22px}footer{gap:3px}.meter{margin:2px auto}.controls button{min-height:50px}.mode-choice select{min-height:40px}}
 .fishing-settings{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px 14px}
 body:not([data-phase=idle]) .fishing-settings{display:none}
 #viewDesigns,.gallery-bar button{font-size:15px;background:#214b49;color:#fff0cc;padding:5px 12px}
@@ -63,30 +39,71 @@ body:not([data-phase=idle]) .fishing-settings{display:none}
 #designDetail{display:block;width:100%;max-height:calc(90dvh - 72px);object-fit:contain}
 #designGallery [hidden]{display:none}
 #caughtArt:not([hidden]){display:block;width:100%;height:min(190px,30svh);object-fit:contain;background:#12343d;border-radius:8px;margin-bottom:10px}
-</style><main><header><div><h1>Moonwater Fishing</h1><span id="best"></span></div><button id="basket">Fish basket</button></header><details id="cup"><summary id="cupTitle"></summary><ol id="ranks"></ol><p id="cupPrize">First prize · Moonwater Pearl</p></details><div class="water"></div><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M8 74 Q20 49 34 36" fill="none" stroke="#d9b36c" stroke-width=".62"/><path d="M34 36 Q42 45 55.6 54" fill="none" stroke="#fff4cd" stroke-width=".14"/></svg><div class="float"></div><footer><p class="status" id="status" role="status">Cast your line into the lagoon.</p><div class="meter" id="rail"><span class="zone"></span><i class="needle"></i></div>
-<div class="controls">
- <button id="left" aria-label="Pull left">Left</button><button id="cast">Cast line</button>
- <div id="catchMedal" role="progressbar" aria-label="Catch progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden>
-  <svg viewBox="0 0 80 80" aria-hidden="true" focusable="false">
+main{display:flex;flex-direction:column}
+header{padding-bottom:8px}
+#cup{flex:none}
+.lagoon{position:relative;flex:1 0 125px;min-height:125px}
+.lagoon .water{inset:16% 0 0;background:repeating-radial-gradient(ellipse at 57% 68%,transparent 0 29px,#b3fffa1b 30px,transparent 32px 70px),linear-gradient(transparent 33%,#147a8e88 58%,#075467 100%)}
+footer{position:relative;flex:none;padding-top:12px;gap:4px;background:linear-gradient(transparent,#102d3cf0 36%)}
+.compass{width:min(90%,420px);height:clamp(108px,23svh,165px);touch-action:none;position:relative}
+.compass svg{position:static;display:block}
+body[data-mode=drag] .compass{cursor:ew-resize}
+.controls{gap:clamp(48px,14vw,120px)}
+.float{--size:clamp(54px,8vw,68px);position:absolute;left:57%;top:51%;width:var(--size);transform:translate(-50%,-7%);pointer-events:none;text-align:center}
+.float-ripple{position:absolute;left:50%;bottom:11%;width:117%;height:13%;transform:translateX(-50%);border:1px solid #cffef6ac;border-radius:50%;box-shadow:0 0 0 4px #def9f414}
+.float-art{height:auto;width:100%;display:block;position:relative;animation:bob-lake 2.2s ease-in-out infinite;filter:drop-shadow(0 2px 3px #09253499)}
+#floatLevel{transform-box:fill-box;transform-origin:center bottom;transform:scaleY(var(--float-fill,0))}
+.float-value{display:block;position:absolute;left:50%;top:103%;transform:translateX(-50%);min-width:3.3em;padding:.15em .45em .2em;color:#fff5c8;background:#10383feF;border:1px solid #e6c778;border-radius:100px;font:bold clamp(15px,2.1vw,20px)/1.03 Georgia;font-variant-numeric:tabular-nums;text-shadow:0 1px #0a2529}
+body:is([data-phase=idle],[data-phase=wait]) .float-value{display:none}
+body[data-phase=landed] .float-art{filter:drop-shadow(0 0 8px #ffdd77)}
+body[data-phase=landed] .float-value{background:#684b1b;color:#fff9d9}
+@keyframes bob-lake{50%{transform:translateY(2px) rotate(2deg)}}
+@media(prefers-reduced-motion:reduce){.float-art{animation:none}}
+@media(max-height:540px){header{padding:7px 12px}h1{font-size:24px}footer{padding-top:4px;gap:2px}.compass{height:82px}.controls :is(#left,#right){width:48px}.controls button{min-height:42px}.float{--size:46px}.lagoon{min-height:110px;flex-basis:110px}}
+</style><main><header><div><h1>Moonwater Fishing</h1><span id="best"></span></div><button id="basket">Fish basket</button></header><details id="cup"><summary id="cupTitle"></summary><ol id="ranks"></ol><p id="cupPrize">First prize · Moonwater Pearl</p></details><div class="lagoon">
+ <div class="water"></div>
+ <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M3 100 Q18 31 34 10" fill="none" stroke="#d9b36c" stroke-width="3" vector-effect="non-scaling-stroke"/><path d="M34 10 Q43 39 57 51" fill="none" stroke="#fff4cd" stroke-width="1.3" vector-effect="non-scaling-stroke"/></svg>
+ <div class="float" id="float" role="progressbar" aria-label="Catch progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+  <span class="float-ripple" aria-hidden="true"></span>
+  <svg class="float-art" viewBox="0 0 64 86" aria-hidden="true">
    <defs>
-    <linearGradient id="fishGold" x2=".25" y2="1"><stop stop-color="#fff6bd"/><stop offset=".54" stop-color="#ffc461"/><stop offset="1" stop-color="#d38a34"/></linearGradient>
-    <g id="moonfin">
-     <path d="M24 35 Q32 23 41 24 L37 16 Q49 17 55 25 Q65 26 71 34 Q65 46 51 49 L39 55 L41 49 Q31 48 23 41 Q16 46 9 45 L13 36 L9 26 Q18 28 24 35Z" stroke-linejoin="round" stroke-width="1.6"/>
-     <path d="M54 29 Q49 36 54 42 M31 37 Q38 33 42 34 L36 41" fill="none" stroke="#29484c" stroke-width="1.8" stroke-linecap="round"/>
-     <circle cx="60" cy="32" r="2.3" fill="#15343b" stroke="none"/>
-    </g>
+    <linearGradient id="brass"><stop stop-color="#875524"/><stop offset=".22" stop-color="#f8d88c"/><stop offset=".46" stop-color="#fff1b8"/><stop offset=".67" stop-color="#d29742"/><stop offset="1" stop-color="#70451e"/></linearGradient>
+    <linearGradient id="glass" x2=".85" y2="1"><stop stop-color="#608d9a"/><stop offset=".37" stop-color="#234f63"/><stop offset="1" stop-color="#112e42"/></linearGradient>
+    <linearGradient id="liquid" x2=".2" y2="1"><stop stop-color="#c0ffd4"/><stop offset=".12" stop-color="#70edbd"/><stop offset=".57" stop-color="#20bd9d"/><stop offset="1" stop-color="#008875"/></linearGradient>
+    <clipPath id="flask"><path d="M32 24C18 24 11 38 12 51c1 13 11 22 20 26 9-4 19-13 20-26 1-13-6-27-20-27Z"/></clipPath>
    </defs>
-   <use href="#moonfin" fill="#698589" stroke="#afc2bb"/>
-  </svg>
-  <div class="gold-layer" aria-hidden="true">
-   <svg viewBox="0 0 80 80" focusable="false"><use href="#moonfin" fill="url(#fishGold)" stroke="#ffedb8"/></svg>
-  </div>
-  <span id="catchPercent" aria-hidden="true">0%</span>
+   <path d="M32 25V7" stroke="#674a24" stroke-width="5"/><path d="M32 25V7" stroke="#f1cb75" stroke-width="2.8"/><circle cx="32" cy="6" r="3.5" fill="#fff6cd" stroke="#986522" stroke-width="1.5"/>
+   <path d="M32 20C15 20 7 36 8 51c1 16 14 26 24 31 10-5 23-15 24-31 1-15-7-31-24-31Z" fill="url(#brass)" stroke="#6f522e" stroke-width="1.4"/>
+   <g clip-path="url(#flask)"><rect x="10" y="24" width="44" height="54" fill="url(#glass)"/><rect id="floatLevel" x="10" y="24" width="44" height="54" fill="url(#liquid)"/>
+   <path d="M23 31Q16 38 17 46" fill="none" stroke="#efffff" stroke-opacity=".7" stroke-width="2.8" stroke-linecap="round"/><path d="M46 45v2m0 7v2m-3 5v2" stroke="#fff2be" stroke-width="2.6" stroke-linecap="round"/></g>
+   <path d="m32 19 5 5-5 5-5-5Z" fill="#7ee7bd" stroke="#f4d58a"/>
+  </svg><span class="float-value" id="catchPercent" aria-hidden="true">0%</span>
  </div>
- <button id="right" aria-label="Pull right">Right</button>
- <button id="hold" hidden>Hold to reel right</button>
 </div>
-
+<footer><p class="status" id="status" role="status">Cast your line into the lagoon.</p>
+<div class="compass" id="rail">
+ <svg viewBox="35 -12 250 137" id="dial" aria-hidden="true">
+  <defs>
+   <linearGradient id="rim" x2="0" y2="1"><stop stop-color="#fff2a8"/><stop offset=".35" stop-color="#d7a449"/><stop offset=".62" stop-color="#9d682d"/><stop offset="1" stop-color="#f9d487"/></linearGradient>
+   <linearGradient id="night" x2=".45" y2="1"><stop stop-color="#355378"/><stop offset=".45" stop-color="#162f54"/><stop offset="1" stop-color="#0d2544"/></linearGradient>
+   <linearGradient id="jade" x2=".8" y2="1"><stop stop-color="#16865a"/><stop offset=".5" stop-color="#45cf88"/><stop offset="1" stop-color="#0e956b"/></linearGradient>
+   <radialGradient id="pearl" cx=".35" cy=".3" r=".75"><stop stop-color="#fff"/><stop offset=".35" stop-color="#fff4da"/><stop offset=".7" stop-color="#d6b6be"/><stop offset="1" stop-color="#947d8e"/></radialGradient>
+   <path id="dialArc" d="M58.27 86.37 A104 104 0 0 1 261.73 86.37" pathLength="100"/>
+   <path id="star" d="m0-4.2 1 3.2 3.2 1-3.2 1L0 4.2l-1-3.2-3.2-1 3.2-1Z"/>
+   <g id="crescent"><path d="M62 83q-18-1-15-19-15 19 2 30 9 5 17-3Z" fill="url(#pearl)" stroke="#f5ce81" stroke-width="1.7"/></g>
+  </defs>
+  <g fill="none"><use href="#dialArc" stroke="#67481e" stroke-width="30"/><use href="#dialArc" stroke="url(#rim)" stroke-width="27"/><use href="#dialArc" stroke="url(#night)" stroke-width="21"/><use href="#dialArc" class="zone" stroke="url(#jade)" stroke-width="21" stroke-dasharray="0 35 30 100"/></g>
+  <g fill="#f6d780"><use href="#star" x="68" y="60"/><use href="#star" x="97" y="27"/><use href="#star" x="125" y="11"/><use href="#star" x="195" y="11"/><use href="#star" x="223" y="27"/><use href="#star" x="252" y="60"/></g>
+  <use href="#crescent"/><use href="#crescent" transform="translate(320 0) scale(-1 1)"/>
+  <path d="M63 90Q98 64 130 87Q146 99 160 94Q174 99 190 87Q222 64 257 90Q222 74 193 93Q174 108 160 101Q146 108 127 93Q98 74 63 90Z" fill="#227867" stroke="url(#rim)" stroke-width="2"/>
+  <g transform="translate(0 9)"><g class="needle"><path d="M160 1 169 94 160 110 151 94Z" fill="url(#rim)" stroke="#755024" stroke-width="1.4"/><path d="m160 5 .4 94-7-6Z" fill="#ffebae"/></g>
+  <circle cx="160" cy="99" r="13" fill="url(#rim)" stroke="#80602c"/><circle cx="160" cy="99" r="9.4" fill="url(#pearl)" stroke="#a78962"/></g>
+ </svg>
+</div>
+<div class="controls">
+ <button id="left" aria-label="Pull left" title="Pull left" hidden></button><button id="cast">Cast line</button>
+ <button id="right" aria-label="Pull right" title="Pull right" hidden></button><button id="hold" hidden>Hold to reel right</button>
+</div>
 <div class="fishing-settings"><label class="mode-choice">Controls <select id="controlMode"><option value="arrows">Twin arrows</option><option value="drag">Pearl slider</option><option value="hold">Hold &amp; release</option></select></label><button id="viewDesigns" type="button">View 4 designs</button></div></footer></main><dialog><img id="caughtArt" alt="" hidden><h2 id="title"></h2><p id="message"></p><button id="openCatchCard" type="button" hidden>View card</button> <button id="close">Continue</button></dialog>
 <dialog id="designGallery" aria-labelledby="designTitle">
  <div class="gallery-bar"><button id="allDesigns" type="button" hidden>‹ All designs</button><h2 id="designTitle">Fishing designs</h2><button id="doneDesigns" type="button">Done</button></div>
@@ -194,19 +211,24 @@ function popup(title,message,cardId){
  if(fish)art.src=MoonwaterFish.artUrl(fish);
  el('openCatchCard').hidden=!cardId;el('openCatchCard').onclick=()=>{dialog.close();album.open(cardId)};el('title').textContent=title;el('message').textContent=message;dialog.showModal()}
 let phase='idle',pos=.5,target=.5,progress=0,time=0,last=0,seed=0;
-const catchMedal=el('catchMedal'),catchPercent=el('catchPercent');
+const lakeFloat=el('float'),catchPercent=el('catchPercent');
+const dial=el('dial'),band=dial.querySelector('.zone'),needle=dial.querySelector('.needle');
 function renderCatch(){
  const percent=Math.floor(progress*100);
- catchMedal.style.setProperty('--catch-fill',progress*100+'%');
- if(catchMedal.getAttribute('aria-valuenow')===String(percent))return;
- catchMedal.setAttribute('aria-valuenow',String(percent));
+ if(lakeFloat.getAttribute('aria-valuenow')===String(percent))return;
+ lakeFloat.style.setProperty('--float-fill',String(progress));
+ lakeFloat.setAttribute('aria-valuenow',String(percent));
  catchPercent.textContent=percent+'%';
+}
+function renderDial(){
+ band.setAttribute('stroke-dasharray','0 '+((target-.15)*100)+' 30 100');
+ needle.setAttribute('transform','rotate('+((pos-.5)*156)+' 160 99)');
 }
 const modeChoice=el('controlMode'),rail=el('rail');
 const guidance={
- arrows:'Move the pearl into the green band. Tap or hold an arrow.',
- drag:'Slide the pearl with your finger into the green band.',
- hold:'Hold to move right. Release to drift left. Stay in green.'
+ arrows:'Use the arrows to keep the needle in green.',
+ drag:'Slide the needle into the green arc.',
+ hold:'Hold for right, release for left. Keep the needle in green.'
 };
 let held=false,dragPointer=null,arrowPointer=null,arrowDirection=0,repeatAfter=0;
 const fishingFooter=document.querySelector('footer');
@@ -221,7 +243,7 @@ function controls(){
  document.body.dataset.mode=mode;document.body.dataset.phase=phase;
  el('cast').disabled=phase!=='idle';
  const showingCatch=phase==='reel'||phase==='landed';
- catchMedal.hidden=!showingCatch;
+ lakeFloat.setAttribute('aria-hidden',String(!showingCatch));
  el('cast').hidden=showingCatch;
  el('left').hidden=el('right').hidden=mode!=='arrows'||!showingCatch;
  el('left').disabled=el('right').disabled=phase!=='reel';
@@ -232,8 +254,10 @@ function controls(){
 }
 modeChoice.onchange=()=>{try{localStorage.setItem('wonder-fishing-control',modeChoice.value)}catch{}controls()};
 function movePearl(event){
- const bounds=rail.getBoundingClientRect();
- pos=Math.max(.02,Math.min(.98,(event.clientX-bounds.left)/bounds.width));
+ const point=dial.createSVGPoint();point.x=event.clientX;point.y=event.clientY;
+ const local=point.matrixTransform(dial.getScreenCTM().inverse());
+ const angle=Math.atan2(local.x-160,Math.max(1,108-local.y))*180/Math.PI;
+ pos=Math.max(.02,Math.min(.98,.5+angle/156));
 }
 rail.onpointerdown=event=>{
  if(modeChoice.value!=='drag'||phase!=='reel'||dragPointer!==null)return;
@@ -264,11 +288,10 @@ function finish(won){
  best();
  el('status').textContent='Fish caught!';
  setTimeout(()=>{
-  phase='idle';controls();
   const copy=old.count===0?'New card!':'Card × '+(old.count+1);
   const weight=kg>old.kg?'New personal record!':'Best '+old.kg.toFixed(2)+' kg';
   popup(name,kg.toFixed(2)+' kg · '+weight+' · '+copy+' · +'+bonus.amount+' '+bonus.label,id);
- },650);
+ },1100);
 }
 function tick(now){
  if(document.hidden){last=now;requestAnimationFrame(tick);return}
@@ -279,12 +302,12 @@ function tick(now){
  pos=Math.max(.02,Math.min(.98,pos+dt*drift));
  if(arrowDirection&&now>=repeatAfter){pull(arrowDirection);repeatAfter=now+150}
  progress=Math.max(0,Math.min(1,progress+(Math.abs(target-pos)<.15?.32:-.11)*dt));
- document.querySelector('.zone').style.left=(target-.15)*100+'%';document.querySelector('.needle').style.left=pos*100+'%';renderCatch();
+ renderDial();renderCatch();
  if(progress>=1||time>=15){finish(progress>=1);return}
  }
  requestAnimationFrame(tick)
 }
-el('cast').onclick=()=>{if(phase!=='idle')return;const t=eventTime();castDay=t.live?t.day:'';phase='wait';time=progress=0;pos=.5;seed=Math.random()*6;document.querySelector('.needle').style.left='50%';document.querySelector('.zone').style.left='35%';last=performance.now();renderCatch();el('status').textContent='Watching the float…';el('cast').textContent='Line cast';controls();requestAnimationFrame(tick)};
+el('cast').onclick=()=>{if(phase!=='idle')return;const t=eventTime();castDay=t.live?t.day:'';phase='wait';time=progress=0;pos=target=.5;seed=Math.random()*6;renderDial();last=performance.now();renderCatch();el('status').textContent='Watching the float…';el('cast').textContent='Line cast';controls();requestAnimationFrame(tick)};
 function pull(direction){if(phase==='reel')pos=Math.max(.02,Math.min(.98,pos+.073*direction))}
 for(const [id,direction] of [['left',-1],['right',1]]){
  const button=el(id);
@@ -304,5 +327,9 @@ el('basket').onclick=()=>{
  const total=Object.values(records).reduce((count,r)=>count+r.count,0);
  popup('Fish basket',total+' caught · Moonwater Pearls: '+pearls.length+'. See every species in Cards.');
 };
-el('close').onclick=()=>dialog.close();best();controls();document.querySelector('.zone').style.left='35%';document.querySelector('.needle').style.left='50%';
+dialog.addEventListener('close',()=>{
+ if(phase==='landed'){phase='idle';controls()}
+ if(phase==='idle'){progress=0;pos=target=.5;renderCatch();renderDial()}
+});
+el('close').onclick=()=>dialog.close();best();controls();renderDial();
 </script></html>
