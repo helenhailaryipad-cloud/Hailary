@@ -34,14 +34,53 @@ body:not([data-phase=idle]) .mode-choice,body:not([data-phase=reel]) .catch-prog
 body[data-mode=drag] .meter{cursor:ew-resize;height:54px}
 .needle{width:29px;height:29px}
 @media(max-height:440px){header{padding:8px 14px}h1{font-size:22px}footer{gap:3px}.meter{margin:2px auto}.controls button{min-height:50px}.mode-choice select{min-height:40px}}
+.fishing-settings{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px 14px}
+body:not([data-phase=idle]) .fishing-settings{display:none}
+#viewDesigns,.gallery-bar button{font-size:15px;background:#214b49;color:#fff0cc;padding:5px 12px}
+#designGallery{width:min(760px,96vw);max-width:96vw;max-height:95dvh;margin:auto;padding:12px;box-sizing:border-box;background:#193c43}
+.gallery-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+.gallery-bar h2{font-size:clamp(16px,3vw,24px);margin:0;text-align:left}
+.gallery-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.gallery-grid button{display:grid;gap:3px;padding:2px 2px 5px;min-width:0;overflow:hidden;background:#25514b;color:#fff1cd;font-size:clamp(13px,2.2vw,17px);border-radius:8px}
+.gallery-grid img{width:100%;height:min(27dvh,230px);object-fit:contain;display:block;background:#10323a}
+#designDetail{display:block;width:100%;max-height:calc(90dvh - 72px);object-fit:contain}
+#designGallery [hidden]{display:none}
 </style><main><header><div><h1>Moonwater Fishing</h1><span id="best"></span></div><button id="basket">Fish basket</button></header><details id="cup"><summary id="cupTitle"></summary><ol id="ranks"></ol><p id="cupPrize">First prize · Moonwater Pearl</p></details><div class="water"></div><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M8 74 Q20 49 34 36" fill="none" stroke="#d9b36c" stroke-width=".62"/><path d="M34 36 Q42 45 55.6 54" fill="none" stroke="#fff4cd" stroke-width=".14"/></svg><div class="float"></div><footer><p class="status" id="status" role="status">Cast your line into the lagoon.</p><div class="meter" id="rail"><span class="zone"></span><i class="needle"></i></div>
 <div class="controls">
  <button id="left" aria-label="Pull left">Left</button><button id="cast">Cast line</button><button id="right" aria-label="Pull right">Right</button>
  <button id="hold" hidden>Hold to reel right</button>
 </div>
 <label class="catch-progress">Catch <progress id="fill" max="1" value="0"></progress></label>
-<label class="mode-choice">Controls <select id="controlMode"><option value="arrows">Twin arrows</option><option value="drag">Pearl slider</option><option value="hold">Hold &amp; release</option></select></label></footer></main><dialog><h2 id="title"></h2><p id="message"></p><button id="close">Continue</button></dialog><script>
+<div class="fishing-settings"><label class="mode-choice">Controls <select id="controlMode"><option value="arrows">Twin arrows</option><option value="drag">Pearl slider</option><option value="hold">Hold &amp; release</option></select></label><button id="viewDesigns" type="button">View 4 designs</button></div></footer></main><dialog><h2 id="title"></h2><p id="message"></p><button id="close">Continue</button></dialog>
+<dialog id="designGallery" aria-labelledby="designTitle">
+ <div class="gallery-bar"><button id="allDesigns" type="button" hidden>‹ All designs</button><h2 id="designTitle">Fishing designs</h2><button id="doneDesigns" type="button">Done</button></div>
+ <div class="gallery-grid" id="designGrid"></div><img id="designDetail" hidden alt="">
+</dialog><script>
 const el=id=>document.getElementById(id),dialog=document.querySelector('dialog');
+const designs=[['А','Pearl track','pearl'],['Б','Moon compass','compass'],['В','Feather float','float'],['Г','Golden reel','reel']];
+const gallery=el('designGallery'),designGrid=el('designGrid'),detailImage=el('designDetail');
+let selectedDesignButton;
+function showDesignGrid(){
+ designGrid.hidden=false;detailImage.hidden=true;el('allDesigns').hidden=true;
+ el('designTitle').textContent='Fishing designs';
+}
+el('viewDesigns').onclick=()=>{
+ if(!designGrid.children.length){
+  for(const [letter,name,file] of designs){
+   const button=document.createElement('button'),img=document.createElement('img');
+   img.src='assets/generated/fishing-design-'+file+'.webp';img.alt='';
+   button.type='button';button.append(img,letter+' · '+name);
+   button.onclick=()=>{
+    selectedDesignButton=button;detailImage.src=img.src;detailImage.alt=name;detailImage.hidden=false;
+    el('designTitle').textContent=letter+' · '+name;designGrid.hidden=true;el('allDesigns').hidden=false;el('allDesigns').focus();
+   };
+   designGrid.append(button);
+  }
+ }
+ showDesignGrid();gallery.showModal();
+};
+el('allDesigns').onclick=()=>{showDesignGrid();selectedDesignButton?.focus()};
+el('doneDesigns').onclick=()=>gallery.close();
 const fish=[['Silver Minnow',.2,1.6],['Moonfin Trout',1.3,8],['Jade Carp',3,16],['Star Sailfish',14,75]];
 const key='wonder-fishing-records-v1';let records={};
 try{records=JSON.parse(localStorage.getItem(key))||{}}catch{}
