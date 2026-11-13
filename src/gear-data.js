@@ -50,10 +50,18 @@ const advanced={accuracy,dodge,critDamage,critResistance,shieldHealth,elementalA
 return {attack,defense,health,crit,speed,penetration,damageBonus,damageReduction,block,expBonus,...advanced,level:lv,power:Math.floor(attack*5+defense*4+health/3+crit*10+speed+penetration*3+damageBonus*20+damageReduction*25+block*15+attributePower({...advanced,accuracy:accuracy-100,critDamage:critDamage-165}))}}
 function cost(entry,action){const t=catalog[entry.template];if(action==='enhance')return entry.enhance>=20?null:{gold:150+entry.enhance*100,stone:2+Math.floor(entry.enhance/4)};if(action==='star')return entry.stars>=5?null:{gold:200*(entry.stars+1),shard:3*(entry.stars+1)};if(action==='gem')return entry.gems>=3?null:{gold:150*(entry.gems+1),gem:1};if(action==='craft')return t.tier>=maxTier?null:{gold:500*(t.grade+1),essence:3*(t.grade+1),stone:5*(t.grade+1),synthesis:t.tier};return null}
 function equipped(eq,uid){return Object.values(eq.equipped).includes(uid)}
-function perform(save,uid,action){const eq=state(save);const i=eq.items.find(e=>e.uid===uid);if(!i)return {ok:false,error:'Item not found.'};if(i.stored)return {ok:false,error:'Withdraw this item first.'};if(action==='equip'||action==='craft'){
+const starGearCount=4;
+function starDonors(eq,item){
+ return eq.items.filter(e=>e.uid!==item.uid&&!e.stored&&!equipped(eq,e.uid)&&catalog[e.template].tier===catalog[item.template].tier);
+}
+function perform(save,uid,action,donors=[]){const eq=state(save);const i=eq.items.find(e=>e.uid===uid);if(!i)return {ok:false,error:'Item not found.'};if(i.stored)return {ok:false,error:'Withdraw this item first.'};if(action==='equip'||action==='craft'||action==='star'){
  const target=catalog[i.template].tier+(action==='craft'?1:0);
  if(target<=maxTier&&target>unlockedTier(save))return {ok:false,error:'T'+target+' unlocks at hero level '+requiredLevel(target)+'.'};
-}if(action==='equip'){const t=catalog[i.template];if(eq.equipped[t.slot]===uid)return {ok:false,error:'Already equipped.'};save.equipment=eq;eq.equipped[t.slot]=uid;return {ok:true,entry:i}}const price=cost(i,action);if(!price)return {ok:false,error:'This upgrade is already complete.'};if((price.gold||0)>save.gold||materialDefs.some(m=>(price[m.id]||0)>eq.materials[m.id]))return {ok:false,error:'Not enough gold or materials.'};save.equipment=eq;save.gold-=price.gold||0;for(const m of materialDefs)eq.materials[m.id]-=price[m.id]||0;if(action==='enhance')i.enhance++;else if(action==='star')i.stars++;else if(action==='gem')i.gems++;else if(action==='craft'){const t=catalog[i.template];i.template=t.slot+'-t'+(t.tier+1)}return {ok:true,entry:i}}
+}if(action==='equip'){const t=catalog[i.template];if(eq.equipped[t.slot]===uid)return {ok:false,error:'Already equipped.'};save.equipment=eq;eq.equipped[t.slot]=uid;return {ok:true,entry:i}}const price=cost(i,action);if(!price)return {ok:false,error:'This upgrade is already complete.'};if((price.gold||0)>save.gold||materialDefs.some(m=>(price[m.id]||0)>eq.materials[m.id]))return {ok:false,error:'Not enough gold or materials.'};if(action==='star'){
+ const eligible=new Set(starDonors(eq,i).map(e=>e.uid));
+ if(!Array.isArray(donors)||donors.length!==starGearCount||new Set(donors).size!==starGearCount||donors.some(id=>!eligible.has(id)))return {ok:false,error:'Select four spare items of the same tier.'};
+ eq.items=eq.items.filter(e=>!donors.includes(e.uid));
+}save.equipment=eq;save.gold-=price.gold||0;for(const m of materialDefs)eq.materials[m.id]-=price[m.id]||0;if(action==='enhance')i.enhance++;else if(action==='star')i.stars++;else if(action==='gem')i.gems++;else if(action==='craft'){const t=catalog[i.template];i.template=t.slot+'-t'+(t.tier+1)}return {ok:true,entry:i}}
 function salvage(save,uid){const eq=state(save),i=eq.items.find(e=>e.uid===uid);if(i?.stored)return {ok:false,error:'Withdraw this item first.'};if(!i||equipped(eq,uid))return {ok:false,error:'Equipped items cannot be salvaged.'};const t=catalog[i.template];save.equipment=eq;eq.items=eq.items.filter(e=>e.uid!==uid);eq.materials.stone+=3+t.grade*3+i.enhance;eq.materials.shard+=i.stars;eq.materials.gem+=i.gems;save.gold+=50*(t.grade+1);return {ok:true}}
 function addDrop(save,tier=1,slotId=null){const eq=state(save);if(eq.items.length>=80){save.equipment=eq;eq.materials.stone+=5;return {converted:true}}const allowed=tiers.filter(t=>t.tier<=tier),t=allowed[allowed.length-1],slot=slots.find(s=>s.id===slotId)||slots[Math.floor(Math.random()*slots.length)],entry={uid:eq.nextId++,template:slot.id+'-t'+t.tier,enhance:0,stars:0,gems:0};save.equipment=eq;eq.items.push(entry);return entry}
 const bossLootTables={
@@ -67,12 +75,24 @@ storm:{slots:['bow','boots','necklace'],enhance:3,stars:2,stone:38,shard:10,gem:
 crystal:{slots:['crown','spiritluck','amulet'],enhance:3,stars:3,stone:44,shard:12,gem:3,essence:11},
 sunspire:{slots:slots.map(s=>s.id),enhance:4,stars:4,stone:55,shard:15,gem:4,essence:14}
 };
-// Boss gear advances five levels before the next equipment unlock.
+// At level 50 and beyond, the next wearable tier joins the ongoing loot pool.
 function bossGearTier(save){
  const level=globalThis.WonderProgress.level(save.xp||0);
- return Math.min(maxTier,1+Math.floor((level+5)/levelsPerTier));
+ return level<50?(level>=45?2:1):Math.min(maxTier,unlockedTier(save)+1);
 }
-function bossLoot(save,id,random=Math.random){const table=bossLootTables[id];if(!table)return null;const eq=state(save);save.equipment=eq;const materials=Object.fromEntries(materialDefs.map(m=>[m.id,table[m.id]||0]));for(const m of materialDefs)eq.materials[m.id]+=materials[m.id];const tier=bossGearTier(save),slot=table.slots[Math.min(table.slots.length-1,Math.max(0,Math.floor(random()*table.slots.length)))],drop=addDrop(save,tier,slot);if(drop.converted){eq.materials.stone+=15;materials.stone+=20;}else{drop.enhance=table.enhance;drop.stars=table.stars;}return {...materials,entry:drop.converted?null:drop,converted:!!drop.converted};}
+function bossGearLabel(save){
+ const top=bossGearTier(save);
+ return top<3?'T'+top:'T2–T'+top;
+}
+function rollBossTier(save,random){
+ const top=bossGearTier(save);
+ if(top<3)return top;
+ const roll=random();
+ if(roll<.5)return unlockedTier(save);
+ if(roll<.8)return top;
+ return 2+Math.min(top-2,Math.floor(random()*(top-1)));
+}
+function bossLoot(save,id,random=Math.random){const table=bossLootTables[id];if(!table)return null;const eq=state(save);save.equipment=eq;const materials=Object.fromEntries(materialDefs.map(m=>[m.id,table[m.id]||0]));for(const m of materialDefs)eq.materials[m.id]+=materials[m.id];const tier=rollBossTier(save,random),slot=table.slots[Math.min(table.slots.length-1,Math.max(0,Math.floor(random()*table.slots.length)))],drop=addDrop(save,tier,slot);if(drop.converted){eq.materials.stone+=15;materials.stone+=20;}else{drop.enhance=table.enhance;drop.stars=table.stars;}return {...materials,entry:drop.converted?null:drop,converted:!!drop.converted};}
 function grant(save,type,won,score=0){const eq=state(save);save.equipment=eq;let stones=type==='dungeon'?(won?12:3):type==='defense'?(won?8:2):type==='spar'?(won?2:0):Math.min(7,Math.floor(score/180));eq.materials.stone+=stones;let shard=won&&(type==='dungeon'||type==='defense')?3:0;eq.materials.shard+=shard;if(won&&type==='dungeon'){eq.materials.essence+=2;eq.materials.gem+=1}return {stone:stones,shard,gem:won&&type==='dungeon'?1:0,essence:won&&type==='dungeon'?2:0}}
-return Object.freeze({slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,bossGearTier,bossLoot,bossLootTables});
+return Object.freeze({slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,starGearCount,starDonors,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
 })();
