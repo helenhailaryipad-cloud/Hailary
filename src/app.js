@@ -12,7 +12,7 @@ const ITEMS=[
 ];
 const GEAR=[{id:'bow',name:'Verdant Bow',stat:'Attack',bonus:24},{id:'crown',name:'Moonstone Crown',stat:'Health',bonus:130},{id:'armor',name:'Grove Robes',stat:'Defense',bonus:18},{id:'boots',name:'Windstep Boots',stat:'Speed',bonus:3},{id:'ring',name:'Dawn Ring',stat:'Critical',bonus:2},{id:'charm',name:'Wish Pendant',stat:'Health',bonus:90}];
 const KEY='wow-save-v1';const defaults=()=>({version:1,name:'REINA',gold:3500,tickets:1800,scales:0,xp:0,owned:['d0','w0'],dragon:'d0',wings:'w0',rolls:0,claimed:[],guarantees:0,upgrades:{bow:0,crown:0,armor:0,boots:0,ring:0,charm:0},defenseWins:0,mergeBest:0,dungeonWins:0,sparWins:0,revision:0,updated:0});
-function valid(s){return s&&s.version===1&&(s.valeChapter===undefined||Number.isInteger(s.valeChapter)&&s.valeChapter>=0&&s.valeChapter<4)&&['gold','tickets','scales','xp','rolls','guarantees','defenseWins','mergeBest','revision','updated'].every(k=>Number.isSafeInteger(s[k])&&s[k]>=0&&s[k]<=(k==='updated'?1e15:1e12))&&['dungeonWins','sparWins'].every(k=>s[k]===undefined||Number.isSafeInteger(s[k])&&s[k]>=0&&s[k]<=1e12)&&globalThis.WonderProgress.validDaily(s.expDungeon)&&globalThis.WonderAdventure.valid(s.adventure)&&globalThis.WonderGear.valid(s.equipment)&&typeof s.name==='string'&&s.name.length>0&&s.name.length<=24&&Array.isArray(s.owned)&&s.owned.length<=8&&new Set(s.owned).size===s.owned.length&&s.owned.includes('d0')&&s.owned.includes('w0')&&s.owned.every(id=>ITEMS.some(i=>i.id===id))&&s.owned.includes(s.dragon)&&s.owned.includes(s.wings)&&ITEMS.find(i=>i.id===s.dragon)?.type==='dragon'&&ITEMS.find(i=>i.id===s.wings)?.type==='wings'&&Array.isArray(s.claimed)&&s.claimed.length<=5&&s.claimed.every(n=>[15,30,60,135,240].includes(n))&&GEAR.every(g=>Number.isInteger(s.upgrades?.[g.id])&&s.upgrades[g.id]>=0&&s.upgrades[g.id]<=20)}
+function valid(s){return s&&s.version===1&&(s.valeChapter===undefined||Number.isInteger(s.valeChapter)&&s.valeChapter>=0&&s.valeChapter<4)&&['gold','tickets','scales','xp','rolls','guarantees','defenseWins','mergeBest','revision','updated'].every(k=>Number.isSafeInteger(s[k])&&s[k]>=0&&s[k]<=(k==='updated'?1e15:1e12))&&['dungeonWins','sparWins'].every(k=>s[k]===undefined||Number.isSafeInteger(s[k])&&s[k]>=0&&s[k]<=1e12)&&globalThis.WonderProgress.validDaily(s.expDungeon)&&globalThis.WonderAdventure.valid(s.adventure)&&MoonwaterFish.valid(s.fishCards)&&globalThis.WonderGear.valid(s.equipment)&&typeof s.name==='string'&&s.name.length>0&&s.name.length<=24&&Array.isArray(s.owned)&&s.owned.length<=8&&new Set(s.owned).size===s.owned.length&&s.owned.includes('d0')&&s.owned.includes('w0')&&s.owned.every(id=>ITEMS.some(i=>i.id===id))&&s.owned.includes(s.dragon)&&s.owned.includes(s.wings)&&ITEMS.find(i=>i.id===s.dragon)?.type==='dragon'&&ITEMS.find(i=>i.id===s.wings)?.type==='wings'&&Array.isArray(s.claimed)&&s.claimed.length<=5&&s.claimed.every(n=>[15,30,60,135,240].includes(n))&&GEAR.every(g=>Number.isInteger(s.upgrades?.[g.id])&&s.upgrades[g.id]>=0&&s.upgrades[g.id]<=20)}
 function normalizeAdventure(s){if(/^(reyna|reina)$/i.test(s.name))s.name='REINA';globalThis.WonderGear.repairLoadout(s);return s}
 let S=defaults();try{const v=JSON.parse(localStorage.getItem(KEY));if(valid(v))S=normalizeAdventure(v);}catch{}
 const INTRO_KEY='wow-intro-style-v1';
@@ -40,13 +40,14 @@ bag:[['bag','Loadout'],['inventory','Bag'],['forge','Crafting'],['warehouse','Wa
 dungeons:[['dungeons','Bosses'],['expLobby','EXP Dungeon']],
 games:[['games','Festival'],['fishing','Fishing'],['defense','Castle Defense'],['merge','Dragon Merge'],['vale','Crownfall Vale']],
 collection:[['collection','Dragons'],['wings','Wings'],['wish','Wishes']],
+cards:[['cards','Fish Journal']],
 more:[['more','Menu'],['world','Realm'],['rankings','Rankings'],['quests','Quests'],['settings','Journal']]
 };
 function nav(){
 const selected=screen==='collection'&&filter==='wings'?'wings':screen;
 const active=Object.keys(sectionPages).find(section=>sectionPages[section].some(([id])=>id===selected))||'dungeons';
 const tabs=sectionPages[active].map(([id,label])=>`<button aria-current="${selected===id?'page':'false'}" onclick="chooseSectionPage('${id}')">${label}</button>`).join('');
-$('#nav').innerHTML='<div class="section-tabs" aria-label="Section pages">'+tabs+'</div>'+[['home','♧','Hero'],['bag','▣','Gear'],['dungeons','⚔','Dungeons'],['games','♜','Games'],['collection','◇','Wonders'],['more','☰','More']].map(([id,icon,label])=>`<button class="${active===id?'active':''}" onclick="go('${id}')"><span class="navico">${uiIcon(({home:'hero',bag:'equipment',dungeons:'dungeons',games:'castle',collection:'dragon',more:'more'})[id])}</span><span class="nav-label">${label}</span></button>`).join('')}
+$('#nav').innerHTML='<div class="section-tabs" aria-label="Section pages">'+tabs+'</div>'+[['home','♧','Hero'],['bag','▣','Gear'],['dungeons','⚔','Dungeons'],['games','♜','Games'],['collection','◇','Wonders'],['cards','▤','Cards'],['more','☰','More']].map(([id,icon,label])=>`<button class="${active===id?'active':''}" onclick="go('${id}')"><span class="navico">${uiIcon(({home:'hero',bag:'equipment',dungeons:'dungeons',games:'castle',collection:'dragon',cards:'quests',more:'more'})[id])}</span><span class="nav-label">${label}</span></button>`).join('')}
 
 function intro(){chooseIntro('2d')}
 
@@ -60,8 +61,27 @@ function moreMenu(){$('#main').innerHTML=`<div class="game-section-title">${uiIc
 
 function stopGame(){$('#game')?._resize?.disconnect();delete document.body.dataset.playing;window.Wonder3D?.dispose();window.WonderEffects?.clear();clearInterval(worldTimer);clearInterval(rankingTimer);cancelAnimationFrame(loop);loop=0;if(game){game.running=false;game=null}gamePaused=false}
 function go(id){if(game?.running&&!game.ended){modal(`<p class="eyebrow">ADVENTURE IN PROGRESS</p><h2>Leave this adventure?</h2><p>This run will end without a reward. Your collection and progress are safe.</p><button onclick="$('#modal').close();openScreen('${id}')">Leave adventure</button>`,'Stay');return}openScreen(id)}
+let selectedFishCard='';
+window.WonderFishAlbum={
+ read:()=>S.fishCards||MoonwaterFish.deviceRecords(),
+ catch(id,kg){
+  S.fishCards??=MoonwaterFish.deviceRecords();
+  const old=MoonwaterFish.recordCatch(S.fishCards,id,kg);
+  save();
+  return old;
+ },
+ open(id){
+  selectedFishCard=MoonwaterFish.byId.has(id)?id:'';
+  go('cards');
+ }
+};
+function showFishJournal(){
+ const query=selectedFishCard?'?fish='+encodeURIComponent(selectedFishCard):'';
+ selectedFishCard='';
+ $('#main').innerHTML='<iframe class="album-frame" title="Fish Journal" src="fish-journal.html'+query+'"></iframe>';
+}
 function openScreen(id){stopGame();screen=id;nav();render();$('#main').scrollTop=0;$('#main').scrollLeft=0;window.WonderEffects?.enter?.()}
-function render(){document.body.classList.remove('is-3d');document.body.dataset.screen=screen;wallet();nav();if(screen==='attributes')characterSheet();else if(['inventory','forge','warehouse'].includes(screen))gearWorkspace();else if(screen==='home')home();else if(screen==='intro')intro();else if(screen==='more')moreMenu();else if(screen==='bag')bag();else if(screen==='collection')collection();else if(screen==='wish')wish();else if(screen==='games')games();else if(screen==='fishing')$('#main').innerHTML=`<button onclick="go('games')">‹ Mini Games</button><iframe title="Moonwater Fishing" src="fishing.html" style="display:block;width:100%;height:calc(100% - 52px);min-height:290px;border:0;border-radius:12px"></iframe>`;else if(screen==='world')realm();else if(screen==='rankings')rankings();else if(screen==='quests')questBoard();else if(screen==='expLobby')expLobby();else if(screen==='dungeons')dungeonLobby();else if(screen==='settings')settings();else if(screen==='defense')startDefense();else if(screen==='merge')startMerge();else if(screen==='vale')startVale();requestAnimationFrame(decorateArt)}
+function render(){document.body.classList.remove('is-3d');document.body.dataset.screen=screen;wallet();nav();if(screen==='attributes')characterSheet();else if(['inventory','forge','warehouse'].includes(screen))gearWorkspace();else if(screen==='home')home();else if(screen==='intro')intro();else if(screen==='more')moreMenu();else if(screen==='bag')bag();else if(screen==='collection')collection();else if(screen==='wish')wish();else if(screen==='games')games();else if(screen==='cards')showFishJournal();else if(screen==='fishing')$('#main').innerHTML=`<button onclick="go('games')">‹ Mini Games</button><iframe title="Moonwater Fishing" src="fishing.html" style="display:block;width:100%;height:calc(100% - 52px);min-height:290px;border:0;border-radius:12px"></iframe>`;else if(screen==='world')realm();else if(screen==='rankings')rankings();else if(screen==='quests')questBoard();else if(screen==='expLobby')expLobby();else if(screen==='dungeons')dungeonLobby();else if(screen==='settings')settings();else if(screen==='defense')startDefense();else if(screen==='merge')startMerge();else if(screen==='vale')startVale();requestAnimationFrame(decorateArt)}
 function renderHeroReadout(st){$('#profileReadout').innerHTML=`<div class="profile-face"><img src="assets/generated/reina-avatar.webp" alt="Reina"><b>Lv. ${level()}</b></div><div class="profile-vitals"><strong aria-label="Combat power ${fmt(st.power)}">${uiIcon('power')}<small>Power</small>${fmt(st.power)}</strong><span class="profile-hp">HP ${fmt(st.health)}</span></div>`;}
 function home(){const st=stats(),d=item(S.dragon),w=item(S.wings);renderHeroReadout(st);$('#main').innerHTML=`<div class="profile"><div class="profile-bg"></div><aside class="profile-panel stats-panel"><p class="eyebrow">ELVEN RANGER</p><h2>${esc(S.name)}</h2><span class="level-pill">LEVEL ${level()}</span><div class="progress"><b style="width:${level()>=1500?100:S.xp%150/1.5}%"></b></div><small class="xp">${level()>=1500?'MAX LEVEL · 1500':fmt(S.xp%150)+' / 150 XP'}</small><div class="power" role="button" tabindex="0" onclick="openHeroStats()" onkeydown="if(event.key==='Enter')openHeroStats()"><small>${uiIcon('power','power-art')}COMBAT POWER · ALL STATS</small><strong>${fmt(st.power)}</strong></div>${[['Attack',st.attack,'attack'],['Defense',st.defense,'defense'],['Health',st.health,'health'],['Critical',st.crit+'%','crit'],['Speed',st.speed,'speed'],['Accuracy',st.accuracy+'%','accuracy'],['Dodge',st.dodge+'%','wind'],['Shield HP',st.shieldHealth,'shield']].map(([n,v,i])=>`<div class="stat"><span>${uiIcon(i,'stat-art')}${n}</span><b>${typeof v==='number'?fmt(v):v}</b></div>`).join('')}<button class="primary hero-equipment-link" onclick="go('bag')">Equipment ›</button></aside><div class="hero-stage"><div class="hero-visual"><div class="scene-atmosphere" aria-hidden="true"><div class="godrays"></div><div class="volumetric-fog"></div></div><div class="stage-halo"></div><div class="avatar-wings" data-tier="${visualTier(w)}">${wingArt(w)}</div><img class="avatar" src="${artPath(equippedRanger())}" alt="REINA, silver-haired elven ranger"><div class="companion" data-tier="${visualTier(d)}">${dragonSVG(d)}<span>${d.name}</span></div></div></div></div><div class="location-badge"><span>✧</span> SKY GARDEN <small>Sanctuary of the first wish</small></div>`}
 function gearDetail(id){const slot={ring:'spiritluck',charm:'amulet'}[id]||id;openEquipment(globalThis.WonderGear.state(S).equipped[slot])}
@@ -128,4 +148,9 @@ async function resolveCloud(keepLocal){try{const r=await fetch('/api/save');if(!
 async function loadLeaderboard(){await loadRankingPlayers();if(!$('#leaderboard'))return;$('#leaderboard').innerHTML=rankingMarkup(true);}
 
 async function publishProfile(){if(!cloudReady||cloudBlocked){toast('Connect and sync your cloud save first');return}if(!await syncCloud()){toast('Save to the cloud before sharing your hero.');return}try{const r=await fetch('/api/leaderboard',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});if(!r.ok)throw Error();toast('Your hero joined the Hall of Wonders');loadLeaderboard()}catch{toast('The hall is unavailable. Please try again.')}}
-render();initCloud();
+render();initCloud().finally(()=>{
+ if(S.fishCards===undefined){
+  const legacy=MoonwaterFish.deviceRecords();
+  if(Object.keys(legacy).length){S.fishCards=legacy;save();if(!game && screen!=='fishing')render()}
+ }
+});

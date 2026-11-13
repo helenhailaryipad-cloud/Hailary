@@ -4,6 +4,7 @@ const context={console,Math,Date,JSON,Number,String,Array,Object,Set,Blob,URL,Pr
 vm.runInContext(fs.readFileSync('src/art-meta.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/generated-art.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/progression-data.js','utf8'),context);
+vm.runInContext(fs.readFileSync('src/fish-catalog.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/gear-data.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/gear-ui.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/adventure-data.js','utf8'),context);
@@ -211,7 +212,7 @@ for(const section of Object.keys(sectionPages)){
  if(!sectionPages[section].every(([,label])=>document.querySelector('#nav').innerHTML.includes('>'+label+'</button>')))throw Error('Missing section page in '+section);
 }
 `,context);
-console.log('PASS: six sections with detail pages, warehouse persistence and equipped item protection.');
+console.log('PASS: main sections with detail pages, warehouse persistence and equipped item protection.');
 
 vm.runInContext(`
 S=defaults(); startMerge();
@@ -227,3 +228,23 @@ if(aimDraws.length)throw Error('Ready egg overlaps the dropped egg during cooldo
 drawEgg=originalDrawEgg;stopGame();
 `,context);
 console.log('PASS: one egg per drop, no ghost egg at landing and no overlapping preview during release.');
+
+vm.runInContext(`
+S=defaults();
+const catalogue=MoonwaterFish;
+if(catalogue.species.length!==100||catalogue.byId.size!==100)throw Error('Incomplete fish collection');
+const legacyFish=catalogue.migrateLegacy({'Moonfin Trout':{count:2,kg:4.2}});
+if(legacyFish['moonfin-trout'].count!==2||!catalogue.valid(legacyFish))throw Error('Legacy catch migration');
+S.fishCards={};
+for(const f of catalogue.species){
+ const before=stats()[f.bonus.key];
+ window.WonderFishAlbum.catch(f.id,f.max);
+ window.WonderFishAlbum.catch(f.id,f.min);
+ const after=stats()[f.bonus.key],r=S.fishCards[f.id];
+ if(after-before!==2*f.bonus.amount||r.count!==2||r.kg!==f.max)throw Error('Wrong stacked card bonus for '+f.name);
+}
+const restored=JSON.parse(JSON.stringify(S));
+if(!valid(restored)||Object.keys(restored.fishCards).length!==100||WonderGear.stats(restored).power!==stats().power)throw Error('Card album did not survive save');
+if(valid({...S,fishCards:{unlisted:{count:1,kg:1}}}))throw Error('Unknown species accepted');
+`,context);
+console.log('PASS: 100 collectable species, legacy catches, exact duplicate stat bonuses and saved card album.');

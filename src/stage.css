@@ -4373,7 +4373,7 @@ body:not([data-playing]) #stage > #main {
   scrollbar-width: none;
 }
 body:not([data-playing]) #stage > #main > * { min-width: 0; }
-body:not([data-playing]) #stage > nav { position: absolute; inset: auto 0 0; height: calc(var(--menu-nav) + env(safe-area-inset-bottom)); display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); grid-template-rows: minmax(0, 1fr); align-items: stretch; align-content: stretch; gap: 5px; padding: 5px max(7px, env(safe-area-inset-right)) max(7px, env(safe-area-inset-bottom)) max(7px, env(safe-area-inset-left)); }
+body:not([data-playing]) #stage > nav { position: absolute; inset: auto 0 0; height: calc(var(--menu-nav) + env(safe-area-inset-bottom)); display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-template-rows: minmax(0, 1fr); align-items: stretch; align-content: stretch; gap: 5px; padding: 5px max(7px, env(safe-area-inset-right)) max(7px, env(safe-area-inset-bottom)) max(7px, env(safe-area-inset-left)); }
 body:not([data-playing]) #stage > nav button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; width: auto; height: auto; min-width: 0; min-height: 0; padding: 4px 2px; margin: 0; }
 body:not([data-playing]) #stage > nav .nav-label { display: block; font-size: clamp(12px, 1.8vmin, 18px); line-height: 1.1; white-space: nowrap; }
 body:not([data-playing]) #stage > nav .navico, body:not([data-playing]) #stage > nav .navico > .gpt-icon { width: clamp(30px, 4.5vmin, 43px); height: clamp(30px, 4.5vmin, 43px); min-width: 0; margin: 0; }
@@ -5782,3 +5782,5 @@ body[data-screen=collection] #stage .collection-grid .art > .raised-wing-pair { 
  #stage #modal.gear-modal:has(.sheet-menu:not([hidden])){width:min(560px,94vw)}
  #stage #modal.gear-modal .sheet-menu{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
+
+body[data-screen=cards] #stage .album-frame{display:block;flex:1 1 auto;width:100%;min-height:0;border:0;border-radius:12px;background:#efe4cc}

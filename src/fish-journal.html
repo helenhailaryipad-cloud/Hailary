@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fish Journal</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;color:#392e23;font:16px/1.35 Georgia,serif;background:#eee3c9}
+button{font:inherit;cursor:pointer;color:inherit}
+button:focus-visible{outline:3px solid #156652;outline-offset:2px}
+.book{min-height:100svh;max-width:1080px;margin:auto;border:5px solid #70533b;border-radius:12px;background:linear-gradient(90deg,#ddc9a9 0,#f5ead0 2%,#fbf5e7 8%,#f3e7cf 99%);box-shadow:inset 0 0 0 1px #ddbc83;padding:clamp(16px,3vw,34px)}
+.bookhead{display:flex;align-items:center;justify-content:space-between;gap:12px}
+h1,h2,p{margin:0}
+h1{font-size:clamp(28px,5vw,44px);line-height:1.05;color:#29483f}
+.discovered{font-size:clamp(13px,2vw,17px);white-space:nowrap;font-variant-numeric:tabular-nums;color:#514939}
+.card-filters{display:flex;gap:4px;border-bottom:1px solid #b49c76;margin:18px 0;padding:0 0 5px}
+.card-filters button{border:0;border-radius:5px;background:none;color:#615644;padding:8px clamp(4px,2.3vw,18px);min-height:42px}
+.card-filters button[aria-pressed=true]{background:#28574c;color:#fff1cd;box-shadow:inset 0 0 0 1px #967a45}
+.card-filters button:hover{box-shadow:inset 0 0 0 1px #b89c6d}
+#cardsGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(7px,1.6vw,17px)}
+.card{display:flex;flex-direction:column;min-width:0;position:relative;text-align:left;border:1px solid #ac8d55;padding:5px;border-radius:8px;background:#fdf6e3;box-shadow:0 3px 5px #4a352323;overflow:hidden}
+.plate{display:grid;place-items:center;position:relative;isolation:isolate;aspect-ratio:1.22;width:100%;overflow:hidden;border-radius:4px;border:1px solid #aa956b;background-color:var(--water,#548080);background-image:radial-gradient(ellipse at 52% 45%,#fcf1c660,transparent 67%),repeating-radial-gradient(ellipse at 115% 110%,transparent 0 18px,#fcf3d52e 19px,transparent 20px 30px)}
+.card[data-id=minnow],dialog[data-id=minnow]{--water:#78a9a6}
+.card[data-id=trout],dialog[data-id=trout]{--water:#a59ab1}
+.card[data-id=carp],dialog[data-id=carp]{--water:#8fab80}
+.card[data-id=sailfish],dialog[data-id=sailfish]{--water:#83a0ba}
+.plate::after{position:absolute;inset:5px;content:"";border:1px solid #fff2ce63;border-radius:2px;pointer-events:none}
+.plate canvas{width:100%;height:auto;filter:drop-shadow(0 2px 1px #222e3326)}
+.card.undiscovered .plate{background-color:color-mix(in srgb,var(--water,#80a6a0) 36%,#e6deca);background-image:repeating-radial-gradient(ellipse at 110% 120%,transparent 0 18px,#a99e842e 19px,transparent 20px 30px)}
+.card.undiscovered canvas{filter:saturate(.7) sepia(.15);opacity:.88}
+.card-name{font-size:clamp(16px,2.2vw,22px);line-height:1.12;margin:10px 5px 5px;color:#29483f}
+.card-count{font:600 clamp(12px,1.7vw,15px)/1.2 system-ui,sans-serif;margin:auto 5px 5px;color:#625846}
+.note{font-size:14px;color:#685c49;margin:14px 0 0}
+dialog{color:#342e23;width:min(365px,94vw);max-height:92svh;overflow:auto;border:2px solid #b5945e;border-radius:12px;padding:14px;background:#f9efd8;box-shadow:0 10px 40px #13272266}
+dialog::backdrop{background:#172a2bc4}
+dialog .plate{max-height:24svh;aspect-ratio:1.9}dialog .plate canvas{width:auto;max-width:100%;height:100%;min-height:0}
+h2{font-size:26px;margin:11px 0 3px;line-height:1.1;color:#284a40}
+.habitat{font-style:italic;color:#6d5735}
+.description{margin:8px 0}
+dl{display:grid;grid-template-columns:1fr auto;margin:10px 0;gap:4px 8px}
+dd{margin:0;font-weight:bold;font-variant-numeric:tabular-nums}
+.done{background:#28574c;color:#fff2d3;border:1px solid #a58a55;border-radius:7px;min-height:42px;width:100%}
+@media(max-width:690px){#cardsGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.card-filters{justify-content:space-between;margin:14px 0}.card-filters button{flex:1;padding-inline:2px;font-size:14px}}
+
+.album-tools,.turn-page{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin:10px 0}
+.album-tools label{font-size:14px}.album-tools input{font:inherit;min-height:36px;max-width:135px;padding:5px 8px;border:1px solid #ac9167;border-radius:5px;background:#fffaf0}
+#bonusTotal{font-size:14px;color:#365748}
+.turn-page{justify-content:center;gap:15px;margin-top:16px}
+.turn-page button{background:#28574c;color:#fff3d3;border:1px solid #a58a55;border-radius:6px;padding:6px 12px;min-height:40px}
+.turn-page button:disabled{opacity:.45}
+.card-bonus{margin:0 5px 4px;color:#476045;font-size:13px}
+#cardsGrid{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:690px){#cardsGrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:400px){#cardsGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<main class="book">
+ <header class="bookhead"><h1>Fish Journal</h1><p class="discovered" id="collectionCount"></p></header>
+ <nav id="filters" class="card-filters" aria-label="Card collection filters"></nav>
+ <div class="album-tools"><label>Find a creature <input id="search" type="search" placeholder="Name" autocomplete="off"></label><span id="bonusTotal"></span></div>
+ <section id="cardsGrid" aria-label="Fish cards"></section>
+ <div class="turn-page"><button id="prev">‹ Previous</button><span id="pageCount" aria-live="polite"></span><button id="next">Next ›</button></div>
+ <p id="albumNote" class="note"></p>
+</main>
+<dialog id="cardDetail" aria-labelledby="speciesName">
+ <div class="plate"><canvas id="detailArt" width="480" height="300" aria-hidden="true"></canvas></div>
+ <h2 id="speciesName"></h2><p class="habitat" id="habitat"></p><p class="description" id="description"></p>
+ <dl><dt>Total caught</dt><dd id="caughtCount"></dd><dt>Best weight</dt><dd id="bestWeight"></dd><dt>Each catch</dt><dd id="perCatch"></dd><dt>Bonus earned</dt><dd id="earned"></dd></dl>
+ <button id="done" class="done">Back to cards</button>
+</dialog>
+<script src="fish-catalog.js"></script><script src="fish-art.js"></script>
+<script>
+const el=id=>document.getElementById(id),detail=el('cardDetail');
+let filter='All',page=0,selected=null;
+const perPage=12;
+function read(){return parent.WonderFishAlbum?.read() || MoonwaterFish.deviceRecords()}
+function showCard(fish){
+ selected=fish;
+ const result=read()[fish.id],bonus=fish.bonus;
+ detail.dataset.id=fish.form;
+ el('speciesName').textContent=fish.name;el('habitat').textContent=fish.water;
+ el('description').textContent=result?'Collected in Moonwater Fishing.':'Catch this creature in Moonwater Fishing to collect its card.';
+ el('caughtCount').textContent=result?.count||0;
+ el('bestWeight').textContent=result?.count?result.kg.toFixed(2)+' kg':'Unknown';
+ el('perCatch').textContent='+'+bonus.amount+' '+bonus.label;
+ el('earned').textContent='+'+(result?.count||0)*bonus.amount+' '+bonus.label;
+ MoonwaterPlates.draw(el('detailArt'),fish);
+ if(!detail.open)detail.showModal();
+}
+function renderAlbum(){
+ const records=read(),species=MoonwaterFish.species;
+ const owned=species.filter(f=>records[f.id]?.count).length;
+ el('collectionCount').textContent=owned+' / '+species.length+' discovered';
+ for(const button of el('filters').children)button.setAttribute('aria-pressed',String(filter===button.textContent));
+ const totals=MoonwaterFish.totals(records);
+ el('bonusTotal').textContent=Object.values(MoonwaterFish.bonuses).filter(b=>totals[b.key]).map(b=>'+'+totals[b.key]+' '+b.label).join(' · ');
+ const q=el('search').value.trim().toLowerCase();
+ const matches=species.filter(f=>f.name.toLowerCase().includes(q)&&(filter==='All'||(filter==='Collected')===Boolean(records[f.id]?.count)));
+ const pages=Math.max(1,Math.ceil(matches.length/perPage));page=Math.min(page,pages-1);
+ el('pageCount').textContent=(page+1)+' / '+pages;el('prev').disabled=page===0;el('next').disabled=page+1===pages;
+ const grid=el('cardsGrid');grid.replaceChildren();
+ for(const fish of matches.slice(page*perPage,(page+1)*perPage)){
+  const caught=records[fish.id]?.count||0;
+  const button=document.createElement('button');
+  button.className='card'+(caught?'':' undiscovered');button.dataset.id=fish.form;
+  button.innerHTML='<span class="plate"><canvas width="480" height="300" aria-hidden="true"></canvas></span><strong class="card-name"></strong><span class="card-bonus"></span><span class="card-count"></span>';
+  button.querySelector('strong').textContent=fish.name;button.querySelector('.card-count').textContent=caught?'Caught × '+caught:'Undiscovered';
+  button.querySelector('.card-bonus').textContent='+'+fish.bonus.amount+' '+fish.bonus.label+' / catch';
+  MoonwaterPlates.draw(button.querySelector('canvas'),fish);
+  button.onclick=()=>showCard(fish);grid.append(button);
+ }
+ el('albumNote').textContent=matches.length?'':q?'No creatures match this name.':filter==='Collected'?'Your first catch opens its card here.':'Every creature has been discovered.';
+ if(detail.open && selected)showCard(selected);
+}
+for(const name of ['All','Collected','Undiscovered']){
+ const button=document.createElement('button');button.textContent=name;
+ button.onclick=()=>{filter=name;page=0;renderAlbum()};el('filters').append(button);
+}
+el('search').oninput=()=>{page=0;renderAlbum()};
+function turn(by){page+=by;renderAlbum();window.scrollTo(0,0)}
+el('prev').onclick=()=>turn(-1);el('next').onclick=()=>turn(1);
+el('done').onclick=()=>detail.close();
+detail.onclick=e=>{if(e.target===detail){const b=detail.getBoundingClientRect();if(e.clientX<b.left||e.clientX>b.right||e.clientY<b.top||e.clientY>b.bottom)detail.close()}};
+window.addEventListener('storage',renderAlbum);
+renderAlbum();
+const requested=MoonwaterFish.byId.get(new URLSearchParams(location.search).get('fish'));
+if(requested && read()[requested.id]?.count)showCard(requested);
+</script>
+</body></html>
