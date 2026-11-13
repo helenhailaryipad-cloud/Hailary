@@ -33,12 +33,28 @@ function dungeonBowAim(g){
  const facing=enemy.x>=hero.x?1:-1;
  return {x:hero.x+facing*.34*box.w,y:hero.y+5-.728*box.h+(.84-bowPivot)*box.w*bowSlope,facing};
 }
-// Lower only the bow side of the painted pose. Both halves meet at the shoulder.
+// Compose at atlas resolution so the combat shadow follows a single silhouette.
+const aimedRangerFrames=new WeakMap();
 function drawAimedRanger(c,image,rect,w,h){
- const [x,y,sw,sh]=rect,cut=Math.round(sw*bowPivot),pivot=w*cut/sw;
- c.drawImage(image,x,y,cut,sh,-w/2,-h,pivot,h);
- c.save();c.translate(pivot-w/2,0);c.transform(1,bowSlope,0,1,0,0);
- c.drawImage(image,x+cut,y,sw-cut,sh,0,-h,w-pivot,h);c.restore();
+ let frame=aimedRangerFrames.get(image);
+ if(!frame||frame.rect!==rect){
+  const [sx,sy,sw,sh]=rect;
+  const canvas=document.createElement('canvas');
+  canvas.width=sw;canvas.height=sh;
+  const paint=canvas.getContext('2d');
+  const bowBottom=Math.round(sh*.56),waist=Math.round(sh*.67);
+  paint.drawImage(image,sx,sy,sw,sh,0,0,sw,sh);
+  const pivot=Math.round(sw*bowPivot);
+  paint.clearRect(pivot,0,sw-pivot,waist);
+  for(let x=pivot;x<sw;x++){
+   const drop=(x-pivot)*bowSlope;
+   const joint=Math.round(bowBottom+drop);
+   paint.drawImage(image,sx+x,sy,1,bowBottom,x,drop,1,joint-drop);
+   paint.drawImage(image,sx+x,sy+bowBottom,1,waist-bowBottom,x,joint,1,waist-joint);
+  }
+  frame={rect,canvas};aimedRangerFrames.set(image,frame);
+ }
+ c.drawImage(frame.canvas,-w/2,-h,w,h);
 }
 function drawReina(c,g,x,floor,width,height){const pose=reinaFrame(g),costume=equippedRanger(),aim=pose.shooting&&g.crawl?.enemy&&motionAllowed()?dungeonBowAim(g):null;
  if(costume!=='reina'){
