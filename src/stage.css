@@ -5665,17 +5665,17 @@ body[data-screen=bag] #stage .inventory-materials .material-summary {
 .boss-wheel-wrap .boss-wheel{
  transform:rotate(var(--wheel-angle));transition:--wheel-angle 3s cubic-bezier(.13,.65,.17,1);
  position:absolute;left:calc(var(--cx) - 35.6%);top:12%;width:71.2%;height:auto;aspect-ratio:1;
- background:repeating-conic-gradient(#b89458 0deg .6deg,#fff3d8 .6deg 45deg,#b89458 45deg 45.6deg,var(--face) 45.6deg 90deg);
+ background:repeating-conic-gradient(#b89458 0deg .6deg,#fff3d8 .6deg var(--sector),#b89458 var(--sector) calc(var(--sector) + .6deg),var(--face) calc(var(--sector) + .6deg) calc(2 * var(--sector)));
  border:2px solid #d4ae64;box-shadow:inset 0 0 12px #b58d5255;container-type:inline-size;
 }
 .boss-wheel-wrap .boss-wheel > span{
  display:grid;justify-items:center;align-content:center;gap:2px;box-sizing:border-box;
  width:25%;max-width:none;height:24%;margin:0;left:37.5%;top:38%;padding:0;
  background:none;color:#42311c;text-shadow:0 1px #fff;font:700 clamp(11px,5cqw,19px)/1 Georgia;
- transform:rotate(calc(var(--slice)*45deg + 22.5deg)) translateY(-142%) rotate(calc(var(--slice)*-45deg - 22.5deg - var(--wheel-angle)));
+ --position:calc((var(--slice) + .5) * var(--sector));transform:rotate(var(--position)) translateY(-157%) rotate(calc(0deg - var(--position) - var(--wheel-angle)));
 }
 .boss-wheel-wrap .wheel-reward-icon{width:14cqw;height:14cqw}
-.boss-wheel-wrap .wheel-center{width:18%;height:18%;left:41%;top:41%;border:3px solid #dfb350;border-radius:50%;background:radial-gradient(circle at 35% 25%,#fffdf4,var(--hub) 48%,#a77e41 83%,#fff4be)}
+.boss-wheel-wrap .wheel-center{width:21%;height:21%;left:39.5%;top:39.5%;border:2px solid #dfb350;border-radius:50%;background:var(--frame) 51.2% 49.4% / 740% 705% no-repeat;box-shadow:0 2px 5px #49351c77}
 .boss-wheel-wrap .wheel-pointer{inset:0;background:var(--frame) center/100% 100%;clip-path:polygon(calc(var(--cx) - 4.6%) 9%,var(--cx) 1%,calc(var(--cx) + 4.6%) 9%,var(--cx) 22.5%);pointer-events:none}
 
 @media(prefers-reduced-motion:reduce){.boss-wheel-wrap .boss-wheel{transition:none}}
