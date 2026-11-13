@@ -5708,3 +5708,10 @@ body[data-screen=collection] #stage .collection-grid .art > .raised-wing-pair { 
 #stage #modal.gear-modal .gear-stat-line {font-size:15px;min-height:24px;padding:2px 0}
 
 .empty-gear-slot{display:grid;place-items:center;width:100%;max-width:var(--stage-cell,64px);aspect-ratio:1;border:1px solid #d6c79c;border-radius:9px;background:#30443ec9;color:#fff7dc;font:600 11px/1.15 Georgia;text-align:center;overflow-wrap:anywhere}
+
+.boss-wheel-wrap .wheel-sparks {position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.boss-wheel-wrap .wheel-winner .wheel-reward-icon {filter:drop-shadow(0 0 4px #e3a732);animation:wheel-prize-pop .54s ease-out}
+.wheel-result.wheel-reveal {animation:wheel-reward-reveal .6s ease-out}
+@keyframes wheel-prize-pop {0%{scale:1} 38%{scale:1.24;filter:drop-shadow(0 0 7px #ffd562)} 100%{scale:1}}
+@keyframes wheel-reward-reveal {0%{scale:.96} 42%{scale:1.055;text-shadow:0 0 8px #f5cb72} 100%{scale:1}}
+@media(prefers-reduced-motion:reduce){.boss-wheel-wrap .wheel-winner .wheel-reward-icon,.wheel-result.wheel-reveal{animation:none}}
