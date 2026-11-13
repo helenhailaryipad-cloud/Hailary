@@ -5699,3 +5699,10 @@ body[data-screen=bag] #stage .inventory-materials .material-summary {
 
 body[data-screen=bag] #stage .doll-panel { align-self:stretch; }
 body[data-screen=collection] #stage .collection-grid .art > .raised-wing-pair { width:min(95%,220px); max-height:100%; }
+
+#stage #modal.gear-modal[open] {
+ width:min(460px,calc(100% - 24px));height:auto;max-height:min(78dvh,650px);margin:auto;
+}
+#stage #modal.gear-modal .gear-detail-section {padding:8px 12px;margin:0}
+#stage #modal.gear-modal .gear-detail-section h3 {font-size:16px;margin:4px 0}
+#stage #modal.gear-modal .gear-stat-line {font-size:15px;min-height:24px;padding:2px 0}
