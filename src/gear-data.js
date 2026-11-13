@@ -75,6 +75,13 @@ storm:{slots:['bow','boots','necklace'],enhance:3,stars:2,stone:38,shard:10,gem:
 crystal:{slots:['crown','spiritluck','amulet'],enhance:3,stars:3,stone:44,shard:12,gem:3,essence:11},
 sunspire:{slots:slots.map(s=>s.id),enhance:4,stars:4,stone:55,shard:15,gem:4,essence:14}
 };
+const guardianNames=['Jade Antlerwolf','Sapphire Bastion','Ruby Gryphon','Gilded Serpent','Amethyst Dreamwing','Coral Hydra','Glacier Mammoth','Ember Mantis','Mossback Tusk','Moonveil Fox','Pearlclaw','Obsidian Minotaur','Voltfang Wyvern','Rosewood Hart','Ivory Sphinx','Astral Scorpion','Mistborn Qilin','Copperhide','Tide Leviathan','Crystal Owl','Storm Chimera','Lava Basilisk','Diamond Lion','Aurora Phoenix','Celestial Dragon'];
+const tierGuardians=guardianNames.map((name,index)=>{
+ const tier=index+7,id='guardian-t'+tier;
+ const source=bossLootTables[['storm','crystal','sunspire'][index%3]];
+ bossLootTables[id]={...source};
+ return {name,id,tier};
+});
 // At level 50 and beyond, the next wearable tier joins the ongoing loot pool.
 function bossGearTier(save){
  const level=globalThis.WonderProgress.level(save.xp||0);
@@ -94,5 +101,5 @@ function rollBossTier(save,random){
 }
 function bossLoot(save,id,random=Math.random){const table=bossLootTables[id];if(!table)return null;const eq=state(save);save.equipment=eq;const materials=Object.fromEntries(materialDefs.map(m=>[m.id,table[m.id]||0]));for(const m of materialDefs)eq.materials[m.id]+=materials[m.id];const tier=rollBossTier(save,random),slot=table.slots[Math.min(table.slots.length-1,Math.max(0,Math.floor(random()*table.slots.length)))],drop=addDrop(save,tier,slot);if(drop.converted){eq.materials.stone+=15;materials.stone+=20;}else{drop.enhance=table.enhance;drop.stars=table.stars;}return {...materials,entry:drop.converted?null:drop,converted:!!drop.converted};}
 function grant(save,type,won,score=0){const eq=state(save);save.equipment=eq;let stones=type==='dungeon'?(won?12:3):type==='defense'?(won?8:2):type==='spar'?(won?2:0):Math.min(7,Math.floor(score/180));eq.materials.stone+=stones;let shard=won&&(type==='dungeon'||type==='defense')?3:0;eq.materials.shard+=shard;if(won&&type==='dungeon'){eq.materials.essence+=2;eq.materials.gem+=1}return {stone:stones,shard,gem:won&&type==='dungeon'?1:0,essence:won&&type==='dungeon'?2:0}}
-return Object.freeze({slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,starGearCount,starDonors,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
+return Object.freeze({slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,starGearCount,starDonors,tierGuardians,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
 })();

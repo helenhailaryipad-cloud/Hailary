@@ -1,6 +1,6 @@
 'use strict';
 (()=>{
-const ids=['mistwood','moonfall','emberpeak','coral','frost','honey','storm','crystal','sunspire'];
+const ids=['mistwood','moonfall','emberpeak','coral','frost','honey','storm','crystal','sunspire',...globalThis.WonderGear.tierGuardians.map(g=>g.id)];
 const quests=[
 {id:'first',name:'First light',desc:'Defeat your first dungeon boss.',kind:'wins',target:1,gold:600},
 {id:'hunter',name:'Boss hunter',desc:'Defeat 5 dungeon bosses.',kind:'wins',target:5,gold:1500},
