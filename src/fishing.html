@@ -10,20 +10,20 @@ img,svg{-webkit-user-drag:none}
 .controls{display:flex;width:min(94%,480px);margin:0 auto;justify-content:center;gap:clamp(12px,3vw,24px)}
 .controls button{
  display:inline-flex;align-items:center;justify-content:center;gap:12px;min-width:0;
- min-height:clamp(58px,7vw,72px);padding:8px 18px;touch-action:none;
+ min-height:clamp(64px,7.8vw,80px);padding:8px 18px;touch-action:none;
  border:2px solid #efcb88;border-radius:18px;font:700 clamp(19px,3vw,25px)/1.12 Georgia,serif;
  box-shadow:inset 0 1px #ffe7b9,0 3px 0 #463626,0 4px 12px #09374799
 }
 .controls #cast{
- min-width:min(244px,90%);gap:12px;padding:6px 22px 6px 14px;border:2px solid #edcc82;border-radius:100px;
+ min-width:min(270px,94%);gap:12px;padding:6px 22px 6px 14px;border:2px solid #edcc82;border-radius:100px;
  color:#fff4cf;background:linear-gradient(180deg,#357678,#184850 55%,#12313f);text-shadow:0 1px 2px #102b33;
  box-shadow:inset 0 0 0 2px #725a37,inset 0 0 0 3px #e9cf8b80,0 3px 0 #49391f,0 4px 9px #071e2e90
 }
-#cast .cast-icon{position:static;display:block;width:clamp(37px,5.6vw,48px);height:auto;flex:none}
+#cast .cast-icon{position:static;display:block;width:clamp(41px,6.2vw,53px);height:auto;flex:none}
 #cast:disabled{opacity:.8}
 .controls button[hidden],.controls:not(:has(button:not([hidden]))){display:none}
 .controls :is(#left,#right){
- width:clamp(72px,10.4vw,95px);min-height:0;aspect-ratio:1;padding:0;border:0;border-radius:50%;
+ width:clamp(80px,11.6vw,106px);min-height:0;aspect-ratio:1;padding:0;border:0;border-radius:50%;
  background-image:url("assets/generated/fishing-design-compass.webp");background-size:410% auto;
  background-position:22.9% 91.8%;box-shadow:0 2px 8px #071f34b0
 }
@@ -36,7 +36,7 @@ header{padding-bottom:8px}
 .lagoon{position:relative;flex:1 0 125px;min-height:125px}
 .lagoon .water{inset:16% 0 0;background:repeating-radial-gradient(ellipse at 57% 68%,transparent 0 29px,#b3fffa1b 30px,transparent 32px 70px),linear-gradient(transparent 33%,#147a8e88 58%,#075467 100%)}
 footer{position:relative;flex:none;padding-top:12px;gap:4px;background:linear-gradient(transparent,#102d3cf0 36%)}
-.compass{width:min(94%,480px);height:clamp(124px,26.5svh,190px);position:relative}
+.compass{width:min(97%,536px);height:clamp(138px,29.5svh,212px);position:relative}
 .compass svg{position:static;display:block}
 .controls{gap:clamp(48px,14vw,120px)}
 .float{--size:clamp(54px,8vw,68px);position:absolute;left:57%;top:51%;width:var(--size);transform:translate(-50%,-7%);pointer-events:none;text-align:center}
@@ -49,8 +49,8 @@ body[data-phase=landed] .float-art{filter:drop-shadow(0 0 8px #ffdd77)}
 body[data-phase=landed] .float-value{background:#684b1b;color:#fff9d9}
 @keyframes bob-lake{50%{transform:translateY(2px) rotate(2deg)}}
 @media(prefers-reduced-motion:reduce){.float-art{animation:none}}
-@media(max-height:540px){header{padding:7px 12px}h1{font-size:24px}footer{padding-top:4px;gap:2px}.compass{height:94px}.controls :is(#left,#right){width:56px}.controls button{min-height:42px}.float{--size:46px}.lagoon{min-height:110px;flex-basis:110px}}
-</style><main><header><div><h1>Moonwater Fishing</h1><span id="best"></span></div><button id="basket">Fish basket</button></header><details id="cup"><summary id="cupTitle"></summary><ol id="ranks"></ol><p id="cupPrize">First prize · Moonwater Pearl</p></details><div class="lagoon">
+@media(max-height:540px){header{padding:7px 12px}h1{font-size:24px}footer{padding-top:4px;gap:2px}.compass{height:105px}.controls :is(#left,#right){width:63px}.controls button{min-height:42px}.float{--size:46px}.lagoon{min-height:110px;flex-basis:110px}}
+</style><main><header><div><button type="button" id="exitFishing">‹ Mini Games</button><h1>Moonwater Fishing</h1><span id="best"></span><span id="dailyCasts" style="display:block"></span></div><button id="basket">Fish basket</button></header><details id="cup"><summary id="cupTitle"></summary><ol id="ranks"></ol><p id="cupPrize">First prize · Moonwater Pearl</p></details><div class="lagoon">
  <div class="water"></div>
  <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M3 100 Q18 31 34 10" fill="none" stroke="#d9b36c" stroke-width="3" vector-effect="non-scaling-stroke"/><path d="M34 10 Q43 39 57 51" fill="none" stroke="#fff4cd" stroke-width="1.3" vector-effect="non-scaling-stroke"/></svg>
  <div class="float" id="float" role="progressbar" aria-label="Catch progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
@@ -106,6 +106,10 @@ body[data-phase=landed] .float-value{background:#684b1b;color:#fff9d9}
 </footer></main><dialog><img draggable="false" id="caughtArt" alt="" hidden><h2 id="title"></h2><p id="message"></p><button id="openCatchCard" type="button" hidden>View card</button> <button id="close">Continue</button></dialog>
 <script src="fish-catalog.js"></script><script>
 const el=id=>document.getElementById(id),dialog=document.querySelector('dialog');
+el('exitFishing').onclick=()=>{
+ try{if(parent!==window && typeof parent.go==='function'){parent.go('games');return}}catch{}
+ location.assign('./?screen=games');
+};
 const fish=MoonwaterFish.species;
 const album=parent.WonderFishAlbum || {
  read:()=>MoonwaterFish.deviceRecords(),
@@ -182,7 +186,20 @@ function popup(title,message,cardId){
  art.hidden=!fish;
  if(fish)art.src=MoonwaterFish.artUrl(fish);
  el('openCatchCard').hidden=!cardId;el('openCatchCard').onclick=()=>{dialog.close();album.open(cardId)};el('title').textContent=title;el('message').textContent=message;dialog.showModal()}
-const greenArcWidth=0.24;
+const dailyLimit=10;
+const quotaKey='moonwater-daily-casts';
+function usedCasts(day){
+ const saved=JSON.parse(localStorage.getItem(quotaKey)||'null');
+ return saved?.day===day ? saved.used : 0;
+}
+function refreshQuota(){
+ let left=0;
+ try{left=Math.max(0,dailyLimit-usedCasts(eventTime().day));el('dailyCasts').textContent='Casts left today: '+left+' / '+dailyLimit}
+ catch{el('dailyCasts').textContent='Daily counter unavailable'}
+ el('cast').disabled=phase!=='idle'||left===0;
+ if(phase==='idle')el('status').textContent=left?'Cast your line to start fishing.':'Casts reset at midnight in Lisbon.';
+}
+const greenArcWidth=0.20;
 let phase='idle',pos=.5,target=.5,progress=0,time=0,last=0,seed=0;
 const lakeFloat=el('float'),catchPercent=el('catchPercent');
 const dial=el('dial'),band=dial.querySelector('.zone'),needle=dial.querySelector('.needle');
@@ -233,7 +250,7 @@ function controls(){
  el('left').hidden=el('right').hidden=!showingCatch;
  el('left').disabled=el('right').disabled=phase!=='reel';
  el('basket').disabled=phase!=='idle';
- if(phase==='idle')el('status').textContent='Cast your line to start fishing.';
+ refreshQuota();
 }
 window.addEventListener('blur',stopArrow);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)stopArrow()});
@@ -273,7 +290,18 @@ function tick(now){
  }
  requestAnimationFrame(tick)
 }
-el('cast').onclick=()=>{if(phase!=='idle')return;const t=eventTime();castDay=t.live?t.day:'';phase='wait';time=progress=0;pos=target=steeringGoal=.5;seed=Math.random()*6;renderDial();last=performance.now();renderCatch();el('status').textContent='Watching the float…';el('castLabel').textContent='Line cast';controls();requestAnimationFrame(tick)};
+function startCast(){
+ if(phase!=='idle')return;
+ const t=eventTime();
+ try{
+  const used=usedCasts(t.day);
+  if(used>=dailyLimit){refreshQuota();return}
+  localStorage.setItem(quotaKey,JSON.stringify({day:t.day,used:used+1}));
+ }catch{refreshQuota();return}
+ castDay=t.live?t.day:'';phase='wait';time=progress=0;pos=target=steeringGoal=.5;seed=Math.random()*6;renderDial();last=performance.now();renderCatch();el('status').textContent='Watching the float…';el('castLabel').textContent='Line cast';controls();requestAnimationFrame(tick)};
+el('cast').onclick=()=>navigator.locks ? navigator.locks.request(quotaKey,startCast) : startCast();
+window.addEventListener('storage',refreshQuota);
+setInterval(refreshQuota,1000);
 for(const [id,direction] of [['left',-1],['right',1]]){
  const button=el(id);
  button.onpointerdown=event=>{
