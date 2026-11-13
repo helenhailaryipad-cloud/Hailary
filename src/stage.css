@@ -5807,3 +5807,13 @@ body[data-screen=fishing] #stage img{-webkit-user-drag:none}
 #stage #modal.gear-modal .gear-heading .item-power {font-size:22px;color:#ffdd91}
 #stage #modal.gear-modal .quick-gear-links {display:flex;gap:10px;margin-top:10px}
 #stage #modal.gear-modal .quick-gear-links button {flex:1}
+
+#stage .forge-resources button.forge-piece {
+  --piece-size:clamp(68px,8vw,84px);
+  box-sizing:border-box; width:var(--piece-size); height:var(--piece-size);
+  flex:0 0 var(--piece-size); padding:0;
+}
+#stage .forge-resources button.forge-piece > img.gear-illustration {
+  position:absolute; inset:0; width:100%; height:100%; object-fit:contain;
+}
+#stage .forge-resources button.forge-piece > b {z-index:1}
