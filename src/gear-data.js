@@ -74,8 +74,19 @@ function bonuses(save){const eq=state(save),sum={};for(const slot of slots){cons
 const petStarts={d0:1,d1:3,d2:5,d3:8};
 const petCap=20;
 function petLevel(s,id){return s.petLevels?.[id]??petStarts[id]}
-function petAttack(s,id){return [60,150,190,280][Number(id[1])]+12*(petLevel(s,id)-petStarts[id])}
-function validPets(s){return s.petLevels===undefined||(s.petLevels!==null&&typeof s.petLevels==='object'&&!Array.isArray(s.petLevels)&&Object.entries(s.petLevels).every(([id,n])=>Object.hasOwn(petStarts,id)&&s.owned?.includes(id)&&Number.isInteger(n)&&n>=petStarts[id]&&n<=petCap))}
+function emberCost(s){return s.owned.includes('d1')?10*(1+(s.emberStars||0)):50}
+function evolveEmber(s){
+ const cost=emberCost(s),stars=s.emberStars||0;
+ if(stars>=6||(s.emberShards||0)<cost)return false;
+ s.emberShards-=cost;
+ if(s.owned.includes('d1'))s.emberStars=stars+1;else s.owned.push('d1');
+ return true;
+}
+function petAttack(s,id){return [60,150,190,280][Number(id[1])]+12*(petLevel(s,id)-petStarts[id])+(id==='d1'?30*(s.emberStars||0):0)}
+function validPets(s){
+ if(s.emberShards!==undefined&&(!Number.isSafeInteger(s.emberShards)||s.emberShards<0))return false;
+ if(s.emberStars!==undefined&&(!Number.isInteger(s.emberStars)||s.emberStars<0||s.emberStars>6||!s.owned?.includes('d1')))return false;
+ return s.petLevels===undefined||(s.petLevels!==null&&typeof s.petLevels==='object'&&!Array.isArray(s.petLevels)&&Object.entries(s.petLevels).every(([id,n])=>Object.hasOwn(petStarts,id)&&s.owned?.includes(id)&&Number.isInteger(n)&&n>=petStarts[id]&&n<=petCap))}
 function trainPet(s,id){
  if(!Object.hasOwn(petStarts,id)||!s.owned.includes(id))return false;
  const level=petLevel(s,id),cost=level*100;
@@ -153,5 +164,5 @@ function rollBossTier(save,random){
 }
 function bossLoot(save,id,random=Math.random){const table=bossLootTables[id];if(!table)return null;const eq=state(save);save.equipment=eq;const materials=Object.fromEntries(materialDefs.map(m=>[m.id,table[m.id]||0]));for(const m of materialDefs)eq.materials[m.id]+=materials[m.id];const tier=rollBossTier(save,random),slot=table.slots[Math.min(table.slots.length-1,Math.max(0,Math.floor(random()*table.slots.length)))],drop=addDrop(save,tier,slot);if(drop.converted){eq.materials.stone+=15;materials.stone+=20;}else{drop.enhance=table.enhance;drop.stars=table.stars;}return {...materials,entry:drop.converted?null:drop,converted:!!drop.converted};}
 function grant(save,type,won,score=0){const eq=state(save);save.equipment=eq;let stones=type==='dungeon'?(won?12:3):type==='defense'?(won?8:2):type==='spar'?(won?2:0):Math.min(7,Math.floor(score/180));eq.materials.stone+=stones;let shard=won&&(type==='dungeon'||type==='defense')?3:0;eq.materials.shard+=shard;if(won&&type==='dungeon'){eq.materials.essence+=2;eq.materials.gem+=1}return {stone:stones,shard,gem:won&&type==='dungeon'?1:0,essence:won&&type==='dungeon'?2:0}}
-return Object.freeze({petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,starGearCount,starDonors,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
+return Object.freeze({emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,starGearCount,starDonors,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
 })();

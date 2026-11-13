@@ -5836,3 +5836,11 @@ body[data-screen=fishing] #stage img{-webkit-user-drag:none}
 #stage .pet-choice svg{position:static;width:100%;height:clamp(40px,8dvh,78px)}
 #stage .pet-choice strong{font-size:clamp(11px,1.7vw,18px);overflow-wrap:anywhere}
 #stage .pet-choice[aria-pressed=true]{outline:3px solid #ffd478;outline-offset:-3px}
+
+#stage .ember-progress{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+#stage .ember-progress>strong{color:#ffcf63;letter-spacing:2px}
+#stage .ember-progress details{width:100%}
+#stage .ember-progress summary{cursor:pointer;padding:8px}
+#stage .ember-forms{display:flex;justify-content:center;gap:18px}
+#stage .ember-forms figure{margin:0}
+#stage .ember-forms svg{position:static;width:88px;height:88px}

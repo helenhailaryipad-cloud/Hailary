@@ -34,10 +34,13 @@ const petShapes={
  d2:{fur:'#8975ab',light:'#eee3ff',ears:'M25 52L21 30L43 41 M55 41L79 30L75 53',tail:'M33 84L44 97L50 92L56 97L68 83'},
  d3:{fur:'#c89770',light:'#ffe6bd',ears:'M35 52Q6 52 12 34Q32 34 42 48 M59 48Q71 32 89 34Q91 51 64 54',tail:'M65 83Q76 66 84 69Q82 84 68 89'}
 };
-function dragonSVG(it){
+function dragonSVG(it,stars=S.emberStars||0){
  const p=petShapes[it.id],owl=it.id==='d2';
+ const extraTails=it.id==='d1'&&stars>=5?
+  '<g fill="#e57632" stroke="#763a31"><path d="M48 87Q4 92 9 47Q21 67 34 63Q32 76 48 87Z"/>'+
+  (stars===6?'<path d="M55 80Q90 63 83 24Q106 43 96 70Q82 85 55 89Z" fill="#ffbc49"/><path d="M16 63Q1 51 7 29Q18 51 29 49Z" fill="#ffd56a"/>':'')+'</g>':'';
  const antlers=it.id==='d3'?'<path d="M40 43L33 26L29 10M34 28L22 21 M60 43L67 26L71 10M66 28L78 21" fill="none" stroke="#d8ad61" stroke-width="4"/>':'';
- return `<svg class="pet-portrait" viewBox="0 0 104 104" role="img" aria-label="${it.name}, ${it.title}"><g stroke="#594636" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" fill="${p.fur}">${antlers}<path d="${p.tail}"/><ellipse cx="51" cy="78" rx="24" ry="20"/><ellipse cx="50" cy="80" rx="13" ry="15" fill="${p.light}" stroke="none"/><path d="${p.ears}"/><path d="M23 58Q23 34 49 35Q77 33 78 58Q79 76 52 80Q25 77 23 58Z"/><g fill="${p.light}" stroke="none"><ellipse cx="39" cy="59" rx="${owl?13:8}" ry="9"/><ellipse cx="61" cy="59" rx="${owl?13:8}" ry="9"/></g><g fill="#322c30"><ellipse cx="40" cy="58" rx="3.5" ry="5"/><ellipse cx="60" cy="58" rx="3.5" ry="5"/></g><g fill="white" stroke="none"><circle cx="39" cy="56" r="1.4"/><circle cx="59" cy="56" r="1.4"/></g><path d="M46 65Q50 62 54 65L50 70Z" fill="${owl?'#efb052':'#694844'}"/><ellipse cx="36" cy="94" rx="9" ry="4"/><ellipse cx="64" cy="94" rx="9" ry="4"/></g></svg>`;
+ return `<svg class="pet-portrait" viewBox="0 0 104 104" role="img" aria-label="${it.name}, ${it.title}"><g stroke="#594636" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" fill="${p.fur}">${extraTails}${antlers}<path d="${p.tail}"/><ellipse cx="51" cy="78" rx="24" ry="20"/><ellipse cx="50" cy="80" rx="13" ry="15" fill="${p.light}" stroke="none"/><path d="${p.ears}"/><path d="M23 58Q23 34 49 35Q77 33 78 58Q79 76 52 80Q25 77 23 58Z"/><g fill="${p.light}" stroke="none"><ellipse cx="39" cy="59" rx="${owl?13:8}" ry="9"/><ellipse cx="61" cy="59" rx="${owl?13:8}" ry="9"/></g><g fill="#322c30"><ellipse cx="40" cy="58" rx="3.5" ry="5"/><ellipse cx="60" cy="58" rx="3.5" ry="5"/></g><g fill="white" stroke="none"><circle cx="39" cy="56" r="1.4"/><circle cx="59" cy="56" r="1.4"/></g><path d="M46 65Q50 62 54 65L50 70Z" fill="${owl?'#efb052':'#694844'}"/><ellipse cx="36" cy="94" rx="9" ry="4"/><ellipse cx="64" cy="94" rx="9" ry="4"/></g></svg>`;
 }
 function upgradePet(id){
  if(!WonderGear.trainPet(S,id))return;
@@ -101,6 +104,17 @@ function home(){const st=stats(),d=item(S.dragon),w=item(S.wings);renderHeroRead
 function gearDetail(id){const slot={ring:'spiritluck',charm:'amulet'}[id]||id;openEquipment(globalThis.WonderGear.state(S).equipped[slot])}
 function upgrade(id){const slot={ring:'spiritluck',charm:'amulet'}[id]||id,eq=globalThis.WonderGear.state(S),uid=eq.equipped[slot],entry=eq.items.find(i=>i.uid===uid);if(entry)equipmentAction(uid,'enhance',equipmentStamp(entry))}
 
+function applyEmberEvolution(){
+ if(!WonderGear.evolveEmber(S))return;
+ save();showPetGallery('d1');toast(S.emberStars?'Emberheart · '+S.emberStars+' stars':'Emberheart unlocked');
+}
+function emberProgress(){
+ const stars=S.emberStars||0,shards=S.emberShards||0,cost=WonderGear.emberCost(S),owned=S.owned.includes('d1');
+ const previews=[5,6].map(n=>`<figure>${dragonSVG(item('d1'),n)}<figcaption>${n}★ · ${n===5?'Adult':'Ultimate'}</figcaption></figure>`).join('');
+ return `<section class="ember-progress"><strong aria-label="${stars} of 6 stars">${'★'.repeat(stars)}${'☆'.repeat(6-stars)}</strong>
+ ${stars<6?`<span>${shards} / ${cost} shards · +10 per dungeon boss</span><button ${shards<cost?'disabled':''} onclick="applyEmberEvolution()">${owned?'Star up · +30 ATK':'Summon Emberheart'}</button>`:'<span>Ultimate form unlocked</span>'}
+ <details><summary>Evolution preview</summary><div class="ember-forms">${previews}</div></details></section>`;
+}
 let selectedPetId=null;
 function showPetGallery(id=selectedPetId||S.dragon){
  const pet=item(id),rules=WonderGear,lv=rules.petLevel(S,id),attack=rules.petAttack(S,id);
@@ -113,7 +127,7 @@ function showPetGallery(id=selectedPetId||S.dragon){
  <div class="pet-gallery-stage">${dragonSVG(pet)}</div>
  <div class="pet-gallery-panel"><strong>ATK ${attack} ${owned&&!maxed?'<em>→ '+(attack+12)+'</em>':''}</strong>
  <div class="pet-gallery-actions">${owned?`<button ${active?'disabled':''} onclick="equip('${id}')">${active?'Equipped':'Equip'}</button><button class="primary" ${maxed||S.gold<cost?'disabled':''} onclick="upgradePet('${id}')">${maxed?'Max level':'Upgrade · '+fmt(cost)+' gold'}</button>`:`<button class="primary" ${S.gold<pet.cost?'disabled':''} onclick="buy('${id}')">Unlock · ${fmt(pet.cost)} gold</button>`}</div></div>
- <div class="pet-gallery-roster" aria-label="Choose a pet">${portraits}</div></section>`;
+ ${id==='d1'?emberProgress():''}<div class="pet-gallery-roster" aria-label="Choose a pet">${portraits}</div></section>`;
 }
 function collection(){nav();if(filter==='dragon'){showPetGallery();return}$('#main').innerHTML=`<div class="topline"><div><p class="eyebrow">A COLLECTION OF WONDERS</p><h1>Wonders</h1></div><span class="badge">${S.owned.length} / ${ITEMS.length} collected</span></div>${sectionArtwork('scene-wonders','Pets and luminous wings in the sanctuary')}<button class="primary wishes-link" onclick="go('wish')">Make a wish</button><div class="tabs"><button class="${filter==='dragon'?'active':''}" onclick="filter='dragon';collection()">Pets</button><button class="${filter==='wings'?'active':''}" onclick="filter='wings';collection()">Wings</button></div><div class="grid collection-grid">${ITEMS.filter(i=>i.type===filter).map(i=>{const owned=S.owned.includes(i.id),equipped=S[i.type==='dragon'?'dragon':'wings']===i.id;return `<article class="card ${equipped?'selected':''}"><div class="wonder-card-status"><span class="rarity">${i.rarity.toUpperCase()}</span>${equipped?'<span class="equipped">EQUIPPED</span>':''}</div><div class="art">${art(i)}</div><p class="eyebrow">${i.title}</p><h3>${i.name}${i.type==='dragon'?' · Lv. '+WonderGear.petLevel(S,i.id):''}</h3><p>${i.desc}</p><div class="item-footer"><span>+${i.type==='dragon'?WonderGear.petAttack(S,i.id):i.power} ${i.type==='dragon'?'ATK':'DEF'}</span><button class="${equipped?'':'primary'}" ${equipped?'disabled':''} onclick="${owned?`equip('${i.id}')`:`buy('${i.id}')`}">${equipped?'Equipped':owned?'Equip':fmt(i.cost)+' gold'}</button></div>${owned&&i.type==='dragon'?`<button class="pet-upgrade" ${WonderGear.petLevel(S,i.id)>=WonderGear.petCap||S.gold<100*WonderGear.petLevel(S,i.id)?'disabled':''} onclick="upgradePet('${i.id}')">${WonderGear.petLevel(S,i.id)>=WonderGear.petCap?'Max level':'Upgrade · '+fmt(100*WonderGear.petLevel(S,i.id))+' gold'}</button>`:''}</article>`}).join('')}</div>`}
 function equip(id){const i=item(id);if(!S.owned.includes(id))return;S[i.type==='dragon'?'dragon':'wings']=id;save();collection();toast(i.name+' equipped')}
