@@ -5604,7 +5604,12 @@ body[data-playing] #main .crawl-actions button{pointer-events:auto;position:rela
 body[data-playing] #main .crawl-actions button strong{font-size:clamp(12px,2.1cqw,17px)}
 body[data-playing] #main .crawl-actions button small{font-size:10px;line-height:1}
 body[data-playing] #main .crawl-actions button .ui-icon{width:16px;height:16px}
+body[data-playing] #main .crawl-actions #skillDodge{min-width:64px;min-height:48px}
 .crawl-actions #skillDodge[data-warning=true]:enabled{outline:2px solid #ffe995;box-shadow:0 0 10px #ffce53}
+@media(prefers-reduced-motion:no-preference){
+ .crawl-actions #skillDodge[data-warning=true]:enabled{animation:dodge-warning .64s ease-in-out infinite alternate}
+ @keyframes dodge-warning{to{box-shadow:0 0 16px 3px #ffd36a,inset 0 0 9px #ffc968}}
+}
 
 body[data-screen=bag] #stage .bag-layout > .inventory-panel {
   background:linear-gradient(155deg,rgba(94,123,108,.97),rgba(67,96,85,.97));

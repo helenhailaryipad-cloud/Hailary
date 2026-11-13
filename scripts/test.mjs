@@ -184,7 +184,9 @@ const gearBefore=JSON.stringify(S);openHeroStats();showHeroStatTab('advanced');e
 const savedRandom=Math.random;Math.random=()=>.99;
 launchBattle('dungeon','mistwood');game.enemy.attack=100;game.stats.defense=0;game.stats.damageReduction=0;game.stats.block=0;game.stats.dodge=0;game.stats.critResistance=100;game.shield=60;const hpBefore=game.hp;
 launchEnemyStrike(game,1);if(game.shield!==60||game.hp!==hpBefore)throw Error('Damage before projectile arrival');
-battleSkill('dodge');updateCrawl(game,.46);if(game.shield!==60||game.hp!==hpBefore)throw Error('In-flight dodge failed');
+const dodgeStartY=game.crawl.hero.y;
+battleSkill('dodge');updateCrawl(game,.46);
+if(Math.abs(game.crawl.hero.y-dodgeStartY)!==52)throw Error('Dodge must move Reina sideways');if(game.shield!==60||game.hp!==hpBefore)throw Error('In-flight dodge failed');
 game.evade=0;
 enemyStrike(1);if(game.shield!==0||game.hp!==hpBefore-40)throw Error('Barrier must absorb once and pass remainder to HP');
 game.stage=1;battleEnemy();if(game.shield!==0)throw Error('New hall refilled barrier');

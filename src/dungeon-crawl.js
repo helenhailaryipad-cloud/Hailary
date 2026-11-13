@@ -6,6 +6,15 @@ const BOSS_LANE = {right:520, top:358, bottom:390};
 function setupCrawl(g){g.crawl={hero:{x:118,y:330,tx:285,ty:310},enemy:{x:520,y:300},engaged:false,exitReady:false,shots:[],danger:null,roomTime:0};}
 function crawlRoom(g){const a=g.crawl;a.hero={x:118,y:330,tx:285,ty:310};a.enemy={x:520,y:g.stage===2?BOSS_LANE.top:300};a.engaged=false;a.exitReady=false;a.shots=[];a.danger=null;a.roomTime=0;g.transition=0;}
 function moveRanger(x,y){const g=game;if(!g?.crawl||g.ended||gamePaused||!Number.isFinite(x)||!Number.isFinite(y))return;g.crawl.hero.tx=Math.max(84,Math.min(640,x));g.crawl.hero.ty=Math.max(235,Math.min(406,y));}
+function beginCrawlDodge(g){
+ const {hero,enemy,danger}=g.crawl;
+ const targetY=danger?.y??enemy.y;
+ let direction=hero.y>=targetY?1:-1;
+ if(hero.y+direction*52>406||hero.y+direction*52<235)direction=-direction;
+ hero.tx=hero.x;
+ hero.ty=hero.y+direction*52;
+ hero.dodgeUntil=g.clock+.22;
+}
 function walkDungeon(){const g=game;if(!g?.crawl||g.ended||gamePaused)return;if(g.crawl.exitReady)moveRanger(639,316);else moveRanger(Math.max(100,g.crawl.enemy.x-(g.enemy.boss ? BOSS_STANDOFF : 195)),g.crawl.enemy.y);}
 function bindCrawlInput(canvas){canvas.tabIndex=0;canvas.setAttribute('aria-label','Dungeon room. Tap the floor to move, tap an enemy to attack. Arrow keys move, E follows the path.');let pointer=null;const point=e=>{const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)*720/r.width,y:(e.clientY-r.top)*520/r.height};};canvas.addEventListener('pointerdown',e=>{if(game?.kind!=='battle'||!game.crawl||game.ended||gamePaused||pointer!==null)return;pointer=e.pointerId;canvas.setPointerCapture?.(pointer);const p=point(e),a=game.crawl;if(a.exitReady&&Math.hypot(p.x-649,p.y-316)<43){walkDungeon();return;}if(!a.exitReady&&hitsDungeonEnemy(game,p.x,p.y)){walkDungeon();battleSkill('burst');}else moveRanger(p.x,p.y);});canvas.addEventListener('pointermove',e=>{if(e.pointerId===pointer&&game?.crawl){const p=point(e);moveRanger(p.x,p.y);}});for(const event of ['pointerup','pointercancel'])canvas.addEventListener(event,()=>{pointer=null;});canvas.addEventListener('keydown',e=>{const g=game;if(!g?.crawl||g.ended||gamePaused)return;const delta={ArrowLeft:[-75,0],ArrowRight:[75,0],ArrowUp:[0,-55],ArrowDown:[0,55],a:[-75,0],d:[75,0],w:[0,-55],s:[0,55]}[e.key];if(delta){e.preventDefault();moveRanger(g.crawl.hero.x+delta[0],g.crawl.hero.y+delta[1]);}else if(e.key.toLowerCase()==='e'){e.preventDefault();walkDungeon();}});}
 function crawlShot(g,enemy=false,burst=false,strike=null){
@@ -22,7 +31,7 @@ function crawlShot(g,enemy=false,burst=false,strike=null){
 }
 function updateCrawl(g,dt){const a=g.crawl;a.roomTime+=dt;for(const p of a.shots)p.life-=dt;const impacts=a.shots.filter(p=>p.strike&&p.life<=0);a.shots=a.shots.filter(p=>p.life>0);const h=a.hero;
 if(g.enemy.boss && g.enemy.hp>0 && !a.exitReady) h.tx=Math.min(h.tx,a.enemy.x-BOSS_STANDOFF);
-const dist=Math.hypot(h.tx-h.x,h.ty-h.y),step=Math.min(dist,180*dt);if(dist>.5){h.x+=(h.tx-h.x)/dist*step;h.y+=(h.ty-h.y)/dist*step;}
+const dist=Math.hypot(h.tx-h.x,h.ty-h.y),step=Math.min(dist,(h.dodgeUntil>g.clock?320:180)*dt);if(dist>.5){h.x+=(h.tx-h.x)/dist*step;h.y+=(h.ty-h.y)/dist*step;}
 for(const p of impacts){if(!a.exitReady)enemyStrike(p.strike.multiplier,p.strike.special,p.strike.danger);if(g.ended)return true;}
 for(const shot of a.shots){
  if(shot.enemy||shot.released)continue;
@@ -52,7 +61,7 @@ return false;}
 function crawlHUD(g){const a=g.crawl;if(!a)return;const buttons=$('#crawlCombatButtons');if(buttons)buttons.hidden=a.exitReady||g.ended;
  const heal=$('#skillHeal');if(heal)heal.hidden=g.hp>=g.maxhp||a.exitReady||g.ended;
  const dodged=g.particles.some(p=>p.text==='EVADED'||p.text==='DODGED');
- const warning=g.telegraph>0&&!a.exitReady&&!g.ended;
+ const warning=(g.telegraph>0||a.shots.some(p=>p.strike?.special))&&!a.exitReady&&!g.ended;
  const cue=g.ended?(g.won?'Boss defeated':'Retreat'):a.exitReady?'Hall cleared':warning&&g.evade<=0?(g.dodgeCD>0?'Incoming strike! Move aside':'Incoming strike! Tap Dodge'):dodged?'Dodged!':g.evade>0?'Evading':a.engaged?'Tap the enemy to attack':'Tap the floor to move';
  const cueEl=$('#crawlCue');if(cueEl&&cueEl.textContent!==cue)cueEl.textContent=cue;
  const dodge=$('#skillDodge');if(dodge?.dataset)dodge.dataset.warning=String(warning);
