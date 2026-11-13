@@ -5401,10 +5401,14 @@ body #stage [data-tier][data-stars] {
   --star-tint:color-mix(in srgb,var(--rarity) 14%,transparent);
 }
 body #stage button.equipment-cell[data-tier][data-stars],
-body #stage .gear-workspace button.storage-slot[data-tier][data-stars],
-body #stage .gear-detail-header[data-tier][data-stars] .detail-item-icon {
+body #stage .gear-workspace button.storage-slot[data-tier][data-stars] {
   border:3px solid var(--rarity);
   box-shadow:0 0 4px color-mix(in srgb,var(--rarity) 55%,transparent);
+}
+body #stage .gear-detail-header[data-tier][data-stars] .detail-item-icon {
+  border:0;
+  background:transparent;
+  box-shadow:none;
 }
 body #stage .equipment-cell[data-tier][data-stars] .gear-stars {color:#fff3da}
 body #stage button.equipment-cell[data-tier] .gear-tier {
