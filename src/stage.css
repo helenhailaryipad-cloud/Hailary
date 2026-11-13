@@ -5659,7 +5659,7 @@ body[data-screen=bag] #stage .inventory-materials .material-summary {
  --face:#dce9c7; --hub:#188157; --cx:50.8%;
 }
 .boss-wheel-panel .boss-wheel-wrap{
- width:min(100%,420px);height:auto;aspect-ratio:622/592;margin:12px auto;
+ width:min(100%,560px);height:auto;aspect-ratio:622/592;margin:12px auto;
  background:var(--frame) center/100% 100% no-repeat;border-radius:16px;overflow:hidden;
 }
 .boss-wheel-wrap .boss-wheel{
@@ -5670,7 +5670,7 @@ body[data-screen=bag] #stage .inventory-materials .material-summary {
 }
 .boss-wheel-wrap .boss-wheel > span{
  display:grid;justify-items:center;align-content:center;gap:2px;box-sizing:border-box;
- width:25%;height:24%;margin:0;left:37.5%;top:38%;padding:0;
+ width:25%;max-width:none;height:24%;margin:0;left:37.5%;top:38%;padding:0;
  background:none;color:#42311c;text-shadow:0 1px #fff;font:700 clamp(11px,5cqw,19px)/1 Georgia;
  transform:rotate(calc(var(--slice)*45deg + 22.5deg)) translateY(-142%) rotate(calc(var(--slice)*-45deg - 22.5deg - var(--wheel-angle)));
 }
