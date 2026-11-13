@@ -5652,3 +5652,33 @@ body[data-screen=bag] #stage .inventory-materials {
 body[data-screen=bag] #stage .inventory-materials .material-summary {
   width:100%;max-width:var(--gear-cell-size);min-width:0;height:auto;aspect-ratio:1;
 }
+
+.boss-wheel-panel[data-theme] {
+ --frame:url(assets/generated/wheel-emerald.webp);
+ --face:#dce9c7; --hub:#188157; --cx:50.8%;
+}
+.boss-wheel-panel[data-theme=pearl] {
+ --frame:url(assets/generated/wheel-pearl.webp);
+ --face:#dce8ef; --hub:#efdbb0; --cx:49.5%;
+}
+.wheel-themes{display:flex;justify-content:center;gap:8px}
+.wheel-themes button{margin:0;padding:5px 16px;min-height:44px;font-size:16px}
+.wheel-themes button[aria-pressed=true]{outline:2px solid #ffdf88}
+.boss-wheel-panel .boss-wheel-wrap{
+ width:min(100%,420px);height:auto;aspect-ratio:622/592;margin:12px auto;
+ background:var(--frame) center/100% 100% no-repeat;border-radius:16px;overflow:hidden;
+}
+.boss-wheel-wrap .boss-wheel{
+ position:absolute;left:calc(var(--cx) - 35.6%);top:12%;width:71.2%;height:auto;aspect-ratio:1;
+ background:repeating-conic-gradient(#b89458 0deg .6deg,#fff3d8 .6deg 45deg,#b89458 45deg 45.6deg,var(--face) 45.6deg 90deg);
+ border:2px solid #d4ae64;box-shadow:inset 0 0 12px #b58d5255;container-type:inline-size;
+}
+.boss-wheel-wrap .boss-wheel > span{
+ display:grid;justify-items:center;align-content:center;gap:2px;box-sizing:border-box;
+ width:25%;height:24%;margin:0;left:37.5%;top:38%;padding:0;
+ background:none;color:#42311c;text-shadow:0 1px #fff;font:700 clamp(11px,5cqw,19px)/1 Georgia;
+ transform:rotate(calc(var(--slice)*45deg + 22.5deg)) translateY(-142%) rotate(calc(var(--slice)*-45deg - 22.5deg));
+}
+.boss-wheel-wrap .wheel-reward-icon{width:12cqw;height:12cqw}
+.boss-wheel-wrap .wheel-center{width:18%;height:18%;left:41%;top:41%;border:3px solid #dfb350;border-radius:50%;background:radial-gradient(circle at 35% 25%,#fffdf4,var(--hub) 48%,#a77e41 83%,#fff4be)}
+.boss-wheel-wrap .wheel-pointer{inset:0;background:var(--frame) center/100% 100%;clip-path:polygon(calc(var(--cx) - 4.6%) 9%,var(--cx) 1%,calc(var(--cx) + 4.6%) 9%,var(--cx) 22.5%);pointer-events:none}
