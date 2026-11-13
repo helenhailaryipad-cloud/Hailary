@@ -153,5 +153,6 @@ Moonshadow Blue Whale|whale|hp|8000|60000`.trim().split('\n');
    return migrateLegacy(JSON.parse(localStorage.getItem('wonder-fishing-records-v1')));
   }catch{return {}}
  }
- return {species,byId,bonuses,valid,migrateLegacy,recordCatch,totals,deviceRecords};
+ const artUrl=fish=>'assets/moonwater/'+fish.id+'.avif';
+ return {species,byId,bonuses,valid,migrateLegacy,recordCatch,totals,deviceRecords,artUrl};
 })();

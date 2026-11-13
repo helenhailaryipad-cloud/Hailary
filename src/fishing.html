@@ -62,6 +62,7 @@ body:not([data-phase=idle]) .fishing-settings{display:none}
 .gallery-grid img{width:100%;height:min(27dvh,230px);object-fit:contain;display:block;background:#10323a}
 #designDetail{display:block;width:100%;max-height:calc(90dvh - 72px);object-fit:contain}
 #designGallery [hidden]{display:none}
+#caughtArt:not([hidden]){display:block;width:100%;height:min(190px,30svh);object-fit:contain;background:#12343d;border-radius:8px;margin-bottom:10px}
 </style><main><header><div><h1>Moonwater Fishing</h1><span id="best"></span></div><button id="basket">Fish basket</button></header><details id="cup"><summary id="cupTitle"></summary><ol id="ranks"></ol><p id="cupPrize">First prize · Moonwater Pearl</p></details><div class="water"></div><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M8 74 Q20 49 34 36" fill="none" stroke="#d9b36c" stroke-width=".62"/><path d="M34 36 Q42 45 55.6 54" fill="none" stroke="#fff4cd" stroke-width=".14"/></svg><div class="float"></div><footer><p class="status" id="status" role="status">Cast your line into the lagoon.</p><div class="meter" id="rail"><span class="zone"></span><i class="needle"></i></div>
 <div class="controls">
  <button id="left" aria-label="Pull left">Left</button><button id="cast">Cast line</button>
@@ -86,7 +87,7 @@ body:not([data-phase=idle]) .fishing-settings{display:none}
  <button id="hold" hidden>Hold to reel right</button>
 </div>
 
-<div class="fishing-settings"><label class="mode-choice">Controls <select id="controlMode"><option value="arrows">Twin arrows</option><option value="drag">Pearl slider</option><option value="hold">Hold &amp; release</option></select></label><button id="viewDesigns" type="button">View 4 designs</button></div></footer></main><dialog><h2 id="title"></h2><p id="message"></p><button id="openCatchCard" type="button" hidden>View card</button> <button id="close">Continue</button></dialog>
+<div class="fishing-settings"><label class="mode-choice">Controls <select id="controlMode"><option value="arrows">Twin arrows</option><option value="drag">Pearl slider</option><option value="hold">Hold &amp; release</option></select></label><button id="viewDesigns" type="button">View 4 designs</button></div></footer></main><dialog><img id="caughtArt" alt="" hidden><h2 id="title"></h2><p id="message"></p><button id="openCatchCard" type="button" hidden>View card</button> <button id="close">Continue</button></dialog>
 <dialog id="designGallery" aria-labelledby="designTitle">
  <div class="gallery-bar"><button id="allDesigns" type="button" hidden>‹ All designs</button><h2 id="designTitle">Fishing designs</h2><button id="doneDesigns" type="button">Done</button></div>
  <div class="gallery-grid" id="designGrid"></div><img id="designDetail" hidden alt="">
@@ -187,7 +188,11 @@ function standings(){
 }
 standings();setInterval(standings,1000);
 function best(){el('best').textContent='Personal best · '+Math.max(0,...Object.values(album.read()).map(r=>r.kg)).toFixed(2)+' kg'}
-function popup(title,message,cardId){el('openCatchCard').hidden=!cardId;el('openCatchCard').onclick=()=>{dialog.close();album.open(cardId)};el('title').textContent=title;el('message').textContent=message;dialog.showModal()}
+function popup(title,message,cardId){
+ const fish=MoonwaterFish.byId.get(cardId),art=el('caughtArt');
+ art.hidden=!fish;
+ if(fish)art.src=MoonwaterFish.artUrl(fish);
+ el('openCatchCard').hidden=!cardId;el('openCatchCard').onclick=()=>{dialog.close();album.open(cardId)};el('title').textContent=title;el('message').textContent=message;dialog.showModal()}
 let phase='idle',pos=.5,target=.5,progress=0,time=0,last=0,seed=0;
 const catchMedal=el('catchMedal'),catchPercent=el('catchPercent');
 function renderCatch(){
