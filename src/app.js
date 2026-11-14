@@ -152,7 +152,7 @@ function wearOutfit(hero, outfit){
 }
 const reinaPieces = [
   {bit:1, slot:'Hair', classic:'Silver waves', name:'Lilac waves', price:400},
-  {bit:2, slot:'Dress', classic:'Grove silk', name:'Violet silk', price:1200},
+  {bit:2, slot:'Dress &amp; boots', classic:'Grove silk set', name:'Violet silk set', price:1200},
   {bit:4, slot:'Weapon', classic:'Golden bough', name:'Frostglass bow', price:800}
 ];
 let reinaPreview=0;
