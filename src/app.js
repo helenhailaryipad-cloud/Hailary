@@ -250,7 +250,7 @@ function cityDrawerAction(index){
  modal('<h2>'+label+'</h2><p>This section is in development.</p>');
 }
 function cityDrawerMarkup(){
- return '<nav class="city-drawer" id="city-drawer" aria-label="More activities" hidden>'+cityDrawerItems.map(([icon,label],i)=>'<button class="city-icon" onclick="cityDrawerAction('+i+')"><span class="city-glyph"><img src="'+artPath('hud-'+icon)+'" alt=""></span><span class="city-caption">'+label+'</span></button>').join('')+'</nav>';
+ return '<nav class="city-drawer" id="city-drawer" aria-label="More activities" hidden>'+cityDrawerItems.map(([icon,label],i)=>'<button class="city-icon" onclick="cityDrawerAction('+i+')"><span class="city-glyph"><img src="'+artPath('drawer-'+icon)+'" alt=""></span><span class="city-caption">'+label+'</span></button>').join('')+'</nav>';
 }
 function cityAction(target,label){
  if(target==='sale')go('eliteSale');
@@ -262,7 +262,7 @@ function cityAction(target,label){
 const cityArtVersion = document.querySelector('meta[name="wonder-release"]')?.content;
 const cityNotices=new Set(['shop','benefits','treasure','summon','gear','goldpass','clan','superpack','dream','rush']);
 function cityIcon([icon,label,target=''], artPrefix='hud-'){
- if(icon==='more')return '<button class="city-icon city-more" id="city-drawer-toggle" aria-label="More" aria-controls="city-drawer" aria-expanded="false" onclick="toggleCityDrawer()"><span class="city-four" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>';
+ if(icon==='more')return '<button class="city-icon city-more" id="city-drawer-toggle" aria-label="More" aria-controls="city-drawer" aria-expanded="false" onclick="toggleCityDrawer()"><img class="city-four" src="assets/generated/drawer-more.webp" alt=""></button>';
  const notice=cityNotices.has(icon)?'<i class="city-notice" aria-hidden="true">!</i>':'';
  return `<button class="city-icon" onclick="cityAction('${target}','${label}')" aria-label="${label}"><span class="city-glyph"><img src="${artPath(icon==='cloud-war-citadel'?icon:artPrefix+icon)}${cityArtVersion?'?v='+cityArtVersion:''}" alt="">${notice}</span><span class="city-caption">${label}</span></button>`;
 }
