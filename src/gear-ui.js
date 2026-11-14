@@ -554,7 +554,7 @@ const dailyCards=[
 const timedCards=[
  ['Elements','scene-exp','Material',1,5,'20:00'],['Dark Hunt','battle-dungeon','Material',10,0,'21:00'],
  ['Max Combo','scene-castle','EXP',1,10,'21:00'],['LostRealm','scene-realm','Material',2,10,'20:45'],
- ['Fishing','scene-wonders','EXP',1,10,'16:30'],['CloudWar','scene-dungeons','EXP',1,10,'19:30']
+ ['CloudWar','scene-dungeons','EXP',1,10,'19:30']
 ];
 let dailyPage=0;
 function dailyOpen(page){dailyPage=page;cityDaily()}
@@ -574,6 +574,7 @@ function cityDaily(){
    const action=timed?'<small>Available at<br>'+dest+'</small>':done>=max?'<b>Completed</b>':dest?'<button onclick="go(\''+dest+'\')">Go</button>':'<button disabled>Go</button>';
    return '<article class="daily-task">'+artImage(art,'')+'<i>'+kind+'</i><div><h3>'+name+'</h3><p>Times　'+done+'/'+max+'</p><p>Activity　'+(name==='EXP Forest'?activity:0)+'/'+points+'</p></div><aside>'+action+'</aside></article>';
   }).join('');
+  if(!timed)list='<article class="daily-task">'+artImage('fishing-design-compass','')+'<div><h3>Moonwater Fishing</h3><p>Always open</p></div><aside><button onclick="go(\'fishing\')">Go</button></aside></article>'+list;
  }else if(page===3){
   banner+='<div class="daily-jackpot">'+dailyTokens(['gear-armor-t6','hud-prisms','hud-gems'])+'</div><small>Lucky Bag EXP　0 / 55</small>';
   list='<div class="daily-columns"><b>Simple Lucky Bag</b><b>Luxury Lucky Bag</b></div>'+Array.from({length:16},(_,i)=>'<article class="daily-track">'+dailyTokens([['hud-gift','hud-pass','crystal'][i%3]])+'<b>'+ (i+1)+'</b><div>'+dailyTokens(['hud-prisms',i%2?'hud-gift':'hud-gems'])+'</div></article>').join('');

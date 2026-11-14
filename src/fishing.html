@@ -123,13 +123,13 @@ const album=parent.WonderFishAlbum || {
 };
 const lisbonClock=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Lisbon',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'});
 const anglers=['Nyra','Kael','Pip','Vesper'];
-const duration=1800;
+const secondsPerDay=86400;
 function eventTime(date=new Date()){
  const t=Object.fromEntries(lisbonClock.formatToParts(date).map(v=>[v.type,v.value]));
- const elapsed=(Number(t.hour)-21)*3600+Number(t.minute)*60+Number(t.second);
- return {day:t.year+'-'+t.month+'-'+t.day,elapsed,live:elapsed>=0&&elapsed<duration};
+ const elapsed=Number(t.hour)*3600+Number(t.minute)*60+Number(t.second);
+ return {day:t.year+'-'+t.month+'-'+t.day,elapsed};
 }
-let castDay='',cachedDay='',schedule=[],playerScore=0;
+let cachedDay='',schedule=[],playerScore=0;
 function loadCup(day){
  cachedDay=day;playerScore=0;schedule=[];
  try{playerScore=Number(localStorage.getItem('moonwater-cup-'+day))||0}catch{}
@@ -137,9 +137,9 @@ function loadCup(day){
  function random(){state=(Math.imul(state,1664525)+1013904223)>>>0;return state/4294967296}
  for(const name of anglers){
   const catches=[];
-  for(let at=15+random()*40;at<duration;at+=45+random()*95){
+  for(let at=15+random()*40;at<1800;at+=45+random()*95){
    const {name:species,min:lo,max:hi}=fish[Math.floor(random()**1.7*fish.length)];
-   catches.push({at,kg:+(lo+random()*(hi-lo)).toFixed(2),species});
+   catches.push({at:at*secondsPerDay/1800,kg:+(lo+random()*(hi-lo)).toFixed(2),species});
   }
   schedule.push({name,catches});
  }
@@ -156,7 +156,7 @@ function awardPearl(day,kg){
  try{localStorage.setItem(pearlKey,JSON.stringify(pearls))}catch{}
 }
 function settleCup(t){
- const marker=t.day+(t.elapsed>=duration?'closed':'open');
+ const marker=t.day;
  if(checkedFinal===marker)return;
  checkedFinal=marker;
  try{
@@ -165,7 +165,7 @@ function settleCup(t){
    loadCup(previous);awardPearl(previous,playerScore);loadCup(t.day);
   }
  }catch{}
- if(t.elapsed>=duration)awardPearl(t.day,playerScore);
+
 }
 function standings(){
  const t=eventTime();
@@ -174,11 +174,10 @@ function standings(){
  el('cupPrize').textContent=pearls.includes(t.day)?'First place! Moonwater Pearl added to your basket.':'First prize · Moonwater Pearl';
  const rows=schedule.map(bot=>({name:bot.name+' · AI',kg:bot.catches.reduce((best,c)=>c.at<=t.elapsed?Math.max(best,c.kg):best,0)}));
  rows.push({name:'You',kg:playerScore});rows.sort((a,b)=>b.kg-a.kg||(a.kg&&a.name==='You'?-1:b.kg&&b.name==='You'?1:0));
- const remaining=duration-t.elapsed;
- el('cupTitle').textContent=t.live?'Fishing Cup · '+Math.floor(remaining/60)+':'+String(remaining%60).padStart(2,'0')+' left':t.elapsed>=duration?'Final standings · Tomorrow at 21:00':'Fishing Cup · Today at 21:00 Lisbon';
+
+ el('cupTitle').textContent='Daily Fishing Cup · Standings';
  el('ranks').innerHTML=rows.map(row=>'<li class="'+(row.name==='You'?'self':'')+'">'+row.name+' · '+(row.kg?row.kg.toFixed(2)+' kg':'No catch')+'</li>').join('');
- if(t.live&&!standings.wasLive)el('cup').open=true;
- standings.wasLive=t.live;
+
 }
 standings();setInterval(standings,1000);
 function best(){el('best').textContent='Personal best · '+Math.max(0,...Object.values(album.read()).map(r=>r.kg)).toFixed(2)+' kg'}
@@ -262,7 +261,8 @@ function finish(won){
  const {id,name,min:low,max:high,bonus}=fish[Math.floor(Math.random()**1.7*fish.length)];
  const kg=+(low+(high-low)*Math.random()).toFixed(2),old=album.catch(id,kg);
  const t=eventTime();
- if(t.live&&t.day===castDay){
+ {
+  settleCup(t);
   if(cachedDay!==t.day)loadCup(t.day);
   playerScore=Math.max(playerScore,kg);
   try{localStorage.setItem('moonwater-last-entered',t.day);localStorage.setItem('moonwater-cup-'+t.day,String(playerScore))}catch{}
@@ -300,7 +300,7 @@ function startCast(){
   if(used>=dailyLimit){refreshQuota();return}
   localStorage.setItem(quotaKey,JSON.stringify({day:t.day,used:used+1,afterTestRefill:t.day==='2026-11-13'}));
  }catch{refreshQuota();return}
- castDay=t.live?t.day:'';phase='wait';time=progress=0;pos=target=steeringGoal=.5;seed=Math.random()*6;renderDial();last=performance.now();renderCatch();el('status').textContent='Watching the float…';el('castLabel').textContent='Line cast';controls();requestAnimationFrame(tick)};
+ phase='wait';time=progress=0;pos=target=steeringGoal=.5;seed=Math.random()*6;renderDial();last=performance.now();renderCatch();el('status').textContent='Watching the float…';el('castLabel').textContent='Line cast';controls();requestAnimationFrame(tick)};
 el('cast').onclick=()=>navigator.locks ? navigator.locks.request(quotaKey,startCast) : startCast();
 window.addEventListener('storage',refreshQuota);
 setInterval(refreshQuota,1000);
