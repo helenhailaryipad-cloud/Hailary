@@ -229,7 +229,7 @@ const cityGroups=[
 ];
 const cityDrawerItems=[
  ['fashion','Fashion','fashion'],['combat','Skill'],['upgrade','Advance'],['summon','Synthesize','cityCraft'],['clan','Guild'],['rank','Rankings','rankings'],
- ['pass','Gallery','petGallery'],['treasure','Legacy'],['shop','Trade'],['benefits','Couple'],['reinforce','Assist','petAssist'],['siege','OldGods'],
+ ['pass','Gallery','petGallery'],['treasure','Legacy'],['benefits','Couple'],['reinforce','Assist','petAssist'],['siege','OldGods'],
  ['isle','Otherworld'],['challenge','Fane'],['skin','Diviniform'],['gems','Element'],['gacha','BonusCard']
 ];
 function toggleCityDrawer(){
