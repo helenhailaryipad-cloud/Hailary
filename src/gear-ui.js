@@ -624,3 +624,23 @@ function cityBounty(){
  const empty='<div class="bounty-empty">'+artImage(journal?'hud-quest':['','hud-shop','hud-pass'][bountyPage],'')+'<strong>'+(journal?bountyRanks[bountyRank]:title)+'</strong></div>';
  $('#main').innerHTML='<section class="companion-room spirit-room bounty-room"><div class="satchel-top"><strong>Bounty</strong>'+wallet+'</div><header class="bounty-banner"><h2>'+title+'</h2>'+artImage(journal?'hud-chest':bountyPage===1?'hud-shop':'hud-pet','')+'</header>'+(journal?'<div class="bounty-track"><b>0<small>Adventure EXP</small></b><section>'+track+'</section></div>':'<div></div>')+'<div class="bounty-list">'+(journal&&bountyRank===0?cards:empty)+'</div><div class="companion-modes">'+(journal?ranks:'')+'</div><nav class="spirit-nav"><button aria-label="Back to city" onclick="go(\'home\')">‹</button>'+nav+'</nav></section>';
 }
+
+const huntModes=['World Boss','Personal Boss','Eternal Abyss','X-server'];
+let huntMode=0,huntFloor=1,huntSlot=0;
+function cityHunting(){
+ const bosses=DUNGEONS.filter(d=>d.tier===huntFloor),boss=bosses[huntSlot];
+ const mode=huntModes[huntMode],world=huntMode===0;
+ const wallet=[['gold',S.gold],['wishes',S.tickets],['crystals',S.scales]].map(([id,n])=>'<span>'+uiIcon(id)+fmt(n)+'</span>').join('');
+ const button=(label,active,action)=>'<button aria-pressed="'+active+'" onclick="'+action+'">'+label+'</button>';
+ const modes=huntModes.slice(0,3).map((name,i)=>button(name,huntMode===i,'huntMode='+i+';cityHunting()')).join('');
+ const floors=Array.from(new Set(DUNGEONS.map(d=>d.tier))).map(t=>button(t+'F',huntFloor===t,'huntFloor='+t+';huntSlot=0;cityHunting()')).join('');
+ const cards=bosses.map((d,i)=>button(artImage(d.art,'')+'<strong>'+d.boss+'</strong><small>Lv. '+d.recommended+'</small>',huntSlot===i,'huntSlot='+i+';cityHunting()')).join('');
+ const stamina=WonderAdventure.staminaLimit-WonderAdventure.dailyDungeon(S).spent;
+ const preview='<div class="hunt-title"><b>T'+boss.tier+' · '+boss.boss+'</b><small>Recommended level: '+boss.recommended+'</small></div>'+artImage(boss.art,boss.boss,'hunt-hero')+'<button class="hunt-stats" onclick="inspectBoss(\''+boss.id+'\')">'+artImage('hud-quest','')+'Boss Stats</button><aside><strong>Rewards</strong>'+[uiIcon('gold'),uiIcon('wishes'),uiIcon('equipment')].map(x=>'<span>'+x+'</span>').join('')+'</aside>';
+ const entry='<div class="hunt-energy">Energy: '+stamina+' / '+WonderAdventure.staminaLimit+'</div><button class="spirit-gold" '+(level()<boss.recommended||stamina<=0?'disabled':'')+' onclick="launchBattle(\'dungeon\',\''+boss.id+'\')">Proceed Now</button>';
+ $('#main').innerHTML='<section class="companion-room spirit-room hunt-room"><div class="satchel-top"><strong>'+mode+'</strong>'+wallet+'</div><div class="hunt-scene">'+(world?preview:'<div class="hunt-title">'+mode+'</div>'+artImage(huntMode===3?'hud-clan':'hud-hunting','','hunt-emblem'))+'</div><section class="hunt-picker">'+(world?'<div class="hunt-floors">'+floors+'</div><div class="hunt-cards">'+cards+'</div>'+entry:'')+'</section><div class="companion-modes">'+(huntMode!==3?modes:'')+'</div><nav class="spirit-nav"><button aria-label="Back to city" onclick="go(\'home\')">‹</button>'+button('Boss',huntMode!==3,'huntMode=0;cityHunting()')+button('X-server',huntMode===3,'huntMode=3;cityHunting()')+'</nav></section>';
+ if(world)for(const rail of document.querySelectorAll('.hunt-floors,.hunt-cards')){
+  const selected=rail.querySelector('[aria-pressed=true]');
+  rail.scrollLeft=selected.offsetLeft-(rail.clientWidth-selected.offsetWidth)/2;
+ }
+}
