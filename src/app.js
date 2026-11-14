@@ -79,7 +79,7 @@ function chooseSectionPage(id){
 function moreMenu(){$('#main').innerHTML=`<div class="game-section-title">${uiIcon('more')}<h1>Sky Garden</h1></div><div class="royal-launcher">${[['rankings','scene-ranking','Rankings','ranking'],['quests','scene-quests','Quests','quests'],['world','scene-realm','Realm','party'],['wish','scene-wishes','Wishes','wishes'],['settings','scene-settings','Journal','settings']].map(([id,scene,label,icon])=>`<button class="launcher-tile" aria-label="${label}" onclick="go('${id}')">${artImage(scene,label)}<span class="launcher-shade"></span><span class="launcher-icon">${uiIcon(icon)}</span><strong>${label}</strong></button>`).join('')}</div>`;}
 
 function stopGame(){$('#game')?._resize?.disconnect();delete document.body.dataset.playing;window.Wonder3D?.dispose();window.WonderEffects?.clear();clearInterval(worldTimer);clearInterval(rankingTimer);cancelAnimationFrame(loop);loop=0;if(game){game.running=false;game=null}gamePaused=false}
-function go(id){if(game?.running&&!game.ended){modal(`<p class="eyebrow">ADVENTURE IN PROGRESS</p><h2>Leave this adventure?</h2><p>This run will end without a reward. Your collection and progress are safe.</p><button onclick="$('#modal').close();openScreen('${id}')">Leave adventure</button>`,'Stay');return}openScreen(id)}
+function go(id){if(screen==='home'&&id!=='home'&&$('#city-drawer')?.hidden)returnToDrawer=false;if(game?.running&&!game.ended){modal(`<p class="eyebrow">ADVENTURE IN PROGRESS</p><h2>Leave this adventure?</h2><p>This run will end without a reward. Your collection and progress are safe.</p><button onclick="$('#modal').close();openScreen('${id}')">Leave adventure</button>`,'Stay');return}openScreen(id)}
 let selectedFishCard='';
 window.WonderFishAlbum={
  read:()=>S.fishCards||MoonwaterFish.deviceRecords(),
@@ -99,7 +99,7 @@ function showFishJournal(){
  selectedFishCard='';
  $('#main').innerHTML='<iframe class="album-frame" title="Fish Journal" src="fish-journal.html'+query+'"></iframe>';
 }
-function openScreen(id){if(id==='eliteSale'){eliteTab=0;eliteHero='reina';}if(id==='cityExplore')exploreNode=0;if(id==='cityHunting'){huntMode=0;huntFloor=WonderGear.unlockedTier(S);huntSlot=0;}if(id==='cityBounty'){bountyPage=0;bountyRank=0;}if(id==='cityGameplay'){playSection=0;playMaterial=0;playTier=3;}if(id==='cityDaily')dailyPage=0;if(id==='cityForge'){smithPage='Forge';smithMode='Identify';smithUid=null;}if(id==='citySkin'){skinTab=0;skinMode='Upgrade';skinVariant=0;skinHidden=false;}if(id==='cityCompanion'){companionKey='elf';companionMode='Upgrade';}if(id==='cityPet'){petPage='Formation';petFocus=S.dragon;}if(id==='home')cityExpanded=false;if(id==='fashion')reinaPreview=S.reinaFashion?.equipped || 0;stopGame();screen=id;nav();render();$('#main').scrollTop=0;$('#main').scrollLeft=0;window.WonderEffects?.enter?.()}
+function openScreen(id){if(id==='eliteSale'){eliteTab=0;eliteHero='reina';}if(id==='cityExplore')exploreNode=0;if(id==='cityHunting'){huntMode=0;huntFloor=WonderGear.unlockedTier(S);huntSlot=0;}if(id==='cityBounty'){bountyPage=0;bountyRank=0;}if(id==='cityGameplay'){playSection=0;playMaterial=0;playTier=3;}if(id==='cityDaily')dailyPage=0;if(id==='cityForge'){smithPage='Forge';smithMode='Identify';smithUid=null;}if(id==='citySkin'){skinTab=0;skinMode='Upgrade';skinVariant=0;skinHidden=false;}if(id==='cityCompanion'){companionKey='elf';companionMode='Upgrade';}if(id==='cityPet'){petPage='Formation';petFocus=S.dragon;}const restoreDrawer=id==='home'&&returnToDrawer;if(id==='home'){cityExpanded=false;returnToDrawer=false;}if(id==='fashion')reinaPreview=S.reinaFashion?.equipped || 0;stopGame();screen=id;nav();render();if(restoreDrawer)toggleCityDrawer();$('#main').scrollTop=0;$('#main').scrollLeft=0;window.WonderEffects?.enter?.()}
 function render(){document.body.classList.remove('is-3d');document.body.dataset.screen=screen;wallet();nav();if(screen==='eliteSale')eliteStore();else if(screen==='cloudWar')cityCloudWar();else if(screen==='cityExplore')cityExplore();else if(screen==='cityHunting')cityHunting();else if(screen==='cityBounty')cityBounty();else if(screen==='cityGameplay')cityGameplay();else if(screen==='cityDaily')cityDaily();else if(screen==='cityForge')cityForge();else if(screen==='citySkin')citySkin();else if(screen==='cityCompanion')cityCompanion();else if(screen==='cityPet')cityPet();else if(screen==='cityCraft')cityCraft();else if(screen==='cityBag')cityBag();else if(screen==='character')reinaCharacter();else if(screen==='fashion')reinaAtelier();else if(screen==='attributes')characterSheet();else if(['inventory','forge','warehouse'].includes(screen))gearWorkspace();else if(screen==='profile')heroProfile();else if(screen==='home')home();else if(screen==='intro')intro();else if(screen==='more')moreMenu();else if(screen==='bag')bag();else if(screen==='collection')collection();else if(screen==='wish')wish();else if(screen==='games')games();else if(screen==='cards')showFishJournal();else if(screen==='fishing')$('#main').innerHTML=`<iframe title="Moonwater Fishing" src="fishing.html" style="display:block;width:100%;height:100%;min-height:290px;border:0;border-radius:12px"></iframe>`;else if(screen==='world')realm();else if(screen==='rankings')rankings();else if(screen==='quests')questBoard();else if(screen==='expLobby')expLobby();else if(screen==='dungeons')dungeonLobby();else if(screen==='settings')settings();else if(screen==='defense')startDefense();else if(screen==='merge')startMerge();else if(screen==='vale')startVale();requestAnimationFrame(decorateArt)}
 function renderHeroReadout(st){$('#profileReadout').innerHTML=`<div class="profile-face"><img src="assets/generated/reina-avatar.webp" alt="Reina"><b>Lv. ${level()}</b></div><div class="profile-vitals"><strong aria-label="Combat power ${fmt(st.power)}">${uiIcon('power')}<small>Power</small>${fmt(st.power)}</strong><span class="profile-hp">HP ${fmt(st.health)}</span></div>`;}
 const mounts = [
@@ -233,6 +233,7 @@ const cityDrawerItems=[
  ['isle','Otherworld'],['challenge','Fane'],['skin','Diviniform'],['gems','Element'],['gacha','BonusCard']
 ];
 function toggleCityDrawer(){
+ returnToDrawer=false;
  const panel=$('#city-drawer'),toggle=$('#city-drawer-toggle');
  panel.hidden=!panel.hidden;
  toggle.setAttribute('aria-expanded',String(!panel.hidden));
@@ -243,7 +244,14 @@ function toggleCityDrawer(){
   fold.setAttribute('aria-expanded','false');fold.setAttribute('aria-label','Show events');
  }
 }
+let returnToDrawer=false;
+function returnToMenu(){
+ const dialog=$('#modal');
+ if(dialog.open)dialog.close();
+ go('home');
+}
 function cityDrawerAction(index){
+ returnToDrawer=true;
  const [,label,target]=cityDrawerItems[index];
  if(target==='petGallery'||target==='petAssist'){go('cityPet');petTab(target==='petGallery'?'Gallery':'Assist');return}
  if(target){go(target);return}
