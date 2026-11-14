@@ -226,3 +226,17 @@ function transferGear(uid,stored){
  if(stored)entry.stored=true;else delete entry.stored;
  S.equipment=eq;save();gearWorkspace();
 }
+
+function reinaCharacter(records=false){
+ const st=stats(),progress=WonderProgress,cap=level()===progress.maxLevel;
+ const xp=cap?progress.xpPerLevel:S.xp%progress.xpPerLevel;
+ const rows=[['ATK','attack'],['HP','health'],['ARP','penetration'],['DEF','defense'],['Accuracy','accuracy'],['Dodge','dodge'],['Crit','crit'],['RSL','critResistance'],['Shield HP','shieldHealth'],['Sparring Point','sparWins']];
+ const attributes=rows.map(([label,key])=>`<div>${statIcon(key==='sparWins'?'attack':key,'stat-art')}<span>${label}</span><b>${key==='sparWins'?fmt(S.sparWins||0):heroStatValue(key,st)}</b></div>`).join('');
+ const history=[['Dungeon victories',S.dungeonWins],['Sparring victories',S.sparWins],['Castle Defense victories',S.defenseWins],['Best Dragon Merge score',S.mergeBest]];
+ $('#main').innerHTML=`<section class="reina-sheet"><header><strong>${records?'Achievements':'Character'}</strong><h1>Lv. ${level()} &nbsp;${esc(S.name)}</h1></header>
+ <div class="reina-display"><div class="reina-plinth"></div><div class="reina-sheet-wings">${artImage(S.wings,'')}</div><img class="reina-figure" src="${reinaLookPath(false)}" alt="Reina"><div class="reina-familiar">${dragonSVG(item(S.dragon))}</div>
+ <aside><button onclick="go('profile')">${uiIcon('hero')}Profile</button><button onclick="go('fashion')">${uiIcon('equipment')}Fashion</button><button onclick="go('settings')">${uiIcon('settings')}Settings</button></aside></div>
+ <button class="reina-power" aria-label="Combat power and all attributes" onclick="openHeroStats()">${statIcon('power')}${fmt(st.power)}</button>
+ <section class="reina-values">${records?`<div class="reina-records">${history.map(([name,n])=>`<div>${name}<b>${fmt(n||0)}</b></div>`).join('')}</div>`:`<div class="reina-exp"><b>EXP</b><div role="progressbar" aria-label="Level experience" aria-valuenow="${xp}" aria-valuemax="${progress.xpPerLevel}"><i style="width:${100*xp/progress.xpPerLevel}%"></i><span>${cap?'MAX':xp+' / '+progress.xpPerLevel}</span></div></div><div class="reina-grid">${attributes}</div><button class="reina-details" onclick="openHeroStats()">All attributes ›</button>`}</section>
+ <div class="reina-sheet-nav"><button aria-label="Back to city" onclick="go('home')">‹</button><button aria-pressed="${!records}" onclick="reinaCharacter()">${uiIcon('hero')}Character</button><button aria-pressed="${records}" onclick="reinaCharacter(true)">${uiIcon('laurel')}Achievements</button></div></section>`;
+}

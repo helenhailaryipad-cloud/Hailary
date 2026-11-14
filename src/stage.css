@@ -5996,3 +5996,30 @@ body[data-screen=home] #stage .city-hud .city-chat small{box-sizing:border-box;f
 body[data-screen=home] #stage .city-event small{font:700 1.5cqw/1.15 Arial,sans-serif}
 body[data-screen=home] #stage .city-tools{width:9%;right:0;top:63%}
 body[data-screen=home] #stage .city-tools .city-caption{font-size:1.45cqw}
+
+body[data-screen=character] #stage{width:min(100%,62dvh);margin-inline:auto}
+body[data-screen=character] #stage>:is(header,nav,footer){display:none!important}
+body[data-screen=character] #stage>#main{inset:0!important;padding:0!important;width:100%;height:100%;display:block;overflow:auto}
+.reina-sheet{height:100%;min-height:470px;box-sizing:border-box;container-type:inline-size;display:grid;grid-template-rows:9% minmax(0,1fr) 6% auto 8%;color:#fff4dc;background:radial-gradient(ellipse at 45% 44%,#6071aa88,transparent 45%),linear-gradient(#21213e,#354774 43%,#36777e 90%,#33475b);font:650 clamp(12px,1.8vh,21px)/1.14 Arial,sans-serif}
+#stage .reina-sheet header{position:relative;display:flex;align-items:end;justify-content:center;background:none;box-shadow:none;border:0;padding:0}
+.reina-sheet header strong{position:absolute;left:0;top:20%;padding:.35em .8em;color:#fff4ce;background:#42748d;border-left:3px solid #ebcc89;font-size:3cqw}
+.reina-sheet h1{margin:0;font-size:3.8cqw;color:#fff2d5}
+.reina-display{position:relative;min-height:0;isolation:isolate}
+.reina-figure,.reina-sheet-wings,.reina-familiar,.reina-plinth{position:absolute}
+.reina-figure{inset:5% 10% 4%;width:80%;height:91%;object-fit:contain}
+.reina-sheet-wings{inset:10% 10% 30%}.reina-sheet-wings img,.reina-familiar>*{width:100%;height:100%;object-fit:contain}
+.reina-familiar{right:9%;top:7%;width:21%;height:23%}
+.reina-plinth{bottom:3%;left:27%;width:46%;height:4%;background:radial-gradient(ellipse,#f9d99280,transparent 70%)}
+.reina-display aside{position:absolute;right:2%;bottom:-9%;display:grid;gap:1vh;z-index:1}
+#stage #main .reina-sheet button{position:relative;margin:0;min-height:0;min-width:0;border:0;outline:0;box-shadow:none;background:transparent;font:inherit;color:inherit;padding:.25em;cursor:pointer}
+#stage #main .reina-sheet button:focus-visible{outline:2px solid #ffe9ab}
+#stage #main .reina-sheet button:after,#stage #main .reina-sheet button:before{content:none}
+.reina-sheet .gpt-icon{display:inline-block;width:1.45em;height:1.45em;flex:none}
+.reina-display aside button,.reina-sheet-nav button{display:grid;place-items:center;font-size:2.5cqw!important}
+#stage #main .reina-power{justify-self:center;display:flex;align-items:center;gap:.25em;color:#ffcd87;font-size:4.6cqw}
+.reina-values{margin:0 2% 2%;padding:1.5%;background:#20394fb8;border:1px solid #a5c2b77a;border-radius:4px}
+.reina-exp,.reina-grid>div,.reina-records>div{display:flex;align-items:center;gap:.45em;padding:.43em .55em}
+.reina-exp{justify-content:center}.reina-exp>div{position:relative;width:68%;background:#243148;text-align:center}.reina-exp i{position:absolute;inset:0 auto 0 0;background:#75ab51}.reina-exp span{position:relative;text-shadow:0 1px 2px #111}
+.reina-grid{display:grid;grid-template-columns:1fr 1fr;font-size:2.85cqw}.reina-grid b,.reina-records b{margin-left:auto}.reina-grid>div:nth-child(4n+1),.reina-grid>div:nth-child(4n+2),.reina-records>div:nth-child(odd){background:#809abb28}
+#stage #main .reina-details{display:block;margin-left:auto;color:#ffe2a0;font-size:2.65cqw}
+.reina-sheet-nav{display:flex;align-items:stretch;justify-content:end;gap:3%;padding:0 3%;background:#253a56}.reina-sheet-nav button:first-child{margin-right:auto!important;font-size:6cqw!important}.reina-sheet-nav button[aria-pressed=true]{color:#ffe19e!important;border-bottom:3px solid #edbd73!important}
