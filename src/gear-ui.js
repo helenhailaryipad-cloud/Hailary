@@ -711,3 +711,18 @@ function cityCloudWar(){
  const markers=nodes.map((p,i)=>'<button class="cloud-place" style="left:'+p.x+'%;top:'+p.y+'%;--banner:'+(p.color||'#ffe0a2')+'" onclick="cloudTerritory('+i+')">'+artImage(p.art,'')+'<b>'+p.name+'</b><small>'+p.owner+'</small></button>').join('');
  $('#main').innerHTML='<section class="cloud-war"><header><strong>Cloud War</strong><small>Battle starts at 19:30</small></header><nav aria-label="Faction count">'+[2,3,4].map(n=>'<button aria-pressed="'+(cloudCount===n)+'" onclick="cloudCount='+n+';cityCloudWar()">'+n+' Factions</button>').join('')+'</nav><div class="cloud-field"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'+lines+'</svg>'+markers+'</div><footer><button aria-label="Back to city" onclick="go(\'home\')">‹</button><button onclick="cloudBrief('+[3,2,4].indexOf(cloudCount)+')">War Guide</button></footer></section>';
 }
+
+let eliteTab=0,eliteHero='reina';
+function eliteStore(){
+ const sale=activeFashionSale(),set=partyWardrobe[sale.hero];
+ const tabs=['Outfit Pack','Weapon Pack','Chat Bubble Pack'];
+ const names=[['Outfit Pack','Hair Accessory Pack'],['Weapon Pack'],['Chat Bubble Pack','Avatar Pack']][eliteTab];
+ const hero=dressedHero(eliteHero,set.id,set.outfit);
+ const previews=[[hero,'<div class="elite-hair">'+hero+'</div>'],[artImage('gear-bow-t'+sale.tier,set.outfit+' bow')],['<span class="elite-bubble">Hello!</span>','<span class="elite-frame">'+artImage('reina-avatar','Avatar frame')+'</span>']][eliteTab];
+ const select='<label>Try on <select onchange="eliteHero=this.value;eliteStore()">'+[['reina','Reina'],...Object.entries(partyWardrobe).map(([id,v])=>[id,v.label])].map(([id,name])=>'<option value="'+id+'" '+(eliteHero===id?'selected':'')+'>'+name+'</option>').join('')+'</select></label>';
+ const cards=names.map((name,i)=>{
+  const action=name==='Outfit Pack'?'<button onclick="wardrobe(eliteHero,partyWardrobe[activeFashionSale().hero].id)">Try on · All classes</button>':name==='Weapon Pack'?'<button onclick="fashionSale()">Bow upgrades</button>':'';
+  return '<article><div class="elite-art">'+previews[i]+'</div><div class="elite-price"><h3>'+name+'</h3><p>'+artImage('crystal','Crystals')+'680</p><del>€31.99</del><strong>€10.99 · Preview</strong>'+action+'</div></article>';
+ }).join('');
+ $('#main').innerHTML='<section class="elite-store"><header><small>'+set.outfit+' Collection</small><h1>Fashion Elite Sale</h1><span>Rotation ends '+new Date(sale.end).toISOString().slice(0,10)+' UTC</span>'+(eliteTab===0?select:'')+'</header><div class="elite-cards">'+cards+'</div><nav><button aria-label="Back to city" onclick="go(\'home\')">‹</button>'+tabs.map((t,i)=>'<button aria-pressed="'+(i===eliteTab)+'" onclick="eliteTab='+i+';eliteStore()">'+t+'</button>').join('')+'</nav></section>';
+}

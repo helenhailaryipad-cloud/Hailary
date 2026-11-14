@@ -99,8 +99,8 @@ function showFishJournal(){
  selectedFishCard='';
  $('#main').innerHTML='<iframe class="album-frame" title="Fish Journal" src="fish-journal.html'+query+'"></iframe>';
 }
-function openScreen(id){if(id==='cityExplore')exploreNode=0;if(id==='cityHunting'){huntMode=0;huntFloor=WonderGear.unlockedTier(S);huntSlot=0;}if(id==='cityBounty'){bountyPage=0;bountyRank=0;}if(id==='cityGameplay'){playSection=0;playMaterial=0;playTier=3;}if(id==='cityDaily')dailyPage=0;if(id==='cityForge'){smithPage='Forge';smithMode='Identify';smithUid=null;}if(id==='citySkin'){skinTab=0;skinMode='Upgrade';skinVariant=0;skinHidden=false;}if(id==='cityCompanion'){companionKey='elf';companionMode='Upgrade';}if(id==='cityPet'){petPage='Formation';petFocus=S.dragon;}if(id==='home')cityExpanded=false;if(id==='fashion')reinaPreview=S.reinaFashion?.equipped || 0;stopGame();screen=id;nav();render();$('#main').scrollTop=0;$('#main').scrollLeft=0;window.WonderEffects?.enter?.()}
-function render(){document.body.classList.remove('is-3d');document.body.dataset.screen=screen;wallet();nav();if(screen==='cloudWar')cityCloudWar();else if(screen==='cityExplore')cityExplore();else if(screen==='cityHunting')cityHunting();else if(screen==='cityBounty')cityBounty();else if(screen==='cityGameplay')cityGameplay();else if(screen==='cityDaily')cityDaily();else if(screen==='cityForge')cityForge();else if(screen==='citySkin')citySkin();else if(screen==='cityCompanion')cityCompanion();else if(screen==='cityPet')cityPet();else if(screen==='cityCraft')cityCraft();else if(screen==='cityBag')cityBag();else if(screen==='character')reinaCharacter();else if(screen==='fashion')reinaAtelier();else if(screen==='attributes')characterSheet();else if(['inventory','forge','warehouse'].includes(screen))gearWorkspace();else if(screen==='profile')heroProfile();else if(screen==='home')home();else if(screen==='intro')intro();else if(screen==='more')moreMenu();else if(screen==='bag')bag();else if(screen==='collection')collection();else if(screen==='wish')wish();else if(screen==='games')games();else if(screen==='cards')showFishJournal();else if(screen==='fishing')$('#main').innerHTML=`<iframe title="Moonwater Fishing" src="fishing.html" style="display:block;width:100%;height:100%;min-height:290px;border:0;border-radius:12px"></iframe>`;else if(screen==='world')realm();else if(screen==='rankings')rankings();else if(screen==='quests')questBoard();else if(screen==='expLobby')expLobby();else if(screen==='dungeons')dungeonLobby();else if(screen==='settings')settings();else if(screen==='defense')startDefense();else if(screen==='merge')startMerge();else if(screen==='vale')startVale();requestAnimationFrame(decorateArt)}
+function openScreen(id){if(id==='eliteSale'){eliteTab=0;eliteHero='reina';}if(id==='cityExplore')exploreNode=0;if(id==='cityHunting'){huntMode=0;huntFloor=WonderGear.unlockedTier(S);huntSlot=0;}if(id==='cityBounty'){bountyPage=0;bountyRank=0;}if(id==='cityGameplay'){playSection=0;playMaterial=0;playTier=3;}if(id==='cityDaily')dailyPage=0;if(id==='cityForge'){smithPage='Forge';smithMode='Identify';smithUid=null;}if(id==='citySkin'){skinTab=0;skinMode='Upgrade';skinVariant=0;skinHidden=false;}if(id==='cityCompanion'){companionKey='elf';companionMode='Upgrade';}if(id==='cityPet'){petPage='Formation';petFocus=S.dragon;}if(id==='home')cityExpanded=false;if(id==='fashion')reinaPreview=S.reinaFashion?.equipped || 0;stopGame();screen=id;nav();render();$('#main').scrollTop=0;$('#main').scrollLeft=0;window.WonderEffects?.enter?.()}
+function render(){document.body.classList.remove('is-3d');document.body.dataset.screen=screen;wallet();nav();if(screen==='eliteSale')eliteStore();else if(screen==='cloudWar')cityCloudWar();else if(screen==='cityExplore')cityExplore();else if(screen==='cityHunting')cityHunting();else if(screen==='cityBounty')cityBounty();else if(screen==='cityGameplay')cityGameplay();else if(screen==='cityDaily')cityDaily();else if(screen==='cityForge')cityForge();else if(screen==='citySkin')citySkin();else if(screen==='cityCompanion')cityCompanion();else if(screen==='cityPet')cityPet();else if(screen==='cityCraft')cityCraft();else if(screen==='cityBag')cityBag();else if(screen==='character')reinaCharacter();else if(screen==='fashion')reinaAtelier();else if(screen==='attributes')characterSheet();else if(['inventory','forge','warehouse'].includes(screen))gearWorkspace();else if(screen==='profile')heroProfile();else if(screen==='home')home();else if(screen==='intro')intro();else if(screen==='more')moreMenu();else if(screen==='bag')bag();else if(screen==='collection')collection();else if(screen==='wish')wish();else if(screen==='games')games();else if(screen==='cards')showFishJournal();else if(screen==='fishing')$('#main').innerHTML=`<iframe title="Moonwater Fishing" src="fishing.html" style="display:block;width:100%;height:100%;min-height:290px;border:0;border-radius:12px"></iframe>`;else if(screen==='world')realm();else if(screen==='rankings')rankings();else if(screen==='quests')questBoard();else if(screen==='expLobby')expLobby();else if(screen==='dungeons')dungeonLobby();else if(screen==='settings')settings();else if(screen==='defense')startDefense();else if(screen==='merge')startMerge();else if(screen==='vale')startVale();requestAnimationFrame(decorateArt)}
 function renderHeroReadout(st){$('#profileReadout').innerHTML=`<div class="profile-face"><img src="assets/generated/reina-avatar.webp" alt="Reina"><b>Lv. ${level()}</b></div><div class="profile-vitals"><strong aria-label="Combat power ${fmt(st.power)}">${uiIcon('power')}<small>Power</small>${fmt(st.power)}</strong><span class="profile-hp">HP ${fmt(st.health)}</span></div>`;}
 const mounts = [
   {id:'silver-tabby', name:'Silver Tabby', rarity:'Common', icon:'silver-tabby-icon', rider:'reina-silver-tabby'}
@@ -122,33 +122,40 @@ const partyWardrobe = {
   healer:{label:'Priestess', outfit:'Lilyveil', id:'lilyveil', gold:1200},
   rogue:{label:'Rogue', outfit:'Emberleaf', id:'emberleaf', gold:1200}
 };
-function dressedHero(hero, outfit, label){
-  const costume = outfit === partyWardrobe[hero].id ? outfit : 'classic';
-  const release = encodeURIComponent(document.querySelector('meta[name=wonder-release]')?.content || 'layers-1');
-  const asset = suffix => artPath('party-'+hero+'-'+suffix)+'?v='+release;
-  return `<span class="dressed-hero" role="img" aria-label="${label}"><img src="${asset('base')}" alt=""><img src="${asset('wear-'+costume)}" alt=""></span>`;
+const outfitCatalog=Object.fromEntries(Object.values(partyWardrobe).map(item=>[item.id,item]));
+outfitCatalog.moonblossom={id:'moonblossom',outfit:'Moonblossom',gold:1200};
+const outfitColors={roseguard:320,starfall:195,lilyveil:65,emberleaf:345,moonblossom:235};
+function ownsOutfit(id){
+  return !id || Boolean(S.costumes?.owned?.includes(id)) || (id==='moonblossom' && Boolean(S.reinaFashion?.owned & 2));
 }
-function wardrobe(hero, outfit = S.costumes?.equipped?.[hero] || ''){
-  const item = partyWardrobe[hero];
-  const special = outfit === item.id;
-  const owned = !special || S.costumes?.owned?.includes(item.id);
-  const equipped = (S.costumes?.equipped?.[hero] || '') === outfit;
-  const action = equipped ? 'Equipped' : owned ? 'Equip' : 'Buy & equip · '+fmt(item.gold)+' gold';
-  modal(`<div class="outfit-room"><h2>${item.label} · Wardrobe</h2>${dressedHero(hero,outfit,item.label)}<div class="outfit-options">${[['','Classic'],[item.id,item.outfit]].map(([id,name])=>`<button aria-pressed="${id===outfit}" onclick="wardrobe('${hero}','${id}')">${name}</button>`).join('')}</div><button class="primary" ${equipped || (!owned && S.gold<item.gold) ? 'disabled' : ''} onclick="wearOutfit('${hero}','${special?item.id:''}')">${action}</button></div>`);
+function dressedHero(hero,outfit,label){
+  const look=outfitCatalog[outfit], native=partyWardrobe[hero];
+  if(hero==='reina')return '<span class="dressed-hero"><img src="'+reinaLookPath(false,look?2:0,look?.id||'')+'" alt="'+label+'"></span>';
+  const tint=look && look.id!==native.id?' style="filter:grayscale(1) sepia(.85) saturate(2.4) hue-rotate('+outfitColors[outfit]+'deg)"':'';
+  return '<span class="dressed-hero" role="img" aria-label="'+label+'"><img src="'+artPath('party-'+hero+'-base')+'" alt=""><img src="'+artPath('party-'+hero+'-wear-'+(look?native.id:'classic'))+'" alt=""'+tint+'></span>';
 }
-function wearOutfit(hero, outfit){
-  const item = partyWardrobe[hero];
-  if(!item || (outfit && outfit !== item.id)) return;
-  const closet = S.costumes ??= {owned:[], equipped:{}};
-  if(outfit && !closet.owned.includes(outfit)){
-    if(S.gold < item.gold) return;
-    S.gold -= item.gold;
-    closet.owned.push(outfit);
+function wardrobe(hero,outfit=S.costumes?.equipped?.[hero] || (hero==='reina' && (S.reinaFashion?.equipped & 2)?'moonblossom':'')){
+  const label=hero==='reina'?'Reina':partyWardrobe[hero].label, item=outfitCatalog[outfit];
+  const current=S.costumes?.equipped?.[hero] || (hero==='reina' && (S.reinaFashion?.equipped & 2)?'moonblossom':'');
+  const choices=[{id:'',outfit:'Classic'},...Object.values(outfitCatalog)];
+  const action=current===outfit?'Equipped':ownsOutfit(outfit)?'Equip':'Buy & equip · '+fmt(item.gold)+' gold';
+  modal(`<div class="outfit-room"><h2>${label} · Wardrobe</h2>${dressedHero(hero,outfit,label)}<div class="outfit-options">${choices.map(o=>`<button aria-pressed="${o.id===outfit}" onclick="wardrobe('${hero}','${o.id}')">${o.outfit}</button>`).join('')}</div><button class="primary" ${current===outfit||(!ownsOutfit(outfit)&&S.gold<item.gold)?'disabled':''} onclick="wearOutfit('${hero}','${outfit}')">${action}</button></div>`);
+}
+function wearOutfit(hero,outfit){
+  if((hero!=='reina'&&!partyWardrobe[hero])||(outfit&&!outfitCatalog[outfit]))return;
+  const closet=S.costumes??={};closet.owned??=[];closet.equipped??={};
+  if(!ownsOutfit(outfit)){
+    const price=outfitCatalog[outfit].gold;
+    if(S.gold<price)return;
+    S.gold-=price;closet.owned.push(outfit);
   }
-  closet.equipped[hero] = outfit;
-  save();
-  home();
-  wardrobe(hero,outfit);
+  closet.equipped[hero]=outfit;
+  if(hero==='reina'){
+    const pieces=S.reinaFashion??={owned:0,equipped:0};
+    pieces.equipped=outfit?pieces.equipped|2:pieces.equipped&~2;
+    if(outfit==='moonblossom')pieces.owned|=2;
+  }
+  save();render();wardrobe(hero,outfit);
 }
 const reinaPieces = [
   {bit:1, slot:'Hair', classic:'Silver waves', name:'Lilac waves', price:400},
@@ -156,11 +163,14 @@ const reinaPieces = [
   {bit:4, slot:'Weapon', classic:'Golden bough', name:'Frostglass bow', price:800}
 ];
 let reinaPreview=0;
-function reinaLookPath(riding, mask=S.reinaFashion?.equipped || 0){
+function reinaLookPath(riding, mask=S.reinaFashion?.equipped || 0, shared=S.costumes?.equipped?.reina){
+  if((mask & 2) && shared && shared!=='moonblossom' && outfitCatalog[shared]){
+    return artPath('look-'+(riding?'ride':'stand')+'-'+mask)+'?outfit='+shared;
+  }
   return artPath(mask ? 'look-'+(riding?'ride':'stand')+'-'+mask : riding ? currentMount().rider : equippedRanger());
 }
 function reinaLookPrice(){
-  const owned=S.reinaFashion?.owned || 0;
+  const owned=(S.reinaFashion?.owned || 0) | (ownsOutfit('moonblossom')?2:0);
   return reinaPieces.reduce((sum,p)=>sum+((reinaPreview & p.bit) && !(owned & p.bit) ? p.price : 0),0);
 }
 function previewReina(mask){
@@ -173,15 +183,16 @@ function wearReinaLook(){
   if(S.gold<price){toast('Not enough gold');return}
   S.gold-=price;
   S.reinaFashion={owned:(S.reinaFashion?.owned || 0) | reinaPreview,equipped:reinaPreview};
+  if(S.costumes?.equipped)S.costumes.equipped.reina=reinaPreview&2?'moonblossom':'';
   save();reinaAtelier();
 }
 function reinaAtelier(){
   const price=reinaLookPrice(), equipped=reinaPreview===(S.reinaFashion?.equipped || 0);
   const rows=reinaPieces.map(p=>{
-    const picked=Boolean(reinaPreview & p.bit),owned=Boolean((S.reinaFashion?.owned || 0) & p.bit);
+    const picked=Boolean(reinaPreview & p.bit),owned=p.bit===2?ownsOutfit('moonblossom'):Boolean((S.reinaFashion?.owned || 0) & p.bit);
     return `<fieldset><legend>${p.slot}</legend><div><button aria-pressed="${!picked}" onclick="previewReina(${reinaPreview & ~p.bit})">${p.classic}</button><button aria-pressed="${picked}" onclick="previewReina(${reinaPreview | p.bit})">${p.name}<small>${owned?'Owned':fmt(p.price)+' gold'}</small></button></div></fieldset>`;
   }).join('');
-  $('#main').innerHTML=`<section class="reina-atelier"><div class="atelier-portrait"><h1>Reina</h1><img src="${reinaLookPath(false,reinaPreview)}" alt="Reina wearing the selected pieces"></div><div class="atelier-controls"><h2>Moonblossom Collection</h2>${rows}<div class="atelier-actions"><button onclick="previewReina(7)">Try full set</button><button class="primary" ${equipped||price>S.gold?'disabled':''} onclick="wearReinaLook()">${equipped?'Equipped':price?'Buy &amp; equip · '+fmt(price)+' gold':'Equip'}</button></div>${price>S.gold?'<small>Not enough gold</small>':''}</div></section>`;
+  $('#main').innerHTML=`<section class="reina-atelier"><div class="atelier-portrait"><h1>Reina</h1><img src="${reinaLookPath(false,reinaPreview,'')}" alt="Reina wearing the selected pieces"></div><div class="atelier-controls"><h2>Moonblossom Collection</h2><button onclick="wardrobe('reina')">Shared outfits</button>${rows}<div class="atelier-actions"><button onclick="previewReina(7)">Try full set</button><button class="primary" ${equipped||price>S.gold?'disabled':''} onclick="wearReinaLook()">${equipped?'Equipped':price?'Buy &amp; equip · '+fmt(price)+' gold':'Equip'}</button></div>${price>S.gold?'<small>Not enough gold</small>':''}</div></section>`;
 }
 const fashionSeasons = [
   {hero:'paladin', tier:5}, {hero:'mage', tier:4},
@@ -242,7 +253,7 @@ function cityDrawerMarkup(){
  return '<nav class="city-drawer" id="city-drawer" aria-label="More activities" hidden>'+cityDrawerItems.map(([icon,label],i)=>'<button class="city-icon" onclick="cityDrawerAction('+i+')"><span class="city-glyph"><img src="'+artPath('hud-'+icon)+'" alt=""></span><span class="city-caption">'+label+'</span></button>').join('')+'</nav>';
 }
 function cityAction(target,label){
- if(target==='sale')fashionSale();
+ if(target==='sale')go('eliteSale');
  else if(target==='ride')toggleMount();
  else if(target==='collection')chooseSectionPage('collection');
  else if(target)go(target);
