@@ -497,3 +497,50 @@ function citySkin(){
  const rail=$('.skin-scroll');
  if(rail){rail.scrollLeft=scroll;rail.querySelector?.('[aria-pressed=true]')?.scrollIntoView?.({block:'nearest',inline:'nearest'})}
 }
+
+const smithPages={
+ Forge:['Enhance','Upgrade','Identify','Advance'],
+ Gem:['Embed','Refine','Engrading'],
+ Set:['Aurora Set','Star Set','Moon Set','Sun Set'],
+ Awaken:['Awaken','Gear Evolution','Enchant','Deify'],
+ Exalt:['Exalt','Hallow']
+};
+let smithPage='Forge',smithMode='Identify',smithUid=null;
+function smithTab(page,mode){
+ smithPage=page;smithMode=mode||smithPages[page][0];cityForge();
+}
+function cityForge(){
+ const r=eqRules(),eq=r.state(S),pieces=eq.items.filter(e=>!e.stored);
+ const e=pieces.find(x=>x.uid===smithUid)||pieces.find(x=>x.uid===eq.equipped.bow)||pieces[0];
+ const sub=smithMode,page=smithPage;
+ const details=e?r.detail(e):null;
+ const tile=x=>{const t=r.catalog[x.template];return '<span class="smith-item" style="--edge:'+t.color+'">'+gearArt(t)+'<b>T'+t.tier+'</b><small>★ '+x.stars+'</small></span>'};
+ const rows=obj=>Object.entries(obj).map(([k,n])=>'<span>'+ (r.labels[k]||k)+' <b>'+fmtCompanion(n)+'</b></span>').join('');
+ const material=(id)=>{const m=r.materialDefs.find(x=>x.id===id);return '<span class="smith-material">'+equipmentIcon(m.icon)+'<small>'+fmt(eq.materials[id])+'</small></span>'};
+ let scene='',panel='',action=sub;
+ if(e){
+  smithUid=e.uid;
+  const t=r.catalog[e.template];
+  if(page==='Forge'){
+   scene='<strong>Score '+fmt(details.power)+'</strong>';
+   panel='<h3>'+ (sub==='Identify'?'Tier-up conditions':sub)+'</h3><p>T'+t.tier+' · '+t.name+'</p><h3>Tier '+t.tier+' Stats</h3><div class="smith-bars">'+Object.entries(details.total).map(([k,n])=>'<div>'+ (r.labels[k]||k)+' <b>'+fmtCompanion(n)+'</b><hr></div>').join('')+'</div>';action=sub==='Identify'?'Free':sub;
+  }else if(page==='Gem'){
+   scene=Array.from({length:6},(_,i)=>'<div class="smith-socket s'+i+'">'+(i<e.gems?artImage('crystal','Gem'):'◇')+'<small>'+(i<e.gems?'Sky Gem':'Empty')+'</small></div>').join('');
+   panel='<h3>'+sub+'</h3><p>'+e.gems+' embedded · '+fmt(eq.materials.gem)+' Sky Gems</p>';action=sub==='Embed'?'Quick Embed':sub;
+  }else if(page==='Set'){
+   scene='<div class="smith-supplies">'+material('shard')+'<i>◇</i><i>◇</i></div>';
+   panel='<h3>'+sub+'</h3><div class="smith-pieces"><span>1 Piece<br>ATK %</span><span>2 Pieces<br>ATK · ARP</span><span>4 Pieces<br>HP · DEF</span></div>';action='Obtain';
+  }else if(page==='Awaken'){
+   scene='<div class="smith-supplies">'+material('essence')+'</div>';
+   panel='<h3>'+sub+' Stats</h3><div class="smith-summary">'+rows(details.base)+'</div>';
+  }else{
+   scene='<div class="smith-sides">'+material('shard')+material('essence')+'</div>';
+   panel='<h3>Basic Bonus</h3><div class="smith-summary">'+rows(details.base)+'</div><h3>Enhancement Bonus</h3><div class="smith-summary">'+(rows(details.enhancement)||'0')+'</div><h3>Set Bonus</h3>';
+  }
+ }
+ const rail=pieces.map(x=>'<button aria-pressed="'+(e===x)+'" onclick="smithUid='+x.uid+';cityForge()"><small>'+r.catalog[x.template].name+'</small>'+tile(x)+'<small>+'+x.enhance+'</small></button>').join('');
+ const icons=['hud-forge','hud-gems','hud-gear','hud-reinforce','hud-rank'];
+ const old=$('.smith-rail')?.scrollLeft||0;
+ $('#main').innerHTML='<section class="spirit-room companion-room smith-room" data-forge="'+page+'"><div class="satchel-top"><strong>Forge</strong>'+[['gold',S.gold],['wishes',S.tickets],['crystals',S.scales]].map(([i,n])=>'<span>'+uiIcon(i)+fmt(n)+'</span>').join('')+'</div><div class="smith-scene"><div class="smith-rune"></div>'+scene+(e?tile(e):'No equipment')+'</div><div class="smith-panel">'+panel+'</div><div><button class="spirit-gold" disabled>'+action+'</button></div><div class="smith-rail">'+rail+'</div><div class="companion-modes">'+smithPages[page].map(m=>'<button aria-pressed="'+(m===sub)+'" onclick="smithTab(\''+page+'\',\''+m+'\')">'+m+'</button>').join('')+'</div><div class="spirit-nav"><button aria-label="Back to city" onclick="go(\'home\')">‹</button>'+Object.keys(smithPages).map((p,i)=>'<button aria-pressed="'+(p===page)+'" onclick="smithTab(\''+p+'\')">'+artImage(icons[i],'')+p+'</button>').join('')+'</div></section>';
+ const strip=$('.smith-rail');if(strip)strip.scrollLeft=old;
+}
