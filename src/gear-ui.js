@@ -440,7 +440,7 @@ function companionAction(action,arg){
  save();cityCompanion();
 }
 function cityCompanionEffects(){
- return ['elf','back','cloak','footprint'].map(key=>{
+ return ['back','cloak','footprint'].map(key=>{
   const v=WonderGear.companionState(S,key);
   if(!v.equipped||v.hidden)return '';
   return '<span aria-hidden="true" class="city-companion-effect fx-'+key+' form-'+v.form+'">'+(key==='footprint'?'<i></i><i></i><i></i>':key==='cloak'?'<span class="moonveil-cloak"></span>':artImage(WonderGear.companionTypes[key].art,''))+'</span>';

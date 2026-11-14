@@ -287,6 +287,9 @@ function cityTool(icon,label,action){
 }
 function home(){
  const mount=currentMount(),st=stats();
+ const primary=item(S.dragon);
+ const partnerId=WonderGear.petTeam(S).slice(1).find(Boolean)||S.owned.find(id=>id!==primary.id&&item(id)?.type==='dragon')||(primary.id==='d1'?'d0':'d1');
+ const pets=[primary,item(partnerId)];
  const short=[cityGroups[0][0],cityGroups[1][3]];
  $('#main').innerHTML=`<section class="city-hud" data-expanded="${cityExpanded}"><button class="city-status" onclick="go('profile')"><img src="${artPath('reina-avatar')}" alt=""><b>${fmt(st.power)}<i class="city-bars"></i><small>Lv. ${level()} · Peace</small></b></button>
  <button class="city-rank" onclick="go('rankings')"><img src="${artPath('hud-rank')}" alt="">Rank</button><div class="city-wallet"><span><img src="${artPath('hud-gems')}">${fmt(S.tickets)}</span><span><img src="${artPath('hud-prisms')}">${fmt(S.scales)}</span></div><div class="city-place">Sky Garden</div>
@@ -295,8 +298,9 @@ function home(){
  <button class="city-fold" aria-label="${cityExpanded?'Hide events':'Show events'}" aria-expanded="${cityExpanded}" aria-controls="city-promotions" onclick="foldCityMenu(this)"><span class="city-fold-disc" aria-hidden="true"></span></button>
  <div id="city-promotions" class="city-promos">${cityGroups[1].map(item=>cityIcon(item,'left-')).join('')}</div></div>
  <button class="city-reinforce" onclick="go('forge')"><span>Reinforce<small>Gear upgrades</small></span><img src="${artPath('hud-reinforce')}"></button><div class="city-extra"><button class="city-icon" onclick="go('fishing')"><span class="city-glyph"><img class="city-fish" src="assets/generated/fishing-crowned-goldfish.webp" alt=""></span><span class="city-caption">Fishing</span></button>${[['isle','Isle Expedition'],['cloud-war-citadel','Cloud War','cloudWar']].map(item=>cityIcon(item)).join('')}</div>
- <div class="city-wings">${artImage(S.wings,'Equipped wings')}</div><div class="city-aura"><img src="${artPath('hud-aura')}" alt="Overlord’s Aura"></div><div class="city-hero form-${mount?WonderGear.companionState(S,'mount').form:0}"><b>${esc(S.name)}</b><img src="${reinaLookPath(Boolean(mount))}" alt="Reina"></div>${cityCompanionEffects()}<div class="city-pet">${dragonSVG(item(S.dragon))}</div>
- <div class="city-sidekick">${dressedHero('mage',S.costumes?.equipped?.mage,'Storm mage')}</div><div class="city-jobs">${[['Daily','cityDaily'],['Gameplay','cityGameplay'],['Bounty','cityBounty'],['Hunting','cityHunting']].map(([name,id])=>`<button onclick="go('${id}')"><img src="${artPath('wing-menu-'+name.toLowerCase())}" alt="">${name}</button>`).join('')}</div>
+ <div class="city-wings">${artImage(S.wings,'Equipped wings')}</div><div class="city-aura"><img src="${artPath('hud-aura')}" alt="Overlord’s Aura"></div><div class="city-hero form-${mount?WonderGear.companionState(S,'mount').form:0}"><b>${esc(S.name)}</b><img src="${reinaLookPath(Boolean(mount))}" alt="Reina"></div>${cityCompanionEffects()}
+ ${pets.map((pet,i)=>`<div class="city-pet city-pet-${i}"><img src="${pet.portrait||artPath(pet.id)}" alt="${esc(pet.name)}" draggable="false"></div>`).join('')}
+ <div class="city-jobs">${[['Daily','cityDaily'],['Gameplay','cityGameplay'],['Bounty','cityBounty'],['Hunting','cityHunting']].map(([name,id])=>`<button onclick="go('${id}')"><img src="${artPath('wing-menu-'+name.toLowerCase())}" alt="">${name}</button>`).join('')}</div>
  <div class="city-tools">${[['broadcast','Elf Broadcast']].map(item=>cityIcon(item)).join('')}</div>
  <div class="city-skills">${[['move','Realm',"go('world')"],['ally1','Pet',"chooseSectionPage('collection')"],['combat','Combat',"go('dungeons')"],['ally2','Companion',"go('profile')"],['ride','Ride','toggleMount()'],['ally3','Wardrobe',"go('fashion')"],['travel','Travel',"go('world')"]].map(a=>cityTool(...a)).join('')}</div>
  <div class="city-quick">${cityTool('chest','Rewards',"go('quests')")}${cityTool('upgrade','Upgrade',"go('forge')")}</div>

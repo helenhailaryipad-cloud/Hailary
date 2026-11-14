@@ -6202,3 +6202,10 @@ body[data-screen=cityExplore] #stage>#main{display:block;max-width:none;margin:0
 .explore-enemy{width:90%;text-align:center;background:#211c35e8;border:1px solid #c8a970;border-radius:15px;padding:.7em}.explore-enemy h2{margin:.15em;color:#ffe2a2}.explore-enemy progress{width:88%;height:12px;accent-color:#df5568}
 #stage .explore-guardian{width:98%;height:100%;max-height:55dvh;object-fit:contain;filter:drop-shadow(0 7px 8px #1e132f88)}
 .explore-actions{display:grid;justify-items:center;gap:.65em}.explore-actions button{min-width:130px}
+
+.city-hud .city-hero{left:25%;top:31%;width:50%;height:34%}
+.city-hud .city-wings{left:14%;top:32%;width:72%;height:29%}
+.city-hud .city-aura{top:26%}
+.city-hud .city-pet{top:auto;bottom:35%;width:16%;height:11%}
+.city-hud .city-pet-0{left:19%}.city-hud .city-pet-1{left:65%}
+.city-hud .city-pet img{object-position:center bottom}
