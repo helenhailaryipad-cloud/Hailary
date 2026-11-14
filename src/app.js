@@ -99,7 +99,7 @@ function showFishJournal(){
  selectedFishCard='';
  $('#main').innerHTML='<iframe class="album-frame" title="Fish Journal" src="fish-journal.html'+query+'"></iframe>';
 }
-function openScreen(id){if(id==='fashion')reinaPreview=S.reinaFashion?.equipped || 0;stopGame();screen=id;nav();render();$('#main').scrollTop=0;$('#main').scrollLeft=0;window.WonderEffects?.enter?.()}
+function openScreen(id){if(id==='home')cityExpanded=false;if(id==='fashion')reinaPreview=S.reinaFashion?.equipped || 0;stopGame();screen=id;nav();render();$('#main').scrollTop=0;$('#main').scrollLeft=0;window.WonderEffects?.enter?.()}
 function render(){document.body.classList.remove('is-3d');document.body.dataset.screen=screen;wallet();nav();if(screen==='fashion')reinaAtelier();else if(screen==='attributes')characterSheet();else if(['inventory','forge','warehouse'].includes(screen))gearWorkspace();else if(screen==='profile')heroProfile();else if(screen==='home')home();else if(screen==='intro')intro();else if(screen==='more')moreMenu();else if(screen==='bag')bag();else if(screen==='collection')collection();else if(screen==='wish')wish();else if(screen==='games')games();else if(screen==='cards')showFishJournal();else if(screen==='fishing')$('#main').innerHTML=`<iframe title="Moonwater Fishing" src="fishing.html" style="display:block;width:100%;height:100%;min-height:290px;border:0;border-radius:12px"></iframe>`;else if(screen==='world')realm();else if(screen==='rankings')rankings();else if(screen==='quests')questBoard();else if(screen==='expLobby')expLobby();else if(screen==='dungeons')dungeonLobby();else if(screen==='settings')settings();else if(screen==='defense')startDefense();else if(screen==='merge')startMerge();else if(screen==='vale')startVale();requestAnimationFrame(decorateArt)}
 function renderHeroReadout(st){$('#profileReadout').innerHTML=`<div class="profile-face"><img src="assets/generated/reina-avatar.webp" alt="Reina"><b>Lv. ${level()}</b></div><div class="profile-vitals"><strong aria-label="Combat power ${fmt(st.power)}">${uiIcon('power')}<small>Power</small>${fmt(st.power)}</strong><span class="profile-hp">HP ${fmt(st.health)}</span></div>`;}
 const mounts = [
@@ -210,7 +210,7 @@ function buyFashionBow(id){
   S.gold-=fashionBowPrice;
   save();home();fashionSale();
 }
-let cityExpanded=true;
+let cityExpanded=false;
 const cityGroups=[
  [['top-up','Top-up'],['shop','Shop'],['benefits','benefits'],['treasure','TresHunt'],['summon','Summon','wish'],['challenge','Challenge','dungeons'],['gear','Master of Gear','forge'],['discord','Discord']],
  [['pass','ValuePass'],['siege','Pet Siege'],['goldpass','GoldPass'],['gift','DailyGift','quests'],['clan','ClanClash'],['superpack','SuperPack'],['fashion','Fashion Sale','sale'],['snow','Snowland'],['dream','DreamPass'],['fest','FestEvent'],['gacha','GodGacha','wish'],['spend','SpendRank'],['rush','Rush Rank','rankings'],['chain','Chain Buy']],
@@ -236,7 +236,7 @@ function home(){
  <button class="city-rank" onclick="go('rankings')"><img src="${artPath('hud-rank')}" alt="">Rank</button><div class="city-wallet"><span><img src="${artPath('hud-gems')}">${fmt(S.tickets)}</span><span><img src="${artPath('hud-prisms')}">${fmt(S.scales)}</span></div><div class="city-place">Sky Garden</div>
  <button class="city-event" onclick="go('rankings')"><img src="${artPath('hud-event')}" alt=""><small>Hall of Wonders</small><strong>${esc(S.name)}</strong></button>
  <div class="city-top">${(cityExpanded?cityGroups[0]:short).map(cityIcon).join('')}</div>
- <button class="city-fold" aria-label="Toggle events" aria-expanded="${cityExpanded}" onclick="cityExpanded=!cityExpanded;home()">${cityExpanded?'❮':'❯'}</button>
+ <button class="city-fold" aria-label="${cityExpanded?'Hide events':'Show events'}" aria-expanded="${cityExpanded}" onclick="cityExpanded=!cityExpanded;home()">${cityExpanded?'❮':'❯'}</button>
  ${cityExpanded?`<div class="city-promos">${cityGroups[1].map(cityIcon).join('')}</div><button class="city-reinforce" onclick="go('forge')"><span>Reinforce<small>Gear upgrades</small></span><img src="${artPath('hud-reinforce')}"></button><div class="city-extra">${[['isle','Isle Expedition'],['cloud','Cloud War']].map(cityIcon).join('')}</div>`:''}
  <div class="city-wings">${artImage(S.wings,'Equipped wings')}</div><div class="city-aura"><img src="${artPath('hud-aura')}" alt="Overlord’s Aura"></div><div class="city-hero"><b>${esc(S.name)}</b><img src="${reinaLookPath(Boolean(mount))}" alt="Reina"></div><div class="city-pet">${dragonSVG(item(S.dragon))}</div>
  <div class="city-sidekick">${dressedHero('mage',S.costumes?.equipped?.mage,'Storm mage')}</div><div class="city-jobs">${[['Daily','quests'],['Gameplay','games'],['Bounty','quests'],['Hunting','dungeons']].map(([name,id])=>`<button onclick="go('${id}')"><img src="${artPath('hud-'+name.toLowerCase())}" alt="">${name}</button>`).join('')}</div>
