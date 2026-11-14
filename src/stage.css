@@ -6194,3 +6194,6 @@ body:not([data-screen]) #stage>.return-to-menu,body:is([data-screen=home],[data-
 .explore-map .trail-next strong{font-size:clamp(13px,3.2cqw,20px);font-variant-numeric:tabular-nums}
 .explore-map .trail-low{color:#ffb4a6}.explore-map .trail-ready{color:#bef2ab}
 .explore-map .trail-done img{opacity:.65}.explore-map footer{background:linear-gradient(transparent,#202139ed 50%)}
+body[data-screen=cityExplore] #stage>#main{display:block;max-width:none;margin:0;transform:none}
+#stage #main .explore-map .trail-marker{position:absolute;transform:translate(-50%,-50%);margin:0;width:12%;min-width:0;box-shadow:none}
+.explore-map .trail-field{inset:1% 0 10%}

@@ -646,7 +646,14 @@ function cityHunting(){
  }
 }
 
-const exploreTrail=[[27,84],[48,77],[69,69],[49,61],[49,48],[29,41],[49,33],[69,25],[49,15]];
+const exploreTrail=[[24,89],[53,80],[74,69],[40,60],[16,49],[56,39],[85,29],[56,18],[25,8]];
+// Vertical tangents give each switchback a smooth turn at its marker.
+const exploreTrailPath=exploreTrail.reduce((path,[x,y],i)=>{
+ if(i===0)return 'M '+x+' '+y;
+ const [previousX,previousY]=exploreTrail[i-1];
+ const middleY=(previousY+y)/2;
+ return path+' C '+previousX+' '+middleY+' '+x+' '+middleY+' '+x+' '+y;
+},'');
 function exploreStageLabel(index){
  return (Math.floor(index/9)+1)+'-'+(index%9+1);
 }
@@ -687,7 +694,7 @@ function cityExplore(){
   return `<button class="trail-marker ${i<next?'trail-done':''}" style="left:${x}%;top:${y}%" aria-pressed="${i===next}" aria-label="Preview stage ${label}" onclick="previewExploreStage(${index})">${artImage(i===8?'hud-chest':i===4?'hud-pass':'hud-rank','')}<b>${i<next?'✓ ':''}${label}</b></button>`;
  }).join('');
  const tools=[['Stage Rewards','hud-chest'],['Clear Battle Pass','hud-pass'],['Assignment','hud-quest'],['Clearance Objective','hud-reward'],['Training','hud-upgrade','expLobby']].map(args=>exploreTool(...args)).join('');
- $('#main').innerHTML='<section class="explore-map" aria-label="Explore chapter '+chapter+'"><div class="trail-field"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M48 94 Q27 90 27 84 C27 79 39 81 48 77 S78 73 69 69 S46 65 49 61 S54 52 49 48 S22 45 29 41 S42 38 49 33 S77 29 69 25 S54 22 49 15"/></svg>'+markers+'</div><aside class="trail-benefits"><b>Stage Progress</b><small>Chapter '+chapter+' · '+next+' / 9</small></aside><div class="trail-bonus">'+exploreTool('Training Bonus','hud-upgrade')+'</div><div class="trail-tools">'+tools+'</div><footer><button aria-label="Back to city" onclick="go(\'home\')">‹</button><div class="trail-next"><button class="spirit-gold" onclick="clearExploreStage('+cleared+')" '+(power<required?'disabled':'')+'>Explore · '+exploreStageLabel(cleared)+'</button><small>Power needed for the next stage</small><strong class="'+(power<required?'trail-low':'trail-ready')+'">'+fmt(power)+' / '+fmt(required)+'</strong></div>'+exploreTool('Power Up','hud-reinforce','cityForge')+'</footer></section>';
+ $('#main').innerHTML='<section class="explore-map" aria-label="Explore chapter '+chapter+'"><div class="trail-field"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="'+exploreTrailPath+'"/></svg>'+markers+'</div><aside class="trail-benefits"><b>Stage Progress</b><small>Chapter '+chapter+' · '+next+' / 9</small></aside><div class="trail-bonus">'+exploreTool('Training Bonus','hud-upgrade')+'</div><div class="trail-tools">'+tools+'</div><footer><button aria-label="Back to city" onclick="go(\'home\')">‹</button><div class="trail-next"><button class="spirit-gold" onclick="clearExploreStage('+cleared+')" '+(power<required?'disabled':'')+'>Explore · '+exploreStageLabel(cleared)+'</button><small>Power needed for the next stage</small><strong class="'+(power<required?'trail-low':'trail-ready')+'">'+fmt(power)+' / '+fmt(required)+'</strong></div>'+exploreTool('Power Up','hud-reinforce','cityForge')+'</footer></section>';
 }
 
 const cloudFactions=[
