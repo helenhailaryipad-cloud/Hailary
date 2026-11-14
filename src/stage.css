@@ -6161,3 +6161,8 @@ body:is([data-screen=cityDaily],[data-screen=cityGameplay],[data-screen=cityExpl
 img[src*="?outfit=roseguard"]{filter:hue-rotate(55deg)}img[src*="?outfit=starfall"]{filter:hue-rotate(-48deg)}img[src*="?outfit=lilyveil"]{filter:hue-rotate(140deg)}img[src*="?outfit=emberleaf"]{filter:hue-rotate(90deg)}
 
 .city-glyph .city-fish{display:block;width:100%;height:100%}
+
+.cloud-field.twin-islands{background:url('assets/generated/cloud-war-twin-islands.webp') center/100% 100% no-repeat}
+.twin-islands .cloud-place img{display:none}
+.twin-islands .cloud-place{min-height:44px;align-content:center}
+.twin-islands .cloud-place b,.twin-islands .cloud-place small{background:#28243de6;border-radius:.35em;padding:.12em .4em}

@@ -676,7 +676,7 @@ const cloudFactions=[
  ['Lynx','Thunderstone Island','Storm Fortress','#dfadff']
 ];
 const cloudLayouts={
- 2:[[19,25,34,39],[81,75,66,61]],
+ 2:[[15,50,26,17],[85,50,74,17]],
  3:[[18,21,32,35],[82,21,68,35],[50,90,50,73]],
  4:[[17,17,33,32],[83,17,67,32],[17,83,33,68],[83,83,67,68]]
 };
@@ -687,6 +687,9 @@ function cloudTerritories(){
   const [owner,island,fort,color]=cloudFactions[i];
   nodes.push({name:island,owner,color,x,y,art:'hud-isle'},{name:fort,owner,color,x:fx,y:fy,art:'hud-siege'});
  });
+ if(cloudCount===2){
+  nodes.push({...nodes[1],name:'West Windmill',x:23,y:78},{...nodes[3],name:'East Windmill',x:77,y:78});
+ }
  return nodes;
 }
 function cloudTerritory(index){
@@ -704,12 +707,12 @@ function cloudBrief(page){
 function cityCloudWar(){
  const nodes=cloudTerritories();
  let lines='';
- for(let i=1;i<nodes.length;i+=2){
+ for(let i=1;cloudCount!==2 && i<nodes.length;i+=2){
   const a=nodes[i],b=nodes[i+1];
   lines+='<polyline points="'+a.x+','+a.y+' '+b.x+','+b.y+' 50,52" stroke="'+a.color+'"/>';
  }
  const markers=nodes.map((p,i)=>'<button class="cloud-place" style="left:'+p.x+'%;top:'+p.y+'%;--banner:'+(p.color||'#ffe0a2')+'" onclick="cloudTerritory('+i+')">'+artImage(p.art,'')+'<b>'+p.name+'</b><small>'+p.owner+'</small></button>').join('');
- $('#main').innerHTML='<section class="cloud-war"><header><strong>Cloud War</strong><small>Battle starts at 19:30</small></header><nav aria-label="Faction count">'+[2,3,4].map(n=>'<button aria-pressed="'+(cloudCount===n)+'" onclick="cloudCount='+n+';cityCloudWar()">'+n+' Factions</button>').join('')+'</nav><div class="cloud-field"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'+lines+'</svg>'+markers+'</div><footer><button aria-label="Back to city" onclick="go(\'home\')">‹</button><button onclick="cloudBrief('+[3,2,4].indexOf(cloudCount)+')">War Guide</button></footer></section>';
+ $('#main').innerHTML='<section class="cloud-war"><header><strong>Cloud War</strong><small>Battle starts at 19:30</small></header><nav aria-label="Faction count">'+[2,3,4].map(n=>'<button aria-pressed="'+(cloudCount===n)+'" onclick="cloudCount='+n+';cityCloudWar()">'+n+' Factions</button>').join('')+'</nav><div class="cloud-field'+(cloudCount===2?' twin-islands':'')+'"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'+lines+'</svg>'+markers+'</div><footer><button aria-label="Back to city" onclick="go(\'home\')">‹</button><button onclick="cloudBrief('+[3,2,4].indexOf(cloudCount)+')">War Guide</button></footer></section>';
 }
 
 let eliteTab=0,eliteHero='reina';
