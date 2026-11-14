@@ -658,13 +658,38 @@ function exploreStageLabel(index){
  return (Math.floor(index/9)+1)+'-'+(index%9+1);
 }
 function exploreRequiredPower(index){return 1500+35*index;}
-function clearExploreStage(index){
- if(screen!=='cityExplore'||index!==(S.exploreCleared||0))return;
- if(stats().power<exploreRequiredPower(index)){toast('More power needed for stage '+exploreStageLabel(index));return;}
- S.exploreCleared=index+1;
+const exploreBosses=['mistwood','moonfall','emberpeak','coral','frost','honey','storm','crystal','sunspire'];
+let exploreFight=null;
+function leaveExploreFight(){
+ if(exploreFight)clearInterval(exploreFight.timer);
+ exploreFight=null;
+}
+function startExploreFight(index){
+ if(exploreFight||screen!=='cityExplore'||index!==(S.exploreCleared||0))return;
+ const required=exploreRequiredPower(index),power=stats().power;
+ if(power<required){toast('More power needed for stage '+exploreStageLabel(index));return;}
+ const fight={index,hp:required,damage:Math.ceil(power/7)};
+ exploreFight=fight;
+ fight.timer=setInterval(()=>strikeExploreBoss(fight),650);
+ cityExplore();
+}
+function strikeExploreBoss(fight){
+ if(!fight||fight!==exploreFight||screen!=='cityExplore')return;
+ if(fight.index!==(S.exploreCleared||0)){leaveExploreFight();cityExplore();return;}
+ fight.hp=Math.max(0,fight.hp-fight.damage);
+ if(fight.hp){
+  $('#explore-boss-health').value=fight.hp;
+  return;
+ }
+ leaveExploreFight();
+ S.exploreCleared=fight.index+1;
  save();
  cityExplore();
- toast('Stage '+exploreStageLabel(index)+' cleared');
+ toast(BOSS_NAMES[exploreBosses[fight.index%9]]+' defeated · Stage '+exploreStageLabel(fight.index)+' cleared');
+}
+function showExploreFight(fight){
+ const boss=exploreBosses[fight.index%9];
+ $('#main').innerHTML=`<section class="explore-map explore-battle"><div class="explore-enemy"><small>Stage ${exploreStageLabel(fight.index)}</small><h2>${BOSS_NAMES[boss]}</h2><progress id="explore-boss-health" aria-label="Boss health" max="${exploreRequiredPower(fight.index)}" value="${fight.hp}"></progress></div>${artImage(boss,'','explore-guardian')}<div class="explore-actions"><button class="spirit-gold" onclick="strikeExploreBoss(exploreFight)">Strike</button><button onclick="leaveExploreFight();cityExplore()">Back to map</button></div></section>`;
 }
 function previewExploreStage(index){
  const cleared=S.exploreCleared||0;
@@ -687,6 +712,7 @@ function exploreTool(name,art,destination){
  return '<button onclick="'+action+'">'+artImage(art,'')+'<small>'+name+'</small></button>';
 }
 function cityExplore(){
+ if(exploreFight){showExploreFight(exploreFight);return;}
  const cleared=S.exploreCleared||0, chapter=Math.floor(cleared/9)+1, next=cleared%9;
  const power=stats().power, required=exploreRequiredPower(cleared);
  const markers=exploreTrail.map(([x,y],i)=>{
@@ -694,7 +720,7 @@ function cityExplore(){
   return `<button class="trail-marker ${i<next?'trail-done':''}" style="left:${x}%;top:${y}%" aria-pressed="${i===next}" aria-label="Preview stage ${label}" onclick="previewExploreStage(${index})">${artImage('explore-marker-'+(i+1),'')}<b>${i<next?'✓ ':''}${label}</b></button>`;
  }).join('');
  const tools=[['Stage Rewards','hud-chest'],['Clear Battle Pass','hud-pass'],['Assignment','hud-quest'],['Clearance Objective','hud-reward'],['Training','hud-upgrade','expLobby']].map(args=>exploreTool(...args)).join('');
- $('#main').innerHTML='<section class="explore-map" aria-label="Explore chapter '+chapter+'"><div class="trail-field"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="'+exploreTrailPath+'"/></svg>'+markers+'</div><aside class="trail-benefits"><b>Stage Progress</b><small>Chapter '+chapter+' · '+next+' / 9</small></aside><div class="trail-bonus">'+exploreTool('Training Bonus','hud-upgrade')+'</div><div class="trail-tools">'+tools+'</div><footer><button aria-label="Back to city" onclick="go(\'home\')">‹</button><div class="trail-next"><button class="spirit-gold" onclick="clearExploreStage('+cleared+')" '+(power<required?'disabled':'')+'>Explore · '+exploreStageLabel(cleared)+'</button><small>Power needed for the next stage</small><strong class="'+(power<required?'trail-low':'trail-ready')+'">'+fmt(power)+' / '+fmt(required)+'</strong></div>'+exploreTool('Power Up','hud-reinforce','cityForge')+'</footer></section>';
+ $('#main').innerHTML='<section class="explore-map" aria-label="Explore chapter '+chapter+'"><div class="trail-field"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="'+exploreTrailPath+'"/></svg>'+markers+'</div><aside class="trail-benefits"><b>Stage Progress</b><small>Chapter '+chapter+' · '+next+' / 9</small></aside><div class="trail-bonus">'+exploreTool('Training Bonus','hud-upgrade')+'</div><div class="trail-tools">'+tools+'</div><footer><button aria-label="Back to city" onclick="go(\'home\')">‹</button><div class="trail-next"><button class="spirit-gold" onclick="startExploreFight('+cleared+')" '+(power<required?'disabled':'')+'>Explore · '+exploreStageLabel(cleared)+'</button><small>Power needed for the next stage</small><strong class="'+(power<required?'trail-low':'trail-ready')+'">'+fmt(power)+' / '+fmt(required)+'</strong></div>'+exploreTool('Power Up','hud-reinforce','cityForge')+'</footer></section>';
 }
 
 const cloudFactions=[
