@@ -461,3 +461,39 @@ function cityCompanion(){
  $('#main').innerHTML='<section class="spirit-room companion-room"><div class="satchel-top"><strong>'+t.name+'</strong>'+[['gold',S.gold],['wishes',S.tickets],['crystals',S.scales]].map(([i,n])=>'<span>'+uiIcon(i)+fmt(n)+'</span>').join('')+'</div><header><h2>Lv.'+v.level+' '+t.title+'</h2><b class="spirit-value">⚔ '+fmt(Object.values(t.growth).reduce((a,b)=>a+b,0)*points)+'</b></header><div class="companion-show">'+(key==='mount'?'':'<label><input type="checkbox" '+(v.hidden?'checked':'')+' onchange="companionAction(\'hide\')"> Hide</label>')+'<div class="companion-object form-'+v.form+'">'+preview+'</div></div><div class="companion-forms">'+forms+'</div><section class="companion-stats"><div>'+statRows+'</div><div>'+(companionMode==='Equip'?equip:companionMode==='Morphing'&&key!=='back'?equip:upgrade)+(key==='back'?equip:'')+'</div></section><div class="companion-modes">'+modes.map(m=>'<button aria-pressed="'+(m===companionMode)+'" onclick="companionTab(\''+key+'\',\''+m+'\')">'+m+'</button>').join('')+'</div><div class="spirit-nav"><button aria-label="Back to city" onclick="go(\'home\')">‹</button>'+nav+'</div></section>';
 }
 function fmtCompanion(n){return Number(n.toFixed(1)).toLocaleString('en-US')}
+
+const skinPages=[
+ {name:'Wings',title:'Sunset Wings',icon:'w3',art:['w3','w0','w2'],stats:['health','defense','dodge','critResistance']},
+ {name:'Soulforge',title:'Abyssal Arrow',icon:'hud-skin',art:['arrow'],stats:['attack','penetration','accuracy','dodge']},
+ {name:'Holy Weapon',title:'Verdant Bow',icon:'gear-bow-t1',art:['gear-bow-t1','gear-bow-t3','gear-bow-t7'],stats:['attack','penetration','accuracy','crit','critResistance']},
+ {name:'Pet Aura',title:'Moonlight Aura',icon:'hud-pet',art:['aura'],stats:['attack','health','penetration','defense','accuracy']},
+ {name:'Radiance',title:'Starlight',icon:'hud-dream',art:['radiance'],stats:['health','defense','dodge','critResistance']},
+ {name:'Shield',title:'Antique Shield',icon:'hud-reinforce',art:['shield'],stats:['attack','health','penetration','defense','shieldHealth']},
+ {name:'Spectral Dragon',title:'Frostglass',icon:'familiar-15',art:['familiar-15','familiar-24','familiar-35'],stats:['attack','health','penetration','defense','elementalDefense']}
+];
+let skinTab=0,skinMode='Upgrade',skinVariant=0,skinHidden=false;
+function switchSkin(index,mode,variant){
+ if(index!==skinTab)skinHidden=false;
+ skinTab=index;skinMode=mode;skinVariant=variant;citySkin();
+}
+function skinArtwork(page,variant){
+ const id=page.art[variant]||page.art[0];
+ if(id==='radiance')return '<img src="'+reinaLookPath(false)+'" alt="Reina">';
+ if(id==='aura')return dragonSVG(item(S.dragon));
+ if(id==='arrow')return '<span class="skin-arrow"><i></i></span>';
+ if(id==='shield')return '<span class="skin-shield"><i>✧</i></span>';
+ return artImage(id,page.title);
+}
+function citySkin(){
+ const page=skinPages[skinTab],st=stats(),morph=skinMode==='Morphing';
+ const labels={health:'HP',attack:'ATK',defense:'DEF',accuracy:'Accuracy',dodge:'Dodge',crit:'Crit',critResistance:'RSL',shieldHealth:'Shield HP',penetration:'ARP',elementalDefense:'Elem. DEF'};
+ const statsList=page.stats.map(key=>'<div><b>'+labels[key]+'</b><span>'+fmtCompanion(st[key])+(['accuracy','dodge','crit','critResistance','penetration'].includes(key)?'%':'')+'</span></div>').join('');
+ const nav=skinPages.map((p,i)=>'<button aria-pressed="'+(i===skinTab)+'" onclick="switchSkin('+i+',\'Upgrade\',0)">'+artImage(p.icon,'')+p.name+'</button>').join('');
+ const variants=[0,1,2].map(i=>'<button aria-pressed="'+(skinVariant===i)+'" onclick="switchSkin('+skinTab+',\'Morphing\','+i+')">'+artImage(page.art.length>1?page.art[i]:page.icon,'','form-'+(page.art.length>1?0:i))+'<small>'+(['Classic','Moonlight','Sunfire'][i])+'</small></button>').join('');
+ const skillIcons=['gear-spiritguard-t3','gear-amulet-t3','gear-spiritluck-t6','gear-amulet-t7','gear-spiritguard-t5'];
+ const strip=skillIcons.map(id=>artImage(id,'')).join('')+'<span></span>'+['gear-spiritguard-t1','gear-spiritguard-t3','gear-spiritguard-t7'].map(id=>artImage(id,'')).join('');
+ const scroll=$('.skin-scroll')?.scrollLeft||0;
+ $('#main').innerHTML='<section class="spirit-room companion-room skin-room"><div class="satchel-top"><strong>'+page.name+'</strong>'+[['gold',S.gold],['wishes',S.tickets],['crystals',S.scales]].map(([i,n])=>'<span>'+uiIcon(i)+fmt(n)+'</span>').join('')+'</div><header><h2>'+page.title+'</h2><b class="spirit-value" title="Hero combat power">⚔ '+fmt(st.power)+'</b></header><div class="companion-show"><label><input type="checkbox" '+(skinHidden?'checked':'')+' onchange="skinHidden=this.checked;citySkin()"> Hide</label><div class="companion-object skin-object skin-art-'+skinTab+' form-'+(page.art.length===1?skinVariant:0)+'">'+(skinHidden?'':skinArtwork(page,skinVariant))+'</div><button class="skin-transform" onclick="switchSkin('+skinTab+',\'Morphing\',skinVariant)">Transform</button></div><div class="'+(morph?'companion-forms':'skin-skills')+'">'+(morph?variants:strip)+'</div><section class="companion-stats"><div><small>Hero attributes</small>'+statsList+'</div><div><small>'+ (morph?'Appearance preview':'Upgrade preview')+'</small><strong>'+(morph?['Classic','Moonlight','Sunfire'][skinVariant]:page.name)+'</strong>'+(morph?'':'<progress value="0" max="1"></progress><button class="spirit-gold" disabled>Upgrade</button>')+'</div></section><div class="companion-modes">'+['Upgrade','Morphing'].map(m=>'<button aria-pressed="'+(m===skinMode)+'" onclick="switchSkin('+skinTab+',\''+m+'\',0)">'+m+'</button>').join('')+'</div><div class="spirit-nav skin-nav"><button aria-label="Back to city" onclick="go(\'home\')">‹</button><div class="skin-scroll">'+nav+'</div></div></section>';
+ const rail=$('.skin-scroll');
+ if(rail){rail.scrollLeft=scroll;rail.querySelector?.('[aria-pressed=true]')?.scrollIntoView?.({block:'nearest',inline:'nearest'})}
+}
