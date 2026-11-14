@@ -5968,3 +5968,31 @@ body[data-screen=home] #stage .city-hud button::after{content:none!important;ani
 .city-fold-disc::after{content:'';width:32%;height:32%;border-top:.35em solid #fff3ce;border-right:.35em solid #fff3ce;transform:rotate(45deg) translate(-8%,8%)}
 .city-fold[aria-expanded=true] .city-fold-disc::after{transform:rotate(-135deg) translate(-8%,8%)}
 .city-fold:focus-visible .city-fold-disc{outline:2px solid #ffe9a8}
+
+/* Game area measured inside the tablet bezel in the two reference photos. */
+.city-left-events{inset:10.5% auto auto .55%;width:36%;height:56%;grid-template-rows:27% 10% 63%}
+.city-left-events .city-top{grid-column:1;grid-auto-rows:7.2cqh}
+.city-left-events .city-promos{grid-column:1;grid-auto-rows:7.1cqh}
+#stage .city-left-events button.city-fold{grid-column:1;align-self:center;margin:0 0 0 1.1cqw;width:7cqw;height:5cqh}
+.city-hud[data-expanded=false] :is(.city-top:not(.city-compact),.city-promos,.city-extra,.city-reinforce),
+.city-hud[data-expanded=true] .city-compact{display:none!important}
+#stage .city-hud .city-icon{background:transparent;border:0;box-shadow:none}
+#stage .city-hud .city-glyph{position:relative;display:block;flex:none;width:min(6.5cqw,4.65cqh);height:min(6.5cqw,4.65cqh)}
+#stage .city-hud .city-glyph img{width:100%;height:100%;object-fit:contain}
+#stage .city-hud .city-caption{display:block;line-height:1.02;font-family:Arial,Helvetica,sans-serif;font-weight:700;letter-spacing:-.035em;color:white;text-shadow:0 1px 2px #241f35,1px 0 2px #241f35}
+.city-notice{position:absolute;right:-7%;top:-12%;width:1.1em;height:1.13em;border-radius:20%;background:#c93432;color:white;text-shadow:none;font:italic 800 1.85cqw/1.13 Arial}
+.city-fold-disc{position:relative}
+.city-fold-disc::after,.city-fold[aria-expanded=true] .city-fold-disc::after{width:66%;height:62%;border:0;background:#fff9e9;clip-path:polygon(2% 48%,54% 0,99% 49%,69% 55%,36% 100%,47% 58%,23% 65%);transform:scaleX(1)}
+.city-fold[aria-expanded=true] .city-fold-disc::after{transform:scaleX(-1)}
+.city-dock .city-glyph{margin:auto}
+.city-left-events .city-promos,.city-extra,.city-reinforce{animation:none}
+body[data-screen=home] #stage{width:min(100%,72dvh);margin-inline:auto}
+body[data-screen=home] #stage #main>.city-hud>button{position:absolute!important}
+body[data-screen=home] #stage #main .city-hud button{outline:0!important;box-shadow:none!important;border:0!important}
+body[data-screen=home] #stage #main .city-hud button:focus-visible{outline:2px solid #fff4d0!important;outline-offset:1px}
+body[data-screen=home] #stage #main .city-hud :is(.city-icon,.city-tool,.city-fold,.city-rank,.city-reward){background:transparent!important;backdrop-filter:none!important}
+body[data-screen=home] #stage #main .city-chat button{position:absolute!important}
+body[data-screen=home] #stage .city-hud .city-chat small{box-sizing:border-box;font:inherit;font-size:.85em;width:8.6cqw;margin-right:.5cqw}
+body[data-screen=home] #stage .city-event small{font:700 1.5cqw/1.15 Arial,sans-serif}
+body[data-screen=home] #stage .city-tools{width:9%;right:0;top:63%}
+body[data-screen=home] #stage .city-tools .city-caption{font-size:1.45cqw}

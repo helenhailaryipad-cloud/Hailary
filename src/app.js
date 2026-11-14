@@ -223,14 +223,17 @@ function cityAction(target,label){
  else if(target)go(target);
  else modal('<h2>'+esc(label)+'</h2><p>This activity is not available yet.</p>');
 }
-const cityEventArt={
- 'top-up':'gold',shop:'castle',benefits:'gift',treasure:'gem',summon:'wishes',challenge:'dungeons',gear:'equipment',discord:'party',
- pass:'quests',siege:'dragon',goldpass:'laurel',gift:'chest',clan:'shield',superpack:'crystals',fashion:'hero',snow:'wind',
- dream:'star',fest:'burst',gacha:'craft',spend:'ranking',rush:'speed',chain:'plus'
-};
+const cityNotices=new Set(['shop','benefits','treasure','summon','gear','goldpass','clan','superpack','dream','rush']);
 function cityIcon([icon,label,target='']){
- const symbol=cityEventArt[icon]?uiIcon(cityEventArt[icon],'event-emblem'):`<img src="${artPath('hud-'+icon)}" alt="">`;
- return `<button class="city-icon" onclick="cityAction('${target}','${label}')" aria-label="${label}">${symbol}<span>${label}</span></button>`;
+ const notice=cityNotices.has(icon)?'<i class="city-notice" aria-hidden="true">!</i>':'';
+ return `<button class="city-icon" onclick="cityAction('${target}','${label}')" aria-label="${label}"><span class="city-glyph"><img src="${artPath('hud-'+icon)}" alt="">${notice}</span><span class="city-caption">${label}</span></button>`;
+}
+function foldCityMenu(button){
+ cityExpanded=!cityExpanded;
+ const hud=button.closest('.city-hud');
+ hud.dataset.expanded=String(cityExpanded);
+ button.setAttribute('aria-expanded',String(cityExpanded));
+ button.setAttribute('aria-label',cityExpanded?'Hide events':'Show events');
 }
 function cityTool(icon,label,action){
  return `<button class="city-tool" aria-label="${label}" title="${label}" onclick="${action}"><img src="${artPath('hud-'+icon)}" alt=""></button>`;
@@ -238,13 +241,13 @@ function cityTool(icon,label,action){
 function home(){
  const mount=currentMount(),st=stats();
  const short=[cityGroups[0][0],cityGroups[1][3]];
- $('#main').innerHTML=`<section class="city-hud"><button class="city-status" onclick="go('profile')"><img src="${artPath('reina-avatar')}" alt=""><b>${fmt(st.power)}<i class="city-bars"></i><small>Lv. ${level()} · Peace</small></b></button>
+ $('#main').innerHTML=`<section class="city-hud" data-expanded="${cityExpanded}"><button class="city-status" onclick="go('profile')"><img src="${artPath('reina-avatar')}" alt=""><b>${fmt(st.power)}<i class="city-bars"></i><small>Lv. ${level()} · Peace</small></b></button>
  <button class="city-rank" onclick="go('rankings')"><img src="${artPath('hud-rank')}" alt="">Rank</button><div class="city-wallet"><span><img src="${artPath('hud-gems')}">${fmt(S.tickets)}</span><span><img src="${artPath('hud-prisms')}">${fmt(S.scales)}</span></div><div class="city-place">Sky Garden</div>
  <button class="city-event" onclick="go('rankings')"><img src="${artPath('hud-event')}" alt=""><small>Hall of Wonders</small><strong>${esc(S.name)}</strong></button>
- <div class="city-left-events"><div class="city-top">${(cityExpanded?cityGroups[0]:short).map(cityIcon).join('')}</div>
- <button class="city-fold" aria-label="${cityExpanded?'Hide events':'Show events'}" aria-expanded="${cityExpanded}" onclick="cityExpanded=!cityExpanded;home();document.querySelector('.city-fold').focus({preventScroll:true})"><span class="city-fold-disc" aria-hidden="true"></span></button>
- ${cityExpanded?`<div class="city-promos">${cityGroups[1].map(cityIcon).join('')}</div>`:''}</div>
- ${cityExpanded?`<button class="city-reinforce" onclick="go('forge')"><span>Reinforce<small>Gear upgrades</small></span><img src="${artPath('hud-reinforce')}"></button><div class="city-extra">${[['isle','Isle Expedition'],['cloud','Cloud War']].map(cityIcon).join('')}</div>`:''}
+ <div class="city-left-events"><div class="city-top">${cityGroups[0].map(cityIcon).join('')}</div><div class="city-top city-compact">${short.map(cityIcon).join('')}</div>
+ <button class="city-fold" aria-label="${cityExpanded?'Hide events':'Show events'}" aria-expanded="${cityExpanded}" aria-controls="city-promotions" onclick="foldCityMenu(this)"><span class="city-fold-disc" aria-hidden="true"></span></button>
+ <div id="city-promotions" class="city-promos">${cityGroups[1].map(cityIcon).join('')}</div></div>
+ <button class="city-reinforce" onclick="go('forge')"><span>Reinforce<small>Gear upgrades</small></span><img src="${artPath('hud-reinforce')}"></button><div class="city-extra">${[['isle','Isle Expedition'],['cloud','Cloud War']].map(cityIcon).join('')}</div>
  <div class="city-wings">${artImage(S.wings,'Equipped wings')}</div><div class="city-aura"><img src="${artPath('hud-aura')}" alt="Overlord’s Aura"></div><div class="city-hero"><b>${esc(S.name)}</b><img src="${reinaLookPath(Boolean(mount))}" alt="Reina"></div><div class="city-pet">${dragonSVG(item(S.dragon))}</div>
  <div class="city-sidekick">${dressedHero('mage',S.costumes?.equipped?.mage,'Storm mage')}</div><div class="city-jobs">${[['Daily','quests'],['Gameplay','games'],['Bounty','quests'],['Hunting','dungeons']].map(([name,id])=>`<button onclick="go('${id}')"><img src="${artPath('hud-'+name.toLowerCase())}" alt="">${name}</button>`).join('')}</div>
  <div class="city-tools">${[['broadcast','Elf Broadcast']].map(cityIcon).join('')}</div>
