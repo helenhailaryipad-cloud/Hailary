@@ -210,7 +210,7 @@ function buyFashionBow(id){
   S.gold-=fashionBowPrice;
   save();home();fashionSale();
 }
-let cityExpanded=false;
+let cityExpanded=true;
 const cityGroups=[
  [['top-up','Top-up'],['shop','Shop'],['benefits','benefits'],['treasure','TresHunt'],['summon','Summon','wish'],['challenge','Challenge','dungeons'],['gear','Master of Gear','forge'],['discord','Discord']],
  [['pass','ValuePass'],['siege','Pet Siege'],['goldpass','GoldPass'],['gift','DailyGift','quests'],['clan','ClanClash'],['superpack','SuperPack'],['fashion','Fashion Sale','sale'],['snow','Snowland'],['dream','DreamPass'],['fest','FestEvent'],['gacha','GodGacha','wish'],['spend','SpendRank'],['rush','Rush Rank','rankings'],['chain','Chain Buy']],
@@ -226,20 +226,25 @@ function cityAction(target,label){
 function cityIcon([icon,label,target='']){
  return `<button class="city-icon" onclick="cityAction('${target}','${label}')" aria-label="${label}"><img src="${artPath('hud-'+icon)}" alt=""><span>${label}</span></button>`;
 }
+function cityTool(icon,label,action){
+ return `<button class="city-tool" aria-label="${label}" title="${label}" onclick="${action}"><img src="${artPath('hud-'+icon)}" alt=""></button>`;
+}
 function home(){
  const mount=currentMount(),st=stats();
  const short=[cityGroups[0][0],cityGroups[1][3]];
- $('#main').innerHTML=`<section class="city-hud"><button class="city-status" onclick="go('profile')"><img src="${artPath('reina-avatar')}" alt=""><b>${fmt(st.power)}<small>Lv. ${level()} · Peace</small></b></button>
- <button class="city-rank" onclick="go('rankings')"><img src="${artPath('hud-rank')}" alt="">Rank</button><div class="city-wallet">${uiIcon('wishes')}${fmt(S.tickets)}　${uiIcon('crystals')}${fmt(S.scales)}</div><div class="city-place">Sky Garden</div>
- <button class="city-event" onclick="go('rankings')"><img src="${artPath('hud-event')}" alt=""><small>Hall of Wonders</small></button>
+ $('#main').innerHTML=`<section class="city-hud"><button class="city-status" onclick="go('profile')"><img src="${artPath('reina-avatar')}" alt=""><b>${fmt(st.power)}<i class="city-bars"></i><small>Lv. ${level()} · Peace</small></b></button>
+ <button class="city-rank" onclick="go('rankings')"><img src="${artPath('hud-rank')}" alt="">Rank</button><div class="city-wallet"><span><img src="${artPath('hud-gems')}">${fmt(S.tickets)}</span><span><img src="${artPath('hud-prisms')}">${fmt(S.scales)}</span></div><div class="city-place">Sky Garden</div>
+ <button class="city-event" onclick="go('rankings')"><img src="${artPath('hud-event')}" alt=""><small>Hall of Wonders</small><strong>${esc(S.name)}</strong></button>
  <div class="city-top">${(cityExpanded?cityGroups[0]:short).map(cityIcon).join('')}</div>
  <button class="city-fold" aria-label="Toggle events" aria-expanded="${cityExpanded}" onclick="cityExpanded=!cityExpanded;home()">${cityExpanded?'❮':'❯'}</button>
- ${cityExpanded?`<div class="city-promos">${cityGroups[1].map(cityIcon).join('')}</div><div class="city-extra">${[['isle','Isle Expedition'],['cloud','Cloud War']].map(cityIcon).join('')}</div>`:''}
- <div class="city-hero"><b>${esc(S.name)}</b><img src="${reinaLookPath(Boolean(mount))}" alt="Reina"></div><div class="city-pet">${dragonSVG(item(S.dragon))}</div>
- <div class="city-jobs">${[['Daily','quests'],['Gameplay','games'],['Bounty','quests'],['Hunting','dungeons']].map(([name,id])=>`<button onclick="go('${id}')"><img src="${artPath('hud-'+name.toLowerCase())}" alt="">${name}</button>`).join('')}</div>
- <div class="city-tools">${[['broadcast','Elf Broadcast'],['ride','Ride','ride']].map(cityIcon).join('')}</div>
- <button class="city-reward" onclick="go('quests')"><img src="${artPath('hud-reward')}" alt=""> Rewards</button><button class="city-quest" onclick="go('quests')"><img src="${artPath('hud-quest')}" alt=""> Quest Board</button>
- <div class="city-chat"><small>Globe</small> Welcome to Sky Garden</div><div class="city-dock">${cityGroups[2].map(cityIcon).join('')}</div></section>`;
+ ${cityExpanded?`<div class="city-promos">${cityGroups[1].map(cityIcon).join('')}</div><button class="city-reinforce" onclick="go('forge')"><span>Reinforce<small>Gear upgrades</small></span><img src="${artPath('hud-reinforce')}"></button><div class="city-extra">${[['isle','Isle Expedition'],['cloud','Cloud War']].map(cityIcon).join('')}</div>`:''}
+ <div class="city-wings">${artImage(S.wings,'Equipped wings')}</div><div class="city-aura"><img src="${artPath('hud-aura')}" alt="Overlord’s Aura"></div><div class="city-hero"><b>${esc(S.name)}</b><img src="${reinaLookPath(Boolean(mount))}" alt="Reina"></div><div class="city-pet">${dragonSVG(item(S.dragon))}</div>
+ <div class="city-sidekick">${dressedHero('mage',S.costumes?.equipped?.mage,'Storm mage')}</div><div class="city-jobs">${[['Daily','quests'],['Gameplay','games'],['Bounty','quests'],['Hunting','dungeons']].map(([name,id])=>`<button onclick="go('${id}')"><img src="${artPath('hud-'+name.toLowerCase())}" alt="">${name}</button>`).join('')}</div>
+ <div class="city-tools">${[['broadcast','Elf Broadcast']].map(cityIcon).join('')}</div>
+ <div class="city-skills">${[['move','Realm',"go('world')"],['ally1','Pet',"chooseSectionPage('collection')"],['combat','Combat',"go('dungeons')"],['ally2','Companion',"go('profile')"],['ride','Ride','toggleMount()'],['ally3','Wardrobe',"go('fashion')"],['travel','Travel',"go('world')"]].map(a=>cityTool(...a)).join('')}</div>
+ <div class="city-quick">${cityTool('chest','Rewards',"go('quests')")}${cityTool('upgrade','Upgrade',"go('forge')")}</div>
+ <button class="city-reward" onclick="go('quests')"><img src="${artPath('hud-reward')}" alt=""><small>Rewards</small></button><button class="city-quest" onclick="go('quests')"><img src="${artPath('hud-quest')}" alt=""> Quest Board</button>
+ <div class="city-chat"><div><small>Globe</small> Welcome to Sky Garden</div><div><small>System</small> ${esc(S.name)} · Level ${level()}</div>${cityTool('message','Journal',"go('settings')")}</div><div class="city-dock">${cityGroups[2].map(cityIcon).join('')}</div></section>`;
 }
 function heroProfile(){const mount=currentMount(),st=stats(),d=item(S.dragon),w=item(S.wings);renderHeroReadout(st);$('#main').innerHTML=`<div class="profile"><div class="profile-bg"></div><aside class="profile-panel stats-panel"><p class="eyebrow">ELVEN RANGER</p><h2>${esc(S.name)}</h2><span class="level-pill">LEVEL ${level()}</span><div class="progress"><b style="width:${level()>=1500?100:S.xp%150/1.5}%"></b></div><small class="xp">${level()>=1500?'MAX LEVEL · 1500':fmt(S.xp%150)+' / 150 XP'}</small><div class="power" role="button" tabindex="0" onclick="openHeroStats()" onkeydown="if(event.key==='Enter')openHeroStats()"><small>${uiIcon('power','power-art')}COMBAT POWER · ALL STATS</small><strong>${fmt(st.power)}</strong></div>${[['Attack',st.attack,'attack'],['Defense',st.defense,'defense'],['Health',st.health,'health'],['Critical',st.crit+'%','crit'],['Speed',st.speed,'speed'],['Accuracy',st.accuracy+'%','accuracy'],['Dodge',st.dodge+'%','wind'],['Shield HP',st.shieldHealth,'shield']].map(([n,v,i])=>`<div class="stat"><span>${uiIcon(i,'stat-art')}${n}</span><b>${typeof v==='number'?fmt(v):v}</b></div>`).join('')}<button class="primary hero-equipment-link" onclick="go('bag')">Equipment ›</button></aside><div class="hero-stage"><div class="hero-visual"><div class="scene-atmosphere" aria-hidden="true"><div class="godrays"></div><div class="volumetric-fog"></div></div><div class="stage-halo"></div><div class="party-formation" role="group" aria-label="Reina’s party">${Object.entries(partyWardrobe).map(([id,item])=>`<button class="party-member party-${id}" aria-label="${item.label} wardrobe" onclick="wardrobe('${id}')">${dressedHero(id,S.costumes?.equipped?.[id],item.label)}</button>`).join('')}</div>${mount ? `<img class="avatar mounted-reina" src="${reinaLookPath(true)}" alt="Reina riding ${mount.name}">` : `<div class="avatar-wings" data-tier="${visualTier(w)}">${wingArt(w)}</div><img class="avatar" src="${reinaLookPath(false)}" alt="REINA, silver-haired elven ranger">`}<button class="fashion-sale-link" onclick="fashionSale()">Fashion Sale</button><button class="mount-toggle" type="button" aria-pressed="${Boolean(mount)}" onclick="toggleMount()">Mount</button><div class="companion" data-tier="${visualTier(d)}">${dragonSVG(d)}<span>${d.name}</span></div></div></div></div><div class="location-badge"><span>✧</span> SKY GARDEN <small>Sanctuary of the first wish</small></div>`}
 function gearDetail(id){const slot={ring:'spiritluck',charm:'amulet'}[id]||id;openEquipment(globalThis.WonderGear.state(S).equipped[slot])}
