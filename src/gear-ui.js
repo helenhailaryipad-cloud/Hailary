@@ -603,3 +603,24 @@ function cityGameplay(){
  const scene=mount?mountPanel:`<div class="gp-empty">${artImage(['hud-pet','hud-combat','hud-gear','hud-combat','hud-rank'][playSection],'')}${dest?`<button class="spirit-gold" onclick="go('${dest[1]}')">${dest[0]}</button>`:''}</div>`;
  $('#main').innerHTML=`<section class="companion-room spirit-room gp-room"><div class="satchel-top"><strong>${name}</strong>${[['gold',S.gold],['wishes',S.tickets],['crystals',S.scales]].map(([id,n])=>'<span>'+uiIcon(id)+fmt(n)+'</span>').join('')}</div><header class="gp-banner"><h2>${title}</h2>${mount?'<small>Mount development materials</small>':''}</header><div class="gp-content">${scene}</div><div class="companion-modes">${playSection===0?nav(playMaterials,playMaterial,'playMaterial'):''}</div><nav class="spirit-nav"><button aria-label="Back to city" onclick="go('home')">‹</button>${nav(playSections,playSection,'playSection')}</nav></section>`;
 }
+
+const bountyPages=['AdvQuest','Adventure Shop','Pet Pass'];
+const bountyRanks=['Silver Quests','Gold Quests','Diamond Quests'];
+const silverObjectives=[
+ ['Spend 500 Cloud Tokens in the Cloud Shop',500],
+ ['Complete the Elf Dungeon twice',2],
+ ['Complete the Mount Dungeon twice',2],
+ ['Complete the Cloak Dungeon twice',2]
+];
+let bountyPage=0,bountyRank=0;
+function cityBounty(){
+ const title=bountyPage===0?'Adventure Quest':bountyPages[bountyPage];
+ const wallet=[['gold',S.gold],['wishes',S.tickets],['crystals',S.scales]].map(([id,n])=>'<span>'+uiIcon(id)+fmt(n)+'</span>').join('');
+ const track=[500,1000,1500,2000,2500].map((n,i)=>'<div>'+artImage(i<2?'hud-gems':'hud-pass','')+'<small>'+n+'</small></div>').join('');
+ const cards=silverObjectives.map(([name,target])=>'<article><header>'+name+' <b>(0/'+target+')</b></header><div>'+dailyTokens(['scene-exp','crystal','hud-prisms','hud-pet','hud-quest'])+'<button disabled>Claim</button></div></article>').join('');
+ const journal=bountyPage===0;
+ const ranks=bountyRanks.map((name,i)=>'<button aria-pressed="'+(i===bountyRank)+'" onclick="bountyRank='+i+';cityBounty()">'+name+'</button>').join('');
+ const nav=bountyPages.map((name,i)=>'<button aria-pressed="'+(bountyPage===i)+'" onclick="bountyPage='+i+';cityBounty()">'+artImage(['hud-quest','hud-shop','hud-pet'][i],'')+name+'</button>').join('');
+ const empty='<div class="bounty-empty">'+artImage(journal?'hud-quest':['','hud-shop','hud-pass'][bountyPage],'')+'<strong>'+(journal?bountyRanks[bountyRank]:title)+'</strong></div>';
+ $('#main').innerHTML='<section class="companion-room spirit-room bounty-room"><div class="satchel-top"><strong>Bounty</strong>'+wallet+'</div><header class="bounty-banner"><h2>'+title+'</h2>'+artImage(journal?'hud-chest':bountyPage===1?'hud-shop':'hud-pet','')+'</header>'+(journal?'<div class="bounty-track"><b>0<small>Adventure EXP</small></b><section>'+track+'</section></div>':'<div></div>')+'<div class="bounty-list">'+(journal&&bountyRank===0?cards:empty)+'</div><div class="companion-modes">'+(journal?ranks:'')+'</div><nav class="spirit-nav"><button aria-label="Back to city" onclick="go(\'home\')">‹</button>'+nav+'</nav></section>';
+}
