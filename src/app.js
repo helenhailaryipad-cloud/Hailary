@@ -285,7 +285,27 @@ function home(){
  <div class="city-left-events"><div class="city-top">${cityGroups[0].map(cityIcon).join('')}</div><div class="city-top city-compact">${short.map(cityIcon).join('')}</div>
  <button class="city-fold" aria-label="${cityExpanded?'Hide events':'Show events'}" aria-expanded="${cityExpanded}" aria-controls="city-promotions" onclick="foldCityMenu(this)"><span class="city-fold-disc" aria-hidden="true"></span></button>
  <div id="city-promotions" class="city-promos">${cityGroups[1].map(cityIcon).join('')}</div></div>
- <button class="city-reinforce" onclick="go('forge')"><span>Reinforce<small>Gear upgrades</small></span><img src="${artPath('hud-reinforce')}"></button><div class="city-extra"><button class="city-icon" onclick="go('fishing')"><span class="city-glyph"><svg xmlns="http://www.w3.org/2000/svg" class="city-fish" aria-hidden="true" viewBox="0 0 64 64"><g stroke="#3b304c" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"><path fill="#eee2ff" d="M6 18Q13 19 20 26Q25 21 32 20L29 12Q39 13 43 20Q54 21 61 32Q54 43 42 44Q37 51 29 51L31 44Q24 42 19 37Q13 44 5 46Q8 37 9 32Q8 25 6 18Z"/><path fill="none" d="M45 24Q40 32 45 39"/><path fill="#bca8d1" d="M34 30L25 34L32 37Z"/></g><circle cx="51" cy="29" r="2.8" fill="#392e46"/></svg></span><span class="city-caption">Fishing</span></button>${[['isle','Isle Expedition'],['cloud','Cloud War','cloudWar']].map(cityIcon).join('')}</div>
+ <button class="city-reinforce" onclick="go('forge')"><span>Reinforce<small>Gear upgrades</small></span><img src="${artPath('hud-reinforce')}"></button><div class="city-extra"><button class="city-icon" onclick="go('fishing')"><span class="city-glyph"><svg xmlns="http://www.w3.org/2000/svg" class="city-fish" aria-hidden="true" viewBox="0 0 80 80">
+ <defs>
+  <linearGradient id="koi-pearl" x2=".45" y2="1"><stop stop-color="#ffffe6"/><stop offset=".34" stop-color="#a4f9fb"/><stop offset=".58" stop-color="#54c9cd"/><stop offset=".78" stop-color="#5184aa"/><stop offset="1" stop-color="#69518d"/></linearGradient>
+  <linearGradient id="koi-silk" x2=".5" y2="1"><stop stop-color="#fff0bc"/><stop offset=".35" stop-color="#ffa18a"/><stop offset=".7" stop-color="#d7719d"/><stop offset="1" stop-color="#774777"/></linearGradient>
+  <linearGradient id="koi-gold" x2=".4" y2="1"><stop stop-color="#fff8c5"/><stop offset=".48" stop-color="#f5ce82"/><stop offset="1" stop-color="#b87c48"/></linearGradient>
+ </defs>
+ <g stroke-linejoin="round" stroke-linecap="round">
+  <g stroke="#553655" stroke-width="2">
+   <path fill="url(#koi-silk)" d="M33 49C17 50 7 38 6 22C14 28 27 24 32 42C31 27 22 23 24 12C38 17 45 32 39 48Z"/>
+   <path fill="url(#koi-silk)" d="M42 31C41 23 46 16 51 13L51 20L56 16L55 26Z"/>
+   <path fill="url(#koi-silk)" d="M44 52C44 62 35 65 31 70C30 60 33 53 38 49Z"/>
+   <path fill="url(#koi-pearl)" d="M24 43C30 47 36 44 40 36C46 22 56 17 66 20C72 22 75 27 75 31C69 34 69 42 59 49C48 58 32 60 24 49C21 46 19 43 18 40Z"/>
+  </g>
+  <path fill="none" stroke="url(#koi-gold)" stroke-width="2.3" d="M8 25C15 31 21 36 26 44M26 16C35 25 36 32 36 39M28 49C38 56 49 53 57 48M42 35C48 23 57 19 65 22"/>
+  <path fill="none" stroke="#fff6da" stroke-width="2" d="M56 26Q60 22 65 24M57 31Q54 37 59 40"/>
+  <g fill="none" stroke="#268a9c" stroke-width="1.4"><path d="M42 39q4 3 6-3m-11 9q4 3 6-3m1 4q4 2 6-4"/></g>
+  <path fill="url(#koi-silk)" stroke="#b27d65" stroke-width="1.5" d="M54 39C51 46 45 51 41 51C44 45 45 40 54 39Z"/>
+  <circle cx="66" cy="28" r="3.4" fill="#293048" stroke="#ffdfa2" stroke-width="1.6"/><circle cx="67" cy="27" r="1.1" fill="white"/>
+  <path d="M63 7l1.4 4.5L69 13l-4.6 1.4L63 19l-1.4-4.6L57 13l4.6-1.5Z" fill="#fff4bf"/>
+ </g>
+</svg></span><span class="city-caption">Fishing</span></button>${[['isle','Isle Expedition'],['cloud','Cloud War','cloudWar']].map(cityIcon).join('')}</div>
  <div class="city-wings">${artImage(S.wings,'Equipped wings')}</div><div class="city-aura"><img src="${artPath('hud-aura')}" alt="Overlord’s Aura"></div><div class="city-hero form-${mount?WonderGear.companionState(S,'mount').form:0}"><b>${esc(S.name)}</b><img src="${reinaLookPath(Boolean(mount))}" alt="Reina"></div>${cityCompanionEffects()}<div class="city-pet">${dragonSVG(item(S.dragon))}</div>
  <div class="city-sidekick">${dressedHero('mage',S.costumes?.equipped?.mage,'Storm mage')}</div><div class="city-jobs">${[['Daily','cityDaily'],['Gameplay','cityGameplay'],['Bounty','cityBounty'],['Hunting','cityHunting']].map(([name,id])=>`<button onclick="go('${id}')"><img src="${artPath('hud-'+name.toLowerCase())}" alt="">${name}</button>`).join('')}</div>
  <div class="city-tools">${[['broadcast','Elf Broadcast']].map(cityIcon).join('')}</div>
