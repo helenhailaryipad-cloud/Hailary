@@ -5890,3 +5890,12 @@ body[data-screen=home] #stage .hero-visual .mount-toggle {
 #stage .outfit-room > img {height:min(38dvh,320px);width:100%;object-fit:contain;}
 #stage .outfit-options {display:flex;gap:8px;}
 #stage .outfit-options [aria-pressed=true] {outline:2px solid #ffcf75;}
+
+body[data-screen=home] #stage .hero-visual button.fashion-sale-link {position:absolute;left:10px;bottom:12px;z-index:8;min-height:44px;pointer-events:auto;}
+#stage .fashion-sale {text-align:center;}
+#stage .fashion-sale h2 {margin:0;}
+#stage .fashion-offers {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px;}
+#stage .fashion-offers article {display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;}
+#stage .fashion-offers img {width:100%;height:min(30dvh,220px);object-fit:contain;}
+#stage .fashion-offers h3 {margin:0;}
+#stage .fashion-offers button {margin-top:auto;min-height:44px;}
