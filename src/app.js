@@ -124,7 +124,8 @@ const partyWardrobe = {
 };
 function partySprite(hero, outfit){
   const variant = outfit === partyWardrobe[hero].id ? '-'+outfit : '';
-  return artPath('party-'+hero+variant);
+  const release = document.querySelector('meta[name=wonder-release]')?.content || 'wardrobe-2';
+  return artPath('party-'+hero+variant)+'?v='+encodeURIComponent(release);
 }
 function wardrobe(hero, outfit = S.costumes?.equipped?.[hero] || ''){
   const item = partyWardrobe[hero];
