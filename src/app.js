@@ -216,6 +216,31 @@ const cityGroups=[
  [['pass','ValuePass'],['siege','Pet Siege'],['goldpass','GoldPass'],['gift','DailyGift','quests'],['clan','ClanClash'],['superpack','SuperPack'],['fashion','Fashion Sale','sale'],['snow','Snowland'],['dream','DreamPass'],['fest','FestEvent'],['gacha','GodGacha','wish'],['spend','SpendRank'],['rush','Rush Rank','rankings'],['chain','Chain Buy']],
  [['character','Character','character'],['bag','Bag','cityBag'],['pet','Pet','cityPet'],['companion','Companion','cityCompanion'],['skin','Skin','citySkin'],['forge','Forge','cityForge'],['more','More','more']]
 ];
+const cityDrawerItems=[
+ ['fashion','Fashion','fashion'],['combat','Skill'],['upgrade','Advance'],['summon','Synthesize','cityCraft'],['clan','Guild'],['rank','Rankings','rankings'],
+ ['pass','Gallery','petGallery'],['treasure','Legacy'],['shop','Trade'],['benefits','Couple'],['reinforce','Assist','petAssist'],['siege','OldGods'],
+ ['isle','Otherworld'],['challenge','Fane'],['skin','Diviniform'],['gems','Element'],['gacha','BonusCard']
+];
+function toggleCityDrawer(){
+ const panel=$('#city-drawer'),toggle=$('#city-drawer-toggle');
+ panel.hidden=!panel.hidden;
+ toggle.setAttribute('aria-expanded',String(!panel.hidden));
+ if(!panel.hidden){
+  cityExpanded=false;
+  $('.city-hud').dataset.expanded='false';
+  const fold=$('.city-fold');
+  fold.setAttribute('aria-expanded','false');fold.setAttribute('aria-label','Show events');
+ }
+}
+function cityDrawerAction(index){
+ const [,label,target]=cityDrawerItems[index];
+ if(target==='petGallery'||target==='petAssist'){go('cityPet');petTab(target==='petGallery'?'Gallery':'Assist');return}
+ if(target){go(target);return}
+ modal('<h2>'+label+'</h2><p>This section is in development.</p>');
+}
+function cityDrawerMarkup(){
+ return '<nav class="city-drawer" id="city-drawer" aria-label="More activities" hidden>'+cityDrawerItems.map(([icon,label],i)=>'<button class="city-icon" onclick="cityDrawerAction('+i+')"><span class="city-glyph"><img src="'+artPath('hud-'+icon)+'" alt=""></span><span class="city-caption">'+label+'</span></button>').join('')+'</nav>';
+}
 function cityAction(target,label){
  if(target==='sale')fashionSale();
  else if(target==='ride')toggleMount();
@@ -225,10 +250,12 @@ function cityAction(target,label){
 }
 const cityNotices=new Set(['shop','benefits','treasure','summon','gear','goldpass','clan','superpack','dream','rush']);
 function cityIcon([icon,label,target='']){
+ if(icon==='more')return '<button class="city-icon city-more" id="city-drawer-toggle" aria-label="More" aria-controls="city-drawer" aria-expanded="false" onclick="toggleCityDrawer()"><span class="city-four" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>';
  const notice=cityNotices.has(icon)?'<i class="city-notice" aria-hidden="true">!</i>':'';
  return `<button class="city-icon" onclick="cityAction('${target}','${label}')" aria-label="${label}"><span class="city-glyph"><img src="${artPath('hud-'+icon)}" alt="">${notice}</span><span class="city-caption">${label}</span></button>`;
 }
 function foldCityMenu(button){
+ const drawer=$('#city-drawer');if(drawer&&!drawer.hidden)toggleCityDrawer();
  cityExpanded=!cityExpanded;
  const hud=button.closest('.city-hud');
  hud.dataset.expanded=String(cityExpanded);
@@ -254,7 +281,7 @@ function home(){
  <div class="city-skills">${[['move','Realm',"go('world')"],['ally1','Pet',"chooseSectionPage('collection')"],['combat','Combat',"go('dungeons')"],['ally2','Companion',"go('profile')"],['ride','Ride','toggleMount()'],['ally3','Wardrobe',"go('fashion')"],['travel','Travel',"go('world')"]].map(a=>cityTool(...a)).join('')}</div>
  <div class="city-quick">${cityTool('chest','Rewards',"go('quests')")}${cityTool('upgrade','Upgrade',"go('forge')")}</div>
  <button class="city-reward" onclick="go('quests')"><img src="${artPath('hud-reward')}" alt=""><small>Rewards</small></button><button class="city-quest" onclick="go('quests')"><img src="${artPath('hud-quest')}" alt=""> Quest Board</button>
- <div class="city-chat"><div><small>Globe</small> Welcome to Sky Garden</div><div><small>System</small> ${esc(S.name)} · Level ${level()}</div>${cityTool('message','Journal',"go('settings')")}</div><div class="city-dock">${cityGroups[2].map(cityIcon).join('')}</div></section>`;
+ <div class="city-chat"><div><small>Globe</small> Welcome to Sky Garden</div><div><small>System</small> ${esc(S.name)} · Level ${level()}</div>${cityTool('message','Journal',"go('settings')")}</div>${cityDrawerMarkup()}<div class="city-dock">${cityGroups[2].map(cityIcon).join('')}</div></section>`;
 }
 function heroProfile(){const mount=currentMount(),st=stats(),d=item(S.dragon),w=item(S.wings);renderHeroReadout(st);$('#main').innerHTML=`<div class="profile"><div class="profile-bg"></div><aside class="profile-panel stats-panel"><p class="eyebrow">ELVEN RANGER</p><h2>${esc(S.name)}</h2><span class="level-pill">LEVEL ${level()}</span><div class="progress"><b style="width:${level()>=1500?100:S.xp%150/1.5}%"></b></div><small class="xp">${level()>=1500?'MAX LEVEL · 1500':fmt(S.xp%150)+' / 150 XP'}</small><div class="power" role="button" tabindex="0" onclick="openHeroStats()" onkeydown="if(event.key==='Enter')openHeroStats()"><small>${uiIcon('power','power-art')}COMBAT POWER · ALL STATS</small><strong>${fmt(st.power)}</strong></div>${[['Attack',st.attack,'attack'],['Defense',st.defense,'defense'],['Health',st.health,'health'],['Critical',st.crit+'%','crit'],['Speed',st.speed,'speed'],['Accuracy',st.accuracy+'%','accuracy'],['Dodge',st.dodge+'%','wind'],['Shield HP',st.shieldHealth,'shield']].map(([n,v,i])=>`<div class="stat"><span>${uiIcon(i,'stat-art')}${n}</span><b>${typeof v==='number'?fmt(v):v}</b></div>`).join('')}<button class="primary hero-equipment-link" onclick="go('bag')">Equipment ›</button></aside><div class="hero-stage"><div class="hero-visual"><div class="scene-atmosphere" aria-hidden="true"><div class="godrays"></div><div class="volumetric-fog"></div></div><div class="stage-halo"></div><div class="party-formation" role="group" aria-label="Reina’s party">${Object.entries(partyWardrobe).map(([id,item])=>`<button class="party-member party-${id}" aria-label="${item.label} wardrobe" onclick="wardrobe('${id}')">${dressedHero(id,S.costumes?.equipped?.[id],item.label)}</button>`).join('')}</div>${mount ? `<img class="avatar mounted-reina" src="${reinaLookPath(true)}" alt="Reina riding ${mount.name}">` : `<div class="avatar-wings" data-tier="${visualTier(w)}">${wingArt(w)}</div><img class="avatar" src="${reinaLookPath(false)}" alt="REINA, silver-haired elven ranger">`}<button class="fashion-sale-link" onclick="fashionSale()">Fashion Sale</button><button class="mount-toggle" type="button" aria-pressed="${Boolean(mount)}" onclick="toggleMount()">Mount</button><div class="companion" data-tier="${visualTier(d)}">${dragonSVG(d)}<span>${d.name}</span></div></div></div></div><div class="location-badge"><span>✧</span> SKY GARDEN <small>Sanctuary of the first wish</small></div>`}
 function gearDetail(id){const slot={ring:'spiritluck',charm:'amulet'}[id]||id;openEquipment(globalThis.WonderGear.state(S).equipped[slot])}
