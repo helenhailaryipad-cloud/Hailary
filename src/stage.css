@@ -6179,3 +6179,7 @@ img[src*="?outfit=roseguard"]{filter:hue-rotate(55deg)}img[src*="?outfit=starfal
 .cloud-place[data-rank] .map-token{display:grid;place-items:center;color:var(--banner);background:#29243bec;border:2px solid currentColor;border-radius:50%;width:1.45em;height:1.45em;font:700 clamp(14px,4cqw,28px)/1 Georgia,serif;box-shadow:0 2px 4px #20182a99}
 .cloud-place[data-rank="Capital"] .map-token{border:3px double currentColor;border-radius:30%;font-size:clamp(18px,5cqw,34px)}
 .cloud-place[data-rank="Stronghold"] .map-token{border-radius:22%}
+
+.city-fold .city-fold-disc{border:0;background:transparent url('assets/generated/left-fold.webp') center/contain no-repeat;transform:scaleX(-1)}
+.city-fold[aria-expanded=true] .city-fold-disc{transform:none}
+.city-fold .city-fold-disc::after{content:none}
