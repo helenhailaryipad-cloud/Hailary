@@ -82,7 +82,7 @@ const familiarGroups=[
 const familiars=familiarGroups.flatMap(([family,color,start,base,names],group)=>names.split('|').map((name,i)=>{
  const index=4+group*10+i,id='d'+index;
  petStarts[id]=start;
- return {id,name,family,color,type:'dragon',title:group===4?'FAE SPIRIT':'DRAGON SPIRIT',accent:color,rarity:group===4?'Rare':family,power:base+i*2,cost:800+base*12+i*30,portrait:'assets/generated/familiar-'+index+'.webp'};
+ return {id,name,family,color,type:'dragon',title:group===4?'FAE SPIRIT':'DRAGON SPIRIT',accent:color,rarity:group===4?'Rare':family,power:base+i*2,cost:800+base*12+i*30,portrait:'assets/generated/familiar-'+index+'.webp?v=fullbody2'};
 }));
 const familiarById=Object.fromEntries(familiars.map(p=>[p.id,p]));
 const petCap=20;
