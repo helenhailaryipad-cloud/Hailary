@@ -5916,3 +5916,25 @@ body[data-screen=home] #stage .hero-visual button.fashion-sale-link {position:ab
 .atelier-controls button[aria-pressed=true]{outline:2px solid #ffdb80;outline-offset:-2px;background:linear-gradient(#977343,#624821)}
 .atelier-controls small{display:block;font-size:.78em;margin-top:3px}
 @media(max-width:610px){.reina-atelier{display:block}.atelier-portrait img{height:clamp(155px,30dvh,270px)}.atelier-controls fieldset{margin:5px 0}.atelier-portrait{padding:8px}}
+
+body[data-screen=home] #stage :is(header,footer,#nav){display:none!important}
+body[data-screen=home] #stage #main{position:absolute!important;inset:0!important;height:100%!important;width:100%!important;max-width:none;margin:0;padding:0!important;overflow:hidden}
+.city-hud{position:relative;isolation:isolate;width:100%;height:100%;container-type:size;background:linear-gradient(180deg,#19396866,transparent 44%,#52375033),url('assets/sunny-garden.webp') center/cover;color:white;font:700 min(2cqw,2vh) Arial,sans-serif}
+#stage .city-hud button{box-sizing:border-box;min-width:0;min-height:0;margin:0;padding:0;border:0;box-shadow:none;color:white;font:inherit;text-shadow:0 1px 3px #150e23;background:#302d45c4;border-radius:.65em;cursor:pointer}
+.city-hud>*,.city-top,.city-promos{position:absolute}.city-hud .gpt-icon{width:1.55em;height:1.55em;vertical-align:middle}
+.city-top,.city-promos,.city-extra,.city-tools,.city-dock{display:grid;text-align:center;align-content:start}
+.city-top{top:9.6%;left:.5%;width:36%;grid-template-columns:repeat(4,1fr);grid-auto-rows:7.3cqh}
+.city-promos{top:31%;left:.5%;width:27%;grid-template-columns:repeat(3,1fr);grid-auto-rows:7cqh}
+#stage .city-icon{background:none;display:flex;align-items:center;flex-direction:column;font:700 min(1.85cqw,1.55cqh)/1.03 Arial,sans-serif;text-shadow:0 1px 2px #000,1px 1px 3px #17142c}
+.city-icon img{display:block;width:72%;height:4.4cqh;object-fit:contain}.city-icon span{max-width:100%}
+.city-fold{left:2.1%;top:26.9%;width:5.8%;height:4%}.city-extra{right:1%;top:31%;width:17%;grid-template-columns:1fr 1fr}
+.city-status{left:1%;top:3%;width:26%;height:5.6%;display:flex;align-items:center}.city-status img{height:100%;border-radius:50%;border:2px solid #ddbd72}.city-status b{color:#ffdb8e}.city-status small{display:block;color:#c0ee93;border-top:3px solid #93d64e}
+.city-wallet{right:2%;top:3%;padding:.25em .9em;border-radius:2em;background:#172238c9}.city-place{right:2%;top:6.4%;background:#162b40b5;padding:.15em .5em}.city-event{right:2%;top:10%;width:14%;height:12%;display:grid;place-content:center;justify-items:center}.city-event .gpt-icon{font-size:2.2em}
+.city-hero{z-index:-1;top:39%;left:32%;width:36%;height:25%;display:flex;flex-direction:column;align-items:center;color:#fff4c9;text-shadow:0 1px 3px #332444}.city-hero img{width:100%;min-height:0;height:100%;object-fit:contain}.city-pet{z-index:-1;top:48%;left:58%;width:14%;height:11%}.city-pet>*{width:100%;height:100%;object-fit:contain}
+.city-jobs{right:0;top:40%;width:16%;display:grid;gap:1cqh}.city-jobs button{height:4.5cqh}.city-tools{right:1%;width:8%;top:65%;gap:4.5cqh}
+.city-reward{left:1%;bottom:16%;width:12%;height:6%}.city-quest{left:31%;width:38%;bottom:16%;height:4.4%}
+.city-chat,.city-dock{left:15%;width:70%;box-sizing:border-box;background:#211d35ce}.city-chat{bottom:7%;height:5.5%;padding:1.5cqh 1cqw;font-size:1.8cqw}.city-chat small{background:#622875;padding:.15em .7em}
+.city-dock{bottom:0;height:7%;align-content:center;grid-template-columns:repeat(7,1fr)}.city-dock img{height:4.1cqh}
+#stage .city-rank{left:29%;top:2%;width:7%;height:6%;display:grid;justify-items:center;background:none;font-size:1.6cqw}
+.city-rank img,.city-event img{width:100%;height:4.4cqh;object-fit:contain}.city-event img{height:6cqh}
+.city-jobs button,.city-quest{display:flex;align-items:center;justify-content:space-evenly}.city-jobs img,.city-quest img{height:95%;max-width:40%;object-fit:contain}.city-reward img{height:80%;width:100%;display:block;object-fit:contain}
