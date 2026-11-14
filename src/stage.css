@@ -6164,8 +6164,13 @@ img[src*="?outfit=roseguard"]{filter:hue-rotate(55deg)}img[src*="?outfit=starfal
 
 .cloud-war{grid-template-columns:minmax(0,1fr)}
 .cloud-map-plane{position:absolute;inset:0}
-.cloud-field.twin-islands{container-type:size;display:grid;place-items:center;min-height:0;min-width:0;background:#76aac5}
-.twin-islands .cloud-map-plane{position:relative;inset:auto;width:min(100cqw,75cqh);aspect-ratio:3/4;background:url('assets/generated/cloud-war-twin-islands.webp') center/contain no-repeat}
-.twin-islands .cloud-place img{display:none}
-.twin-islands .cloud-place{min-height:44px;align-content:center}
-.twin-islands .cloud-place b,.twin-islands .cloud-place small{background:#28243de6;border-radius:.35em;padding:.12em .4em}
+.cloud-war .cloud-field{container-type:size;display:grid;place-items:center;min-height:0;min-width:0;background:#76aac5}
+.cloud-war .cloud-map-plane{position:relative;inset:auto;width:min(100cqw,75cqh);aspect-ratio:3/4;background:var(--map-art) center/contain no-repeat}
+.cloud-war .cloud-place img{display:none}
+.cloud-war .cloud-place{min-height:44px;align-content:center}
+.cloud-war .cloud-place b,.cloud-war .cloud-place small{background:#28243de6;border-radius:.35em;padding:.12em .4em}
+
+.map-2{--map-art:url('assets/generated/cloud-war-twin-islands.webp')}
+.map-3{--map-art:url('assets/generated/cloud-war-three.webp')}
+.map-4{--map-art:url('assets/generated/cloud-war-four.webp')}
+.map-4 .cloud-place{width:18%}

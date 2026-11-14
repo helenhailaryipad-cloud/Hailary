@@ -670,19 +670,19 @@ function cityExplore(){
 }
 
 const cloudFactions=[
- ['Leopard','Snowpeak Island','Wings Fortress','#ffbb68'],
- ['Snowfox','Snowfox Island','Firebird Fortress','#a6caff'],
- ['Falcon','Winddance Island','Light Fortress','#abe694'],
- ['Lynx','Thunderstone Island','Storm Fortress','#dfadff']
+ ['Galewing','Galehaven','Windwatch','#67dfd9'],
+ ['Embercrest','Emberhold','Cinderwatch','#ffa2a6'],
+ ['Moonveil','Moonspire','Dusk Watch','#dab6ff'],
+ ['Thornhart','Thornhaven','Briar Watch','#a5edb0']
 ];
 const cloudLayouts={
  2:[[15,50,26,17],[85,50,74,17]],
- 3:[[18,21,32,35],[82,21,68,35],[50,90,50,73]],
- 4:[[17,17,33,32],[83,17,67,32],[17,83,33,68],[83,83,67,68]]
+ 3:[[18,21,31,32],[82,21,68,32],[50,84,50,63]],
+ 4:[[50,18,50,29],[88,50,70,50],[50,88,50,66],[12,50,30,50]]
 };
 let cloudCount=3;
 function cloudTerritories(){
- const nodes=[{name:'Palace City',owner:'Neutral',x:50,y:52,art:'hud-clan'}];
+ const nodes=[{name:'Palace City',owner:'Neutral',x:50,y:({2:52,3:44,4:49})[cloudCount],art:'hud-clan'}];
  cloudLayouts[cloudCount].forEach(([x,y,fx,fy],i)=>{
   const [owner,island,fort,color]=cloudFactions[i];
   nodes.push({name:island,owner,color,x,y,art:'hud-isle'},{name:fort,owner,color,x:fx,y:fy,art:'hud-siege'});
@@ -706,13 +706,8 @@ function cloudBrief(page){
 }
 function cityCloudWar(){
  const nodes=cloudTerritories();
- let lines='';
- for(let i=1;cloudCount!==2 && i<nodes.length;i+=2){
-  const a=nodes[i],b=nodes[i+1];
-  lines+='<polyline points="'+a.x+','+a.y+' '+b.x+','+b.y+' 50,52" stroke="'+a.color+'"/>';
- }
- const markers=nodes.map((p,i)=>'<button class="cloud-place" style="left:'+p.x+'%;top:'+p.y+'%;--banner:'+(p.color||'#ffe0a2')+'" onclick="cloudTerritory('+i+')">'+artImage(p.art,'')+'<b>'+p.name+'</b><small>'+p.owner+'</small></button>').join('');
- $('#main').innerHTML='<section class="cloud-war"><div class="cloud-heading"><strong>Cloud War</strong><small>Battle starts at 19:30</small></div><div class="cloud-tabs" role="group" aria-label="Faction count">'+[2,3,4].map(n=>'<button aria-pressed="'+(cloudCount===n)+'" onclick="cloudCount='+n+';cityCloudWar()">'+n+' Factions</button>').join('')+'</div><div class="cloud-field'+(cloudCount===2?' twin-islands':'')+'"><div class="cloud-map-plane"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'+lines+'</svg>'+markers+'</div></div><div class="cloud-actions"><button aria-label="Back to city" onclick="go(\'home\')">‹</button><button onclick="cloudBrief('+[3,2,4].indexOf(cloudCount)+')">War Guide</button></div></section>';
+ const markers=nodes.map((p,i)=>'<button class="cloud-place" style="left:'+p.x+'%;top:'+p.y+'%;--banner:'+(p.color||'#ffe0a2')+'" onclick="cloudTerritory('+i+')">'+'<b>'+p.name+'</b><small>'+p.owner+'</small></button>').join('');
+ $('#main').innerHTML='<section class="cloud-war"><div class="cloud-heading"><strong>Cloud War</strong><small>Battle starts at 19:30</small></div><div class="cloud-tabs" role="group" aria-label="Faction count">'+[2,3,4].map(n=>'<button aria-pressed="'+(cloudCount===n)+'" onclick="cloudCount='+n+';cityCloudWar()">'+n+' Factions</button>').join('')+'</div><div class="cloud-field map-'+cloudCount+'"><div class="cloud-map-plane">'+markers+'</div></div><div class="cloud-actions"><button aria-label="Back to city" onclick="go(\'home\')">‹</button><button onclick="cloudBrief('+[3,2,4].indexOf(cloudCount)+')">War Guide</button></div></section>';
 }
 
 let eliteTab=0,eliteHero='reina';
