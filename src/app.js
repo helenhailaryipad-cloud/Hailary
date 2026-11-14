@@ -259,11 +259,12 @@ function cityAction(target,label){
  else if(target)go(target);
  else modal('<h2>'+esc(label)+'</h2><p>This activity is not available yet.</p>');
 }
+const cityArtVersion = document.querySelector('meta[name="wonder-release"]')?.content;
 const cityNotices=new Set(['shop','benefits','treasure','summon','gear','goldpass','clan','superpack','dream','rush']);
 function cityIcon([icon,label,target='']){
  if(icon==='more')return '<button class="city-icon city-more" id="city-drawer-toggle" aria-label="More" aria-controls="city-drawer" aria-expanded="false" onclick="toggleCityDrawer()"><span class="city-four" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>';
  const notice=cityNotices.has(icon)?'<i class="city-notice" aria-hidden="true">!</i>':'';
- return `<button class="city-icon" onclick="cityAction('${target}','${label}')" aria-label="${label}"><span class="city-glyph"><img src="${artPath('hud-'+icon)}" alt="">${notice}</span><span class="city-caption">${label}</span></button>`;
+ return `<button class="city-icon" onclick="cityAction('${target}','${label}')" aria-label="${label}"><span class="city-glyph"><img src="${artPath('hud-'+icon)}${cityArtVersion?'?v='+cityArtVersion:''}" alt="">${notice}</span><span class="city-caption">${label}</span></button>`;
 }
 function foldCityMenu(button){
  const drawer=$('#city-drawer');if(drawer&&!drawer.hidden)toggleCityDrawer();
