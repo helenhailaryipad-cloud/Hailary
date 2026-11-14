@@ -5951,3 +5951,16 @@ body[data-screen=home] #stage #main{position:absolute!important;inset:0!importan
  .city-promos,.city-extra,.city-reinforce{animation:city-events-in .16s ease-out}
  @keyframes city-events-in{from{opacity:0;transform:translateY(-.5cqh)}to{opacity:1;transform:translateY(0)}}
 }
+
+/* Event controls float above the city at the reference grid positions. */
+body[data-screen=home] #stage .city-hud button,
+body[data-screen=home] #stage .city-hud button *{animation:none!important;transition:none!important}
+body[data-screen=home] #stage .city-hud button::before,
+body[data-screen=home] #stage .city-hud button::after{content:none!important;animation:none!important}
+#stage .city-hud :is(.city-top,.city-promos) button.city-icon{background:transparent!important;border:0!important;border-radius:0;box-shadow:none!important;display:flex;flex-flow:column;align-items:center;justify-content:flex-start;gap:0;color:#fffdf2;font:700 clamp(9px,1.82cqw,22px)/1.04 Arial,Helvetica,sans-serif;letter-spacing:-.02em;text-shadow:0 1px 2px #382a34,0 1px 3px #382a34}
+#stage .city-hud .city-icon .event-emblem{position:relative;display:block;flex:none;width:min(6.4cqw,4.6cqh);height:min(6.4cqw,4.6cqh);max-width:none;max-height:none;opacity:.93;filter:drop-shadow(0 1px 1px #37243966);margin:0}
+#stage .city-hud .city-fold{z-index:8;left:1.1%;top:25.7%;width:max(7.8cqw,44px);height:max(5.6cqh,44px);display:grid;place-items:center;background:transparent!important;box-shadow:none!important;touch-action:manipulation}
+.city-fold-disc{display:grid;place-items:center;width:min(5.8cqw,4.1cqh);aspect-ratio:1;border:1.5px solid #f2dfacb8;border-radius:50%;background:#323c47a6}
+.city-fold-disc::after{content:'';width:32%;height:32%;border-top:.35em solid #fff3ce;border-right:.35em solid #fff3ce;transform:rotate(45deg) translate(-8%,8%)}
+.city-fold[aria-expanded=true] .city-fold-disc::after{transform:rotate(-135deg) translate(-8%,8%)}
+.city-fold:focus-visible .city-fold-disc{outline:2px solid #ffe9a8}
