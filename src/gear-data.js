@@ -70,7 +70,41 @@ const stonePrice=1000;
 function buyStone(save){if(save.gold<stonePrice)return false;const eq=state(save);save.equipment=eq;save.gold-=stonePrice;eq.materials.synthesis++;return true}
 function attributePower(t){return (t.accuracy||0)*12+(t.dodge||0)*18+(t.critDamage||0)*8+(t.critResistance||0)*15+(t.shieldHealth||0)/3+(t.elementalAttack||0)*3+(t.elementalDefense||0)*3}
 function detail(entry){const t=catalog[entry.template],base={},enhancement={},star={},gem={},perfect={};for(const [key,n]of Object.entries(t.base)){base[key]=round(n*t.factor);star[key]=round(base[key]*entry.stars*.12)}for(const [key,n]of Object.entries(t.enhanceBonus))enhancement[key]=round(n*entry.enhance);if(entry.gems){const key=t.offense?'attack':'health';gem[key]=entry.gems*(t.offense?18:75);gem[t.offense?'penetration':'defense']=entry.gems*(t.offense?4:9)}if(t.grade){if(t.offense){perfect.attackPercent=round(t.grade*1.5);perfect.damageBonus=t.grade}else{perfect.healthPercent=round(t.grade*1.2);perfect.defensePercent=round(t.grade*1.5);perfect.damageReduction=round(t.grade*.6)}}if(t.slot==='spiritguard')perfect.expBonus=entry.stars*3;if(t.slot==='crown'&&t.grade>=2)perfect.block=t.grade*1.5;const total={};for(const section of [base,enhancement,star,gem,perfect])for(const [key,n]of Object.entries(section))total[key]=round((total[key]||0)+n);return {template:t,base,enhancement,star,gem,perfect,total,power:Math.round((total.attack||0)*5+(total.defense||0)*4+(total.health||0)/3+(total.crit||0)*10+(total.speed||0)+(total.penetration||0)*3+(total.attackPercent||0)*20+(total.healthPercent||0)*10+(total.defensePercent||0)*15+(total.damageBonus||0)*20+(total.damageReduction||0)*25+(total.block||0)*15+attributePower(total))}}
-function bonuses(save){const eq=state(save),sum={};for(const slot of slots){const uid=eq.equipped[slot.id];const e=eq.items.find(i=>i.uid===uid);if(e&&catalog[e.template].tier<=unlockedTier(save))for(const [key,n]of Object.entries(detail(e).total))sum[key]=round((sum[key]||0)+n)}return sum}
+const companionTypes={
+ elf:{name:'Elf',title:'Dreamveil',art:'familiar-46',icon:'hud-pet',growth:{attack:6,health:60,penetration:0.2,defense:2}},
+ mount:{name:'Mount',title:'Silver Tabby',art:'reina-silver-tabby',icon:'silver-tabby-icon',growth:{attack:3,health:120,penetration:0.1,defense:5}},
+ cloak:{name:'Cloak',title:'Moonveil Mantle',art:'gear-armor-t3',icon:'gear-armor-t3',growth:{attack:2,health:80,elementalAttack:3,elementalDefense:3}},
+ back:{name:'Back Accessory',title:'Adventurer’s Satchel',art:'hud-bag',icon:'hud-bag',growth:{attack:3,health:65,penetration:0.1,defense:2}},
+ footprint:{name:'Footprint',title:'Starlit Steps',art:'reina-walk',icon:'gear-boots-t3',growth:{attack:2,health:50,elementalAttack:2,elementalDefense:2}}
+};
+function companionState(save,key){
+ return {level:1,tier:1,form:0,hidden:false,equipped:false,...save.companions?.[key]};
+}
+function validCompanions(data){
+ if(data===undefined)return true;
+ return data!==null&&typeof data==='object'&&!Array.isArray(data)&&Object.entries(data).every(([key,v])=>
+  Object.hasOwn(companionTypes,key)&&v&&Number.isInteger(v.level)&&v.level>=1&&v.level<=100&&Number.isInteger(v.tier)&&v.tier>=1&&v.tier<=10&&Number.isInteger(v.form)&&v.form>=0&&v.form<=2&&typeof v.hidden==='boolean'&&typeof v.equipped==='boolean');
+}
+function companionPoints(v){return v.level-1+(v.tier-1)*5}
+function improveCompanion(save,key,tier){
+ if(!Object.hasOwn(companionTypes,key))return false;
+ const v=companionState(save,key);
+ if(tier){
+  const eq=state(save),price=5*v.tier;
+  if(v.tier>=10||v.level<v.tier*5||eq.materials.shard<price)return false;
+  eq.materials.shard-=price;save.equipment=eq;v.tier++;
+ }else{
+  if(v.level>=100||save.gold<100*v.level)return false;
+  save.gold-=100*v.level;v.level++;
+ }
+ (save.companions??={})[key]=v;return true;
+}
+function bonuses(save){const eq=state(save),sum={};
+ for(const [key,type] of Object.entries(companionTypes)){
+  const points=companionPoints(companionState(save,key));
+  if(points)for(const [stat,n] of Object.entries(type.growth))sum[stat]=round((sum[stat]||0)+n*points);
+ }
+for(const slot of slots){const uid=eq.equipped[slot.id];const e=eq.items.find(i=>i.uid===uid);if(e&&catalog[e.template].tier<=unlockedTier(save))for(const [key,n]of Object.entries(detail(e).total))sum[key]=round((sum[key]||0)+n)}return sum}
 const petStarts={d0:1,d1:3,d2:5,d3:8};
 const familiarGroups=[
  ['Common','#9bcda1',1,65,'Leafcurl|Cinderpip|Shellkin|Ripplefin|Plumwing|Bellvine|Mossprism|Sandfrill|Coralfan|Pebbledrake'],
@@ -115,6 +149,7 @@ function petTeamAttack(s){
  return petTeam(s).reduce((sum,id)=>id?sum+petAttack(s,id)+badgeRank(s,id)*5:sum,0);
 }
 function validPets(s){
+ if(!validCompanions(s.companions))return false;
  for(const [ranks,max] of [[s.petBadges,20],[s.petStars,6]]){
   if(ranks!==undefined&&(!ranks||typeof ranks!=='object'||Array.isArray(ranks)||!Object.entries(ranks).every(([id,n])=>Object.hasOwn(petStarts,id)&&s.owned?.includes(id)&&Number.isInteger(n)&&n>=0&&n<=max)))return false;
  }
@@ -202,5 +237,5 @@ function rollBossTier(save,random){
 }
 function bossLoot(save,id,random=Math.random){const table=bossLootTables[id];if(!table)return null;const eq=state(save);save.equipment=eq;const materials=Object.fromEntries(materialDefs.map(m=>[m.id,table[m.id]||0]));for(const m of materialDefs)eq.materials[m.id]+=materials[m.id];const tier=rollBossTier(save,random),slot=table.slots[Math.min(table.slots.length-1,Math.max(0,Math.floor(random()*table.slots.length)))],drop=addDrop(save,tier,slot);if(drop.converted){eq.materials.stone+=15;materials.stone+=20;}else{drop.enhance=table.enhance;drop.stars=table.stars;}return {...materials,entry:drop.converted?null:drop,converted:!!drop.converted};}
 function grant(save,type,won,score=0){const eq=state(save);save.equipment=eq;let stones=type==='dungeon'?(won?12:3):type==='defense'?(won?8:2):type==='spar'?(won?2:0):Math.min(7,Math.floor(score/180));eq.materials.stone+=stones;let shard=won&&(type==='dungeon'||type==='defense')?3:0;eq.materials.shard+=shard;if(won&&type==='dungeon'){eq.materials.essence+=2;eq.materials.gem+=1}return {stone:stones,shard,gem:won&&type==='dungeon'?1:0,essence:won&&type==='dungeon'?2:0}}
-return Object.freeze({petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,starGearCount,starDonors,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
+return Object.freeze({companionTypes,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,starGearCount,starDonors,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
 })();

@@ -411,3 +411,53 @@ function cityPet(){
  }
  $('#main').innerHTML='<section class="spirit-room" data-page="'+petPage+'"><strong class="spirit-ribbon">'+petPage+'</strong><div class="spirit-body">'+body+'</div><div class="spirit-nav"><button aria-label="Back to city" onclick="go(\'home\')">‹</button>'+petPages.map((page,i)=>'<button aria-pressed="'+(page===petPage)+'" onclick="petTab(\''+page+'\')">'+artImage(['hud-pet','hud-bag','hud-companion','hud-forge'][i],'')+page+'</button>').join('')+'</div></section>';
 }
+
+let companionKey='elf',companionMode='Upgrade';
+const companionForms=['Classic','Moonlight','Sunfire'];
+function companionModes(key){
+ if(key==='back')return ['Morphing'];
+ return ['elf','mount'].includes(key)?['Upgrade','Tier-up','Morphing','Equip']:['Upgrade','Morphing'];
+}
+function companionTab(key,mode){
+ if(!WonderGear.companionTypes[key])return;
+ companionKey=key;
+ companionMode=companionModes(key).includes(mode)?mode:companionModes(key)[0];
+ cityCompanion();
+}
+function companionAction(action,arg){
+ const r=WonderGear,key=companionKey,v=r.companionState(S,key);
+ if(action==='upgrade'||action==='tier'){
+  if(!r.improveCompanion(S,key,action==='tier'))return;
+ }else{
+  if(action==='form'&&Number.isInteger(arg)&&arg>=0&&arg<=2&&v.level>=[1,5,10][arg])v.form=arg;
+  else if(action==='hide')v.hidden=!v.hidden;
+  else if(action==='equip'){
+   if(key==='mount'){S.mountId=currentMount()?'':mounts[0].id;delete S.ridingSilverTabby}
+   else v.equipped=!v.equipped;
+  }else return;
+  (S.companions??={})[key]=v;
+ }
+ save();cityCompanion();
+}
+function cityCompanionEffects(){
+ return ['elf','back','cloak','footprint'].map(key=>{
+  const v=WonderGear.companionState(S,key);
+  if(!v.equipped||v.hidden)return '';
+  return '<span aria-hidden="true" class="city-companion-effect fx-'+key+' form-'+v.form+'">'+(key==='footprint'?'<i></i><i></i><i></i>':key==='cloak'?'<span class="moonveil-cloak"></span>':artImage(WonderGear.companionTypes[key].art,''))+'</span>';
+ }).join('');
+}
+function cityCompanion(){
+ const r=WonderGear,key=companionKey,t=r.companionTypes[key],v=r.companionState(S,key);
+ const labels={attack:'ATK',health:'HP',defense:'DEF',penetration:'ARP %',elementalAttack:'ELEM. ATK',elementalDefense:'ELEM. DEF'};
+ const tier=companionMode==='Tier-up'||key==='back'&&v.level>=v.tier*5&&v.tier<10,points=r.companionPoints(v);
+ const price=tier?v.tier*5:v.level*100,balance=tier?r.state(S).materials.shard:S.gold;
+ const equipped=key==='mount'?!!currentMount():v.equipped;
+ const statRows=Object.entries(t.growth).map(([k,n])=>'<div><b>'+labels[k]+'</b><span>'+fmtCompanion(n*points)+'</span><em>↑ '+fmtCompanion(n*(tier?5:1))+'</em></div>').join('');
+ const modes=companionModes(key),nav=Object.entries(r.companionTypes).map(([k,x])=>'<button aria-pressed="'+(k===key)+'" onclick="companionTab(\''+k+'\')">'+artImage(x.icon,'')+x.name+'</button>').join('');
+ const equip='<button class="spirit-gold" onclick="companionAction(\'equip\')">'+(equipped?(key==='mount'?'Dismount':'Unequip'):(key==='mount'?'Ride':'Equip'))+'</button>';
+ const upgrade='<small>'+ (tier?'Tier '+v.tier+' · Requires Lv. '+v.tier*5:'Lv. '+v.level+' / 100')+'</small><progress value="'+(tier?Math.min(v.level,v.tier*5):v.level)+'" max="'+(tier?v.tier*5:100)+'"></progress><button class="spirit-gold" onclick="companionAction(\''+(tier?'tier':'upgrade')+'\')" '+(balance<price||(tier?v.tier>=10||v.level<v.tier*5:v.level>=100)?'disabled':'')+'>'+(tier?'Tier up':'Upgrade')+'</button><small>'+fmt(price)+(tier?' shards':' gold')+'</small>';
+ const forms=companionForms.map((name,i)=>'<button aria-pressed="'+(v.form===i)+'" class="form-'+i+'" onclick="companionAction(\'form\','+i+')" '+(v.level<[1,5,10][i]?'disabled':'')+'>'+artImage(t.icon,'')+'<small>'+name+(v.level<[1,5,10][i]?' · Lv.'+[1,5,10][i]:'')+'</small></button>').join('');
+ const preview=key==='cloak'?'<div class="moonveil-cloak" role="img" aria-label="Moonveil Mantle"><i>✦</i></div>':key==='footprint'?'<div class="step-marks"><i></i><i></i><i></i></div><img src="'+reinaLookPath(false)+'" alt="Reina">':artImage(t.art,t.title);
+ $('#main').innerHTML='<section class="spirit-room companion-room"><div class="satchel-top"><strong>'+t.name+'</strong>'+[['gold',S.gold],['wishes',S.tickets],['crystals',S.scales]].map(([i,n])=>'<span>'+uiIcon(i)+fmt(n)+'</span>').join('')+'</div><header><h2>Lv.'+v.level+' '+t.title+'</h2><b class="spirit-value">⚔ '+fmt(Object.values(t.growth).reduce((a,b)=>a+b,0)*points)+'</b></header><div class="companion-show">'+(key==='mount'?'':'<label><input type="checkbox" '+(v.hidden?'checked':'')+' onchange="companionAction(\'hide\')"> Hide</label>')+'<div class="companion-object form-'+v.form+'">'+preview+'</div></div><div class="companion-forms">'+forms+'</div><section class="companion-stats"><div>'+statRows+'</div><div>'+(companionMode==='Equip'?equip:companionMode==='Morphing'&&key!=='back'?equip:upgrade)+(key==='back'?equip:'')+'</div></section><div class="companion-modes">'+modes.map(m=>'<button aria-pressed="'+(m===companionMode)+'" onclick="companionTab(\''+key+'\',\''+m+'\')">'+m+'</button>').join('')+'</div><div class="spirit-nav"><button aria-label="Back to city" onclick="go(\'home\')">‹</button>'+nav+'</div></section>';
+}
+function fmtCompanion(n){return Number(n.toFixed(1)).toLocaleString('en-US')}
