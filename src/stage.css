@@ -6204,6 +6204,7 @@ body[data-screen=cityExplore] #stage>#main{display:block;max-width:none;margin:0
 .explore-actions{display:grid;justify-items:center;gap:.65em}.explore-actions button{min-width:130px}
 
 .city-hud .city-hero{left:25%;top:31%;width:50%;height:34%}
+.city-hud .city-hero img{filter:brightness(1.08) saturate(1.04)}
 .city-hud .city-wings{left:14%;top:32%;width:72%;height:29%}
 .city-hud .city-aura{top:26%}
 .city-hud .city-pet{top:auto;bottom:35%;width:16%;height:11%}
