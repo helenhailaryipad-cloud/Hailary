@@ -320,3 +320,94 @@ function cityCraft(){
  const groups=['Equipment','Necklace & Amulet','Rings'];
  $('#main').innerHTML=`<section class="satchel loom"><div class="satchel-top"><strong>Gear Crafting</strong>${[['gold',S.gold],['wishes',S.tickets],['crystals',S.scales]].map(([i,n])=>`<span>${uiIcon(i)}${fmt(n)}</span>`).join('')}</div><div class="loom-body"><aside>${[1,2,3,4,5].map(n=>`<button aria-pressed="${craftBand===n}" onclick="craftFilter(${n},null,craftGroup)">${n}-Star Gear</button>${craftBand===n?tiers.map(t=>`<button class="loom-tier" aria-pressed="${t===craftTier}" onclick="craftFilter(craftBand,${t},craftGroup)">T${t} Gear</button>`).join(''):''}`).join('')}</aside><div class="loom-work">${e?`<div class="loom-orbit"><div>${gearArt(r.catalog[e.template])}</div></div><h2>${r.catalog[e.template].name}</h2><strong>${e.stars} → ${craftBand} ★ · T${craftTier}</strong><p>${craftTier>r.unlockedTier(S)?'Requires Lv. '+r.requiredLevel(craftTier):'Success rate: 100% with all materials'}</p><div class="loom-inputs">${Array.from({length:r.starGearCount},(_,i)=>{const d=donors.find(x=>x.uid===craftInputs[i]);return d?tile(d,'craftAdd('+d.uid+')',true):'<span>+</span>'}).join('')}</div><p>${craftInputs.length} / ${r.starGearCount} spare items · ${priceText(price)}</p><div class="loom-options">${donors.map(x=>tile(x,'craftAdd('+x.uid+')',craftInputs.includes(x.uid))).join('')}</div><div class="loom-buttons"><button onclick="craftBatch([${choices.map(x=>x.uid).join(',')}])">Batch</button><button onclick="craftAdd()" ${donors.length?'':'disabled'}>Add</button><button onclick="craftCommit('${equipmentStamp(e)}')" ${ready?'':'disabled'}>Synthesize</button></div><div class="loom-options">${choices.map(x=>tile(x,'craftSelect('+x.uid+')',x===e)).join('')}</div>`:'<p>No matching equipment in your bag.</p>'}</div></div><div class="satchel-tabs">${groups.map(g=>`<button aria-pressed="${g===craftGroup}" onclick="craftFilter(craftBand,null,'${g}')">${g}</button>`).join('')}</div>${satchelNav()}</section>`;
 }
+
+let petPage='Formation',petFocus=null,emblemFilter='All';
+const petPages=['Formation','Gallery','Assist','Badge'];
+function petTab(page,id){
+ petPage=page;petFocus=id||petFocus||S.dragon;if(page==='Badge'&&id)emblemFilter='All';cityPet();
+}
+function setPetTeam(team){
+ S.dragon=team[0];S.petPartners=team.slice(1,3);S.petAssist=team.slice(3);
+ save();cityPet();
+}
+function assignPet(slot,id){
+ const team=WonderGear.petTeam(S);
+ if(!Number.isInteger(slot)||slot<0||slot>=team.length)return;
+ if(id===null&&slot===0)return;
+ if(id!==null&&(!S.owned.includes(id)||item(id)?.type!=='dragon'))return;
+ const previous=team.indexOf(id);
+ if(previous===0&&slot!==0&&!team[slot]){toast('Choose another pet for this slot.');return}
+ if(id&&previous>=0)team[previous]=team[slot];
+ team[slot]=id;
+ if(!team[0]){team[0]=id;team[slot]=null}
+ $('#modal').close();petFocus=team[slot]||team[0];setPetTeam(team);
+}
+function recommendPets(){
+ const ids=ITEMS.filter(p=>p.type==='dragon'&&S.owned.includes(p.id)).map(p=>p.id);
+ const power=id=>WonderGear.petAttack(S,id)+5*WonderGear.badgeRank(S,id);
+ ids.sort((a,b)=>power(b)-power(a));
+ const primary=ids.slice(0,3),assist=WonderGear.petTeam(S).slice(3).map(id=>primary.includes(id)?null:id);
+ petFocus=primary[0];setPetTeam([...Array.from({length:3},(_,i)=>primary[i]||null),...assist]);
+}
+function petTile(id,click,label,selected=false){
+ if(!id)return '<button class="spirit-empty" onclick="'+click+'" aria-label="'+label+'">+<small>'+label+'</small></button>';
+ const p=item(id);
+ return '<button class="spirit-card" style="--edge:'+p.color+'" aria-pressed="'+selected+'" onclick="'+click+'"><small>'+p.rarity+'</small>'+dragonSVG(p)+'<b>'+p.name+'</b><small>'+label+'</small></button>';
+}
+function pickPet(slot){
+ const team=WonderGear.petTeam(S),owned=ITEMS.filter(p=>p.type==='dragon'&&S.owned.includes(p.id));
+ modal('<h2>'+ (slot<3?'Primary Pet':'Pet Assist')+'</h2><div class="spirit-picker">'+owned.map(p=>petTile(p.id,"assignPet("+slot+",'"+p.id+"')",team.includes(p.id)?'Deployed':'Select',team[slot]===p.id)).join('')+'</div>'+(slot&&team[slot]?'<button onclick="assignPet('+slot+',null)">Remove</button>':''));
+}
+function petFeed(){
+ if(WonderGear.trainPet(S,petFocus)){save();cityPet()}
+}
+function petUnlock(){
+ const p=item(petFocus);
+ if(S.owned.includes(p.id)||S.gold<p.cost)return;
+ S.gold-=p.cost;S.owned.push(p.id);save();cityPet();
+}
+function starPet(){
+ const stars=S.petStars?.[petFocus]||0,price=10*(stars+1);
+ if(petFocus==='d1'){
+  if(!WonderGear.evolveEmber(S))return;
+ }else{
+  const eq=WonderGear.state(S);
+  if(!S.owned.includes(petFocus)||stars>=6||eq.materials.shard<price)return;
+  eq.materials.shard-=price;S.equipment=eq;(S.petStars??={})[petFocus]=stars+1;
+ }
+ save();cityPet();
+}
+function forgePetBadge(){
+ const rank=WonderGear.badgeRank(S,petFocus),price=5*(rank+1);
+ if(!S.owned.includes(petFocus)||rank>=20)return;
+ const eq=WonderGear.state(S);
+ if(eq.materials.shard<price)return;
+ eq.materials.shard-=price;S.equipment=eq;(S.petBadges??={})[petFocus]=rank+1;save();cityPet();
+}
+function cityPet(){
+ const rules=WonderGear,team=rules.petTeam(S),pets=ITEMS.filter(p=>p.type==='dragon');
+ if(!petFocus||petPage==='Formation'&&!team.slice(0,3).includes(petFocus))petFocus=S.dragon;
+ if(petPage==='Badge'&&emblemFilter!=='All'&&item(petFocus).rarity!==emblemFilter)petFocus=pets.find(p=>p.rarity===emblemFilter)?.id||S.dragon;
+ const p=item(petFocus),owned=S.owned.includes(p.id),lv=rules.petLevel(S,p.id),atk=rules.petAttack(S,p.id),rank=rules.badgeRank(S,p.id);
+ const switchTo=(page,id)=>"petTab('"+page+"','"+id+"')";
+ const strip=(list,page)=>'<div class="spirit-strip">'+list.map(q=>petTile(q.id,switchTo(page,q.id),S.owned.includes(q.id)?'Lv. '+rules.petLevel(S,q.id):'Locked',q.id===p.id)).join('')+'</div>';
+ const portrait='<div class="spirit-model">'+dragonSVG(p)+'</div>';
+ const title='<h2>'+p.name+'</h2><span>'+p.rarity+' · Lv. '+lv+'</span>';
+ const primary=team.slice(0,3).map((id,i)=>'<div>'+petTile(id,id?switchTo('Formation',id):'pickPet('+i+')',id?'Lv. '+rules.petLevel(S,id):'Deploy',id===p.id)+(id?'<button class="spirit-link" onclick="pickPet('+i+')">Replace</button>':'')+'</div>').join('');
+ let body;
+ if(petPage==='Formation'){
+  const other=team.slice(0,3).filter(id=>id&&id!==p.id);
+  body='<div class="spirit-scene"><div class="spirit-value">⚔ '+fmt(rules.petTeamAttack(S))+'</div><button class="spirit-recommend" onclick="recommendPets()">Recommended<br>Lineup</button><div class="spirit-flanks">'+other.map(id=>dragonSVG(item(id))).join('')+'</div>'+portrait+'</div><section class="spirit-panel">'+title+'<progress max="'+rules.petCap+'" value="'+lv+'"></progress><p>ATK '+fmt(atk)+'　·　Badge ATK +'+rank*5+'</p><button class="spirit-gold" onclick="petFeed()" '+(lv>=rules.petCap||S.gold<lv*100?'disabled':'')+'>'+(lv>=rules.petCap?'Max level':'Fast Feed · '+fmt(lv*100)+' gold')+'</button></section><div class="spirit-lineup">'+primary+'</div>';
+ }else if(petPage==='Assist'){
+  body='<div class="spirit-value">⚔ '+fmt(rules.petTeamAttack(S))+'</div><section class="spirit-panel"><h2>Primary Pet</h2><div class="spirit-lineup">'+primary+'</div></section><section class="spirit-panel spirit-support"><h2>Pet Assist</h2><div class="spirit-assists">'+team.slice(3).map((id,i)=>petTile(id,'pickPet('+(i+3)+')',id?'Replace':'Assign')).join('')+'</div></section><p>Deployed pets contribute their full ATK.</p>';
+ }else if(petPage==='Gallery'){
+  const stars=p.id==='d1'?S.emberStars||0:S.petStars?.[p.id]||0;
+  const shards=p.id==='d1'?S.emberShards||0:rules.state(S).materials.shard;
+  const starControl=owned?'<p>'+('★'.repeat(stars))+('☆'.repeat(6-stars))+'</p><button class="spirit-gold" onclick="starPet()" '+(stars>=6||shards<10*(stars+1)?'disabled':'')+'>'+ (stars>=6?'Max stars':'Star-up · '+10*(stars+1)+(p.id==='d1'?' Ember shards':' shards'))+'</button> ':'';
+  body='<header>'+title+'</header>'+portrait+'<section class="spirit-panel"><h2>ATK '+fmt(atk)+'</h2><p>'+p.title+' · '+(team.includes(p.id)?'Deployed':owned?'Collected':'Uncollected')+'</p>'+starControl+'<button class="spirit-gold" onclick="'+(owned?"petTab('Badge','"+p.id+"')":"petUnlock()")+'" '+(!owned&&S.gold<p.cost?'disabled':'')+'>'+(owned?'View Badge':'Unlock · '+fmt(p.cost)+' gold')+'</button> <button class="spirit-link" onclick="filter=\'dragon\';go(\'collection\')">Pet Summon</button></section>'+strip(pets,'Gallery');
+ }else{
+  const shards=rules.state(S).materials.shard,cost=5*(rank+1);
+  body='<header><h2>Level '+rank+' · '+p.name+' Badge</h2><span>Exclusive Pet · '+p.name+'</span></header>'+portrait+'<section class="spirit-panel"><h2>Badge Forge</h2><p>Bonus ATK +'+rank*5+(rank<20?' → +'+(rank+1)*5:'')+'</p><progress value="'+Math.min(shards,cost)+'" max="'+cost+'"></progress><button class="spirit-gold" onclick="forgePetBadge()" '+(!owned||rank>=20||shards<cost?'disabled':'')+'>'+(rank>=20?'Max level':owned?'Forge · '+shards+'/'+cost+' shards':'Unlock pet in Gallery')+'</button></section>'+strip(pets.filter(q=>emblemFilter==='All'||q.rarity===emblemFilter),'Badge')+'<div class="spirit-filters">'+['All',...new Set(pets.map(q=>q.rarity))].map(f=>'<button aria-pressed="'+(emblemFilter===f)+'" onclick="emblemFilter=\''+f+'\';cityPet()">'+f+'</button>').join('')+'</div>';
+ }
+ $('#main').innerHTML='<section class="spirit-room" data-page="'+petPage+'"><strong class="spirit-ribbon">'+petPage+'</strong><div class="spirit-body">'+body+'</div><div class="spirit-nav"><button aria-label="Back to city" onclick="go(\'home\')">‹</button>'+petPages.map((page,i)=>'<button aria-pressed="'+(page===petPage)+'" onclick="petTab(\''+page+'\')">'+artImage(['hud-pet','hud-bag','hud-companion','hud-forge'][i],'')+page+'</button>').join('')+'</div></section>';
+}
