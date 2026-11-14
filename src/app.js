@@ -116,7 +116,39 @@ function toggleMount(){
   home();
   document.querySelector('.mount-toggle')?.focus({preventScroll:true});
 }
-function home(){const mount=currentMount(),st=stats(),d=item(S.dragon),w=item(S.wings);renderHeroReadout(st);$('#main').innerHTML=`<div class="profile"><div class="profile-bg"></div><aside class="profile-panel stats-panel"><p class="eyebrow">ELVEN RANGER</p><h2>${esc(S.name)}</h2><span class="level-pill">LEVEL ${level()}</span><div class="progress"><b style="width:${level()>=1500?100:S.xp%150/1.5}%"></b></div><small class="xp">${level()>=1500?'MAX LEVEL · 1500':fmt(S.xp%150)+' / 150 XP'}</small><div class="power" role="button" tabindex="0" onclick="openHeroStats()" onkeydown="if(event.key==='Enter')openHeroStats()"><small>${uiIcon('power','power-art')}COMBAT POWER · ALL STATS</small><strong>${fmt(st.power)}</strong></div>${[['Attack',st.attack,'attack'],['Defense',st.defense,'defense'],['Health',st.health,'health'],['Critical',st.crit+'%','crit'],['Speed',st.speed,'speed'],['Accuracy',st.accuracy+'%','accuracy'],['Dodge',st.dodge+'%','wind'],['Shield HP',st.shieldHealth,'shield']].map(([n,v,i])=>`<div class="stat"><span>${uiIcon(i,'stat-art')}${n}</span><b>${typeof v==='number'?fmt(v):v}</b></div>`).join('')}<button class="primary hero-equipment-link" onclick="go('bag')">Equipment ›</button></aside><div class="hero-stage"><div class="hero-visual"><div class="scene-atmosphere" aria-hidden="true"><div class="godrays"></div><div class="volumetric-fog"></div></div><div class="stage-halo"></div><div class="party-formation" role="group" aria-label="Reina’s party">${[['paladin','Paladin'],['mage','Storm mage'],['healer','Priestess'],['rogue','Rogue']].map(([id,label])=>`<img class="party-${id}" src="${artPath('party-'+id)}" alt="${label}">`).join('')}</div>${mount ? `<img class="avatar mounted-reina" src="${artPath(mount.rider)}" alt="Reina riding ${mount.name}">` : `<div class="avatar-wings" data-tier="${visualTier(w)}">${wingArt(w)}</div><img class="avatar" src="${artPath(equippedRanger())}" alt="REINA, silver-haired elven ranger">`}<button class="mount-toggle" type="button" aria-pressed="${Boolean(mount)}" onclick="toggleMount()">Mount</button><div class="companion" data-tier="${visualTier(d)}">${dragonSVG(d)}<span>${d.name}</span></div></div></div></div><div class="location-badge"><span>✧</span> SKY GARDEN <small>Sanctuary of the first wish</small></div>`}
+const partyWardrobe = {
+  paladin:{label:'Paladin', outfit:'Roseguard', id:'roseguard', gold:1200},
+  mage:{label:'Storm mage', outfit:'Starfall', id:'starfall', gold:1200},
+  healer:{label:'Priestess', outfit:'Lilyveil', id:'lilyveil', gold:1200},
+  rogue:{label:'Rogue', outfit:'Emberleaf', id:'emberleaf', gold:1200}
+};
+function partySprite(hero, outfit){
+  const variant = outfit === partyWardrobe[hero].id ? '-'+outfit : '';
+  return artPath('party-'+hero+variant);
+}
+function wardrobe(hero, outfit = S.costumes?.equipped?.[hero] || ''){
+  const item = partyWardrobe[hero];
+  const special = outfit === item.id;
+  const owned = !special || S.costumes?.owned?.includes(item.id);
+  const equipped = (S.costumes?.equipped?.[hero] || '') === outfit;
+  const action = equipped ? 'Equipped' : owned ? 'Equip' : 'Buy & equip · '+fmt(item.gold)+' gold';
+  modal(`<div class="outfit-room"><h2>${item.label} · Wardrobe</h2><img src="${partySprite(hero,outfit)}" alt="${special?item.outfit:'Classic'} outfit"><div class="outfit-options">${[['','Classic'],[item.id,item.outfit]].map(([id,name])=>`<button aria-pressed="${id===outfit}" onclick="wardrobe('${hero}','${id}')">${name}</button>`).join('')}</div><button class="primary" ${equipped || (!owned && S.gold<item.gold) ? 'disabled' : ''} onclick="wearOutfit('${hero}','${special?item.id:''}')">${action}</button></div>`);
+}
+function wearOutfit(hero, outfit){
+  const item = partyWardrobe[hero];
+  if(!item || (outfit && outfit !== item.id)) return;
+  const closet = S.costumes ??= {owned:[], equipped:{}};
+  if(outfit && !closet.owned.includes(outfit)){
+    if(S.gold < item.gold) return;
+    S.gold -= item.gold;
+    closet.owned.push(outfit);
+  }
+  closet.equipped[hero] = outfit;
+  save();
+  home();
+  wardrobe(hero,outfit);
+}
+function home(){const mount=currentMount(),st=stats(),d=item(S.dragon),w=item(S.wings);renderHeroReadout(st);$('#main').innerHTML=`<div class="profile"><div class="profile-bg"></div><aside class="profile-panel stats-panel"><p class="eyebrow">ELVEN RANGER</p><h2>${esc(S.name)}</h2><span class="level-pill">LEVEL ${level()}</span><div class="progress"><b style="width:${level()>=1500?100:S.xp%150/1.5}%"></b></div><small class="xp">${level()>=1500?'MAX LEVEL · 1500':fmt(S.xp%150)+' / 150 XP'}</small><div class="power" role="button" tabindex="0" onclick="openHeroStats()" onkeydown="if(event.key==='Enter')openHeroStats()"><small>${uiIcon('power','power-art')}COMBAT POWER · ALL STATS</small><strong>${fmt(st.power)}</strong></div>${[['Attack',st.attack,'attack'],['Defense',st.defense,'defense'],['Health',st.health,'health'],['Critical',st.crit+'%','crit'],['Speed',st.speed,'speed'],['Accuracy',st.accuracy+'%','accuracy'],['Dodge',st.dodge+'%','wind'],['Shield HP',st.shieldHealth,'shield']].map(([n,v,i])=>`<div class="stat"><span>${uiIcon(i,'stat-art')}${n}</span><b>${typeof v==='number'?fmt(v):v}</b></div>`).join('')}<button class="primary hero-equipment-link" onclick="go('bag')">Equipment ›</button></aside><div class="hero-stage"><div class="hero-visual"><div class="scene-atmosphere" aria-hidden="true"><div class="godrays"></div><div class="volumetric-fog"></div></div><div class="stage-halo"></div><div class="party-formation" role="group" aria-label="Reina’s party">${Object.entries(partyWardrobe).map(([id,item])=>`<button class="party-${id}" aria-label="${item.label} wardrobe" onclick="wardrobe('${id}')"><img src="${partySprite(id,S.costumes?.equipped?.[id])}" alt="${item.label}"></button>`).join('')}</div>${mount ? `<img class="avatar mounted-reina" src="${artPath(mount.rider)}" alt="Reina riding ${mount.name}">` : `<div class="avatar-wings" data-tier="${visualTier(w)}">${wingArt(w)}</div><img class="avatar" src="${artPath(equippedRanger())}" alt="REINA, silver-haired elven ranger">`}<button class="mount-toggle" type="button" aria-pressed="${Boolean(mount)}" onclick="toggleMount()">Mount</button><div class="companion" data-tier="${visualTier(d)}">${dragonSVG(d)}<span>${d.name}</span></div></div></div></div><div class="location-badge"><span>✧</span> SKY GARDEN <small>Sanctuary of the first wish</small></div>`}
 function gearDetail(id){const slot={ring:'spiritluck',charm:'amulet'}[id]||id;openEquipment(globalThis.WonderGear.state(S).equipped[slot])}
 function upgrade(id){const slot={ring:'spiritluck',charm:'amulet'}[id]||id,eq=globalThis.WonderGear.state(S),uid=eq.equipped[slot],entry=eq.items.find(i=>i.uid===uid);if(entry)equipmentAction(uid,'enhance',equipmentStamp(entry))}
 
