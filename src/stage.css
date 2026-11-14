@@ -6170,7 +6170,12 @@ img[src*="?outfit=roseguard"]{filter:hue-rotate(55deg)}img[src*="?outfit=starfal
 .cloud-war .cloud-place{min-height:44px;align-content:center}
 .cloud-war .cloud-place b,.cloud-war .cloud-place small{background:#28243de6;border-radius:.35em;padding:.12em .4em}
 
-.map-2{--map-art:url('assets/generated/cloud-war-twin-islands.webp')}
-.map-3{--map-art:url('assets/generated/cloud-war-three.webp')}
-.map-4{--map-art:url('assets/generated/cloud-war-four.webp')}
+.map-2{--map-art:url('assets/generated/cloud-war-realms-2.webp')}
+.map-3{--map-art:url('assets/generated/cloud-war-realms-3.webp')}
+.map-4{--map-art:url('assets/generated/cloud-war-realms-4.webp')}
 .map-4 .cloud-place{width:18%}
+
+.cloud-field .cloud-place[data-rank]{width:12%;min-height:0;aspect-ratio:1;display:grid;place-content:center}
+.cloud-place[data-rank] .map-token{display:grid;place-items:center;color:var(--banner);background:#29243bec;border:2px solid currentColor;border-radius:50%;width:1.45em;height:1.45em;font:700 clamp(14px,4cqw,28px)/1 Georgia,serif;box-shadow:0 2px 4px #20182a99}
+.cloud-place[data-rank="Capital"] .map-token{border:3px double currentColor;border-radius:30%;font-size:clamp(18px,5cqw,34px)}
+.cloud-place[data-rank="Stronghold"] .map-token{border-radius:22%}
