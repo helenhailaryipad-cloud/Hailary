@@ -647,15 +647,31 @@ function cityHunting(){
 }
 
 const exploreTrail=[[27,84],[48,77],[69,69],[49,61],[49,48],[29,41],[49,33],[69,25],[49,15]];
-let exploreNode=0;
+function exploreStageLabel(index){
+ return (Math.floor(index/9)+1)+'-'+(index%9+1);
+}
+function exploreRequiredPower(index){return 1500+35*index;}
+function clearExploreStage(index){
+ if(screen!=='cityExplore'||index!==(S.exploreCleared||0))return;
+ if(stats().power<exploreRequiredPower(index)){toast('More power needed for stage '+exploreStageLabel(index));return;}
+ S.exploreCleared=index+1;
+ save();
+ cityExplore();
+ toast('Stage '+exploreStageLabel(index)+' cleared');
+}
+function previewExploreStage(index){
+ const cleared=S.exploreCleared||0;
+ const status=index<cleared?'Cleared':index===cleared?'Next stage':'Clear the previous stage to unlock';
+ modal('<h2>Stage '+exploreStageLabel(index)+'</h2><p>'+status+'</p><p>Power required: '+fmt(exploreRequiredPower(index))+'</p>');
+}
 function exploreDetail(title){
+ const cleared=S.exploreCleared||0, chapter=Math.floor(cleared/9)+1;
  const descriptions={
-  'Stage Rewards':'Clear stages to unlock rewards.',
-  'Clear Battle Pass':'Chapter 1 · 0 / 9 stages cleared',
-  'Assignment':'Explore stage 1-1.',
-  'Clearance Objective':'Reach the gate at stage 1-9.',
-  'Training Bonus':'Chapter 1 · Training bonus preview',
-  'Explore':'Stage 1-'+(exploreNode+1)+(exploreNode===0?' · Starting stage':' · Clear the previous stage to unlock')
+  'Stage Rewards':'Chapter '+chapter+' · '+cleared%9+' / 9 stages cleared',
+  'Clear Battle Pass':'Chapter '+chapter+' · '+cleared%9+' / 9 stages cleared',
+  'Assignment':'Explore stage '+exploreStageLabel(cleared)+'.',
+  'Clearance Objective':'Reach the gate at stage '+chapter+'-9.',
+  'Training Bonus':'Chapter '+chapter+' · Training bonus preview'
  };
  modal('<h2>'+title+'</h2><p>'+descriptions[title]+'</p>');
 }
@@ -664,9 +680,14 @@ function exploreTool(name,art,destination){
  return '<button onclick="'+action+'">'+artImage(art,'')+'<small>'+name+'</small></button>';
 }
 function cityExplore(){
- const markers=exploreTrail.map(([x,y],i)=>'<button class="trail-marker" style="left:'+x+'%;top:'+y+'%" aria-pressed="'+(i===exploreNode)+'" aria-label="Preview stage 1-'+(i+1)+'" onclick="exploreNode='+i+';cityExplore()">'+artImage(i===8?'hud-chest':i===4?'hud-pass':'hud-rank','')+'<b>1-'+(i+1)+'</b></button>').join('');
+ const cleared=S.exploreCleared||0, chapter=Math.floor(cleared/9)+1, next=cleared%9;
+ const power=stats().power, required=exploreRequiredPower(cleared);
+ const markers=exploreTrail.map(([x,y],i)=>{
+  const index=cleared-next+i, label=exploreStageLabel(index);
+  return `<button class="trail-marker ${i<next?'trail-done':''}" style="left:${x}%;top:${y}%" aria-pressed="${i===next}" aria-label="Preview stage ${label}" onclick="previewExploreStage(${index})">${artImage(i===8?'hud-chest':i===4?'hud-pass':'hud-rank','')}<b>${i<next?'✓ ':''}${label}</b></button>`;
+ }).join('');
  const tools=[['Stage Rewards','hud-chest'],['Clear Battle Pass','hud-pass'],['Assignment','hud-quest'],['Clearance Objective','hud-reward'],['Training','hud-upgrade','expLobby']].map(args=>exploreTool(...args)).join('');
- $('#main').innerHTML='<section class="explore-map" aria-label="Explore chapter one"><div class="trail-field"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M48 94 Q27 90 27 84 C27 79 39 81 48 77 S78 73 69 69 S46 65 49 61 S54 52 49 48 S22 45 29 41 S42 38 49 33 S77 29 69 25 S54 22 49 15"/></svg>'+markers+'</div><aside class="trail-benefits"><b>Stage Benefits</b><small>Clear 1-9 to unlock</small></aside><div class="trail-bonus">'+exploreTool('Training Bonus','hud-upgrade')+'</div><div class="trail-tools">'+tools+'</div><footer><button aria-label="Back to city" onclick="go(\'home\')">‹</button><button class="spirit-gold" onclick="exploreDetail(\'Explore\')">Explore · 1-'+(exploreNode+1)+'</button>'+exploreTool('Power Up','hud-reinforce','cityForge')+'</footer></section>';
+ $('#main').innerHTML='<section class="explore-map" aria-label="Explore chapter '+chapter+'"><div class="trail-field"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M48 94 Q27 90 27 84 C27 79 39 81 48 77 S78 73 69 69 S46 65 49 61 S54 52 49 48 S22 45 29 41 S42 38 49 33 S77 29 69 25 S54 22 49 15"/></svg>'+markers+'</div><aside class="trail-benefits"><b>Stage Progress</b><small>Chapter '+chapter+' · '+next+' / 9</small></aside><div class="trail-bonus">'+exploreTool('Training Bonus','hud-upgrade')+'</div><div class="trail-tools">'+tools+'</div><footer><button aria-label="Back to city" onclick="go(\'home\')">‹</button><div class="trail-next"><button class="spirit-gold" onclick="clearExploreStage('+cleared+')" '+(power<required?'disabled':'')+'>Explore · '+exploreStageLabel(cleared)+'</button><small>Power needed for the next stage</small><strong class="'+(power<required?'trail-low':'trail-ready')+'">'+fmt(power)+' / '+fmt(required)+'</strong></div>'+exploreTool('Power Up','hud-reinforce','cityForge')+'</footer></section>';
 }
 
 const cloudFactions=[

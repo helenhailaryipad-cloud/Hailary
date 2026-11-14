@@ -6188,3 +6188,9 @@ img[src*="?outfit=roseguard"]{filter:hue-rotate(55deg)}img[src*="?outfit=starfal
 #stage>.return-to-menu{position:absolute;right:max(6px,env(safe-area-inset-right));top:max(6px,env(safe-area-inset-top));z-index:99}
 body:not([data-screen]) #stage>.return-to-menu,body:is([data-screen=home],[data-screen=intro]):not([data-playing]) #stage>.return-to-menu{display:none}
 #stage .dialog-menu-exit{position:sticky;bottom:0;display:flex;justify-content:center;padding:4px;z-index:2}
+
+.explore-map .trail-next{display:grid;justify-items:center;gap:.18em;color:white;text-shadow:0 1px 3px #181826}
+.explore-map .trail-next small{font-size:clamp(11px,2.8cqw,17px)}
+.explore-map .trail-next strong{font-size:clamp(13px,3.2cqw,20px);font-variant-numeric:tabular-nums}
+.explore-map .trail-low{color:#ffb4a6}.explore-map .trail-ready{color:#bef2ab}
+.explore-map .trail-done img{opacity:.65}.explore-map footer{background:linear-gradient(transparent,#202139ed 50%)}
