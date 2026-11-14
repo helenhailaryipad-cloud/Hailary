@@ -261,10 +261,62 @@ function cityBag(){
  if(['Pet','ALL'].includes(cityBagFilter))cells.push(...S.owned.map(item).filter(it=>it?.type==='dragon').map(it=>`<button class="satchel-stack" aria-label="${it.name}" onclick="selectedPetId='${it.id}';chooseSectionPage('collection')">${dragonSVG(it)}<b>Lv.${r.petLevel(S,it.id)}</b></button>`));
  const wallet=[['gold',S.gold],['wishes',S.tickets],['crystals',S.scales]].map(([icon,n])=>`<span>${uiIcon(icon)}${new Intl.NumberFormat('en',{notation:'compact'}).format(n)}</span>`).join('');
  $('#main').innerHTML=`<section class="satchel"><div class="satchel-top"><strong>Bag</strong>${wallet}</div><h1>Lv. ${level()} &nbsp;${esc(S.name)}</h1>
- <div class="satchel-stage"><div class="satchel-rail">${rails(0)}</div><div class="satchel-model"><div class="satchel-wings">${artImage(S.wings,'')}</div><img src="${reinaLookPath(false)}" alt="Reina"><div class="satchel-pet">${dragonSVG(pet)}</div></div><div class="satchel-rail">${rails(5)}</div></div>
+ <div class="satchel-stage"><div class="satchel-rail">${rails(0)}</div><div class="satchel-model"><div class="satchel-wings">${artImage(S.wings,'')}</div><img src="${reinaLookPath(false)}" alt="Reina"></div><div class="satchel-rail">${rails(5)}</div></div>
  <div class="satchel-actions"><button aria-label="Equipped wings" onclick="chooseSectionPage('wings')">${artImage(S.wings,'')}</button>${[['gem','Gem'],['star','Star'],['equipment','Enhance']].map(([i,n])=>`<button onclick="cityBagPick('${n}')">${uiIcon(i)}${n}</button>`).join('')}<button aria-label="Equipped pet" onclick="selectedPetId=S.dragon;chooseSectionPage('collection')">${dragonSVG(pet)}</button></div>
  <div class="satchel-tabs">${['Common','Materials','Pet','ALL'].map(t=>`<button aria-pressed="${t===cityBagFilter}" onclick="cityBagFilter='${t}';cityBag()">${t}</button>`).join('')}</div>
  <div class="satchel-scroll"><div class="satchel-grid">${cells.join('')}</div></div>
  <div class="satchel-foot"><span>Capacity: ${eq.items.length}/80</span><button onclick="cityBagPick('Convert')">Convert</button><button onclick="cityBagPick('Devour')">Devour</button><button onclick="cityBagOrder=cityBagOrder==='slot'?'power':'slot';cityBag();toast('Sorted by '+cityBagOrder)">Sort</button></div>
- <div class="satchel-nav"><button aria-label="Back to city" onclick="go('home')">‹</button>${[['hud-bag','Bag','cityBag()'],['hud-forge','Gear Crafting',"go('forge')"],['hud-shop','Warehouse',"go('warehouse')"],['hud-summon','Devour',"cityBagPick('Devour')"]].map(([icon,n,action])=>`<button onclick="${action}">${artImage(icon,'')}${n}</button>`).join('')}</div></section>`;
+ ${satchelNav()}</section>`;
+}
+
+function satchelNav(){return ` <div class="satchel-nav"><button aria-label="Back to city" onclick="go('home')">‹</button>${[['hud-bag','Bag',"go('cityBag')"],['hud-forge','Gear Crafting',"go('cityCraft')"],['hud-shop','Warehouse',"go('warehouse')"],['hud-summon','Devour',"cityBagPick('Devour')"]].map(([icon,n,action])=>`<button onclick="${action}">${artImage(icon,'')}${n}</button>`).join('')}</div>`;}
+let craftBand=1,craftTier=null,craftGroup='Equipment',craftTarget=null,craftInputs=[];
+function craftFilter(band,tier,group){
+ craftBand=band;craftTier=tier;craftGroup=group;craftTarget=null;craftInputs=[];cityCraft();
+}
+function craftSelect(uid){craftTarget=uid;craftInputs=[];cityCraft()}
+function craftAdd(uid){
+ const r=eqRules(),eq=r.state(S),e=eq.items.find(x=>x.uid===craftTarget);
+ if(!e)return;
+ const allowed=r.starDonors(eq,e).map(x=>x.uid);
+ if(uid===undefined)craftInputs=allowed.slice(0,r.starGearCount);
+ else if(craftInputs.includes(uid))craftInputs=craftInputs.filter(x=>x!==uid);
+ else if(allowed.includes(uid)&&craftInputs.length<r.starGearCount)craftInputs.push(uid);
+ cityCraft();
+}
+function craftCommit(stamp){
+ const r=eqRules(),e=r.state(S).items.find(x=>x.uid===craftTarget);
+ if(!e||equipmentStamp(e)!==stamp)return;
+ const result=r.perform(S,e.uid,'star',craftInputs);
+ if(!result.ok){toast(result.error);return}
+ save();craftInputs=[];cityCraft();toast('Star added');
+}
+function craftBatch(targetIds){
+ const r=eqRules(),trial=JSON.parse(JSON.stringify(S));
+ let count=0;
+ for(const uid of targetIds){
+  const eq=r.state(trial),item=eq.items.find(x=>x.uid===uid);
+  if(!item||item.stars!==craftBand-1)continue;
+  const donors=r.starDonors(eq,item).sort((a,b)=>a.stars-b.stars||a.enhance-b.enhance||a.gems-b.gems).slice(0,r.starGearCount);
+  if(!r.perform(trial,uid,'star',donors.map(x=>x.uid)).ok)continue;
+  count++;
+ }
+ if(!count){toast('Not enough spare gear or materials.');return}
+ if(!confirm('Upgrade '+count+' items using '+count*r.starGearCount+' spare items, '+(S.gold-trial.gold)+' gold and '+(r.state(S).materials.shard-trial.equipment.materials.shard)+' shards?'))return;
+ S.gold=trial.gold;S.equipment=trial.equipment;save();craftInputs=[];cityCraft();
+}
+function cityCraft(){
+ const r=eqRules(),eq=r.state(S),pieces=eq.items.filter(e=>!e.stored);
+ const group=t=>['necklace','amulet'].includes(t.slot)?'Necklace & Amulet':t.slot.startsWith('spirit')?'Rings':'Equipment';
+ const family=pieces.filter(e=>group(r.catalog[e.template])===craftGroup&&e.stars===craftBand-1);
+ const tiers=[...new Set(family.map(e=>r.catalog[e.template].tier))].sort((a,b)=>b-a);
+ if(!tiers.includes(craftTier))craftTier=tiers.find(t=>t<=r.unlockedTier(S))??tiers[0]??null;
+ const choices=family.filter(e=>r.catalog[e.template].tier===craftTier),e=choices.find(x=>x.uid===craftTarget)||choices[0];
+ craftTarget=e?.uid??null;
+ const donors=e?r.starDonors(eq,e):[],price=e?r.cost(e,'star'):null;
+ craftInputs=craftInputs.filter(id=>donors.some(x=>x.uid===id));
+ const ready=e&&craftTier<=r.unlockedTier(S)&&craftInputs.length===r.starGearCount&&S.gold>=price.gold&&eq.materials.shard>=price.shard;
+ const tile=(entry,action,active=false)=>{const t=r.catalog[entry.template];return `<button class="loom-item" aria-label="${t.name}, ${entry.stars} stars" aria-pressed="${active}" style="--edge:${t.color}" onclick="${action}">${gearArt(t)}<b>T${t.tier}</b><small>★${entry.stars}</small></button>`};
+ const groups=['Equipment','Necklace & Amulet','Rings'];
+ $('#main').innerHTML=`<section class="satchel loom"><div class="satchel-top"><strong>Gear Crafting</strong>${[['gold',S.gold],['wishes',S.tickets],['crystals',S.scales]].map(([i,n])=>`<span>${uiIcon(i)}${fmt(n)}</span>`).join('')}</div><div class="loom-body"><aside>${[1,2,3,4,5].map(n=>`<button aria-pressed="${craftBand===n}" onclick="craftFilter(${n},null,craftGroup)">${n}-Star Gear</button>${craftBand===n?tiers.map(t=>`<button class="loom-tier" aria-pressed="${t===craftTier}" onclick="craftFilter(craftBand,${t},craftGroup)">T${t} Gear</button>`).join(''):''}`).join('')}</aside><div class="loom-work">${e?`<div class="loom-orbit"><div>${gearArt(r.catalog[e.template])}</div></div><h2>${r.catalog[e.template].name}</h2><strong>${e.stars} → ${craftBand} ★ · T${craftTier}</strong><p>${craftTier>r.unlockedTier(S)?'Requires Lv. '+r.requiredLevel(craftTier):'Success rate: 100% with all materials'}</p><div class="loom-inputs">${Array.from({length:r.starGearCount},(_,i)=>{const d=donors.find(x=>x.uid===craftInputs[i]);return d?tile(d,'craftAdd('+d.uid+')',true):'<span>+</span>'}).join('')}</div><p>${craftInputs.length} / ${r.starGearCount} spare items · ${priceText(price)}</p><div class="loom-options">${donors.map(x=>tile(x,'craftAdd('+x.uid+')',craftInputs.includes(x.uid))).join('')}</div><div class="loom-buttons"><button onclick="craftBatch([${choices.map(x=>x.uid).join(',')}])">Batch</button><button onclick="craftAdd()" ${donors.length?'':'disabled'}>Add</button><button onclick="craftCommit('${equipmentStamp(e)}')" ${ready?'':'disabled'}>Synthesize</button></div><div class="loom-options">${choices.map(x=>tile(x,'craftSelect('+x.uid+')',x===e)).join('')}</div>`:'<p>No matching equipment in your bag.</p>'}</div></div><div class="satchel-tabs">${groups.map(g=>`<button aria-pressed="${g===craftGroup}" onclick="craftFilter(craftBand,null,'${g}')">${g}</button>`).join('')}</div>${satchelNav()}</section>`;
 }
