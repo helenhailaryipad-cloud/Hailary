@@ -544,3 +544,45 @@ function cityForge(){
  $('#main').innerHTML='<section class="spirit-room companion-room smith-room" data-forge="'+page+'"><div class="satchel-top"><strong>Forge</strong>'+[['gold',S.gold],['wishes',S.tickets],['crystals',S.scales]].map(([i,n])=>'<span>'+uiIcon(i)+fmt(n)+'</span>').join('')+'</div><div class="smith-scene"><div class="smith-rune"></div>'+scene+(e?tile(e):'No equipment')+'</div><div class="smith-panel">'+panel+'</div><div><button class="spirit-gold" disabled>'+action+'</button></div><div class="smith-rail">'+rail+'</div><div class="companion-modes">'+smithPages[page].map(m=>'<button aria-pressed="'+(m===sub)+'" onclick="smithTab(\''+page+'\',\''+m+'\')">'+m+'</button>').join('')+'</div><div class="spirit-nav"><button aria-label="Back to city" onclick="go(\'home\')">‹</button>'+Object.keys(smithPages).map((p,i)=>'<button aria-pressed="'+(p===page)+'" onclick="smithTab(\''+p+'\')">'+artImage(icons[i],'')+p+'</button>').join('')+'</div></section>';
  const strip=$('.smith-rail');if(strip)strip.scrollLeft=old;
 }
+
+const dailyPages=['Daily','Time Limited','Retrieve','Weekly Lucky Bag','Auto Sweep'];
+const dailyCards=[
+ ['Alliance Arena','scene-castle','EXP',5,20],['Gear Dungeon','scene-dungeons','Material',3,30,'dungeons'],
+ ['Elf Dungeon','scene-wonders','Material',2,10],['Training','scene-realm','EXP',1,10],
+ ['EXP Forest','scene-exp','EXP',2,10,'expLobby'],['Dusk Hall','battle-dungeon','Material',2,10]
+];
+const timedCards=[
+ ['Elements','scene-exp','Material',1,5,'20:00'],['Dark Hunt','battle-dungeon','Material',10,0,'21:00'],
+ ['Max Combo','scene-castle','EXP',1,10,'21:00'],['LostRealm','scene-realm','Material',2,10,'20:45'],
+ ['Fishing','scene-wonders','EXP',1,10,'16:30'],['CloudWar','scene-dungeons','EXP',1,10,'19:30']
+];
+let dailyPage=0;
+function dailyOpen(page){dailyPage=page;cityDaily()}
+function dailyTokens(ids){return ids.map(id=>'<span class="daily-token">'+artImage(id,id.replace(/^hud-/,'').replaceAll('-',' '))+'</span>').join('')}
+function dailyCalendar(){
+ modal('<h2>Event Weekly Calendar</h2>'+timedCards.map(([name,,,,,time])=>'<p>'+name+' · '+time+'</p>').join(''));
+}
+function cityDaily(){
+ const page=dailyPage,timed=page===1,exp=WonderProgress.daily(S),activity=Math.min(2,exp.completed||0)*5;
+ let list='',foot='';
+ const titles=['Daily Must-Do','Daily Must-Do','Resource Retrieval','Weekly Lucky Bag','Sweep'];
+ let banner='<h2>'+titles[page]+'</h2>';
+ if(page<2){
+  banner+='<button class="daily-calendar" onclick="dailyCalendar()">'+artImage('hud-daily','')+'Weekly Calendar</button><div class="daily-milestones"><b>'+activity+'<small>Activeness</small></b>'+[60,120,180,240,300].map(n=>'<span>'+artImage('hud-chest','Reward chest')+'<small>'+n+'</small></span>').join('')+'</div>';
+  list=(timed?timedCards:dailyCards).map(([name,art,kind,max,points,dest])=>{
+   const done=name==='EXP Forest'?Math.min(max,exp.used):0;
+   const action=timed?'<small>Available at<br>'+dest+'</small>':done>=max?'<b>Completed</b>':dest?'<button onclick="go(\''+dest+'\')">Go</button>':'<button disabled>Go</button>';
+   return '<article class="daily-task">'+artImage(art,'')+'<i>'+kind+'</i><div><h3>'+name+'</h3><p>Times　'+done+'/'+max+'</p><p>Activity　'+(name==='EXP Forest'?activity:0)+'/'+points+'</p></div><aside>'+action+'</aside></article>';
+  }).join('');
+ }else if(page===3){
+  banner+='<div class="daily-jackpot">'+dailyTokens(['gear-armor-t6','hud-prisms','hud-gems'])+'</div><small>Lucky Bag EXP　0 / 55</small>';
+  list='<div class="daily-columns"><b>Simple Lucky Bag</b><b>Luxury Lucky Bag</b></div>'+Array.from({length:16},(_,i)=>'<article class="daily-track">'+dailyTokens([['hud-gift','hud-pass','crystal'][i%3]])+'<b>'+ (i+1)+'</b><div>'+dailyTokens(['hud-prisms',i%2?'hud-gift':'hud-gems'])+'</div></article>').join('');
+  foot='<span>Luxury Lucky Bag</span><button disabled>€15.99 · Preview</button>';
+ }else{
+  const sweep=page===4,names=sweep?['Mount Dungeon','Wings Dungeon','Elf Dungeon','Shield Dungeon','Cloak Dungeon']:['Dragon Dungeon','Brawl','Q&A Fun','EXP Forest','Dusk Hall'];
+  if(sweep)banner+='<small>Super Dungeon Tickets　0</small>';
+  list=names.map((name,i)=>'<article class="daily-resource"><header><b>'+name+(sweep?' (Hell)':'')+'</b><small>'+(sweep?'Challenge attempts　0/2':'Retrieval chances　0')+'</small></header><div>'+dailyTokens([['crystal','hud-gems','hud-prisms'],['hud-pass','w0','w3'],['hud-pet','crystal'],['hud-reinforce','hud-gems'],['gear-armor-t3','hud-pass']][i])+'<button disabled>'+(sweep?'Sweep unavailable':'Retrieve')+'</button></div></article>').join('');
+  foot=sweep?'<label><input type="checkbox"> Auto-purchase</label><label><input type="checkbox" checked> Double Raid</label><button disabled>Auto Sweep</button>':'<label><input type="radio" name="retrieval" checked> Diamond · 100%</label><label><input type="radio" name="retrieval"> Gold · 90%</label><button disabled>Retrieve</button>';
+ }
+ $('#main').innerHTML='<section class="companion-room spirit-room daily-room daily-page-'+page+'"><div class="satchel-top"><strong>Daily</strong>'+[['gold',S.gold],['wishes',S.tickets],['crystals',S.scales]].map(([id,n])=>'<span>'+uiIcon(id)+fmt(n)+'</span>').join('')+'</div><header class="daily-banner">'+banner+'</header><div class="daily-list">'+list+'</div>'+(foot?'<div class="daily-foot">'+foot+'</div>':'')+'<nav class="spirit-nav"><button aria-label="Back to city" onclick="go(\'home\')">‹</button>'+dailyPages.map((name,i)=>'<button aria-pressed="'+(i===page)+'" onclick="dailyOpen('+i+')">'+artImage(['hud-daily','hud-event','hud-reward','hud-bag','hud-combat'][i],'')+name+'</button>').join('')+'</nav></section>';
+}
