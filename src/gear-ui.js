@@ -645,3 +645,26 @@ function cityHunting(){
   rail.scrollLeft=selected.offsetLeft-(rail.clientWidth-selected.offsetWidth)/2;
  }
 }
+
+const exploreTrail=[[27,84],[48,77],[69,69],[49,61],[49,48],[29,41],[49,33],[69,25],[49,15]];
+let exploreNode=0;
+function exploreDetail(title){
+ const descriptions={
+  'Stage Rewards':'Clear stages to unlock rewards.',
+  'Clear Battle Pass':'Chapter 1 · 0 / 9 stages cleared',
+  'Assignment':'Explore stage 1-1.',
+  'Clearance Objective':'Reach the gate at stage 1-9.',
+  'Training Bonus':'Chapter 1 · Training bonus preview',
+  'Explore':'Stage 1-'+(exploreNode+1)+(exploreNode===0?' · Starting stage':' · Clear the previous stage to unlock')
+ };
+ modal('<h2>'+title+'</h2><p>'+descriptions[title]+'</p>');
+}
+function exploreTool(name,art,destination){
+ const action=destination?"go('"+destination+"')":"exploreDetail('"+name+"')";
+ return '<button onclick="'+action+'">'+artImage(art,'')+'<small>'+name+'</small></button>';
+}
+function cityExplore(){
+ const markers=exploreTrail.map(([x,y],i)=>'<button class="trail-marker" style="left:'+x+'%;top:'+y+'%" aria-pressed="'+(i===exploreNode)+'" aria-label="Preview stage 1-'+(i+1)+'" onclick="exploreNode='+i+';cityExplore()">'+artImage(i===8?'hud-chest':i===4?'hud-pass':'hud-rank','')+'<b>1-'+(i+1)+'</b></button>').join('');
+ const tools=[['Stage Rewards','hud-chest'],['Clear Battle Pass','hud-pass'],['Assignment','hud-quest'],['Clearance Objective','hud-reward'],['Training','hud-upgrade','expLobby']].map(args=>exploreTool(...args)).join('');
+ $('#main').innerHTML='<section class="explore-map" aria-label="Explore chapter one"><div class="trail-field"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M48 94 Q27 90 27 84 C27 79 39 81 48 77 S78 73 69 69 S46 65 49 61 S54 52 49 48 S22 45 29 41 S42 38 49 33 S77 29 69 25 S54 22 49 15"/></svg>'+markers+'</div><aside class="trail-benefits"><b>Stage Benefits</b><small>Clear 1-9 to unlock</small></aside><div class="trail-bonus">'+exploreTool('Training Bonus','hud-upgrade')+'</div><div class="trail-tools">'+tools+'</div><footer><button aria-label="Back to city" onclick="go(\'home\')">‹</button><button class="spirit-gold" onclick="exploreDetail(\'Explore\')">Explore · 1-'+(exploreNode+1)+'</button>'+exploreTool('Power Up','hud-reinforce','cityForge')+'</footer></section>';
+}
