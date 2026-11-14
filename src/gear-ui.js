@@ -112,7 +112,7 @@ gearDialog.addEventListener('cancel',event=>{
   toggleEquipmentMenu();
  }
 });
-function refreshEquipmentSurface(){if(['inventory','forge','warehouse'].includes(screen))gearWorkspace();else if(screen==='bag')bag();else if(screen==='home')home();wallet()}
+function refreshEquipmentSurface(){if(screen==='cityBag')cityBag();else if(['inventory','forge','warehouse'].includes(screen))gearWorkspace();else if(screen==='bag')bag();else if(screen==='home')home();wallet()}
 function equipmentAction(uid,action,expected){if(gearActionLock)return;if(action==='star'){$('#modal').close();openStarForge(uid);return}const eq=eqRules().state(S),entry=eq.items.find(i=>i.uid===uid);if(!entry||equipmentStamp(entry)!==expected){toast('This item changed. Open it again.');return}gearActionLock=true;try{const result=eqRules().perform(S,uid,action);if(!result.ok){toast(result.error);return}save();refreshEquipmentSurface();$('#modal').close();openEquipment(uid);toast(action==='equip'?'Item equipped':action==='craft'?'Next tier crafted. All upgrades kept.':'Equipment improved')}finally{setTimeout(()=>gearActionLock=false,220)}}
 function autoEquipBest(){const r=eqRules(),eq=r.state(S),changed=new Set();for(let pass=0;pass<3;pass++){let improved=false;for(const slot of r.slots){let bestUid=eq.equipped[slot.id],bestPower=r.stats({...S,equipment:eq}).power;for(const candidate of eq.items.filter(i=>!i.stored&&r.catalog[i.template].tier<=r.unlockedTier(S)&&r.catalog[i.template].slot===slot.id)){const power=r.stats({...S,equipment:{...eq,equipped:{...eq.equipped,[slot.id]:candidate.uid}}}).power;if(power>bestPower){bestPower=power;bestUid=candidate.uid}}if(bestUid!==eq.equipped[slot.id]){eq.equipped[slot.id]=bestUid;changed.add(slot.id);improved=true}}if(!improved)break}if(changed.size){S.equipment=eq;save();bag();toast(changed.size+' equipment slots improved')}else {const locked=eq.items.filter(i=>!i.stored&&r.catalog[i.template].tier>r.unlockedTier(S)).map(i=>r.catalog[i.template].tier);toast(locked.length?'Best available gear equipped. T'+Math.min(...locked)+' requires Lv. '+r.requiredLevel(Math.min(...locked))+'.':'Your strongest items are already equipped')}}
 function confirmSalvage(uid){const r=eqRules(),eq=r.state(S),entry=eq.items.find(i=>i.uid===uid);if(!entry||r.equipped(eq,uid))return;const t=r.catalog[entry.template];modal(`<p class="eyebrow">SALVAGE SPARE EQUIPMENT</p><h2>${t.name}</h2><p>This spare item will become ${3+t.grade*3+entry.enhance} enhancement crystals and ${50*(t.grade+1)} gold. Socketed gems and ${entry.stars} star shards are recovered.</p><p class="rules">This item will be removed. Equipped items are protected.</p><button onclick="openEquipment(${uid})">Keep item</button> <button class="primary" onclick="salvageEquipment(${uid})">Salvage this item</button>`)}
@@ -239,4 +239,32 @@ function reinaCharacter(records=false){
  <button class="reina-power" aria-label="Combat power and all attributes" onclick="openHeroStats()">${statIcon('power')}${fmt(st.power)}</button>
  <section class="reina-values">${records?`<div class="reina-records">${history.map(([name,n])=>`<div>${name}<b>${fmt(n||0)}</b></div>`).join('')}</div>`:`<div class="reina-exp"><b>EXP</b><div role="progressbar" aria-label="Level experience" aria-valuenow="${xp}" aria-valuemax="${progress.xpPerLevel}"><i style="width:${100*xp/progress.xpPerLevel}%"></i><span>${cap?'MAX':xp+' / '+progress.xpPerLevel}</span></div></div><div class="reina-grid">${attributes}</div><button class="reina-details" onclick="openHeroStats()">All attributes ›</button>`}</section>
  <div class="reina-sheet-nav"><button aria-label="Back to city" onclick="go('home')">‹</button><button aria-pressed="${!records}" onclick="reinaCharacter()">${uiIcon('hero')}Character</button><button aria-pressed="${records}" onclick="reinaCharacter(true)">${uiIcon('laurel')}Achievements</button></div></section>`;
+}
+
+let cityBagFilter='Common',cityBagOrder='slot';
+function cityBagPick(mode){
+ const r=eqRules(),eq=r.state(S),spares=mode==='Convert',devour=mode==='Devour';
+ const choices=eq.items.filter(e=>!e.stored&&(spares?!e.starter&&!r.equipped(eq,e.uid):devour||r.equipped(eq,e.uid)));
+ const pick=e=>{
+  const action=spares?`confirmSalvage(${e.uid})`:devour?`$('#modal').close();openStarForge(${e.uid})`:`openEquipment(${e.uid},'upgrades',${mode==='Gem'?2:mode==='Star'?1:0})`;
+  return `<button aria-label="${r.catalog[e.template].name}" onclick="${action}">${gearArt(r.catalog[e.template])}</button>`;
+ };
+ modal(`<h2>${mode}</h2><p>${spares?'Select spare gear to convert into materials.':devour?'Select the item to strengthen with spare equipment.':'Choose equipped gear.'}</p><div class="satchel-choice">${choices.map(pick).join('')||'No eligible equipment.'}</div>`);
+}
+function cityBag(){
+ const r=eqRules(),eq=r.state(S),pet=item(S.dragon);
+ const rails=start=>r.slots.slice(start,start+5).map(slot=>loadoutCell(eq,slot)).join('');
+ const gear=eq.items.filter(e=>!e.stored).sort((a,b)=>cityBagOrder==='power'?r.detail(b).power-r.detail(a).power:r.catalog[a.template].slot.localeCompare(r.catalog[b.template].slot)||a.uid-b.uid);
+ const cells=[];
+ if(['Common','ALL'].includes(cityBagFilter))cells.push(...gear.map(e=>equipmentCell(e,{equipped:r.equipped(eq,e.uid)})));
+ if(['Materials','ALL'].includes(cityBagFilter))cells.push(...r.materialDefs.map(m=>`<button class="satchel-stack" style="--rarity:${m.color}" aria-label="${m.name}" onclick="materialInfo('${m.id}')">${equipmentIcon(m.icon)}<b>${fmt(eq.materials[m.id])}</b></button>`));
+ if(['Pet','ALL'].includes(cityBagFilter))cells.push(...S.owned.map(item).filter(it=>it?.type==='dragon').map(it=>`<button class="satchel-stack" aria-label="${it.name}" onclick="selectedPetId='${it.id}';chooseSectionPage('collection')">${dragonSVG(it)}<b>Lv.${r.petLevel(S,it.id)}</b></button>`));
+ const wallet=[['gold',S.gold],['wishes',S.tickets],['crystals',S.scales]].map(([icon,n])=>`<span>${uiIcon(icon)}${new Intl.NumberFormat('en',{notation:'compact'}).format(n)}</span>`).join('');
+ $('#main').innerHTML=`<section class="satchel"><div class="satchel-top"><strong>Bag</strong>${wallet}</div><h1>Lv. ${level()} &nbsp;${esc(S.name)}</h1>
+ <div class="satchel-stage"><div class="satchel-rail">${rails(0)}</div><div class="satchel-model"><div class="satchel-wings">${artImage(S.wings,'')}</div><img src="${reinaLookPath(false)}" alt="Reina"><div class="satchel-pet">${dragonSVG(pet)}</div></div><div class="satchel-rail">${rails(5)}</div></div>
+ <div class="satchel-actions"><button aria-label="Equipped wings" onclick="chooseSectionPage('wings')">${artImage(S.wings,'')}</button>${[['gem','Gem'],['star','Star'],['equipment','Enhance']].map(([i,n])=>`<button onclick="cityBagPick('${n}')">${uiIcon(i)}${n}</button>`).join('')}<button aria-label="Equipped pet" onclick="selectedPetId=S.dragon;chooseSectionPage('collection')">${dragonSVG(pet)}</button></div>
+ <div class="satchel-tabs">${['Common','Materials','Pet','ALL'].map(t=>`<button aria-pressed="${t===cityBagFilter}" onclick="cityBagFilter='${t}';cityBag()">${t}</button>`).join('')}</div>
+ <div class="satchel-scroll"><div class="satchel-grid">${cells.join('')}</div></div>
+ <div class="satchel-foot"><span>Capacity: ${eq.items.length}/80</span><button onclick="cityBagPick('Convert')">Convert</button><button onclick="cityBagPick('Devour')">Devour</button><button onclick="cityBagOrder=cityBagOrder==='slot'?'power':'slot';cityBag();toast('Sorted by '+cityBagOrder)">Sort</button></div>
+ <div class="satchel-nav"><button aria-label="Back to city" onclick="go('home')">‹</button>${[['hud-bag','Bag','cityBag()'],['hud-forge','Gear Crafting',"go('forge')"],['hud-shop','Warehouse',"go('warehouse')"],['hud-summon','Devour',"cityBagPick('Devour')"]].map(([icon,n,action])=>`<button onclick="${action}">${artImage(icon,'')}${n}</button>`).join('')}</div></section>`;
 }
