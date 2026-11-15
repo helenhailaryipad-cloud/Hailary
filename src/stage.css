@@ -6256,3 +6256,16 @@ body[data-screen=isleArena] #stage>#main{display:block;inset:0!important;width:1
 #isle-actor-0 img{pointer-events:none}
 #isle-actor-0[data-dragging]{z-index:94!important;transition:none;cursor:grabbing}
 #stage .isle-totem.isle-drop{outline:2px solid #ffe89a;background:#ffd98226;box-shadow:0 0 15px #ffe39980}
+
+/* The three shrines sit one third of a turn apart on the same ring. */
+.isle-arena{container-type:size}
+.isle-arena .isle-field{width:min(100%,100cqh - 205px);height:auto;min-height:0;aspect-ratio:1;justify-self:center;align-self:center;isolation:isolate}
+.isle-field::before{content:"";position:absolute;inset:19%;border-radius:50%;border:2px solid #ffe3a39c;box-shadow:0 0 0 4px #a67d4929,inset 0 0 20px #ffdc9026;pointer-events:none}
+#stage .isle-totem{width:29%;height:30%;padding:.5%;transform:translate(-50%,-50%);bottom:auto;right:auto}
+#stage #isle-totem-0{left:50%;top:19%}
+#stage #isle-totem-1{left:23.15%;top:65.5%}
+#stage #isle-totem-2{left:76.85%;top:65.5%}
+.isle-totem img{height:min(9dvh,11cqw);width:80%}
+.isle-field .isle-fighter{width:16%;height:19%;transition:left .65s ease-in-out,top .65s ease-in-out}
+.isle-field .isle-fighter b{font-size:clamp(9px,2.2cqw,13px)}
+@media(prefers-reduced-motion:reduce){.isle-field .isle-fighter{transition:none}}

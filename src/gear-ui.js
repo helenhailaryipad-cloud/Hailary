@@ -821,7 +821,6 @@ function advanceIsleRound(round){
  for(let turn=0;turn<3;turn++){
   const guild=(round.time+turn)%3;
   if(guild===0)continue;
-  if(round.time%6===0)round.targets[guild-1]=Math.floor(Math.random()*3);
   const target=round.targets[guild-1];
   isleHit(round.totems[target],guild,14);
  }
@@ -920,9 +919,9 @@ function enableIsleDrag(round){
 }
 // Three approaches per totem: Reina in front, rival guilds on opposite flanks.
 const isleApproaches=[
- [[49,44],[29,23],[72,18]],
- [[27,83],[11,64],[44,57]],
- [[71,85],[55,69],[89,56]]
+ [[50,40],[32,24],[68,24]],
+ [[23,87],[9,62],[39,62]],
+ [[77,87],[61,62],[91,62]]
 ];
 function updateIsleArena(){
  const r=isleRound,done=r.winner!==null;
