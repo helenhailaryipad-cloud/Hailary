@@ -6233,3 +6233,6 @@ body[data-screen=isleArena] #stage>#main{display:block;inset:0!important;width:1
 .isle-fighter{pointer-events:none;position:absolute;width:21%;height:24%;object-fit:contain;transform:translate(-50%,-42%);z-index:3;transition:left .32s,top .32s;filter:drop-shadow(0 2px 3px #382d44)}
 .isle-projectile{pointer-events:none;position:absolute;z-index:4;width:9px;height:9px;border-radius:50%;background:currentColor;box-shadow:0 0 6px 3px currentColor}
 @media(prefers-reduced-motion:reduce){.isle-fighter{transition:none}}
+.isle-fighter img{display:block;width:100%;height:100%;object-fit:contain}
+.isle-fighter b{position:absolute;bottom:-.3em;left:50%;transform:translateX(-50%);white-space:nowrap;border:1px solid currentColor;border-radius:1em;background:#211d32ed;color:#dfcaff;padding:.14em .4em;font:700 clamp(10px,1.35dvh,15px)/1.2 system-ui}
+#isle-actor-2 b{color:#ffd0b2}#isle-actor-0 b{color:#ffe397;background:#452e0bf5}
