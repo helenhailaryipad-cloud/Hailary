@@ -820,9 +820,10 @@ function advanceIsleRound(round){
  // Resolve hits in a rotating order so the same guild does not always hit last.
  for(let turn=0;turn<3;turn++){
   const guild=(round.time+turn)%3;
-  if(guild&&round.time%6===0)round.targets[guild-1]=Math.floor(Math.random()*3);
-  const target=guild?round.targets[guild-1]:round.selected;
-  isleHit(round.totems[target],guild,guild?14:20);
+  if(guild===0)continue;
+  if(round.time%6===0)round.targets[guild-1]=Math.floor(Math.random()*3);
+  const target=round.targets[guild-1];
+  isleHit(round.totems[target],guild,14);
  }
  round.time--;
  const owners=round.totems.map(t=>t.owner);
@@ -838,24 +839,37 @@ function advanceIsleRound(round){
 }
 function selectIsleTotem(index){
  if(!isleRound||isleRound.winner!==null)return;
- isleRound.selected=index;updateIsleArena();
+ const r=isleRound,t=r.totems[index];
+ r.selected=index;
+ const own=t.owner===0,previous=t.hp;
+ isleHit(t,0,20);
+ const feedback=own?(previous===100?'Fully guarded':'Guard +'+(t.hp-previous)):t.owner===0?'Captured!':'−'+(previous-t.hp)+' HP';
+ updateIsleArena();
+ const effect=$('#isle-hit-'+index);
+ effect.textContent=feedback;
+ effect.getAnimations?.().forEach(animation=>animation.cancel());
+ if(!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)effect.animate?.([{opacity:1,transform:'translateY(4px)'},{opacity:1,transform:'translateY(-4px)'},{opacity:0,transform:'translateY(-12px)'}],{duration:780,fill:'forwards'});
+
 }
 function renderIsleArena(){
  const r=isleRound;
- $('#main').innerHTML=`<section class="isle-arena"><div class="isle-heading"><small>Isle Expedition</small><h1>Totem Arena</h1><b id="isle-clock"></b></div><div class="isle-field">${isleTotems.map((name,i)=>`<button class="isle-totem" id="isle-totem-${i}" onclick="selectIsleTotem(${i})" ${r?'':'disabled'}>${artImage('explore-marker-'+[9,4,3][i],'')}<b>${name}</b><span id="isle-owner-${i}">Neutral</span><progress id="isle-hp-${i}" max="100" value="100" aria-label="${name} strength"></progress></button>`).join('')}</div><div class="isle-controls"><strong id="isle-status">Dawnwing vs two rival bot guilds</strong><p id="isle-hint">Hold two totems at the finish. The Oracle breaks a three-way tie. Hold all three for 15 seconds to win early.</p><button class="spirit-gold" id="isle-start" onclick="startIsleRound()">Enter arena</button><button onclick="go('home')">Return to Menu</button></div></section>`;
+ $('#main').innerHTML=`<section class="isle-arena"><div class="isle-heading"><small>Isle Expedition</small><h1>Totem Arena</h1><b id="isle-clock"></b></div><div class="isle-field">${isleTotems.map((name,i)=>`<button class="isle-totem" id="isle-totem-${i}" onclick="selectIsleTotem(${i})" ${r?'':'disabled'}>${artImage('explore-marker-'+[9,4,3][i],'')}<b>${name}</b><span id="isle-owner-${i}">Neutral</span><progress id="isle-hp-${i}" max="100" value="100" aria-label="${name} strength"></progress><em class="isle-hit" id="isle-hit-${i}"></em></button>`).join('')}${r?'<img id="isle-reina" src="'+reinaLookPath(false)+'" alt="Reina">':''}</div><div class="isle-controls"><strong id="isle-status">Your guild: Dawnwing</strong><p id="isle-hint">Hold two totems at the finish. The Oracle breaks a three-way tie. Hold all three for 15 seconds to win early.</p><button class="spirit-gold" hidden id="isle-strike" onclick="selectIsleTotem(isleRound.selected)">Strike</button><button class="spirit-gold" id="isle-start" onclick="startIsleRound()">Enter arena</button><button onclick="go('home')">Return to Menu</button></div></section>`;
  if(r)updateIsleArena();
 }
 function updateIsleArena(){
  const r=isleRound,done=r.winner!==null;
+ $('#isle-reina').dataset.target=r.selected;
+ $('#isle-strike').hidden=done;
+ $('#isle-strike').textContent=(r.totems[r.selected].owner===0?'Guard ':'Strike ')+isleTotems[r.selected];
  $('#isle-clock').textContent=Math.floor(r.time/60)+':'+String(r.time%60).padStart(2,'0');
  r.totems.forEach((t,i)=>{
   const button=$('#isle-totem-'+i);button.disabled=done;
   button.setAttribute('aria-pressed',String(!done&&r.selected===i));
-  $('#isle-owner-'+i).textContent=isleGuilds[t.owner]||'Neutral';
+  $('#isle-owner-'+i).textContent=t.owner===0?'Yours · Dawnwing':isleGuilds[t.owner]||'Neutral';
   $('#isle-hp-'+i).value=t.hp;
  });
  $('#isle-status').textContent=done?(r.winner<0?'No victor':isleGuilds[r.winner]+' wins!'):(r.totems[r.selected].owner===0?'Defending ':'Attacking ')+isleTotems[r.selected];
- $('#isle-hint').textContent=done?'The battle has ended.':r.heldBy>=0?isleGuilds[r.heldBy]+' holds all three: '+r.held+' / 15 s':'Tap a totem to send Reina. The final hit captures it.';
+ $('#isle-hint').textContent=done?'The battle has ended.':r.heldBy>=0?isleGuilds[r.heldBy]+' holds all three: '+r.held+' / 15 s':'Tap a totem to strike. Tap your own to restore its guard.';
  $('#isle-start').hidden=!done;
  if(done)$('#isle-start').textContent='Play again';
 }
