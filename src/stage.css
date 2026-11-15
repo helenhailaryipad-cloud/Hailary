@@ -6295,7 +6295,7 @@ body[data-screen=isleArena] #stage>#main{display:block;inset:0!important;width:1
 .map-2 .cloud-map-plane svg{stroke-width:.65;filter:drop-shadow(0 1px 2px #142b39);pointer-events:none}
 #stage .map-2 .duel-place{position:absolute;transform:translate(-50%,-50%);display:grid;justify-items:center;align-content:center;width:21%;padding:0;min-height:40px;color:#fff9e7;border:0;background:transparent;box-shadow:none;line-height:1}
 #stage .map-2 .duel-place img{width:10cqw;height:9cqw;object-fit:contain;filter:drop-shadow(0 2px 2px #143637)}
-#stage .map-2 .duel-place[data-rank=Stronghold] img{width:15cqw;height:13cqw}
+#stage .map-2 .duel-place[data-rank=Fortress] img{width:15cqw;height:13cqw}
 #stage .map-2 .duel-place[data-rank=Capital]{width:32%}
 #stage .map-2 .duel-place[data-rank=Capital] img{width:22cqw;height:19cqw}
 .duel-place span,.duel-place small{background:#20313aee;border-bottom:2px solid var(--banner);border-radius:.35em;padding:.16em .45em;white-space:nowrap;font:600 clamp(10px,2.6cqw,18px)/1.1 system-ui}

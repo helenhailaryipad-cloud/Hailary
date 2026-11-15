@@ -753,28 +753,29 @@ const cloudDefenders={
  Stronghold:['Guard','Elite','Guard','Elite','Guard'],
  Capital:['Guard','Elite','Guard','Boss','Guard','Elite','Guard']
 };
+const duelRanks=['Capital','Fortress','Fortress','Island','Island','Island'];
 let cloudCount=2;
 function cloudTerritories(){
  return cloudLayouts[cloudCount].flatMap((points,i)=>{
   const [owner,capital,fort,color]=cloudFactions[i];
-  const names=[capital,fort,owner+' Keep',owner+' Lookout',owner+' Camp',owner+' Gate'];
-  return points.map(([x,y],j)=>({owner,color,x,y,name:names[j],rank:cloudRanks[j]}));
+  const names=cloudCount===2?[capital,fort+' Fortress',owner+' Fortress',...(i===0?['Snowpeak Island','Winddance Island','Thunderstone Island']:['Snowfox Island','Firebird Island','Sunrise Island'])]:[capital,fort,owner+' Keep',owner+' Lookout',owner+' Camp',owner+' Gate'];
+  return points.map(([x,y],j)=>({owner,color,x,y,name:names[j],rank:(cloudCount===2?duelRanks:cloudRanks)[j]}));
  });
 }
 function cloudTerritory(index){
  const place=cloudTerritories()[index];
- const portraits=cloudDefenders[place.rank].map((role,i)=>'<span>'+artImage('guardian-t'+(7+i),'')+'<small>'+role+'</small></span>').join('');
+ const portraits=cloudDefenders[({Island:"Outpost",Fortress:"Stronghold"})[place.rank]||place.rank].map((role,i)=>'<span>'+artImage('guardian-t'+(7+i),'')+'<small>'+role+'</small></span>').join('');
  modal('<h2>'+place.name+'</h2><p>'+place.rank+' · '+place.owner+'</p><div class="cloud-guards">'+portraits+'</div><h3>Killing Rewards</h3><p>Territory points · 30</p>'+dailyTokens(['hud-prisms','hud-gems','gear-armor-t6']));
 }
 function cloudBrief(page){
  const names=['3-Faction War','2-Faction War','4-Faction War','Twin Sanctum','Four Sanctums'];
  const descriptions=['Three capitals command the sky roads.','Two factions compete for the sky island.','Four factions defend their own capitals.','Four factions contest two holy cities.','Four factions contest four holy cities.'];
  const days=[null,10,14,50,90];
- const body='<h2>'+names[page]+'</h2><p>'+descriptions[page]+'</p>'+(days[page]?'<p>Opens on server day '+days[page]+'</p>':'')+(page<3?'<p>Each faction holds three outposts, two strongholds and one capital.</p>':'')+'<div class="cloud-brief-tabs">'+names.map((n,i)=>'<button aria-pressed="'+(i===page)+'" onclick="cloudBrief('+i+')">'+n+'</button>').join('')+'</div>';
+ const body='<h2>'+names[page]+'</h2><p>'+descriptions[page]+'</p>'+(days[page]?'<p>Opens on server day '+days[page]+'</p>':'')+(page===1?'<p>Each capital connects to two fortresses guarding three islands.</p>':page<3?'<p>Each faction holds three outposts, two strongholds and one capital.</p>':'')+'<div class="cloud-brief-tabs">'+names.map((n,i)=>'<button aria-pressed="'+(i===page)+'" onclick="cloudBrief('+i+')">'+n+'</button>').join('')+'</div>';
  if($('#modal').open)$('#modalBody').innerHTML=body;else modal(body);
 }
 function cloudDuelMap(nodes){
- const links=[[0,1],[0,2],[1,3],[1,4],[2,5]];
+ const links=[[0,1],[0,2],[1,3],[1,4],[2,3],[2,5]];
  const capitalRoad = `<line x1="${nodes[0].x}" y1="${nodes[0].y}" x2="${nodes[6].x}" y2="${nodes[6].y}" stroke="#ffedbd"/>`;
  const roads=[0,6].flatMap(base=>links.map(([from,to])=>{
   const a=nodes[base+from],b=nodes[base+to];
@@ -782,9 +783,9 @@ function cloudDuelMap(nodes){
  })).join('');
  const places=nodes.map((p,i)=>{
   const capital=p.rank==='Capital';
-  const art=capital?'vale-castle':p.rank==='Stronghold'?'vale-tower':'vale-village';
+  const art=p.rank==='Island'?'left-explore':(capital?'vale-castle':'vale-tower')+(i<6?1:2);
   const label=capital?p.name:p.rank;
-  return `<button class="duel-place" data-rank="${p.rank}" style="left:${p.x}%;top:${p.y}%;--banner:${p.color}" aria-label="${p.owner}: ${p.name}, ${p.rank}" onclick="cloudTerritory(${i})"><img src="assets/generated/${art}${i<6?1:2}.webp" alt=""><span>${label}</span>${capital?'<small>'+p.owner+' Capital</small>':''}</button>`;
+  return `<button class="duel-place" data-rank="${p.rank}" style="left:${p.x}%;top:${p.y}%;--banner:${p.color}" aria-label="${p.owner}: ${p.name}, ${p.rank}" onclick="cloudTerritory(${i})"><img src="assets/generated/${art}.webp" alt=""><span>${label}</span>${capital?'<small>'+p.owner+' Capital</small>':''}</button>`;
  }).join('');
  return '<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'+capitalRoad+roads+'</svg>'+places;
 }
