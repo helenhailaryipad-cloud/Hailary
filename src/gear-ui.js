@@ -808,7 +808,7 @@ function startIsleRound(){
  const round={time:90,selected:0,heldBy:-1,held:0,winner:null,targets:[1,2],
   totems:isleTotems.map(()=>({owner:-1,hp:100}))};
  isleRound=round;
- round.timer=setInterval(()=>{if(round===isleRound&&round.winner===null){advanceIsleRound(round);updateIsleArena();}},1000);
+ round.timer=setInterval(()=>{if(round===isleRound&&round.winner===null){advanceIsleRound(round);updateIsleArena();round.targets.forEach((target,i)=>showIsleShot(i+1,target));}},1000);
  renderIsleArena();
 }
 function isleHit(totem,guild,damage){
@@ -845,20 +845,41 @@ function selectIsleTotem(index){
  isleHit(t,0,20);
  const feedback=own?(previous===100?'Fully guarded':'Guard +'+(t.hp-previous)):t.owner===0?'Captured!':'−'+(previous-t.hp)+' HP';
  updateIsleArena();
+ showIsleShot(0,index);
  const effect=$('#isle-hit-'+index);
  effect.textContent=feedback;
  effect.getAnimations?.().forEach(animation=>animation.cancel());
  if(!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)effect.animate?.([{opacity:1,transform:'translateY(4px)'},{opacity:1,transform:'translateY(-4px)'},{opacity:0,transform:'translateY(-12px)'}],{duration:780,fill:'forwards'});
 
 }
+function showIsleShot(guild,target){
+ const field=$('.isle-field'),actor=$('#isle-actor-'+guild),icon=$('#isle-totem-'+target+' img');
+ if(!field||!actor||!icon)return;
+ const f=field.getBoundingClientRect(),a=actor.getBoundingClientRect(),b=icon.getBoundingClientRect();
+ const x=a.left+a.width/2-f.left,y=a.top+a.height/2-f.top;
+ const dx=b.left+b.width/2-f.left-x,dy=b.top+b.height/2-f.top-y;
+ const shot=document.createElement('i');
+ shot.className='isle-projectile';shot.style.left=x+'px';shot.style.top=y+'px';
+ shot.style.color=['#fff2a1','#b391ff','#ff9467'][guild];
+ field.appendChild(shot);
+ const reduced=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+ if(!reduced)shot.animate([{transform:'translate(0,0)'},{transform:'translate('+dx+'px,'+dy+'px)'}],{duration:300,fill:'forwards'});
+ else shot.style.transform='translate('+dx+'px,'+dy+'px)';
+ setTimeout(()=>shot.remove(),340);
+ icon.animate?.([{filter:'brightness(1.8)'},{filter:'brightness(1)'}],{duration:220,delay:reduced?0:260});
+}
 function renderIsleArena(){
  const r=isleRound;
- $('#main').innerHTML=`<section class="isle-arena"><div class="isle-heading"><small>Isle Expedition</small><h1>Totem Arena</h1><b id="isle-clock"></b></div><div class="isle-field">${isleTotems.map((name,i)=>`<button class="isle-totem" id="isle-totem-${i}" onclick="selectIsleTotem(${i})" ${r?'':'disabled'}>${artImage('explore-marker-'+[9,4,3][i],'')}<b>${name}</b><span id="isle-owner-${i}">Neutral</span><progress id="isle-hp-${i}" max="100" value="100" aria-label="${name} strength"></progress><em class="isle-hit" id="isle-hit-${i}"></em></button>`).join('')}${r?'<img id="isle-reina" src="'+reinaLookPath(false)+'" alt="Reina">':''}</div><div class="isle-controls"><strong id="isle-status">Your guild: Dawnwing</strong><p id="isle-hint">Hold two totems at the finish. The Oracle breaks a three-way tie. Hold all three for 15 seconds to win early.</p><button class="spirit-gold" hidden id="isle-strike" onclick="selectIsleTotem(isleRound.selected)">Strike</button><button class="spirit-gold" id="isle-start" onclick="startIsleRound()">Enter arena</button><button onclick="go('home')">Return to Menu</button></div></section>`;
+ $('#main').innerHTML=`<section class="isle-arena"><div class="isle-heading"><small>Isle Expedition</small><h1>Totem Arena</h1><b id="isle-clock"></b></div><div class="isle-field">${isleTotems.map((name,i)=>`<button class="isle-totem" id="isle-totem-${i}" onclick="selectIsleTotem(${i})" ${r?'':'disabled'}>${artImage('explore-marker-'+[9,4,3][i],'')}<b>${name}</b><span id="isle-owner-${i}">Neutral</span><progress id="isle-hp-${i}" max="100" value="100" aria-label="${name} strength"></progress><em class="isle-hit" id="isle-hit-${i}"></em></button>`).join('')}${r?[reinaLookPath(false),artPath('party-mage-base'),artPath('party-rogue-base')].map((src,i)=>`<img class="isle-fighter" id="isle-actor-${i}" src="${src}" alt="${i?isleGuilds[i]:'Reina'}">`).join(''):''}</div><div class="isle-controls"><strong id="isle-status">Your guild: Dawnwing</strong><p id="isle-hint">Hold two totems at the finish. The Oracle breaks a three-way tie. Hold all three for 15 seconds to win early.</p><button class="spirit-gold" hidden id="isle-strike" onclick="selectIsleTotem(isleRound.selected)">Strike</button><button class="spirit-gold" id="isle-start" onclick="startIsleRound()">Enter arena</button><button onclick="go('home')">Return to Menu</button></div></section>`;
  if(r)updateIsleArena();
 }
 function updateIsleArena(){
  const r=isleRound,done=r.winner!==null;
- $('#isle-reina').dataset.target=r.selected;
+ [r.selected,...r.targets].forEach((target,i)=>{
+  const actor=$('#isle-actor-'+i);
+  actor.style.left=([50,24,76][target]+[-16,0,16][i])+'%';
+  actor.style.top=([34,81,81][target]+(i===1?4:0))+'%';
+ });
  $('#isle-strike').hidden=done;
  $('#isle-strike').textContent=(r.totems[r.selected].owner===0?'Guard ':'Strike ')+isleTotems[r.selected];
  $('#isle-clock').textContent=Math.floor(r.time/60)+':'+String(r.time%60).padStart(2,'0');
