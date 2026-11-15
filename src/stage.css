@@ -6289,3 +6289,15 @@ body[data-screen=isleArena] #stage>#main{display:block;inset:0!important;width:1
 .jungle-overlay{inset:50% auto auto 50%;transform:translate(-50%,-50%);width:84%;padding:1rem;border:1px solid #ccac67;border-radius:13px;display:grid;gap:.55rem}
 .jungle-overlay[hidden]{display:none}.jungle-overlay :is(h2,p){margin:0}
 .jungle-hud{inset:0 0 auto;padding:.4rem;pointer-events:none;font-weight:bold}.jungle-hud:empty{display:none}
+
+.cloud-war .map-2{background:#527f8b}
+.cloud-war .map-2 .cloud-map-plane{background-image:url('assets/generated/cloud-duel-terrain.webp');container-type:inline-size}
+.map-2 .cloud-map-plane svg{stroke-width:.65;filter:drop-shadow(0 1px 2px #142b39);pointer-events:none}
+#stage .map-2 .duel-place{position:absolute;transform:translate(-50%,-50%);display:grid;justify-items:center;align-content:center;width:21%;padding:0;min-height:40px;color:#fff9e7;border:0;background:transparent;box-shadow:none;line-height:1}
+#stage .map-2 .duel-place img{width:10cqw;height:9cqw;object-fit:contain;filter:drop-shadow(0 2px 2px #143637)}
+#stage .map-2 .duel-place[data-rank=Stronghold] img{width:15cqw;height:13cqw}
+#stage .map-2 .duel-place[data-rank=Capital]{width:32%}
+#stage .map-2 .duel-place[data-rank=Capital] img{width:22cqw;height:19cqw}
+.duel-place span,.duel-place small{background:#20313aee;border-bottom:2px solid var(--banner);border-radius:.35em;padding:.16em .45em;white-space:nowrap;font:600 clamp(10px,2.6cqw,18px)/1.1 system-ui}
+.duel-place[data-rank=Capital] span{color:#fff0bd;font:700 clamp(14px,4.2cqw,29px)/1 Georgia,serif}
+.duel-place small{color:var(--banner);border:0}

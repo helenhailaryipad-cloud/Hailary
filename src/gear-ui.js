@@ -732,8 +732,8 @@ const cloudFactions=[
 // Each row places the capital, two strongholds, then three outposts.
 const cloudLayouts={
  2:[
-  [[16,50],[27,18],[26,77],[12,31],[12,66],[39,85]],
-  [[84,50],[73,18],[74,77],[88,31],[88,66],[61,85]]
+  [[31,48],[22,26],[22,70],[13,10],[38,12],[31,89]],
+  [[69,48],[78,26],[78,70],[87,10],[62,12],[69,89]]
  ],
  3:[
   [[17,20],[32,16],[10,34],[43,15],[20,27],[6,43]],
@@ -753,7 +753,7 @@ const cloudDefenders={
  Stronghold:['Guard','Elite','Guard','Elite','Guard'],
  Capital:['Guard','Elite','Guard','Boss','Guard','Elite','Guard']
 };
-let cloudCount=3;
+let cloudCount=2;
 function cloudTerritories(){
  return cloudLayouts[cloudCount].flatMap((points,i)=>{
   const [owner,capital,fort,color]=cloudFactions[i];
@@ -773,11 +773,25 @@ function cloudBrief(page){
  const body='<h2>'+names[page]+'</h2><p>'+descriptions[page]+'</p>'+(days[page]?'<p>Opens on server day '+days[page]+'</p>':'')+(page<3?'<p>Each faction holds three outposts, two strongholds and one capital.</p>':'')+'<div class="cloud-brief-tabs">'+names.map((n,i)=>'<button aria-pressed="'+(i===page)+'" onclick="cloudBrief('+i+')">'+n+'</button>').join('')+'</div>';
  if($('#modal').open)$('#modalBody').innerHTML=body;else modal(body);
 }
+function cloudDuelMap(nodes){
+ const links=[[0,1],[0,2],[1,3],[1,4],[2,5]];
+ const roads=[0,6].flatMap(base=>links.map(([from,to])=>{
+  const a=nodes[base+from],b=nodes[base+to];
+  return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${a.color}"/>`;
+ })).join('');
+ const places=nodes.map((p,i)=>{
+  const capital=p.rank==='Capital';
+  const art=capital?'vale-castle':p.rank==='Stronghold'?'vale-tower':'vale-village';
+  const label=capital?p.name:p.rank;
+  return `<button class="duel-place" data-rank="${p.rank}" style="left:${p.x}%;top:${p.y}%;--banner:${p.color}" aria-label="${p.owner}: ${p.name}, ${p.rank}" onclick="cloudTerritory(${i})"><img src="assets/generated/${art}${i<6?1:2}.webp" alt=""><span>${label}</span>${capital?'<small>'+p.owner+' Capital</small>':''}</button>`;
+ }).join('');
+ return '<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'+roads+'</svg>'+places;
+}
 function cityCloudWar(){
  const nodes=cloudTerritories();
  const symbols={Capital:'♛',Stronghold:'♜',Outpost:'⚑'};
  const markers=nodes.map((p,i)=>`<button class="cloud-place" data-rank="${p.rank}" aria-label="${p.owner}: ${p.name}, ${p.rank}" title="${p.name} · ${p.rank}" style="left:${p.x}%;top:${p.y}%;--banner:${p.color}" onclick="cloudTerritory(${i})"><span class="map-token" aria-hidden="true">${symbols[p.rank]}</span></button>`).join('');
- $('#main').innerHTML='<section class="cloud-war"><div class="cloud-heading"><strong>Cloud War</strong><small>Battle starts at 19:30</small></div><div class="cloud-tabs" role="group" aria-label="Faction count">'+[2,3,4].map(n=>'<button aria-pressed="'+(cloudCount===n)+'" onclick="cloudCount='+n+';cityCloudWar()">'+n+' Factions</button>').join('')+'</div><div class="cloud-field map-'+cloudCount+'"><div class="cloud-map-plane">'+markers+'</div></div><div class="cloud-actions"><button aria-label="Back to city" onclick="go(\'home\')">‹</button><button onclick="cloudBrief('+[3,2,4].indexOf(cloudCount)+')">War Guide</button></div></section>';
+ $('#main').innerHTML='<section class="cloud-war"><div class="cloud-heading"><strong>Cloud War</strong><small>Battle starts at 19:30</small></div><div class="cloud-tabs" role="group" aria-label="Faction count">'+[2,3,4].map(n=>'<button aria-pressed="'+(cloudCount===n)+'" onclick="cloudCount='+n+';cityCloudWar()">'+n+' Factions</button>').join('')+'</div><div class="cloud-field map-'+cloudCount+'"><div class="cloud-map-plane">'+(cloudCount===2?cloudDuelMap(nodes):markers)+'</div></div><div class="cloud-actions"><button aria-label="Back to city" onclick="go(\'home\')">‹</button><button onclick="cloudBrief('+[3,2,4].indexOf(cloudCount)+')">War Guide</button></div></section>';
 }
 
 let eliteTab=0,eliteHero='reina';
