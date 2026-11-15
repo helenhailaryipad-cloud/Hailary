@@ -5969,12 +5969,13 @@ body[data-screen=home] #stage .city-hud button::after{content:none!important;ani
 .city-fold[aria-expanded=true] .city-fold-disc::after{transform:rotate(-135deg) translate(-8%,8%)}
 .city-fold:focus-visible .city-fold-disc{outline:2px solid #ffe9a8}
 
+.city-hud[data-expanded=false] .city-extra > [aria-label="Isle Expedition"]{grid-column:2}
 /* Game area measured inside the tablet bezel in the two reference photos. */
 .city-left-events{inset:10.5% auto auto .55%;width:36%;height:56%;grid-template-rows:27% 10% 63%}
 .city-left-events .city-top{grid-column:1;grid-auto-rows:7.2cqh}
 .city-left-events .city-promos{grid-column:1;grid-auto-rows:7.1cqh}
 #stage .city-left-events button.city-fold{grid-column:1;align-self:center;margin:0 0 0 1.1cqw;width:7cqw;height:5cqh}
-.city-hud[data-expanded=false] :is(.city-top:not(.city-compact),.city-promos,.city-extra,.city-reinforce),
+.city-hud[data-expanded=false] :is(.city-top:not(.city-compact),.city-promos,.city-extra > :not([aria-label="Isle Expedition"]),.city-reinforce),
 .city-hud[data-expanded=true] .city-compact{display:none!important}
 #stage .city-hud .city-icon{background:transparent;border:0;box-shadow:none}
 #stage .city-hud .city-glyph{position:relative;display:block;flex:none;width:min(6.5cqw,4.65cqh);height:min(6.5cqw,4.65cqh)}
