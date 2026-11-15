@@ -6310,3 +6310,12 @@ body[data-screen=cloudWar] #stage:has(.map-2){width:min(100%,82dvh)}
 #stage .map-2 .duel-place img{height:min(11cqw,8dvh)}
 #stage .map-2 .duel-place[data-rank=Fortress] img{height:min(14cqw,9dvh)}
 #stage .map-2 .duel-place[data-rank=Capital] img{height:min(20cqw,12dvh)}
+
+.cloud-portal-preview{text-align:center}
+.portal-defenders{position:relative;aspect-ratio:1.45;margin:.65rem auto;width:min(100%,440px);border-radius:16px;background:radial-gradient(ellipse at 50% 38%,#546b7e,#26384d 78%);overflow:hidden}
+.portal-defenders svg{position:absolute;inset:0;width:100%;height:100%;fill:none;stroke:#d5bc8b;stroke-width:1.5}
+.portal-defender{position:absolute;transform:translate(-50%,-50%);width:13%;display:grid;justify-items:center;color:#fff}
+.portal-defender img{width:100%;aspect-ratio:1;object-fit:contain;border-radius:50%;border:2px solid #87c7dc;background:#29414e}
+.portal-defender small{font:700 clamp(9px,1.5vh,13px)/1 system-ui;background:#203541;padding:2px 4px;border-radius:4px}
+.portal-defender[data-role=Boss] img{border-color:#ffba4b;background:#603649}
+.portal-defender[data-role=Elite] img{border-color:#cc92ed}

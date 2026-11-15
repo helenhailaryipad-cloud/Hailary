@@ -762,8 +762,27 @@ function cloudTerritories(){
   return points.map(([x,y],j)=>({owner,color,x,y,name:names[j],rank:(cloudCount===2?duelRanks:cloudRanks)[j]}));
  });
 }
+const cloudPortalRewards={
+ Island:{personal:1440,armor:'gear-armor-t6'},
+ Fortress:{personal:1800,armor:'gear-armor-t7'},
+ Capital:{personal:2160,armor:'gear-armor-t8'}
+};
+const cloudPortalSlots=[
+ ['Boss',50,31,16],['Elite',9,31,12],['Elite',91,31,13],['Elite',50,87,14],
+ ['Guard',24,14,7],['Guard',24,48,8],['Guard',76,14,9],['Guard',76,48,10],
+ ['Guard',34,69,8],['Guard',66,69,7]
+];
+function cloudPortalPreview(place){
+ const rewards=cloudPortalRewards[place.rank];
+ const paths='M50 31 L24 14 L9 31 L24 48 Z M50 31 L76 14 L91 31 L76 48 Z M50 31 V55 M50 55 H34 V69 L50 87 L66 69 V55 Z';
+ const defenders=cloudPortalSlots.map(([role,x,y,art])=>
+  `<div class="portal-defender" data-role="${role}" style="left:${x}%;top:${y}%"><small>${role}</small>${artImage('guardian-t'+art,role)}</div>`
+ ).join('');
+ return `<section class="cloud-portal-preview"><h2>${place.name}</h2><p>${place.owner} · ${place.rank==='Capital'?'Holy City':place.rank}</p><div class="portal-defenders"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="${paths}"/></svg>${defenders}</div><h3>Boss rewards</h3><p>Territory points <b>30</b> · Personal point pool <b>${rewards.personal}</b></p><small>Personal points are shared by damage dealt.</small><div>${dailyTokens(['hud-prisms','hud-gems',rewards.armor])}</div></section>`;
+}
 function cloudTerritory(index){
  const place=cloudTerritories()[index];
+ if(cloudCount===2)return modal(cloudPortalPreview(place));
  const portraits=cloudDefenders[({Island:"Outpost",Fortress:"Stronghold"})[place.rank]||place.rank].map((role,i)=>'<span>'+artImage('guardian-t'+(7+i),'')+'<small>'+role+'</small></span>').join('');
  modal('<h2>'+place.name+'</h2><p>'+place.rank+' · '+place.owner+'</p><div class="cloud-guards">'+portraits+'</div><h3>Killing Rewards</h3><p>Territory points · 30</p>'+dailyTokens(['hud-prisms','hud-gems','gear-armor-t6']));
 }
