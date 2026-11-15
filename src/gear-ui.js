@@ -741,10 +741,10 @@ const cloudLayouts={
   [[50,81],[19,68],[81,68],[12,52],[88,52],[67,77]]
  ],
  4:[
-  [[50,20],[30,19],[70,19],[17,21],[40,13],[81,21]],
-  [[86,50],[88,35],[87,62],[90,28],[78,54],[82,69]],
-  [[50,86],[30,75],[71,75],[16,69],[42,78],[62,78]],
-  [[14,50],[12,35],[13,62],[10,28],[22,48],[22,56]]
+  [[32,39],[35,23],[16,35],[12,9],[39,9],[9,22]],
+  [[68,39],[65,23],[84,35],[88,9],[61,9],[91,22]],
+  [[32,61],[35,77],[16,65],[12,91],[39,91],[9,78]],
+  [[68,61],[65,77],[84,65],[88,91],[61,91],[91,78]]
  ]
 };
 const cloudRanks=['Capital','Stronghold','Stronghold','Outpost','Outpost','Outpost'];
@@ -754,12 +754,12 @@ const cloudDefenders={
  Capital:['Guard','Elite','Guard','Boss','Guard','Elite','Guard']
 };
 const duelRanks=['Capital','Fortress','Fortress','Island','Island','Island'];
-let cloudCount=2;
+let cloudCount=4;
 function cloudTerritories(){
  return cloudLayouts[cloudCount].flatMap((points,i)=>{
   const [owner,capital,fort,color]=cloudFactions[i];
-  const names=cloudCount===2?[capital,fort+' Fortress',owner+' Fortress',...(i===0?['Snowpeak Island','Winddance Island','Thunderstone Island']:['Snowfox Island','Firebird Island','Sunrise Island'])]:[capital,fort,owner+' Keep',owner+' Lookout',owner+' Camp',owner+' Gate'];
-  return points.map(([x,y],j)=>({owner,color,x,y,name:names[j],rank:(cloudCount===2?duelRanks:cloudRanks)[j]}));
+  const names=cloudCount===4?[['Palace City','Dawnstar City','Heaven City','Domain City'][i],fort+' Fortress',owner+' Fortress',owner+' Isle',owner+' Reach',owner+' Haven']:cloudCount===2?[capital,fort+' Fortress',owner+' Fortress',...(i===0?['Snowpeak Island','Winddance Island','Thunderstone Island']:['Snowfox Island','Firebird Island','Sunrise Island'])]:[capital,fort,owner+' Keep',owner+' Lookout',owner+' Camp',owner+' Gate'];
+  return points.map(([x,y],j)=>({owner,color,x,y,name:names[j],rank:(cloudCount!==3?duelRanks:cloudRanks)[j]}));
  });
 }
 const cloudPortalRewards={
@@ -782,7 +782,7 @@ function cloudPortalPreview(place){
 }
 function cloudTerritory(index){
  const place=cloudTerritories()[index];
- if(cloudCount===2)return modal(cloudPortalPreview(place));
+ if(cloudCount!==3)return modal(cloudPortalPreview(place));
  const portraits=cloudDefenders[({Island:"Outpost",Fortress:"Stronghold"})[place.rank]||place.rank].map((role,i)=>'<span>'+artImage('guardian-t'+(7+i),'')+'<small>'+role+'</small></span>').join('');
  modal('<h2>'+place.name+'</h2><p>'+place.rank+' · '+place.owner+'</p><div class="cloud-guards">'+portraits+'</div><h3>Killing Rewards</h3><p>Territory points · 30</p>'+dailyTokens(['hud-prisms','hud-gems','gear-armor-t6']));
 }
@@ -790,20 +790,22 @@ function cloudBrief(page){
  const names=['3-Faction War','2-Faction War','4-Faction War','Twin Sanctum','Four Sanctums'];
  const descriptions=['Three capitals command the sky roads.','Two factions compete for the sky island.','Four factions defend their own capitals.','Four factions contest two holy cities.','Four factions contest four holy cities.'];
  const days=[null,10,14,50,90];
- const body='<h2>'+names[page]+'</h2><p>'+descriptions[page]+'</p>'+(days[page]?'<p>Opens on server day '+days[page]+'</p>':'')+(page===1?'<p>Each capital connects to two fortresses guarding three islands.</p>':page<3?'<p>Each faction holds three outposts, two strongholds and one capital.</p>':'')+'<div class="cloud-brief-tabs">'+names.map((n,i)=>'<button aria-pressed="'+(i===page)+'" onclick="cloudBrief('+i+')">'+n+'</button>').join('')+'</div>';
+ const body='<h2>'+names[page]+'</h2><p>'+descriptions[page]+'</p>'+(days[page]?'<p>Opens on server day '+days[page]+'</p>':'')+(page===2?'<p>Four Holy Cities share a central road. Each faction has two fortresses and three islands. Follow roads to attack territories of the same or higher tier.</p><p>Daily Carnage Point allowance: 1200. Weekly shop allowance: 80 additional points.</p>':page===1?'<p>Each capital connects to two fortresses guarding three islands.</p>':page<3?'<p>Each faction holds three outposts, two strongholds and one capital.</p>':'')+'<div class="cloud-brief-tabs">'+names.map((n,i)=>'<button aria-pressed="'+(i===page)+'" onclick="cloudBrief('+i+')">'+n+'</button>').join('')+'</div>';
  if($('#modal').open)$('#modalBody').innerHTML=body;else modal(body);
 }
-function cloudDuelMap(nodes){
+function cloudLinkedMap(nodes){
  const links=[[0,1],[0,2],[1,3],[1,4],[2,3],[2,5]];
- const capitalRoad = `<line x1="${nodes[0].x}" y1="${nodes[0].y}" x2="${nodes[6].x}" y2="${nodes[6].y}" stroke="#ffedbd"/>`;
- const roads=[0,6].flatMap(base=>links.map(([from,to])=>{
+ const bases=cloudLayouts[cloudCount].map((_,i)=>i*6);
+ const cityLinks=cloudCount===4?[[0,6],[6,18],[18,12],[12,0]]:[[0,6]];
+ const capitalRoad=cityLinks.map(([a,b])=>`<line x1="${nodes[a].x}" y1="${nodes[a].y}" x2="${nodes[b].x}" y2="${nodes[b].y}" stroke="#ffedbd"/>`).join('');
+ const roads=bases.flatMap(base=>links.map(([from,to])=>{
   const a=nodes[base+from],b=nodes[base+to];
   return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${a.color}"/>`;
  })).join('');
  const places=nodes.map((p,i)=>{
   const capital=p.rank==='Capital';
   const art=p.rank==='Island'?'left-explore':(capital?'vale-castle':'vale-tower')+(i<6?1:2);
-  const label=p.name;
+  const label=cloudCount===2||capital?p.name:p.rank;
   return `<button class="duel-place" data-rank="${p.rank}" style="left:${p.x}%;top:${p.y}%;--banner:${p.color}" aria-label="${p.owner}: ${p.name}, ${p.rank}" onclick="cloudTerritory(${i})"><img src="assets/generated/${art}.webp" alt=""><span>${label}</span>${capital?'<small>'+p.owner+' · Holy City</small>':''}</button>`;
  }).join('');
  return '<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'+capitalRoad+roads+'</svg>'+places;
@@ -812,7 +814,7 @@ function cityCloudWar(){
  const nodes=cloudTerritories();
  const symbols={Capital:'♛',Stronghold:'♜',Outpost:'⚑'};
  const markers=nodes.map((p,i)=>`<button class="cloud-place" data-rank="${p.rank}" aria-label="${p.owner}: ${p.name}, ${p.rank}" title="${p.name} · ${p.rank}" style="left:${p.x}%;top:${p.y}%;--banner:${p.color}" onclick="cloudTerritory(${i})"><span class="map-token" aria-hidden="true">${symbols[p.rank]}</span></button>`).join('');
- $('#main').innerHTML='<section class="cloud-war"><div class="cloud-heading"><strong>Cloud War</strong><small>Battle starts at 19:30</small></div><div class="cloud-tabs" role="group" aria-label="Faction count">'+[2,3,4].map(n=>'<button aria-pressed="'+(cloudCount===n)+'" onclick="cloudCount='+n+';cityCloudWar()">'+n+' Factions</button>').join('')+'</div><div class="cloud-field map-'+cloudCount+'"><div class="cloud-map-plane">'+(cloudCount===2?cloudDuelMap(nodes):markers)+'</div></div><div class="cloud-actions"><button aria-label="Back to city" onclick="go(\'home\')">‹</button><button onclick="cloudBrief('+[3,2,4].indexOf(cloudCount)+')">War Guide</button></div></section>';
+ $('#main').innerHTML='<section class="cloud-war"><div class="cloud-heading"><strong>Cloud War</strong><small>'+ (cloudCount===4?'Daily Carnage Points · 1200':'Battle starts at 19:30')+'</small></div><div class="cloud-tabs" role="group" aria-label="Faction count">'+[2,3,4].map(n=>'<button aria-pressed="'+(cloudCount===n)+'" onclick="cloudCount='+n+';cityCloudWar()">'+n+' Factions</button>').join('')+'</div><div class="cloud-field map-'+cloudCount+'"><div class="cloud-map-plane">'+(cloudCount!==3?cloudLinkedMap(nodes):markers)+'</div></div><div class="cloud-actions"><button aria-label="Back to city" onclick="go(\'home\')">‹</button><button onclick="cloudBrief('+[3,2,4].indexOf(cloudCount)+')">War Guide</button></div></section>';
 }
 
 let eliteTab=0,eliteHero='reina';
