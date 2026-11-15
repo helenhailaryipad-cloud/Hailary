@@ -784,8 +784,8 @@ function cloudDuelMap(nodes){
  const places=nodes.map((p,i)=>{
   const capital=p.rank==='Capital';
   const art=p.rank==='Island'?'left-explore':(capital?'vale-castle':'vale-tower')+(i<6?1:2);
-  const label=capital?p.name:p.rank;
-  return `<button class="duel-place" data-rank="${p.rank}" style="left:${p.x}%;top:${p.y}%;--banner:${p.color}" aria-label="${p.owner}: ${p.name}, ${p.rank}" onclick="cloudTerritory(${i})"><img src="assets/generated/${art}.webp" alt=""><span>${label}</span>${capital?'<small>'+p.owner+' Capital</small>':''}</button>`;
+  const label=p.name;
+  return `<button class="duel-place" data-rank="${p.rank}" style="left:${p.x}%;top:${p.y}%;--banner:${p.color}" aria-label="${p.owner}: ${p.name}, ${p.rank}" onclick="cloudTerritory(${i})"><img src="assets/generated/${art}.webp" alt=""><span>${label}</span>${capital?'<small>'+p.owner+' · Holy City</small>':''}</button>`;
  }).join('');
  return '<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'+capitalRoad+roads+'</svg>'+places;
 }

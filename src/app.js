@@ -18,7 +18,7 @@ function normalizeAdventure(s){if(/^(reyna|reina)$/i.test(s.name))s.name='REINA'
 let S=defaults();try{const v=JSON.parse(localStorage.getItem(KEY));if(valid(v))S=normalizeAdventure(v);}catch{}
 const INTRO_KEY='wow-intro-style-v1';
 function storedIntroStyle(){return '2d'}
-let screen=globalThis.location?.search==='?screen=games'?'games':storedIntroStyle()==='2d'?'home':'intro',filter='dragon',loop=0,game=null,saveTimer=0,cloudReady=false,cloudBlocked=false,cloudStatus='Connecting…',cloudRevision=0,cloudBusy=false,gamePaused=false;
+let screen=globalThis.location?.search==='?screen=cloudWar'?'cloudWar':globalThis.location?.search==='?screen=games'?'games':storedIntroStyle()==='2d'?'home':'intro',filter='dragon',loop=0,game=null,saveTimer=0,cloudReady=false,cloudBlocked=false,cloudStatus='Connecting…',cloudRevision=0,cloudBusy=false,gamePaused=false;
 const item=id=>ITEMS.find(i=>i.id===id),level=()=>globalThis.WonderProgress.level(S.xp),gearLevel=id=>S.upgrades[id]||0;
 function stats(){return globalThis.WonderGear.stats(S)}
 function toast(t){$('#toast').textContent=t;$('#toast').classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('#toast').classList.remove('show'),3000)}

@@ -6301,3 +6301,12 @@ body[data-screen=isleArena] #stage>#main{display:block;inset:0!important;width:1
 .duel-place span,.duel-place small{background:#20313aee;border-bottom:2px solid var(--banner);border-radius:.35em;padding:.16em .45em;white-space:nowrap;font:600 clamp(10px,2.6cqw,18px)/1.1 system-ui}
 .duel-place[data-rank=Capital] span{color:#fff0bd;font:700 clamp(14px,4.2cqw,29px)/1 Georgia,serif}
 .duel-place small{color:var(--banner);border:0}
+
+/* Let the painted battlefield and the interactive routes share the full play area. */
+body[data-screen=cloudWar] #stage:has(.map-2){width:min(100%,82dvh)}
+.cloud-war .map-2 .cloud-map-plane{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto;background-size:100% 100%}
+#stage .map-2 .duel-place{width:25%;gap:0}
+#stage .map-2 .duel-place span{max-width:100%;white-space:normal;text-wrap:balance;line-height:1.08;box-shadow:0 1px 3px #14242d88}
+#stage .map-2 .duel-place img{height:min(11cqw,8dvh)}
+#stage .map-2 .duel-place[data-rank=Fortress] img{height:min(14cqw,9dvh)}
+#stage .map-2 .duel-place[data-rank=Capital] img{height:min(20cqw,12dvh)}
