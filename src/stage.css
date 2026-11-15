@@ -6252,3 +6252,7 @@ body[data-screen=isleArena] #stage>#main{display:block;inset:0!important;width:1
 .isle-vital progress[data-health=low]{--fill:linear-gradient(#ffada7,#ba4857 50%,#832b45)!important}
 .isle-vital progress::-webkit-progress-bar{background:#28243c}.isle-vital progress::-webkit-progress-value{background:var(--fill)}.isle-vital progress::-moz-progress-bar{background:var(--fill)}
 .isle-vital strong{position:absolute;inset:0;text-align:center;color:white;font:800 12px/14px system-ui;font-variant-numeric:tabular-nums;text-shadow:0 1px 2px #151324,0 0 3px #151324;pointer-events:none}
+#isle-actor-0{pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:grab}
+#isle-actor-0 img{pointer-events:none}
+#isle-actor-0[data-dragging]{z-index:94!important;transition:none;cursor:grabbing}
+#stage .isle-totem.isle-drop{outline:2px solid #ffe89a;background:#ffd98226;box-shadow:0 0 15px #ffe39980}
