@@ -794,3 +794,68 @@ function eliteStore(){
  }).join('');
  $('#main').innerHTML='<section class="elite-store"><header><small>'+set.outfit+' Collection</small><h1>Fashion Elite Sale</h1><span>Rotation ends '+new Date(sale.end).toISOString().slice(0,10)+' UTC</span>'+(eliteTab===0?select:'')+'</header><div class="elite-cards">'+cards+'</div><nav><button aria-label="Back to city" onclick="go(\'home\')">‹</button>'+tabs.map((t,i)=>'<button aria-pressed="'+(i===eliteTab)+'" onclick="eliteTab='+i+';eliteStore()">'+t+'</button>').join('')+'</nav></section>';
 }
+
+const isleGuilds=['Dawnwing','Moonveil','Embercrest'];
+const isleTotems=['Oracle Totem','West Spirit','East Spirit'];
+let isleRound=null;
+function leaveIsleArena(){
+ if(isleRound)clearInterval(isleRound.timer);
+ isleRound=null;
+}
+function startIsleRound(){
+ if(screen!=='isleArena')return;
+ leaveIsleArena();
+ const round={time:90,selected:0,heldBy:-1,held:0,winner:null,targets:[1,2],
+  totems:isleTotems.map(()=>({owner:-1,hp:100}))};
+ isleRound=round;
+ round.timer=setInterval(()=>{if(round===isleRound&&round.winner===null){advanceIsleRound(round);updateIsleArena();}},1000);
+ renderIsleArena();
+}
+function isleHit(totem,guild,damage){
+ if(totem.owner===guild){totem.hp=Math.min(100,totem.hp+damage);return;}
+ totem.hp-=damage;
+ if(totem.hp<=0){totem.owner=guild;totem.hp=100;}
+}
+function advanceIsleRound(round){
+ // Resolve hits in a rotating order so the same guild does not always hit last.
+ for(let turn=0;turn<3;turn++){
+  const guild=(round.time+turn)%3;
+  if(guild&&round.time%6===0)round.targets[guild-1]=Math.floor(Math.random()*3);
+  const target=guild?round.targets[guild-1]:round.selected;
+  isleHit(round.totems[target],guild,guild?14:20);
+ }
+ round.time--;
+ const owners=round.totems.map(t=>t.owner);
+ const holder=owners.every(owner=>owner===owners[0])?owners[0]:-1;
+ round.held=holder<0?0:holder===round.heldBy?round.held+1:1;
+ round.heldBy=holder;
+ if(round.held>=15)round.winner=holder;
+ else if(!round.time){
+  const majority=isleGuilds.findIndex((_,i)=>owners.filter(owner=>owner===i).length>=2);
+  round.winner=majority>=0?majority:owners[0];
+ }
+ if(round.winner!==null)clearInterval(round.timer);
+}
+function selectIsleTotem(index){
+ if(!isleRound||isleRound.winner!==null)return;
+ isleRound.selected=index;updateIsleArena();
+}
+function renderIsleArena(){
+ const r=isleRound;
+ $('#main').innerHTML=`<section class="isle-arena"><div class="isle-heading"><small>Isle Expedition</small><h1>Totem Arena</h1><b id="isle-clock"></b></div><div class="isle-field">${isleTotems.map((name,i)=>`<button class="isle-totem" id="isle-totem-${i}" onclick="selectIsleTotem(${i})" ${r?'':'disabled'}>${artImage('explore-marker-'+[9,4,3][i],'')}<b>${name}</b><span id="isle-owner-${i}">Neutral</span><progress id="isle-hp-${i}" max="100" value="100" aria-label="${name} strength"></progress></button>`).join('')}</div><div class="isle-controls"><strong id="isle-status">Dawnwing vs two rival bot guilds</strong><p id="isle-hint">Hold two totems at the finish. The Oracle breaks a three-way tie. Hold all three for 15 seconds to win early.</p><button class="spirit-gold" id="isle-start" onclick="startIsleRound()">Enter arena</button><button onclick="go('home')">Return to Menu</button></div></section>`;
+ if(r)updateIsleArena();
+}
+function updateIsleArena(){
+ const r=isleRound,done=r.winner!==null;
+ $('#isle-clock').textContent=Math.floor(r.time/60)+':'+String(r.time%60).padStart(2,'0');
+ r.totems.forEach((t,i)=>{
+  const button=$('#isle-totem-'+i);button.disabled=done;
+  button.setAttribute('aria-pressed',String(!done&&r.selected===i));
+  $('#isle-owner-'+i).textContent=isleGuilds[t.owner]||'Neutral';
+  $('#isle-hp-'+i).value=t.hp;
+ });
+ $('#isle-status').textContent=done?(r.winner<0?'No victor':isleGuilds[r.winner]+' wins!'):(r.totems[r.selected].owner===0?'Defending ':'Attacking ')+isleTotems[r.selected];
+ $('#isle-hint').textContent=done?'The battle has ended.':r.heldBy>=0?isleGuilds[r.heldBy]+' holds all three: '+r.held+' / 15 s':'Tap a totem to send Reina. The final hit captures it.';
+ $('#isle-start').hidden=!done;
+ if(done)$('#isle-start').textContent='Play again';
+}
