@@ -6236,3 +6236,11 @@ body[data-screen=isleArena] #stage>#main{display:block;inset:0!important;width:1
 .isle-fighter img{display:block;width:100%;height:100%;object-fit:contain}
 .isle-fighter b{position:absolute;bottom:-.3em;left:50%;transform:translateX(-50%);white-space:nowrap;border:1px solid currentColor;border-radius:1em;background:#211d32ed;color:#dfcaff;padding:.14em .4em;font:700 clamp(10px,1.35dvh,15px)/1.2 system-ui}
 #isle-actor-2 b{color:#ffd0b2}#isle-actor-0 b{color:#ffe397;background:#452e0bf5}
+.isle-field .isle-projectile{z-index:95}
+.isle-fighter .dressed-hero{position:relative;display:block;width:100%;height:100%}
+.isle-fighter .dressed-hero img{position:absolute;inset:0;object-fit:contain;object-position:center}
+.isle-field .isle-projectile{background:none;box-shadow:none;width:0;height:0}
+.isle-projectile::after{content:"";position:absolute;display:block;transform:translate(-50%,-50%) rotate(var(--aim));filter:drop-shadow(0 0 3px currentColor)}
+.isle-shot-0::after{width:32px;height:10px;background:#ffe6a1;clip-path:polygon(0 2%,20% 32%,74% 32%,70% 0,100% 50%,70% 100%,74% 68%,20% 68%,0 98%,8% 50%)}
+.isle-shot-1::after{width:25px;height:12px;border-radius:80% 55% 55% 80%;background:radial-gradient(circle at 76% 48%,white,#d5adff 22%,#965cf2 44%,transparent 76%);box-shadow:0 0 7px #af8aff}
+.isle-shot-2::after{width:23px;height:10px;background:linear-gradient(#fff2d5 48%,#ff9456 52%);clip-path:polygon(0 30%,25% 30%,25% 0,35% 25%,68% 18%,100% 50%,67% 84%,35% 75%,25% 100%,25% 70%,0 70%)}
