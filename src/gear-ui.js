@@ -875,7 +875,7 @@ function showIsleShot(guild,target){
 }
 function renderIsleArena(){
  const r=isleRound;
- $('#main').innerHTML=`<section class="isle-arena"><div class="isle-heading"><small>Isle Expedition</small><h1>Totem Arena</h1><b id="isle-clock"></b></div><div class="isle-field">${isleTotems.map((name,i)=>`<button class="isle-totem" id="isle-totem-${i}" onclick="selectIsleTotem(${i})" ${r?'':'disabled'}>${artImage('explore-marker-'+[9,4,3][i],'')}<b>${name}</b><span id="isle-owner-${i}">Neutral</span><progress id="isle-hp-${i}" max="100" value="100" aria-label="${name} strength"></progress><em class="isle-hit" id="isle-hit-${i}"></em></button>`).join('')}${r?[reinaLookPath(false),artPath('party-mage-base'),artPath('party-rogue-base')].map((src,i)=>`<div class="isle-fighter" id="isle-actor-${i}">${i?dressedHero(i===1?'mage':'rogue',null,isleGuilds[i]):`<img src="${src}" alt="">`}<b>${i?isleGuilds[i]+' · Bot':'You · Reina'}</b></div>`).join(''):''}</div><div class="isle-controls"><strong id="isle-status">You play as Reina · Dawnwing</strong><p id="isle-hint">Hold two totems at the finish. The Oracle breaks a three-way tie. Hold all three for 15 seconds to win early.</p><button class="spirit-gold" hidden id="isle-strike" onclick="selectIsleTotem(isleRound.selected)">Strike</button><button class="spirit-gold" id="isle-start" onclick="startIsleRound()">Enter arena</button><button onclick="go('home')">Return to Menu</button></div></section>`;
+ $('#main').innerHTML=`<section class="isle-arena"><div class="isle-heading"><small>Isle Expedition</small><h1>Totem Arena</h1><b id="isle-clock"></b></div><div class="isle-field">${isleTotems.map((name,i)=>`<button class="isle-totem" id="isle-totem-${i}" onclick="selectIsleTotem(${i})" ${r?'':'disabled'}>${artImage('explore-marker-'+[9,4,3][i],'')}<b>${name}</b><span id="isle-owner-${i}">Neutral</span><span class="isle-vital"><progress id="isle-hp-${i}" max="100" value="100" aria-label="${name} health"></progress><strong id="isle-percent-${i}" aria-hidden="true">100%</strong></span><em class="isle-hit" id="isle-hit-${i}"></em></button>`).join('')}${r?[reinaLookPath(false),artPath('party-mage-base'),artPath('party-rogue-base')].map((src,i)=>`<div class="isle-fighter" id="isle-actor-${i}">${i?dressedHero(i===1?'mage':'rogue',null,isleGuilds[i]):`<img src="${src}" alt="">`}<b>${i?isleGuilds[i]+' · Bot':'You · Reina'}</b></div>`).join(''):''}</div><div class="isle-controls"><strong id="isle-status">You play as Reina · Dawnwing</strong><p id="isle-hint">Hold two totems at the finish. The Oracle breaks a three-way tie. Hold all three for 15 seconds to win early.</p><button class="spirit-gold" hidden id="isle-strike" onclick="selectIsleTotem(isleRound.selected)">Strike</button><button class="spirit-gold" id="isle-start" onclick="startIsleRound()">Enter arena</button><button onclick="go('home')">Return to Menu</button></div></section>`;
  if(r)updateIsleArena();
 }
 // Three approaches per totem: Reina in front, rival guilds on opposite flanks.
@@ -900,7 +900,10 @@ function updateIsleArena(){
   const button=$('#isle-totem-'+i);button.disabled=done;
   button.setAttribute('aria-pressed',String(!done&&r.selected===i));
   $('#isle-owner-'+i).textContent=t.owner===0?'Yours · Dawnwing':isleGuilds[t.owner]||'Neutral';
-  $('#isle-hp-'+i).value=t.hp;
+  const bar=$('#isle-hp-'+i);
+  bar.value=t.hp;
+  bar.dataset.health=t.hp<=30?'low':t.hp<=60?'worn':'full';
+  $('#isle-percent-'+i).textContent=t.hp+'%';
  });
  $('#isle-status').textContent=done?(r.winner<0?'No victor':isleGuilds[r.winner]+' wins!'):(r.totems[r.selected].owner===0?'Reina guards ':'Reina attacks ')+isleTotems[r.selected];
  $('#isle-hint').textContent=done?'The battle has ended.':r.heldBy>=0?isleGuilds[r.heldBy]+' holds all three: '+r.held+' / 15 s':'Tap a totem to aim Reina’s next shot. Rival bots choose their own targets.';

@@ -6244,3 +6244,11 @@ body[data-screen=isleArena] #stage>#main{display:block;inset:0!important;width:1
 .isle-shot-0::after{width:32px;height:10px;background:#ffe6a1;clip-path:polygon(0 2%,20% 32%,74% 32%,70% 0,100% 50%,70% 100%,74% 68%,20% 68%,0 98%,8% 50%)}
 .isle-shot-1::after{width:25px;height:12px;border-radius:80% 55% 55% 80%;background:radial-gradient(circle at 76% 48%,white,#d5adff 22%,#965cf2 44%,transparent 76%);box-shadow:0 0 7px #af8aff}
 .isle-shot-2::after{width:23px;height:10px;background:linear-gradient(#fff2d5 48%,#ff9456 52%);clip-path:polygon(0 30%,25% 30%,25% 0,35% 25%,68% 18%,100% 50%,67% 84%,35% 75%,25% 100%,25% 70%,0 70%)}
+.isle-totem .isle-vital{position:relative;display:grid;place-items:center;width:94%;max-width:128px;height:18px;margin-top:3px;padding:0;box-sizing:border-box;background:#201a32;border:2px solid #e3b965;border-radius:9px;box-shadow:0 0 0 1px #634826,0 2px 4px #20152b}
+.isle-vital::before,.isle-vital::after{content:"";position:absolute;width:6px;height:6px;background:#fff0b4;border:1px solid #926029;transform:rotate(45deg);z-index:1}
+.isle-vital::before{left:-4px}.isle-vital::after{right:-4px}
+.isle-totem .isle-vital progress{appearance:none;-webkit-appearance:none;display:block;width:100%;height:100%;border:0;border-radius:inherit;overflow:hidden;background:#28243c;--fill:linear-gradient(#94edd7,#228c82 50%,#11655e)}
+.isle-vital progress[data-health=worn]{--fill:linear-gradient(#ffe29c,#c18027 50%,#8b571c)!important}
+.isle-vital progress[data-health=low]{--fill:linear-gradient(#ffada7,#ba4857 50%,#832b45)!important}
+.isle-vital progress::-webkit-progress-bar{background:#28243c}.isle-vital progress::-webkit-progress-value{background:var(--fill)}.isle-vital progress::-moz-progress-bar{background:var(--fill)}
+.isle-vital strong{position:absolute;inset:0;text-align:center;color:white;font:800 12px/14px system-ui;font-variant-numeric:tabular-nums;text-shadow:0 1px 2px #151324,0 0 3px #151324;pointer-events:none}
