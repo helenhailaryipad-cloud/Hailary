@@ -732,8 +732,8 @@ const cloudFactions=[
 // Each row places the capital, two strongholds, then three outposts.
 const cloudLayouts={
  2:[
-  [[31,48],[22,26],[22,70],[13,10],[38,12],[31,89]],
-  [[69,48],[78,26],[78,70],[87,10],[62,12],[69,89]]
+  [[78,35],[55,18],[40,39],[19,12],[79,10],[15,35]],
+  [[78,65],[55,82],[40,61],[19,88],[79,90],[15,65]]
  ],
  3:[
   [[17,20],[32,16],[10,34],[43,15],[20,27],[6,43]],
@@ -775,6 +775,7 @@ function cloudBrief(page){
 }
 function cloudDuelMap(nodes){
  const links=[[0,1],[0,2],[1,3],[1,4],[2,5]];
+ const capitalRoad = `<line x1="${nodes[0].x}" y1="${nodes[0].y}" x2="${nodes[6].x}" y2="${nodes[6].y}" stroke="#ffedbd"/>`;
  const roads=[0,6].flatMap(base=>links.map(([from,to])=>{
   const a=nodes[base+from],b=nodes[base+to];
   return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${a.color}"/>`;
@@ -785,7 +786,7 @@ function cloudDuelMap(nodes){
   const label=capital?p.name:p.rank;
   return `<button class="duel-place" data-rank="${p.rank}" style="left:${p.x}%;top:${p.y}%;--banner:${p.color}" aria-label="${p.owner}: ${p.name}, ${p.rank}" onclick="cloudTerritory(${i})"><img src="assets/generated/${art}${i<6?1:2}.webp" alt=""><span>${label}</span>${capital?'<small>'+p.owner+' Capital</small>':''}</button>`;
  }).join('');
- return '<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'+roads+'</svg>'+places;
+ return '<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'+capitalRoad+roads+'</svg>'+places;
 }
 function cityCloudWar(){
  const nodes=cloudTerritories();
