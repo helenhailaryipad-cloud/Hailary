@@ -6279,3 +6279,13 @@ body[data-screen=isleArena] #stage>#main{display:block;inset:0!important;width:1
 .isle-station .isle-totem img{height:11cqh;width:70%;object-fit:contain}
 #stage #main .isle-station button.isle-drop{box-shadow:0 0 0 2px #ffe397}
 .isle-controls{position:relative;z-index:2}
+
+.jungle-screen{width:min(100%,580px);margin:auto;color:#fff4cb}
+.jungle-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem}
+.jungle-heading h1{margin:0}
+.jungle-field{position:relative;width:min(100%,50svh);margin:auto;aspect-ratio:400/540;overflow:hidden;border:2px solid #c9aa66;border-radius:16px;background:#294d39 url(assets/generated/scene-exp.webp) center/cover}
+#trekField{width:100%;height:100%;display:block;touch-action:none}
+.jungle-overlay,.jungle-hud{position:absolute;background:#192e2bea;color:#fff4d0;text-align:center}
+.jungle-overlay{inset:50% auto auto 50%;transform:translate(-50%,-50%);width:84%;padding:1rem;border:1px solid #ccac67;border-radius:13px;display:grid;gap:.55rem}
+.jungle-overlay[hidden]{display:none}.jungle-overlay :is(h2,p){margin:0}
+.jungle-hud{inset:0 0 auto;padding:.4rem;pointer-events:none;font-weight:bold}.jungle-hud:empty{display:none}
