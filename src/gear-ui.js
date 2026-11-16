@@ -740,9 +740,11 @@ const cloudLayouts={
   [[83,20],[68,16],[90,34],[57,15],[80,27],[94,43]],
   [[50,81],[19,68],[81,68],[12,52],[88,52],[67,77]]
  ],
- 4:[[1,1],[-1,1],[1,-1],[-1,-1]].map(([horizontal,vertical])=>
-  [[-13.5,-9],[-12.6,-24.3],[-31.5,-14.4],[-33.3,-36],[-10.8,-36],[-36,-26.1]].map(([x,y])=>
-   [50+horizontal*x,50+vertical*y]))
+ 4:[0,1,3,2].map(turns=>
+  [[-11,-9],[-24,-24],[-26,0],[-36,-35],[-43,0],[-32,-16]].map(([x,y])=>{
+   for(let turn=0;turn<turns;turn++)[x,y]=[-y,x];
+   return [50+x,50+y];
+  }))
 };
 const cloudRanks=['Capital','Stronghold','Stronghold','Outpost','Outpost','Outpost'];
 const cloudDefenders={
@@ -920,29 +922,25 @@ function cloudFourBoard(nodes){
  const route=(a,b,color)=>{
   const start=nodes[a],end=nodes[b];
   const x=start.x*6,y=start.y*8,dx=(end.x-start.x)*6,dy=(end.y-start.y)*8;
-  const sector=Math.floor(a/6);
-  const mirrored=sector===1||sector===2;
-  const localRoad=sector===Math.floor(b/6);
-  const bend=((a+b)%2?.14:-.14)*(localRoad&&mirrored?-1:1);
+  const bend=.055;
   const path=`M ${x} ${y} Q ${x+dx/2-dy*bend} ${y+dy/2+dx*bend} ${x+dx} ${y+dy}`;
   const lit=cloudScore(a)>=80||cloudScore(b)>=80;
   return `<g fill="none" stroke-linecap="round" pointer-events="none">${lit?`<path d="${path}" stroke="#39f4cf" stroke-width="12" opacity=".65" filter="url(#cloudRoadGlow)"/>`:''}<path d="${path}" stroke="${lit?'#54ffe0':color}" opacity="${lit?1:.65}" stroke-width="${lit?5:2.5}"/>${lit?`<path d="${path}" stroke="#e4fff5" stroke-width="1.7"/>`:''}</g>`;
  };
  const roads=[];
- const sectorLinks=[[0,1],[0,2],[1,2],[1,3],[1,4],[2,3],[2,5],[3,4],[3,5]];
- for(const base of [0,6,12,18]){
-  for(const [a,b] of sectorLinks)roads.push(route(base+a,base+b,nodes[base].color));
- }
- // Connect the facing cities, forts and outer islands across each sector boundary.
- for(const [left,right] of [[0,6],[12,18]]){
-  for(const slot of [0,1,4])roads.push(route(left+slot,right+slot,'#ffe7aa'));
- }
- for(const [top,bottom] of [[0,12],[6,18]]){
-  for(const slot of [0,2,5])roads.push(route(top+slot,bottom+slot,'#ffe7aa'));
+ // Repeat the drawn north-west quarter clockwise. Slots are city, corner fort,
+ // side fort, entry island, perimeter island and inner island.
+ const clockwise=[0,6,18,12];
+ for(const [quarter,base] of clockwise.entries()){
+  const next=clockwise[(quarter+1)%4];
+  const local=[[0,1],[0,2],[1,2],[1,5],[2,5],[2,4],[3,4],[3,5]];
+  for(const [a,b] of local)roads.push(route(base+a,base+b,nodes[base].color));
+  const across=[[0,0],[0,2],[1,2],[1,4],[3,4]];
+  for(const [a,b] of across)roads.push(route(base+a,next+b,'#ffe7aa'));
  }
  const ships=cloudFactions.map((faction,sector)=>{
   const first=sector*6+3, island=nodes[first];
-  const x=sector%2?435:165,y=sector<2?64:731;
+  const x=sector%2?552:48,y=sector<2?49:751;
   const endX=island.x*6,endY=island.y*8;
   const trail=`M ${x} ${y} Q ${x} ${(y+endY)/2} ${endX} ${endY}`;
   roads.push(`<g fill="none" stroke-linecap="round"><path d="${trail}" stroke="${island.color}" stroke-width="9" opacity=".5" filter="url(#cloudRoadGlow)"/><path d="${trail}" stroke="${island.color}" stroke-width="4"/><path d="${trail}" stroke="#fff7db" stroke-width="2" stroke-dasharray="2 6"/></g>`);
