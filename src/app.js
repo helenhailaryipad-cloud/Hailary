@@ -146,7 +146,18 @@ function fashionCard(name,icon,selected,click){
 function fashionShowcase({portrait,alt,title,bonus,owned,price,equipped,action,cards,extra=''}){
   const category=fashionCategory;
   const tabs=['Dresses','Hair','Weapons'].map(tab=>`<button aria-pressed="${tab===category}" onclick="changeFashionTab('${tab}')">${tab}</button>`).join('');
-  return `<section class="fashion-showcase" data-category="${category}"><div class="fashion-stage"><div class="fashion-model"><span class="fashion-plumes">${wingArt(fashionWing())}</span><img src="${portrait}" alt="${alt}"></div></div><div class="fashion-detail"><div><h2>${title}</h2><small>${bonus}${bonus?' · ':''}${owned?'Owned':fmt(price)+' gold'}</small></div><button class="primary" ${equipped||(!owned&&S.gold<price)?'disabled':''} onclick="${action}">${equipped?'Equipped':owned?'Equip':'Buy &amp; equip'}</button></div><div class="fashion-picker">${screen==='fashion'?`<div class="fashion-tabs" role="group" aria-label="Fashion categories">${tabs}</div>`:''}<div class="fashion-cards">${cards}</div></div>${extra}</section>`;
+  const current=stats();
+  const active={Dresses:Boolean(currentDress()), Hair:Boolean(wornStyle(styleSets.Hair)), Weapons:Boolean(wornStyle(styleSets.Weapons))};
+  const [key,amount]={Dresses:['defense',WonderGear.fashionTraits.clothing],Hair:['health',WonderGear.fashionTraits.hair],Weapons:['attack',WonderGear.fashionTraits.weapon]}[category];
+  const delta=(Number(Boolean(bonus))-Number(active[category]))*amount;
+  const rows=[['attack','ATK'],['health','HP'],['defense','DEF']].map(([stat,label])=>{
+    const change=stat===key?delta:0;
+    return `<div><span>${label}</span><b>${fmt(current[stat])}</b><em>${change>0?'+'+change:change||''}</em></div>`;
+  }).join('');
+  return `<section class="fashion-showcase" data-category="${category}">
+    <div class="fashion-stage"><div class="fashion-model"><span class="fashion-plumes">${wingArt(fashionWing())}</span><img src="${portrait}" alt="${alt}"></div><span class="fashion-power">${uiIcon('power')} ${fmt(current.power)}</span></div>
+    <div class="fashion-detail"><div class="fashion-values">${rows}</div><div class="fashion-selection"><h2>${title}</h2><small>${bonus?bonus+' · ':''}${owned?'Owned':fmt(price)+' gold'}</small><button class="primary" ${equipped||(!owned&&S.gold<price)?'disabled':''} onclick="${action}">${equipped?'Equipped':owned?'Equip':'Buy &amp; equip'}</button></div></div>
+    <div class="fashion-picker">${screen==='fashion'?`<div class="fashion-tabs" role="group" aria-label="Fashion categories">${tabs}</div>`:''}<div class="fashion-cards">${cards}</div></div>${extra}</section>`;
 }
 function fittingRoom(){
   const selected=clothingPreview??currentDress();
