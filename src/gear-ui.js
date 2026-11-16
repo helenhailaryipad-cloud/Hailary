@@ -783,10 +783,76 @@ function cloudScore(index){
  const damage=S.cloudWarHits?.[index]||[];
  return cloudPortalSlots.reduce((sum,[role],slot)=>sum+(damage[slot]>=cloudEnemyHealth[role]?cloudEnemyScore[role]:0),0);
 }
+const cloudSquads=[['Aeris','Wren'],['Pyra','Flint'],['Selene','Vesper'],['Briar','Rowan']];
+const cloudPatrol=[3,4,2,5,1,0];
+let cloudBotTimer, cloudPlayerDuel=null;
+function cloudBotDamage(index,slot){
+ return S.cloudPatrol?.hits[index]?.[slot]||0;
+}
+function cloudDamage(index,slot){
+ return Math.min(cloudEnemyHealth[cloudPortalSlots[slot][0]],cloudBotDamage(index,slot)+(S.cloudWarHits?.[index]?.[slot]||0));
+}
+function cloudFactionScores(index){
+ const section=Math.floor(index/6),scores=[cloudScore(index),0,0,0];
+ cloudPortalSlots.forEach(([role],slot)=>{
+  if(cloudDamage(index,slot)>=cloudEnemyHealth[role]&&(S.cloudWarHits?.[index]?.[slot]||0)<cloudEnemyHealth[role])scores[section]+=cloudEnemyScore[role];
+ });
+ return scores;
+}
+function cloudOwner(index){
+ return cloudFactionScores(index).findIndex(points=>points>=80);
+}
+function cloudBotTarget(faction){
+ for(const position of cloudPatrol){
+  const index=faction*6+position;
+  if(cloudOwner(index)===faction)continue;
+  for(const slot of [4,1,0,5,2,6,3,7,8,9]){
+   if(cloudDamage(index,slot)<cloudEnemyHealth[cloudPortalSlots[slot][0]]&&cloudPlayerDuel!==index*10+slot)return {index,slot};
+  }
+ }
+ return null;
+}
+function cloudPatrolText(faction,slot){
+ return cloudSquads[faction].join(' & ')+' · Fighting '+cloudPortalSlots[slot][0];
+}
 function cloudCapturePanel(index){
- const score=cloudScore(index);
- if(score>=80)return `<p>Captured · Galewing</p>`;
- return `<p aria-live="polite">Unowned · ${score}/80 territory points</p><p>Choose a defender to enter battle.</p>`;
+ const faction=Math.floor(index/6),scores=cloudFactionScores(index),owner=cloudOwner(index);
+ const target=cloudBotTarget(faction);
+ const points=scores.map((n,i)=>n?cloudFactions[i][0]+' '+n+'/80':'').filter(Boolean).join(' · ');
+ return '<p>'+(owner<0?'Unowned':cloudFactions[owner][0]+' controls this territory')+' · '+(points||'0/80 territory points')+'</p>'+
+  (target?.index===index?'<p>'+cloudPatrolText(faction,target.slot)+'</p>':'');
+}
+function startCloudPatrol(){
+ clearInterval(cloudBotTimer);
+ S.cloudPatrol??={hits:{},last:Date.now()};
+ cloudBotTimer=setInterval(()=>{
+  if(screen!=='cloudWar'||cloudCount!==4){clearInterval(cloudBotTimer);return;}
+  if(document.hidden||Date.now()-S.cloudPatrol.last<6500)return;
+  let moved=false;
+  for(let faction=0;faction<4;faction++){
+   const target=cloudBotTarget(faction);
+   if(!target)continue;
+   const {index,slot}=target;
+   const hits=S.cloudPatrol.hits[index]??=Array(10).fill(0);
+   hits[slot]++;
+   moved=true;
+  }
+  if(!moved)return;
+  S.cloudPatrol.last=Date.now();
+  save();
+  const board=document.querySelector('.cloud-four-board');
+  if(board)board.outerHTML=cloudFourBoard(cloudTerritories());
+  const panel=document.querySelector('[data-patrol-zone]');
+  if(panel){
+   const index=Number(panel.dataset.patrolZone);
+   panel.innerHTML=cloudCapturePanel(index);
+   panel.parentElement.querySelectorAll('.portal-strike').forEach((button,slot)=>{
+    const remaining=cloudEnemyHealth[cloudPortalSlots[slot][0]]-cloudDamage(index,slot);
+    button.disabled=remaining<=0;
+    button.querySelector('progress').value=remaining;
+   });
+  }
+ },1000);
 }
 const cloudChestCounts={Boss:3,Elite:2,Guard:1};
 function cloudChestAmount(role){return cloudChestCounts[role];}
@@ -814,8 +880,9 @@ function cloudStrike(index,slot){
  const defender=cloudPortalSlots[slot],place=cloudTerritories()[index];
  if(screen!=='cloudWar'||cloudCount!==4||!defender||!place)return;
  const [role,,,art]=defender,limit=cloudEnemyHealth[role];
- const previous=S.cloudWarHits?.[index]?.[slot]||0;
+ const previous=cloudDamage(index,slot);
  if(previous>=limit)return;
+ cloudPlayerDuel=index*10+slot;
  const field=$('.cloud-field.map-4');
  const mapOffset=[field.scrollLeft,field.scrollTop];
  $('#modal').close();
@@ -840,6 +907,7 @@ function cloudStrike(index,slot){
  canvas.onclick=strike;
  function returnToTerritory(){
   if(!canvas.isConnected||screen!=='cloudWar')return;
+  cloudPlayerDuel=null;
   cityCloudWar();
   const restored=$('.cloud-field.map-4');
   restored.scrollLeft=mapOffset[0];restored.scrollTop=mapOffset[1];
@@ -900,10 +968,10 @@ function cloudPortalPreview(place,index){
  // Each outer courtyard holds one elite and two guards around its central paving.
  const pads=[[50,32],[26,32],[74,32],[50,58],[14,24],[12,36],[86,24],[88,36],[42,69],[58,69]];
  const defenders=cloudPortalSlots.map(([role,x,y,art],slot)=>cloudCount===4?
-  `<button class="portal-defender portal-strike" aria-label="Fight ${role} in ${place.name}, target ${slot+1}" style="left:${pads[slot][0]}%;top:${pads[slot][1]}%" data-role="${role}" onclick="cloudStrike(${index},${slot})" ${(S.cloudWarHits?.[index]?.[slot]||0)>=cloudEnemyHealth[role]?'disabled':''}><small>${role==='Boss'?'Golden Boss':role}</small>${artImage('guardian-t'+art,role)}<progress max="${cloudEnemyHealth[role]}" value="${cloudEnemyHealth[role]-(S.cloudWarHits?.[index]?.[slot]||0)}"></progress></button>`:
+  `<button class="portal-defender portal-strike" aria-label="Fight ${role} in ${place.name}, target ${slot+1}" style="left:${pads[slot][0]}%;top:${pads[slot][1]}%" data-role="${role}" onclick="cloudStrike(${index},${slot})" ${cloudDamage(index,slot)>=cloudEnemyHealth[role]?'disabled':''}><small>${role==='Boss'?'Golden Boss':role}</small>${artImage('guardian-t'+art,role)}<progress max="${cloudEnemyHealth[role]}" value="${cloudEnemyHealth[role]-cloudDamage(index,slot)}"></progress></button>`:
   `<div class="portal-defender" data-role="${role}" style="left:${x}%;top:${y}%"><small>${role==='Boss'?'Golden Boss':role}</small>${artImage('guardian-t'+art,role)}</div>`
  ).join('');
- return `<section class="cloud-portal-preview"><h2>${place.name}</h2><p>${place.owner} · ${place.rank==='Capital'?'Holy City':place.rank}</p>${cloudCount===4?cloudCapturePanel(index):''}<div class="portal-defenders" ${cloudCount===4?'data-terrain="'+place.rank+'"':''}><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="${paths}"/></svg>${defenders}</div><h3>Defender rewards</h3><div class="cloud-tier-rewards">${['Boss','Elite','Guard'].map(r=>`<span><b>${r==='Boss'?'Golden Boss':r}</b> ${cloudChestAmount(r)} ${r==='Guard'?'chest':'chests'} · ${cloudEnemyScore[r]} points</span>`).join('')}</div><p>Boss personal point pool <b>${rewards.personal}</b></p><small>Personal points are shared by damage dealt.</small><div>${dailyTokens(['hud-prisms','hud-gems',rewards.armor])}</div></section>`;
+ return `<section class="cloud-portal-preview"><h2>${place.name}</h2><p>${place.owner} · ${place.rank==='Capital'?'Holy City':place.rank}</p>${cloudCount===4?'<div data-patrol-zone="'+index+'">'+cloudCapturePanel(index)+'</div>':''}<div class="portal-defenders" ${cloudCount===4?'data-terrain="'+place.rank+'"':''}><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="${paths}"/></svg>${defenders}</div><h3>Defender rewards</h3><div class="cloud-tier-rewards">${['Boss','Elite','Guard'].map(r=>`<span><b>${r==='Boss'?'Golden Boss':r}</b> ${cloudChestAmount(r)} ${r==='Guard'?'chest':'chests'} · ${cloudEnemyScore[r]} points</span>`).join('')}</div><p>Boss personal point pool <b>${rewards.personal}</b></p><small>Personal points are shared by damage dealt.</small><div>${dailyTokens(['hud-prisms','hud-gems',rewards.armor])}</div></section>`;
 }
 function cloudTerritory(index){
  const place=cloudTerritories()[index];
@@ -924,8 +992,10 @@ function cloudFourBoard(nodes){
   const x=start.x*6,y=start.y*8,dx=(end.x-start.x)*6,dy=(end.y-start.y)*8;
   const bend=.055;
   const path=`M ${x} ${y} Q ${x+dx/2-dy*bend} ${y+dy/2+dx*bend} ${x+dx} ${y+dy}`;
-  const lit=cloudScore(a)>=80||cloudScore(b)>=80;
-  return `<g fill="none" stroke-linecap="round" pointer-events="none">${lit?`<path d="${path}" stroke="#39f4cf" stroke-width="12" opacity=".65" filter="url(#cloudRoadGlow)"/>`:''}<path d="${path}" stroke="${lit?'#54ffe0':color}" opacity="${lit?1:.65}" stroke-width="${lit?5:2.5}"/>${lit?`<path d="${path}" stroke="#e4fff5" stroke-width="1.7"/>`:''}</g>`;
+  const owners=[cloudOwner(a),cloudOwner(b)];
+  const captured=owners.find(owner=>owner>=0),lit=captured!==undefined;
+  const glow=captured===0?'#54ffe0':cloudFactions[captured]?.[3];
+  return `<g fill="none" stroke-linecap="round" pointer-events="none">${lit?`<path d="${path}" stroke="${glow}" stroke-width="12" opacity=".65" filter="url(#cloudRoadGlow)"/>`:''}<path d="${path}" stroke="${lit?glow:color}" opacity="${lit?1:.65}" stroke-width="${lit?5:2.5}"/>${lit?`<path d="${path}" stroke="#e4fff5" stroke-width="1.7"/>`:''}</g>`;
  };
  const roads=[];
  // Repeat the drawn north-west quarter clockwise. Slots are city, corner fort,
@@ -946,6 +1016,7 @@ function cloudFourBoard(nodes){
   roads.push(`<g fill="none" stroke-linecap="round"><path d="${trail}" stroke="${island.color}" stroke-width="9" opacity=".5" filter="url(#cloudRoadGlow)"/><path d="${trail}" stroke="${island.color}" stroke-width="4"/><path d="${trail}" stroke="#fff7db" stroke-width="2" stroke-dasharray="2 6"/></g>`);
   return `<g transform="translate(${x} ${y})" role="button" tabindex="0" aria-label="${faction[0]} skyship to ${island.name}" onclick="cloudTerritory(${first})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();cloudTerritory(${first})}" style="cursor:pointer"><rect x="-32" y="-24" width="64" height="54" fill="transparent"/><image href="assets/generated/hud-isle-skyship.webp" x="-24" y="-24" width="48" height="43"/><text y="29" fill="${island.color}" stroke="#152333" stroke-width="3" paint-order="stroke" font-size="11" font-weight="bold">${faction[0]}</text></g>`;
  }).join('');
+ const patrols=cloudFactions.map((_,faction)=>cloudBotTarget(faction));
  const markers=nodes.map((p,i)=>{
   const city=p.rank==='Capital',island=p.rank==='Island';
   const faction=p.owner.toLowerCase();
@@ -956,8 +1027,10 @@ function cloudFourBoard(nodes){
   const label=city?p.name+' · '+p.owner:p.name+' '+p.rank;
   const fontSize=city?10.5:9.5;
   const ribbonWidth=Math.ceil(label.length*fontSize*.57)+9;
+  const sector=Math.floor(i/6),owner=cloudOwner(i),target=patrols[sector];
+  const badge=target?.index===i?cloudPatrolText(sector,target.slot):owner>=0?cloudFactions[owner][0]:'';
   const spriteSize=city?size:Math.round(size*.9);
-  return `<g transform="translate(${p.x*6} ${p.y*8})" role="button" tabindex="0" aria-label="${p.owner}: ${p.name}, ${p.rank}" onclick="cloudTerritory(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();cloudTerritory(${i})}" style="cursor:pointer"><rect x="${-width/2}" y="${-size*.65}" width="${width}" height="${size+24}" fill="transparent"/><image href="assets/generated/${asset}.webp" x="${-spriteSize/2}" y="${size*.3-spriteSize}" width="${spriteSize}" height="${spriteSize}"/><rect x="${-ribbonWidth/2}" y="${size*.3}" width="${ribbonWidth}" height="14" rx="4" fill="#415874" fill-opacity=".65"/><text y="${size*.3+10.4}" fill="#fffdf4" font-size="${fontSize}" font-weight="600">${label}</text></g>`;
+  return `<g transform="translate(${p.x*6} ${p.y*8})" role="button" tabindex="0" aria-label="${p.owner}: ${p.name}, ${p.rank}" onclick="cloudTerritory(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();cloudTerritory(${i})}" style="cursor:pointer"><rect x="${-width/2}" y="${-size*.65}" width="${width}" height="${size+24}" fill="transparent"/><image href="assets/generated/${asset}.webp" x="${-spriteSize/2}" y="${size*.3-spriteSize}" width="${spriteSize}" height="${spriteSize}"/><rect x="${-ribbonWidth/2}" y="${size*.3}" width="${ribbonWidth}" height="14" rx="4" fill="#415874" fill-opacity=".65"/><text y="${size*.3+10.4}" fill="#fffdf4" font-size="${fontSize}" font-weight="600">${label}</text>${badge?`<text y="${size*.3+24}" fill="#fff8dd" stroke="#354355" stroke-width="2.5" paint-order="stroke" font-size="8">${badge}</text>`:''}</g>`;
  }).join('');
  return `<svg class="cloud-four-board" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid meet" role="group" aria-label="Four faction territories" text-anchor="middle" font-family="system-ui"><defs><filter id="cloudRoadGlow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3"/></filter></defs><image href="assets/generated/cloud-war-heavens.webp" width="600" height="800" preserveAspectRatio="xMidYMid slice" pointer-events="none"/><rect width="600" height="800" fill="#416c9a" opacity=".14" pointer-events="none"/>${roads.join('')}${ships}${markers}</svg>`;
 }
@@ -986,6 +1059,8 @@ function cityCloudWar(){
  const markers=nodes.map((p,i)=>`<button class="cloud-place" data-rank="${p.rank}" aria-label="${p.owner}: ${p.name}, ${p.rank}" title="${p.name} · ${p.rank}" style="left:${p.x}%;top:${p.y}%;--banner:${p.color}" onclick="cloudTerritory(${i})"><span class="map-token" aria-hidden="true">${symbols[p.rank]}</span></button>`).join('');
  $('#main').innerHTML='<section class="cloud-war"><div class="cloud-heading"><strong>Cloud War</strong><small>'+ (cloudCount===4?'Daily Carnage Points · 1200':'Battle starts at 19:30')+'</small></div><div class="cloud-field map-'+cloudCount+'"><div class="cloud-map-plane">'+(cloudCount===4?cloudFourBoard(nodes):cloudCount===2?cloudLinkedMap(nodes):markers)+'</div></div><div class="cloud-actions"><button aria-label="Back to city" onclick="go(\'home\')">‹</button>'+(cloudCount===4?`<button onclick="showCloudChests()">Rewards · ${cloudChestTotal()}</button>`:'')+'<button onclick="cloudBrief('+[3,2,4].indexOf(cloudCount)+')">War Guide</button></div></section>';
  if(cloudCount===4){
+  cloudPlayerDuel=null;
+  startCloudPatrol();
   const field=$('.cloud-field.map-4');
   field.scrollLeft=offset?offset[0]:0;
   field.scrollTop=offset?offset[1]:0;
