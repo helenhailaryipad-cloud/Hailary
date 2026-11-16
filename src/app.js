@@ -450,7 +450,6 @@ async function renderStyledPortrait(url,hair,weapon){
   const ctx=c.getContext('2d');
   ctx.translate(Math.round(h*.42-w/2),Math.ceil(h*.08));
   const [skin,hairLayer,dressLayer,bootsLayer,weaponLayer]=await portraitLayers(body,dress?.[1],Boolean(head));
-  if(!bow)ctx.drawImage(weaponLayer,0,0);
   ctx.drawImage(hairLayer,0,0);
   ctx.drawImage(bootsLayer,0,0);
   ctx.drawImage(dressLayer,0,0);
@@ -464,8 +463,12 @@ async function renderStyledPortrait(url,hair,weapon){
     const height=h*(raised ? .47 : .56),width=height*bow.width/bow.height;
     const grip=[.63,.68,.68,.61,.62,.56,.65,.62,.65,.60][weapon-1];
     ctx.save();ctx.translate(gx,gy);ctx.rotate((raised?32:15)*Math.PI/180);ctx.scale(-1,1);
-    ctx.globalCompositeOperation='destination-over';
     ctx.drawImage(bow,-width*grip,-height*.5,width,height);ctx.restore();
+    // Only the hand closes over the grip. The rest of the bow stays in front.
+    ctx.save();ctx.beginPath();ctx.ellipse(gx,gy,h*.024,h*.027,0,0,Math.PI*2);ctx.clip();
+    ctx.drawImage(skin,0,0);ctx.restore();
+  }else{
+    ctx.drawImage(weaponLayer,0,0);
   }
   return new Promise((resolve,reject)=>c.toBlob(blob=>blob?resolve(URL.createObjectURL(blob)):reject(Error('Portrait encoding')),'image/png'));
 }
