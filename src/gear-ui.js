@@ -741,7 +741,7 @@ const cloudLayouts={
   [[50,81],[19,68],[81,68],[12,52],[88,52],[67,77]]
  ],
  4:[[1,1],[-1,1],[1,-1],[-1,-1]].map(([horizontal,vertical])=>
-  [[-18,-12],[-14,-27],[-35,-16],[-37,-40],[-12,-40],[-40,-29]].map(([x,y])=>
+  [[-15,-10],[-14,-27],[-35,-16],[-37,-40],[-12,-40],[-40,-29]].map(([x,y])=>
    [50+horizontal*x,50+vertical*y]))
 };
 const cloudRanks=['Capital','Stronghold','Stronghold','Outpost','Outpost','Outpost'];
