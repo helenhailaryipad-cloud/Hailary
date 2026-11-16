@@ -6411,3 +6411,9 @@ body[data-screen=cloudWar] #stage:has(#main > .cloud-encounter){width:min(100%,7
 .fashion-model>img{position:relative;z-index:1}
 .fashion-plumes{position:absolute;top:5%;left:6%;width:88%;height:66%;pointer-events:none}
 .fashion-categories,.atelier-controls .wing-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin-bottom:12px}
+body[data-screen=fashion]:not([data-playing]) #stage #nav{
+ display:grid;grid-template:1fr/repeat(2,minmax(0,1fr));height:calc(58px + env(safe-area-inset-bottom));padding:5px 8px calc(5px + env(safe-area-inset-bottom));gap:6px
+}
+body[data-screen=fashion] #stage #nav button{width:100%;height:100%;min-height:44px}
+body[data-screen=fashion] #stage #nav [aria-pressed=true]{color:#ffe49e;border-color:#ffdb80}
+body[data-screen=fashion]:not([data-playing]) #stage #main{bottom:calc(58px + env(safe-area-inset-bottom))}
