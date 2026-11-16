@@ -186,7 +186,7 @@ function previewReina(mask){
   reinaAtelier();
 }
 function wearReinaLook(){
-  if(screen!=='fashion')return;
+  if(screen!=='fashion'&&!(screen==='citySkin'&&skinMode==='Appearance'))return;
   const price=reinaLookPrice();
   if(S.gold<price){toast('Not enough gold');return}
   S.gold-=price;
@@ -198,15 +198,16 @@ function wearReinaLook(){
 }
 function reinaAtelier(){
   const price=reinaLookPrice(), equipped=reinaPreview===(S.reinaFashion?.equipped || 0)&&wingPreview===(S.reinaFashion?.wingSkin||'');
-  const tabs=['Clothing','Weapons','Hair','Wings'].map(name=>`<button aria-pressed="${fashionCategory===name}" onclick="fashionCategory='${name}';reinaAtelier()">${name}</button>`).join('');
+  const inSkin=screen==='citySkin';
+  const tabs=['Clothing','Accessories'].map(name=>`<button aria-pressed="${fashionCategory===name}" onclick="fashionCategory='${name}';reinaAtelier()">${name}</button>`).join('');
   const traits=WonderGear.fashionTraits;
   const pieceBonus={1:'+'+traits.hair+' HP',2:'+'+traits.clothing+' Defense',4:'+'+traits.weapon+' Attack'};
   const wings=['',...ITEMS.filter(it=>it.type==='wings').map(it=>it.id)].map(id=>`<button aria-pressed="${wingPreview===id}" onclick="wingPreview='${id}';reinaAtelier()">${id?item(id).name:'Original'}${id?`<small>+${traits.wings} Shield HP · ${wingSkinPrice(id)?fmt(wingSkinPrice(id))+' gold':'Unlocked'}</small>`:''}</button>`).join('');
-  const rows=reinaPieces.filter(p=>p.bit===({Hair:1,Clothing:2,Weapons:4})[fashionCategory]).map(p=>{
+  const rows=reinaPieces.filter(p=>p.bit===({Accessories:1,Clothing:2,Weapons:4})[fashionCategory]).map(p=>{
     const picked=Boolean(reinaPreview & p.bit),owned=p.bit===2?ownsOutfit('moonblossom'):Boolean((S.reinaFashion?.owned || 0) & p.bit);
     return `<fieldset><legend>${p.slot}</legend><div><button aria-pressed="${!picked}" onclick="previewReina(${reinaPreview & ~p.bit})">${p.classic}</button><button aria-pressed="${picked}" onclick="previewReina(${reinaPreview | p.bit})">${p.name}<small>${pieceBonus[p.bit]} · ${owned?'Owned':fmt(p.price)+' gold'}</small></button></div></fieldset>`;
   }).join('');
-  $('#main').innerHTML=`<section class="reina-atelier"><div class="atelier-portrait"><h1>Reina</h1><div class="fashion-model"><span class="fashion-plumes">${wingArt(fashionWing(wingPreview))}</span><img src="${reinaLookPath(false,reinaPreview)}" alt="Reina wearing the selected pieces"></div></div><div class="atelier-controls"><h2>Fashion</h2><nav class="fashion-categories">${tabs}</nav>${fashionCategory==='Clothing'?'<button onclick="wardrobe(\'reina\')">Shared outfits</button>':''}${fashionCategory==='Wings'?'<fieldset><legend>Wing appearance</legend><div class="wing-choices">'+wings+'</div></fieldset>':rows}<div class="atelier-actions"><button onclick="previewReina(7)">Try full set</button><button class="primary" ${equipped||price>S.gold?'disabled':''} onclick="wearReinaLook()">${equipped?'Equipped':price?'Buy &amp; equip · '+fmt(price)+' gold':'Equip'}</button></div>${price>S.gold?'<small>Not enough gold</small>':''}</div></section>`;
+  $('#main').innerHTML=`<section class="reina-atelier"><div class="atelier-portrait"><h1>Reina</h1><div class="fashion-model"><span class="fashion-plumes">${wingArt(fashionWing(wingPreview))}</span><img src="${reinaLookPath(false,reinaPreview)}" alt="Reina wearing the selected pieces"></div></div><div class="atelier-controls"><h2>${inSkin?(fashionCategory==='Wings'?'Wing appearance':'Weapon appearance'):'Fashion'}</h2>${inSkin?`<button onclick="switchSkin(skinTab,'Morphing',skinVariant)">Back to ${skinPages[skinTab].name}</button>`:`<nav class="fashion-categories">${tabs}</nav>`}${fashionCategory==='Clothing'?'<button onclick="wardrobe(\'reina\')">Shared outfits</button>':''}${fashionCategory==='Wings'?'<fieldset><legend>Wing appearance</legend><div class="wing-choices">'+wings+'</div></fieldset>':rows}<div class="atelier-actions"><button class="primary" ${equipped||price>S.gold?'disabled':''} onclick="wearReinaLook()">${equipped?'Equipped':price?'Buy &amp; equip · '+fmt(price)+' gold':'Equip'}</button></div>${price>S.gold?'<small>Not enough gold</small>':''}</div></section>`;
 }
 const fashionSeasons = [
   {hero:'paladin', tier:5}, {hero:'mage', tier:4},
