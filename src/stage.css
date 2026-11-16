@@ -6334,3 +6334,6 @@ body[data-screen=cloudWar] #main>.cloud-war:has(.map-4){position:absolute;inset:
 #stage .cloud-war .map-4 .cloud-map-plane{position:absolute;inset:0;width:auto;height:auto;aspect-ratio:auto;container-type:normal;background:none}
 #stage .map-4 svg.cloud-four-board{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:auto;stroke:none;filter:none}
 #stage .cloud-four-board g:focus-visible rect:first-child{stroke:white;stroke-width:2}
+#stage button.portal-strike,button.portal-strike{position:absolute;padding:0;border:0;background:none;min-width:0;min-height:0}
+.portal-strike:disabled{filter:grayscale(1);opacity:.55}
+.portal-strike progress{width:80%;height:5px;accent-color:#fc8875}

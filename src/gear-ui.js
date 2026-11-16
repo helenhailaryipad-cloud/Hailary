@@ -772,17 +772,39 @@ const cloudPortalSlots=[
  ['Guard',24,14,7],['Guard',24,48,8],['Guard',76,14,9],['Guard',76,48,10],
  ['Guard',34,69,8],['Guard',66,69,7]
 ];
-function cloudPortalPreview(place){
+const cloudEnemyScore={Guard:10,Elite:20,Boss:30};
+const cloudEnemyHealth={Guard:2,Elite:3,Boss:4};
+function cloudScore(index){
+ const damage=S.cloudWarHits?.[index]||[];
+ return cloudPortalSlots.reduce((sum,[role],slot)=>sum+(damage[slot]>=cloudEnemyHealth[role]?cloudEnemyScore[role]:0),0);
+}
+function cloudCapturePanel(index){
+ const score=cloudScore(index);
+ return `<p aria-live="polite">${score>=80?'Captured · Galewing':'Unowned'} · ${score}/80 territory points</p><p>Tap a defender to strike.</p>`;
+}
+function cloudStrike(index,slot){
+ if(screen!=='cloudWar'||cloudCount!==4||!cloudPortalSlots[slot]||!cloudTerritories()[index])return;
+ const role=cloudPortalSlots[slot][0];
+ S.cloudWarHits??={};
+ const hits=S.cloudWarHits[index]??=Array(10).fill(0);
+ if(hits[slot]>=cloudEnemyHealth[role])return;
+ hits[slot]++;
+ save();
+ cityCloudWar();
+ $('#modalBody').innerHTML=cloudPortalPreview(cloudTerritories()[index],index);
+}
+function cloudPortalPreview(place,index){
  const rewards=cloudPortalRewards[place.rank];
  const paths='M50 31 L24 14 L9 31 L24 48 Z M50 31 L76 14 L91 31 L76 48 Z M50 31 V55 M50 55 H34 V69 L50 87 L66 69 V55 Z';
- const defenders=cloudPortalSlots.map(([role,x,y,art])=>
+ const defenders=cloudPortalSlots.map(([role,x,y,art],slot)=>cloudCount===4?
+  `<button class="portal-defender portal-strike" style="left:${x}%;top:${y}%" data-role="${role}" onclick="cloudStrike(${index},${slot})" ${(S.cloudWarHits?.[index]?.[slot]||0)>=cloudEnemyHealth[role]?'disabled':''}><small>${role}</small>${artImage('guardian-t'+art,role)}<progress max="${cloudEnemyHealth[role]}" value="${cloudEnemyHealth[role]-(S.cloudWarHits?.[index]?.[slot]||0)}"></progress></button>`:
   `<div class="portal-defender" data-role="${role}" style="left:${x}%;top:${y}%"><small>${role}</small>${artImage('guardian-t'+art,role)}</div>`
  ).join('');
- return `<section class="cloud-portal-preview"><h2>${place.name}</h2><p>${place.owner} · ${place.rank==='Capital'?'Holy City':place.rank}</p><div class="portal-defenders"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="${paths}"/></svg>${defenders}</div><h3>Boss rewards</h3><p>Territory points <b>30</b> · Personal point pool <b>${rewards.personal}</b></p><small>Personal points are shared by damage dealt.</small><div>${dailyTokens(['hud-prisms','hud-gems',rewards.armor])}</div></section>`;
+ return `<section class="cloud-portal-preview"><h2>${place.name}</h2><p>${place.owner} · ${place.rank==='Capital'?'Holy City':place.rank}</p>${cloudCount===4?cloudCapturePanel(index):''}<div class="portal-defenders"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="${paths}"/></svg>${defenders}</div><h3>Boss rewards</h3><p>Territory points <b>30</b> · Personal point pool <b>${rewards.personal}</b></p><small>Personal points are shared by damage dealt.</small><div>${dailyTokens(['hud-prisms','hud-gems',rewards.armor])}</div></section>`;
 }
 function cloudTerritory(index){
  const place=cloudTerritories()[index];
- if(cloudCount!==3)return modal(cloudPortalPreview(place));
+ if(cloudCount!==3)return modal(cloudPortalPreview(place,index));
  const portraits=cloudDefenders[({Island:"Outpost",Fortress:"Stronghold"})[place.rank]||place.rank].map((role,i)=>'<span>'+artImage('guardian-t'+(7+i),'')+'<small>'+role+'</small></span>').join('');
  modal('<h2>'+place.name+'</h2><p>'+place.rank+' · '+place.owner+'</p><div class="cloud-guards">'+portraits+'</div><h3>Killing Rewards</h3><p>Territory points · 30</p>'+dailyTokens(['hud-prisms','hud-gems','gear-armor-t6']));
 }
@@ -796,7 +818,11 @@ function cloudBrief(page){
 function cloudFourBoard(nodes){
  const route=(a,b,color)=>{
   const start=nodes[a],end=nodes[b];
-  return `<line x1="${start.x*6}" y1="${start.y*8}" x2="${end.x*6}" y2="${end.y*8}" stroke="${color}" stroke-width="3"/>`;
+  const x=start.x*6,y=start.y*8,dx=(end.x-start.x)*6,dy=(end.y-start.y)*8;
+  const bend=(a+b)%2?.14:-.14;
+  const path=`M ${x} ${y} Q ${x+dx/2-dy*bend} ${y+dy/2+dx*bend} ${x+dx} ${y+dy}`;
+  const lit=cloudScore(a)>=80||cloudScore(b)>=80;
+  return `<g fill="none" stroke-linecap="round" pointer-events="none">${lit?`<path d="${path}" stroke="#39f4cf" stroke-width="12" opacity=".65" filter="url(#cloudRoadGlow)"/>`:''}<path d="${path}" stroke="${lit?'#54ffe0':color}" opacity="${lit?1:.65}" stroke-width="${lit?5:2.5}"/>${lit?`<path d="${path}" stroke="#e4fff5" stroke-width="1.7"/>`:''}</g>`;
  };
  const roads=[[0,6],[6,18],[18,12],[12,0]].map(([a,b])=>route(a,b,'#ffe7aa'));
  for(const base of [0,6,12,18]){
@@ -808,7 +834,7 @@ function cloudFourBoard(nodes){
   const size=city?75:island?42:52,label=city?p.name:p.rank,width=city?133:76;
   return `<g transform="translate(${p.x*6} ${p.y*8})" role="button" tabindex="0" aria-label="${p.owner}: ${p.name}, ${p.rank}" onclick="cloudTerritory(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();cloudTerritory(${i})}" style="cursor:pointer"><rect x="${-width/2}" y="${-size*.65}" width="${width}" height="${size+24}" fill="transparent"/><image href="assets/generated/${asset}.webp" x="${-size/2}" y="${-size*.67}" width="${size}" height="${size}"/><rect x="${-width/2}" y="${size*.3}" width="${width}" height="${city?36:19}" rx="5" fill="#192d38" stroke="${p.color}" stroke-width="1.5"/><text x="0" y="${size*.3+14}" fill="#fff3ce" font-size="${city?16:13}" font-weight="bold">${label}</text>${city?`<text y="${size*.3+29}" fill="${p.color}" font-size="12">${p.owner}</text>`:''}</g>`;
  }).join('');
- return `<svg class="cloud-four-board" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid meet" role="group" aria-label="Four faction territories" text-anchor="middle" font-family="system-ui"><image href="assets/generated/scene-realm.webp" width="600" height="800" preserveAspectRatio="xMidYMid slice"/><rect width="600" height="800" fill="#233b4e" opacity=".36"/>${roads.join('')}${markers}</svg>`;
+ return `<svg class="cloud-four-board" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid meet" role="group" aria-label="Four faction territories" text-anchor="middle" font-family="system-ui"><defs><filter id="cloudRoadGlow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3"/></filter></defs><image href="assets/generated/scene-realm.webp" width="600" height="800" preserveAspectRatio="xMidYMid slice"/><rect width="600" height="800" fill="#233b4e" opacity=".36"/>${roads.join('')}${markers}</svg>`;
 }
 function cloudLinkedMap(nodes){
  const links=[[0,1],[0,2],[1,3],[1,4],[2,3],[2,5]];
