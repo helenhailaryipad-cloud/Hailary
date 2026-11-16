@@ -784,18 +784,55 @@ function cloudScore(index){
 function cloudCapturePanel(index){
  const score=cloudScore(index);
  if(score>=80)return `<p>Captured · Galewing</p>`;
- return `<p aria-live="polite">Unowned · ${score}/80 territory points</p><p>Tap a defender to strike.</p>`;
+ return `<p aria-live="polite">Unowned · ${score}/80 territory points</p><p>Choose a defender to enter battle.</p>`;
 }
 function cloudStrike(index,slot){
- if(screen!=='cloudWar'||cloudCount!==4||!cloudPortalSlots[slot]||!cloudTerritories()[index])return;
- const role=cloudPortalSlots[slot][0];
- S.cloudWarHits??={};
- const hits=S.cloudWarHits[index]??=Array(10).fill(0);
- if(hits[slot]>=cloudEnemyHealth[role])return;
- hits[slot]++;
- save();
- cityCloudWar();
- $('#modalBody').innerHTML=cloudPortalPreview(cloudTerritories()[index],index);
+ const defender=cloudPortalSlots[slot],place=cloudTerritories()[index];
+ if(screen!=='cloudWar'||cloudCount!==4||!defender||!place)return;
+ const [role,,,art]=defender,limit=cloudEnemyHealth[role];
+ const previous=S.cloudWarHits?.[index]?.[slot]||0;
+ if(previous>=limit)return;
+ const dialog=$('#modal'),body=$('#modalBody');
+ const max=role==='Boss'?3000:role==='Elite'?2100:1500;
+ let hp=Math.ceil(max*(1-previous/limit)),elapsed=0,nextShot=.15,burstReady=0,last=performance.now();
+ const shots=[],actor={clock:0,heroShotAt:-1,spriteIdle:true};
+ body.innerHTML=`<section class="cloud-encounter"><h2>${place.name} · ${role}</h2><label>${role} HP <b data-enemy-hp></b><progress max="${max}" value="${hp}"></progress></label><canvas width="640" height="420" aria-label="Reina fighting the ${role}"></canvas><p>Reina · 100% HP · Auto-fighting</p><button class="primary" data-burst>Celestial Arrow</button> <button data-exit>Leave battle</button></section>`;
+ const canvas=body.querySelector('canvas'),ctx=canvas.getContext('2d'),burst=body.querySelector('[data-burst]');
+ const bar=body.querySelector('progress'),number=body.querySelector('[data-enemy-hp]');
+ function shoot(damage){
+  actor.heroShotAt=elapsed;
+  shots.push({at:elapsed,damage});
+ }
+ function strike(){
+  if(elapsed<burstReady||hp<=0)return;
+  shoot(90);burstReady=elapsed+6;
+ }
+ burst.onclick=strike;
+ canvas.onclick=strike;
+ body.querySelector('[data-exit]').onclick=()=>{body.innerHTML=cloudPortalPreview(place,index);};
+ function frame(now){
+  if(!dialog.open||!canvas.isConnected||screen!=='cloudWar')return;
+  elapsed+=Math.min(.1,(now-last)/1000);last=now;actor.clock=elapsed;
+  if(elapsed>=nextShot){shoot(100);nextShot=elapsed+.65;}
+  ctx.clearRect(0,0,640,420);
+  drawReina(ctx,actor,140,350,155,220);
+  drawArtSprite(ctx,'guardian-t'+art,486,346+(motionAllowed()?Math.sin(elapsed*3)*3:0),200,245);
+  for(let i=shots.length-1;i>=0;i--){
+   const t=(elapsed-shots[i].at)/.3;
+   if(t>=1){hp=Math.max(0,hp-shots[i].damage);shots.splice(i,1);}
+   else drawGoldenArrow(ctx,170+290*t,234-18*t,54,-.06);
+  }
+  number.textContent=Math.ceil(100*hp/max)+'%';bar.value=hp;
+  burst.disabled=elapsed<burstReady;
+  burst.textContent=burst.disabled?'Celestial Arrow · '+Math.ceil(burstReady-elapsed)+'s':'Celestial Arrow';
+  if(hp>0){requestAnimationFrame(frame);return;}
+  S.cloudWarHits??={};
+  const hits=S.cloudWarHits[index]??=Array(10).fill(0);
+  if(!(hits[slot]>=limit)){hits[slot]=limit;save();}
+  cityCloudWar();
+  body.innerHTML=`<h2>Victory · ${role}</h2><p>+${cloudEnemyScore[role]} territory points</p>`+cloudPortalPreview(place,index);
+ }
+ requestAnimationFrame(frame);
 }
 function cloudPortalPreview(place,index){
  const rewards=cloudPortalRewards[place.rank];
