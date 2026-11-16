@@ -816,7 +816,7 @@ function cloudBrief(page){
  const names=['3-Faction War','2-Faction War','4-Faction War','Twin Sanctum','Four Sanctums'];
  const descriptions=['Three capitals command the sky roads.','Two factions compete for the sky island.','Four factions defend their own capitals.','Four factions contest two holy cities.','Four factions contest four holy cities.'];
  const days=[null,10,14,50,90];
- const body='<h2>'+names[page]+'</h2><p>'+descriptions[page]+'</p>'+(days[page]?'<p>Opens on server day '+days[page]+'</p>':'')+(page===2?'<p>Four Holy Cities share a central road. Each faction has two fortresses and three islands. Follow roads to attack territories of the same or higher tier.</p><p>Daily Carnage Point allowance: 1200. Weekly shop allowance: 80 additional points.</p>':page===1?'<p>Each capital connects to two fortresses guarding three islands.</p>':page<3?'<p>Each faction holds three outposts, two strongholds and one capital.</p>':'')+'<div class="cloud-brief-tabs">'+names.map((n,i)=>'<button aria-pressed="'+(i===page)+'" onclick="cloudBrief('+i+')">'+n+'</button>').join('')+'</div>';
+ const body='<h2>'+names[page]+'</h2><p>'+descriptions[page]+'</p>'+(days[page]?'<p>Opens on server day '+days[page]+'</p>':'')+(page===2?'<p>Neighboring islands, fortresses and Holy Cities are connected by roads, including across faction borders. Each faction has two fortresses and three islands. Follow roads to attack territories of the same or higher tier.</p><p>Daily Carnage Point allowance: 1200. Weekly shop allowance: 80 additional points.</p>':page===1?'<p>Each capital connects to two fortresses guarding three islands.</p>':page<3?'<p>Each faction holds three outposts, two strongholds and one capital.</p>':'')+'<div class="cloud-brief-tabs">'+names.map((n,i)=>'<button aria-pressed="'+(i===page)+'" onclick="cloudBrief('+i+')">'+n+'</button>').join('')+'</div>';
  if($('#modal').open)$('#modalBody').innerHTML=body;else modal(body);
 }
 function cloudFourBoard(nodes){
@@ -831,9 +831,17 @@ function cloudFourBoard(nodes){
   const lit=cloudScore(a)>=80||cloudScore(b)>=80;
   return `<g fill="none" stroke-linecap="round" pointer-events="none">${lit?`<path d="${path}" stroke="#39f4cf" stroke-width="12" opacity=".65" filter="url(#cloudRoadGlow)"/>`:''}<path d="${path}" stroke="${lit?'#54ffe0':color}" opacity="${lit?1:.65}" stroke-width="${lit?5:2.5}"/>${lit?`<path d="${path}" stroke="#e4fff5" stroke-width="1.7"/>`:''}</g>`;
  };
- const roads=[[0,6],[6,18],[18,12],[12,0]].map(([a,b])=>route(a,b,'#ffe7aa'));
+ const roads=[];
+ const sectorLinks=[[0,1],[0,2],[1,2],[1,3],[1,4],[2,3],[2,5],[3,4],[3,5]];
  for(const base of [0,6,12,18]){
-  for(const [a,b] of [[0,1],[0,2],[1,3],[1,4],[2,3],[2,5]])roads.push(route(base+a,base+b,nodes[base].color));
+  for(const [a,b] of sectorLinks)roads.push(route(base+a,base+b,nodes[base].color));
+ }
+ // Connect the facing cities, forts and outer islands across each sector boundary.
+ for(const [left,right] of [[0,6],[12,18]]){
+  for(const slot of [0,1,4])roads.push(route(left+slot,right+slot,'#ffe7aa'));
+ }
+ for(const [top,bottom] of [[0,12],[6,18]]){
+  for(const slot of [0,2,5])roads.push(route(top+slot,bottom+slot,'#ffe7aa'));
  }
  const markers=nodes.map((p,i)=>{
   const city=p.rank==='Capital',island=p.rank==='Island';
