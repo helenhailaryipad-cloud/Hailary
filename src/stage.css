@@ -6370,14 +6370,14 @@ body[data-screen=cloudWar] #main>.cloud-war:has(.map-4){position:absolute;inset:
 .portal-defenders[data-terrain] .portal-defender:disabled{filter:grayscale(1);opacity:.65}
 
 /* Territory and encounter share a compact native dialog over the world map. */
-#stage #modal[open]:has(.cloud-portal-preview,.cloud-encounter){
-  position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(86vw,490px);
+#stage #modal[open]:has(.cloud-portal-preview){
+  position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(88vw,640px);
   height:fit-content;max-height:83dvh;padding:14px 12px 12px;
   border:2px solid #d6bd83;border-radius:19px;
   background:linear-gradient(155deg,#294765,#16314c 65%,#224765);
   box-shadow:0 12px 48px #112137a6;
 }
-#stage #modal:has(.cloud-portal-preview,.cloud-encounter)::backdrop{
+#stage #modal:has(.cloud-portal-preview)::backdrop{
   background:rgb(13 29 43 / 41%);backdrop-filter:none;
 }
 #modal :is(.cloud-portal-preview,.cloud-encounter) h2{
@@ -6385,12 +6385,24 @@ body[data-screen=cloudWar] #main>.cloud-war:has(.map-4){position:absolute;inset:
 }
 #modal .cloud-portal-preview :is(p,h3){margin:4px 0;font-size:clamp(12px,2vw,16px);line-height:1.25}
 #modal .cloud-portal-preview small{font-size:12px}
-#modal .cloud-portal-preview .portal-defenders[data-terrain]{width:min(100%,45dvh);margin:8px auto}
-#modal .portal-strike::before{
-  content:"";position:absolute;inset:32% -20% 1%;z-index:-1;border-radius:48%;
-  background:var(--arena-art) center 70% / cover;border:1px solid #ddcc9a;
-  box-shadow:0 3px 0 #43545b,0 5px 5px #192d4280;
+#modal .cloud-portal-preview .portal-defenders[data-terrain]{width:min(100%,54dvh);margin:8px auto}
+
+#stage #modal .portal-defenders[data-terrain] > button.portal-strike{
+  position:absolute!important;display:grid;margin:0;padding:0;transform:translate(-50%,-50%)!important;
+  width:9%;height:auto;min-height:0;min-width:0;line-height:1;gap:0;
+  background:transparent;border:0;box-shadow:none;
 }
-#modal .cloud-battlefield canvas{
-  background:linear-gradient(#21375222,#253c522e),var(--arena-art) center / 100% 100% no-repeat,#69859b;
+#stage #modal .portal-strike[data-role=Boss]{width:13%!important}
+#stage #modal .portal-strike small{font-size:clamp(8px,1.2vw,12px);line-height:1}
+#stage #main:has(>.cloud-encounter){position:absolute;inset:0;display:block;padding:0;overflow:auto}
+#stage .cloud-encounter{
+  box-sizing:border-box;min-height:100%;display:grid;align-content:center;justify-items:center;
+  gap:8px;padding:clamp(36px,7vh,72px) 3% 20px;color:white;text-align:center;
+  background:linear-gradient(#152a41bd,#152a41d9),var(--arena-art) center/cover;
 }
+#stage .cloud-encounter h2,#stage .cloud-encounter p{margin:0}
+#stage .cloud-encounter label,#stage .cloud-encounter .cloud-battlefield{width:min(100%,90dvh)}
+.cloud-battlefield canvas{background:linear-gradient(#21375222,#253c522e),var(--arena-art) center / 100% 100% no-repeat,#69859b}
+.cloud-encounter .cloud-loot-stack{display:block;position:relative;width:clamp(64px,13vw,115px);margin:auto}
+.cloud-encounter .cloud-loot-stack img{width:100%;display:block}
+.cloud-encounter .cloud-loot-stack strong{position:absolute;bottom:0;right:0;background:#392737;border-radius:8px;padding:0 6px}
