@@ -9,7 +9,7 @@ function equippedRanger(){
  const armor=gear?.items.find(entry=>entry.uid===gear.equipped.armor);
  return ({'armor-t3':'reina-t3','armor-t4':'reina-t3','armor-t5':'reina-t5','armor-t6':'reina-t5','armor-t7':'reina-t5','armor-t8':'reina-t8'})['armor-t'+(armor?WonderGear.artTier(WonderGear.catalog[armor.template].tier):1)] || 'reina';
 }
-function artPath(id){return id==='reina'?'assets/ranger-cartoon.webp':'assets/generated/'+id+'.webp';}
+function artPath(id){return id==='reina'?'assets/ranger-cartoon.webp':'assets/generated/'+(/^(?:look-(?:stand|ride)-[1-7]|parts-(?:stand|ride))$/.test(id)?'skin2-':'')+id+'.webp';}
 function artImage(id,alt='',cls=''){return `<img class="generated-image ${cls}" src="${artPath(id)}" alt="${alt}" loading="lazy" decoding="async">`;}
 function sectionArtwork(id,alt){return `<div class="section-artwork">${artImage(id,alt)}</div>`;}
 function uiIcon(name,cls=''){const group=name in UTILITY_ICONS?'utility':name in STAT_ICONS?'stat':'main',n=group==='utility'?UTILITY_ICONS[name]:group==='stat'?STAT_ICONS[name]:ART_ICON_INDEX[name]??5;return `<span class="gpt-icon icon-${group} ${cls}" style="--art-col:${n%4};--art-row:${Math.floor(n/4)}" aria-hidden="true"></span>`;}
