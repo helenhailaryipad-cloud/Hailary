@@ -873,10 +873,20 @@ function cloudLinkedMap(nodes){
  return '<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">'+capitalRoad+roads+'</svg>'+places;
 }
 function cityCloudWar(){
+ const previous=$('.cloud-field.map-4');
+ const offset=previous&&[previous.scrollLeft,previous.scrollTop];
  const nodes=cloudTerritories();
  const symbols={Capital:'♛',Stronghold:'♜',Outpost:'⚑'};
  const markers=nodes.map((p,i)=>`<button class="cloud-place" data-rank="${p.rank}" aria-label="${p.owner}: ${p.name}, ${p.rank}" title="${p.name} · ${p.rank}" style="left:${p.x}%;top:${p.y}%;--banner:${p.color}" onclick="cloudTerritory(${i})"><span class="map-token" aria-hidden="true">${symbols[p.rank]}</span></button>`).join('');
  $('#main').innerHTML='<section class="cloud-war"><div class="cloud-heading"><strong>Cloud War</strong><small>'+ (cloudCount===4?'Daily Carnage Points · 1200':'Battle starts at 19:30')+'</small></div><div class="cloud-tabs" role="group" aria-label="Faction count">'+[2,3,4].map(n=>'<button aria-pressed="'+(cloudCount===n)+'" onclick="cloudCount='+n+';cityCloudWar()">'+n+' Factions</button>').join('')+'</div><div class="cloud-field map-'+cloudCount+'"><div class="cloud-map-plane">'+(cloudCount===4?cloudFourBoard(nodes):cloudCount===2?cloudLinkedMap(nodes):markers)+'</div></div><div class="cloud-actions"><button aria-label="Back to city" onclick="go(\'home\')">‹</button>'+(cloudCount===4?cloudRouteButton():'')+'<button onclick="cloudBrief('+[3,2,4].indexOf(cloudCount)+')">War Guide</button></div></section>';
+ if(cloudCount===4){
+  const field=$('.cloud-field.map-4');
+  const board=field.firstElementChild;
+  const target=nodes[cloudNextPortal()??0];
+  field.scrollLeft=offset?offset[0]:board.offsetWidth*target.x/100-field.clientWidth/2;
+  field.scrollTop=offset?offset[1]:board.offsetHeight*target.y/100-field.clientHeight/2;
+ }
+
 }
 
 let eliteTab=0,eliteHero='reina';
