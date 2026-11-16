@@ -6350,3 +6350,8 @@ body[data-screen=cloudWar] #main>.cloud-war:has(.map-4){position:absolute;inset:
 #modal .cloud-loot-stack{position:relative;display:block;width:min(155px,46vw);margin:16px auto}
 #modal .cloud-loot-stack img{display:block;width:100%;height:auto;filter:drop-shadow(0 4px 9px #805a28)}
 #modal .cloud-loot-stack strong{position:absolute;bottom:0;right:0;border-radius:10px;padding:2px 9px;background:#392737;color:#ffe9a2;font-size:22px}
+.cloud-battlefield{position:relative;isolation:isolate}
+.cloud-floating-loot{position:absolute;z-index:1;top:4%;left:50%;transform:translateX(-50%);width:max-content;max-width:95%;text-align:center;pointer-events:none;color:#fff1ba;text-shadow:0 2px 4px #291822,0 0 2px #291822}
+#modal .cloud-floating-loot .cloud-loot-stack{width:clamp(54px,10vw,96px);margin:0 auto 3px}
+.cloud-floating-loot>strong{padding:.12em .55em;border-radius:1em;background:#302239dc}
+@media(prefers-reduced-motion:no-preference){.cloud-floating-loot{animation:cloud-loot-rise 3.2s ease-out both}@keyframes cloud-loot-rise{0%{opacity:0;transform:translate(-50%,28px) scale(.78)}12%,83%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,-10px)}}}

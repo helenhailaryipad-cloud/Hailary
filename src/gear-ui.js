@@ -818,7 +818,7 @@ function cloudStrike(index,slot){
  const max=role==='Boss'?3000:role==='Elite'?2100:1500;
  let hp=Math.ceil(max*(1-previous/limit)),elapsed=0,nextShot=.15,burstReady=0,last=performance.now();
  const shots=[],actor={clock:0,heroShotAt:-1,spriteIdle:true};
- body.innerHTML=`<section class="cloud-encounter"><h2>${place.name} · ${role}</h2><label>${role} HP <b data-enemy-hp></b><progress max="${max}" value="${hp}"></progress></label><canvas width="640" height="420" aria-label="Reina fighting the ${role}"></canvas><p>Reina · 100% HP · Auto-fighting</p><button class="primary" data-burst>Celestial Arrow</button> <button data-exit>Leave battle</button></section>`;
+ body.innerHTML=`<section class="cloud-encounter"><h2>${place.name} · ${role}</h2><label>${role} HP <b data-enemy-hp></b><progress max="${max}" value="${hp}"></progress></label><div class="cloud-battlefield"><canvas width="640" height="420" aria-label="Reina fighting the ${role}"></canvas></div><p data-status>Reina · 100% HP · Auto-fighting</p><button class="primary" data-burst>Celestial Arrow</button> <button data-exit>Leave battle</button></section>`;
  const canvas=body.querySelector('canvas'),ctx=canvas.getContext('2d'),burst=body.querySelector('[data-burst]');
  const bar=body.querySelector('progress'),number=body.querySelector('[data-enemy-hp]');
  function shoot(damage){
@@ -853,11 +853,13 @@ function cloudStrike(index,slot){
   const hits=S.cloudWarHits[index]??=Array(10).fill(0);
   if(!(hits[slot]>=limit)){hits[slot]=limit;save();}
   cityCloudWar();
-  body.innerHTML=`<section class="cloud-boss-prize" aria-labelledby="cloud-prize-title"><h2 id="cloud-prize-title">Victory rewards</h2>${cloudChestDisplay(cloudChestAmount(role))}<p>+${cloudEnemyScore[role]} territory points</p><button class="primary" data-continue>Continue</button></section>`;
-  dialog.scrollTop=body.scrollTop=0;
-  const next=body.querySelector('[data-continue]');
-  next.onclick=()=>{body.innerHTML=cloudPortalPreview(place,index);};
-  next.focus({preventScroll:true});
+  burst.disabled=true;
+  canvas.onclick=null;
+  body.querySelector('[data-status]').textContent='Victory';
+  canvas.parentElement.insertAdjacentHTML('beforeend',`<div class="cloud-floating-loot" role="status">${cloudChestDisplay(cloudChestAmount(role))}<strong>+${cloudEnemyScore[role]} territory points</strong></div>`);
+  setTimeout(()=>{
+   if(dialog.open&&canvas.isConnected&&screen==='cloudWar')body.innerHTML=cloudPortalPreview(place,index);
+  },3200);
  }
  requestAnimationFrame(frame);
 }
