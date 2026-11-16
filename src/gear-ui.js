@@ -762,7 +762,7 @@ function cloudTerritories(){
  return cloudLayouts[cloudCount].flatMap((points,i)=>{
   const [owner,capital,fort,color]=cloudFactions[i];
   const names=cloudCount===4?cloudSectorNames[i]:cloudCount===2?[capital,fort+' Fortress',owner+' Fortress',...(i===0?['Snowpeak Island','Winddance Island','Thunderstone Island']:['Snowfox Island','Firebird Island','Sunrise Island'])]:[capital,fort,owner+' Keep',owner+' Lookout',owner+' Camp',owner+' Gate'];
-  return points.map(([x,y],j)=>({owner,color,x,y,name:names[j],rank:(cloudCount!==3?duelRanks:cloudRanks)[j]}));
+  return points.map(([x,y],j)=>({owner,color:cloudCount===4&&i===0?'#ffdb70':color,x,y,name:names[j],rank:(cloudCount!==3?duelRanks:cloudRanks)[j]}));
  });
 }
 const cloudPortalRewards={
@@ -849,7 +849,10 @@ function cloudFourBoard(nodes){
  }
  const markers=nodes.map((p,i)=>{
   const city=p.rank==='Capital',island=p.rank==='Island';
-  const asset='cloud-sky-'+(city?cloudFactions[Math.floor(i/6)][0].toLowerCase():island?'isle':'fort');
+  const faction=p.owner.toLowerCase();
+  const castle=faction==='galewing'?'galewing-gold':faction;
+  const fort=faction==='galewing'?'fort':'fort-'+faction;
+  const asset='cloud-sky-'+(city?castle:island?'isle':fort);
   const size=city?100:island?48:65,label=p.name,width=city?133:82;
   return `<g transform="translate(${p.x*6} ${p.y*8})" role="button" tabindex="0" aria-label="${p.owner}: ${p.name}, ${p.rank}" onclick="cloudTerritory(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();cloudTerritory(${i})}" style="cursor:pointer">${i===next?`<ellipse rx="${size*.63}" ry="${size*.45}" cy="${-size*.14}" fill="#ffc94d" fill-opacity=".12" stroke="#ffe195" stroke-width="3"/><rect x="-47" y="${-size*.68-21}" width="94" height="22" rx="11" fill="#ffe195"/><text y="${-size*.68-5}" fill="#362911" font-size="14" font-weight="800">${i===3?'START HERE':'NEXT STOP'}</text>`:''}<rect x="${-width/2}" y="${-size*.65}" width="${width}" height="${size+24}" fill="transparent"/><image href="assets/generated/${asset}.webp" x="${-size/2}" y="${-size*.67}" width="${size}" height="${size}"/><rect x="${-width/2}" y="${size*.3}" width="${width}" height="36" rx="5" fill="#192d38" stroke="${p.color}" stroke-width="1.5"/><text x="0" y="${size*.3+14}" fill="#fff3ce" font-size="${city?16:13}" font-weight="bold">${label}</text><text y="${size*.3+29}" fill="${p.color}" font-size="12">${city?p.owner:p.rank}</text></g>`;
  }).join('');
