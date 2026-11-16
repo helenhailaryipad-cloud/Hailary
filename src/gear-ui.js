@@ -485,6 +485,7 @@ function skinArtwork(page,variant){
  return artImage(id,page.title);
 }
 function openSkinAppearance(){
+  stylePick=null;
   fashionCategory=skinTab===0?'Wings':'Weapons';
   reinaPreview=S.reinaFashion?.equipped||0;
   wingPreview=S.reinaFashion?.wingSkin||'';

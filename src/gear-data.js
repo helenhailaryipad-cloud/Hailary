@@ -165,9 +165,9 @@ function trainPet(s,id){
 const fashionTraits=Object.freeze({hair:30,clothing:5,weapon:6,wings:12});
 function stats(save){const b=bonuses(save);
  const look=save.reinaFashion?.equipped||0;
- if(look&1)b.health=(b.health||0)+fashionTraits.hair;
+ if((look&1)||save.atelier?.hair)b.health=(b.health||0)+fashionTraits.hair;
  if(look&2)b.defense=(b.defense||0)+fashionTraits.clothing;
- if(look&4)b.attack=(b.attack||0)+fashionTraits.weapon;
+ if((look&4)||save.atelier?.weapon)b.attack=(b.attack||0)+fashionTraits.weapon;
  if(['w0','w1','w2','w3'].includes(save.reinaFashion?.wingSkin))b.shieldHealth=(b.shieldHealth||0)+fashionTraits.wings;
  const bowBonus=['roseguard','starfall','lilyveil','emberleaf'].reduce((total,id)=>{
    const rank=save.fashionBows?.[id];

@@ -29,6 +29,27 @@ for(const dress of reinaDresses){
   if(!reinaLookPath(true).includes('ride-2.webp#dress-'+dress.id))throw Error('Mounted outfit');
 }
 S=defaults();
+S=defaults();S.gold=30000;openScreen('fashion');
+if(!['Dresses','Hair','Weapons'].every(tab=>document.querySelector('#nav').innerHTML.includes('>'+tab+'<')))throw Error('Fashion tabs');
+wearOutfit('reina','pearl',false);
+for(const category of ['Hair','Weapons']){
+  changeFashionTab(category);
+  const set=styleSets[category];
+  if(set.names.length!==10)throw Error('Missing fashion styles');
+  for(let n=1;n<=10;n++){
+    stylePick=n;
+    const before=S.gold;
+    if(!styleFittingRoom(set).includes(set.names[n-1]))throw Error('Style preview');
+    wearStyle();wearStyle();
+    if(S.gold!==before-set.price||currentDress()!=='pearl'||wornStyle(set)!==n)throw Error('Independent style purchase');
+  }
+}
+if(!reinaLookPath(false).includes('atelier-pearl.webp#atelier-10-10'))throw Error('Combined outfit');
+S=normalizeAdventure(JSON.parse(JSON.stringify(S)));
+if(!valid(S)||S.atelier.hair!==10||S.atelier.weapon!==10)throw Error('Style persistence');
+changeFashionTab('Hair');stylePick=0;wearStyle();
+if(S.atelier.weapon!==10||currentDress()!=='pearl'||S.atelier.hair!==0)throw Error('Independent reset');
+S=defaults();
 const namedLegacy={...defaults(),name:'Reyna',gold:1234,xp:456};const legacyBefore=JSON.stringify({...namedLegacy,name:'REINA'});normalizeAdventure(namedLegacy);if(JSON.stringify(namedLegacy)!==legacyBefore)throw Error('Name correction must preserve progress');if(normalizeAdventure({...defaults(),name:'Nyra'}).name!=='Nyra')throw Error('Keep custom hero names');if(comparable({...defaults(),name:'REINA'})!==comparable(normalizeAdventure({...defaults(),name:'Reyna'})))throw Error('Name correction must not create cloud conflict');
 S=defaults();home();const progressBeforeIntro=JSON.stringify(S);const introPrefs=new Map(),originalGet=localStorage.getItem,originalSet=localStorage.setItem;localStorage.getItem=k=>introPrefs.get(k)||null;localStorage.setItem=(k,v)=>introPrefs.set(k,String(v));chooseIntro('2d');if(storedIntroStyle()!=='2d'||screen!=='home'||document.querySelector('#main').innerHTML.includes('id="intro3d"')||JSON.stringify(S)!==progressBeforeIntro)throw Error('2D return preserves adventure');openScreen('intro');chooseIntro('3d');if(storedIntroStyle()!=='2d'||screen!=='home'||document.querySelector('#main').innerHTML.includes('id="intro3d"')||JSON.stringify(S)!==progressBeforeIntro)throw Error('Retired 3D preference must return to 2D and preserve adventure');localStorage.getItem=originalGet;localStorage.setItem=originalSet;
 S=defaults();S.tickets=100000;const initial=S.tickets;
