@@ -6394,6 +6394,7 @@ body[data-screen=cloudWar] #main>.cloud-war:has(.map-4){position:absolute;inset:
 }
 #stage #modal .portal-strike[data-role=Boss]{width:13%!important}
 #stage #modal .portal-strike small{font-size:clamp(8px,1.2vw,12px);line-height:1}
+body[data-screen=cloudWar] #stage:has(#main > .cloud-encounter){width:min(100%,74dvh)}
 #stage #main:has(>.cloud-encounter){position:absolute;inset:0;display:block;padding:0;overflow:auto}
 #stage .cloud-encounter{
   box-sizing:border-box;min-height:100%;display:grid;align-content:center;justify-items:center;
