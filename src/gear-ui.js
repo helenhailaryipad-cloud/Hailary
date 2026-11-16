@@ -954,9 +954,12 @@ function cloudFourBoard(nodes){
   const castle=faction==='galewing'?'larkspire':faction;
   const variant=['','gate','tower','grove','crystal','spring'][i%6];
   const asset=city?'cloud-sky-'+castle:'cloud-'+faction+'-'+variant;
-  const size=city?100:island?48:65,label=p.name,width=city?133:82;
+  const size=city?100:island?48:65,width=city?133:82;
+  const label=city?p.name+' · '+p.owner:p.name+' '+p.rank;
+  const fontSize=city?10.5:9.5;
+  const ribbonWidth=Math.ceil(label.length*fontSize*.57)+9;
   const spriteSize=city?size:Math.round(size*.9);
-  return `<g transform="translate(${p.x*6} ${p.y*8})" role="button" tabindex="0" aria-label="${p.owner}: ${p.name}, ${p.rank}" onclick="cloudTerritory(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();cloudTerritory(${i})}" style="cursor:pointer"><rect x="${-width/2}" y="${-size*.65}" width="${width}" height="${size+24}" fill="transparent"/><image href="assets/generated/${asset}.webp" x="${-spriteSize/2}" y="${size*.3-spriteSize}" width="${spriteSize}" height="${spriteSize}"/><rect x="${-width/2}" y="${size*.3}" width="${width}" height="36" rx="5" fill="#192d38" stroke="${p.color}" stroke-width="1.5"/><text x="0" y="${size*.3+14}" fill="#fff3ce" font-size="${city?16:13}" font-weight="bold">${label}</text><text y="${size*.3+29}" fill="${p.color}" font-size="12">${city?p.owner:p.rank}</text></g>`;
+  return `<g transform="translate(${p.x*6} ${p.y*8})" role="button" tabindex="0" aria-label="${p.owner}: ${p.name}, ${p.rank}" onclick="cloudTerritory(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();cloudTerritory(${i})}" style="cursor:pointer"><rect x="${-width/2}" y="${-size*.65}" width="${width}" height="${size+24}" fill="transparent"/><image href="assets/generated/${asset}.webp" x="${-spriteSize/2}" y="${size*.3-spriteSize}" width="${spriteSize}" height="${spriteSize}"/><rect x="${-ribbonWidth/2}" y="${size*.3}" width="${ribbonWidth}" height="14" rx="4" fill="#415874" fill-opacity=".65"/><text y="${size*.3+10.4}" fill="#fffdf4" font-size="${fontSize}" font-weight="600">${label}</text></g>`;
  }).join('');
  return `<svg class="cloud-four-board" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid meet" role="group" aria-label="Four faction territories" text-anchor="middle" font-family="system-ui"><defs><filter id="cloudRoadGlow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3"/></filter></defs><image href="assets/generated/cloud-war-heavens.webp" width="600" height="800" preserveAspectRatio="xMidYMid slice" pointer-events="none"/><rect width="600" height="800" fill="#416c9a" opacity=".14" pointer-events="none"/>${roads.join('')}${ships}${markers}</svg>`;
 }
