@@ -6355,3 +6355,7 @@ body[data-screen=cloudWar] #main>.cloud-war:has(.map-4){position:absolute;inset:
 #modal .cloud-floating-loot .cloud-loot-stack{width:clamp(54px,10vw,96px);margin:0 auto 3px}
 .cloud-floating-loot>strong{padding:.12em .55em;border-radius:1em;background:#302239dc}
 @media(prefers-reduced-motion:no-preference){.cloud-floating-loot{animation:cloud-loot-rise 3.2s ease-out both}@keyframes cloud-loot-rise{0%{opacity:0;transform:translate(-50%,28px) scale(.78)}12%,83%{opacity:1;transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,-10px)}}}
+.portal-defender[data-role=Boss]{width:16%;z-index:1}
+.portal-defender[data-role=Boss] img{border:3px solid #ffd75a;background:radial-gradient(#9d712b,#492f26);box-shadow:0 0 8px #ffc844}
+.portal-defender[data-role=Boss] small{background:#5a370d;color:#ffe28a;white-space:nowrap}
+.cloud-tier-rewards{display:grid;gap:4px;text-align:center}

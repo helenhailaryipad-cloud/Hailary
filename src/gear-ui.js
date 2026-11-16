@@ -786,7 +786,8 @@ function cloudCapturePanel(index){
  if(score>=80)return `<p>Captured · Galewing</p>`;
  return `<p aria-live="polite">Unowned · ${score}/80 territory points</p><p>Choose a defender to enter battle.</p>`;
 }
-function cloudChestAmount(role){return role==='Boss'?2:1;}
+const cloudChestCounts={Boss:3,Elite:2,Guard:1};
+function cloudChestAmount(role){return cloudChestCounts[role];}
 function cloudChestTotal(){
  return Object.values(S.cloudWarHits||{}).reduce((total,hits)=>total+cloudPortalSlots.reduce((n,[role],slot)=>n+(hits?.[slot]>=cloudEnemyHealth[role]?cloudChestAmount(role):0),0),0);
 }
@@ -813,9 +814,10 @@ function cloudStrike(index,slot){
  const dialog=$('#modal'),body=$('#modalBody');
  const max=role==='Boss'?3000:role==='Elite'?2100:1500;
  let hp=Math.ceil(max*(1-previous/limit)),elapsed=0,nextShot=.15,burstReady=0,last=performance.now();
+ const orbDamage=role==='Boss'?2:1;
  let heroHP=100,nextOrb=2,orbStart=null,lastHit=-2;
  const shots=[],actor={clock:0,heroShotAt:-1,spriteIdle:true};
- body.innerHTML=`<section class="cloud-encounter"><h2>${place.name} · ${role}</h2><label>${role} HP <b data-enemy-hp></b><progress max="${max}" value="${hp}"></progress></label><div class="cloud-battlefield"><canvas width="640" height="420" aria-label="Reina fighting the ${role}"></canvas></div><p data-status>Reina · 100% HP · Auto-fighting</p><button class="primary" data-burst>Celestial Arrow</button> <button data-exit>Leave battle</button></section>`;
+ body.innerHTML=`<section class="cloud-encounter"><h2>${place.name} · ${role==='Boss'?'Golden Boss':role}</h2><label>${role} HP <b data-enemy-hp></b><progress max="${max}" value="${hp}"></progress></label><div class="cloud-battlefield"><canvas width="640" height="420" aria-label="Reina fighting the ${role}"></canvas></div><p data-status>Reina · 100% HP · Auto-fighting</p><button class="primary" data-burst>Celestial Arrow</button> <button data-exit>Leave battle</button></section>`;
  const canvas=body.querySelector('canvas'),ctx=canvas.getContext('2d'),burst=body.querySelector('[data-burst]');
  const bar=body.querySelector('progress'),number=body.querySelector('[data-enemy-hp]');
  function shoot(damage){
@@ -836,25 +838,26 @@ function cloudStrike(index,slot){
   ctx.clearRect(0,0,640,420);
   cloudArenaFloor(ctx);
   drawReina(ctx,actor,140,368,155,220);
+  ctx.save();
+  if(role==='Boss'){ctx.shadowColor='#ffd361';ctx.shadowBlur=13;}
   drawArtSprite(ctx,'guardian-t'+art,486,369,200,245);
-  if(role==='Boss'){
-   if(elapsed>=nextOrb){orbStart=elapsed;nextOrb=elapsed+3.5;}
-   if(orbStart!==null){
-    const t=(elapsed-orbStart)/.8;
-    if(t>=1){
-     heroHP-=2;lastHit=elapsed;orbStart=null;
-     body.querySelector('[data-status]').textContent='Reina · '+heroHP+'% HP · Auto-fighting';
-    }else{
-     const x=458-314*t,y=226+28*t-26*Math.sin(Math.PI*t);
-     ctx.save();ctx.strokeStyle='#ba77ff';ctx.lineWidth=5;ctx.shadowColor='#b65fff';ctx.shadowBlur=14;
-     ctx.beginPath();ctx.moveTo(x+22,y-2);ctx.lineTo(x,y);ctx.stroke();
-     ctx.fillStyle='#ffdbff';ctx.beginPath();ctx.arc(x,y,8,0,2*Math.PI);ctx.fill();ctx.restore();
-    }
+  ctx.restore();
+  if(elapsed>=nextOrb){orbStart=elapsed;nextOrb=elapsed+3.5;}
+  if(orbStart!==null){
+   const t=(elapsed-orbStart)/.8;
+   if(t>=1){
+    heroHP-=orbDamage;lastHit=elapsed;orbStart=null;
+    body.querySelector('[data-status]').textContent='Reina · '+heroHP+'% HP · Auto-fighting';
+   }else{
+    const x=458-314*t,y=226+28*t-26*Math.sin(Math.PI*t);
+    ctx.save();ctx.strokeStyle='#ba77ff';ctx.lineWidth=5;ctx.shadowColor='#b65fff';ctx.shadowBlur=14;
+    ctx.beginPath();ctx.moveTo(x+22,y-2);ctx.lineTo(x,y);ctx.stroke();
+    ctx.fillStyle='#ffdbff';ctx.beginPath();ctx.arc(x,y,8,0,2*Math.PI);ctx.fill();ctx.restore();
    }
-   if(elapsed-lastHit<.65){
-    ctx.save();ctx.font='bold 21px system-ui';ctx.fillStyle='#fff2fb';ctx.strokeStyle='#772654';ctx.lineWidth=4;
-    const y=178-18*(elapsed-lastHit);ctx.strokeText('−2%',132,y);ctx.fillText('−2%',132,y);ctx.restore();
-   }
+  }
+  if(elapsed-lastHit<.65){
+   ctx.save();ctx.font='bold 21px system-ui';ctx.fillStyle='#fff2fb';ctx.strokeStyle='#772654';ctx.lineWidth=4;
+   const y=178-18*(elapsed-lastHit);ctx.strokeText('−'+orbDamage+'%',132,y);ctx.fillText('−'+orbDamage+'%',132,y);ctx.restore();
   }
   for(let i=shots.length-1;i>=0;i--){
    const t=(elapsed-shots[i].at)/.3;
@@ -883,10 +886,10 @@ function cloudPortalPreview(place,index){
  const rewards=cloudPortalRewards[place.rank];
  const paths='M50 31 L24 14 L9 31 L24 48 Z M50 31 L76 14 L91 31 L76 48 Z M50 31 V55 M50 55 H34 V69 L50 87 L66 69 V55 Z';
  const defenders=cloudPortalSlots.map(([role,x,y,art],slot)=>cloudCount===4?
-  `<button class="portal-defender portal-strike" style="left:${x}%;top:${y}%" data-role="${role}" onclick="cloudStrike(${index},${slot})" ${(S.cloudWarHits?.[index]?.[slot]||0)>=cloudEnemyHealth[role]?'disabled':''}><small>${role}</small>${artImage('guardian-t'+art,role)}<progress max="${cloudEnemyHealth[role]}" value="${cloudEnemyHealth[role]-(S.cloudWarHits?.[index]?.[slot]||0)}"></progress></button>`:
-  `<div class="portal-defender" data-role="${role}" style="left:${x}%;top:${y}%"><small>${role}</small>${artImage('guardian-t'+art,role)}</div>`
+  `<button class="portal-defender portal-strike" style="left:${x}%;top:${y}%" data-role="${role}" onclick="cloudStrike(${index},${slot})" ${(S.cloudWarHits?.[index]?.[slot]||0)>=cloudEnemyHealth[role]?'disabled':''}><small>${role==='Boss'?'Golden Boss':role}</small>${artImage('guardian-t'+art,role)}<progress max="${cloudEnemyHealth[role]}" value="${cloudEnemyHealth[role]-(S.cloudWarHits?.[index]?.[slot]||0)}"></progress></button>`:
+  `<div class="portal-defender" data-role="${role}" style="left:${x}%;top:${y}%"><small>${role==='Boss'?'Golden Boss':role}</small>${artImage('guardian-t'+art,role)}</div>`
  ).join('');
- return `<section class="cloud-portal-preview"><h2>${place.name}</h2><p>${place.owner} · ${place.rank==='Capital'?'Holy City':place.rank}</p>${cloudCount===4?cloudCapturePanel(index):''}<div class="portal-defenders"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="${paths}"/></svg>${defenders}</div><h3>Boss rewards</h3><p>Territory points <b>30</b> · Personal point pool <b>${rewards.personal}</b></p><small>Personal points are shared by damage dealt.</small><div>${dailyTokens(['hud-prisms','hud-gems',rewards.armor])}</div></section>`;
+ return `<section class="cloud-portal-preview"><h2>${place.name}</h2><p>${place.owner} · ${place.rank==='Capital'?'Holy City':place.rank}</p>${cloudCount===4?cloudCapturePanel(index):''}<div class="portal-defenders"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="${paths}"/></svg>${defenders}</div><h3>Defender rewards</h3><div class="cloud-tier-rewards">${['Boss','Elite','Guard'].map(r=>`<span><b>${r==='Boss'?'Golden Boss':r}</b> ${cloudChestAmount(r)} ${r==='Guard'?'chest':'chests'} · ${cloudEnemyScore[r]} points</span>`).join('')}</div><p>Boss personal point pool <b>${rewards.personal}</b></p><small>Personal points are shared by damage dealt.</small><div>${dailyTokens(['hud-prisms','hud-gems',rewards.armor])}</div></section>`;
 }
 function cloudTerritory(index){
  const place=cloudTerritories()[index];
