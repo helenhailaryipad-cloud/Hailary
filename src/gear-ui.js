@@ -896,7 +896,7 @@ function cloudPortalPreview(place,index){
  const rewards=cloudPortalRewards[place.rank];
  const paths='M50 31 L24 14 L9 31 L24 48 Z M50 31 L76 14 L91 31 L76 48 Z M50 31 V55 M50 55 H34 V69 L50 87 L66 69 V55 Z';
  // Each outer courtyard holds one elite and two guards around its central paving.
- const pads=[[50,32],[20,32],[80,32],[50,71],[13,24],[27,40],[73,24],[87,40],[42,61],[58,61]];
+ const pads=[[50,32],[17,24],[82,24],[50,58],[11,35],[26,33],[73,33],[87,35],[41,69],[58,69]];
  const defenders=cloudPortalSlots.map(([role,x,y,art],slot)=>cloudCount===4?
   `<button class="portal-defender portal-strike" aria-label="Fight ${role} in ${place.name}, target ${slot+1}" style="left:${pads[slot][0]}%;top:${pads[slot][1]}%" data-role="${role}" onclick="cloudStrike(${index},${slot})" ${(S.cloudWarHits?.[index]?.[slot]||0)>=cloudEnemyHealth[role]?'disabled':''}><small>${role==='Boss'?'Golden Boss':role}</small>${artImage('guardian-t'+art,role)}<progress max="${cloudEnemyHealth[role]}" value="${cloudEnemyHealth[role]-(S.cloudWarHits?.[index]?.[slot]||0)}"></progress></button>`:
   `<div class="portal-defender" data-role="${role}" style="left:${x}%;top:${y}%"><small>${role==='Boss'?'Golden Boss':role}</small>${artImage('guardian-t'+art,role)}</div>`

@@ -6371,8 +6371,8 @@ body[data-screen=cloudWar] #main>.cloud-war:has(.map-4){position:absolute;inset:
 
 /* Territory and encounter share a compact native dialog over the world map. */
 #stage #modal[open]:has(.cloud-portal-preview){
-  position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(88vw,640px);
-  height:fit-content;max-height:83dvh;padding:14px 12px 12px;
+  position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(90vw,735px);
+  height:fit-content;max-height:88dvh;padding:14px 12px 12px;
   border:2px solid #d6bd83;border-radius:19px;
   background:linear-gradient(155deg,#294765,#16314c 65%,#224765);
   box-shadow:0 12px 48px #112137a6;
@@ -6385,7 +6385,7 @@ body[data-screen=cloudWar] #main>.cloud-war:has(.map-4){position:absolute;inset:
 }
 #modal .cloud-portal-preview :is(p,h3){margin:4px 0;font-size:clamp(12px,2vw,16px);line-height:1.25}
 #modal .cloud-portal-preview small{font-size:12px}
-#modal .cloud-portal-preview .portal-defenders[data-terrain]{width:min(100%,54dvh);margin:8px auto}
+#modal .cloud-portal-preview .portal-defenders[data-terrain]{width:min(100%,61dvh);margin:8px auto}
 
 #stage #modal .portal-defenders[data-terrain] > button.portal-strike{
   position:absolute!important;display:grid;margin:0;padding:0;transform:translate(-50%,-50%)!important;
