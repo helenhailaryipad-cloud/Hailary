@@ -22,7 +22,7 @@ S=defaults();S.gold=15000;openScreen('fashion');
 if(reinaDresses.length!==10)throw Error('Clothing catalog');
 for(const dress of reinaDresses){
   clothingPreview=dress.id;
-  if(!fittingRoom().includes('#dress-'+dress.id))throw Error('Missing outfit preview');
+  if(reinaLookPath(false,2,dress.id)!==artPath('atelier-'+dress.id)||!fittingRoom().includes('alt="Reina in '+dress.outfit+'"'))throw Error('Missing outfit preview');
   const balance=S.gold;
   wearOutfit('reina',dress.id,false);wearOutfit('reina',dress.id,false);
   if(S.gold!==balance-dress.gold||!ownsOutfit(dress.id)||currentDress()!==dress.id||!valid(S))throw Error('Outfit purchase or ownership');

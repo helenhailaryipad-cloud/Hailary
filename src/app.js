@@ -129,11 +129,11 @@ const partyWardrobe = {
 const outfitCatalog=Object.fromEntries(Object.values(partyWardrobe).map(item=>[item.id,item]));
 outfitCatalog.moonblossom={id:'moonblossom',outfit:'Moonblossom',gold:1200};
 const reinaDresses = [
-  ['dawnpetal','Petal Dancer Dress'], ['frostlace','Frostfeather Poncho'],
-  ['nightbloom','Nightfall Cloak'], ['sunweave','Sunburst Pleated Skirt'],
-  ['tidal','Tidecaller Gown'], ['emberveil','Ember Duelist Jacket'],
-  ['willow','Willow Scout Tunic'], ['stardust','Astral Split Robe'],
-  ['pearl','Pearl Court Ballgown'], ['sapphire','Sky Captain Tailcoat']
+  ['dawnpetal','Sky Courier'], ['frostlace','Moonlit Ballerina'],
+  ['nightbloom','Garden Apothecary'], ['sunweave','Masquerade Countess'],
+  ['tidal','Amber Dancer'], ['emberveil','Northern Wayfarer'],
+  ['willow','Iridescent Moth Queen'], ['stardust','Cloudfleet Captain'],
+  ['pearl','Cherry Blossom Kimono'], ['sapphire','Clockwork Artisan']
 ].map(([id,outfit])=>({id,outfit,gold:1200,reinaOnly:true}));
 for(const dress of reinaDresses)outfitCatalog[dress.id]=dress;
 let clothingPreview;
@@ -146,7 +146,7 @@ function fittingRoom(){
   if(selected && !choices.some(o=>o.id===selected))choices.push(outfitCatalog[selected]);
   const dress=outfitCatalog[selected],owned=ownsOutfit(selected),worn=selected===currentDress();
   const mask=((S.reinaFashion?.equipped||0)&~2)|(selected?2:0);
-  const buttons=choices.map(o=>`<button aria-pressed="${selected===o.id}" onclick="clothingPreview='${o.id}';reinaAtelier()">${o.outfit}</button>`).join('');
+  const buttons=choices.map(o=>`<button aria-pressed="${selected===o.id}" onclick="clothingPreview='${o.id}';reinaAtelier()">${o.reinaOnly?`<img class="dress-thumb" src="${artPath('atelier-'+o.id)}" alt="">`:''}${o.outfit}</button>`).join('');
   return `<section class="reina-atelier"><div class="atelier-portrait"><h1>Reina</h1><div class="fashion-model"><span class="fashion-plumes">${wingArt(fashionWing())}</span><img src="${reinaLookPath(false,mask,selected)}" alt="Reina in ${dress?.outfit||'Grove silk'}"></div></div><div class="atelier-controls"><h2>Clothing</h2><button onclick="wardrobe('reina')">Shared outfits</button><fieldset><legend>Dress &amp; boots</legend><div class="dress-grid">${buttons}</div></fieldset><small>${selected?'+'+WonderGear.fashionTraits.clothing+' Defense · ':''}${owned?'Owned':fmt(dress.gold)+' gold'}</small><button class="primary" ${worn||(!owned&&S.gold<dress.gold)?'disabled':''} onclick="wearOutfit('reina','${selected}',false)">${worn?'Equipped':owned?'Equip':'Buy &amp; equip'}</button></div></section>`;
 }
 const outfitColors={roseguard:320,starfall:195,lilyveil:65,emberleaf:345,moonblossom:235};
@@ -330,6 +330,7 @@ document.addEventListener('load',async event=>{
   }catch{dressImages.delete(src);clothingMasks.delete(match[2]);}
 },true);
 function reinaLookPath(riding, mask=S.reinaFashion?.equipped || 0, shared=S.costumes?.equipped?.reina){
+  if((mask & 2) && outfitCatalog[shared]?.reinaOnly && !riding)return artPath('atelier-'+shared);
   if((mask & 2) && outfitCatalog[shared]?.reinaOnly)return artPath('look-'+(riding?'ride':'stand')+'-'+mask)+'#dress-'+shared;
   if((mask & 2) && shared && shared!=='moonblossom' && outfitCatalog[shared]){
     return artPath('look-'+(riding?'ride':'stand')+'-'+mask)+'?outfit='+shared;
