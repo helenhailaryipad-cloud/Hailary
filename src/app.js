@@ -140,14 +140,23 @@ let clothingPreview;
 function currentDress(){
   return (S.reinaFashion?.equipped & 2) ? (S.costumes?.equipped?.reina || 'moonblossom') : '';
 }
+function fashionCard(name,icon,selected,click){
+  return `<button class="fashion-card" aria-pressed="${selected}" onclick="${click}"><img src="${icon}" alt=""><span>${name}</span></button>`;
+}
+function fashionShowcase({portrait,alt,title,bonus,owned,price,equipped,action,cards,extra=''}){
+  const category=fashionCategory;
+  const tabs=['Dresses','Hair','Weapons'].map(tab=>`<button aria-pressed="${tab===category}" onclick="changeFashionTab('${tab}')">${tab}</button>`).join('');
+  return `<section class="fashion-showcase" data-category="${category}"><div class="fashion-stage"><div class="fashion-model"><span class="fashion-plumes">${wingArt(fashionWing())}</span><img src="${portrait}" alt="${alt}"></div></div><div class="fashion-detail"><div><h2>${title}</h2><small>${bonus}${bonus?' · ':''}${owned?'Owned':fmt(price)+' gold'}</small></div><button class="primary" ${equipped||(!owned&&S.gold<price)?'disabled':''} onclick="${action}">${equipped?'Equipped':owned?'Equip':'Buy &amp; equip'}</button></div><div class="fashion-picker">${screen==='fashion'?`<div class="fashion-tabs" role="group" aria-label="Fashion categories">${tabs}</div>`:''}<div class="fashion-cards">${cards}</div></div>${extra}</section>`;
+}
 function fittingRoom(){
   const selected=clothingPreview??currentDress();
   const choices=[{id:'',outfit:'Grove silk set'}, {...outfitCatalog.moonblossom,outfit:'Violet silk set'},...reinaDresses];
   if(selected && !choices.some(o=>o.id===selected))choices.push(outfitCatalog[selected]);
   const dress=outfitCatalog[selected],owned=ownsOutfit(selected),worn=selected===currentDress();
   const mask=((S.reinaFashion?.equipped||0)&~2)|(selected?2:0);
-  const buttons=choices.map(o=>`<button aria-pressed="${selected===o.id}" onclick="clothingPreview='${o.id}';reinaAtelier()">${o.reinaOnly?`<img class="dress-thumb" src="${artPath('atelier-'+o.id)}" alt="">`:''}${o.outfit}</button>`).join('');
-  return `<section class="reina-atelier"><div class="atelier-portrait"><h1>Reina</h1><div class="fashion-model"><span class="fashion-plumes">${wingArt(fashionWing())}</span><img src="${reinaLookPath(false,mask,selected)}" alt="Reina in ${dress?.outfit||'Grove silk'}"></div></div><div class="atelier-controls"><h2>Dresses</h2><button onclick="wardrobe('reina')">Shared outfits</button><fieldset><legend>Dress &amp; boots</legend><div class="dress-grid">${buttons}</div></fieldset><small>${selected?'+'+WonderGear.fashionTraits.clothing+' Defense · ':''}${owned?'Owned':fmt(dress.gold)+' gold'}</small><button class="primary" ${worn||(!owned&&S.gold<dress.gold)?'disabled':''} onclick="wearOutfit('reina','${selected}',false)">${worn?'Equipped':owned?'Equip':'Buy &amp; equip'}</button></div></section>`;
+  const cards=choices.map(o=>fashionCard(o.outfit,o.reinaOnly?artPath('fashion-icon-'+o.id):o.id&&o.id!=='moonblossom'?artPath('party-'+Object.keys(partyWardrobe).find(hero=>partyWardrobe[hero].id===o.id)+'-wear-'+o.id):artPath('fashion-icon-'+(o.id?'violet':'grove')),selected===o.id,`clothingPreview='${o.id}';reinaAtelier()`)).join('');
+  return fashionShowcase({portrait:reinaLookPath(false,mask,selected),alt:'Reina in '+(dress?.outfit||'Grove silk'),title:choices.find(o=>o.id===selected).outfit,bonus:selected?'+'+WonderGear.fashionTraits.clothing+' Defense':'',owned,price:dress?.gold||0,equipped:worn,action:`wearOutfit('reina','${selected}',false)`,cards,extra:`<button class="shared-fashion" onclick="wardrobe('reina')">Shared outfits</button>`});
+
 }
 const outfitColors={roseguard:320,starfall:195,lilyveil:65,emberleaf:345,moonblossom:235};
 function ownsOutfit(id){
@@ -365,11 +374,12 @@ function styleFittingRoom(set){
   const owned=styleOwned(set,pick),equipped=pick===worn;
   const name=n=>n===-1?set.legacy:n===0?set.classic:set.names[n-1];
   const img=n=>artPath(set.slot+'-style-'+n);
-  const buttons=[0,-1,...set.names.map((_,i)=>i+1)].map(n=>`<button aria-pressed="${n===pick}" onclick="stylePick=${n};reinaAtelier()">${n>0?`<img class="dress-thumb" src="${img(n)}" alt="">`:''}${name(n)}</button>`).join('');
+  const legacyIcons=set.slot==='hair'?['silver','lilac']:['gold','frost'];
+  const cards=[0,-1,...set.names.map((_,i)=>i+1)].map(n=>fashionCard(name(n),n>0?img(n):artPath('fashion-icon-'+legacyIcons[-n]),n===pick,`stylePick=${n};reinaAtelier()`)).join('');
   const mask=(S.reinaFashion?.equipped||0)&~set.bit;
   const look={...S.atelier,[set.slot]:Math.max(0,pick)};
   const portrait=reinaLookPath(false,pick===-1?mask|set.bit:mask,currentDress(),look);
-  return `<section class="reina-atelier"><div class="atelier-portrait"><h1>Reina</h1><div class="fashion-model"><span class="fashion-plumes">${wingArt(fashionWing())}</span><img src="${portrait}" alt="Reina · ${name(pick)}"></div></div><div class="atelier-controls"><h2>${fashionCategory}</h2>${screen==='citySkin'?`<button onclick="switchSkin(skinTab,'Morphing',skinVariant)">Back to Holy Weapon</button>`:''}<fieldset><legend>${name(pick)}</legend><div class="dress-grid">${buttons}</div></fieldset><small>${pick?set.bonus+' · ':''}${owned?'Owned':fmt(set.price)+' gold'}</small><button class="primary" ${equipped||(!owned&&set.price>S.gold)?'disabled':''} onclick="wearStyle()">${equipped?'Equipped':owned?'Equip':'Buy &amp; equip'}</button></div></section>`;
+  return fashionShowcase({portrait,alt:'Reina · '+name(pick),title:name(pick),bonus:pick?set.bonus:'',owned,price:set.price,equipped,action:'wearStyle()',cards,extra:screen==='citySkin'?`<button onclick="switchSkin(skinTab,'Morphing',skinVariant)">Back to Holy Weapon</button>`:''});
 }
 // Chin, hand, chin-to-crown scale and head accessory width, in each portrait's pixels.
 const portraitFit={
@@ -496,8 +506,14 @@ function reinaAtelier(){
   const price=reinaLookPrice(), equipped=reinaPreview===(S.reinaFashion?.equipped || 0)&&wingPreview===(S.reinaFashion?.wingSkin||'');
   const inSkin=screen==='citySkin';
   if(!inSkin)nav();
-  if(styleSets[fashionCategory]){$('#main').innerHTML=styleFittingRoom(styleSets[fashionCategory]);return;}
-  if(!inSkin && fashionCategory==='Dresses'){$('#main').innerHTML=fittingRoom();return;}
+  if(styleSets[fashionCategory]||(!inSkin&&fashionCategory==='Dresses')){
+    const previous=document.querySelector('.fashion-showcase');
+    const scroll=previous?.dataset?.category===fashionCategory?previous.querySelector('.fashion-cards').scrollTop:0;
+    $('#main').innerHTML=styleSets[fashionCategory]?styleFittingRoom(styleSets[fashionCategory]):fittingRoom();
+    const gallery=document.querySelector('.fashion-cards');
+    if(gallery)gallery.scrollTop=scroll;
+    return;
+  }
   const traits=WonderGear.fashionTraits;
   const pieceBonus={1:'+'+traits.hair+' HP',2:'+'+traits.clothing+' Defense',4:'+'+traits.weapon+' Attack'};
   const wings=['',...ITEMS.filter(it=>it.type==='wings').map(it=>it.id)].map(id=>`<button aria-pressed="${wingPreview===id}" onclick="wingPreview='${id}';reinaAtelier()">${id?item(id).name:'Original'}${id?`<small>+${traits.wings} Shield HP · ${wingSkinPrice(id)?fmt(wingSkinPrice(id))+' gold':'Unlocked'}</small>`:''}</button>`).join('');
