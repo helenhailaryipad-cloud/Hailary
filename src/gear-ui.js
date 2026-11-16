@@ -752,10 +752,16 @@ const cloudDefenders={
 };
 const duelRanks=['Capital','Fortress','Fortress','Island','Island','Island'];
 let cloudCount=4;
+const cloudSectorNames=[
+ ['Larkspire','Kitewatch','Galehold','Wispwake','Sailfern','Swiftmere'],
+ ['Cinderkeep','Ashvault','Flarewatch','Coalpetal','Emberfen','Sparkreef'],
+ ['Lunavale','Duskhaven','Veilwatch','Mothmere','Glowtide','Silkmoon'],
+ ['Briarcrest','Rootwatch','Mossguard','Dewthorn','Fernwake','Oakwhorl']
+];
 function cloudTerritories(){
  return cloudLayouts[cloudCount].flatMap((points,i)=>{
   const [owner,capital,fort,color]=cloudFactions[i];
-  const names=cloudCount===4?[['Palace City','Dawnstar City','Heaven City','Domain City'][i],fort+' Fortress',owner+' Fortress',owner+' Isle',owner+' Reach',owner+' Haven']:cloudCount===2?[capital,fort+' Fortress',owner+' Fortress',...(i===0?['Snowpeak Island','Winddance Island','Thunderstone Island']:['Snowfox Island','Firebird Island','Sunrise Island'])]:[capital,fort,owner+' Keep',owner+' Lookout',owner+' Camp',owner+' Gate'];
+  const names=cloudCount===4?cloudSectorNames[i]:cloudCount===2?[capital,fort+' Fortress',owner+' Fortress',...(i===0?['Snowpeak Island','Winddance Island','Thunderstone Island']:['Snowfox Island','Firebird Island','Sunrise Island'])]:[capital,fort,owner+' Keep',owner+' Lookout',owner+' Camp',owner+' Gate'];
   return points.map(([x,y],j)=>({owner,color,x,y,name:names[j],rank:(cloudCount!==3?duelRanks:cloudRanks)[j]}));
  });
 }
@@ -782,7 +788,8 @@ function cloudNextPortal(){
 function cloudRouteButton(){
  const index=cloudNextPortal();
  if(index===undefined)return '<span>Route complete</span>';
- const name=cloudTerritories()[index].name;
+ const target=cloudTerritories()[index];
+ const name=target.name+' '+(target.rank==='Capital'?'City':target.rank);
  return `<button onclick="cloudTerritory(${index})">${cloudIntroRoute.indexOf(index)+1}/3 · ${name} ›</button>`;
 }
 function cloudCapturePanel(index){
@@ -843,8 +850,8 @@ function cloudFourBoard(nodes){
  const markers=nodes.map((p,i)=>{
   const city=p.rank==='Capital',island=p.rank==='Island';
   const asset=island?'left-explore':(city?'vale-castle':'vale-tower')+2;
-  const size=city?75:island?42:52,label=city?p.name:p.rank,width=city?133:76;
-  return `<g transform="translate(${p.x*6} ${p.y*8})" role="button" tabindex="0" aria-label="${p.owner}: ${p.name}, ${p.rank}" onclick="cloudTerritory(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();cloudTerritory(${i})}" style="cursor:pointer">${i===next?`<ellipse rx="${size*.63}" ry="${size*.45}" cy="${-size*.14}" fill="#ffc94d" fill-opacity=".12" stroke="#ffe195" stroke-width="3"/><rect x="-47" y="${-size*.68-21}" width="94" height="22" rx="11" fill="#ffe195"/><text y="${-size*.68-5}" fill="#362911" font-size="14" font-weight="800">${i===3?'START HERE':'NEXT STOP'}</text>`:''}<rect x="${-width/2}" y="${-size*.65}" width="${width}" height="${size+24}" fill="transparent"/><image href="assets/generated/${asset}.webp" x="${-size/2}" y="${-size*.67}" width="${size}" height="${size}"/><rect x="${-width/2}" y="${size*.3}" width="${width}" height="${city?36:19}" rx="5" fill="#192d38" stroke="${p.color}" stroke-width="1.5"/><text x="0" y="${size*.3+14}" fill="#fff3ce" font-size="${city?16:13}" font-weight="bold">${label}</text>${city?`<text y="${size*.3+29}" fill="${p.color}" font-size="12">${p.owner}</text>`:''}</g>`;
+  const size=city?75:island?42:52,label=p.name,width=city?133:82;
+  return `<g transform="translate(${p.x*6} ${p.y*8})" role="button" tabindex="0" aria-label="${p.owner}: ${p.name}, ${p.rank}" onclick="cloudTerritory(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();cloudTerritory(${i})}" style="cursor:pointer">${i===next?`<ellipse rx="${size*.63}" ry="${size*.45}" cy="${-size*.14}" fill="#ffc94d" fill-opacity=".12" stroke="#ffe195" stroke-width="3"/><rect x="-47" y="${-size*.68-21}" width="94" height="22" rx="11" fill="#ffe195"/><text y="${-size*.68-5}" fill="#362911" font-size="14" font-weight="800">${i===3?'START HERE':'NEXT STOP'}</text>`:''}<rect x="${-width/2}" y="${-size*.65}" width="${width}" height="${size+24}" fill="transparent"/><image href="assets/generated/${asset}.webp" x="${-size/2}" y="${-size*.67}" width="${size}" height="${size}"/><rect x="${-width/2}" y="${size*.3}" width="${width}" height="36" rx="5" fill="#192d38" stroke="${p.color}" stroke-width="1.5"/><text x="0" y="${size*.3+14}" fill="#fff3ce" font-size="${city?16:13}" font-weight="bold">${label}</text><text y="${size*.3+29}" fill="${p.color}" font-size="12">${city?p.owner:p.rank}</text></g>`;
  }).join('');
  return `<svg class="cloud-four-board" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid meet" role="group" aria-label="Four faction territories" text-anchor="middle" font-family="system-ui"><defs><filter id="cloudRoadGlow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3"/></filter><radialGradient id="cloudWarSky" cx="50%" cy="50%" r="70%"><stop stop-color="#2b4359"/><stop offset=".56" stop-color="#203449"/><stop offset="1" stop-color="#121f30"/></radialGradient></defs><rect width="600" height="800" fill="url(#cloudWarSky)"/>${roads.join('')}${markers}</svg>`;
 }
