@@ -6368,3 +6368,29 @@ body[data-screen=cloudWar] #main>.cloud-war:has(.map-4){position:absolute;inset:
 .portal-defenders[data-terrain] .portal-defender{width:11%;filter:drop-shadow(0 2px 2px #182337)}
 .portal-defenders[data-terrain] .portal-defender[data-role=Boss]{width:15%}
 .portal-defenders[data-terrain] .portal-defender:disabled{filter:grayscale(1);opacity:.65}
+
+/* Territory and encounter share a compact native dialog over the world map. */
+#stage #modal[open]:has(.cloud-portal-preview,.cloud-encounter){
+  position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(86vw,490px);
+  height:fit-content;max-height:83dvh;padding:14px 12px 12px;
+  border:2px solid #d6bd83;border-radius:19px;
+  background:linear-gradient(155deg,#294765,#16314c 65%,#224765);
+  box-shadow:0 12px 48px #112137a6;
+}
+#stage #modal:has(.cloud-portal-preview,.cloud-encounter)::backdrop{
+  background:rgb(13 29 43 / 41%);backdrop-filter:none;
+}
+#modal :is(.cloud-portal-preview,.cloud-encounter) h2{
+  margin:0 30px 4px;font-size:clamp(18px,3.3vw,26px);line-height:1.15;color:#fff1c7;
+}
+#modal .cloud-portal-preview :is(p,h3){margin:4px 0;font-size:clamp(12px,2vw,16px);line-height:1.25}
+#modal .cloud-portal-preview small{font-size:12px}
+#modal .cloud-portal-preview .portal-defenders[data-terrain]{width:min(100%,45dvh);margin:8px auto}
+#modal .portal-strike::before{
+  content:"";position:absolute;inset:32% -20% 1%;z-index:-1;border-radius:48%;
+  background:var(--arena-art) center 70% / cover;border:1px solid #ddcc9a;
+  box-shadow:0 3px 0 #43545b,0 5px 5px #192d4280;
+}
+#modal .cloud-battlefield canvas{
+  background:linear-gradient(#21375222,#253c522e),var(--arena-art) center / 100% 100% no-repeat,#69859b;
+}

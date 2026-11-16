@@ -797,6 +797,9 @@ function cloudChestDisplay(count){
 function showCloudChests(){
  modal(`<section class="cloud-boss-prize"><h2>Cloud War rewards</h2>${cloudChestDisplay(cloudChestTotal())}<p>Chests earned from defeated defenders</p></section>`);
 }
+function cloudArenaStyle(slot){
+ return "--arena-art:url('assets/generated/cloud-arena-"+slot+".webp')";
+}
 function cloudArenaFloor(ctx){
  ctx.save();
  for(const x of [140,486]){
@@ -817,7 +820,7 @@ function cloudStrike(index,slot){
  const orbDamage=role==='Boss'?2:1;
  let heroHP=100,nextOrb=2,orbStart=null,lastHit=-2;
  const shots=[],actor={clock:0,heroShotAt:-1,spriteIdle:true};
- body.innerHTML=`<section class="cloud-encounter"><h2>${place.name} · ${role==='Boss'?'Golden Boss':role}</h2><label>${role} HP <b data-enemy-hp></b><progress max="${max}" value="${hp}"></progress></label><div class="cloud-battlefield"><canvas width="640" height="420" aria-label="Reina fighting the ${role}"></canvas></div><p data-status>Reina · 100% HP · Auto-fighting</p><button class="primary" data-burst>Celestial Arrow</button> <button data-exit>Leave battle</button></section>`;
+ body.innerHTML=`<section class="cloud-encounter"><h2>${place.name} · ${role==='Boss'?'Golden Boss':role}</h2><label>${role} HP <b data-enemy-hp></b><progress max="${max}" value="${hp}"></progress></label><div class="cloud-battlefield" style="${cloudArenaStyle(slot)}"><canvas width="640" height="420" aria-label="Reina fighting the ${role}"></canvas></div><p data-status>Reina · 100% HP · Auto-fighting</p><button class="primary" data-burst>Celestial Arrow</button> <button data-exit>Leave battle</button></section>`;
  const canvas=body.querySelector('canvas'),ctx=canvas.getContext('2d'),burst=body.querySelector('[data-burst]');
  const bar=body.querySelector('progress'),number=body.querySelector('[data-enemy-hp]');
  function shoot(damage){
@@ -886,7 +889,7 @@ function cloudPortalPreview(place,index){
  const rewards=cloudPortalRewards[place.rank];
  const paths='M50 31 L24 14 L9 31 L24 48 Z M50 31 L76 14 L91 31 L76 48 Z M50 31 V55 M50 55 H34 V69 L50 87 L66 69 V55 Z';
  const defenders=cloudPortalSlots.map(([role,x,y,art],slot)=>cloudCount===4?
-  `<button class="portal-defender portal-strike" aria-label="Fight ${role} in ${place.name}, target ${slot+1}" style="left:${x}%;top:${y}%" data-role="${role}" onclick="cloudStrike(${index},${slot})" ${(S.cloudWarHits?.[index]?.[slot]||0)>=cloudEnemyHealth[role]?'disabled':''}><small>${role==='Boss'?'Golden Boss':role}</small>${artImage('guardian-t'+art,role)}<progress max="${cloudEnemyHealth[role]}" value="${cloudEnemyHealth[role]-(S.cloudWarHits?.[index]?.[slot]||0)}"></progress></button>`:
+  `<button class="portal-defender portal-strike" aria-label="Fight ${role} in ${place.name}, target ${slot+1}" style="left:${x}%;top:${y}%;${cloudArenaStyle(slot)}" data-role="${role}" onclick="cloudStrike(${index},${slot})" ${(S.cloudWarHits?.[index]?.[slot]||0)>=cloudEnemyHealth[role]?'disabled':''}><small>${role==='Boss'?'Golden Boss':role}</small>${artImage('guardian-t'+art,role)}<progress max="${cloudEnemyHealth[role]}" value="${cloudEnemyHealth[role]-(S.cloudWarHits?.[index]?.[slot]||0)}"></progress></button>`:
   `<div class="portal-defender" data-role="${role}" style="left:${x}%;top:${y}%"><small>${role==='Boss'?'Golden Boss':role}</small>${artImage('guardian-t'+art,role)}</div>`
  ).join('');
  return `<section class="cloud-portal-preview"><h2>${place.name}</h2><p>${place.owner} · ${place.rank==='Capital'?'Holy City':place.rank}</p>${cloudCount===4?cloudCapturePanel(index):''}<div class="portal-defenders" ${cloudCount===4?'data-terrain="'+place.rank+'"':''}><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="${paths}"/></svg>${defenders}</div><h3>Defender rewards</h3><div class="cloud-tier-rewards">${['Boss','Elite','Guard'].map(r=>`<span><b>${r==='Boss'?'Golden Boss':r}</b> ${cloudChestAmount(r)} ${r==='Guard'?'chest':'chests'} · ${cloudEnemyScore[r]} points</span>`).join('')}</div><p>Boss personal point pool <b>${rewards.personal}</b></p><small>Personal points are shared by damage dealt.</small><div>${dailyTokens(['hud-prisms','hud-gems',rewards.armor])}</div></section>`;
