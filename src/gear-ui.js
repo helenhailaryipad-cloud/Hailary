@@ -741,7 +741,7 @@ const cloudLayouts={
   [[50,81],[19,68],[81,68],[12,52],[88,52],[67,77]]
  ],
  4:[[1,1],[-1,1],[1,-1],[-1,-1]].map(([horizontal,vertical])=>
-  [[-15,-10],[-14,-27],[-35,-16],[-37,-40],[-12,-40],[-40,-29]].map(([x,y])=>
+  [[-13.5,-9],[-12.6,-24.3],[-31.5,-14.4],[-33.3,-36],[-10.8,-36],[-36,-26.1]].map(([x,y])=>
    [50+horizontal*x,50+vertical*y]))
 };
 const cloudRanks=['Capital','Stronghold','Stronghold','Outpost','Outpost','Outpost'];
@@ -942,7 +942,7 @@ function cloudFourBoard(nodes){
  }
  const ships=cloudFactions.map((faction,sector)=>{
   const first=sector*6+3, island=nodes[first];
-  const x=sector%2?450:150,y=sector<2?27:768;
+  const x=sector%2?435:165,y=sector<2?64:731;
   const endX=island.x*6,endY=island.y*8;
   const trail=`M ${x} ${y} Q ${x} ${(y+endY)/2} ${endX} ${endY}`;
   roads.push(`<g fill="none" stroke-linecap="round"><path d="${trail}" stroke="${island.color}" stroke-width="9" opacity=".5" filter="url(#cloudRoadGlow)"/><path d="${trail}" stroke="${island.color}" stroke-width="4"/><path d="${trail}" stroke="#fff7db" stroke-width="2" stroke-dasharray="2 6"/></g>`);
