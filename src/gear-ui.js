@@ -786,6 +786,28 @@ function cloudCapturePanel(index){
  if(score>=80)return `<p>Captured · Galewing</p>`;
  return `<p aria-live="polite">Unowned · ${score}/80 territory points</p><p>Choose a defender to enter battle.</p>`;
 }
+function cloudChestAmount(role){return role==='Boss'?2:1;}
+function cloudChestTotal(){
+ return Object.values(S.cloudWarHits||{}).reduce((total,hits)=>total+cloudPortalSlots.reduce((n,[role],slot)=>n+(hits?.[slot]>=cloudEnemyHealth[role]?cloudChestAmount(role):0),0),0);
+}
+function cloudChestDisplay(count){
+ return `<div class="cloud-loot-stack"><img src="${artPath('left-superpack')}" alt="Treasure chest"><strong>×${count}</strong></div>`;
+}
+function showCloudChests(){
+ modal(`<section class="cloud-boss-prize"><h2>Cloud War rewards</h2>${cloudChestDisplay(cloudChestTotal())}<p>Chests earned from defeated defenders</p></section>`);
+}
+function cloudArenaFloor(ctx){
+ ctx.save();
+ ctx.beginPath();ctx.ellipse(320,362,345,51,0,0,Math.PI*2);
+ const stone=ctx.createLinearGradient(0,311,0,413);
+ stone.addColorStop(0,'#73848a');stone.addColorStop(.7,'#506466');stone.addColorStop(1,'#36484d');
+ ctx.fillStyle=stone;ctx.fill();ctx.strokeStyle='#bcb395';ctx.lineWidth=3;ctx.stroke();
+ for(const x of [140,486]){
+  ctx.beginPath();ctx.ellipse(x,366,x===486?77:40,9,0,0,Math.PI*2);
+  ctx.fillStyle='#1e292ead';ctx.fill();
+ }
+ ctx.restore();
+}
 function cloudStrike(index,slot){
  const defender=cloudPortalSlots[slot],place=cloudTerritories()[index];
  if(screen!=='cloudWar'||cloudCount!==4||!defender||!place)return;
@@ -815,8 +837,9 @@ function cloudStrike(index,slot){
   elapsed+=Math.min(.1,(now-last)/1000);last=now;actor.clock=elapsed;
   if(elapsed>=nextShot){shoot(100);nextShot=elapsed+.65;}
   ctx.clearRect(0,0,640,420);
-  drawReina(ctx,actor,140,350,155,220);
-  drawArtSprite(ctx,'guardian-t'+art,486,346+(motionAllowed()?Math.sin(elapsed*3)*3:0),200,245);
+  cloudArenaFloor(ctx);
+  drawReina(ctx,actor,140,368,155,220);
+  drawArtSprite(ctx,'guardian-t'+art,486,369,200,245);
   for(let i=shots.length-1;i>=0;i--){
    const t=(elapsed-shots[i].at)/.3;
    if(t>=1){hp=Math.max(0,hp-shots[i].damage);shots.splice(i,1);}
@@ -830,14 +853,11 @@ function cloudStrike(index,slot){
   const hits=S.cloudWarHits[index]??=Array(10).fill(0);
   if(!(hits[slot]>=limit)){hits[slot]=limit;save();}
   cityCloudWar();
-  if(role==='Boss'){
-   body.innerHTML=`<section class="cloud-boss-prize" aria-labelledby="cloud-prize-title"><h2 id="cloud-prize-title">Boss defeated</h2><div class="cloud-prize-chests" role="img" aria-label="Reward chests"><img src="${artPath('left-superpack')}" alt=""><img src="${artPath('left-superpack')}" alt=""></div><p>+${cloudEnemyScore.Boss} territory points</p><button class="primary" data-continue>Continue</button></section>`;
-   const next=body.querySelector('[data-continue]');
-   next.onclick=()=>{body.innerHTML=cloudPortalPreview(place,index);body.querySelector('button:not([disabled])')?.focus();};
-   next.focus();
-   return;
-  }
-  body.innerHTML=`<h2>Victory · ${role}</h2><p>+${cloudEnemyScore[role]} territory points</p>`+cloudPortalPreview(place,index);
+  body.innerHTML=`<section class="cloud-boss-prize" aria-labelledby="cloud-prize-title"><h2 id="cloud-prize-title">Victory rewards</h2>${cloudChestDisplay(cloudChestAmount(role))}<p>+${cloudEnemyScore[role]} territory points</p><button class="primary" data-continue>Continue</button></section>`;
+  dialog.scrollTop=body.scrollTop=0;
+  const next=body.querySelector('[data-continue]');
+  next.onclick=()=>{body.innerHTML=cloudPortalPreview(place,index);};
+  next.focus({preventScroll:true});
  }
  requestAnimationFrame(frame);
 }
@@ -930,7 +950,7 @@ function cityCloudWar(){
  const nodes=cloudTerritories();
  const symbols={Capital:'♛',Stronghold:'♜',Outpost:'⚑'};
  const markers=nodes.map((p,i)=>`<button class="cloud-place" data-rank="${p.rank}" aria-label="${p.owner}: ${p.name}, ${p.rank}" title="${p.name} · ${p.rank}" style="left:${p.x}%;top:${p.y}%;--banner:${p.color}" onclick="cloudTerritory(${i})"><span class="map-token" aria-hidden="true">${symbols[p.rank]}</span></button>`).join('');
- $('#main').innerHTML='<section class="cloud-war"><div class="cloud-heading"><strong>Cloud War</strong><small>'+ (cloudCount===4?'Daily Carnage Points · 1200':'Battle starts at 19:30')+'</small></div><div class="cloud-field map-'+cloudCount+'"><div class="cloud-map-plane">'+(cloudCount===4?cloudFourBoard(nodes):cloudCount===2?cloudLinkedMap(nodes):markers)+'</div></div><div class="cloud-actions"><button aria-label="Back to city" onclick="go(\'home\')">‹</button><button onclick="cloudBrief('+[3,2,4].indexOf(cloudCount)+')">War Guide</button></div></section>';
+ $('#main').innerHTML='<section class="cloud-war"><div class="cloud-heading"><strong>Cloud War</strong><small>'+ (cloudCount===4?'Daily Carnage Points · 1200':'Battle starts at 19:30')+'</small></div><div class="cloud-field map-'+cloudCount+'"><div class="cloud-map-plane">'+(cloudCount===4?cloudFourBoard(nodes):cloudCount===2?cloudLinkedMap(nodes):markers)+'</div></div><div class="cloud-actions"><button aria-label="Back to city" onclick="go(\'home\')">‹</button>'+(cloudCount===4?`<button onclick="showCloudChests()">Rewards · ${cloudChestTotal()}</button>`:'')+'<button onclick="cloudBrief('+[3,2,4].indexOf(cloudCount)+')">War Guide</button></div></section>';
  if(cloudCount===4){
   const field=$('.cloud-field.map-4');
   field.scrollLeft=offset?offset[0]:0;

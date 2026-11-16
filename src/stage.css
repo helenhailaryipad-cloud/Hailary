@@ -6347,3 +6347,6 @@ body[data-screen=cloudWar] #main>.cloud-war:has(.map-4){position:absolute;inset:
 .cloud-prize-chests img{width:min(25%,105px);height:auto;filter:drop-shadow(0 3px 8px #efb94760)}
 .cloud-prize-chests img:first-child{width:min(20%,84px);margin-right:-3%;transform:rotate(-9deg)}
 @media(prefers-reduced-motion:no-preference){.cloud-prize-chests{animation:cloud-prize-appear .45s ease-out both}@keyframes cloud-prize-appear{from{opacity:0;transform:translateY(14px) scale(.9)}to{opacity:1;transform:none}}}
+#modal .cloud-loot-stack{position:relative;display:block;width:min(155px,46vw);margin:16px auto}
+#modal .cloud-loot-stack img{display:block;width:100%;height:auto;filter:drop-shadow(0 4px 9px #805a28)}
+#modal .cloud-loot-stack strong{position:absolute;bottom:0;right:0;border-radius:10px;padding:2px 9px;background:#392737;color:#ffe9a2;font-size:22px}
