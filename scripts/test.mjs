@@ -18,6 +18,17 @@ vm.runInContext(fs.readFileSync('src/game-polish.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/minigame-engine.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/app.js','utf8'),context);
 vm.runInContext(`
+S=defaults();S.gold=15000;openScreen('fashion');
+if(reinaDresses.length!==10)throw Error('Clothing catalog');
+for(const dress of reinaDresses){
+  clothingPreview=dress.id;
+  if(!fittingRoom().includes('#dress-'+dress.id))throw Error('Missing outfit preview');
+  const balance=S.gold;
+  wearOutfit('reina',dress.id,false);wearOutfit('reina',dress.id,false);
+  if(S.gold!==balance-dress.gold||!ownsOutfit(dress.id)||currentDress()!==dress.id||!valid(S))throw Error('Outfit purchase or ownership');
+  if(!reinaLookPath(true).includes('ride-2.webp#dress-'+dress.id))throw Error('Mounted outfit');
+}
+S=defaults();
 const namedLegacy={...defaults(),name:'Reyna',gold:1234,xp:456};const legacyBefore=JSON.stringify({...namedLegacy,name:'REINA'});normalizeAdventure(namedLegacy);if(JSON.stringify(namedLegacy)!==legacyBefore)throw Error('Name correction must preserve progress');if(normalizeAdventure({...defaults(),name:'Nyra'}).name!=='Nyra')throw Error('Keep custom hero names');if(comparable({...defaults(),name:'REINA'})!==comparable(normalizeAdventure({...defaults(),name:'Reyna'})))throw Error('Name correction must not create cloud conflict');
 S=defaults();home();const progressBeforeIntro=JSON.stringify(S);const introPrefs=new Map(),originalGet=localStorage.getItem,originalSet=localStorage.setItem;localStorage.getItem=k=>introPrefs.get(k)||null;localStorage.setItem=(k,v)=>introPrefs.set(k,String(v));chooseIntro('2d');if(storedIntroStyle()!=='2d'||screen!=='home'||document.querySelector('#main').innerHTML.includes('id="intro3d"')||JSON.stringify(S)!==progressBeforeIntro)throw Error('2D return preserves adventure');openScreen('intro');chooseIntro('3d');if(storedIntroStyle()!=='2d'||screen!=='home'||document.querySelector('#main').innerHTML.includes('id="intro3d"')||JSON.stringify(S)!==progressBeforeIntro)throw Error('Retired 3D preference must return to 2D and preserve adventure');localStorage.getItem=originalGet;localStorage.setItem=originalSet;
 S=defaults();S.tickets=100000;const initial=S.tickets;
