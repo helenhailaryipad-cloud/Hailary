@@ -6359,3 +6359,12 @@ body[data-screen=cloudWar] #main>.cloud-war:has(.map-4){position:absolute;inset:
 .portal-defender[data-role=Boss] img{border:3px solid #ffd75a;background:radial-gradient(#9d712b,#492f26);box-shadow:0 0 8px #ffc844}
 .portal-defender[data-role=Boss] small{background:#5a370d;color:#ffe28a;white-space:nowrap}
 .cloud-tier-rewards{display:grid;gap:4px;text-align:center}
+
+.portal-defenders[data-terrain]{aspect-ratio:1;width:min(100%,480px);background-size:cover;background-position:center;box-shadow:0 0 0 1px #dac394}
+.portal-defenders[data-terrain=Island]{background-image:url(assets/generated/cloud-interior-island.webp)}
+.portal-defenders[data-terrain=Fortress]{background-image:url(assets/generated/cloud-interior-fortress.webp)}
+.portal-defenders[data-terrain=Capital]{background-image:url(assets/generated/cloud-interior-capital.webp)}
+.portal-defenders[data-terrain] svg{display:none}
+.portal-defenders[data-terrain] .portal-defender{width:11%;filter:drop-shadow(0 2px 2px #182337)}
+.portal-defenders[data-terrain] .portal-defender[data-role=Boss]{width:15%}
+.portal-defenders[data-terrain] .portal-defender:disabled{filter:grayscale(1);opacity:.65}
