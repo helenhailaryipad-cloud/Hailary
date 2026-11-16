@@ -129,11 +129,11 @@ const partyWardrobe = {
 const outfitCatalog=Object.fromEntries(Object.values(partyWardrobe).map(item=>[item.id,item]));
 outfitCatalog.moonblossom={id:'moonblossom',outfit:'Moonblossom',gold:1200};
 const reinaDresses = [
-  ['dawnpetal','Dawnpetal Brocade'], ['frostlace','Frostlace Silk'],
-  ['nightbloom','Midnight Orchid'], ['sunweave','Sunbeam Pleats'],
-  ['tidal','Tidepool Satin'], ['emberveil','Ember Chevron'],
-  ['willow','Willowleaf Tunic'], ['stardust','Stardust Velvet'],
-  ['pearl','Pearl Blossom'], ['sapphire','Sapphire Lattice']
+  ['dawnpetal','Petal Dancer Dress'], ['frostlace','Frostfeather Poncho'],
+  ['nightbloom','Nightfall Cloak'], ['sunweave','Sunburst Pleated Skirt'],
+  ['tidal','Tidecaller Gown'], ['emberveil','Ember Duelist Jacket'],
+  ['willow','Willow Scout Tunic'], ['stardust','Astral Split Robe'],
+  ['pearl','Pearl Court Ballgown'], ['sapphire','Sky Captain Tailcoat']
 ].map(([id,outfit])=>({id,outfit,gold:1200,reinaOnly:true}));
 for(const dress of reinaDresses)outfitCatalog[dress.id]=dress;
 let clothingPreview;
@@ -206,6 +206,70 @@ const fabricStyles={
   pearl:['e6d8c0','be9299',(u,v)=>Math.cos(u/11)+Math.cos(v/11)<-1.65],
   sapphire:['23549b','dec77b',(u,v)=>Math.cos(u/7)+Math.cos(v/7)>1.15]
 };
+// Each panel is cut relative to the waist. The mounted pose drapes the skirt backwards.
+const dressCuts = {
+  dawnpetal:[
+    'M-19 0 Q-35 23 -71 58 Q-99 85 -102 115 Q-80 133 -52 120 Q-28 145 1 128 Q25 143 49 123 Q73 128 83 111 Q66 60 20 0Z',
+    'M-18 0 Q-51 39 -77 69 Q-63 89 -40 82 Q-23 99 -1 84 Q19 99 39 82 Q55 88 68 72 Q48 37 17 0Z',
+    'M-18 0 Q-34 25 -50 42 Q-37 58 -20 48 Q-7 65 7 49 Q26 60 37 47 Q48 50 49 39 L17 0Z'],
+  frostlace:[
+    'M-40 -73 Q-26 -85 -9 -74 L8 -68 Q23 -68 31 -52 L45 -20 L25 -25 L19 16 L4 3 L-11 28 L-18 7 L-41 22 L-37 2 L-69 12 Q-53 -28 -40 -73Z',
+    'M-29 -74 Q-12 -51 25 -50 L32 -39 Q-6 -41 -42 -61Z'],
+  nightbloom:[
+    'M-39 -72 Q-53 -50 -55 -7 Q-59 61 -104 153 Q-78 166 -47 148 L-57 183 Q-17 163 2 120 L12 64 L-12 -57Z',
+    'M-36 -73 Q-14 -74 4 -61 Q4 -12 29 18 L9 44 Q-5 12 -16 -18 L-26 18 L-47 30 Q-36 -15 -36 -73Z'],
+  sunweave:[
+    'M-20 -2 L20 -2 L62 63 Q51 74 33 69 Q18 80 2 73 Q-16 80 -31 71 Q-49 76 -67 66Z',
+    'M-18 -1 L-12 1 L-39 69 L-53 69Z M-3 1 L2 1 L-6 74 L-18 73Z M11 1 L16 1 L41 69 L29 70Z'],
+  tidal:[
+    'M-18 -1 L19 -1 Q33 30 34 74 Q36 119 58 149 Q27 172 -10 160 Q-46 171 -76 146 Q-42 112 -34 67 Q-29 28 -18 -1Z',
+    'M-17 1 Q12 22 32 65 Q12 49 -19 48 Q-42 46 -52 65 Q-42 20 -17 1Z',
+    'M-37 -73 Q-16 -86 7 -65 Q18 -59 26 -46 Q3 -53 -6 -49 Q-30 -51 -47 -60Z'],
+  emberveil:[
+    'M-36 -72 L-18 -74 L-9 -52 L8 -66 L18 -61 L22 -26 L12 -6 L38 47 L15 36 L4 11 L-10 19 L-30 55 L-61 70 L-31 0 L-42 -26Z',
+    'M-33 -70 L-19 -73 L-6 -45 L-16 -49 L-12 -32Z M10 -64 L17 -60 L9 -43 L0 -36Z'],
+  willow:[
+    'M-38 -72 Q-28 -80 -12 -71 Q-16 -53 7 -59 L22 -48 Q12 -19 16 -5 L43 45 L15 40 L4 56 L-14 45 L-38 59 L-39 42 L-61 47 Q-43 23 -27 -6 L-37 -34Z',
+    'M-36 -70 Q-25 -57 -19 -49 Q-29 -38 -41 -36 Q-42 -49 -53 -48 Q-52 -58 -36 -70Z'],
+  stardust:[
+    'M-37 -72 Q-19 -84 -8 -67 Q-33 -37 -21 -7 L-6 11 Q-14 61 -3 112 L-15 168 Q-48 190 -97 175 Q-63 131 -54 78 Q-48 40 -44 -12Z',
+    'M8 -65 L21 -55 Q23 -28 16 -3 Q27 57 52 112 L66 159 Q51 175 30 175 Q20 118 4 79 L-7 7 Q8 -26 8 -65Z',
+    'M-38 -71 L-26 -77 Q-24 -48 -9 -31 L-17 -17 Q-37 -38 -38 -71Z'],
+  pearl:[
+    'M-19 0 L19 0 Q57 31 80 86 Q102 114 104 143 Q74 170 45 159 Q15 178 -14 161 Q-56 176 -87 153 Q-103 160 -114 143 Q-86 69 -56 42Z',
+    'M-18 0 L18 0 Q46 34 69 65 Q44 76 22 63 Q0 81 -25 64 Q-53 77 -74 66 Q-53 27 -18 0Z',
+    'M-38 -69 Q-25 -84 -12 -68 L-18 -54 Q-35 -48 -47 -55Z'],
+  sapphire:[
+    'M-36 -73 L-14 -73 L0 -54 L12 -63 L24 -49 L14 -7 L47 28 L28 39 L13 21 L4 9 L-9 17 Q-28 43 -64 61 L-51 31 L-32 0 L-39 -35Z',
+    'M-31 -71 L-17 -73 L-3 -50 L-11 -47Z M-23 -18 L17 -23 L16 -16 L-25 -10Z M-27 -6 L16 -11 L17 -5 L-29 2Z']
+};
+function tailoredPanels(ctx,id,pose){
+  const [fabric,edge]=fabricStyles[id];
+  ctx.save();
+  if(pose==='stand')ctx.transform(2,0,0,2,270,312);
+  else ctx.transform(1.46,0,-.47,1.34,401,224);
+  ctx.lineJoin='round';
+  dressCuts[id].forEach((outline,index)=>{
+    const path=new Path2D(outline);
+    const silk=ctx.createLinearGradient(-85,-16,69,30);
+    silk.addColorStop(0,'#'+edge);silk.addColorStop(.23,'#'+fabric);
+    silk.addColorStop(.44,'#'+edge);silk.addColorStop(.54,'#'+fabric);
+    silk.addColorStop(.82,'#'+fabric);silk.addColorStop(1,'#'+edge);
+    ctx.fillStyle=silk;ctx.fill(path);
+    ctx.save();ctx.clip(path);
+    const shade=ctx.createLinearGradient(-48,22,54,38);
+    shade.addColorStop(0,'#27172e44');shade.addColorStop(.48,'#261b3500');shade.addColorStop(1,'#291b3c55');
+    ctx.fillStyle=shade;ctx.fillRect(-120,-85,230,280);
+    ctx.lineWidth=1.15;ctx.strokeStyle='#'+edge+'aa';
+    for(const end of [-79,-43,-20,16,49,77]){
+      ctx.beginPath();ctx.moveTo(end*.15,0);ctx.quadraticCurveTo(end*.6,76,end,173);ctx.stroke();
+    }
+    ctx.restore();
+    ctx.strokeStyle='#493548';ctx.lineWidth=2.1;ctx.stroke(path);
+    ctx.strokeStyle='#'+edge;ctx.lineWidth=index===0?1.2:.85;ctx.stroke(path);
+  });
+  ctx.restore();
+}
 const dressImages=new Map();
 const clothingMasks=new Map();
 async function costumePixels(url){
@@ -242,6 +306,16 @@ async function makeCostume(url,id,pose){
     for(let c=0;c<3;c++)data[i+c]=data[i+c]*(1-mask[p])+((1-t)*base[c]+t*accent[c])*light*mask[p];
   }
   ctx.putImageData(pixels,0,0);
+  // Keep the hand resting on the belt in front of the fitted garment.
+  const hand=new Path2D(pose==='stand'
+    ? 'M152 277 Q161 266 173 266 Q200 244 227 257 L239 269 L230 283 L211 278 L196 298 L177 315 L158 315 L144 300Z'
+    : 'M374 243 Q391 237 405 249 L436 274 L453 282 L449 296 L424 301 L398 289 L367 267Z');
+  const original=ctx.getImageData(0,0,canvas.width,canvas.height);
+  tailoredPanels(ctx,id,pose);
+  const foreground=document.createElement('canvas');
+  foreground.width=canvas.width;foreground.height=canvas.height;
+  foreground.getContext('2d').putImageData(original,0,0);
+  ctx.save();ctx.clip(hand);ctx.drawImage(foreground,0,0);ctx.restore();
   return URL.createObjectURL(await new Promise(resolve=>canvas.toBlob(resolve,'image/png')));
 }
 document.addEventListener('load',async event=>{
