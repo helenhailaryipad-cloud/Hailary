@@ -6338,7 +6338,7 @@ body[data-screen=cloudWar] #main>.cloud-war:has(.map-4){position:absolute;inset:
 .portal-strike:disabled{filter:grayscale(1);opacity:.55}
 .portal-strike progress{width:80%;height:5px;accent-color:#fc8875}
 
-.cloud-encounter canvas{display:block;width:100%;height:auto;aspect-ratio:640/420;background:linear-gradient(180deg,#19243699,#12233ab8),url('assets/generated/scene-dungeons.webp') center/cover,#334857;border-radius:12px;cursor:pointer}
+.cloud-encounter canvas{display:block;width:100%;height:auto;aspect-ratio:640/420;background:linear-gradient(180deg,#25416452,#283d5440),url('assets/sunny-garden.webp') center top/100% 125% no-repeat,#719fba;border-radius:12px;cursor:pointer}
 .cloud-encounter label{display:block;text-align:left;color:#ffedb2}
 .cloud-encounter progress{display:block;width:100%;height:14px;margin:4px 0 8px;accent-color:#e77466}
 

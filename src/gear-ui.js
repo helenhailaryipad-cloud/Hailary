@@ -798,10 +798,6 @@ function showCloudChests(){
 }
 function cloudArenaFloor(ctx){
  ctx.save();
- ctx.beginPath();ctx.ellipse(320,362,345,51,0,0,Math.PI*2);
- const stone=ctx.createLinearGradient(0,311,0,413);
- stone.addColorStop(0,'#73848a');stone.addColorStop(.7,'#506466');stone.addColorStop(1,'#36484d');
- ctx.fillStyle=stone;ctx.fill();ctx.strokeStyle='#bcb395';ctx.lineWidth=3;ctx.stroke();
  for(const x of [140,486]){
   ctx.beginPath();ctx.ellipse(x,366,x===486?77:40,9,0,0,Math.PI*2);
   ctx.fillStyle='#1e292ead';ctx.fill();
@@ -817,6 +813,7 @@ function cloudStrike(index,slot){
  const dialog=$('#modal'),body=$('#modalBody');
  const max=role==='Boss'?3000:role==='Elite'?2100:1500;
  let hp=Math.ceil(max*(1-previous/limit)),elapsed=0,nextShot=.15,burstReady=0,last=performance.now();
+ let heroHP=100,nextOrb=2,orbStart=null,lastHit=-2;
  const shots=[],actor={clock:0,heroShotAt:-1,spriteIdle:true};
  body.innerHTML=`<section class="cloud-encounter"><h2>${place.name} · ${role}</h2><label>${role} HP <b data-enemy-hp></b><progress max="${max}" value="${hp}"></progress></label><div class="cloud-battlefield"><canvas width="640" height="420" aria-label="Reina fighting the ${role}"></canvas></div><p data-status>Reina · 100% HP · Auto-fighting</p><button class="primary" data-burst>Celestial Arrow</button> <button data-exit>Leave battle</button></section>`;
  const canvas=body.querySelector('canvas'),ctx=canvas.getContext('2d'),burst=body.querySelector('[data-burst]');
@@ -840,6 +837,25 @@ function cloudStrike(index,slot){
   cloudArenaFloor(ctx);
   drawReina(ctx,actor,140,368,155,220);
   drawArtSprite(ctx,'guardian-t'+art,486,369,200,245);
+  if(role==='Boss'){
+   if(elapsed>=nextOrb){orbStart=elapsed;nextOrb=elapsed+3.5;}
+   if(orbStart!==null){
+    const t=(elapsed-orbStart)/.8;
+    if(t>=1){
+     heroHP-=2;lastHit=elapsed;orbStart=null;
+     body.querySelector('[data-status]').textContent='Reina · '+heroHP+'% HP · Auto-fighting';
+    }else{
+     const x=458-314*t,y=226+28*t-26*Math.sin(Math.PI*t);
+     ctx.save();ctx.strokeStyle='#ba77ff';ctx.lineWidth=5;ctx.shadowColor='#b65fff';ctx.shadowBlur=14;
+     ctx.beginPath();ctx.moveTo(x+22,y-2);ctx.lineTo(x,y);ctx.stroke();
+     ctx.fillStyle='#ffdbff';ctx.beginPath();ctx.arc(x,y,8,0,2*Math.PI);ctx.fill();ctx.restore();
+    }
+   }
+   if(elapsed-lastHit<.65){
+    ctx.save();ctx.font='bold 21px system-ui';ctx.fillStyle='#fff2fb';ctx.strokeStyle='#772654';ctx.lineWidth=4;
+    const y=178-18*(elapsed-lastHit);ctx.strokeText('−2%',132,y);ctx.fillText('−2%',132,y);ctx.restore();
+   }
+  }
   for(let i=shots.length-1;i>=0;i--){
    const t=(elapsed-shots[i].at)/.3;
    if(t>=1){hp=Math.max(0,hp-shots[i].damage);shots.splice(i,1);}
