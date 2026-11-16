@@ -283,10 +283,10 @@ async function costumePixels(url){
   return {canvas,ctx,pixels:ctx.getImageData(0,0,canvas.width,canvas.height)};
 }
 async function clothingMask(pose){
-  const [green,violet]=await Promise.all([1,3].map(i=>costumePixels(artPath('look-'+pose+'-'+i))));
+  const [green,violet,parts]=await Promise.all([costumePixels(artPath('look-'+pose+'-1')),costumePixels(artPath('look-'+pose+'-3')),costumePixels(artPath('parts-'+pose))]);
   const a=green.pixels.data,b=violet.pixels.data,mask=new Float32Array(a.length/4);
   for(let i=0;i<a.length;i+=4){
-    if(b[i+3]&&b[i+2]>b[i+1]+5){
+    if(parts.pixels.data[i]===96&&b[i+3]&&b[i+2]>b[i+1]+5){
       const change=Math.max(...[0,1,2].map(c=>Math.abs(a[i+c]-b[i+c])));
       mask[i/4]=Math.min(1,Math.max(0,(change-10)/25));
     }
@@ -390,6 +390,34 @@ function styleImage(url){
   }
   return styleSourceCache.get(url);
 }
+// The indexed artwork identifies skin (0), hair (48), dress (96), boots (144) and bow (192).
+// Every source pixel belongs to one layer. Fingers remain in the foreground at the grip.
+async function portraitLayers(body,dress,replaceHead){
+  const w=body.naturalWidth,h=body.naturalHeight;
+  const surface=()=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c};
+  const work=surface().getContext('2d',{willReadFrequently:true});
+  const map=await styleImage(artPath('parts-'+(dress||'stand')));
+  work.imageSmoothingEnabled=false;work.drawImage(map,0,0,w,h);
+  const labels=work.getImageData(0,0,w,h).data;
+  let keep;
+  if(replaceHead&&!dress){
+    const cut=await styleImage(artPath('fit-mask-stock'));
+    work.clearRect(0,0,w,h);work.drawImage(cut,0,0,w,h);
+    keep=work.getImageData(0,0,w,h).data;
+  }
+  work.clearRect(0,0,w,h);work.drawImage(body,0,0);
+  const pixels=work.getImageData(0,0,w,h).data;
+  const layers=Array.from({length:5},()=>work.createImageData(w,h));
+  for(let offset=0;offset<pixels.length;offset+=4){
+    if(!pixels[offset+3])continue;
+    const slot=Math.round(labels[offset]/48);
+    if(replaceHead&&(slot===1||keep&&!keep[offset+3]))continue;
+    const dest=layers[slot].data;
+    dest[offset]=pixels[offset];dest[offset+1]=pixels[offset+1];
+    dest[offset+2]=pixels[offset+2];dest[offset+3]=pixels[offset+3];
+  }
+  return layers.map(pixels=>{const c=surface();c.getContext('2d').putImageData(pixels,0,0);return c});
+}
 async function renderStyledPortrait(url,hair,weapon){
   const [body,head,bow]=await Promise.all([styleImage(url),hair&&styleImage(artPath('hair-style-'+hair)),weapon&&styleImage(artPath('weapon-style-'+weapon))]);
   const dress=url.match(/atelier-([a-z]+)\.webp/);
@@ -400,21 +428,16 @@ async function renderStyledPortrait(url,hair,weapon){
   c.width=Math.ceil(h*.90);c.height=Math.ceil(h*1.11);
   const ctx=c.getContext('2d');
   ctx.translate(Math.round(h*.42-w/2),Math.ceil(h*.08));
-  ctx.drawImage(body,0,0);
+  const [skin,hairLayer,dressLayer,bootsLayer,weaponLayer]=await portraitLayers(body,dress?.[1],Boolean(head));
+  if(!bow)ctx.drawImage(weaponLayer,0,0);
+  ctx.drawImage(hairLayer,0,0);
+  ctx.drawImage(bootsLayer,0,0);
+  ctx.drawImage(dressLayer,0,0);
+  ctx.drawImage(skin,0,0);
   if(head){
-    const mask=await styleImage(artPath('fit-mask-'+(dress?dress[1]:'stock')));
-    ctx.globalCompositeOperation='destination-in';ctx.drawImage(mask,0,0,w,h);
-    ctx.globalCompositeOperation='source-over';
     const height=scale*1.12*hairScale[hair-1],width=height*head.width/head.height;
     const [hx,hy]=hairChins[hair-1];ctx.drawImage(head,cx-width*hx,cy-height*hy,width,height);
   }
-  if(bow&&!dress){
-      ctx.save();ctx.scale(w/533,h/800);ctx.beginPath();
-      for(const [i,[x,y]] of [[467,28],[505,32],[477,76],[532,220],[530,289],[444,359],[429,399],[415,517],[365,562],[375,511],[396,415],[409,393],[431,343],[412,318],[466,74]].entries()){
-        if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
-      }
-      ctx.closePath();ctx.clip();ctx.clearRect(0,0,533,800);ctx.restore();
-    }
   if(bow){
     const raised=dress?.[1]==='sunweave';
     const height=h*(raised ? .47 : .56),width=height*bow.width/bow.height;
