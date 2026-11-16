@@ -321,7 +321,9 @@ async function makeCostume(url,id,pose){
 document.addEventListener('load',async event=>{
   const img=event.target;
   if(img.tagName!=='IMG')return;
-  const src=img.src,match=src.match(/(look-(stand|ride)-[2367]\.webp)#dress-([a-z]+)$/);
+  const src=img.src;
+  const plain=img.parentElement?.classList.contains('fashion-model') && !src.includes('#') && /(?:atelier-[a-z]+|look-stand-\d+|ranger-cartoon)\.webp(?:\?|$)/.test(src);
+  const match=plain?[null,0,0]:src.match(/(look-(stand|ride)-[2367]\.webp)#dress-([a-z]+)$/);
   if(!match||!fabricStyles[match[3]])return;
   try{
     if(!dressImages.has(src))dressImages.set(src,makeCostume(src.split('#')[0],match[3],match[2]));
@@ -371,7 +373,7 @@ function styleFittingRoom(set){
 }
 // Chin, hand, chin-to-crown scale and head accessory width, in each portrait's pixels.
 const portraitFit={
-  dawnpetal:[149,74,215,242,68,68],frostlace:[156,77,108,183,66,64],
+  dawnpetal:[149,74,215,242,68,68],frostlace:[156,77,206,189,66,64],
   nightbloom:[153,77,215,270,67,65],sunweave:[205,77,255,119,68,65],
   tidal:[151,76,246,219,68,65],emberveil:[155,83,215,226,68,90],
   willow:[192,79,261,223,68,66],stardust:[179,86,239,221,69,126],
@@ -392,38 +394,42 @@ async function renderStyledPortrait(url,hair,weapon){
   const [body,head,bow]=await Promise.all([styleImage(url),hair&&styleImage(artPath('hair-style-'+hair)),weapon&&styleImage(artPath('weapon-style-'+weapon))]);
   const dress=url.match(/atelier-([a-z]+)\.webp/);
   const w=body.naturalWidth,h=body.naturalHeight;
-  const [cx,cy,gx,gy,scale,cap]=dress?portraitFit[dress[1]]:[w*.49,h*.178,w*.766,h*.469,h*.17,h*.16];
-  const pad=Math.ceil(h*.24),top=Math.ceil(h*.09);
-  const c=document.createElement('canvas');c.width=w+2*pad;c.height=h+top;
-  const ctx=c.getContext('2d');ctx.translate(pad,top);ctx.drawImage(body,0,0);
+  const [cx,cy,gx,gy,scale]=dress?portraitFit[dress[1]]:[w*.49,h*.178,w*.766,h*.469,h*.17,h*.16];
+  // All combinations share one frame and the same floor line.
+  const c=document.createElement('canvas');
+  c.width=Math.ceil(h*.90);c.height=Math.ceil(h*1.11);
+  const ctx=c.getContext('2d');
+  ctx.translate(Math.round(h*.42-w/2),Math.ceil(h*.08));
+  ctx.drawImage(body,0,0);
   if(head){
-    const pixels=ctx.getImageData(pad,top,w,h),d=pixels.data;
-    for(let y=0;y<Math.min(h,cy+scale*2.4);y++)for(let x=0;x<w;x++){
-      const i=4*(y*w+x),r=d[i],g=d[i+1],b=d[i+2];
-      const hairColor=b>g*1.075 && r>g*1.045 && b>=r*.94;
-      const ribbon=g>r*1.2&&b>r*1.1;
-      if((y<cy-2&&Math.abs(x-cx)<cap*1.23)||(x<cx+scale*.52&&hairColor)||(y<cy+scale*.95&&x<cx&&ribbon))d[i+3]=0;
-    }
-    ctx.putImageData(pixels,pad,top);
-    const height=scale*hairScale[hair-1],width=height*head.width/head.height;
+    const mask=await styleImage(artPath('fit-mask-'+(dress?dress[1]:'stock')));
+    ctx.globalCompositeOperation='destination-in';ctx.drawImage(mask,0,0,w,h);
+    ctx.globalCompositeOperation='source-over';
+    const height=scale*1.12*hairScale[hair-1],width=height*head.width/head.height;
     const [hx,hy]=hairChins[hair-1];ctx.drawImage(head,cx-width*hx,cy-height*hy,width,height);
   }
-  if(bow){
-    if(!dress){
+  if(bow&&!dress){
       ctx.save();ctx.scale(w/533,h/800);ctx.beginPath();
       for(const [i,[x,y]] of [[467,28],[505,32],[477,76],[532,220],[530,289],[444,359],[429,399],[415,517],[365,562],[375,511],[396,415],[409,393],[431,343],[412,318],[466,74]].entries()){
         if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
       }
       ctx.closePath();ctx.clip();ctx.clearRect(0,0,533,800);ctx.restore();
     }
-    const height=h*.68,width=height*bow.width/bow.height;
-    ctx.drawImage(bow,gx-width*.65,gy-height*.5,width,height);
+  if(bow){
+    const raised=dress?.[1]==='sunweave';
+    const height=h*(raised ? .47 : .56),width=height*bow.width/bow.height;
+    const grip=[.63,.68,.68,.61,.62,.56,.65,.62,.65,.60][weapon-1];
+    ctx.save();ctx.translate(gx,gy);ctx.rotate((raised?32:15)*Math.PI/180);ctx.scale(-1,1);
+    ctx.globalCompositeOperation='destination-over';
+    ctx.drawImage(bow,-width*grip,-height*.5,width,height);ctx.restore();
   }
   return new Promise((resolve,reject)=>c.toBlob(blob=>blob?resolve(URL.createObjectURL(blob)):reject(Error('Portrait encoding')),'image/png'));
 }
 document.addEventListener('load',async event=>{
   const img=event.target;if(img.tagName!=='IMG')return;
-  const src=img.src,match=src.match(/#atelier-(\d+)-(\d+)$/);if(!match)return;
+  const src=img.src;
+  const plain=img.parentElement?.classList.contains('fashion-model') && !src.includes('#') && /(?:atelier-[a-z]+|look-stand-\d+|ranger-cartoon)\.webp(?:\?|$)/.test(src);
+  const match=plain?[null,0,0]:src.match(/#atelier-(\d+)-(\d+)$/);if(!match)return;
   if(!styleRenderCache.has(src))styleRenderCache.set(src,renderStyledPortrait(src.split('#')[0],+match[1],+match[2]));
   try{const result=await styleRenderCache.get(src);if(img.src===src)img.src=result}
   catch{styleRenderCache.delete(src)}

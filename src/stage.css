@@ -5907,7 +5907,7 @@ body[data-screen=home] #stage .hero-visual button.fashion-sale-link {position:ab
 .reina-atelier{max-width:920px;margin:auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(270px,1fr);overflow:hidden;border:2px solid #caa564;border-radius:18px;background:#223a39;color:#fff2cc}
 .atelier-portrait{text-align:center;background:radial-gradient(ellipse at 50% 65%,#577a82,#384461 60%,#212b3d);padding:16px}
 .atelier-portrait h1,.atelier-controls h2{margin:0 0 .5em;color:#ffe6aa}
-.atelier-portrait img{height:clamp(180px,48vh,460px);width:100%;object-fit:contain}
+.atelier-portrait .fashion-model>img{display:block;height:clamp(180px,53dvh,505px);width:100%;object-fit:contain}
 .atelier-controls{align-self:center;padding:clamp(12px,3vw,28px)}
 .atelier-controls fieldset{border:0;border-top:1px solid #7d7556;margin:12px 0;padding:6px 0}
 .atelier-controls legend{padding-right:.75em;color:#f5d99c;font-weight:700}
@@ -5915,7 +5915,7 @@ body[data-screen=home] #stage .hero-visual button.fashion-sale-link {position:ab
 .atelier-controls button{min-width:0;flex:1;min-height:42px}
 .atelier-controls button[aria-pressed=true]{outline:2px solid #ffdb80;outline-offset:-2px;background:linear-gradient(#977343,#624821)}
 .atelier-controls small{display:block;font-size:.78em;margin-top:3px}
-@media(max-width:610px){.reina-atelier{display:block}.atelier-portrait img{height:clamp(155px,30dvh,270px)}.atelier-controls fieldset{margin:5px 0}.atelier-portrait{padding:8px}}
+@media(max-width:610px){.reina-atelier{display:block}.atelier-portrait .fashion-model>img{height:clamp(155px,33dvh,295px)}.atelier-controls fieldset{margin:5px 0}.atelier-portrait{padding:8px}}
 
 body[data-screen=home] #stage :is(header,footer,#nav){display:none!important}
 body[data-screen=home] #stage #main{position:absolute!important;inset:0!important;height:100%!important;width:100%!important;max-width:none;margin:0;padding:0!important;overflow:hidden}
