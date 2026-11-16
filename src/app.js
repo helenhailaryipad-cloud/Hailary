@@ -155,7 +155,7 @@ function fashionShowcase({portrait,alt,title,bonus,owned,price,equipped,action,c
     return `<div><span>${label}</span><b>${fmt(current[stat])}</b><em>${change>0?'+'+change:change||''}</em></div>`;
   }).join('');
   return `<section class="fashion-showcase" data-category="${category}">
-    <div class="fashion-stage"><div class="fashion-model"><span class="fashion-plumes">${wingArt(fashionWing())}</span><img src="${portrait}" alt="${alt}"></div><span class="fashion-power">${uiIcon('power')} ${fmt(current.power)}</span></div>
+    <div class="fashion-stage"><div class="fashion-model">${category==='Dresses'?'':`<span class="fashion-plumes">${wingArt(fashionWing())}</span>`}<img src="${portrait}" alt="${alt}"></div><span class="fashion-power">${uiIcon('power')} ${fmt(current.power)}</span></div>
     <div class="fashion-detail"><div class="fashion-values">${rows}</div><div class="fashion-selection"><h2>${title}</h2><small>${bonus?bonus+' · ':''}${owned?'Owned':fmt(price)+' gold'}</small><button class="primary" ${equipped||(!owned&&S.gold<price)?'disabled':''} onclick="${action}">${equipped?'Equipped':owned?'Equip':'Buy &amp; equip'}</button></div></div>
     <div class="fashion-picker">${screen==='fashion'?`<div class="fashion-tabs" role="group" aria-label="Fashion categories">${tabs}</div>`:''}<div class="fashion-cards">${cards}</div></div>${extra}</section>`;
 }
