@@ -830,6 +830,13 @@ function cloudStrike(index,slot){
   const hits=S.cloudWarHits[index]??=Array(10).fill(0);
   if(!(hits[slot]>=limit)){hits[slot]=limit;save();}
   cityCloudWar();
+  if(role==='Boss'){
+   body.innerHTML=`<section class="cloud-boss-prize" aria-labelledby="cloud-prize-title"><h2 id="cloud-prize-title">Boss defeated</h2><div class="cloud-prize-chests" role="img" aria-label="Reward chests"><img src="${artPath('left-superpack')}" alt=""><img src="${artPath('left-superpack')}" alt=""></div><p>+${cloudEnemyScore.Boss} territory points</p><button class="primary" data-continue>Continue</button></section>`;
+   const next=body.querySelector('[data-continue]');
+   next.onclick=()=>{body.innerHTML=cloudPortalPreview(place,index);body.querySelector('button:not([disabled])')?.focus();};
+   next.focus();
+   return;
+  }
   body.innerHTML=`<h2>Victory · ${role}</h2><p>+${cloudEnemyScore[role]} territory points</p>`+cloudPortalPreview(place,index);
  }
  requestAnimationFrame(frame);
