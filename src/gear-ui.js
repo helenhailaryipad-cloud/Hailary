@@ -843,6 +843,14 @@ function cloudFourBoard(nodes){
  for(const [top,bottom] of [[0,12],[6,18]]){
   for(const slot of [0,2,5])roads.push(route(top+slot,bottom+slot,'#ffe7aa'));
  }
+ const ships=cloudFactions.map((faction,sector)=>{
+  const first=sector*6+3, island=nodes[first];
+  const x=sector%2?450:150,y=sector<2?27:768;
+  const endX=island.x*6,endY=island.y*8;
+  const trail=`M ${x} ${y} Q ${x} ${(y+endY)/2} ${endX} ${endY}`;
+  roads.push(`<g fill="none" stroke-linecap="round"><path d="${trail}" stroke="${island.color}" stroke-width="9" opacity=".5" filter="url(#cloudRoadGlow)"/><path d="${trail}" stroke="${island.color}" stroke-width="4"/><path d="${trail}" stroke="#fff7db" stroke-width="2" stroke-dasharray="2 6"/></g>`);
+  return `<g transform="translate(${x} ${y})" role="button" tabindex="0" aria-label="${faction[0]} skyship to ${island.name}" onclick="cloudTerritory(${first})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();cloudTerritory(${first})}" style="cursor:pointer"><rect x="-32" y="-24" width="64" height="54" fill="transparent"/><image href="assets/generated/hud-isle-skyship.webp" x="-24" y="-24" width="48" height="43"/><text y="29" fill="${island.color}" stroke="#152333" stroke-width="3" paint-order="stroke" font-size="11" font-weight="bold">${faction[0]}</text></g>`;
+ }).join('');
  const markers=nodes.map((p,i)=>{
   const city=p.rank==='Capital',island=p.rank==='Island';
   const faction=p.owner.toLowerCase();
@@ -852,7 +860,7 @@ function cloudFourBoard(nodes){
   const size=city?100:island?48:65,label=p.name,width=city?133:82;
   return `<g transform="translate(${p.x*6} ${p.y*8})" role="button" tabindex="0" aria-label="${p.owner}: ${p.name}, ${p.rank}" onclick="cloudTerritory(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();cloudTerritory(${i})}" style="cursor:pointer"><rect x="${-width/2}" y="${-size*.65}" width="${width}" height="${size+24}" fill="transparent"/><image href="assets/generated/${asset}.webp" x="${-size/2}" y="${-size*.67}" width="${size}" height="${size}"/><rect x="${-width/2}" y="${size*.3}" width="${width}" height="36" rx="5" fill="#192d38" stroke="${p.color}" stroke-width="1.5"/><text x="0" y="${size*.3+14}" fill="#fff3ce" font-size="${city?16:13}" font-weight="bold">${label}</text><text y="${size*.3+29}" fill="${p.color}" font-size="12">${city?p.owner:p.rank}</text></g>`;
  }).join('');
- return `<svg class="cloud-four-board" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid meet" role="group" aria-label="Four faction territories" text-anchor="middle" font-family="system-ui"><defs><filter id="cloudRoadGlow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3"/></filter><radialGradient id="cloudWarSky" cx="50%" cy="50%" r="70%"><stop stop-color="#2b4359"/><stop offset=".56" stop-color="#203449"/><stop offset="1" stop-color="#121f30"/></radialGradient></defs><rect width="600" height="800" fill="url(#cloudWarSky)"/>${roads.join('')}${markers}</svg>`;
+ return `<svg class="cloud-four-board" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid meet" role="group" aria-label="Four faction territories" text-anchor="middle" font-family="system-ui"><defs><filter id="cloudRoadGlow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3"/></filter><radialGradient id="cloudWarSky" cx="50%" cy="50%" r="70%"><stop stop-color="#2b4359"/><stop offset=".56" stop-color="#203449"/><stop offset="1" stop-color="#121f30"/></radialGradient></defs><rect width="600" height="800" fill="url(#cloudWarSky)"/>${roads.join('')}${ships}${markers}</svg>`;
 }
 function cloudLinkedMap(nodes){
  const links=[[0,1],[0,2],[1,3],[1,4],[2,3],[2,5]];
@@ -880,9 +888,8 @@ function cityCloudWar(){
  $('#main').innerHTML='<section class="cloud-war"><div class="cloud-heading"><strong>Cloud War</strong><small>'+ (cloudCount===4?'Daily Carnage Points · 1200':'Battle starts at 19:30')+'</small></div><div class="cloud-tabs" role="group" aria-label="Faction count">'+[2,3,4].map(n=>'<button aria-pressed="'+(cloudCount===n)+'" onclick="cloudCount='+n+';cityCloudWar()">'+n+' Factions</button>').join('')+'</div><div class="cloud-field map-'+cloudCount+'"><div class="cloud-map-plane">'+(cloudCount===4?cloudFourBoard(nodes):cloudCount===2?cloudLinkedMap(nodes):markers)+'</div></div><div class="cloud-actions"><button aria-label="Back to city" onclick="go(\'home\')">‹</button><button onclick="cloudBrief('+[3,2,4].indexOf(cloudCount)+')">War Guide</button></div></section>';
  if(cloudCount===4){
   const field=$('.cloud-field.map-4');
-  const board=field.firstElementChild;
-  field.scrollLeft=offset?offset[0]:(board.offsetWidth-field.clientWidth)/2;
-  field.scrollTop=offset?offset[1]:(board.offsetHeight-field.clientHeight)/2;
+  field.scrollLeft=offset?offset[0]:0;
+  field.scrollTop=offset?offset[1]:0;
  }
 
 }
