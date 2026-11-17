@@ -446,7 +446,7 @@ const fittingTemplate={width:500,height:800,body:{x:0,y:40,width:500,height:750}
   hand:[[199,289],[215,279],[233,279],[245,283],[247,289],[230,289],[244,295],[247,301],[238,302],[246,307],[244,313],[235,313],[244,319],[240,323],[223,317],[211,317],[201,324],[189,318]]};
 let fittingControlDress='grove',fittingControlHair=1;
 const fittingDresses=[['base','Base swimsuit'],['grove','Emerald Leaves'],['frostlace','Amethyst Lace']];
-const fittingHairs=[[0,'No hair'],[1,'Chestnut Pixie'],[2,'Pearl Bun']];
+const fittingHairs=[[1,'Chestnut Pixie'],[2,'Pearl Bun']];
 async function composeRegisteredReina(dress,hair){
   const ids=['body',...(dress==='base'?[]:[dress]),...(hair?['hair-'+hair]:[])];
   const layers=await Promise.all(ids.map(id=>styleImage(artPath('fit-control-'+id))));
@@ -495,9 +495,24 @@ function styleImage(url){
   return styleSourceCache.get(url);
 }
 // Every standing Reina uses the same complete body, including its head.
-function registeredLook(){return S.reinaLayers||{dress:'grove',hair:1};}
+function registeredLook(){const look=S.reinaLayers||{dress:'grove',hair:1};return {...look,hair:look.hair===2?2:1};}
+const readyRegisteredLooks=new Map();
+let fashionPreviewRequest=0;
+async function previewRegisteredHair(hair){
+  const request=++fashionPreviewRequest,look=registeredLook();
+  if(!fittingHairs.some(([id])=>id===hair))return;
+  const key=artPath('fit-control-body')+'#registered-'+look.dress+'-'+hair+'-0';
+  try{
+    const result=await renderRegisteredLook(look.dress,hair,0);
+    await styleImage(result);readyRegisteredLooks.set(key,result);
+    if(request!==fashionPreviewRequest||screen!=='fashion'||fashionCategory!=='Hair')return;
+    stylePick=hair;reinaAtelier();
+  }catch{toast('Could not load hairstyle. Please try again.');}
+}
 function registeredLookPath(dress=registeredLook().dress,hair=registeredLook().hair,weapon=0){
-  return artPath('fit-control-body')+'#registered-'+dress+'-'+hair+'-'+weapon;
+  hair=hair===2?2:1;
+  const key=artPath('fit-control-body')+'#registered-'+dress+'-'+hair+'-'+weapon;
+  return readyRegisteredLooks.get(key)||key;
 }
 async function renderRegisteredLook(dress,hair,weapon){
   const portrait=await styleImage(await composeRegisteredReina(dress,hair));
@@ -518,7 +533,7 @@ document.addEventListener('load',async event=>{
   const src=img.src,match=src.match(/#registered-(base|grove|frostlace)-(0|1|2)-(\d+)$/);
   if(!match)return;
   if(!styleRenderCache.has(src))styleRenderCache.set(src,renderRegisteredLook(match[1],+match[2],+match[3]));
-  try{const result=await styleRenderCache.get(src);if(img.src===src)img.src=result;}
+  try{const result=await styleRenderCache.get(src);readyRegisteredLooks.set(src,result);if(img.src===src)img.src=result;}
   catch{styleRenderCache.delete(src);img.alt='Could not load Reina. Please reopen Fashion.';}
 },true);
 function reinaLookPath(riding,mask=S.reinaFashion?.equipped||0,shared=S.costumes?.equipped?.reina,styles=S.atelier){
@@ -537,7 +552,7 @@ function registeredFashionRoom(){
   const dress=isHair?look.dress:chosen,hair=isHair?chosen:look.hair;
   const owned=isHair?chosen<=1||styleOwned(styleSets.Hair,chosen):chosen!=='frostlace'||ownsOutfit('frostlace');
   const price=isHair?400:1200;
-  const cards=choices.map(([id,name])=>fashionCard(name,isHair?(id?artPath('hair-style-'+id):artPath('fit-control-body')):artPath('fit-control-'+(id==='base'?'body':id)),chosen===id,isHair?`stylePick=${id};reinaAtelier()`:`clothingPreview='${id}';reinaAtelier()`)).join('');
+  const cards=choices.map(([id,name])=>fashionCard(name,isHair?(id?artPath('hair-style-'+id):artPath('fit-control-body')):artPath('fit-control-'+(id==='base'?'body':id)),chosen===id,isHair?`previewRegisteredHair(${id})`:`clothingPreview='${id}';reinaAtelier()`)).join('');
   const bonus=isHair?(chosen?styleSets.Hair.bonus:''):(chosen==='frostlace'?'+'+WonderGear.fashionTraits.clothing+' Defense':'');
   return fashionShowcase({portrait:registeredLookPath(dress,hair),alt:'Reina · '+choices.find(([id])=>id===chosen)[1],title:choices.find(([id])=>id===chosen)[1],bonus,owned,price,equipped:chosen===(isHair?look.hair:look.dress),action:`wearRegisteredLook('${dress}',${hair})`,cards});
 }

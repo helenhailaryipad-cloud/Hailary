@@ -61,7 +61,9 @@ if(S.reinaLayers.dress!=='frostlace'||S.reinaLayers.hair!==2||!valid(S)||!reinaL
 changeFashionTab('Dresses');wearRegisteredLook('base',2);
 if(S.reinaLayers.dress!=='base'||S.reinaLayers.hair!==2||S.gold!==afterHair)throw Error('Base swimsuit must keep hair and cost nothing');
 changeFashionTab('Hair');wearRegisteredLook('base',0);
-if(S.reinaLayers.hair!==0||S.reinaLayers.dress!=='base'||S.gold!==afterHair)throw Error('Bald base must retain the intact body');
+if(S.reinaLayers.hair!==2||S.reinaLayers.dress!=='base'||S.gold!==afterHair)throw Error('Bald selection must be rejected');
+S.reinaLayers.hair=0;if(registeredLook().hair!==1)throw Error('Legacy bald appearance must use a hairstyle');
+if(fittingHairs.some(([id])=>id===0))throw Error('No bald option in Fashion');
 S=defaults();
 const namedLegacy={...defaults(),name:'Reyna',gold:1234,xp:456};const legacyBefore=JSON.stringify({...namedLegacy,name:'REINA'});normalizeAdventure(namedLegacy);if(JSON.stringify(namedLegacy)!==legacyBefore)throw Error('Name correction must preserve progress');if(normalizeAdventure({...defaults(),name:'Nyra'}).name!=='Nyra')throw Error('Keep custom hero names');if(comparable({...defaults(),name:'REINA'})!==comparable(normalizeAdventure({...defaults(),name:'Reyna'})))throw Error('Name correction must not create cloud conflict');
 S=defaults();home();const progressBeforeIntro=JSON.stringify(S);const introPrefs=new Map(),originalGet=localStorage.getItem,originalSet=localStorage.setItem;localStorage.getItem=k=>introPrefs.get(k)||null;localStorage.setItem=(k,v)=>introPrefs.set(k,String(v));chooseIntro('2d');if(storedIntroStyle()!=='2d'||screen!=='home'||document.querySelector('#main').innerHTML.includes('id="intro3d"')||JSON.stringify(S)!==progressBeforeIntro)throw Error('2D return preserves adventure');openScreen('intro');chooseIntro('3d');if(storedIntroStyle()!=='2d'||screen!=='home'||document.querySelector('#main').innerHTML.includes('id="intro3d"')||JSON.stringify(S)!==progressBeforeIntro)throw Error('Retired 3D preference must return to 2D and preserve adventure');localStorage.getItem=originalGet;localStorage.setItem=originalSet;
