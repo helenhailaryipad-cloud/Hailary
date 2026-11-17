@@ -440,18 +440,8 @@ function styleFittingRoom(set){
   const portrait=reinaLookPath(false,pick===-1?mask|set.bit:mask,currentDress(),look);
   return fashionShowcase({portrait,alt:'Reina · '+name(pick),title:name(pick),bonus:pick?set.bonus:'',owned,price:set.price,equipped,action:'wearStyle()',cards,extra:screen==='citySkin'?`<button onclick="switchSkin(skinTab,'Morphing',skinVariant)">Back to Holy Weapon</button>`:''});
 }
-// Chin, hand, chin-to-crown scale and head accessory width, in each portrait's pixels.
-const portraitFit={
-  dawnpetal:[149,74,215,242,68,68],frostlace:[156,77,206,189,66,64],
-  nightbloom:[153,77,215,270,67,65],sunweave:[205,77,255,119,68,65],
-  tidal:[151,76,246,219,68,65],emberveil:[155,83,215,226,68,90],
-  willow:[192,79,261,223,68,66],stardust:[179,86,239,221,69,126],
-  pearl:[153,75,249,227,67,68],sapphire:[153,78,212,241,66,67]
-};
-// Eye centers in the original artwork, used to register every hairstyle to the face.
-const outfitEyes={"dawnpetal": [134.27, 44.44, 157.37, 48.61], "frostlace": [144.38, 43.75, 166.88, 48.61], "nightbloom": [132.94, 43.75, 155.35, 48.61], "sunweave": [177.5, 43.06, 199.69, 47.92], "tidal": [140.4, 43.06, 162.0, 47.92], "emberveil": [139.15, 50.0, 163.35, 54.17], "willow": [180.95, 44.44, 203.57, 50.0], "stardust": [158.68, 61.11, 181.35, 65.28], "pearl": [150.5, 44.44, 173.08, 50.0], "sapphire": [132.3, 43.75, 155.92, 49.31]};
 const hairstyleEyes=[[81.38, 79.2, 118.19, 88.0], [79.44, 112.0, 118.19, 120.53], [82.34, 75.35, 122.06, 83.72], [94.94, 79.17, 125.94, 86.67], [81.38, 78.4, 117.22, 86.4], [84.28, 88.14, 124.0, 98.34], [77.5, 74.94, 110.44, 82.83], [83.31, 58.1, 110.44, 65.1], [79.89, 82.76, 118.39, 90.38], [68.34, 109.98, 105.61, 117.6]];
-const hairTones=[[126,68,43],[210,180,157],[161,49,82],[195,103,44],[70,60,80],[211,163,94],[82,98,147],[214,120,159],[51,133,126],[66,54,68]];
+const fittedGrips={"grove": [375, 337], "violet": [373, 337], "dawnpetal": [353, 350], "frostlace": [389, 319], "nightbloom": [370, 327], "sunweave": [377, 328], "tidal": [376, 338], "emberveil": [356, 337], "willow": [376, 339], "stardust": [349, 330], "pearl": [360, 331], "sapphire": [345, 338]};
 const styleRenderCache=new Map(),styleSourceCache=new Map();
 function styleImage(url){
   if(!styleSourceCache.has(url)){
@@ -460,107 +450,51 @@ function styleImage(url){
   }
   return styleSourceCache.get(url);
 }
-// The indexed artwork identifies skin (0), hair (48), dress (96), boots (144) and bow (192).
-// Every source pixel belongs to one layer. Fingers remain in the foreground at the grip.
-async function portraitLayers(body,dress,hair){
-  const w=body.naturalWidth,h=body.naturalHeight;
-  const surface=()=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c};
-  const work=surface().getContext('2d',{willReadFrequently:true});
-  const map=await styleImage(artPath('parts-'+(dress||'stand')));
-  work.imageSmoothingEnabled=false;work.drawImage(map,0,0,w,h);
-  const labels=work.getImageData(0,0,w,h).data;
-  work.clearRect(0,0,w,h);work.drawImage(body,0,0);
-  const pixels=work.getImageData(0,0,w,h).data;
-  const eyes=dress?outfitEyes[dress]:[w*.465,h*.097,w*.529,h*.109];
-  const layers=Array.from({length:5},()=>work.createImageData(w,h));
-  for(let offset=0;offset<pixels.length;offset+=4){
-    if(!pixels[offset+3])continue;
-    const slot=Math.round(labels[offset]/48);
-    // The hair label includes rear locks crossing the shoulder, as well as
-    // small pieces of clothing and bowstring. Preserve the painted silhouette
-    // below the face and replace only the crown around the original eyes.
-    let alpha=pixels[offset+3];
-    if(hair&&slot===1){
-      const x=(offset/4)%w,y=Math.floor(offset/4/w);
-      const [lx,ly,rx,ry]=eyes;
-      const span=Math.hypot(rx-lx,ry-ly);
-      const dx=(x-(lx+rx)/2)/span;
-      if(Math.abs(dx)<2.8){
-        const edge=(ly+ry)/2+span*(1.45-Math.min(1,Math.abs(dx)/2));
-        alpha*=Math.max(0,Math.min(1,(y-edge)/(span*.2)));
-      }
-      if(!alpha)continue;
-    }
-    const dest=layers[slot].data;
-    dest[offset]=pixels[offset];dest[offset+1]=pixels[offset+1];
-    dest[offset+2]=pixels[offset+2];dest[offset+3]=alpha;
-    if(hair&&slot===1){
-      const r=pixels[offset],g=pixels[offset+1],b=pixels[offset+2];
-      if(b>=g&&r>=g&&r-g<68&&Math.abs(b-r)<86){
-        const tone=hairTones[hair-1];
-        const light=(r*.30+g*.59+b*.11)/255;
-        for(let c=0;c<3;c++)dest[offset+c]=light<.62?tone[c]*light/.62:tone[c]+(255-tone[c])*(light-.62)/.38;
-      }
-    }
+// The source URL always shows a complete outfit, even while the new layers decode.
+async function renderFitting(dress,hair,weapon){
+  const classic=hair===0||hair===11;
+  const headId=classic?'fitting-hair-'+(hair===11?'lilac':'silver'):'hair-style-'+hair;
+  const [body,head,bow]=await Promise.all([
+    styleImage(artPath('fitting-'+dress)),styleImage(artPath(headId)),
+    styleImage(artPath(weapon>0&&weapon<=10?'weapon-style-'+weapon:'atelier-icon-'+(weapon===11?'frost':'gold')))
+  ]);
+  const canvas=document.createElement('canvas');
+  canvas.width=500;canvas.height=660;
+  const ctx=canvas.getContext('2d');
+  ctx.imageSmoothingQuality='high';
+  ctx.drawImage(body,0,0);
+  if(classic){ctx.drawImage(head,155,28,157,157)}
+  else{
+    const [x,y,rightX,rightY]=hairstyleEyes[hair-1];
+    const scale=27.8/Math.hypot(rightX-x,rightY-y);
+    ctx.drawImage(head,234-x*scale,112-y*scale,head.width*scale,head.height*scale);
   }
-  return layers.map(pixels=>{const c=surface();c.getContext('2d').putImageData(pixels,0,0);return c});
-}
-async function renderStyledPortrait(url,hair,weapon){
-  const [body,head,bow]=await Promise.all([styleImage(url),hair&&styleImage(artPath('hair-style-'+hair)),weapon&&styleImage(artPath('weapon-style-'+weapon))]);
-  const dress=url.match(/atelier-([a-z]+)\.webp/);
-  const w=body.naturalWidth,h=body.naturalHeight;
-  const [cx,cy,gx,gy,scale]=dress?portraitFit[dress[1]]:[w*.49,h*.178,w*.766,h*.469,h*.17,h*.16];
-  // All combinations share one frame and the same floor line.
-  const c=document.createElement('canvas');
-  c.width=Math.ceil(Math.max(h*.90,w+h*.12));c.height=Math.ceil(h*1.11);
-  const ctx=c.getContext('2d');
-  ctx.translate(Math.round((c.width-w)/2),Math.ceil(h*.08));
-  if(!head&&!bow){
-    ctx.drawImage(body,0,0);
-    return URL.createObjectURL(await new Promise(resolve=>c.toBlob(resolve,'image/png')));
-  }
-  const [skin,hairLayer,dressLayer,bootsLayer,weaponLayer]=await portraitLayers(body,dress?.[1],hair);
-  ctx.drawImage(hairLayer,0,0);
-  ctx.drawImage(bootsLayer,0,0);
-  ctx.drawImage(dressLayer,0,0);
-  ctx.drawImage(skin,0,0);
-  if(head){
-    const [sx,sy,ex,ey]=hairstyleEyes[hair-1];
-    const [tx,ty,ux,uy]=dress?outfitEyes[dress[1]]:[w*.465,h*.097,w*.529,h*.109];
-    const ratio=Math.hypot(ux-tx,uy-ty)/Math.hypot(ex-sx,ey-sy);
-    const angle=Math.atan2(uy-ty,ux-tx)-Math.atan2(ey-sy,ex-sx);
-    ctx.save();ctx.translate(tx,ty);ctx.rotate(angle);ctx.scale(ratio,ratio);
-    ctx.drawImage(head,-sx,-sy);ctx.restore();
-  }
-  if(bow){
-    const raised=dress?.[1]==='sunweave';
-    const height=h*(raised ? .47 : .56),width=height*bow.width/bow.height;
-    const grip=[.63,.68,.68,.61,.62,.56,.65,.62,.65,.60][weapon-1];
-    ctx.save();ctx.translate(gx,gy);ctx.rotate((raised?32:15)*Math.PI/180);ctx.scale(-1,1);
-    ctx.drawImage(bow,-width*grip,-height*.5,width,height);ctx.restore();
-    // Only the hand closes over the grip. The rest of the bow stays in front.
-    ctx.save();ctx.beginPath();ctx.ellipse(gx,gy,h*.024,h*.027,0,0,Math.PI*2);ctx.clip();
-    ctx.drawImage(skin,0,0);ctx.restore();
-  }else{
-    ctx.drawImage(weaponLayer,0,0);
-  }
-  return new Promise((resolve,reject)=>c.toBlob(blob=>blob?resolve(URL.createObjectURL(blob)):reject(Error('Portrait encoding')),'image/png'));
+  const [x,y]=fittedGrips[dress];
+  const height=273,width=height*bow.width/bow.height;
+  ctx.save();ctx.translate(x,y);ctx.rotate(.19);ctx.scale(-1,1);
+  const grip=[.63,.68,.68,.61,.62,.56,.65,.62,.65,.60][weapon-1]??.50;
+  ctx.drawImage(bow,-width*grip,-height/2,width,height);ctx.restore();
+  ctx.save();ctx.beginPath();ctx.ellipse(x,y,8,9,0,0,Math.PI*2);ctx.clip();
+  ctx.drawImage(body,0,0);ctx.restore();
+  const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+  if(!blob)throw Error('Portrait encoding');
+  return URL.createObjectURL(blob);
 }
 document.addEventListener('load',async event=>{
   const img=event.target;if(img.tagName!=='IMG')return;
   const src=img.src;
-  const plain=img.parentElement?.classList.contains('fashion-model') && !src.includes('#') && /(?:atelier-[a-z]+|look-stand-\d+|ranger-cartoon)\.webp(?:\?|$)/.test(src);
-  const match=plain?[null,0,0]:src.match(/#atelier-(\d+)-(\d+)$/);if(!match)return;
-  if(!styleRenderCache.has(src))styleRenderCache.set(src,renderStyledPortrait(src.split('#')[0],+match[1],+match[2]));
+  const match=src.match(/atelier-([a-z]+)\.webp#atelier-(\d+)-(\d+)$/);
+  if(!match||!fittedGrips[match[1]])return;
+  if(!styleRenderCache.has(src))styleRenderCache.set(src,renderFitting(match[1],+match[2],+match[3]));
   try{const result=await styleRenderCache.get(src);if(img.src===src)img.src=result}
   catch{styleRenderCache.delete(src)}
 },true);
 function reinaLookPath(riding, mask=S.reinaFashion?.equipped || 0, shared=S.costumes?.equipped?.reina,styles=S.atelier){
-  if(!riding&&(styles?.hair||styles?.weapon)){
-    const base=(mask&2)&&outfitCatalog[shared]?.reinaOnly?artPath('atelier-'+shared):artPath(mask?'look-stand-'+mask:styles.hair?'look-stand-1':'reina');
-    return base+'#atelier-'+(styles.hair||0)+'-'+(styles.weapon||0);
+  if(!riding&&(!(mask&2)||!shared||shared==='moonblossom'||outfitCatalog[shared]?.reinaOnly)){
+    const dress=(mask&2)?(outfitCatalog[shared]?.reinaOnly?shared:'violet'):'grove';
+    const hair=styles?.hair||((mask&1)?11:0),weapon=styles?.weapon||((mask&4)?11:0);
+    return artPath('atelier-'+dress)+'#atelier-'+hair+'-'+weapon;
   }
-  if((mask & 2) && outfitCatalog[shared]?.reinaOnly && !riding)return artPath('atelier-'+shared);
   if((mask & 2) && outfitCatalog[shared]?.reinaOnly)return artPath('look-'+(riding?'ride':'stand')+'-'+mask)+'#dress-'+shared;
   if((mask & 2) && shared && shared!=='moonblossom' && outfitCatalog[shared]){
     return artPath('look-'+(riding?'ride':'stand')+'-'+mask)+(riding&&[2,3,6,7].includes(mask)?'&':'?')+'outfit='+shared;
