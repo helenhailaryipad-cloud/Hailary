@@ -18,6 +18,22 @@ for (const [url, asset] of Object.entries(ASSETS)) {
   asset.type = 'image/avif';
   asset.content = fs.readFileSync(compact).toString('base64');
 }
+// Keep full-resolution fitting artwork within the Worker bundle limit.
+// Script-mode minification preserves top-level names used by inline handlers.
+if (process.argv.includes('--hosted')) {
+  const {transform} = await import('esbuild');
+  for (const [url, asset] of Object.entries(ASSETS)) {
+    if (asset.base64 || !/\.(js|css)$/.test(url)) continue;
+    asset.content = (await transform(asset.content, {
+      loader: url.endsWith('.css') ? 'css' : 'js',
+      minifyWhitespace: true,
+      minifySyntax: true,
+      minifyIdentifiers: true,
+      legalComments: 'none',
+      target: 'es2022'
+    })).code;
+  }
+}
 const hash = createHash('sha256');
 for (const [url, asset] of Object.entries(ASSETS).sort(([a],[b]) => a.localeCompare(b))) {
   hash.update(url).update(asset.content);

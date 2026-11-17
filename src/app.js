@@ -159,7 +159,7 @@ function fashionShowcase({portrait,alt,title,bonus,owned,price,equipped,action,c
   return `<section class="fashion-showcase" data-category="${category}">
     ${stage||`<div class="fashion-stage"><div class="fashion-model"><img src="${portrait}" alt="${alt}"></div><span class="fashion-power">${uiIcon('power')} ${fmt(current.power)}</span></div>`}
     <div class="fashion-detail"><div class="fashion-values">${rows}</div><div class="fashion-selection"><h2>${title}</h2><small>${bonus?bonus+' · ':''}${owned?'Owned':fmt(price)+' gold'}</small><button class="primary" ${equipped||(!owned&&S.gold<price)?'disabled':''} onclick="${action}">${equipped?'Equipped':owned?'Equip':'Buy &amp; equip'}</button></div></div>
-    <div class="fashion-picker">${screen==='fashion'?`<div class="fashion-tabs" role="group" aria-label="Fashion categories">${tabs}</div>`:''}<div class="fashion-cards">${cards}</div></div>${extra}</section>`;
+    <div class="fashion-picker"><button class="fit-control-entry" onclick="openFittingControl()">New fitting</button>${screen==='fashion'?`<div class="fashion-tabs" role="group" aria-label="Fashion categories">${tabs}</div>`:''}<div class="fashion-cards">${cards}</div></div>${extra}</section>`;
 }
 function fittingRoom(){
   const selected=clothingPreview??currentDress();
@@ -439,6 +439,31 @@ function styleFittingRoom(set){
   const look={...S.atelier,[set.slot]:Math.max(0,pick)};
   const portrait=reinaLookPath(false,pick===-1?mask|set.bit:mask,currentDress(),look);
   return fashionShowcase({portrait,alt:'Reina · '+name(pick),title:name(pick),bonus:pick?set.bonus:'',owned,price:set.price,equipped,action:'wearStyle()',cards,extra:screen==='citySkin'?`<button onclick="switchSkin(skinTab,'Morphing',skinVariant)">Back to Holy Weapon</button>`:''});
+}
+// Control fitting uses one registered full-body model and clothing-only layers.
+let fittingControlDress='grove',fittingControlHair=1;
+async function openFittingControl(dress=fittingControlDress,hair=fittingControlHair){
+  if(!['grove','frostlace'].includes(dress)||![1,2].includes(hair))return;
+  fittingControlDress=dress;fittingControlHair=hair;
+  const previous=document.querySelector('.fit-control-portrait')?.src;
+  $('#main').innerHTML=`<section class="fit-control">
+    <header><h2>Reina · Fitting preview</h2><button onclick="reinaAtelier()">Back</button></header>
+    <div class="fit-control-stage"><img class="fit-control-portrait" src="${previous||artPath('atelier-grove')}" alt="Reina wearing the selected dress and hairstyle"><span class="fit-control-status" role="status">Preparing outfit…</span></div>
+    <div class="fit-control-options"><fieldset><legend>Dresses</legend>${[['grove','Emerald Leaves'],['frostlace','Amethyst Lace']].map(([id,name])=>`<button aria-pressed="${dress===id}" onclick="openFittingControl('${id}',${hair})"><img src="${artPath('fit-control-'+id)}" alt=""><small>${name}</small></button>`).join('')}</fieldset>
+    <fieldset><legend>Hair</legend>${[[1,'Chestnut Pixie'],[2,'Pearl Bun']].map(([id,name])=>`<button aria-pressed="${hair===id}" onclick="openFittingControl('${dress}',${id})"><img src="${artPath('hair-style-'+id)}" alt=""><small>${name}</small></button>`).join('')}</fieldset></div>
+  </section>`;
+  const target=document.querySelector('.fit-control-portrait');
+  try{
+    const layers=await Promise.all(['body',dress,'hand','hair-'+hair].map(id=>styleImage(artPath('fit-control-'+id))));
+    const canvas=document.createElement('canvas');canvas.width=500;canvas.height=800;
+    const ctx=canvas.getContext('2d');
+    for(const layer of layers)ctx.drawImage(layer,0,0);
+    if(!target.isConnected)return;
+    target.src=canvas.toDataURL('image/png');
+    document.querySelector('.fit-control-status').textContent='';
+  }catch{
+    if(target.isConnected)document.querySelector('.fit-control-status').textContent='Could not load this outfit. Tap its icon to retry.';
+  }
 }
 const hairstyleEyes=[[81.38, 79.2, 118.19, 88.0], [79.44, 112.0, 118.19, 120.53], [82.34, 75.35, 122.06, 83.72], [94.94, 79.17, 125.94, 86.67], [81.38, 78.4, 117.22, 86.4], [84.28, 88.14, 124.0, 98.34], [77.5, 74.94, 110.44, 82.83], [83.31, 58.1, 110.44, 65.1], [79.89, 82.76, 118.39, 90.38], [68.34, 109.98, 105.61, 117.6]];
 const fittedGrips={"grove": [375, 337], "violet": [373, 337], "dawnpetal": [353, 350], "frostlace": [389, 319], "nightbloom": [370, 327], "sunweave": [377, 328], "tidal": [376, 338], "emberveil": [356, 337], "willow": [376, 339], "stardust": [349, 330], "pearl": [360, 331], "sapphire": [345, 338]};

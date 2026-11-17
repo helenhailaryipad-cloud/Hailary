@@ -6467,3 +6467,20 @@ body[data-screen=fashion]:not([data-playing]) #stage #main{bottom:env(safe-area-
 .fashion-stage .fashion-power{bottom:2px}
 .fashion-showcase .fashion-cards{height:clamp(90px,15dvh,155px)}
 .fashion-stage .fashion-power{left:8px;transform:none;padding-inline:6px}
+
+/* Fixed registration for the four-combination fitting control. */
+.fit-control-entry{font-size:13px;padding:5px 14px;margin:2px auto 6px;display:block}
+.fit-control{width:min(100%,850px);margin:auto;padding:8px 12px;border:1px solid #c4aa70;border-radius:18px;background:#192b40;color:#fff1c7;box-sizing:border-box}
+.fit-control header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.fit-control header h2{font-size:18px;margin:8px 0}
+.fit-control header button{font-size:14px;padding:6px 14px}
+.fit-control-stage{position:relative;height:clamp(320px,57dvh,680px);background:radial-gradient(ellipse at 50% 43%,#587183,#263c55 55%,#19283e);border-radius:12px;overflow:hidden}
+.fit-control-stage .fit-control-portrait{display:block;width:100%;height:100%;object-fit:contain;object-position:center;filter:none;transform:none}
+.fit-control-status{position:absolute;bottom:6px;left:0;width:100%;text-align:center;font-size:12px}
+.fit-control-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-top:8px}
+.fit-control-options fieldset{min-width:0;display:flex;gap:8px;border:0;padding:0;margin:0}
+.fit-control-options legend{font-size:14px;margin-bottom:5px}
+.fit-control-options button{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;border:1px solid #8e856b;border-radius:8px;background:#283c50;color:#f9efd6}
+.fit-control-options button[aria-pressed=true]{border-color:#ffe18b;background:#5c5039;box-shadow:inset 0 0 0 1px #ffe18b}
+.fit-control-options button img{width:100%;height:64px;object-fit:contain}
+.fit-control-options small{font-family:Arial,sans-serif;font-size:11px;line-height:1.25}
