@@ -143,7 +143,7 @@ function currentDress(){
 function fashionCard(name,icon,selected,click){
   return `<button class="fashion-card" aria-pressed="${selected}" onclick="${click}"><img src="${icon}" alt=""><span>${name}</span></button>`;
 }
-function fashionShowcase({portrait,alt,title,bonus,owned,price,equipped,action,cards,extra=''}){
+function fashionShowcase({portrait,alt,title,bonus,owned,price,equipped,action,cards,extra='',stage=''}){
   const category=fashionCategory;
   const tabs=['Dresses','Hair','Weapons','Wings'].map(tab=>`<button aria-pressed="${tab===category}" onclick="changeFashionTab('${tab}')">${tab}</button>`).join('');
   const current=stats();
@@ -157,7 +157,7 @@ function fashionShowcase({portrait,alt,title,bonus,owned,price,equipped,action,c
     return `<div><span>${label}</span><b>${fmt(current[stat])}</b><em>${change>0?'+'+change:change||''}</em></div>`;
   }).join('');
   return `<section class="fashion-showcase" data-category="${category}">
-    <div class="fashion-stage"><div class="fashion-model">${category==='Wings'?`<img class="wing-fitting" src="${artPath(fashionWing(wingPreview).id)}" alt="">`: ''}<img src="${portrait}" alt="${alt}"></div><span class="fashion-power">${uiIcon('power')} ${fmt(current.power)}</span></div>
+    ${stage||`<div class="fashion-stage"><div class="fashion-model"><img src="${portrait}" alt="${alt}"></div><span class="fashion-power">${uiIcon('power')} ${fmt(current.power)}</span></div>`}
     <div class="fashion-detail"><div class="fashion-values">${rows}</div><div class="fashion-selection"><h2>${title}</h2><small>${bonus?bonus+' · ':''}${owned?'Owned':fmt(price)+' gold'}</small><button class="primary" ${equipped||(!owned&&S.gold<price)?'disabled':''} onclick="${action}">${equipped?'Equipped':owned?'Equip':'Buy &amp; equip'}</button></div></div>
     <div class="fashion-picker">${screen==='fashion'?`<div class="fashion-tabs" role="group" aria-label="Fashion categories">${tabs}</div>`:''}<div class="fashion-cards">${cards}</div></div>${extra}</section>`;
 }
@@ -215,6 +215,8 @@ const reinaPieces = [
 let reinaPreview=0,wingPreview='',fashionCategory='Dresses';
 const fashionWingNames=['Verdant Veins','Amber Monarch','Swanlight','Scarlet Phoenix','Glacier Shards','Violet Nocturne','Opal Skimmer','Clockwork Halo','Cherry Petals','Midnight Moth'];
 const fashionWings=fashionWingNames.map((name,i)=>({name,id:'fashion-wing-'+(i+1),cost:1000}));
+let tryWingsOn=false;
+const wingLights=['#7ad996','#ffb34e','#cce9ff','#ff7039','#87d9ff','#bf7df1','#7be8e0','#e9b35e','#ff9ec2','#a89bff'];
 function wingFittingRoom(){
   const worn=S.reinaFashion?.wingSkin||'';
   const choices=[{id:'',name:'Original'},...fashionWings];
@@ -222,7 +224,14 @@ function wingFittingRoom(){
   const selected=choices.find(it=>it.id===wingPreview)||choices[0];
   const cards=choices.map(it=>fashionCard(it.name,artPath(fashionWing(it.id).id),selected.id===it.id,`wingPreview='${it.id}';reinaAtelier()`)).join('');
   const price=wingSkinPrice(selected.id);
-  return fashionShowcase({portrait:reinaLookPath(false),alt:'Reina',title:selected.name,bonus:selected.id?'+'+WonderGear.fashionTraits.wings+' Shield HP':'',owned:price===0,price,equipped:selected.id===worn,action:'wearFashionWings()',cards});
+  const art=artPath(fashionWing(selected.id).id);
+  const accent=wingLights[fashionWings.indexOf(selected)]||'#c7b5ff';
+  const stage=`<div class="fashion-stage wing-gallery" style="--wing-light:${accent}">
+    <h2>${selected.name}</h2>
+    ${tryWingsOn?`<div class="fashion-model"><img class="wing-fitting" src="${art}" alt=""><img src="${reinaLookPath(false)}" alt="Reina wearing ${selected.name}"></div>`:`<img class="wing-exhibit" src="${art}" alt="${selected.name} wings">`}
+    <button class="wing-view" onclick="tryWingsOn=!tryWingsOn;reinaAtelier()">${tryWingsOn?'View wings':'Try on Reina'}</button>
+  </div>`;
+  return fashionShowcase({portrait:reinaLookPath(false),alt:'Reina',title:selected.name,bonus:selected.id?'+'+WonderGear.fashionTraits.wings+' Shield HP':'',owned:price===0,price,equipped:selected.id===worn,action:'wearFashionWings()',stage,cards});
 }
 function wearFashionWings(){
   if(screen!=='fashion'||fashionCategory!=='Wings')return;
@@ -380,7 +389,7 @@ const styleSets={
   Weapons:{slot:'weapon',bit:4,price:800,bonus:'+6 Attack',classic:'Original bow',legacy:'Frostglass bow',names:['Rosewood Thorn','Glacier Recurve','Swanfeather','Amber Sunwheel','Indigo Crescent','Ruby Dragon','Tide Serpent','Raven Thorn','Clockwork Compound','Orchid Butterfly']}
 };
 let stylePick=null;
-function changeFashionTab(tab){fashionCategory=tab;if(tab==='Wings')wingPreview=S.reinaFashion?.wingSkin||'';stylePick=null;clothingPreview=undefined;reinaAtelier()}
+function changeFashionTab(tab){fashionCategory=tab;if(tab==='Wings'){wingPreview=S.reinaFashion?.wingSkin||'';tryWingsOn=false;}stylePick=null;clothingPreview=undefined;reinaAtelier()}
 function wornStyle(set){
   return S.atelier?.[set.slot] || ((S.reinaFashion?.equipped & set.bit)?-1:0);
 }

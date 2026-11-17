@@ -6454,3 +6454,9 @@ body[data-screen=fashion]:not([data-playing]) #stage #main{bottom:env(safe-area-
 .fashion-stage .fashion-model>img.wing-fitting{position:absolute;z-index:0;top:3%;left:-5%;width:110%;height:61%;object-fit:contain;pointer-events:none}
 .fashion-showcase[data-category=Wings] .fashion-values>div{grid-template-columns:5em 1fr 3em}
 .fashion-showcase[data-category=Dresses] .fashion-model{width:95%;height:95%;max-height:530px}
+.fashion-stage.wing-gallery{position:relative;isolation:isolate;padding:8px 8px 6px;grid-template-rows:auto minmax(0,1fr) auto;background:radial-gradient(ellipse at 50% 52%,#304365,#11192e 70%,#101526);background-image:radial-gradient(ellipse at 50% 52%,color-mix(in srgb,var(--wing-light) 24%,#202943),#11192e 70%,#101526)}
+.wing-gallery h2{margin:0;color:#fff1d3;font:600 clamp(18px,3vw,27px)/1.2 Georgia,serif}
+.wing-exhibit{display:block;width:94%;height:100%;min-height:0;object-fit:contain;filter:drop-shadow(0 0 3px var(--wing-light)) drop-shadow(0 0 14px color-mix(in srgb,var(--wing-light) 45%,transparent));animation:wing-reveal .4s ease-out}
+.wing-gallery .wing-view{font-size:13px;min-height:34px;padding:3px 15px;background:#24334a;color:#fcebc6;border:1px solid #a28d69;border-radius:18px}
+@keyframes wing-reveal{from{opacity:.55;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.wing-exhibit{animation:none}}
