@@ -6441,8 +6441,8 @@ body[data-screen=fashion]:not([data-playing]) #stage #main{bottom:env(safe-area-
 .fashion-card span{display:grid;place-items:center;padding:1px 2px;background:#1b2737;text-align:center;overflow-wrap:anywhere}
 .fashion-card[aria-pressed=true] span{background:#574831;color:#fff1c9}
 .shared-fashion{justify-self:start;margin:4px 0;min-height:30px;padding:2px 10px;font-size:13px}
-.fashion-showcase{width:min(100%,540px);background:radial-gradient(ellipse at 50% 48%,#356988 0%,#203f63 44%,#152947 78%);padding-inline:clamp(7px,1.5vw,14px)}
-.fashion-stage{position:relative;padding-bottom:28px;background-image:radial-gradient(1px 1px at 23% 35%,#fff9 95%,transparent),radial-gradient(1px 1px at 72% 22%,#d5edff99 95%,transparent);background-size:97px 109px,143px 127px}
+.fashion-showcase{width:min(100%,600px);background:#162c48;padding-inline:clamp(7px,1.5vw,14px)}
+.fashion-stage{position:relative;padding-bottom:28px;background-image:radial-gradient(1px 1px at 23% 35%,#fff9 95%,transparent),radial-gradient(1px 1px at 72% 22%,#d5edff99 95%,transparent),radial-gradient(ellipse at center,#698ba5 0%,#446987 34%,#284864 66%,#162c48 100%);background-size:97px 109px,143px 127px,100% 100%}
 .fashion-power{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:5px;padding:2px 25px;color:#ffe19f;background:linear-gradient(90deg,transparent,#19304f 27% 73%,transparent);font-weight:bold}
 .fashion-power img{width:20px;height:20px;object-fit:contain}
 .fashion-detail{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);padding:6px;background:#254961;border:1px solid #82abbb88}
