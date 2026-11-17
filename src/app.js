@@ -159,18 +159,9 @@ function fashionShowcase({portrait,alt,title,bonus,owned,price,equipped,action,c
   return `<section class="fashion-showcase" data-category="${category}">
     ${stage||`<div class="fashion-stage"><div class="fashion-model"><img src="${portrait}" alt="${alt}"></div><span class="fashion-power">${uiIcon('power')} ${fmt(current.power)}</span></div>`}
     <div class="fashion-detail"><div class="fashion-values">${rows}</div><div class="fashion-selection"><h2>${title}</h2><small>${bonus?bonus+' · ':''}${owned?'Owned':fmt(price)+' gold'}</small><button class="primary" ${equipped||(!owned&&S.gold<price)?'disabled':''} onclick="${action}">${equipped?'Equipped':owned?'Equip':'Buy &amp; equip'}</button></div></div>
-    <div class="fashion-picker">${screen==='fashion'?`<div class="fashion-tabs" role="group" aria-label="Fashion categories">${tabs}</div>`:''}<div class="fashion-cards">${cards}</div></div>${extra}<small class="registered-note">More styles are being fitted. Your existing collection is saved.</small></section>`;
+    <div class="fashion-picker">${screen==='fashion'?`<div class="fashion-tabs" role="group" aria-label="Fashion categories">${tabs}</div>`:''}<div class="fashion-cards">${cards}</div></div>${extra}</section>`;
 }
-function fittingRoom(){
-  const selected=clothingPreview??currentDress();
-  const choices=[{id:'',outfit:'Grove silk set'}, {...outfitCatalog.moonblossom,outfit:'Violet silk set'},...reinaDresses];
-  if(selected && !choices.some(o=>o.id===selected))choices.push(outfitCatalog[selected]);
-  const dress=outfitCatalog[selected],owned=ownsOutfit(selected),worn=selected===currentDress();
-  const mask=((S.reinaFashion?.equipped||0)&~2)|(selected?2:0);
-  const cards=choices.map(o=>fashionCard(o.outfit,o.reinaOnly?artPath('atelier-'+o.id):o.id&&o.id!=='moonblossom'?artPath('party-'+Object.keys(partyWardrobe).find(hero=>partyWardrobe[hero].id===o.id)+'-wear-'+o.id):artPath('atelier-icon-'+(o.id?'violet':'grove')),selected===o.id,`clothingPreview='${o.id}';reinaAtelier()`)).join('');
-  return fashionShowcase({portrait:reinaLookPath(false,mask,selected),alt:'Reina in '+(dress?.outfit||'Grove silk'),title:choices.find(o=>o.id===selected).outfit,bonus:selected?'+'+WonderGear.fashionTraits.clothing+' Defense':'',owned,price:dress?.gold||0,equipped:worn,action:`wearOutfit('reina','${selected}',false)`,cards,extra:`<button class="shared-fashion" onclick="wardrobe('reina')">Shared outfits</button>`});
-
-}
+function fittingRoom(){return registeredFashionRoom();}
 const outfitColors={roseguard:320,starfall:195,lilyveil:65,emberleaf:345,moonblossom:235};
 function ownsOutfit(id){
   return !id || Boolean(S.costumes?.owned?.includes(id)) || (id==='moonblossom' && Boolean(S.reinaFashion?.owned & 2));
@@ -202,6 +193,7 @@ function wearOutfit(hero,outfit,showWardrobe=true){
     const pieces=S.reinaFashion??={owned:0,equipped:0};
     pieces.equipped=outfit?pieces.equipped|2:pieces.equipped&~2;
     if(outfit==='moonblossom')pieces.owned|=2;
+    S.reinaLayers={...registeredLook(),dress:fittedDressId(outfit)};
   }
   if(hero==='reina'&&screen==='fashion')reinaPreview=S.reinaFashion.equipped;
   if(hero==='reina')clothingPreview=outfit;
@@ -404,7 +396,7 @@ const styleSets={
   Weapons:{slot:'weapon',bit:4,price:800,bonus:'+6 Attack',classic:'Original bow',legacy:'Frostglass bow',names:['Rosewood Thorn','Glacier Recurve','Swanfeather','Amber Sunwheel','Indigo Crescent','Ruby Dragon','Tide Serpent','Raven Thorn','Clockwork Compound','Orchid Butterfly']}
 };
 let stylePick=null;
-function changeFashionTab(tab){fashionCategory=tab;if(tab==='Wings'){wingPreview=S.reinaFashion?.wingSkin||fashionWings[0].id;}stylePick=null;clothingPreview=undefined;reinaAtelier()}
+function changeFashionTab(tab){++fashionPreviewRequest;fashionCategory=tab;if(tab==='Wings'){wingPreview=S.reinaFashion?.wingSkin||fashionWings[0].id;}stylePick=null;clothingPreview=undefined;reinaAtelier()}
 function wornStyle(set){
   return S.atelier?.[set.slot] || ((S.reinaFashion?.equipped & set.bit)?-1:0);
 }
@@ -425,6 +417,7 @@ function wearStyle(){
   legacy.equipped=n===-1?legacy.equipped|set.bit:legacy.equipped&~set.bit;
   if(n===-1)legacy.owned|=set.bit;
   wardrobe[set.slot]=Math.max(0,n);
+  if(set.slot==='hair')S.reinaLayers={...registeredLook(),hair:fittedHairId(n)};
   reinaPreview=legacy.equipped;
   save();reinaAtelier();
 }
@@ -445,8 +438,8 @@ function styleFittingRoom(set){
 const fittingTemplate={width:500,height:800,body:{x:0,y:40,width:500,height:750},
   hand:[[199,289],[215,279],[233,279],[245,283],[247,289],[230,289],[244,295],[247,301],[238,302],[246,307],[244,313],[235,313],[244,319],[240,323],[223,317],[211,317],[201,324],[189,318]]};
 let fittingControlDress='grove',fittingControlHair=1;
-const fittingDresses=[['base','Base swimsuit'],['grove','Emerald Leaves'],['frostlace','Amethyst Lace']];
-const fittingHairs=[[1,'Chestnut Pixie'],[2,'Pearl Bun']];
+const fittingDresses=[['base','Base swimsuit'],['grove','Emerald Leaves'],...reinaDresses.map(({id,outfit})=>[id,id==='frostlace'?'Amethyst Lace':outfit])];
+const fittingHairs=styleSets.Hair.names.map((name,i)=>[i+1,name]);
 async function composeRegisteredReina(dress,hair){
   const ids=['body',...(dress==='base'?[]:[dress]),...(hair?['hair-'+hair]:[])];
   const layers=await Promise.all(ids.map(id=>styleImage(artPath('fit-control-'+id))));
@@ -455,6 +448,8 @@ async function composeRegisteredReina(dress,hair){
   const body=layers[0],box=fittingTemplate.body;
   const drawBody=()=>ctx.drawImage(body,box.x,box.y,box.width,box.height);
   drawBody();
+  const coveredLegs={frostlace:650,dawnpetal:400,nightbloom:400,sunweave:450,emberveil:420,willow:450,stardust:400,pearl:450,sapphire:400}[dress];
+  if(coveredLegs)ctx.clearRect(0,coveredLegs,500,800-coveredLegs);
   if(dress!=='base'){
     ctx.drawImage(layers[1],0,0,500,800);
     // Keep the same original hand above the bodice, never a second painted hand.
@@ -495,22 +490,36 @@ function styleImage(url){
   return styleSourceCache.get(url);
 }
 // Every standing Reina uses the same complete body, including its head.
-function registeredLook(){const look=S.reinaLayers||{dress:'grove',hair:1};return {...look,hair:look.hair===2?2:1};}
+function fittedDressId(id){
+  if(id==='moonblossom')return 'frostlace';
+  return fittingDresses.some(([key])=>key===id)?id:'grove';
+}
+function fittedHairId(id){return fittingHairs.some(([key])=>key===id)?id:1;}
+function registeredLook(){
+  const look=S.reinaLayers||{};
+  return {dress:fittedDressId(look.dress??currentDress()),hair:fittedHairId(look.hair??S.atelier?.hair)};
+}
+function ownsRegisteredDress(id){return ['base','grove'].includes(id)||ownsOutfit(id)||(id==='frostlace'&&ownsOutfit('moonblossom'));}
 const readyRegisteredLooks=new Map();
 let fashionPreviewRequest=0;
-async function previewRegisteredHair(hair){
+async function previewRegisteredSelection(category,id){
   const request=++fashionPreviewRequest,look=registeredLook();
-  if(!fittingHairs.some(([id])=>id===hair))return;
-  const key=artPath('fit-control-body')+'#registered-'+look.dress+'-'+hair+'-0';
+  const choices=category==='Hair'?fittingHairs:fittingDresses;
+  if(!choices.some(([key])=>key===id))return;
+  const dress=category==='Dresses'?id:look.dress,hair=category==='Hair'?id:look.hair;
+  const key=artPath('fit-control-body')+'#registered-'+dress+'-'+hair+'-0';
   try{
-    const result=await renderRegisteredLook(look.dress,hair,0);
+    const result=await renderRegisteredLook(dress,hair,0);
     await styleImage(result);readyRegisteredLooks.set(key,result);
-    if(request!==fashionPreviewRequest||screen!=='fashion'||fashionCategory!=='Hair')return;
-    stylePick=hair;reinaAtelier();
-  }catch{toast('Could not load hairstyle. Please try again.');}
+    if(request!==fashionPreviewRequest||screen!=='fashion'||fashionCategory!==category)return;
+    if(category==='Hair')stylePick=hair;else clothingPreview=dress;
+    reinaAtelier();
+  }catch{toast('Could not load this style. Please try again.');}
 }
+function previewRegisteredHair(hair){return previewRegisteredSelection('Hair',hair);}
+function previewRegisteredDress(dress){return previewRegisteredSelection('Dresses',dress);}
 function registeredLookPath(dress=registeredLook().dress,hair=registeredLook().hair,weapon=0){
-  hair=hair===2?2:1;
+  dress=fittedDressId(dress);hair=fittedHairId(hair);
   const key=artPath('fit-control-body')+'#registered-'+dress+'-'+hair+'-'+weapon;
   return readyRegisteredLooks.get(key)||key;
 }
@@ -530,14 +539,14 @@ async function renderRegisteredLook(dress,hair,weapon){
 }
 document.addEventListener('load',async event=>{
   const img=event.target;if(img.tagName!=='IMG')return;
-  const src=img.src,match=src.match(/#registered-(base|grove|frostlace)-(0|1|2)-(\d+)$/);
-  if(!match)return;
+  const src=img.src,match=src.match(/#registered-([a-z]+)-(10|[1-9])-(\d+)$/);
+  if(!match||!fittingDresses.some(([id])=>id===match[1]))return;
   if(!styleRenderCache.has(src))styleRenderCache.set(src,renderRegisteredLook(match[1],+match[2],+match[3]));
   try{const result=await styleRenderCache.get(src);readyRegisteredLooks.set(src,result);if(img.src===src)img.src=result;}
   catch{styleRenderCache.delete(src);img.alt='Could not load Reina. Please reopen Fashion.';}
 },true);
 function reinaLookPath(riding,mask=S.reinaFashion?.equipped||0,shared=S.costumes?.equipped?.reina,styles=S.atelier){
-  if(!riding)return registeredLookPath(undefined,undefined,styles?.weapon||((mask&4)?11:12));
+  if(!riding)return registeredLookPath(arguments.length>=3&&shared!==currentDress()?fittedDressId(shared):undefined,undefined,styles?.weapon||((mask&4)?11:12));
   if((mask & 2) && outfitCatalog[shared]?.reinaOnly)return artPath('look-'+(riding?'ride':'stand')+'-'+mask)+'#dress-'+shared;
   if((mask & 2) && shared && shared!=='moonblossom' && outfitCatalog[shared]){
     return artPath('look-'+(riding?'ride':'stand')+'-'+mask)+(riding&&[2,3,6,7].includes(mask)?'&':'?')+'outfit='+shared;
@@ -550,18 +559,18 @@ function registeredFashionRoom(){
   const choices=isHair?fittingHairs:fittingDresses;
   const chosen=choices.some(([id])=>id===selected)?selected:(isHair?look.hair:look.dress);
   const dress=isHair?look.dress:chosen,hair=isHair?chosen:look.hair;
-  const owned=isHair?chosen<=1||styleOwned(styleSets.Hair,chosen):chosen!=='frostlace'||ownsOutfit('frostlace');
+  const owned=isHair?chosen<=1||styleOwned(styleSets.Hair,chosen):ownsRegisteredDress(chosen);
   const price=isHair?400:1200;
-  const cards=choices.map(([id,name])=>fashionCard(name,isHair?(id?artPath('hair-style-'+id):artPath('fit-control-body')):artPath('fit-control-'+(id==='base'?'body':id)),chosen===id,isHair?`previewRegisteredHair(${id})`:`clothingPreview='${id}';reinaAtelier()`)).join('');
-  const bonus=isHair?(chosen?styleSets.Hair.bonus:''):(chosen==='frostlace'?'+'+WonderGear.fashionTraits.clothing+' Defense':'');
+  const cards=choices.map(([id,name])=>fashionCard(name,isHair?(id?artPath('hair-style-'+id):artPath('fit-control-body')):(id==='base'?registeredLookPath('base',look.hair):artPath('fit-icon-'+id)),chosen===id,isHair?`previewRegisteredHair(${id})`:`previewRegisteredDress('${id}')`)).join('');
+  const bonus=isHair?(chosen?styleSets.Hair.bonus:''):(!['base','grove'].includes(chosen)?'+'+WonderGear.fashionTraits.clothing+' Defense':'');
   return fashionShowcase({portrait:registeredLookPath(dress,hair),alt:'Reina · '+choices.find(([id])=>id===chosen)[1],title:choices.find(([id])=>id===chosen)[1],bonus,owned,price,equipped:chosen===(isHair?look.hair:look.dress),action:`wearRegisteredLook('${dress}',${hair})`,cards});
 }
 function wearRegisteredLook(dress,hair){
   if(screen!=='fashion'||!fittingDresses.some(([id])=>id===dress)||!fittingHairs.some(([id])=>id===hair))return;
   const isHair=fashionCategory==='Hair';
-  const owned=isHair?hair<=1||styleOwned(styleSets.Hair,hair):dress!=='frostlace'||ownsOutfit('frostlace');
+  const owned=isHair?hair<=1||styleOwned(styleSets.Hair,hair):ownsRegisteredDress(dress);
   const price=owned?0:isHair?400:1200;
-  if(S.gold<price)return;
+  if(S.gold<price){toast('Not enough gold');return;}
   S.gold-=price;
   S.reinaLayers={dress,hair};
   S.reinaFashion??={owned:0,equipped:0};
@@ -571,9 +580,10 @@ function wearRegisteredLook(dress,hair){
     S.atelier.hair=hair;S.reinaFashion.equipped&=~1;
   }else{
     S.costumes??={owned:[],equipped:{}};S.costumes.owned??=[];S.costumes.equipped??={};
-    if(dress==='frostlace'&&!S.costumes.owned.includes(dress))S.costumes.owned.push(dress);
-    S.costumes.equipped.reina=dress==='frostlace'?dress:'';
-    S.reinaFashion.equipped=dress==='frostlace'?S.reinaFashion.equipped|2:S.reinaFashion.equipped&~2;
+    const premium=!['base','grove'].includes(dress);
+    if(premium&&!S.costumes.owned.includes(dress))S.costumes.owned.push(dress);
+    S.costumes.equipped.reina=premium?dress:'';
+    S.reinaFashion.equipped=premium?S.reinaFashion.equipped|2:S.reinaFashion.equipped&~2;
   }
   reinaPreview=S.reinaFashion.equipped;save();reinaAtelier();
 }
@@ -604,7 +614,13 @@ function reinaAtelier(){
   const price=reinaLookPrice(), equipped=reinaPreview===(S.reinaFashion?.equipped || 0)&&wingPreview===(S.reinaFashion?.wingSkin||'');
   const inSkin=screen==='citySkin';
   if(!inSkin)nav();
-  if(!inSkin&&['Dresses','Hair'].includes(fashionCategory)){$('#main').innerHTML=registeredFashionRoom();return;}
+  if(!inSkin&&['Dresses','Hair'].includes(fashionCategory)){
+    const previous=document.querySelector('.fashion-showcase');
+    const scroll=previous?.dataset?.category===fashionCategory?previous.querySelector('.fashion-cards').scrollTop:0;
+    $('#main').innerHTML=registeredFashionRoom();
+    const gallery=document.querySelector('.fashion-cards');if(gallery)gallery.scrollTop=scroll;
+    return;
+  }
   if(styleSets[fashionCategory]||fashionCategory==='Wings'||(!inSkin&&fashionCategory==='Dresses')){
     const previous=document.querySelector('.fashion-showcase');
     const scroll=previous?.dataset?.category===fashionCategory?previous.querySelector('.fashion-cards').scrollTop:0;

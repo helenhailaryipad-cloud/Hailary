@@ -44,7 +44,7 @@ for(const category of ['Hair','Weapons']){
     if(S.gold!==before-set.price||currentDress()!=='pearl'||wornStyle(set)!==n)throw Error('Independent style purchase');
   }
 }
-if(!reinaLookPath(false).includes('#registered-grove-1-10'))throw Error('Registered body with weapon');
+if(!reinaLookPath(false).includes('#registered-pearl-10-10'))throw Error('Registered body with weapon');
 S=normalizeAdventure(JSON.parse(JSON.stringify(S)));
 if(!valid(S)||S.atelier.hair!==10||S.atelier.weapon!==10)throw Error('Style persistence');
 changeFashionTab('Hair');stylePick=0;wearStyle();
@@ -295,3 +295,48 @@ if(!valid(restored)||Object.keys(restored.fishCards).length!==100||WonderGear.st
 if(valid({...S,fishCards:{unlisted:{count:1,kg:1}}}))throw Error('Unknown species accepted');
 `,context);
 console.log('PASS: 100 collectable species, legacy catches, exact duplicate stat bonuses and saved card album.');
+
+vm.runInContext(`
+S=defaults();S.gold=50000;openScreen('fashion');
+if(fittingDresses.length!==12||fittingHairs.length!==10)throw Error('Registered wardrobe incomplete');
+for(const {id,outfit} of reinaDresses){
+ changeFashionTab('Dresses');clothingPreview=id;
+ if(!registeredFashionRoom().includes(outfit==='Moonlit Ballerina'?'Amethyst Lace':outfit))throw Error('Missing garment choice');
+ const balance=S.gold;wearRegisteredLook(id,registeredLook().hair);wearRegisteredLook(id,registeredLook().hair);
+ if(S.gold!==balance-1200||registeredLook().dress!==id||currentDress()!==id)throw Error('Registered garment purchase '+id);
+ for(let hair=1;hair<=10;hair++){
+  changeFashionTab('Hair');const before=S.gold,owned=hair===1||styleOwned(styleSets.Hair,hair);
+  wearRegisteredLook(id,hair);wearRegisteredLook(id,hair);
+  if(S.gold!==before-(owned?0:400)||registeredLook().dress!==id||registeredLook().hair!==hair)throw Error('Independent combination '+id+'/'+hair);
+  if(!registeredLookPath().includes('#registered-'+id+'-'+hair+'-0'))throw Error('Wrong composed layer key');
+  S=normalizeAdventure(JSON.parse(JSON.stringify(S)));
+  if(!valid(S)||registeredLook().dress!==id||registeredLook().hair!==hair)throw Error('Combination did not persist');
+ }
+}
+S=defaults();S.costumes={owned:['pearl'],equipped:{reina:'pearl'}};S.reinaFashion={owned:2,equipped:2};S.atelier={owned:['hair9'],hair:9};
+if(registeredLook().dress!=='pearl'||registeredLook().hair!==9)throw Error('Existing wardrobe was reset');
+S=defaults();
+`,context);
+for(const id of ['grove','dawnpetal','frostlace','nightbloom','sunweave','tidal','emberveil','willow','stardust','pearl','sapphire']){
+ assert(fs.existsSync('src/assets/generated/fit-control-'+id+'.webp'),'Missing layer '+id);
+ assert(fs.existsSync('src/assets/generated/fit-icon-'+id+'.webp'),'Missing icon '+id);
+}
+for(let hair=1;hair<=10;hair++)assert(fs.existsSync('src/assets/generated/fit-control-hair-'+hair+'.webp'),'Missing hair '+hair);
+console.log('PASS: all 100 dress/hair combinations, ownership, independent purchases and saved appearance.');
+
+await vm.runInContext(`(async()=>{
+ S=defaults();openScreen('fashion');changeFashionTab('Hair');
+ const originalRenderer=renderRegisteredLook,originalLoader=styleImage;
+ const pending=new Map();renderRegisteredLook=(dress,hair)=>new Promise(resolve=>pending.set(hair,resolve));styleImage=async src=>({src});
+ const before=document.querySelector('#main').innerHTML;
+ const older=previewRegisteredHair(3),newer=previewRegisteredHair(8);
+ if(document.querySelector('#main').innerHTML!==before)throw Error('Current hair removed before next image was ready');
+ pending.get(8)('data:image/png;base64,new');await newer;
+ if(stylePick!==8)throw Error('Newest hair did not appear');
+ pending.get(3)('data:image/png;base64,old');await older;
+ if(stylePick!==8)throw Error('Slow old response replaced new hairstyle');
+ const cancelled=previewRegisteredHair(5);changeFashionTab('Dresses');pending.get(5)('data:image/png;base64,cancelled');await cancelled;
+ if(fashionCategory!=='Dresses'||stylePick!==null)throw Error('Pending preview changed a different tab');
+ renderRegisteredLook=originalRenderer;styleImage=originalLoader;readyRegisteredLooks.clear();S=defaults();
+})()`,context);
+console.log('PASS: current hairstyle stays visible during loading, rapid selections and tab cancellation.');
