@@ -35,7 +35,7 @@ wearOutfit('reina','pearl',false);
 for(const category of ['Hair','Weapons']){
   changeFashionTab(category);
   const set=styleSets[category];
-  if(set.names.length!==10)throw Error('Missing fashion styles');
+  if(set.names.length!==11)throw Error('Missing fashion styles');
   for(let n=1;n<=10;n++){
     stylePick=n;
     const before=S.gold;
@@ -298,7 +298,7 @@ console.log('PASS: 100 collectable species, legacy catches, exact duplicate stat
 
 vm.runInContext(`
 S=defaults();S.gold=50000;openScreen('fashion');
-if(fittingDresses.length!==12||fittingHairs.length!==10)throw Error('Registered wardrobe incomplete');
+if(fittingDresses.length!==13||fittingHairs.length!==11)throw Error('Registered wardrobe incomplete');
 for(const {id,outfit} of reinaDresses){
  changeFashionTab('Dresses');clothingPreview=id;
  if(!registeredFashionRoom().includes(outfit==='Moonlit Ballerina'?'Amethyst Lace':outfit))throw Error('Missing garment choice');
@@ -340,3 +340,14 @@ await vm.runInContext(`(async()=>{
  renderRegisteredLook=originalRenderer;styleImage=originalLoader;readyRegisteredLooks.clear();S=defaults();
 })()`,context);
 console.log('PASS: current hairstyle stays visible during loading, rapid selections and tab cancellation.');
+
+vm.runInContext(`
+ S=defaults();screen='fashion';const leafGold=S.gold;wearLeaflightSet();
+ if(currentDress()!=='leaflight'||registeredLook().hair!==11||S.atelier.weapon!==11)throw Error('Leaflight equip incomplete');
+ if(S.gold!==leafGold)throw Error('Free Leaflight charged gold');
+ if(!reinaLookPath(true).includes('leaflight-riding'))throw Error('Mounted Leaflight reverted');
+ if(!reinaLookPath(false).includes('leaflight'))throw Error('Standing Leaflight reverted');
+ if(!ownsRegisteredDress('leaflight')||!styleOwned(styleSets.Hair,11))throw Error('Leaflight ownership missing');
+ S=defaults();
+`,context);
+console.log('PASS: Leaflight equip, free ownership and standing/mounted routing.');

@@ -136,6 +136,7 @@ const reinaDresses = [
   ['pearl','Cherry Blossom Kimono'], ['sapphire','Clockwork Artisan']
 ].map(([id,outfit])=>({id,outfit,gold:1200,reinaOnly:true}));
 for(const dress of reinaDresses)outfitCatalog[dress.id]=dress;
+outfitCatalog.leaflight={id:'leaflight',outfit:'Leaflight',gold:0,reinaOnly:true};
 let clothingPreview;
 function currentDress(){
   return (S.reinaFashion?.equipped & 2) ? (S.costumes?.equipped?.reina || 'moonblossom') : '';
@@ -159,7 +160,7 @@ function fashionShowcase({portrait,alt,title,bonus,owned,price,equipped,action,c
   return `<section class="fashion-showcase" data-category="${category}">
     ${stage||`<div class="fashion-stage"><div class="fashion-model"><img src="${portrait}" alt="${alt}"></div><span class="fashion-power">${uiIcon('power')} ${fmt(current.power)}</span></div>`}
     <div class="fashion-detail"><div class="fashion-values">${rows}</div><div class="fashion-selection"><h2>${title}</h2><small>${bonus?bonus+' · ':''}${owned?'Owned':fmt(price)+' gold'}</small><button class="primary" ${equipped||(!owned&&S.gold<price)?'disabled':''} onclick="${action}">${equipped?'Equipped':owned?'Equip':'Buy &amp; equip'}</button></div></div>
-    <div class="fashion-picker">${screen==='fashion'?`<div class="fashion-tabs" role="group" aria-label="Fashion categories">${tabs}</div>`:''}<div class="fashion-cards">${cards}</div></div>${extra}</section>`;
+    ${screen==='fashion'?'<button class="leaflight-set" onclick="wearLeaflightSet()">Wear Leaflight set</button>':''}<div class="fashion-picker">${screen==='fashion'?`<div class="fashion-tabs" role="group" aria-label="Fashion categories">${tabs}</div>`:''}<div class="fashion-cards">${cards}</div></div>${extra}</section>`;
 }
 function fittingRoom(){return registeredFashionRoom();}
 const outfitColors={roseguard:320,starfall:195,lilyveil:65,emberleaf:345,moonblossom:235};
@@ -392,8 +393,8 @@ document.addEventListener('load',async event=>{
   }catch{dressImages.delete(src);clothingMasks.delete(match[2]);}
 },true);
 const styleSets={
-  Hair:{slot:'hair',bit:1,price:400,bonus:'+30 HP',classic:'Original hair',legacy:'Lilac waves',names:['Chestnut Pixie','Pearl Braided Bun','Cherry Bob','Copper Curls','Double Moon Buns','Golden Crown Braid','Storm Asymmetrical Bob','Rose Twin Tails','Lagoon Side Braid','Onyx Topknot']},
-  Weapons:{slot:'weapon',bit:4,price:800,bonus:'+6 Attack',classic:'Original bow',legacy:'Frostglass bow',names:['Rosewood Thorn','Glacier Recurve','Swanfeather','Amber Sunwheel','Indigo Crescent','Ruby Dragon','Tide Serpent','Raven Thorn','Clockwork Compound','Orchid Butterfly']}
+  Hair:{slot:'hair',bit:1,price:400,bonus:'+30 HP',classic:'Original hair',legacy:'Lilac waves',names:['Chestnut Pixie','Pearl Braided Bun','Cherry Bob','Copper Curls','Double Moon Buns','Golden Crown Braid','Storm Asymmetrical Bob','Rose Twin Tails','Lagoon Side Braid','Onyx Topknot','Lavender Braid']},
+  Weapons:{slot:'weapon',bit:4,price:800,bonus:'+6 Attack',classic:'Original bow',legacy:'Frostglass bow',names:['Rosewood Thorn','Glacier Recurve','Swanfeather','Amber Sunwheel','Indigo Crescent','Ruby Dragon','Tide Serpent','Raven Thorn','Clockwork Compound','Orchid Butterfly','Azure Laurel']}
 };
 let stylePick=null;
 function changeFashionTab(tab){++fashionPreviewRequest;fashionCategory=tab;if(tab==='Wings'){wingPreview=S.reinaFashion?.wingSkin||fashionWings[0].id;}stylePick=null;clothingPreview=undefined;reinaAtelier()}
@@ -401,6 +402,7 @@ function wornStyle(set){
   return S.atelier?.[set.slot] || ((S.reinaFashion?.equipped & set.bit)?-1:0);
 }
 function styleOwned(set,n){
+  if(n===11)return true;
   if(n<=0)return n===0||Boolean((S.reinaFashion?.owned||0)&set.bit);
   return S.atelier?.owned?.includes(set.slot+n)||false;
 }
@@ -425,7 +427,7 @@ function styleFittingRoom(set){
   const worn=wornStyle(set),pick=stylePick??worn;
   const owned=styleOwned(set,pick),equipped=pick===worn;
   const name=n=>n===-1?set.legacy:n===0?set.classic:set.names[n-1];
-  const img=n=>artPath(set.slot==='hair'?'atelier-icon-hair-'+n:'weapon-style-'+n);
+  const img=n=>n===11?leaflightIcon(set.slot==='hair'?'hair':'bow'):artPath(set.slot==='hair'?'atelier-icon-hair-'+n:'weapon-style-'+n);
   const legacyIcons=set.slot==='hair'?['silver','lilac']:['gold','frost'];
   const cards=[0,-1,...set.names.map((_,i)=>i+1)].map(n=>fashionCard(name(n),n>0?img(n):artPath('atelier-icon-'+legacyIcons[-n]),n===pick,`stylePick=${n};reinaAtelier()`)).join('');
   const mask=(S.reinaFashion?.equipped||0)&~set.bit;
@@ -438,24 +440,69 @@ function styleFittingRoom(set){
 const fittingTemplate={width:500,height:800,body:{x:0,y:40,width:500,height:750},
   hand:[[199,289],[215,279],[233,279],[245,283],[247,289],[230,289],[244,295],[247,301],[238,302],[246,307],[244,313],[235,313],[244,319],[240,323],[223,317],[211,317],[201,324],[189,318]]};
 let fittingControlDress='grove',fittingControlHair=1;
-const fittingDresses=[['base','Base swimsuit'],['grove','Emerald Leaves'],...reinaDresses.map(({id,outfit})=>[id,id==='frostlace'?'Amethyst Lace':outfit])];
+const fittingDresses=[['leaflight','Leaflight'],['base','Base swimsuit'],['grove','Emerald Leaves'],...reinaDresses.map(({id,outfit})=>[id,id==='frostlace'?'Amethyst Lace':outfit])];
 const fittingHairs=styleSets.Hair.names.map((name,i)=>[i+1,name]);
+// These slots are traced on the SAME 1024 x 1536 master. Never re-fit heads.
+// Clip paths are renderer geometry, and the original atlas is retained unchanged.
+const leaflightSlots={
+ hairBack:'M350 100 L430 140 L444 218 L419 290 L405 358 L401 416 L369 470 L337 509 L305 541 L310 579 L291 613 L286 665 L290 736 L177 742 L171 627 L216 592 L230 549 L264 499 L306 432 L322 365 L337 293 L348 238 L340 182 Z',
+ hairFront:'M315 0 H640 V260 H540 L548 231 Q558 234 568 234 Q552 216 565 192 Q579 165 564 137 Q541 124 517 91 Q499 66 478 69 Q455 70 442 94 Q426 119 413 124 L370 106 Q364 109 374 119 L399 143 L404 170 L377 162 L337 134 Z',
+ dress:'M351 270 Q369 268 391 287 Q413 323 450 338 Q493 354 542 358 Q577 357 598 338 L592 297 L603 299 Q624 329 625 362 L616 414 L594 476 L612 530 L623 583 Q640 616 647 655 L672 730 L688 798 L703 868 L708 944 L707 1010 L700 1078 L690 1108 L699 1248 L700 1536 H70 V1130 L123 1004 L166 908 L185 836 L215 778 L270 750 L285 700 L310 627 L363 583 L408 542 L435 490 L426 445 L408 412 L395 389 Q397 355 384 318 L369 290 Z',
+ bow:'M766 93 H897 V1173 H675 V1058 L694 1035 L733 979 L769 912 L787 848 L788 812 L774 789 L749 771 L757 742 L782 729 L788 589 L778 578 L764 552 L777 515 L801 481 L822 438 L831 387 L830 337 L803 265 L781 215 L763 181 Z',
+ grip:'M746 639 Q767 633 784 644 Q798 638 813 647 Q839 655 837 680 Q840 701 820 718 Q800 733 781 721 Q761 712 752 692 Q741 675 746 639 Z'
+};
+function drawLeaflightSlot(ctx,atlas,slot){
+ ctx.save();ctx.translate(0,40);ctx.scale(500/1024,750/1536);
+ ctx.clip(new Path2D(leaflightSlots[slot]));ctx.drawImage(atlas,0,0,1024,1536);ctx.restore();
+}
+function leaflightIcon(slot){const key=artPath('leaflight-master')+'#leaflight-icon-'+slot;return readyRegisteredLooks.get(key)||key;}
+async function renderLeaflightIcon(slot){
+ const atlas=await styleImage(artPath('leaflight-master'));
+ const c=document.createElement('canvas');c.width=500;c.height=800;const ctx=c.getContext('2d');
+ if(slot==='hair'){drawLeaflightSlot(ctx,atlas,'hairBack');drawLeaflightSlot(ctx,atlas,'hairFront');}
+ else drawLeaflightSlot(ctx,atlas,slot);
+ const box={hair:[80,40,240,365],dress:[30,165,335,620],bow:[325,75,125,550]}[slot];
+ const icon=document.createElement('canvas');icon.width=144;icon.height=160;const out=icon.getContext('2d');
+ const scale=Math.min(136/box[2],152/box[3]);out.drawImage(c,...box,(144-box[2]*scale)/2,(160-box[3]*scale)/2,box[2]*scale,box[3]*scale);
+ return icon.toDataURL('image/png');
+}
+function wearLeaflightSet(){
+ if(screen!=='fashion')return;
+ S.reinaLayers={dress:'leaflight',hair:11};
+ S.atelier??={owned:[]};S.atelier.owned??=[];
+ for(const id of ['hair11','weapon11'])if(!S.atelier.owned.includes(id))S.atelier.owned.push(id);
+ S.atelier.hair=11;S.atelier.weapon=11;
+ S.costumes??={owned:[],equipped:{}};S.costumes.owned??=[];S.costumes.equipped??={};
+ if(!S.costumes.owned.includes('leaflight'))S.costumes.owned.push('leaflight');
+ S.costumes.equipped.reina='leaflight';
+ S.reinaFashion??={owned:0,equipped:0};S.reinaFashion.equipped=(S.reinaFashion.equipped|2)&~5;
+ stylePick=null;clothingPreview=undefined;++fashionPreviewRequest;
+ save();reinaAtelier();toast('Leaflight set equipped');
+}
+
 async function composeRegisteredReina(dress,hair){
-  const ids=['body',...(dress==='base'?[]:[dress]),...(hair?['hair-'+hair]:[])];
+  const ids=['body',...(dress==='base'||dress==='leaflight'?[]:[dress]),...(hair&&hair!==11?['hair-'+hair]:[])];
   const layers=await Promise.all(ids.map(id=>styleImage(artPath('fit-control-'+id))));
   const canvas=document.createElement('canvas');canvas.width=fittingTemplate.width;canvas.height=fittingTemplate.height;
   const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
   const body=layers[0],box=fittingTemplate.body;
   const drawBody=()=>ctx.drawImage(body,box.x,box.y,box.width,box.height);
+  const atlas=dress==='leaflight'||hair===11?await styleImage(artPath('leaflight-master')):null;
+  if(hair===11)drawLeaflightSlot(ctx,atlas,'hairBack');
   drawBody();
   const coveredLegs={frostlace:650,dawnpetal:400,nightbloom:400,sunweave:450,emberveil:420,willow:450,stardust:400,pearl:450,sapphire:400}[dress];
   if(coveredLegs)ctx.clearRect(0,coveredLegs,500,800-coveredLegs);
-  if(dress!=='base'){
+  if(dress==='leaflight'){
+    ctx.clearRect(0,590,500,210);
+    drawLeaflightSlot(ctx,atlas,'dress');
+    ctx.save();ctx.beginPath();fittingTemplate.hand.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.clip();drawBody();ctx.restore();
+  }else if(dress!=='base'){
     ctx.drawImage(layers[1],0,0,500,800);
     // Keep the same original hand above the bodice, never a second painted hand.
     ctx.save();ctx.beginPath();fittingTemplate.hand.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.clip();drawBody();ctx.restore();
   }
-  if(hair)ctx.drawImage(layers.at(-1),0,0,500,800);
+  if(hair===11)drawLeaflightSlot(ctx,atlas,'hairFront');
+  else if(hair)ctx.drawImage(layers.at(-1),0,0,500,800);
   return canvas.toDataURL('image/png');
 }
 async function openFittingControl(dress=fittingControlDress,hair=fittingControlHair){
@@ -465,8 +512,8 @@ async function openFittingControl(dress=fittingControlDress,hair=fittingControlH
   $('#main').innerHTML=`<section class="fit-control">
     <header><h2>Reina · Layered fitting</h2><button onclick="reinaAtelier()">Back</button></header>
     <div class="fit-control-stage"><img class="fit-control-portrait" ${previous?`src="${previous}"`:'hidden'} alt="Reina wearing the selected dress and hairstyle"><span class="fit-control-status" role="status">Preparing outfit…</span></div>
-    <div class="fit-control-options"><fieldset><legend>Dresses</legend>${fittingDresses.map(([id,name])=>`<button aria-pressed="${dress===id}" onclick="openFittingControl('${id}',${hair})"><img src="${artPath('fit-control-'+(id==='base'?'body':id))}" alt=""><small>${name}</small></button>`).join('')}</fieldset>
-    <fieldset><legend>Hair</legend>${fittingHairs.map(([id,name])=>`<button aria-pressed="${hair===id}" onclick="openFittingControl('${dress}',${id})">${id?`<img src="${artPath('hair-style-'+id)}" alt="">`:'<span class="fit-no-hair">∅</span>'}<small>${name}</small></button>`).join('')}</fieldset></div>
+    <div class="fit-control-options"><fieldset><legend>Dresses</legend>${fittingDresses.map(([id,name])=>`<button aria-pressed="${dress===id}" onclick="openFittingControl('${id}',${hair})"><img src="${id==='leaflight'?leaflightIcon('dress'):artPath('fit-control-'+(id==='base'?'body':id))}" alt=""><small>${name}</small></button>`).join('')}</fieldset>
+    <fieldset><legend>Hair</legend>${fittingHairs.map(([id,name])=>`<button aria-pressed="${hair===id}" onclick="openFittingControl('${dress}',${id})">${id?`<img src="${id===11?leaflightIcon('hair'):artPath('hair-style-'+id)}" alt="">`:'<span class="fit-no-hair">∅</span>'}<small>${name}</small></button>`).join('')}</fieldset></div>
   </section>`;
   const target=document.querySelector('.fit-control-portrait');
   try{
@@ -499,7 +546,7 @@ function registeredLook(){
   const look=S.reinaLayers||{};
   return {dress:fittedDressId(look.dress??currentDress()),hair:fittedHairId(look.hair??S.atelier?.hair)};
 }
-function ownsRegisteredDress(id){return ['base','grove'].includes(id)||ownsOutfit(id)||(id==='frostlace'&&ownsOutfit('moonblossom'));}
+function ownsRegisteredDress(id){return ['base','grove','leaflight'].includes(id)||ownsOutfit(id)||(id==='frostlace'&&ownsOutfit('moonblossom'));}
 const readyRegisteredLooks=new Map();
 let fashionPreviewRequest=0;
 async function previewRegisteredSelection(category,id){
@@ -526,7 +573,14 @@ function registeredLookPath(dress=registeredLook().dress,hair=registeredLook().h
 async function renderRegisteredLook(dress,hair,weapon){
   const portrait=await styleImage(await composeRegisteredReina(dress,hair));
   if(!weapon)return portrait.src;
-  const bow=await styleImage(artPath(weapon<=10?'weapon-style-'+weapon:'atelier-icon-'+(weapon===11?'frost':'gold')));
+  if(weapon===11){
+    const atlas=await styleImage(artPath('leaflight-master'));
+    const c=document.createElement('canvas');c.width=500;c.height=800;const ctx=c.getContext('2d');ctx.drawImage(portrait,0,0);
+    drawLeaflightSlot(ctx,atlas,'bow');
+    ctx.save();ctx.translate(0,40);ctx.scale(500/1024,750/1536);ctx.strokeStyle='#d2ae58';ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(769,171);ctx.lineTo(689,1081);ctx.stroke();ctx.restore();
+    drawLeaflightSlot(ctx,atlas,'grip');return c.toDataURL('image/png');
+  }
+  const bow=await styleImage(artPath(weapon<=10?'weapon-style-'+weapon:'atelier-icon-'+(weapon===12?'frost':'gold')));
   const canvas=document.createElement('canvas');canvas.width=500;canvas.height=800;
   const ctx=canvas.getContext('2d');ctx.drawImage(portrait,0,0);
   const x=390,y=375,height=340,width=height*bow.width/bow.height;
@@ -539,14 +593,32 @@ async function renderRegisteredLook(dress,hair,weapon){
 }
 document.addEventListener('load',async event=>{
   const img=event.target;if(img.tagName!=='IMG')return;
-  const src=img.src,match=src.match(/#registered-([a-z]+)-(10|[1-9])-(\d+)$/);
+  const src=img.src,icon=src.match(/#leaflight-icon-(hair|dress|bow)$/);
+  if(icon){try{if(!styleRenderCache.has(src))styleRenderCache.set(src,renderLeaflightIcon(icon[1]));const result=await styleRenderCache.get(src);readyRegisteredLooks.set(src,result);if(img.src===src)img.src=result;}catch{img.alt='Style';}return;}
+  const match=src.match(/#registered-([a-z]+)-(11|10|[1-9])-(\d+)$/);
   if(!match||!fittingDresses.some(([id])=>id===match[1]))return;
   if(!styleRenderCache.has(src))styleRenderCache.set(src,renderRegisteredLook(match[1],+match[2],+match[3]));
   try{const result=await styleRenderCache.get(src);readyRegisteredLooks.set(src,result);if(img.src===src)img.src=result;}
   catch{styleRenderCache.delete(src);img.alt='Could not load Reina. Please reopen Fashion.';}
 },true);
+// Canvas battles consume exactly the same assembled portrait as the wardrobe.
+const registeredCombatCache=new Map();
+let lastRegisteredCombatImage=null;
+function registeredCombatBitmap(){
+ if(typeof Image==='undefined'||!S.reinaLayers)return null;
+ const {dress,hair}=registeredLook(),weapon=S.atelier?.weapon||((S.reinaFashion?.equipped&4)?12:13);
+ const key=dress+'/'+hair+'/'+weapon;
+ if(!registeredCombatCache.has(key)){
+  const entry={image:null};registeredCombatCache.set(key,entry);
+  renderRegisteredLook(dress,hair,weapon).then(styleImage).then(image=>{entry.image=image;}).catch(()=>registeredCombatCache.delete(key));
+ }
+ const image=registeredCombatCache.get(key)?.image;
+ if(image)lastRegisteredCombatImage=image;
+ return image||lastRegisteredCombatImage;
+}
 function reinaLookPath(riding,mask=S.reinaFashion?.equipped||0,shared=S.costumes?.equipped?.reina,styles=S.atelier){
-  if(!riding)return registeredLookPath(arguments.length>=3&&shared!==currentDress()?fittedDressId(shared):undefined,undefined,styles?.weapon||((mask&4)?11:12));
+  if(!riding)return registeredLookPath(arguments.length>=3&&shared!==currentDress()?fittedDressId(shared):undefined,undefined,styles?.weapon||((mask&4)?12:13));
+  if(shared==='leaflight'&&registeredLook().hair===11&&styles?.weapon===11)return artPath('leaflight-riding');
   if((mask & 2) && outfitCatalog[shared]?.reinaOnly)return artPath('look-'+(riding?'ride':'stand')+'-'+mask)+'#dress-'+shared;
   if((mask & 2) && shared && shared!=='moonblossom' && outfitCatalog[shared]){
     return artPath('look-'+(riding?'ride':'stand')+'-'+mask)+(riding&&[2,3,6,7].includes(mask)?'&':'?')+'outfit='+shared;
@@ -561,7 +633,7 @@ function registeredFashionRoom(){
   const dress=isHair?look.dress:chosen,hair=isHair?chosen:look.hair;
   const owned=isHair?chosen<=1||styleOwned(styleSets.Hair,chosen):ownsRegisteredDress(chosen);
   const price=isHair?400:1200;
-  const cards=choices.map(([id,name])=>fashionCard(name,isHair?(id?artPath('hair-style-'+id):artPath('fit-control-body')):(id==='base'?registeredLookPath('base',look.hair):artPath('fit-icon-'+id)),chosen===id,isHair?`previewRegisteredHair(${id})`:`previewRegisteredDress('${id}')`)).join('');
+  const cards=choices.map(([id,name])=>fashionCard(name,(id==='leaflight'||id===11)?leaflightIcon(isHair?'hair':'dress'):isHair?(id?artPath('hair-style-'+id):artPath('fit-control-body')):(id==='base'?registeredLookPath('base',look.hair):artPath('fit-icon-'+id)),chosen===id,isHair?`previewRegisteredHair(${id})`:`previewRegisteredDress('${id}')`)).join('');
   const bonus=isHair?(chosen?styleSets.Hair.bonus:''):(!['base','grove'].includes(chosen)?'+'+WonderGear.fashionTraits.clothing+' Defense':'');
   return fashionShowcase({portrait:registeredLookPath(dress,hair),alt:'Reina · '+choices.find(([id])=>id===chosen)[1],title:choices.find(([id])=>id===chosen)[1],bonus,owned,price,equipped:chosen===(isHair?look.hair:look.dress),action:`wearRegisteredLook('${dress}',${hair})`,cards});
 }

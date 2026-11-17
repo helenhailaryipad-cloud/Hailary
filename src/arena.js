@@ -57,6 +57,15 @@ function drawAimedRanger(c,image,rect,w,h){
  c.drawImage(frame.canvas,-w/2,-h,w,h);
 }
 function drawReina(c,g,x,floor,width,height){const pose=reinaFrame(g),costume=equippedRanger(),aim=pose.shooting&&g.crawl?.enemy&&motionAllowed()?dungeonBowAim(g):null;
+ const registered=typeof registeredCombatBitmap==='function'?registeredCombatBitmap():null;
+ if(registered){
+  // One complete silhouette: do not warp or cut its head/arm to animate a shot.
+  const scale=Math.min(width/450,height/740),w=500*scale,h=740*scale;
+  const lift=motionAllowed()&&pose.moving?Math.abs(Math.sin(g.clock*9))*3:0;
+  c.save();c.translate(x,floor-lift);
+  if(aim)c.scale(aim.facing,1);else if(pose.moving&&g.crawl.hero.tx<x)c.scale(-1,1);
+  c.drawImage(registered,0,40,500,740,-w/2,-h,w,h);c.restore();return true;
+ }
  if(costume!=='reina'){
   const lift=motionAllowed()&&pose.moving?Math.abs(Math.sin(g.clock*9))*3:0;
   c.save();c.translate(x,floor-lift);

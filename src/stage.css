@@ -6497,3 +6497,7 @@ img[src*="#registered-"]{opacity:0}
 .fashion-showcase .fashion-detail{min-height:92px;box-sizing:border-box}
 .fashion-stage.wing-gallery{padding:0 0 4px;grid-template:minmax(0,1fr)/minmax(0,1fr)}
 .fashion-stage.wing-gallery h2{position:absolute;top:6px;left:8px;z-index:3;font-size:14px}
+
+/* Compact complete-set action leaves the full-height portrait unobstructed. */
+.leaflight-set{justify-self:center;font:600 12px/1.2 system-ui;min-height:28px;padding:4px 14px;margin:3px;border:1px solid #c3ac73;border-radius:14px;background:#32574e;color:#fff0c8}
+img[src*="#leaflight-icon-"]{opacity:0}
