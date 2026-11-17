@@ -20,7 +20,7 @@ vm.runInContext(fs.readFileSync('src/app.js','utf8'),context);
 
 context.Path2D=Path2D;context.document.createElement=tag=>tag==='canvas'?createCanvas(500,800):({click(){}});
 context.loadImage=loadImage;context.root=process.cwd();
-vm.runInContext(`styleImage=url=>loadImage(url.startsWith('data:')?url:root+'/src/'+url);`,context);
+vm.runInContext(`styleImage=url=>loadImage(url.startsWith('data:')?url:root+'/src/'+url.split('?')[0]);`,context);
 const combinations=[['leaflight',11,11],['leaflight',11,0],['leaflight',2,3],['pearl',11,11]];
 const sheet=createCanvas(2000,800),ctx=sheet.getContext('2d');ctx.fillStyle='#223b54';ctx.fillRect(0,0,2000,800);
 for(let i=0;i<combinations.length;i++){

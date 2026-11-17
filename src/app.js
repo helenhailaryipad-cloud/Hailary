@@ -22,7 +22,7 @@ let screen=globalThis.location?.search==='?screen=cloudWar'?'cloudWar':globalThi
 const item=id=>ITEMS.find(i=>i.id===id),level=()=>globalThis.WonderProgress.level(S.xp),gearLevel=id=>S.upgrades[id]||0;
 function stats(){return globalThis.WonderGear.stats(S)}
 function toast(t){$('#toast').textContent=t;$('#toast').classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('#toast').classList.remove('show'),3000)}
-function save(){S.updated=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch{toast('Device storage is unavailable. Export a backup.')}wallet();if(cloudReady&&!cloudBlocked){clearTimeout(saveTimer);saveTimer=setTimeout(syncCloud,900)}}
+function save(){reconcileLeaflightMount();S.updated=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch{toast('Device storage is unavailable. Export a backup.')}wallet();if(cloudReady&&!cloudBlocked){clearTimeout(saveTimer);saveTimer=setTimeout(syncCloud,900)}}
 function wallet(){const compact=n=>n>=1000?new Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:1}).format(n):fmt(n);for(const [id,value,icon,label] of [['gold',S.gold,'◈','gold'],['tickets',S.tickets,'✧','wishes'],['scales',S.scales,'◇','scales']]){const cell=$('#'+id);cell.innerHTML=uiIcon(id==='gold'?'gold':id==='tickets'?'wishes':'crystals')+compact(value)+' <small>'+label+'</small>';cell.title=fmt(value)+' '+label;cell.setAttribute('aria-label',fmt(value)+' '+label)}}
 function gain(g,t,x){const awardedXP=globalThis.WonderProgress.award(S,x,stats().expBonus);S.gold+=g;S.tickets+=t;save();return {gold:g,wishes:t,xp:awardedXP}}
 function modal(html,closeLabel='Close'){const closeButton=$('#modal').querySelector?.(':scope > button');if(closeButton){closeButton.innerHTML=uiIcon('close');closeButton.title=closeLabel;closeButton.setAttribute('aria-label',closeLabel)}$('#modal').classList.remove('gear-modal');$('#modalBody').classList.toggle('result-screen',html.includes('class="rewards"')||html.includes('class="exp-victory"'));$('#modalBody').innerHTML=(html.includes('class="rewards"')||html.includes('class="exp-victory"')?'<div class="result-medallion">'+uiIcon('laurel')+'</div>':'')+html;$('#modal').showModal();$('#modal').scrollTop=0;requestAnimationFrame(decorateArt)}
@@ -110,10 +110,21 @@ const mounts = [
   {id:'silver-tabby', name:'Silver Tabby', rarity:'Common', icon:'silver-tabby-icon', rider:'reina-silver-tabby'}
 ];
 function currentMount(){
+  reconcileLeaflightMount();
   const id = S.mountId === undefined && S.ridingSilverTabby ? 'silver-tabby' : S.mountId;
   return mounts.find(mount => mount.id === id);
 }
+function leaflightMountCompatible(){
+ return S.reinaLayers?.dress!=='leaflight'||(S.reinaLayers.hair===11&&S.atelier?.weapon===11);
+}
+function reconcileLeaflightMount(){
+ if(!leaflightMountCompatible()&&(S.mountId||S.ridingSilverTabby)){
+  S.mountId='';delete S.ridingSilverTabby;return true;
+ }
+ return false;
+}
 function toggleMount(){
+  if(!leaflightMountCompatible()){toast('This combination is shown standing. The complete Leaflight set supports riding.');return;}
   S.mountId = currentMount() ? '' : mounts[0].id;
   delete S.ridingSilverTabby;
   save();
@@ -618,7 +629,7 @@ function registeredCombatBitmap(){
 }
 function reinaLookPath(riding,mask=S.reinaFashion?.equipped||0,shared=S.costumes?.equipped?.reina,styles=S.atelier){
   if(!riding)return registeredLookPath(arguments.length>=3&&shared!==currentDress()?fittedDressId(shared):undefined,undefined,styles?.weapon||((mask&4)?12:13));
-  if(shared==='leaflight'&&registeredLook().hair===11&&styles?.weapon===11)return artPath('leaflight-riding');
+  if(shared==='leaflight')return registeredLook().hair===11&&styles?.weapon===11?artPath('leaflight-riding'):registeredLookPath('leaflight',undefined,styles?.weapon||13);
   if((mask & 2) && outfitCatalog[shared]?.reinaOnly)return artPath('look-'+(riding?'ride':'stand')+'-'+mask)+'#dress-'+shared;
   if((mask & 2) && shared && shared!=='moonblossom' && outfitCatalog[shared]){
     return artPath('look-'+(riding?'ride':'stand')+'-'+mask)+(riding&&[2,3,6,7].includes(mask)?'&':'?')+'outfit='+shared;

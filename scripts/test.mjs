@@ -351,3 +351,17 @@ vm.runInContext(`
  S=defaults();
 `,context);
 console.log('PASS: Leaflight equip, free ownership and standing/mounted routing.');
+
+vm.runInContext(`{
+ S=defaults();screen='fashion';wearLeaflightSet();S.mountId='silver-tabby';
+ fashionCategory='Hair';wearRegisteredLook('leaflight',2);
+ if(currentMount()||registeredLook().hair!==2||registeredLook().dress!=='leaflight')throw Error('Hair change reverted mounted outfit');
+ if(reinaLookPath(true).includes('#dress-'))throw Error('Legacy mounted Leaflight route');
+ wearLeaflightSet();S.mountId='silver-tabby';fashionCategory='Weapons';stylePick=3;S.gold=10000;wearStyle();
+ if(currentMount()||S.atelier.weapon!==3||registeredLook().dress!=='leaflight')throw Error('Weapon change reverted mounted outfit');
+ wearLeaflightSet();S.mountId='silver-tabby';if(!currentMount()||!reinaLookPath(true).includes('leaflight-riding'))throw Error('Complete riding set broken');
+ const meta=document.querySelector('meta[name="wonder-release"]');meta.content='release-a';const first=artPath('fit-control-body');meta.content='release-b';const second=artPath('fit-control-body');
+ if(first===second||!second.endsWith('?v=release-b')||!registeredLookPath().includes('?v=release-b#registered-'))throw Error('Stale wardrobe cache');
+ delete meta.content;S=defaults();
+}`,context);
+console.log('PASS: independent mounted hair/weapon changes preserve clothing without legacy collar; release-specific wardrobe URLs.');
