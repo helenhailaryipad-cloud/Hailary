@@ -359,6 +359,22 @@ async function makeCostume(url,id,pose){
     for(let c=0;c<3;c++)data[i+c]=data[i+c]*(1-mask[p])+((1-t)*base[c]+t*accent[c])*light*mask[p];
   }
   ctx.putImageData(pixels,0,0);
+  if(pose==='ride'){
+    // The saddle, bent arms and near leg share the mounted silhouette.
+    // Confine the tailoring to the rider's visible fabric.
+    tailoredPanels(ctx,id,pose);
+    const panels=ctx.getImageData(0,0,canvas.width,canvas.height).data;
+    for(let p=0;p<mask.length;p++){
+      const coverage=mask[p];
+      if(!coverage)continue;
+      for(let c=0;c<3;c++){
+        const i=p*4+c;
+        data[i]+=coverage*(panels[i]-data[i]);
+      }
+    }
+    ctx.putImageData(pixels,0,0);
+    return URL.createObjectURL(await new Promise(resolve=>canvas.toBlob(resolve,'image/png')));
+  }
   // Keep the hand resting on the belt in front of the fitted garment.
   const hand=new Path2D(pose==='stand'
     ? 'M152 277 Q161 266 173 266 Q200 244 227 257 L239 269 L230 283 L211 278 L196 298 L177 315 L158 315 L144 300Z'
