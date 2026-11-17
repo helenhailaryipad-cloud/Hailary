@@ -6205,7 +6205,7 @@ body[data-screen=cityExplore] #stage>#main{display:block;max-width:none;margin:0
 
 .city-hud .city-hero{left:25%;top:31%;width:50%;height:34%}
 .city-hud .city-hero img{filter:brightness(1.08) saturate(1.04)}
-.city-hud .city-wings{left:14%;top:32%;width:72%;height:29%}
+.city-hud .city-wings{left:14%;top:25%;width:72%;height:29%}
 .city-hud .city-aura{top:26%}
 .city-hud .city-pet{top:auto;bottom:35%;width:16%;height:11%}
 .city-hud .city-pet-0{left:19%}.city-hud .city-pet-1{left:65%}
@@ -6451,7 +6451,7 @@ body[data-screen=fashion]:not([data-playing]) #stage #main{bottom:env(safe-area-
 .fashion-selection{text-align:center}.fashion-detail h2{font-size:15px}.fashion-selection small{display:block;font:12px/1.4 system-ui}.fashion-selection .primary{min-height:34px;padding:4px 13px;font-size:14px}
 .fashion-picker{background:#254961}.fashion-picker .fashion-tabs{padding:4px 3px 0;gap:2px}.fashion-picker .fashion-tabs button{border-radius:4px 4px 0 0;background:#2b526b;border:1px solid #83a6b8;color:#e6f2fb}.fashion-picker .fashion-tabs button[aria-pressed=true]{background:#446e83;color:white}
 .fashion-cards .fashion-card{border:2px solid #ab946f;border-radius:5px;background:radial-gradient(ellipse at bottom,#586882,#253d58)}.fashion-card span{background:#efe5cf;color:#3a3540}.fashion-card[aria-pressed=true] span{background:#ffe1a3;color:#302e34}.fashion-cards .fashion-card[aria-pressed=true]{border-color:#ffdc8b;box-shadow:0 0 5px #ffce74}
-.fashion-stage .fashion-model>img.wing-fitting{position:absolute;z-index:0;top:0;left:1%;width:98%;height:59%;object-fit:contain;pointer-events:none}
+.fashion-stage .fashion-model>img.wing-fitting{position:absolute;z-index:0;top:25%;left:50%;width:98%;height:auto;max-height:46%;transform:translate(-50%,-65%);object-fit:contain;pointer-events:none}
 .fashion-showcase[data-category=Wings] .fashion-values>div{grid-template-columns:5em 1fr 3em}
 .fashion-stage:not(.wing-gallery){grid-template: minmax(0,1fr) / minmax(0,1fr)}
 .fashion-showcase .fashion-cards{height:clamp(100px,21dvh,205px)}
