@@ -6453,3 +6453,4 @@ body[data-screen=fashion]:not([data-playing]) #stage #main{bottom:env(safe-area-
 .fashion-cards .fashion-card{border:2px solid #ab946f;border-radius:5px;background:radial-gradient(ellipse at bottom,#586882,#253d58)}.fashion-card span{background:#efe5cf;color:#3a3540}.fashion-card[aria-pressed=true] span{background:#ffe1a3;color:#302e34}.fashion-cards .fashion-card[aria-pressed=true]{border-color:#ffdc8b;box-shadow:0 0 5px #ffce74}
 .fashion-stage .fashion-model>img.wing-fitting{position:absolute;z-index:0;top:3%;left:-5%;width:110%;height:61%;object-fit:contain;pointer-events:none}
 .fashion-showcase[data-category=Wings] .fashion-values>div{grid-template-columns:5em 1fr 3em}
+.fashion-showcase[data-category=Dresses] .fashion-model{width:95%;height:95%;max-height:530px}
