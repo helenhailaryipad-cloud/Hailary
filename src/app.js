@@ -451,6 +451,7 @@ const portraitFit={
 // Eye centers in the original artwork, used to register every hairstyle to the face.
 const outfitEyes={"dawnpetal": [134.27, 44.44, 157.37, 48.61], "frostlace": [144.38, 43.75, 166.88, 48.61], "nightbloom": [132.94, 43.75, 155.35, 48.61], "sunweave": [177.5, 43.06, 199.69, 47.92], "tidal": [140.4, 43.06, 162.0, 47.92], "emberveil": [139.15, 50.0, 163.35, 54.17], "willow": [180.95, 44.44, 203.57, 50.0], "stardust": [158.68, 61.11, 181.35, 65.28], "pearl": [150.5, 44.44, 173.08, 50.0], "sapphire": [132.3, 43.75, 155.92, 49.31]};
 const hairstyleEyes=[[81.38, 79.2, 118.19, 88.0], [79.44, 112.0, 118.19, 120.53], [82.34, 75.35, 122.06, 83.72], [94.94, 79.17, 125.94, 86.67], [81.38, 78.4, 117.22, 86.4], [84.28, 88.14, 124.0, 98.34], [77.5, 74.94, 110.44, 82.83], [83.31, 58.1, 110.44, 65.1], [79.89, 82.76, 118.39, 90.38], [68.34, 109.98, 105.61, 117.6]];
+const hairTones=[[126,68,43],[210,180,157],[161,49,82],[195,103,44],[70,60,80],[211,163,94],[82,98,147],[214,120,159],[51,133,126],[66,54,68]];
 const styleRenderCache=new Map(),styleSourceCache=new Map();
 function styleImage(url){
   if(!styleSourceCache.has(url)){
@@ -461,29 +462,46 @@ function styleImage(url){
 }
 // The indexed artwork identifies skin (0), hair (48), dress (96), boots (144) and bow (192).
 // Every source pixel belongs to one layer. Fingers remain in the foreground at the grip.
-async function portraitLayers(body,dress,replaceHead){
+async function portraitLayers(body,dress,hair){
   const w=body.naturalWidth,h=body.naturalHeight;
   const surface=()=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c};
   const work=surface().getContext('2d',{willReadFrequently:true});
   const map=await styleImage(artPath('parts-'+(dress||'stand')));
   work.imageSmoothingEnabled=false;work.drawImage(map,0,0,w,h);
   const labels=work.getImageData(0,0,w,h).data;
-  let keep;
-  if(replaceHead&&!dress){
-    const cut=await styleImage(artPath('fit-mask-stock'));
-    work.clearRect(0,0,w,h);work.drawImage(cut,0,0,w,h);
-    keep=work.getImageData(0,0,w,h).data;
-  }
   work.clearRect(0,0,w,h);work.drawImage(body,0,0);
   const pixels=work.getImageData(0,0,w,h).data;
+  const eyes=dress?outfitEyes[dress]:[w*.465,h*.097,w*.529,h*.109];
   const layers=Array.from({length:5},()=>work.createImageData(w,h));
   for(let offset=0;offset<pixels.length;offset+=4){
     if(!pixels[offset+3])continue;
     const slot=Math.round(labels[offset]/48);
-    if(replaceHead&&(slot===1||keep&&!keep[offset+3]))continue;
+    // The hair label includes rear locks crossing the shoulder, as well as
+    // small pieces of clothing and bowstring. Preserve the painted silhouette
+    // below the face and replace only the crown around the original eyes.
+    let alpha=pixels[offset+3];
+    if(hair&&slot===1){
+      const x=(offset/4)%w,y=Math.floor(offset/4/w);
+      const [lx,ly,rx,ry]=eyes;
+      const span=Math.hypot(rx-lx,ry-ly);
+      const dx=(x-(lx+rx)/2)/span;
+      if(Math.abs(dx)<2.8){
+        const edge=(ly+ry)/2+span*(1.45-Math.min(1,Math.abs(dx)/2));
+        alpha*=Math.max(0,Math.min(1,(y-edge)/(span*.2)));
+      }
+      if(!alpha)continue;
+    }
     const dest=layers[slot].data;
     dest[offset]=pixels[offset];dest[offset+1]=pixels[offset+1];
-    dest[offset+2]=pixels[offset+2];dest[offset+3]=pixels[offset+3];
+    dest[offset+2]=pixels[offset+2];dest[offset+3]=alpha;
+    if(hair&&slot===1){
+      const r=pixels[offset],g=pixels[offset+1],b=pixels[offset+2];
+      if(b>=g&&r>=g&&r-g<68&&Math.abs(b-r)<86){
+        const tone=hairTones[hair-1];
+        const light=(r*.30+g*.59+b*.11)/255;
+        for(let c=0;c<3;c++)dest[offset+c]=light<.62?tone[c]*light/.62:tone[c]+(255-tone[c])*(light-.62)/.38;
+      }
+    }
   }
   return layers.map(pixels=>{const c=surface();c.getContext('2d').putImageData(pixels,0,0);return c});
 }
@@ -501,7 +519,7 @@ async function renderStyledPortrait(url,hair,weapon){
     ctx.drawImage(body,0,0);
     return URL.createObjectURL(await new Promise(resolve=>c.toBlob(resolve,'image/png')));
   }
-  const [skin,hairLayer,dressLayer,bootsLayer,weaponLayer]=await portraitLayers(body,dress?.[1],Boolean(head));
+  const [skin,hairLayer,dressLayer,bootsLayer,weaponLayer]=await portraitLayers(body,dress?.[1],hair);
   ctx.drawImage(hairLayer,0,0);
   ctx.drawImage(bootsLayer,0,0);
   ctx.drawImage(dressLayer,0,0);
