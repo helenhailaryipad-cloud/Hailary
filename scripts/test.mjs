@@ -26,7 +26,7 @@ for(const dress of reinaDresses){
   const balance=S.gold;
   wearOutfit('reina',dress.id,false);wearOutfit('reina',dress.id,false);
   if(S.gold!==balance-dress.gold||!ownsOutfit(dress.id)||currentDress()!==dress.id||!valid(S))throw Error('Outfit purchase or ownership');
-  if(!reinaLookPath(true).includes('ride-2.webp#dress-'+dress.id))throw Error('Mounted outfit');
+  if(!reinaLookPath(true).replace(/[?][^#]*/, '').includes('ride-2.webp#dress-'+dress.id))throw Error('Mounted outfit');
 }
 S=defaults();
 S=defaults();S.gold=30000;openScreen('fashion');

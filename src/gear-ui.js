@@ -474,7 +474,7 @@ const skinPages=[
 let skinTab=0,skinMode='Upgrade',skinVariant=0,skinHidden=false;
 function switchSkin(index,mode,variant){
  if(index!==skinTab)skinHidden=false;
- skinTab=index;skinMode=mode;skinVariant=variant;citySkin();
+ skinTab=index;skinMode=mode;skinVariant=variant;if(index===0&&mode==='Morphing')return openSkinAppearance();citySkin();
 }
 function skinArtwork(page,variant){
  const id=page.art[variant]||page.art[0];
@@ -488,7 +488,7 @@ function openSkinAppearance(){
   stylePick=null;
   fashionCategory=skinTab===0?'Wings':'Weapons';
   reinaPreview=S.reinaFashion?.equipped||0;
-  wingPreview=S.reinaFashion?.wingSkin||'';
+  wingPreview=S.reinaFashion?.wingSkin||fashionWings[0].id;
   skinMode='Appearance';
   reinaAtelier();
 }
