@@ -159,7 +159,7 @@ function fashionShowcase({portrait,alt,title,bonus,owned,price,equipped,action,c
   return `<section class="fashion-showcase" data-category="${category}">
     ${stage||`<div class="fashion-stage"><div class="fashion-model"><img src="${portrait}" alt="${alt}"></div><span class="fashion-power">${uiIcon('power')} ${fmt(current.power)}</span></div>`}
     <div class="fashion-detail"><div class="fashion-values">${rows}</div><div class="fashion-selection"><h2>${title}</h2><small>${bonus?bonus+' · ':''}${owned?'Owned':fmt(price)+' gold'}</small><button class="primary" ${equipped||(!owned&&S.gold<price)?'disabled':''} onclick="${action}">${equipped?'Equipped':owned?'Equip':'Buy &amp; equip'}</button></div></div>
-    <div class="fashion-picker"><button class="fit-control-entry" onclick="openFittingControl()">New fitting</button>${screen==='fashion'?`<div class="fashion-tabs" role="group" aria-label="Fashion categories">${tabs}</div>`:''}<div class="fashion-cards">${cards}</div></div>${extra}</section>`;
+    <div class="fashion-picker"><button class="fit-control-entry" onclick="openFittingControl()">Layered fitting</button>${screen==='fashion'?`<div class="fashion-tabs" role="group" aria-label="Fashion categories">${tabs}</div>`:''}<div class="fashion-cards">${cards}</div></div>${extra}</section>`;
 }
 function fittingRoom(){
   const selected=clothingPreview??currentDress();
@@ -440,26 +440,45 @@ function styleFittingRoom(set){
   const portrait=reinaLookPath(false,pick===-1?mask|set.bit:mask,currentDress(),look);
   return fashionShowcase({portrait,alt:'Reina · '+name(pick),title:name(pick),bonus:pick?set.bonus:'',owned,price:set.price,equipped,action:'wearStyle()',cards,extra:screen==='citySkin'?`<button onclick="switchSkin(skinTab,'Morphing',skinVariant)">Back to Holy Weapon</button>`:''});
 }
-// Control fitting uses one registered full-body model and clothing-only layers.
+// A single, uncut head/body sprite owns every anatomical landmark.
+// Garments and hair are registered to this 500 x 800 coordinate system.
+const fittingTemplate={width:500,height:800,body:{x:0,y:40,width:500,height:750},
+  hand:[[199,289],[215,279],[233,279],[245,283],[247,289],[230,289],[244,295],[247,301],[238,302],[246,307],[244,313],[235,313],[244,319],[240,323],[223,317],[211,317],[201,324],[189,318]]};
 let fittingControlDress='grove',fittingControlHair=1;
+const fittingDresses=[['base','Base swimsuit'],['grove','Emerald Leaves'],['frostlace','Amethyst Lace']];
+const fittingHairs=[[0,'No hair'],[1,'Chestnut Pixie'],[2,'Pearl Bun']];
+async function composeRegisteredReina(dress,hair){
+  const ids=['body',...(dress==='base'?[]:[dress]),...(hair?['hair-'+hair]:[])];
+  const layers=await Promise.all(ids.map(id=>styleImage(artPath('fit-control-'+id))));
+  const canvas=document.createElement('canvas');canvas.width=fittingTemplate.width;canvas.height=fittingTemplate.height;
+  const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+  const body=layers[0],box=fittingTemplate.body;
+  const drawBody=()=>ctx.drawImage(body,box.x,box.y,box.width,box.height);
+  drawBody();
+  if(dress!=='base'){
+    ctx.drawImage(layers[1],0,0,500,800);
+    // Keep the same original hand above the bodice, never a second painted hand.
+    ctx.save();ctx.beginPath();fittingTemplate.hand.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.clip();drawBody();ctx.restore();
+  }
+  if(hair)ctx.drawImage(layers.at(-1),0,0,500,800);
+  return canvas.toDataURL('image/png');
+}
 async function openFittingControl(dress=fittingControlDress,hair=fittingControlHair){
-  if(!['grove','frostlace'].includes(dress)||![1,2].includes(hair))return;
+  if(!fittingDresses.some(([id])=>id===dress)||!fittingHairs.some(([id])=>id===hair))return;
   fittingControlDress=dress;fittingControlHair=hair;
   const previous=document.querySelector('.fit-control-portrait')?.src;
   $('#main').innerHTML=`<section class="fit-control">
-    <header><h2>Reina · Fitting preview</h2><button onclick="reinaAtelier()">Back</button></header>
-    <div class="fit-control-stage"><img class="fit-control-portrait" src="${previous||artPath('atelier-grove')}" alt="Reina wearing the selected dress and hairstyle"><span class="fit-control-status" role="status">Preparing outfit…</span></div>
-    <div class="fit-control-options"><fieldset><legend>Dresses</legend>${[['grove','Emerald Leaves'],['frostlace','Amethyst Lace']].map(([id,name])=>`<button aria-pressed="${dress===id}" onclick="openFittingControl('${id}',${hair})"><img src="${artPath('fit-control-'+id)}" alt=""><small>${name}</small></button>`).join('')}</fieldset>
-    <fieldset><legend>Hair</legend>${[[1,'Chestnut Pixie'],[2,'Pearl Bun']].map(([id,name])=>`<button aria-pressed="${hair===id}" onclick="openFittingControl('${dress}',${id})"><img src="${artPath('hair-style-'+id)}" alt=""><small>${name}</small></button>`).join('')}</fieldset></div>
+    <header><h2>Reina · Layered fitting</h2><button onclick="reinaAtelier()">Back</button></header>
+    <div class="fit-control-stage"><img class="fit-control-portrait" ${previous?`src="${previous}"`:'hidden'} alt="Reina wearing the selected dress and hairstyle"><span class="fit-control-status" role="status">Preparing outfit…</span></div>
+    <div class="fit-control-options"><fieldset><legend>Dresses</legend>${fittingDresses.map(([id,name])=>`<button aria-pressed="${dress===id}" onclick="openFittingControl('${id}',${hair})"><img src="${artPath('fit-control-'+(id==='base'?'body':id))}" alt=""><small>${name}</small></button>`).join('')}</fieldset>
+    <fieldset><legend>Hair</legend>${fittingHairs.map(([id,name])=>`<button aria-pressed="${hair===id}" onclick="openFittingControl('${dress}',${id})">${id?`<img src="${artPath('hair-style-'+id)}" alt="">`:'<span class="fit-no-hair">∅</span>'}<small>${name}</small></button>`).join('')}</fieldset></div>
   </section>`;
   const target=document.querySelector('.fit-control-portrait');
   try{
-    const layers=await Promise.all(['body',dress,'hand','hair-'+hair].map(id=>styleImage(artPath('fit-control-'+id))));
-    const canvas=document.createElement('canvas');canvas.width=500;canvas.height=800;
-    const ctx=canvas.getContext('2d');
-    for(const layer of layers)ctx.drawImage(layer,0,0);
+    const result=await composeRegisteredReina(dress,hair);
     if(!target.isConnected)return;
-    target.src=canvas.toDataURL('image/png');
+    target.src=result;target.hidden=false;
+    target.alt=`Reina · ${fittingDresses.find(([id])=>id===dress)[1]} · ${fittingHairs.find(([id])=>id===hair)[1]}`;
     document.querySelector('.fit-control-status').textContent='';
   }catch{
     if(target.isConnected)document.querySelector('.fit-control-status').textContent='Could not load this outfit. Tap its icon to retry.';

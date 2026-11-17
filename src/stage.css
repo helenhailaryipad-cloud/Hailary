@@ -6484,3 +6484,8 @@ body[data-screen=fashion]:not([data-playing]) #stage #main{bottom:env(safe-area-
 .fit-control-options button[aria-pressed=true]{border-color:#ffe18b;background:#5c5039;box-shadow:inset 0 0 0 1px #ffe18b}
 .fit-control-options button img{width:100%;height:64px;object-fit:contain}
 .fit-control-options small{font-family:Arial,sans-serif;font-size:11px;line-height:1.25}
+
+.fit-control-stage .fit-control-portrait[hidden]{display:none}
+.fit-no-hair{display:grid;place-items:center;height:64px;font-size:32px;color:#d8ccae}
+.fit-control-options fieldset{flex-wrap:wrap}
+.fit-control-options button{min-width:60px}

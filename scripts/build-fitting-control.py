@@ -25,14 +25,13 @@ def save(name, im):
     frame.save(ROOT / 'scripts/hosting-art' / ('fit-control-'+name+'.avif'),quality=75,speed=8)
     return frame
 
-base=Image.open(SRC/'m.png').convert('RGBA')
+base=Image.open(SRC/'base-v2.png').convert('RGBA').resize(SIZE,Image.Resampling.LANCZOS)
 grove=Image.open(SRC/'a.png').convert('RGBA')
 violet=Image.open(SRC/'b.png').convert('RGBA')
-# Reconstruct the shared neckline once; the original mannequin's opaque underlayer
-# remains underneath the garments. Head, face, ears, arms and legs use the master.
-chest=cut(violet,[(181,143),(204,129),(213,109),(250,111),(252,132),(280,142),(291,157),(280,168),(267,181),(245,167),(223,162),(201,168),(184,162)])
-base.alpha_composite(chest)
-body=save('body',base)
+# Keep the master intact. Runtime draws it at (0, 40), size 500 x 750.
+base.save(OUT/'fit-control-body.webp',lossless=True)
+base.save(ROOT/'scripts/hosting-art/fit-control-body.avif',quality=72,speed=8)
+body=Image.new('RGBA',(500,800));body.alpha_composite(base,(0,40))
 hand=cut(base,[(199,249),(215,239),(233,239),(245,243),(247,249),(230,249),(244,255),(247,261),(238,262),(246,267),(244,273),(235,273),(244,279),(240,283),(223,277),(211,277),(201,284),(189,278)])
 save('hand',hand)
 # Costume contours are authored individually, preserving lace and gold edges.
