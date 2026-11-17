@@ -16,6 +16,7 @@ vm.runInContext(fs.readFileSync('src/world.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/arena.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/game-polish.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/minigame-engine.js','utf8'),context);
+vm.runInContext(fs.readFileSync('src/wardrobe-engine.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/app.js','utf8'),context);
 
 context.Path2D=Path2D;context.document.createElement=tag=>tag==='canvas'?createCanvas(500,800):({click(){}});
@@ -25,7 +26,7 @@ const names=['dawnpetal','nightbloom','sunweave','tidal','emberveil','willow','s
 const sheet=createCanvas(1650,600),ctx=sheet.getContext('2d');ctx.fillStyle='#223b54';ctx.fillRect(0,0,1650,600);
 for(let i=0;i<names.length;i++){
  const image=await loadImage(await vm.runInContext(`composeRegisteredReina('${names[i]}',2)`,context));
- const x=(i%6)*275,y=Math.floor(i/6)*300;ctx.drawImage(image,180,120,110,100,x,y,275,250);
+ const x=(i%6)*275,y=Math.floor(i/6)*300;ctx.drawImage(image,360,240,220,200,x,y,275,250);
  ctx.fillStyle='white';ctx.font='14px sans-serif';ctx.fillText(names[i],x+10,y+280);
 }
 fs.writeFileSync('/tmp/garment-necks.png',sheet.toBuffer('image/png'));

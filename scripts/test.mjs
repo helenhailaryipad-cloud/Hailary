@@ -16,6 +16,7 @@ vm.runInContext(fs.readFileSync('src/world.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/arena.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/game-polish.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/minigame-engine.js','utf8'),context);
+vm.runInContext(fs.readFileSync('src/wardrobe-engine.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/app.js','utf8'),context);
 vm.runInContext(`
 S=defaults();S.gold=15000;openScreen('fashion');
@@ -367,3 +368,20 @@ vm.runInContext(`{
  delete meta.content;S=defaults();
 }`,context);
 console.log('PASS: independent mounted hair/weapon changes preserve clothing without legacy collar; release-specific wardrobe URLs.');
+
+await vm.runInContext(`(async()=>{
+ S=defaults();screen='fashion';changeFashionTab('Wings');
+ const originalRenderer=renderRegisteredLook,originalLoader=styleImage;
+ const pending=new Map();renderRegisteredLook=(d,h,w,wing)=>new Promise(resolve=>pending.set(wing||String(w),resolve));styleImage=async src=>({src});
+ const before=document.querySelector('#main').innerHTML;
+ const old=previewRegisteredEquipment('Wings','fashion-wing-2'),newest=previewRegisteredEquipment('Wings','fashion-wing-3');
+ if(document.querySelector('#main').innerHTML!==before)throw Error('Wing preview removed current portrait before decode');
+ pending.get('fashion-wing-3')('data:image/png;base64,wing3');await newest;
+ pending.get('fashion-wing-2')('data:image/png;base64,wing2');await old;
+ if(wingPreview!=='fashion-wing-3')throw Error('Stale wings replaced newer selection');
+ changeFashionTab('Weapons');const cancelled=previewRegisteredEquipment('Weapons',2);changeFashionTab('Dresses');pending.get('2')('data:image/png;base64,weapon2');await cancelled;
+ if(fashionCategory!=='Dresses'||stylePick!==null)throw Error('Pending weapon preview escaped tab cancellation');
+ renderRegisteredLook=originalRenderer;styleImage=originalLoader;readyRegisteredLooks.clear();S=defaults();
+ if(registeredLookPath().includes('fit-control-body'))throw Error('Technical body used as loading placeholder');
+})()`,context);
+console.log('PASS: atomic wings/weapons previews, stale requests ignored, technical body never used as placeholder.');

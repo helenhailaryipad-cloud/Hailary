@@ -226,15 +226,15 @@ function wingFittingRoom(){
   const choices=[{id:'',name:'Original'},...fashionWings];
   if(worn&&!choices.some(it=>it.id===worn))choices.push(fashionWing(worn));
   const selected=choices.find(it=>it.id===wingPreview)||choices[0];
-  const cards=choices.map(it=>fashionCard(it.name,artPath(fashionWing(it.id).id),selected.id===it.id,`wingPreview='${it.id}';reinaAtelier()`)).join('');
+  const cards=choices.map(it=>fashionCard(it.name,artPath(fashionWing(it.id).id),selected.id===it.id,`previewRegisteredEquipment('Wings','${it.id}')`)).join('');
   const price=wingSkinPrice(selected.id);
-  const art=artPath(fashionWing(selected.id).id);
+  const portrait=registeredLookPath(undefined,undefined,S.atelier?.weapon||((S.reinaFashion?.equipped&4)?12:13),fashionWing(selected.id).id);
   const accent=wingLights[fashionWings.indexOf(selected)]||'#c7b5ff';
   const stage=`<div class="fashion-stage wing-gallery" style="--wing-light:${accent}">
     <h2>${selected.name}</h2>
-    <div class="fashion-model"><img class="wing-fitting" src="${art}" alt=""><img src="${reinaLookPath(false)}" alt="Reina wearing ${selected.name}"></div>
+    <div class="fashion-model"><img src="${portrait}" alt="Reina wearing ${selected.name}"></div>
   </div>`;
-  return fashionShowcase({portrait:reinaLookPath(false),alt:'Reina',title:selected.name,bonus:selected.id?'+'+WonderGear.fashionTraits.wings+' Shield HP':'',owned:price===0,price,equipped:selected.id===worn,action:'wearFashionWings()',stage,cards,extra:screen==='citySkin'?`<button class="shared-fashion" onclick="switchSkin(0,'Upgrade',0)">Back to Wings</button>`:'' });
+  return fashionShowcase({portrait,alt:'Reina',title:selected.name,bonus:selected.id?'+'+WonderGear.fashionTraits.wings+' Shield HP':'',owned:price===0,price,equipped:selected.id===worn,action:'wearFashionWings()',stage,cards,extra:screen==='citySkin'?`<button class="shared-fashion" onclick="switchSkin(0,'Upgrade',0)">Back to Wings</button>`:'' });
 }
 function wearFashionWings(){
   if((screen!=='fashion'&&!(screen==='citySkin'&&skinMode==='Appearance'))||fashionCategory!=='Wings')return;
@@ -440,7 +440,7 @@ function styleFittingRoom(set){
   const name=n=>n===-1?set.legacy:n===0?set.classic:set.names[n-1];
   const img=n=>n===11?leaflightIcon(set.slot==='hair'?'hair':'bow'):artPath(set.slot==='hair'?'atelier-icon-hair-'+n:'weapon-style-'+n);
   const legacyIcons=set.slot==='hair'?['silver','lilac']:['gold','frost'];
-  const cards=[0,-1,...set.names.map((_,i)=>i+1)].map(n=>fashionCard(name(n),n>0?img(n):artPath('atelier-icon-'+legacyIcons[-n]),n===pick,`stylePick=${n};reinaAtelier()`)).join('');
+  const cards=[0,-1,...set.names.map((_,i)=>i+1)].map(n=>fashionCard(name(n),n>0?img(n):artPath('atelier-icon-'+legacyIcons[-n]),n===pick,`previewRegisteredEquipment('Weapons',${n})`)).join('');
   const mask=(S.reinaFashion?.equipped||0)&~set.bit;
   const look={...S.atelier,[set.slot]:Math.max(0,pick)};
   const portrait=reinaLookPath(false,pick===-1?mask|set.bit:mask,currentDress(),look);
@@ -508,31 +508,74 @@ function restoreFittingNeck(ctx,dress,drawBody){
  ctx.clip(new Path2D(opening+' L270 130 L200 130 Z'));
  drawBody();ctx.restore();
 }
-async function composeRegisteredReina(dress,hair){
-  const ids=['body',...(dress==='base'||dress==='leaflight'?[]:[dress]),...(hair&&hair!==11?['hair-'+hair]:[])];
-  const layers=await Promise.all(ids.map(id=>styleImage(artPath('fit-control-'+id))));
-  const canvas=document.createElement('canvas');canvas.width=fittingTemplate.width;canvas.height=fittingTemplate.height;
-  const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
-  const body=layers[0],box=fittingTemplate.body;
-  const drawBody=()=>ctx.drawImage(body,box.x,box.y,box.width,box.height);
-  const atlas=dress==='leaflight'||hair===11?await styleImage(artPath('leaflight-master')):null;
-  if(hair===11)drawLeaflightSlot(ctx,atlas,'hairBack');
-  drawBody();
-  const coveredLegs={frostlace:650,dawnpetal:400,nightbloom:400,sunweave:450,emberveil:420,willow:450,stardust:400,pearl:450,sapphire:400}[dress];
-  if(coveredLegs)ctx.clearRect(0,coveredLegs,500,800-coveredLegs);
-  if(dress==='leaflight'){
-    ctx.clearRect(0,590,500,210);
-    drawLeaflightSlot(ctx,atlas,'dress');
-    ctx.save();ctx.beginPath();fittingTemplate.hand.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.clip();drawBody();ctx.restore();
-  }else if(dress!=='base'){
-    ctx.drawImage(layers[1],0,0,500,800);
-    restoreFittingNeck(ctx,dress,drawBody);
-    // Keep the same original hand above the bodice, never a second painted hand.
-    ctx.save();ctx.beginPath();fittingTemplate.hand.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.clip();drawBody();ctx.restore();
+let wardrobeCatalogReady=false;
+const wardrobeHandPath='M'+fittingTemplate.hand.map(p=>p.join(' ')).join(' L')+' Z';
+const wardrobeGripPath='M378 360 Q386 351 397 360 Q413 364 411 374 L405 383 Q399 394 390 393 L378 385 L370 374 Z';
+function ensureWardrobeCatalog(){
+ if(wardrobeCatalogReady)return;
+ const bodyAsset='fit-control-body',standard=[0,0,500,800];
+ const sleeves='M0 175 H204 V336 H0 Z M298 185 H500 V400 H298 Z';
+ const boots='M0 560 H500 V800 H0 Z';
+ const covered={frostlace:650,dawnpetal:400,nightbloom:400,sunweave:450,emberveil:420,willow:450,stardust:400,pearl:450,sapphire:400,leaflight:590};
+ for(const [id] of fittingDresses){
+  const asset=id==='leaflight'?'leaflight-master':'fit-control-'+id;
+  const rect=id==='leaflight'?[0,40,500,750]:standard;
+  const common=id==='leaflight'?{clips:[wardrobeLeafPath('dress')]}:{};
+  const opening=fittingNeckOpenings[id];
+  const rear=opening?opening+' L270 130 L200 130 Z':null;
+  const skin=wardrobeHandPath;
+  const lower=covered[id];
+  const bodyCoverage=lower?[`M60 ${lower} H345 V800 H60 Z`]:[];
+  const layers=[];
+  if(rear)layers.push({slot:'garmentBack',asset,rect,clip:rear});
+  layers.push({slot:'boots',asset,rect,...common,clip:boots,exclude:[skin]});
+  layers.push({slot:'garmentFront',asset,rect,...common,exclude:[boots,sleeves,skin,...(rear?[rear]:[])]});
+  layers.push({slot:'sleeves',asset,rect,...common,clip:sleeves,exclude:[boots,skin,...(rear?[rear]:[])]});
+  WonderWardrobe.register({id:'dress:'+id,kind:'dress',frame:[500,800],bodyCoverage,layers});
+ }
+ // Hair tails render behind the same body; cap and face-framing strands render last.
+ const hairFront='M0 0 H500 V154 H285 V195 H262 V154 H220 V204 H194 V154 H0 Z';
+ for(const [id] of fittingHairs){
+  const asset=id===11?'leaflight-master':'fit-control-hair-'+id;
+  const layers=id===11?[
+   {slot:'hairBack',asset,rect:[0,40,500,750],clip:wardrobeLeafPath('hairBack')},
+   {slot:'hairFront',asset,rect:[0,40,500,750],clip:wardrobeLeafPath('hairFront')}
+  ]:[{slot:'hairBack',asset,exclude:[hairFront]},{slot:'hairFront',asset,clip:hairFront}];
+  WonderWardrobe.register({id:'hair:'+id,kind:'hair',layers});
+ }
+ for(let id=1;id<=13;id++){
+  let layers;
+  if(id===11||id===13)layers=[
+   {slot:'weapon',asset:'leaflight-master',rect:[0,40,500,750],clip:wardrobeLeafPath('bow')},
+   {slot:'weapon',asset:'leaflight-master',strokeOnly:true,stroke:{path:'M375.48828125 123.49609375 L336.42578125 567.83203125',color:'#d2ae58',width:1.07421875}},
+   {slot:'gripFingers',asset:'leaflight-master',rect:[0,40,500,750],clip:wardrobeLeafPath('grip')}
+  ];
+  else{
+   const sourceId=id===12?2:id;
+   const fraction=[.63,.68,.68,.61,.62,.56,.65,.62,.65,.60][sourceId-1];
+   // Opaque artwork bounds, including rotation, retain a 12px canvas margin.
+   const height=[301,308,319,306,295,340,303,300,279,313][sourceId-1];
+   layers=[{slot:'weapon',asset:'weapon-style-'+sourceId,handle:{x:fraction,y:.5,height},transform:{x:390,y:375,rotation:.19,flipX:true}},
+    {slot:'gripFingers',asset:bodyAsset,rect:[0,40,500,750],clip:wardrobeGripPath}];
   }
-  if(hair===11)drawLeaflightSlot(ctx,atlas,'hairFront');
-  else if(hair)ctx.drawImage(layers.at(-1),0,0,500,800);
-  return canvas.toDataURL('image/png');
+  WonderWardrobe.register({id:'weapon:'+id,kind:'weapon',layers});
+ }
+ wardrobeCatalogReady=true;
+}
+// Convert authored atlas paths into the canonical frame once, without moving anatomy.
+function wardrobeLeafPath(slot){
+ return {path:leaflightSlots[slot],matrix:{a:500/1024,b:0,c:0,d:750/1536,e:0,f:40}};
+}
+async function composeWardrobeCanvas(dress,hair,weapon=0,wings=''){
+ ensureWardrobeCatalog();
+ const body='fit-control-body';
+ if(wings&&!WonderWardrobe.get('wings:'+wings))WonderWardrobe.register({id:'wings:'+wings,kind:'wings',layers:[{slot:'wingsBack',asset:wings,fit:[0,-4,480,420]}]});
+ return WonderWardrobe.render({dress:'dress:'+fittedDressId(dress),hair:'hair:'+fittedHairId(hair),weapon:weapon?'weapon:'+weapon:null,wings:wings?'wings:'+wings:null,body,
+  bodyLayers:[{slot:'handFront',asset:body,rect:[0,40,500,750],clip:wardrobeHandPath}],
+  createCanvas:(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;},load:id=>styleImage(artPath(id))});
+}
+async function composeRegisteredReina(dress,hair){
+ return (await composeWardrobeCanvas(dress,hair)).toDataURL('image/png');
 }
 async function openFittingControl(dress=fittingControlDress,hair=fittingControlHair){
   if(!fittingDresses.some(([id])=>id===dress)||!fittingHairs.some(([id])=>id===hair))return;
@@ -557,8 +600,13 @@ async function openFittingControl(dress=fittingControlDress,hair=fittingControlH
 }
 const hairstyleEyes=[[81.38, 79.2, 118.19, 88.0], [79.44, 112.0, 118.19, 120.53], [82.34, 75.35, 122.06, 83.72], [94.94, 79.17, 125.94, 86.67], [81.38, 78.4, 117.22, 86.4], [84.28, 88.14, 124.0, 98.34], [77.5, 74.94, 110.44, 82.83], [83.31, 58.1, 110.44, 65.1], [79.89, 82.76, 118.39, 90.38], [68.34, 109.98, 105.61, 117.6]];
 const fittedGrips={"grove": [375, 337], "violet": [373, 337], "dawnpetal": [353, 350], "frostlace": [389, 319], "nightbloom": [370, 327], "sunweave": [377, 328], "tidal": [376, 338], "emberveil": [356, 337], "willow": [376, 339], "stardust": [349, 330], "pearl": [360, 331], "sapphire": [345, 338]};
-const styleRenderCache=new Map(),styleSourceCache=new Map();
+class WardrobeCache extends Map{
+ constructor(limit=24){super();this.limit=limit;}
+ set(key,value){if(this.has(key))this.delete(key);super.set(key,value);while(this.size>this.limit)this.delete(this.keys().next().value);return this;}
+}
+const styleRenderCache=new WardrobeCache(),styleSourceCache=new Map();
 function styleImage(url){
+  if(url.startsWith('data:')){const image=new Image();image.src=url;return image.decode().then(()=>image);}
   if(!styleSourceCache.has(url)){
     const image=new Image();image.src=url;
     styleSourceCache.set(url,image.decode().then(()=>image).catch(err=>{styleSourceCache.delete(url);throw err}));
@@ -576,14 +624,14 @@ function registeredLook(){
   return {dress:fittedDressId(look.dress??currentDress()),hair:fittedHairId(look.hair??S.atelier?.hair)};
 }
 function ownsRegisteredDress(id){return ['base','grove','leaflight'].includes(id)||ownsOutfit(id)||(id==='frostlace'&&ownsOutfit('moonblossom'));}
-const readyRegisteredLooks=new Map();
+const readyRegisteredLooks=new WardrobeCache();
 let fashionPreviewRequest=0;
 async function previewRegisteredSelection(category,id){
   const request=++fashionPreviewRequest,look=registeredLook();
   const choices=category==='Hair'?fittingHairs:fittingDresses;
   if(!choices.some(([key])=>key===id))return;
   const dress=category==='Dresses'?id:look.dress,hair=category==='Hair'?id:look.hair;
-  const key=artPath('fit-control-body')+'#registered-'+dress+'-'+hair+'-0';
+  const key=registeredLookKey(dress,hair,0);
   try{
     const result=await renderRegisteredLook(dress,hair,0);
     await styleImage(result);readyRegisteredLooks.set(key,result);
@@ -594,56 +642,57 @@ async function previewRegisteredSelection(category,id){
 }
 function previewRegisteredHair(hair){return previewRegisteredSelection('Hair',hair);}
 function previewRegisteredDress(dress){return previewRegisteredSelection('Dresses',dress);}
-function registeredLookPath(dress=registeredLook().dress,hair=registeredLook().hair,weapon=0){
-  dress=fittedDressId(dress);hair=fittedHairId(hair);
-  const key=artPath('fit-control-body')+'#registered-'+dress+'-'+hair+'-'+weapon;
-  return readyRegisteredLooks.get(key)||key;
+function registeredLookKey(dress,hair,weapon=0,wings=''){
+ const release=artPath('fit-control-body').split('?')[1]||'';
+ return 'wardrobe-placeholder.svg'+(release?'?'+release:'')+'#registered-'+dress+'-'+hair+'-'+weapon+(wings?'~'+wings:'');
 }
-async function renderRegisteredLook(dress,hair,weapon){
-  const portrait=await styleImage(await composeRegisteredReina(dress,hair));
-  if(!weapon)return portrait.src;
-  if(weapon===11){
-    const atlas=await styleImage(artPath('leaflight-master'));
-    const c=document.createElement('canvas');c.width=500;c.height=800;const ctx=c.getContext('2d');ctx.drawImage(portrait,0,0);
-    drawLeaflightSlot(ctx,atlas,'bow');
-    ctx.save();ctx.translate(0,40);ctx.scale(500/1024,750/1536);ctx.strokeStyle='#d2ae58';ctx.lineWidth=2.2;ctx.beginPath();ctx.moveTo(769,171);ctx.lineTo(689,1081);ctx.stroke();ctx.restore();
-    drawLeaflightSlot(ctx,atlas,'grip');return c.toDataURL('image/png');
-  }
-  const bow=await styleImage(artPath(weapon<=10?'weapon-style-'+weapon:'atelier-icon-'+(weapon===12?'frost':'gold')));
-  const canvas=document.createElement('canvas');canvas.width=500;canvas.height=800;
-  const ctx=canvas.getContext('2d');ctx.drawImage(portrait,0,0);
-  const x=390,y=375,height=340,width=height*bow.width/bow.height;
-  const grip=[.63,.68,.68,.61,.62,.56,.65,.62,.65,.60][weapon-1]??.5;
-  ctx.save();ctx.translate(x,y);ctx.rotate(.19);ctx.scale(-1,1);
-  ctx.drawImage(bow,-width*grip,-height/2,width,height);ctx.restore();
-  // The original hand overlaps the handle; the bow remains in front of the body.
-  ctx.save();ctx.beginPath();ctx.ellipse(x,y,10,12,0,0,Math.PI*2);ctx.clip();ctx.drawImage(portrait,0,0);ctx.restore();
-  return canvas.toDataURL('image/png');
+function registeredLookPath(dress=registeredLook().dress,hair=registeredLook().hair,weapon=0,wings=''){
+ dress=fittedDressId(dress);hair=fittedHairId(hair);
+ const key=registeredLookKey(dress,hair,weapon,wings);
+ return readyRegisteredLooks.get(key)||key;
+}
+async function previewRegisteredEquipment(category,id){
+ const request=++fashionPreviewRequest,{dress,hair}=registeredLook();
+ const weapon=category==='Weapons'?(id>0?id:id===-1?12:13):(S.atelier?.weapon||((S.reinaFashion?.equipped&4)?12:13));
+ const wings=category==='Wings'?fashionWing(id).id:'';
+ try{
+  const result=await renderRegisteredLook(dress,hair,weapon,wings);await styleImage(result);
+  readyRegisteredLooks.set(registeredLookKey(dress,hair,weapon,wings),result);
+  if(request!==fashionPreviewRequest||fashionCategory!==category)return;
+  if(category==='Wings')wingPreview=id;else stylePick=id;
+  reinaAtelier();
+ }catch{toast('Could not load this style. Please try again.');}
+}
+async function renderRegisteredLook(dress,hair,weapon,wings=''){
+ return (await composeWardrobeCanvas(dress,hair,weapon,wings)).toDataURL('image/png');
 }
 document.addEventListener('load',async event=>{
   const img=event.target;if(img.tagName!=='IMG')return;
   const src=img.src,icon=src.match(/#leaflight-icon-(hair|dress|bow)$/);
   if(icon){try{if(!styleRenderCache.has(src))styleRenderCache.set(src,renderLeaflightIcon(icon[1]));const result=await styleRenderCache.get(src);readyRegisteredLooks.set(src,result);if(img.src===src)img.src=result;}catch{img.alt='Style';}return;}
-  const match=src.match(/#registered-([a-z]+)-(11|10|[1-9])-(\d+)$/);
+  const match=src.match(/#registered-([a-z]+)-(11|10|[1-9])-(\d+)(?:~([a-z0-9-]+))?$/);
   if(!match||!fittingDresses.some(([id])=>id===match[1]))return;
-  if(!styleRenderCache.has(src))styleRenderCache.set(src,renderRegisteredLook(match[1],+match[2],+match[3]));
-  try{const result=await styleRenderCache.get(src);readyRegisteredLooks.set(src,result);if(img.src===src)img.src=result;}
+  if(!styleRenderCache.has(src))styleRenderCache.set(src,renderRegisteredLook(match[1],+match[2],+match[3],match[4]||''));
+  try{const result=await styleRenderCache.get(src);readyRegisteredLooks.set(registeredLookKey(match[1],+match[2],+match[3],match[4]||''),result);if(img.src===src)img.src=result;}
   catch{styleRenderCache.delete(src);img.alt='Could not load Reina. Please reopen Fashion.';}
 },true);
 // Canvas battles consume exactly the same assembled portrait as the wardrobe.
-const registeredCombatCache=new Map();
+const registeredCombatCache=new WardrobeCache(8);
 let lastRegisteredCombatImage=null;
 function registeredCombatBitmap(){
  if(typeof Image==='undefined'||!S.reinaLayers)return null;
  const {dress,hair}=registeredLook(),weapon=S.atelier?.weapon||((S.reinaFashion?.equipped&4)?12:13);
- const key=dress+'/'+hair+'/'+weapon;
+ const wings=fashionWing().id,key=dress+'/'+hair+'/'+weapon+'/'+wings;
  if(!registeredCombatCache.has(key)){
   const entry={image:null};registeredCombatCache.set(key,entry);
-  renderRegisteredLook(dress,hair,weapon).then(styleImage).then(image=>{entry.image=image;}).catch(()=>registeredCombatCache.delete(key));
+  renderRegisteredLook(dress,hair,weapon,wings).then(styleImage).then(image=>{entry.image=image;}).catch(()=>registeredCombatCache.delete(key));
  }
  const image=registeredCombatCache.get(key)?.image;
  if(image)lastRegisteredCombatImage=image;
  return image||lastRegisteredCombatImage;
+}
+function reinaWorldLookPath(){
+ return registeredLookPath(undefined,undefined,S.atelier?.weapon||((S.reinaFashion?.equipped&4)?12:13),fashionWing().id);
 }
 function reinaLookPath(riding,mask=S.reinaFashion?.equipped||0,shared=S.costumes?.equipped?.reina,styles=S.atelier){
   if(!riding)return registeredLookPath(arguments.length>=3&&shared!==currentDress()?fittedDressId(shared):undefined,undefined,styles?.weapon||((mask&4)?12:13));
@@ -843,7 +892,7 @@ function home(){
  <button class="city-fold" aria-label="${cityExpanded?'Hide events':'Show events'}" aria-expanded="${cityExpanded}" aria-controls="city-promotions" onclick="foldCityMenu(this)"><span class="city-fold-disc" aria-hidden="true"></span></button>
  <div id="city-promotions" class="city-promos">${cityGroups[1].map(item=>cityIcon(item,'left-')).join('')}</div></div>
  <button class="city-reinforce" onclick="go('forge')"><span>Reinforce<small>Gear upgrades</small></span><img src="${artPath('hud-reinforce')}"></button><div class="city-extra"><button class="city-icon" onclick="go('fishing')"><span class="city-glyph"><img class="city-fish" src="assets/generated/fishing-crowned-goldfish.webp" alt=""></span><span class="city-caption">Fishing</span></button>${[['isle-skyship','Isle Expedition','isleArena'],['cloud-war-citadel','Cloud War','cloudWar']].map(item=>cityIcon(item)).join('')}</div>
- <div class="city-wings">${artImage(fashionWing().id,'Reina’s wings')}</div><div class="city-aura"><img src="${artPath('hud-aura')}" alt="Overlord’s Aura"></div><div class="city-hero form-${mount?WonderGear.companionState(S,'mount').form:0}"><b>${esc(S.name)}</b><img src="${reinaLookPath(Boolean(mount))}" alt="Reina"></div>${cityCompanionEffects()}
+ ${mount?`<div class="city-wings">${artImage(fashionWing().id,'Reina’s wings')}</div>`:''}<div class="city-aura"><img src="${artPath('hud-aura')}" alt="Overlord’s Aura"></div><div class="city-hero form-${mount?WonderGear.companionState(S,'mount').form:0}"><b>${esc(S.name)}</b><img src="${mount?reinaLookPath(true):reinaWorldLookPath()}" alt="Reina"></div>${cityCompanionEffects()}
  ${pets.map((pet,i)=>`<div class="city-pet city-pet-${i}"><img src="${pet.portrait||artPath(pet.id)}" alt="${esc(pet.name)}" draggable="false"></div>`).join('')}
  <div class="city-jobs">${[['Daily','cityDaily'],['Gameplay','cityGameplay'],['Bounty','cityBounty'],['Hunting','cityHunting']].map(([name,id])=>`<button onclick="go('${id}')"><img src="${artPath('wing-menu-'+name.toLowerCase())}" alt="">${name}</button>`).join('')}</div>
  <div class="city-tools">${[['broadcast','Elf Broadcast']].map(item=>cityIcon(item)).join('')}</div>
@@ -852,7 +901,7 @@ function home(){
  <button class="city-reward" aria-label="Challenge" onclick="go('cityExplore')"><img src="${artPath('left-explore')}" alt=""><small>Challenge</small></button><button class="city-quest" onclick="go('quests')"><img src="${artPath('hud-quest')}" alt=""> Quest Board</button>
  <div class="city-chat"><div><small>Globe</small> Welcome to Sky Garden</div><div><small>System</small> ${esc(S.name)} · Level ${level()}</div>${cityTool('wing-chat','Journal',"go('settings')")}</div>${cityDrawerMarkup()}<div class="city-dock">${cityGroups[2].map(item=>cityIcon(item)).join('')}</div></section>`;
 }
-function heroProfile(){const mount=currentMount(),st=stats(),d=item(S.dragon),w=item(S.wings);renderHeroReadout(st);$('#main').innerHTML=`<div class="profile"><div class="profile-bg"></div><aside class="profile-panel stats-panel"><p class="eyebrow">ELVEN RANGER</p><h2>${esc(S.name)}</h2><span class="level-pill">LEVEL ${level()}</span><div class="progress"><b style="width:${level()>=1500?100:S.xp%150/1.5}%"></b></div><small class="xp">${level()>=1500?'MAX LEVEL · 1500':fmt(S.xp%150)+' / 150 XP'}</small><div class="power" role="button" tabindex="0" onclick="openHeroStats()" onkeydown="if(event.key==='Enter')openHeroStats()"><small>${uiIcon('power','power-art')}COMBAT POWER · ALL STATS</small><strong>${fmt(st.power)}</strong></div>${[['Attack',st.attack,'attack'],['Defense',st.defense,'defense'],['Health',st.health,'health'],['Critical',st.crit+'%','crit'],['Speed',st.speed,'speed'],['Accuracy',st.accuracy+'%','accuracy'],['Dodge',st.dodge+'%','wind'],['Shield HP',st.shieldHealth,'shield']].map(([n,v,i])=>`<div class="stat"><span>${uiIcon(i,'stat-art')}${n}</span><b>${typeof v==='number'?fmt(v):v}</b></div>`).join('')}<button class="primary hero-equipment-link" onclick="go('bag')">Equipment ›</button></aside><div class="hero-stage"><div class="hero-visual"><div class="scene-atmosphere" aria-hidden="true"><div class="godrays"></div><div class="volumetric-fog"></div></div><div class="stage-halo"></div><div class="party-formation" role="group" aria-label="Reina’s party">${Object.entries(partyWardrobe).map(([id,item])=>`<button class="party-member party-${id}" aria-label="${item.label} wardrobe" onclick="wardrobe('${id}')">${dressedHero(id,S.costumes?.equipped?.[id],item.label)}</button>`).join('')}</div>${mount ? `<img class="avatar mounted-reina" src="${reinaLookPath(true)}" alt="Reina riding ${mount.name}">` : `<div class="avatar-wings" data-tier="${visualTier(fashionWing())}">${wingArt(fashionWing())}</div><img class="avatar" src="${reinaLookPath(false)}" alt="REINA, silver-haired elven ranger">`}<button class="fashion-sale-link" onclick="fashionSale()">Fashion Sale</button><button class="mount-toggle" type="button" aria-pressed="${Boolean(mount)}" onclick="toggleMount()">Mount</button><div class="companion" data-tier="${visualTier(d)}">${dragonSVG(d)}<span>${d.name}</span></div></div></div></div><div class="location-badge"><span>✧</span> SKY GARDEN <small>Sanctuary of the first wish</small></div>`}
+function heroProfile(){const mount=currentMount(),st=stats(),d=item(S.dragon),w=item(S.wings);renderHeroReadout(st);$('#main').innerHTML=`<div class="profile"><div class="profile-bg"></div><aside class="profile-panel stats-panel"><p class="eyebrow">ELVEN RANGER</p><h2>${esc(S.name)}</h2><span class="level-pill">LEVEL ${level()}</span><div class="progress"><b style="width:${level()>=1500?100:S.xp%150/1.5}%"></b></div><small class="xp">${level()>=1500?'MAX LEVEL · 1500':fmt(S.xp%150)+' / 150 XP'}</small><div class="power" role="button" tabindex="0" onclick="openHeroStats()" onkeydown="if(event.key==='Enter')openHeroStats()"><small>${uiIcon('power','power-art')}COMBAT POWER · ALL STATS</small><strong>${fmt(st.power)}</strong></div>${[['Attack',st.attack,'attack'],['Defense',st.defense,'defense'],['Health',st.health,'health'],['Critical',st.crit+'%','crit'],['Speed',st.speed,'speed'],['Accuracy',st.accuracy+'%','accuracy'],['Dodge',st.dodge+'%','wind'],['Shield HP',st.shieldHealth,'shield']].map(([n,v,i])=>`<div class="stat"><span>${uiIcon(i,'stat-art')}${n}</span><b>${typeof v==='number'?fmt(v):v}</b></div>`).join('')}<button class="primary hero-equipment-link" onclick="go('bag')">Equipment ›</button></aside><div class="hero-stage"><div class="hero-visual"><div class="scene-atmosphere" aria-hidden="true"><div class="godrays"></div><div class="volumetric-fog"></div></div><div class="stage-halo"></div><div class="party-formation" role="group" aria-label="Reina’s party">${Object.entries(partyWardrobe).map(([id,item])=>`<button class="party-member party-${id}" aria-label="${item.label} wardrobe" onclick="wardrobe('${id}')">${dressedHero(id,S.costumes?.equipped?.[id],item.label)}</button>`).join('')}</div>${mount ? `<img class="avatar mounted-reina" src="${reinaLookPath(true)}" alt="Reina riding ${mount.name}">` : `<img class="avatar" src="${reinaWorldLookPath()}" alt="REINA, silver-haired elven ranger">`}<button class="fashion-sale-link" onclick="fashionSale()">Fashion Sale</button><button class="mount-toggle" type="button" aria-pressed="${Boolean(mount)}" onclick="toggleMount()">Mount</button><div class="companion" data-tier="${visualTier(d)}">${dragonSVG(d)}<span>${d.name}</span></div></div></div></div><div class="location-badge"><span>✧</span> SKY GARDEN <small>Sanctuary of the first wish</small></div>`}
 function gearDetail(id){const slot={ring:'spiritluck',charm:'amulet'}[id]||id;openEquipment(globalThis.WonderGear.state(S).equipped[slot])}
 function upgrade(id){const slot={ring:'spiritluck',charm:'amulet'}[id]||id,eq=globalThis.WonderGear.state(S),uid=eq.equipped[slot],entry=eq.items.find(i=>i.uid===uid);if(entry)equipmentAction(uid,'enhance',equipmentStamp(entry))}
 

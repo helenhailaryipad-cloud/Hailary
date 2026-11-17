@@ -16,6 +16,7 @@ vm.runInContext(fs.readFileSync('src/world.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/arena.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/game-polish.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/minigame-engine.js','utf8'),context);
+vm.runInContext(fs.readFileSync('src/wardrobe-engine.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/app.js','utf8'),context);
 
 context.Path2D=Path2D;context.document.createElement=tag=>tag==='canvas'?createCanvas(500,800):({click(){}});
@@ -26,7 +27,7 @@ const sheet=createCanvas(2000,800),ctx=sheet.getContext('2d');ctx.fillStyle='#22
 for(let i=0;i<combinations.length;i++){
  const [dress,hair,bow]=combinations[i];
  const url=await vm.runInContext(`renderRegisteredLook('${dress}',${hair},${bow})`,context);
- const img=await loadImage(url);ctx.drawImage(img,i*500,0);
+ const img=await loadImage(url);ctx.drawImage(img,i*500,0,500,800);
  ctx.fillStyle='white';ctx.font='16px sans-serif';ctx.fillText(combinations[i].join(' / '),i*500+10,790);
 }
 fs.writeFileSync('/tmp/leaflight-review.png',sheet.toBuffer('image/png'));

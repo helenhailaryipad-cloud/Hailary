@@ -6501,3 +6501,6 @@ img[src*="#registered-"]{opacity:0}
 /* Compact complete-set action leaves the full-height portrait unobstructed. */
 .leaflight-set{justify-self:center;font:600 12px/1.2 system-ui;min-height:28px;padding:4px 14px;margin:3px;border:1px solid #c3ac73;border-radius:14px;background:#32574e;color:#fff0c8}
 img[src*="#leaflight-icon-"]{opacity:0}
+
+/* Keep the complete item and its label visible; scroll the tray instead of crushing cards. */
+.fashion-cards .fashion-card{height:auto;min-height:calc(clamp(44px,7.8dvh,84px) + 2.6em + 4px)}
