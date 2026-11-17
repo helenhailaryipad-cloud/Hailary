@@ -22,7 +22,7 @@ S=defaults();S.gold=15000;openScreen('fashion');
 if(reinaDresses.length!==10)throw Error('Clothing catalog');
 for(const dress of reinaDresses){
   clothingPreview=dress.id;
-  if(reinaLookPath(false,2,dress.id)!==artPath('atelier-'+dress.id)+'#atelier-0-0'||!fittingRoom().includes('alt="Reina in '+dress.outfit+'"'))throw Error('Missing outfit preview');
+  if(!reinaLookPath(false,2,dress.id).includes('#registered-'))throw Error('Old body renderer remains');
   const balance=S.gold;
   wearOutfit('reina',dress.id,false);wearOutfit('reina',dress.id,false);
   if(S.gold!==balance-dress.gold||!ownsOutfit(dress.id)||currentDress()!==dress.id||!valid(S))throw Error('Outfit purchase or ownership');
@@ -44,11 +44,24 @@ for(const category of ['Hair','Weapons']){
     if(S.gold!==before-set.price||currentDress()!=='pearl'||wornStyle(set)!==n)throw Error('Independent style purchase');
   }
 }
-if(!reinaLookPath(false).includes('atelier-pearl.webp#atelier-10-10'))throw Error('Combined outfit');
+if(!reinaLookPath(false).includes('#registered-grove-1-10'))throw Error('Registered body with weapon');
 S=normalizeAdventure(JSON.parse(JSON.stringify(S)));
 if(!valid(S)||S.atelier.hair!==10||S.atelier.weapon!==10)throw Error('Style persistence');
 changeFashionTab('Hair');stylePick=0;wearStyle();
 if(S.atelier.weapon!==10||currentDress()!=='pearl'||S.atelier.hair!==0)throw Error('Independent reset');
+S=defaults();S.gold=10000;openScreen('fashion');
+if(!document.querySelector('#main').innerHTML.includes('#registered-grove-1-0')||document.querySelector('#main').innerHTML.includes('Layered fitting'))throw Error('Registered body must be the main Fashion view');
+const savedOwned=['pearl','nightbloom'];S.costumes={owned:[...savedOwned],equipped:{reina:'pearl'}};
+changeFashionTab('Dresses');wearRegisteredLook('frostlace',1);const afterDress=S.gold;wearRegisteredLook('frostlace',1);
+if(afterDress!==8800||S.gold!==afterDress||!savedOwned.every(id=>ownsOutfit(id)))throw Error('Preserve owned dresses and single purchase');
+changeFashionTab('Hair');wearRegisteredLook('frostlace',2);const afterHair=S.gold;wearRegisteredLook('frostlace',2);
+if(afterHair!==8400||S.gold!==afterHair||currentDress()!=='frostlace')throw Error('Independent registered hair purchase');
+S=normalizeAdventure(JSON.parse(JSON.stringify(S)));
+if(S.reinaLayers.dress!=='frostlace'||S.reinaLayers.hair!==2||!valid(S)||!reinaLookPath(false).includes('#registered-frostlace-2-'))throw Error('Registered appearance persistence');
+changeFashionTab('Dresses');wearRegisteredLook('base',2);
+if(S.reinaLayers.dress!=='base'||S.reinaLayers.hair!==2||S.gold!==afterHair)throw Error('Base swimsuit must keep hair and cost nothing');
+changeFashionTab('Hair');wearRegisteredLook('base',0);
+if(S.reinaLayers.hair!==0||S.reinaLayers.dress!=='base'||S.gold!==afterHair)throw Error('Bald base must retain the intact body');
 S=defaults();
 const namedLegacy={...defaults(),name:'Reyna',gold:1234,xp:456};const legacyBefore=JSON.stringify({...namedLegacy,name:'REINA'});normalizeAdventure(namedLegacy);if(JSON.stringify(namedLegacy)!==legacyBefore)throw Error('Name correction must preserve progress');if(normalizeAdventure({...defaults(),name:'Nyra'}).name!=='Nyra')throw Error('Keep custom hero names');if(comparable({...defaults(),name:'REINA'})!==comparable(normalizeAdventure({...defaults(),name:'Reyna'})))throw Error('Name correction must not create cloud conflict');
 S=defaults();home();const progressBeforeIntro=JSON.stringify(S);const introPrefs=new Map(),originalGet=localStorage.getItem,originalSet=localStorage.setItem;localStorage.getItem=k=>introPrefs.get(k)||null;localStorage.setItem=(k,v)=>introPrefs.set(k,String(v));chooseIntro('2d');if(storedIntroStyle()!=='2d'||screen!=='home'||document.querySelector('#main').innerHTML.includes('id="intro3d"')||JSON.stringify(S)!==progressBeforeIntro)throw Error('2D return preserves adventure');openScreen('intro');chooseIntro('3d');if(storedIntroStyle()!=='2d'||screen!=='home'||document.querySelector('#main').innerHTML.includes('id="intro3d"')||JSON.stringify(S)!==progressBeforeIntro)throw Error('Retired 3D preference must return to 2D and preserve adventure');localStorage.getItem=originalGet;localStorage.setItem=originalSet;
