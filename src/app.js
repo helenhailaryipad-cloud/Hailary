@@ -451,7 +451,7 @@ function styleFittingRoom(set){
 const fittingTemplate={width:500,height:800,body:{x:0,y:40,width:500,height:750},
   hand:[[199,289],[215,279],[233,279],[245,283],[247,289],[230,289],[244,295],[247,301],[238,302],[246,307],[244,313],[235,313],[244,319],[240,323],[223,317],[211,317],[201,324],[189,318]]};
 let fittingControlDress='grove',fittingControlHair=1;
-const fittingDresses=[['leaflight','Leaflight'],['base','Base swimsuit'],['grove','Emerald Leaves'],...reinaDresses.map(({id,outfit})=>[id,id==='frostlace'?'Amethyst Lace':outfit])];
+const fittingDresses=[['leaflight','Leaflight'],['grove','Emerald Leaves'],...reinaDresses.map(({id,outfit})=>[id,id==='frostlace'?'Amethyst Lace':outfit])];
 const fittingHairs=styleSets.Hair.names.map((name,i)=>[i+1,name]);
 // These slots are traced on the SAME 1024 x 1536 master. Never re-fit heads.
 // Clip paths are renderer geometry, and the original atlas is retained unchanged.
@@ -491,6 +491,23 @@ function wearLeaflightSet(){
  save();reinaAtelier();toast('Leaflight set equipped');
 }
 
+// Only the opening is in front of the original neck. The garment's front lip
+// stays above the body; its rear rim must never cut through the neck.
+const fittingNeckOpenings={
+ dawnpetal:'M210 160 Q225 169 240 174 Q246 177 249 175',
+ nightbloom:'M211 163 Q226 171 240 178 Q246 174 251 171',
+ tidal:'M212 157 Q225 164 238 166 Q243 167 245 175',
+ emberveil:'M214 154 Q227 162 239 165 Q245 168 247 177',
+ stardust:'M211 155 Q223 163 233 166 L233 169 Q239 170 245 173 L247 171',
+ sapphire:'M215 162 Q225 168 237 172 Q242 174 244 181'
+};
+function restoreFittingNeck(ctx,dress,drawBody){
+ const opening=fittingNeckOpenings[dress];if(!opening)return;
+ ctx.save();
+ ctx.clip(new Path2D('M214 135 Q216 153 210 162 Q207 167 202 170 L202 184 L252 184 L252 173 Q244 168 247 153 L260 135 Z'));
+ ctx.clip(new Path2D(opening+' L270 130 L200 130 Z'));
+ drawBody();ctx.restore();
+}
 async function composeRegisteredReina(dress,hair){
   const ids=['body',...(dress==='base'||dress==='leaflight'?[]:[dress]),...(hair&&hair!==11?['hair-'+hair]:[])];
   const layers=await Promise.all(ids.map(id=>styleImage(artPath('fit-control-'+id))));
@@ -509,6 +526,7 @@ async function composeRegisteredReina(dress,hair){
     ctx.save();ctx.beginPath();fittingTemplate.hand.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.clip();drawBody();ctx.restore();
   }else if(dress!=='base'){
     ctx.drawImage(layers[1],0,0,500,800);
+    restoreFittingNeck(ctx,dress,drawBody);
     // Keep the same original hand above the bodice, never a second painted hand.
     ctx.save();ctx.beginPath();fittingTemplate.hand.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();ctx.clip();drawBody();ctx.restore();
   }

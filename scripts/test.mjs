@@ -59,9 +59,11 @@ if(afterHair!==8400||S.gold!==afterHair||currentDress()!=='frostlace')throw Erro
 S=normalizeAdventure(JSON.parse(JSON.stringify(S)));
 if(S.reinaLayers.dress!=='frostlace'||S.reinaLayers.hair!==2||!valid(S)||!reinaLookPath(false).includes('#registered-frostlace-2-'))throw Error('Registered appearance persistence');
 changeFashionTab('Dresses');wearRegisteredLook('base',2);
-if(S.reinaLayers.dress!=='base'||S.reinaLayers.hair!==2||S.gold!==afterHair)throw Error('Base swimsuit must keep hair and cost nothing');
+if(S.reinaLayers.dress!=='frostlace'||S.reinaLayers.hair!==2||S.gold!==afterHair)throw Error('Technical swimsuit must not be equippable');
+if(fittingDresses.some(([id])=>id==='base'))throw Error('No swimsuit in Fashion');
+if(fittedDressId('base')!=='grove')throw Error('Legacy swimsuit must migrate to a complete outfit');
 changeFashionTab('Hair');wearRegisteredLook('base',0);
-if(S.reinaLayers.hair!==2||S.reinaLayers.dress!=='base'||S.gold!==afterHair)throw Error('Bald selection must be rejected');
+if(S.reinaLayers.hair!==2||S.reinaLayers.dress!=='frostlace'||S.gold!==afterHair)throw Error('Bald selection must be rejected');
 S.reinaLayers.hair=0;if(registeredLook().hair!==1)throw Error('Legacy bald appearance must use a hairstyle');
 if(fittingHairs.some(([id])=>id===0))throw Error('No bald option in Fashion');
 S=defaults();
@@ -298,7 +300,7 @@ console.log('PASS: 100 collectable species, legacy catches, exact duplicate stat
 
 vm.runInContext(`
 S=defaults();S.gold=50000;openScreen('fashion');
-if(fittingDresses.length!==13||fittingHairs.length!==11)throw Error('Registered wardrobe incomplete');
+if(fittingDresses.length!==12||fittingHairs.length!==11)throw Error('Registered wardrobe incomplete');
 for(const {id,outfit} of reinaDresses){
  changeFashionTab('Dresses');clothingPreview=id;
  if(!registeredFashionRoom().includes(outfit==='Moonlit Ballerina'?'Amethyst Lace':outfit))throw Error('Missing garment choice');
