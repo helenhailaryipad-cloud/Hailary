@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "gpt-image": {
+      "command": "python3",
+      "args": ["mcp/gpt_image_mcp.py"],
+      "env": {
+        "OPENAI_API_KEY": "proxy-injected",
+        "GPT_IMAGE_MODEL": "gpt-image-2.6-sunburst"
+      }
+    }
+  }
+}
