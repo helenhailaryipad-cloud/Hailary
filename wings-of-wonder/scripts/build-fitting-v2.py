@@ -148,7 +148,10 @@ def painted_layer(P, Bb, allow=None):
     d = diff(P, Bb)
     core = keep_big(dilate(erode((d > 20) & ok, 1), 1), int(150*k*k))
     grown = core.copy()
-    for _ in range(r(12)): grown |= dilate(grown, 1) & (d > 5) & ok
+    # Faint differences on bare skin are repaint noise, not cloth: only follow
+    # them when they are clear (a shadow the garment casts) or not skin at all.
+    faint = (d > 5) & ((d > 12) | ~(skin_like(P) & skin_like(Bb)))
+    for _ in range(r(12)): grown |= dilate(grown, 1) & faint & ok
     m = core | (dilate(erode(grown, r(1.5)), r(1.5)) & grown)     # no hairline tendrils
     m |= dilate(bodysuit(Bb), r(5)) & (P[..., 3] > 0) & ok          # the bodysuit never shows
     m |= dilate(m, r(5)) & (Bb[..., 3] < 8) & (P[..., 3] > 0) & ok  # soft outer edges stay soft
@@ -158,10 +161,16 @@ def painted_layer(P, Bb, allow=None):
     raw = (Bb[..., 3] > 0) & (P[..., 3] < 60) & dilate(m, r(10)) & ok
     solid = keep_big(dilate(erode(raw, r(1)), r(1)) & raw, int(12*k*k))
     erase = dilate(solid, r(1)) & raw
+    # Around boots and shoes the body's own soft outline would glow beside the leather.
+    low = yy > (H*0.55)
+    erase |= raw & low & dilate(m, r(3))
     return m, erase
 def save_painted(name, P, m, erase):
     out = P.copy(); out[..., 3] = np.where(m, P[..., 3], 0)
     layer = save('fit-control-'+name, to_frame(img(out)), 72)
+    icon = layer.crop(layer.getbbox()); icon.thumbnail((128, 146), Image.Resampling.LANCZOS)
+    tile = Image.new('RGBA', (144, 160)); tile.alpha_composite(icon, ((144-icon.width)//2, (160-icon.height)//2))
+    if name != 'leaflight': save('fit-icon-'+name, tile)     # wardrobe card picture
     e = np.zeros_like(P); e[..., 3] = np.where(erase, 255, 0)
     save('fit-control-'+name+'-erase', to_frame(img(e)), 50)
     return layer
@@ -172,6 +181,11 @@ def build_grove():      # Emerald Leaves, painted at 500 x 750
     m[146:153, 208:215] = False     # retouch: a stray stub poking above the collar rim
     return save_painted('grove', P, m, erase)
 
+def build_frostlace():  # Amethyst Lace, painted at 500 x 750
+    P = arr(to_frame(Image.open(SRC/'fitting-control/b.png')))
+    return save_painted('frostlace', P, *painted_layer(P, B))
+
+PAINTED = ['emberveil', 'dawnpetal', 'nightbloom', 'sunweave', 'tidal', 'willow', 'stardust', 'pearl', 'sapphire']
 def build_painted(name):  # repainted on the base body at 1024 x 1536
     P = arr(Image.open(SRC/'fitting-control/painted'/(name+'.png')))
     return save_painted(name, P, *painted_layer(P, arr(body_hi)))
@@ -285,17 +299,23 @@ def build_hair(i):
     return save(f'fit-control-hair-{i}', img(A))
 
 if __name__ == '__main__':
-    hand = build_hand(); grove = build_grove(); build_leaflight(); build_leaf_bow(); build_painted('emberveil')
-    hairs = {i: build_hair(i) for i in (3, 9, 10)}
-    hairs[11] = Image.open(OUT/'fit-control-hair-11.webp')
-    hairs[1] = Image.open(OUT/'fit-control-hair-1.webp')
-    dresses = {'grove': grove, 'leaflight': Image.open(OUT/'fit-control-leaflight.webp'), 'emberveil': Image.open(OUT/'fit-control-emberveil.webp')}
-    sheet = Image.new('RGB', (500*5, 800*3), '#dfe9ef')
-    for r, (name, layer) in enumerate(dresses.items()):
-        for c, h in enumerate((1, 3, 9, 10, 11)):
-            er = np.array(Image.open(OUT/f'fit-control-{name}-erase.webp').convert('RGBA'))[..., 3] > 127
-            bb = B.copy(); bb[er, 3] = 0
-            look = img(bb); look.alpha_composite(layer.convert('RGBA'))
-            look.alpha_composite(hairs[h].convert('RGBA')); sheet.paste(look, (c*500, r*800), look)
+    import sys
+    only = set(sys.argv[1:])
+    want = lambda n: not only or n in only
+    if want('grove'): build_grove()
+    if want('frostlace'): build_frostlace()
+    if want('leaflight'): build_leaflight(); build_leaf_bow()
+    for name in PAINTED:
+        if want(name): build_painted(name)
+    for i in (3, 9, 10):
+        if want('hair'): build_hair(i)
+    names = ['leaflight', 'grove', 'frostlace'] + PAINTED
+    sheet = Image.new('RGB', (500*6, 800*2), '#dfe9ef')
+    for i, name in enumerate(names):
+        er = np.array(Image.open(OUT/f'fit-control-{name}-erase.webp').convert('RGBA'))[..., 3] > 127
+        bb = B.copy(); bb[er, 3] = 0
+        look = img(bb); look.alpha_composite(Image.open(OUT/f'fit-control-{name}.webp').convert('RGBA'))
+        look.alpha_composite(Image.open(OUT/f'fit-control-hair-{(3, 9, 10, 11)[i % 4]}.webp').convert('RGBA'))
+        sheet.paste(look, ((i % 6)*500, (i//6)*800), look)
     sheet.save('/tmp/fitting-v2.png')
     print('Built pixel-accurate layers; review /tmp/fitting-v2.png')

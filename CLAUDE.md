@@ -30,14 +30,23 @@ cut with hand-traced polygons, so sleeves, collars and boots did not sit on Rein
 Result: body + layer reproduces the painting, so cuff/wrist, collar/neck and boot/leg always agree.
 Rejected: polygon masks (v301) and per-pixel masks over separately drawn garment art (hand does not meet the cuff).
 
-Done this way: dresses `grove`, `leaflight`, `emberveil`; hair 11 from the Leaflight painting; hairs 3, 9, 10 have
-ear/temple gaps filled. Sheets: `docs/wardrobe-review/fix1-*.png`, `fix2-three-approaches.png`.
+Done this way (third pass): ALL 12 dresses. `grove`, `frostlace` (b.png) and `leaflight` were already paintings
+of the body; the other nine were repainted with the image model and their sources are in
+`scripts/art-source/fitting-control/painted/<id>.png`. Wardrobe card icons (`fit-icon-<id>`) are regenerated from
+the new layers. The polygon dress code, neck-opening paths and the pasted hand layer are removed from `app.js`.
+Hair 11 comes from the Leaflight painting; hairs 3, 9, 10 have ear/temple gaps filled.
+Sheets: `docs/wardrobe-review/fix1-*.png`, `fix2-three-approaches.png`, `fix3-*.png`.
+
+To add or redo a dress: put a 1024x1536 transparent painting of base-v2.png wearing it in `painted/<id>.png`,
+add the id to `PAINTED` in `scripts/build-fitting-v2.py`, run `python3 scripts/build-fitting-v2.py <id>`, then
+render and LOOK at hand, neck, feet (`composeWardrobeCanvas` in the preview) before committing.
 
 Still to do:
-- Repaint the other 9 dresses on the body the same way (each changes the drawing slightly; user must approve looks).
-- Hosted bundle is 33,502,971 bytes against a limit of about 33,554,432: every new layer needs room. Free space
-  before adding nine repainted dresses (e.g. drop layers that the repaint replaces, lower AVIF quality elsewhere).
+- User has not yet approved the nine repainted designs (details differ slightly from the old art).
+- Mounted (cat-rider) portraits, atelier portraits and combat sprites still show the OLD designs of these outfits.
+- Hosted bundle is 33,499,960 bytes against a limit of about 33,554,432 (54 KB spare). `fit-control-hand`,
+  `fit-mask-*` and `leaflight-master` are no longer embedded.
 - Hairs 1, 2, 4-8 still use the fixed front/back rectangle; hair portraits are low-res (154x196).
-- Not inspected yet: mounted (cat-rider) pose, combat sprites, wings tab.
+- Not inspected yet: mounted pose, combat sprites, wings tab.
 - Fresh save shows short auburn hair (hair 1), not silver hair as the handover describes.
 - `dist/` was NOT rebuilt or published; the live site is still v301.

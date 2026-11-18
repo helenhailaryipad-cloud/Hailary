@@ -488,62 +488,18 @@ function wearLeaflightSet(){
  save();reinaAtelier();toast('Leaflight set equipped');
 }
 
-// Only the opening is in front of the original neck. The garment's front lip
-// stays above the body; its rear rim must never cut through the neck.
-const fittingNeckOpenings={
- dawnpetal:'M210 160 Q225 169 240 174 Q246 177 249 175',
- nightbloom:'M211 163 Q226 171 240 178 Q246 174 251 171',
- tidal:'M212 157 Q225 164 238 166 Q243 167 245 175',
- emberveil:'M214 154 Q227 162 239 165 Q245 168 247 177',
- stardust:'M211 155 Q223 163 233 166 L233 169 Q239 170 245 173 L247 171',
- sapphire:'M215 162 Q225 168 237 172 Q242 174 244 181'
-};
-function restoreFittingNeck(ctx,dress,drawBody){
- const opening=fittingNeckOpenings[dress];if(!opening)return;
- ctx.save();
- ctx.clip(new Path2D('M214 135 Q216 153 210 162 Q207 167 202 170 L202 184 L252 184 L252 173 Q244 168 247 153 L260 135 Z'));
- ctx.clip(new Path2D(opening+' L270 130 L200 130 Z'));
- drawBody();ctx.restore();
-}
 let wardrobeCatalogReady=false;
-// Built by scripts/build-fitting-v2.py. Other items still use traced polygons.
-const wardrobePixelDresses=new Set(['grove','leaflight','emberveil']),wardrobeMattedHandDresses=new Set(),wardrobePixelHairs=new Set([3,9,10,11]);
-const wardrobeHandPath='M'+fittingTemplate.hand.map(p=>p.join(' ')).join(' L')+' Z';
+// Hair layers rebuilt by scripts/build-fitting-v2.py; the others still use the shared front/back split.
+const wardrobePixelHairs=new Set([3,9,10,11]);
 const wardrobeGripPath='M378 360 Q386 351 397 360 Q413 364 411 374 L405 383 Q399 394 390 393 L378 385 L370 374 Z';
 function ensureWardrobeCatalog(){
  if(wardrobeCatalogReady)return;
- const bodyAsset='fit-control-body',standard=[0,0,500,800];
- const sleeves='M0 175 H204 V336 H0 Z M298 185 H500 V400 H298 Z';
- const boots='M0 560 H500 V800 H0 Z';
- const covered={frostlace:650,dawnpetal:400,nightbloom:400,sunweave:450,emberveil:420,willow:450,stardust:400,pearl:450,sapphire:400,leaflight:590};
- for(const [id] of fittingDresses){
-  const asset='fit-control-'+id,rect=standard,common={};
-  const opening=fittingNeckOpenings[id];
-  const rear=opening?opening+' L270 130 L200 130 Z':null;
-  const skin=wardrobeHandPath;
-  const lower=covered[id];
-  const bodyCoverage=lower?[`M60 ${lower} H345 V800 H60 Z`]:[];
-  // Painted on the fixed body and extracted per pixel: the layer already
-  // leaves the neck, shoulders and the hand on the hip untouched.
-  if(wardrobePixelDresses.has(id)){
-   WonderWardrobe.register({id:'dress:'+id,kind:'dress',frame:[500,800],bodyErase:'fit-control-'+id+'-erase',layers:[{slot:'garmentFront',asset:'fit-control-'+id}]});
-   continue;
-  }
-  // Garment-only art that covers the hip: whole garment, then the matted hand.
-  if(wardrobeMattedHandDresses.has(id)){
-   WonderWardrobe.register({id:'dress:'+id,kind:'dress',frame:[500,800],bodyCoverage,layers:[
-    ...(rear?[{slot:'garmentBack',asset,rect,clip:rear}]:[]),
-    {slot:'garmentFront',asset,rect,exclude:rear?[rear]:[]},
-    {slot:'handFront',asset:'fit-control-hand'}]});
-   continue;
-  }
-  const layers=[];
-  if(rear)layers.push({slot:'garmentBack',asset,rect,clip:rear});
-  layers.push({slot:'boots',asset,rect,...common,clip:boots,exclude:[skin]});
-  layers.push({slot:'garmentFront',asset,rect,...common,exclude:[boots,sleeves,skin,...(rear?[rear]:[])]});
-  layers.push({slot:'sleeves',asset,rect,...common,clip:sleeves,exclude:[boots,skin,...(rear?[rear]:[])]});
-  WonderWardrobe.register({id:'dress:'+id,kind:'dress',frame:[500,800],bodyCoverage,layers});
- }
+ const bodyAsset='fit-control-body';
+ // Every outfit is a painting of the fixed body, extracted per pixel by
+ // scripts/build-fitting-v2.py: one garment layer, plus a mask of the body
+ // parts it hides. Neck, wrists, hands and legs need no clip paths.
+ for(const [id] of fittingDresses)
+  WonderWardrobe.register({id:'dress:'+id,kind:'dress',frame:[500,800],bodyErase:'fit-control-'+id+'-erase',layers:[{slot:'garmentFront',asset:'fit-control-'+id}]});
  // Hair tails render behind the same body; cap and face-framing strands render last.
  const hairFront='M0 0 H500 V154 H285 V195 H262 V154 H220 V204 H194 V154 H0 Z';
  for(const [id] of fittingHairs){
@@ -581,7 +537,6 @@ async function composeWardrobeCanvas(dress,hair,weapon=0,wings=''){
  const body='fit-control-body';
  if(wings&&!WonderWardrobe.get('wings:'+wings))WonderWardrobe.register({id:'wings:'+wings,kind:'wings',layers:[{slot:'wingsBack',asset:wings,fit:[0,-4,480,420]}]});
  return WonderWardrobe.render({dress:'dress:'+fittedDressId(dress),hair:'hair:'+fittedHairId(hair),weapon:weapon?'weapon:'+weapon:null,wings:wings?'wings:'+wings:null,body,
-  bodyLayers:wardrobePixelDresses.has(fittedDressId(dress))||wardrobeMattedHandDresses.has(fittedDressId(dress))?[]:[{slot:'handFront',asset:body,rect:[0,40,500,750],clip:wardrobeHandPath}],
   createCanvas:(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;},load:id=>styleImage(artPath(id))});
 }
 async function composeRegisteredReina(dress,hair){
