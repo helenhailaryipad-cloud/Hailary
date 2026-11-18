@@ -6522,3 +6522,32 @@ body[data-screen="jungle"] .jungle-field{width:min(100%,60svh);max-height:100svh
 
 /* Portraits with wings have 100 extra frame units above the 800-unit figure: scale back up from the feet so Reina keeps her size. */
 .winged-portrait{transform:scale(1.125);transform-origin:50% 100%}
+
+/* Harvest Pairs */
+body[data-screen="pairs"] #stage>header,body[data-screen="pairs"] #stage>#nav,body[data-screen="pairs"] #stage>.return-to-menu,body[data-screen="pairs"] #stage>footer{display:none!important}
+body[data-screen="pairs"] #stage #main{position:fixed!important;inset:0!important;width:100%!important;height:100svh!important;max-height:none!important;margin:0!important;padding:0!important;overflow:hidden!important;background:#2c6b3f}
+.pairs-screen{position:relative;width:min(100%,62svh);height:100%;margin:0 auto;display:grid;grid-template-rows:minmax(110px,24%) auto 1fr;color:#fff7dc;background:linear-gradient(#5fae58,#3c8a4a 55%,#2f7743);user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;overflow:hidden}
+.pairs-banner{position:relative;overflow:hidden;min-height:0}
+.pairs-cover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 40%}
+.pairs-host{position:absolute;left:2%;top:6%;height:230%;width:auto;filter:drop-shadow(0 3px 6px #1d3b2499)}
+.pairs-banner h1{position:absolute;right:5%;top:12%;margin:0;font-size:clamp(1.5rem,6.2svh,2.7rem);color:#ffe27a;text-shadow:0 2px 0 #8a4a14,0 0 12px #5a2c0acc;letter-spacing:.01em}
+.pairs-bar{display:flex;justify-content:space-between;padding:.55rem 1.2rem;background:linear-gradient(#9a6a3c,#7a4f2b);border-block:3px solid #d9b77a;font-weight:700;font-size:clamp(1rem,2.4svh,1.25rem);box-shadow:0 4px 10px #1e3a2466;z-index:1}
+.pairs-bar b{color:#9dff9a;font-variant-numeric:tabular-nums;margin-left:.2em}
+.pairs-field{position:relative;min-height:0;display:grid;place-items:center;padding:2% 2% 12%;container-type:size}
+.pairs-board{--cols:2;--rows:2;--cell:min(100cqw/6.8,100cqh/6.8);position:relative;width:calc(var(--cell)*(var(--cols) + .8));height:calc(var(--cell)*(var(--rows) + .8))}
+#main .pairs-board .pairs-tile{position:absolute!important;overflow:visible;outline:0!important;border-image:none!important;margin:0;min-width:0;min-height:0;border-radius:0;box-shadow:none!important;transform:none;border:0!important;background:none!important;left:calc(var(--cell)*(var(--x) + .4));top:calc(var(--cell)*(var(--y) + .4));width:var(--cell);height:var(--cell);padding:0;border:0;background:none;display:grid;place-items:center;cursor:pointer;touch-action:manipulation}
+#main .pairs-board .pairs-tile::before,#main .pairs-board .pairs-tile::after{content:none!important;display:none!important}
+.pairs-card{position:absolute;inset:4%;border-radius:12%;background:linear-gradient(#fbf6ea,#e6dcc6);box-shadow:0 3px 0 #a79f8b,0 5px 8px #1f3d2a66;transition:box-shadow .12s,background .12s;pointer-events:none}
+.pairs-tile img{position:relative;width:74%;height:74%;object-fit:contain;pointer-events:none;transition:transform .12s}
+.pairs-tile[aria-pressed="true"] .pairs-card,.pairs-tile.matched .pairs-card{background:linear-gradient(#fff6d8,#ffe2a6);box-shadow:0 0 0 3px #ff8a3c,0 0 14px 4px #ffb347cc}
+.pairs-tile[aria-pressed="true"] img,.pairs-tile.matched img{transform:scale(1.08)}
+.pairs-line{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.pairs-line polyline{fill:none;stroke:#fff36b;stroke-width:.09;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 .08px #ff9a2e) drop-shadow(0 0 .05px #fff)}
+.pairs-panel{position:absolute;inset:auto 7% auto;top:50%;transform:translateY(-58%);display:flex;flex-direction:column;align-items:center;gap:.6rem;padding:1.3rem 1.1rem;text-align:center;background:linear-gradient(145deg,#1d4a3aee,#173a31f2);border:1px solid #e0c57c;border-radius:18px;box-shadow:0 14px 44px #10291fcc;z-index:3}
+.pairs-panel[hidden]{display:none}.pairs-panel :is(h2,p){margin:0}.pairs-panel h2{color:#ffe27a;font-size:1.6rem}.pairs-panel p{font-size:1rem;line-height:1.35}
+.pairs-panel small{letter-spacing:.08em;color:#cfe8c2}.pairs-prize{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:.3em;color:#ffe9a8;font-weight:700}
+.pairs-prize svg,.pairs-prize img{width:1.2em;height:1.2em}
+#main .pairs-panel button{min-width:11rem;min-height:3rem;font-size:1.1rem}
+.pairs-count{font-size:clamp(3.5rem,14svh,6rem);line-height:1;color:#ffe27a;text-shadow:0 3px 0 #8a4a14}
+#main .pairs-exit{position:absolute;padding:0;min-width:0;left:4%;bottom:3%;width:3.4rem;height:3.4rem;border-radius:50%;border:2px solid #f0d9a0;background:#c2504a;color:#fff;font-size:1.9rem;line-height:1;z-index:4;box-shadow:0 4px 10px #1f3d2a88}
+@media (prefers-reduced-motion:reduce){.pairs-card,.pairs-tile img{transition:none}}
