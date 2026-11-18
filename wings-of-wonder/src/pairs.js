@@ -128,7 +128,9 @@ function showPairs() {
     <button class="pairs-rank" onclick="pairsRanking()"><img src="${artPath('hud-rank')}" alt=""><span>Rankings</span></button>
     <button class="pairs-exit" onclick="go('games')" aria-label="Leave Harvest Pairs">‹</button>
   </section>`;
+  preloadPairsArt();
 }
+function preloadPairsArt() { for (let n = 1; n <= Pairs.kinds; n++) { const image = new Image(); image.src = artPath('pairs-tile-' + n); image.decode?.().catch(() => {}); } }
 function pairsRanking() {
   const rows = Pairs.ranking(ADVENTURERS.map(a => a.name), S.pairsBest);
   modal(`<p class="eyebrow">HARVEST PAIRS</p><h2>Today's best times</h2><ol class="pairs-ranking">${rows.map(r => `<li${r.you ? ' class="you"' : ''}><span>${esc(r.you ? S.name : r.name)}${r.ai ? ' <small>AI</small>' : ''}</span><b>${Pairs.clock(r.seconds)}</b></li>`).join('')}</ol><p><small>Rivals marked AI are simulated adventurers, not other players. Their times change each day.${S.pairsBest ? '' : ' Finish a run to enter the board.'}</small></p>`);
@@ -153,15 +155,16 @@ function startPairs() {
     const { cols, rows, cells } = g.board;
     board.style.setProperty('--cols', cols); board.style.setProperty('--rows', rows);
     board.innerHTML = cells.map((kind, i) => kind < 0 ? '' : `<button class="pairs-tile" data-i="${i}" aria-pressed="${g.picked === i}" aria-label="${PAIRS_NAMES[kind]}" style="--x:${i % cols};--y:${Math.floor(i / cols)}"><i class="pairs-card"></i><img src="${artPath('pairs-tile-' + (kind + 1))}" alt="" draggable="false"></button>`).join('')
-      + `<svg class="pairs-line" viewBox="0 0 ${cols + .8} ${rows + .8}" aria-hidden="true"><polyline id="pairsLine" points=""></polyline></svg>`;
+      + `<svg class="pairs-line" id="pairsLines" viewBox="0 0 ${cols + .8} ${rows + .8}" aria-hidden="true"></svg>`;
     $('#pairsStage').textContent = g.stage + 1;
   }
-  function countdown(n) {
+  // Before the first basket: 3-2-1. Between baskets: one short beat, so the pace is not broken.
+  function countdown(n, beat = 450) {
     if (game !== g) return;
     g.locked = true; panel.hidden = false; panel.className = 'pairs-panel pairs-gate'; panel.parentElement.classList.add('gating');
-    panel.innerHTML = `<strong class="pairs-count">${n}</strong><small>${g.stage ? 'Basket ' + (g.stage + 1) + ' of ' + Pairs.stages.length : 'Starting soon'}</small>`;
-    if (n > 1) setTimeout(() => countdown(n - 1), 600);
-    else setTimeout(() => { if (game !== g) return; panel.hidden = true; panel.parentElement.classList.remove('gating'); g.locked = false; last = performance.now(); }, 600);
+    panel.innerHTML = g.stage ? `<small>Basket ${g.stage + 1} of ${Pairs.stages.length}</small>` : `<strong class="pairs-count">${n}</strong><small>Starting soon</small>`;
+    if (n > 1) setTimeout(() => countdown(n - 1, beat), beat);
+    else setTimeout(() => { if (game !== g) return; panel.hidden = true; panel.parentElement.classList.remove('gating'); g.locked = false; last = performance.now(); }, beat);
   }
   function finish() {
     if (g.rewarded) return; g.rewarded = true;
@@ -172,32 +175,39 @@ function startPairs() {
     panel.hidden = false; panel.className = 'pairs-panel';
     panel.innerHTML = `<small>${record ? 'NEW BEST TIME' : 'HARVEST COMPLETE'}</small><h2>${Pairs.clock(seconds)}</h2><p>Best time · ${Pairs.clock(S.pairsBest)}${g.hints ? ' · Hints used · ' + g.hints : ''}</p><p class="pairs-prize">${prizeLine}</p><button class="primary" onclick="startPairs()">Play again</button><button onclick="go('pairs')">Back to lobby</button>`;
   }
-  board.onclick = event => {
-    const tile = event.target.closest('.pairs-tile'); if (!tile) return;
+  // Short notes sit in the top bar, never over the tiles.
+  function flash(text) { const note = $('#pairsPenalty'); note.textContent = text; note.hidden = false; clearTimeout(note.timer); note.timer = setTimeout(() => { note.hidden = true; }, 1100); }
+  // Taps act on touch-down, and nothing waits for an animation: the pair is free the moment it
+  // is matched, its tiles and the joining line just fade out on their own.
+  function tapTile(tile) {
     const result = Pairs.tap(g, +tile.dataset.i); if (!result) return;
     board.querySelectorAll('.hinted').forEach(el => el.classList.remove('hinted'));
-    if ('select' in result) { board.querySelectorAll('.pairs-tile').forEach(el => el.setAttribute('aria-pressed', +el.dataset.i === result.select)); return; }
-    // Show both tiles joined, then collect them.
-    g.locked = true;
-    for (const i of [result.a, result.b]) board.querySelector(`[data-i="${i}"]`)?.classList.add('matched');
-    $('#pairsLine').setAttribute('points', result.line.map(([x, y]) => cell(x, y).join(',')).join(' '));
+    if ('select' in result) { board.querySelectorAll('.pairs-tile[aria-pressed="true"]').forEach(el => el.setAttribute('aria-pressed', 'false')); if (result.select >= 0) tile.setAttribute('aria-pressed', 'true'); return; }
+    const tiles = [result.a, result.b].map(i => board.querySelector(`.pairs-tile[data-i="${i}"]`));
+    for (const el of tiles) { el.classList.add('matched'); el.removeAttribute('data-i'); el.disabled = true; }
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+    line.setAttribute('points', result.line.map(([x, y]) => cell(x, y).join(',')).join(' ')); $('#pairsLines').append(line);
+    const stage = g.stage;
+    if (result.cleared) g.locked = true;
     setTimeout(() => {
       if (game !== g) return;
-      if (result.cleared) {
-        if (Pairs.advance(g)) { draw(); countdown(2); } else { draw(); finish(); }
-        return;
-      }
-      if (!Pairs.hint(g.board)) { Pairs.reshuffle(g.board); toast('No moves left · ingredients shuffled'); }
-      draw(); g.locked = false;
-    }, 260);
-  };
-  $('#pairsHint').onclick = () => {
+      if (result.cleared) { if (Pairs.advance(g)) { draw(); countdown(1, 500); } else { draw(); finish(); } return; }
+      if (g.stage !== stage) return;
+      for (const el of tiles) el.remove(); line.remove();
+      if (!Pairs.hint(g.board)) { Pairs.reshuffle(g.board); flash('Shuffled'); draw(); }
+    }, 240);
+  }
+  board.onpointerdown = event => { const tile = event.target.closest('.pairs-tile'); if (tile && event.isPrimary !== false) { event.preventDefault(); tapTile(tile); } };
+  board.onclick = event => { const tile = event.target.closest('.pairs-tile'); if (tile && event.detail === 0) tapTile(tile); };   // keyboard
+  const hint = $('#pairsHint'), askHint = () => {
     if (game !== g || g.locked || g.ended) return;
     const move = Pairs.hint(g.board); if (!move) return;
     g.time += Pairs.hintPenalty; g.hints = (g.hints || 0) + 1; g.picked = -1;
     board.querySelectorAll('.pairs-tile').forEach(el => { el.setAttribute('aria-pressed', 'false'); el.classList.toggle('hinted', move.includes(+el.dataset.i)); });
-    const note = $('#pairsPenalty'); note.hidden = false; clearTimeout(note.timer); note.timer = setTimeout(() => { note.hidden = true; }, 900);
+    flash('+' + Pairs.hintPenalty + 's');
   };
+  hint.onpointerdown = event => { event.preventDefault(); askHint(); };
+  hint.onclick = event => { if (event.detail === 0) askHint(); };
   function frame(now) {
     if (game !== g || !board.isConnected) return;
     // The clock only runs while the board can be played; a hidden page does not count.
@@ -206,5 +216,5 @@ function startPairs() {
     const text = Pairs.clock(g.time); if (text !== shown) { shown = text; $('#pairsTime').textContent = text; }
     if (!g.ended) loop = requestAnimationFrame(frame);
   }
-  $('#pairsTime').textContent = '0:00'; draw(); countdown(3); loop = requestAnimationFrame(frame);
+  $('#pairsTime').textContent = '0:00'; draw(); countdown(3, 500); loop = requestAnimationFrame(frame);
 }

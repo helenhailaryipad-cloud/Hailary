@@ -82,7 +82,7 @@ across all of them, paused during countdowns and while the page is hidden. Rewar
 minute, settled once; best time in optional save field `S.pairsBest` (seconds). Deals are always clearable; a stuck
 board reshuffles. Second pass: a lobby (`showPairs`: host, rules, runs, Rankings) opens the board (`openPairsBoard`);
 rewards only for 2 completed runs per UTC day (`S.pairsDaily {day, runs}`), further runs are practice; the Sprout mascot
-gives a hint for +3 s; the ranking modal lists the six AI adventurers with simulated daily times, labelled AI, plus
+gives a hint for +3 s; taps act on `pointerdown` and never wait for animations (input locks only during the gates); the ranking modal lists the six AI adventurers with simulated daily times, labelled AI, plus
 the player's best. Original art: lobby background, Sprout mascot, 8 ingredient tiles and a cover (`art-source/pairs/`, built by
 `build-fashion-extras.py`). Logic tests: `node scripts/test-pairs.mjs`. Game buttons need very specific selectors:
 global `#main button` rules set position, borders and `::before`.
