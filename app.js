@@ -444,7 +444,7 @@ function styleFittingRoom(set){
   const worn=wornStyle(set),pick=stylePick??worn;
   const owned=styleOwned(set,pick),equipped=pick===worn;
   const name=n=>n===-1?set.legacy:n===0?set.classic:set.names[n-1];
-  const img=n=>set.slot==='hair'?artPath(n>=11?'fit-icon-hair-'+n:'atelier-icon-hair-'+n):n===11?leaflightIcon('bow'):artPath('weapon-style-'+n);
+  const img=n=>set.slot==='hair'?artPath('fit-icon-hair-'+n):n===11?leaflightIcon('bow'):artPath('weapon-style-'+n);
   const legacyIcons=set.slot==='hair'?['silver','lilac']:['gold','frost'];
   const cards=[0,-1,...set.names.map((_,i)=>i+1).filter(n=>set.names[n-1])].map(n=>fashionCard(name(n),n>0?img(n):artPath('atelier-icon-'+legacyIcons[-n]),n===pick,`previewRegisteredEquipment('Weapons',${n})`)).join('');
   const mask=(S.reinaFashion?.equipped||0)&~set.bit;
@@ -715,7 +715,7 @@ function registeredFashionRoom(){
   const dress=isHair?look.dress:chosen,hair=isHair?chosen:look.hair;
   const owned=isHair?chosen<=1||styleOwned(styleSets.Hair,chosen):ownsRegisteredDress(chosen);
   const price=isHair?400:1200;
-  const cards=choices.map(([id,name])=>fashionCard(name,id==='leaflight'?leaflightIcon('dress'):isHair&&id>=11?artPath('fit-icon-hair-'+id):isHair?(id?artPath('hair-style-'+id):artPath('fit-control-body')):(id==='base'?registeredLookPath('base',look.hair):artPath('fit-icon-'+id)),chosen===id,isHair?`previewRegisteredHair(${id})`:`previewRegisteredDress('${id}')`)).join('');
+  const cards=choices.map(([id,name])=>fashionCard(name,id==='leaflight'?leaflightIcon('dress'):isHair?artPath('fit-icon-hair-'+id):(id==='base'?registeredLookPath('base',look.hair):artPath('fit-icon-'+id)),chosen===id,isHair?`previewRegisteredHair(${id})`:`previewRegisteredDress('${id}')`)).join('');
   const bonus=isHair?(chosen?styleSets.Hair.bonus:''):(!['base','grove'].includes(chosen)?'+'+WonderGear.fashionTraits.clothing+' Defense':'');
   return fashionShowcase({portrait:registeredLookPath(dress,hair),alt:'Reina · '+choices.find(([id])=>id===chosen)[1],title:choices.find(([id])=>id===chosen)[1],bonus,owned,price,equipped:chosen===(isHair?look.hair:look.dress),action:`wearRegisteredLook('${dress}',${hair})`,cards});
 }
