@@ -1,0 +1,7 @@
+WINGS OF WONDER FULL PROJECT BACKUP
+Read HANDOVER.md first.
+project/ contains the exact tracked source, images, authoring assets and built Worker.
+repository-history.bundle contains available Git history.
+Run python3 verify_backup.py to verify the file hashes.
+Player saves, production database rows and credentials are NOT included.
+Clothing alignment is still reported broken by the user.

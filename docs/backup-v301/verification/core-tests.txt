@@ -1,0 +1,22 @@
+PASS: level1500 cap, legacy XP, daily UTC rollover, two entries, reload, party XP, frozen groups, full EXP dungeon victories, no gear/wheel exploit and duplicate claims.
+PASS: nine boss loot tables, guaranteed gear quality, targeted slots, level-matched tiers, no auto replacement, exact materials, full bag conversion and one-time payout.
+PASS: room movement, clamped controls, locked doors, explicit traversal, guardian spawning and physical boss dodge.
+PASS: nine bosses, legacy saves, first-clear once, quest claims, repeat contracts, persistent spins, exact wheel payout and duplicate settlement.
+PASS: legacy gear migration, independent instances, atomic costs, craft transfer, salvage protection, slot validation and full bag drops.
+PASS: independent AI activity, old saves, dungeon victory, pause skills, sparring, single rewards and finish routing.
+PASS: wish milestones, guaranteed choice, exchange, duplicate rewards, tower spawning, merge and physics.
+PASS: cloud equipment validation and exact client/server power parity.
+PASS: authenticated saves, user isolation, revision conflicts, input validation, origin protection, opt-in leaderboard.
+PASS: deterministic AI ranking, varied skill, progress, ordered categories, AI labels, save isolation and persistent pause icons.
+PASS: same-name players, private self marker, category isolation and changing walk/shoot frames without state mutation.
+PASS: full boss body hitbox, exact merge preview, affordable/MAX upgrades and cancellable identity-safe retreat.
+PASS: TD six poses/size, projectile arrival and no orphan payouts, deterministic 20/30/60/120 FPS eggs, wall/stack bounds, paused physics and affordable eight-wave defense victory.
+PASS: advanced stats, read-only inspection, shield spillover and no hall refill, passive dodge and elemental defense.
+PASS: main sections with detail pages, warehouse persistence and equipped item protection.
+PASS: one egg per drop, no ghost egg at landing and no overlapping preview during release.
+PASS: 100 collectable species, legacy catches, exact duplicate stat bonuses and saved card album.
+PASS: all 100 dress/hair combinations, ownership, independent purchases and saved appearance.
+PASS: current hairstyle stays visible during loading, rapid selections and tab cancellation.
+PASS: Leaflight equip, free ownership and standing/mounted routing.
+PASS: independent mounted hair/weapon changes preserve clothing without legacy collar; release-specific wardrobe URLs.
+PASS: atomic wings/weapons previews, stale requests ignored, technical body never used as placeholder.
