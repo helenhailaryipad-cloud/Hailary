@@ -6600,3 +6600,18 @@ body[data-screen="pairs"] #stage #main{position:fixed!important;inset:0!importan
 #main .pairs-screen .pairs-foot .pairs-exit,#main .pairs-screen .pairs-foot .pairs-hint{position:relative!important;inset:auto;flex:none}
 #main .pairs-screen .pairs-foot .pairs-exit{width:3rem;height:3rem;font-size:1.7rem}
 #main .pairs-screen .pairs-foot .pairs-hint{width:4.4rem;height:4.4rem}
+/* Jungle Trek: live ranking, boost cards, larger hearts */
+.trek-rank{display:block;margin-top:3px;padding-top:4px;border-top:1px solid #9ecac066;font:11px/1.5 Arial,sans-serif;color:#e8f6ee}.trek-rank b{color:#8dff8a;font-size:13px}
+.trek-top #trekLives{font-size:24px;letter-spacing:1px}
+.trek-buffs{top:auto;bottom:16%;left:10px;gap:10px}
+.trek-buffs span{position:relative;width:46px;height:46px;padding:0;display:grid;place-items:center;background:#16323fb8;border:1px solid #9ecac066;border-radius:50%;opacity:.45}
+.trek-buffs span.on{opacity:1;border-color:#ffe27a;box-shadow:0 0 12px #ffe27a99}
+.trek-buffs img{width:40px;height:40px;object-fit:contain}
+.trek-buffs b{position:absolute;right:-4px;bottom:-6px;min-width:18px;font:700 12px Arial,sans-serif;color:#fff6d0;text-shadow:0 1px 3px #0c2a1f}
+.jungle-field{container-type:inline-size}
+.trek-top{top:2.4cqw;left:2.4cqw;right:2.4cqw}
+.trek-top>div{padding:1.6cqw 2cqw;gap:.6cqw;border-radius:2cqw}
+.trek-top small{font-size:max(9px,2.1cqw)}.trek-top strong{font-size:max(22px,5.4cqw)}
+.trek-rank{font-size:max(11px,2.5cqw)}.trek-rank b{font-size:max(13px,3cqw)}
+.trek-top #trekLives{font-size:max(24px,5.6cqw)}
+.trek-buffs{left:2.2cqw;gap:2cqw}.trek-buffs span{width:max(46px,10cqw);height:max(46px,10cqw)}.trek-buffs img{width:86%;height:86%}.trek-buffs b{font-size:max(12px,2.8cqw)}
