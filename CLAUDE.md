@@ -93,8 +93,11 @@ painted clearing background (`trek-bg`), barrel sprite (`trek-barrel`), power-up
 teardrop shots, burst on hit, flame lanes, larger hero. The hero is the live wardrobe portrait
 (`registeredCombatBitmap()`), so the worn dress, hair, bow and wings show; a back-view runner is NOT done (it would need
 a back drawing for each of the 22 dresses). HUD: live ranking against six simulated AI rivals and gap to leader
-(`Trek.rivals`, `Trek.standing`), boost icons with seconds, thumb stick under the finger. Rules, rewards and the
-simulation are unchanged. `drawJungle` uses a flatter projection than before (render only). Sources in
+(`Trek.rivals`, `Trek.standing`), boost icons with seconds, thumb stick under the finger. Third pass, after studying the photos again:
+five lanes (`Trek.lanes`) with a row every 2.2 s and random gaps, arrows aimed at the nearest barrel (`Trek.aim`,
+bolts carry `vx`), and Boom barrels: every other danger lane belongs to a marked barrel that warns for 1.6 s and then
+charges down its lane; breaking it first cancels the charge ("Defused"). Floating notes (`g.texts`) for pickups.
+Rival finals are 1500-3500. Rewards (gold/XP caps, 90 s, 3 hearts, boost every 4th kill) are unchanged. `drawJungle` uses a flatter projection than before (render only). Sources in
 `art-source/trek/`, built by `build-fashion-extras.py`.
 
 ## In-chat playable preview (user requirement)
