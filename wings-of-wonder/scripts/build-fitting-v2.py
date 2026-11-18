@@ -285,8 +285,9 @@ def build_hair_cards():
         back = OUT/f'fit-control-hair-{i}-back.webp'
         if back.exists(): card.alpha_composite(Image.open(back).convert('RGBA'))
         card.alpha_composite(body); card.alpha_composite(Image.open(OUT/f'fit-control-hair-{i}.webp').convert('RGBA'))
-        c = arr(card); c[..., 3] *= np.clip((214-rows)/30, 0, 1)        # fade out below the shoulders
-        save(f'fit-icon-hair-{i}', img(c).crop((166, 40, 330, 249)).resize((154, 196), Image.Resampling.LANCZOS))
+        # Cards are wide: crop to the head so it fills the card, fading out at the neck.
+        c = arr(card); c[..., 3] *= np.clip((184-rows)/16, 0, 1)
+        save(f'fit-icon-hair-{i}', img(c).crop((136, 44, 360, 184)).resize((336, 210), Image.Resampling.LANCZOS))
 
 LEAF['grip'] = 'M746 639 Q767 633 784 644 Q798 638 813 647 Q839 655 837 680 Q840 701 820 718 Q800 733 781 721 Q761 712 752 692 Q741 675 746 639 Z'
 def build_leaf_bow():
