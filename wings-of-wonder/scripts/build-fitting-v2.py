@@ -238,7 +238,15 @@ def build_leaflight():
     hair = fill_holes(hair, 200) & ~dress & ~dilate(strap, 1)
     hair |= dilate(hair, 1) & (d > 8) & hzone & ~dress & ~skinish & ~strap
     ho = M.copy(); ho[..., 3] = np.where(hair, M[..., 3], 0)
-    save('fit-control-hair-11', to_frame(img(ho)))
+    layer = save('fit-control-hair-11', to_frame(img(ho)))
+    # Wardrobe card: her head with the braid, like the other hairstyle cards. (The layer alone
+    # has gaps where the braid passes behind her arm; the body always covers them in the game.)
+    head = B.copy(); head[168:, :, 3] = 0
+    card = img(head); card.alpha_composite(layer)
+    c = arr(card); rows = np.arange(800)[:, None]
+    c[..., 3] *= np.clip((190-rows)/14, 0, 1)             # fade out where her arm hides the braid
+    card = img(c).crop((166, 40, 308, 221)).resize((154, 196), Image.Resampling.LANCZOS)
+    save('fit-icon-hair-11', card)
 
 LEAF['grip'] = 'M746 639 Q767 633 784 644 Q798 638 813 647 Q839 655 837 680 Q840 701 820 718 Q800 733 781 721 Q761 712 752 692 Q741 675 746 639 Z'
 def build_leaf_bow():
