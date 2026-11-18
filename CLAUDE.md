@@ -76,7 +76,7 @@ render and LOOK at hand, neck, feet (`composeWardrobeCanvas` in the preview) bef
   (`wardrobeWingPad`, `wardrobeWingTop`), `.winged-portrait` and `drawReina` compensate.
 
 ## Harvest Pairs mini-game (2026-11-18)
-Mini Games -> Harvest Pairs (`src/pairs.js`, screen id `pairs`): tap two identical ingredients that a line with at most
+Home screen icon "Harvest Pairs" (right side, next to Fishing) or Mini Games -> Harvest Pairs (`src/pairs.js`, screen id `pairs`): tap two identical ingredients that a line with at most
 two turns can join; the line is drawn before the pair is collected. Five boards (2x2, 4x3, 4x4, 6x5, 6x6), one clock
 across all of them, paused during countdowns and while the page is hidden. Reward 300 gold + 30 XP, +200 gold under a
 minute, settled once; best time in optional save field `S.pairsBest` (seconds). Deals are always clearable; a stuck
