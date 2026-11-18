@@ -534,12 +534,12 @@ function wardrobeLeafPath(slot){
  return {path:leaflightSlots[slot],matrix:{a:500/1024,b:0,c:0,d:750/1536,e:0,f:40}};
 }
 // Large wings reach past the 500-wide figure frame; portraits with wings are this much wider on each side.
-const wardrobeWingPad=140;
+const wardrobeWingPad=140,wardrobeWingTop=100;
 async function composeWardrobeCanvas(dress,hair,weapon=0,wings=''){
  ensureWardrobeCatalog();
  const body='fit-control-body';
- if(wings&&!WonderWardrobe.get('wings:'+wings))WonderWardrobe.register({id:'wings:'+wings,kind:'wings',layers:[{slot:'wingsBack',asset:wings,fit:[-135,-90,720,600],minTop:2}]});
- return WonderWardrobe.render({dress:'dress:'+fittedDressId(dress),hair:'hair:'+fittedHairId(hair),weapon:weapon?'weapon:'+weapon:null,wings:wings?'wings:'+wings:null,body,pad:wings?wardrobeWingPad:0,
+ if(wings&&!WonderWardrobe.get('wings:'+wings))WonderWardrobe.register({id:'wings:'+wings,kind:'wings',layers:[{slot:'wingsBack',asset:wings,fit:[-135,-115,720,600],minTop:2-wardrobeWingTop}]});
+ return WonderWardrobe.render({dress:'dress:'+fittedDressId(dress),hair:'hair:'+fittedHairId(hair),weapon:weapon?'weapon:'+weapon:null,wings:wings?'wings:'+wings:null,body,pad:wings?wardrobeWingPad:0,padTop:wings?wardrobeWingTop:0,
   createCanvas:(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;},load:id=>styleImage(artPath(id))});
 }
 async function composeRegisteredReina(dress,hair){
@@ -884,7 +884,7 @@ function home(){
  <button class="city-fold" aria-label="${cityExpanded?'Hide events':'Show events'}" aria-expanded="${cityExpanded}" aria-controls="city-promotions" onclick="foldCityMenu(this)"><span class="city-fold-disc" aria-hidden="true"></span></button>
  <div id="city-promotions" class="city-promos">${cityGroups[1].map(item=>cityIcon(item,'left-')).join('')}</div></div>
  <button class="city-reinforce" onclick="go('forge')"><span>Reinforce<small>Gear upgrades</small></span><img src="${artPath('hud-reinforce')}"></button><div class="city-extra"><button class="city-icon" onclick="go('fishing')"><span class="city-glyph"><img class="city-fish" src="assets/generated/fishing-crowned-goldfish.webp" alt=""></span><span class="city-caption">Fishing</span></button>${[['isle-skyship','Isle Expedition','isleArena'],['cloud-war-citadel','Cloud War','cloudWar']].map(item=>cityIcon(item)).join('')}</div>
- ${mount?`<div class="city-wings">${artImage(fashionWing().id,'Reina’s wings')}</div>`:''}<div class="city-aura"><img src="${artPath('hud-aura')}" alt="Overlord’s Aura"></div><div class="city-hero form-${mount?WonderGear.companionState(S,'mount').form:0}"><b>${esc(S.name)}</b><img src="${mount?reinaLookPath(true):reinaWorldLookPath()}" alt="Reina"></div>${cityCompanionEffects()}
+ ${mount?`<div class="city-wings">${artImage(fashionWing().id,'Reina’s wings')}</div>`:''}<div class="city-aura"><img src="${artPath('hud-aura')}" alt="Overlord’s Aura"></div><div class="city-hero form-${mount?WonderGear.companionState(S,'mount').form:0}"><b>${esc(S.name)}</b><img${mount?'':' class="winged-portrait"'} src="${mount?reinaLookPath(true):reinaWorldLookPath()}" alt="Reina"></div>${cityCompanionEffects()}
  ${pets.map((pet,i)=>`<div class="city-pet city-pet-${i}"><img src="${pet.portrait||artPath(pet.id)}" alt="${esc(pet.name)}" draggable="false"></div>`).join('')}
  <div class="city-jobs">${[['Daily','cityDaily'],['Gameplay','cityGameplay'],['Bounty','cityBounty'],['Hunting','cityHunting']].map(([name,id])=>`<button onclick="go('${id}')"><img src="${artPath('wing-menu-'+name.toLowerCase())}" alt="">${name}</button>`).join('')}</div>
  <div class="city-tools">${[['broadcast','Elf Broadcast']].map(item=>cityIcon(item)).join('')}</div>
