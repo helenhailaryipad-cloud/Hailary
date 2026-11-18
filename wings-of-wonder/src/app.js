@@ -462,16 +462,13 @@ const leaflightSlots={
  bow:'M766 93 H897 V1173 H675 V1058 L694 1035 L733 979 L769 912 L787 848 L788 812 L774 789 L749 771 L757 742 L782 729 L788 589 L778 578 L764 552 L777 515 L801 481 L822 438 L831 387 L830 337 L803 265 L781 215 L763 181 Z',
  grip:'M746 639 Q767 633 784 644 Q798 638 813 647 Q839 655 837 680 Q840 701 820 718 Q800 733 781 721 Q761 712 752 692 Q741 675 746 639 Z'
 };
-function drawLeaflightSlot(ctx,atlas,slot){
- ctx.save();ctx.translate(0,40);ctx.scale(500/1024,750/1536);
- ctx.clip(new Path2D(leaflightSlots[slot]));ctx.drawImage(atlas,0,0,1024,1536);ctx.restore();
-}
-function leaflightIcon(slot){const key=artPath('leaflight-master')+'#leaflight-icon-'+slot;return readyRegisteredLooks.get(key)||key;}
+function leaflightIcon(slot){const key=artPath('fit-control-leaflight')+'#leaflight-icon-'+slot;return readyRegisteredLooks.get(key)||key;}
 async function renderLeaflightIcon(slot){
- const atlas=await styleImage(artPath('leaflight-master'));
+ // Icons come from the same per-pixel layers the compositor wears.
+ const layer=await styleImage(artPath({hair:'fit-control-hair-11',dress:'fit-control-leaflight',bow:'fit-control-bow-11'}[slot]));
  const c=document.createElement('canvas');c.width=500;c.height=800;const ctx=c.getContext('2d');
- if(slot==='hair'){drawLeaflightSlot(ctx,atlas,'hairBack');drawLeaflightSlot(ctx,atlas,'hairFront');}
- else drawLeaflightSlot(ctx,atlas,slot);
+ if(slot==='bow'){ctx.save();ctx.translate(0,40);ctx.scale(500/1024,750/1536);ctx.clip(new Path2D(leaflightSlots.bow));ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(layer,0,0,500,800);ctx.restore();}
+ else ctx.drawImage(layer,0,0,500,800);
  const box={hair:[80,40,240,365],dress:[30,165,335,620],bow:[325,75,125,550]}[slot];
  const icon=document.createElement('canvas');icon.width=144;icon.height=160;const out=icon.getContext('2d');
  const scale=Math.min(136/box[2],152/box[3]);out.drawImage(c,...box,(144-box[2]*scale)/2,(160-box[3]*scale)/2,box[2]*scale,box[3]*scale);
@@ -509,6 +506,8 @@ function restoreFittingNeck(ctx,dress,drawBody){
  drawBody();ctx.restore();
 }
 let wardrobeCatalogReady=false;
+// Built by scripts/build-fitting-v2.py. Other items still use traced polygons.
+const wardrobePixelDresses=new Set(['grove','leaflight']),wardrobeMattedHandDresses=new Set(['emberveil']),wardrobePixelHairs=new Set([3,9,10,11]);
 const wardrobeHandPath='M'+fittingTemplate.hand.map(p=>p.join(' ')).join(' L')+' Z';
 const wardrobeGripPath='M378 360 Q386 351 397 360 Q413 364 411 374 L405 383 Q399 394 390 393 L378 385 L370 374 Z';
 function ensureWardrobeCatalog(){
@@ -518,14 +517,26 @@ function ensureWardrobeCatalog(){
  const boots='M0 560 H500 V800 H0 Z';
  const covered={frostlace:650,dawnpetal:400,nightbloom:400,sunweave:450,emberveil:420,willow:450,stardust:400,pearl:450,sapphire:400,leaflight:590};
  for(const [id] of fittingDresses){
-  const asset=id==='leaflight'?'leaflight-master':'fit-control-'+id;
-  const rect=id==='leaflight'?[0,40,500,750]:standard;
-  const common=id==='leaflight'?{clips:[wardrobeLeafPath('dress')]}:{};
+  const asset='fit-control-'+id,rect=standard,common={};
   const opening=fittingNeckOpenings[id];
   const rear=opening?opening+' L270 130 L200 130 Z':null;
   const skin=wardrobeHandPath;
   const lower=covered[id];
   const bodyCoverage=lower?[`M60 ${lower} H345 V800 H60 Z`]:[];
+  // Painted on the fixed body and extracted per pixel: the layer already
+  // leaves the neck, shoulders and the hand on the hip untouched.
+  if(wardrobePixelDresses.has(id)){
+   WonderWardrobe.register({id:'dress:'+id,kind:'dress',frame:[500,800],bodyCoverage,layers:[{slot:'garmentFront',asset:'fit-control-'+id}]});
+   continue;
+  }
+  // Garment-only art that covers the hip: whole garment, then the matted hand.
+  if(wardrobeMattedHandDresses.has(id)){
+   WonderWardrobe.register({id:'dress:'+id,kind:'dress',frame:[500,800],bodyCoverage,layers:[
+    ...(rear?[{slot:'garmentBack',asset,rect,clip:rear}]:[]),
+    {slot:'garmentFront',asset,rect,exclude:rear?[rear]:[]},
+    {slot:'handFront',asset:'fit-control-hand'}]});
+   continue;
+  }
   const layers=[];
   if(rear)layers.push({slot:'garmentBack',asset,rect,clip:rear});
   layers.push({slot:'boots',asset,rect,...common,clip:boots,exclude:[skin]});
@@ -536,19 +547,18 @@ function ensureWardrobeCatalog(){
  // Hair tails render behind the same body; cap and face-framing strands render last.
  const hairFront='M0 0 H500 V154 H285 V195 H262 V154 H220 V204 H194 V154 H0 Z';
  for(const [id] of fittingHairs){
-  const asset=id===11?'leaflight-master':'fit-control-hair-'+id;
-  const layers=id===11?[
-   {slot:'hairBack',asset,rect:[0,40,500,750],clip:wardrobeLeafPath('hairBack')},
-   {slot:'hairFront',asset,rect:[0,40,500,750],clip:wardrobeLeafPath('hairFront')}
-  ]:[{slot:'hairBack',asset,exclude:[hairFront]},{slot:'hairFront',asset,clip:hairFront}];
+  const asset='fit-control-hair-'+id;
+  // Per-pixel hair layers sit wholly in front; gaps beside the ear are filled in the art.
+  if(wardrobePixelHairs.has(id)){WonderWardrobe.register({id:'hair:'+id,kind:'hair',layers:[{slot:'hairFront',asset:'fit-control-hair-'+id}]});continue;}
+  const layers=[{slot:'hairBack',asset,exclude:[hairFront]},{slot:'hairFront',asset,clip:hairFront}];
   WonderWardrobe.register({id:'hair:'+id,kind:'hair',layers});
  }
  for(let id=1;id<=13;id++){
   let layers;
   if(id===11||id===13)layers=[
-   {slot:'weapon',asset:'leaflight-master',rect:[0,40,500,750],clip:wardrobeLeafPath('bow')},
-   {slot:'weapon',asset:'leaflight-master',strokeOnly:true,stroke:{path:'M375.48828125 123.49609375 L336.42578125 567.83203125',color:'#d2ae58',width:1.07421875}},
-   {slot:'gripFingers',asset:'leaflight-master',rect:[0,40,500,750],clip:wardrobeLeafPath('grip')}
+   {slot:'weapon',asset:'fit-control-bow-11',clip:wardrobeLeafPath('bow')},
+   {slot:'weapon',asset:'fit-control-bow-11',strokeOnly:true,stroke:{path:'M375.48828125 123.49609375 L336.42578125 567.83203125',color:'#d2ae58',width:1.07421875}},
+   {slot:'gripFingers',asset:'fit-control-bow-11',clip:wardrobeLeafPath('grip')}
   ];
   else{
    const sourceId=id===12?2:id;
@@ -571,7 +581,7 @@ async function composeWardrobeCanvas(dress,hair,weapon=0,wings=''){
  const body='fit-control-body';
  if(wings&&!WonderWardrobe.get('wings:'+wings))WonderWardrobe.register({id:'wings:'+wings,kind:'wings',layers:[{slot:'wingsBack',asset:wings,fit:[0,-4,480,420]}]});
  return WonderWardrobe.render({dress:'dress:'+fittedDressId(dress),hair:'hair:'+fittedHairId(hair),weapon:weapon?'weapon:'+weapon:null,wings:wings?'wings:'+wings:null,body,
-  bodyLayers:[{slot:'handFront',asset:body,rect:[0,40,500,750],clip:wardrobeHandPath}],
+  bodyLayers:wardrobePixelDresses.has(fittedDressId(dress))||wardrobeMattedHandDresses.has(fittedDressId(dress))?[]:[{slot:'handFront',asset:body,rect:[0,40,500,750],clip:wardrobeHandPath}],
   createCanvas:(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;},load:id=>styleImage(artPath(id))});
 }
 async function composeRegisteredReina(dress,hair){
