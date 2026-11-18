@@ -12,26 +12,32 @@ Read `docs/WINGS-OF-WONDER-HANDOVER.md` before any game work.
 - `docs/backup-v301/` — original handover, file inventory, function index, captured test output.
 - `docs/wardrobe-review/` — rendered wardrobe contact sheets.
 
-## Wardrobe status (updated 2026-11-18)
-Root cause of the "neck/shoulder/hand sticks out" complaints: layers were cut with hand-traced polygons
-(hard edges, a pasted polygonal hand, base bodysuit showing beside narrow dresses, gaps beside the ear).
+## Wardrobe status (updated 2026-11-18, second pass)
+Root cause of the "neck/shoulder/hand/leg sticks out" complaints: garment art was drawn separately from the body and
+cut with hand-traced polygons, so sleeves, collars and boots did not sit on Reina's actual wrist, neck and calves.
 
-Fixed with per-pixel layers built by `wings-of-wonder/scripts/build-fitting-v2.py` (first batch, awaiting user review):
-- Dresses: `grove` (Emerald Leaves), `leaflight`, `emberveil` (Northern Wayfarer).
-- Hair: 3 Cherry Bob, 9 Lagoon Side Braid, 10 Onyx Topknot, 11 Lavender Braid.
-- Method: dresses painted on the base body are extracted as "pixels that differ from the base body"; garment-only art
-  gets the whole garment plus a colour-matted hand (`fit-control-hand`); portrait hair gets ear/temple gaps filled.
-- Registered in `ensureWardrobeCatalog()` via `wardrobePixelDresses`, `wardrobeMattedHandDresses`, `wardrobePixelHairs`.
-- `leaflight-master.webp` is no longer loaded at runtime or embedded in the hosted bundle (bow is `fit-control-bow-11`).
-- Hosted bundle after the change: 33,520,104 bytes (limit is about 32 MiB = 33,554,432; it was 33,520,880).
-- Before/after sheets: `docs/wardrobe-review/fix1-*.png`.
+**Chosen approach: paint the outfit on the fixed base body, then extract it.**
+1. Get a full-figure painting of the bald base body (`scripts/art-source/fitting-control/base-v2.png`, 1024x1536)
+   wearing the outfit. Emerald Leaves (`a.png`) and Leaflight (`leaflight/master.png`) already were such paintings.
+   Northern Wayfarer was repainted with the image model (images edit API, model gpt-image-2.6-sunburst, inputs:
+   base-v2.png + the old garment art, 1024x1536, transparent background) and saved as
+   `scripts/art-source/fitting-control/painted/emberveil.png`. The model keeps the body almost pixel-identical.
+2. `wings-of-wonder/scripts/build-fitting-v2.py` `painted_layer()` takes every pixel that differs from the base body as
+   the garment (`fit-control-<id>`), and the body pixels the painting leaves empty as an erase mask
+   (`fit-control-<id>-erase`: calf wider than a boot, bare toes). The head is never repainted.
+3. `wardrobe-engine.js` cuts the erase mask out of the body only (`bodyErase`); `ensureWardrobeCatalog()` registers
+   these dresses through `wardrobePixelDresses` as a single `garmentFront` layer. No hand layer, no neck masks.
+Result: body + layer reproduces the painting, so cuff/wrist, collar/neck and boot/leg always agree.
+Rejected: polygon masks (v301) and per-pixel masks over separately drawn garment art (hand does not meet the cuff).
+
+Done this way: dresses `grove`, `leaflight`, `emberveil`; hair 11 from the Leaflight painting; hairs 3, 9, 10 have
+ear/temple gaps filled. Sheets: `docs/wardrobe-review/fix1-*.png`, `fix2-three-approaches.png`.
 
 Still to do:
-- Remaining 9 dresses still use polygons (visible: polygonal hand patch with bodysuit wedges on every one of them).
-  Garment-only art (`scripts/art-source/fitting-control/<id>.png`) can use the matted-hand route like emberveil.
-- Remaining hairs 1, 2, 4-8: check ear/temple gaps; 4, 8 have long tails behind the shoulders (need back/front split).
-- Hair portraits are only 154x196 px sources, so hair is softer than the body.
+- Repaint the other 9 dresses on the body the same way (each changes the drawing slightly; user must approve looks).
+- Hosted bundle is 33,502,971 bytes against a limit of about 33,554,432: every new layer needs room. Free space
+  before adding nine repainted dresses (e.g. drop layers that the repaint replaces, lower AVIF quality elsewhere).
+- Hairs 1, 2, 4-8 still use the fixed front/back rectangle; hair portraits are low-res (154x196).
 - Not inspected yet: mounted (cat-rider) pose, combat sprites, wings tab.
-- Fashion tab item icons are small full-body thumbnails.
 - Fresh save shows short auburn hair (hair 1), not silver hair as the handover describes.
 - `dist/` was NOT rebuilt or published; the live site is still v301.

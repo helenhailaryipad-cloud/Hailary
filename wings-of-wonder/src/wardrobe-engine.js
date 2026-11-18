@@ -36,13 +36,24 @@
   if(!Number.isFinite(scale)||scale<1||scale>4)throw Error('Invalid wardrobe scale');
   const selected=[dress,hair,weapon,wings].filter(Boolean).map(id=>{const it=items.get(id);if(!it)throw Error('Unknown wardrobe item '+id);return it;});
   const layers=[{slot:'body',asset:body,rect:frame.body},...selected.flatMap(it=>it.layers),...bodyLayers];
-  const images=new Map(await Promise.all([...new Set(layers.map(it=>it.asset))].map(async id=>[id,await load(id)])));
+  const images=new Map(await Promise.all([...new Set([...layers.map(it=>it.asset),...selected.map(it=>it.bodyErase).filter(Boolean)])].map(async id=>[id,await load(id)])));
   // Nothing is returned until the complete dressed scene is decoded.
   const canvas=createCanvas(500*scale,800*scale),ctx=canvas.getContext('2d');ctx.scale(scale,scale);
   ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
   const coverage=selected.filter(it=>it.kind==='dress').flatMap(it=>it.bodyCoverage||[]);
+  // Per-pixel masks of body parts the outfit hides (a calf wider than its boot, bare toes).
+  const erase=selected.filter(it=>it.kind==='dress'&&it.bodyErase).map(it=>images.get(it.bodyErase));
   for(const layer of layers.map((it,index)=>({...it,index})).sort((a,b)=>slots.indexOf(a.slot)-slots.indexOf(b.slot)||a.index-b.index)){
-   const image=images.get(layer.asset);ctx.save();
+   const image=images.get(layer.asset);
+   if(layer.slot==='body'&&erase.length){
+    // Cut the hidden parts out of the body alone, never out of wings or hair behind it.
+    const own=createCanvas(500*scale,800*scale),b=own.getContext('2d');b.scale(scale,scale);
+    b.imageSmoothingEnabled=true;b.imageSmoothingQuality='high';
+    b.save();for(const mask of coverage)clip(b,mask,true);b.drawImage(image,...(layer.rect||[0,0,500,800]));b.restore();
+    b.globalCompositeOperation='destination-out';for(const mask of erase)b.drawImage(mask,0,0,500,800);
+    ctx.drawImage(own,0,0,500,800);continue;
+   }
+   ctx.save();
    if(layer.slot==='body')for(const mask of coverage)clip(ctx,mask,true);
    for(const mask of layer.exclude||[])clip(ctx,mask,true);
    for(const mask of layer.clips||[])clip(ctx,mask);

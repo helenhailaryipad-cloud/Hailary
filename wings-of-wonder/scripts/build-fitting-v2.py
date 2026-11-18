@@ -96,9 +96,9 @@ def diff(p, b):
     """Largest channel difference with both images composited on mid grey."""
     def comp(a): al = a[..., 3:4]/255; return a[..., :3]*al + 128*(1-al)
     return np.abs(comp(p)-comp(b)).max(-1)
-def save(name, im):
+def save(name, im, quality=80):
     im.save(OUT/(name+'.webp'), lossless=True)
-    im.save(HOST/(name+'.avif'), quality=80, speed=6)
+    im.save(HOST/(name+'.avif'), quality=quality, speed=4)   # compact copy for the hosted bundle
     return im
 def suit_mask(a):
     R, G, B, A = a[..., 0], a[..., 1], a[..., 2], a[..., 3]
@@ -130,25 +130,53 @@ def build_hand():
     out = B.copy(); out[..., 3] = np.where(hand, B[..., 3], 0)*fade
     return save('fit-control-hand', img(out))
 
-# ---------- Emerald Leaves: painted on the base body at 500 x 750 ----------
-def build_grove():
-    paint = to_frame(Image.open(SRC/'fitting-control/a.png')); P = arr(paint); d = diff(P, B)
-    both_skin = skin_like(P) & skin_like(B)          # body, not cloth
-    strong = (d > 44) & ~both_skin
-    core = keep_big(dilate(erode(strong, 1), 1) | ((d > 90) & ~both_skin), 40)
-    m = core.copy()
-    # Sheer cloth over skin differs only slightly from the body: follow any
-    # difference outwards from the garment so soft folds are never chopped.
-    grown = m.copy()
-    for _ in range(14): grown |= dilate(grown, 1) & (d > 5)
-    m |= dilate(erode(grown, 2), 2) & grown                # no hairline tendrils along body outlines
-    m |= dilate(bodysuit(B), 5) & (P[..., 3] > 0)         # the bodysuit never shows
-    m |= dilate(m, 6) & (B[..., 3] < 8) & (P[..., 3] > 0)  # keep sheer hems soft outside the body
-    m = fill_holes(m, 150)
-    out = P.copy(); out[..., 3] = np.where(m, P[..., 3], 0)
-    return save('fit-control-grove', img(out))
+# ---------- outfits painted on the fixed base body ----------
+def painted_layer(P, Bb, allow=None):
+    """Split a full-figure painting made on the base body into the garment
+    layer and the body pixels it hides.
 
-# ---------- Leaflight: painted on the base body at 1024 x 1536 ----------
+    Garment = every pixel that differs from the base body, followed outwards
+    through faint differences (sheer cloth over skin). The head is never
+    repainted. Wherever the painting is empty but the base body is not (a calf
+    wider than its boot, bare toes), the body must be hidden: that is `erase`.
+    Compositing body-minus-erase plus the garment reproduces the painting.
+    """
+    H, W = P.shape[:2]; k = W/500; r = lambda v: max(1, round(v*k))
+    yy = np.mgrid[0:H, 0:W][0]
+    head = (Bb[..., 3] > 40) & (yy < (148-BODY_Y)*H/750 + (BODY_Y if H == 800 else 0))
+    ok = ~head if allow is None else (allow & ~head)
+    d = diff(P, Bb)
+    core = keep_big(dilate(erode((d > 20) & ok, 1), 1), int(150*k*k))
+    grown = core.copy()
+    for _ in range(r(12)): grown |= dilate(grown, 1) & (d > 5) & ok
+    m = core | (dilate(erode(grown, r(1.5)), r(1.5)) & grown)     # no hairline tendrils
+    m |= dilate(bodysuit(Bb), r(5)) & (P[..., 3] > 0) & ok          # the bodysuit never shows
+    m |= dilate(m, r(5)) & (Bb[..., 3] < 8) & (P[..., 3] > 0) & ok  # soft outer edges stay soft
+    m = fill_holes(m, int(150*k*k))
+    # Real hidden areas are several pixels wide; one-pixel rims where the two
+    # silhouettes merely anti-alias differently are left alone.
+    raw = (Bb[..., 3] > 0) & (P[..., 3] < 60) & dilate(m, r(10)) & ok
+    solid = keep_big(dilate(erode(raw, r(1)), r(1)) & raw, int(12*k*k))
+    erase = dilate(solid, r(1)) & raw
+    return m, erase
+def save_painted(name, P, m, erase):
+    out = P.copy(); out[..., 3] = np.where(m, P[..., 3], 0)
+    layer = save('fit-control-'+name, to_frame(img(out)), 72)
+    e = np.zeros_like(P); e[..., 3] = np.where(erase, 255, 0)
+    save('fit-control-'+name+'-erase', to_frame(img(e)), 50)
+    return layer
+
+def build_grove():      # Emerald Leaves, painted at 500 x 750
+    P = arr(to_frame(Image.open(SRC/'fitting-control/a.png')))
+    m, erase = painted_layer(P, B)
+    m[146:153, 208:215] = False     # retouch: a stray stub poking above the collar rim
+    return save_painted('grove', P, m, erase)
+
+def build_painted(name):  # repainted on the base body at 1024 x 1536
+    P = arr(Image.open(SRC/'fitting-control/painted'/(name+'.png')))
+    return save_painted(name, P, *painted_layer(P, arr(body_hi)))
+
+# ---------- Leaflight: painted on the base body at 1024 x 1536, with hair and bow ----------
 LEAF = {
  'dress': 'M351 270 Q369 268 391 287 Q413 323 450 338 Q493 354 542 358 Q577 357 598 338 L592 297 L603 299 Q624 329 625 362 L616 414 L594 476 L612 530 L623 583 Q640 616 647 655 L672 730 L688 798 L703 868 L708 944 L707 1010 L700 1078 L690 1108 L699 1248 L700 1536 H70 V1130 L123 1004 L166 908 L185 836 L215 778 L270 750 L285 700 L310 627 L363 583 L408 542 L435 490 L426 445 L408 412 L395 389 Q397 355 384 318 L369 290 Z',
  'bow': 'M766 93 H897 V1173 H675 V1058 L694 1035 L733 979 L769 912 L787 848 L788 812 L774 789 L749 771 L757 742 L782 729 L788 589 L778 578 L764 552 L777 515 L801 481 L822 438 L831 387 L830 337 L803 265 L781 215 L763 181 Z',
@@ -161,25 +189,15 @@ def build_leaflight():
     R, G, Bl = M[..., 0], M[..., 1], M[..., 2]
     purple = (Bl > G+6) & (R > G-5) & (d > 30)
     hair_seed = dilate(erode(purple, 2), 4)
+    lilac = dilate((Bl > G+6) & (R > G-5) & (d > 12), 2)
     bow = dilate(path_mask(LEAF['bow'], (W, H)), 2)
     # The bowstring crosses the skirt edge; keep a band around it out of the dress.
     yy, xx = np.mgrid[0:H, 0:W]
     sx0, sy0, sx1, sy1 = 375.49*W/500, (123.5-BODY_Y)*H/750, 336.43*W/500, (567.83-BODY_Y)*H/750
     string = (np.abs(xx-(sx0+(yy-sy0)*(sx1-sx0)/(sy1-sy0))) < 7) & (yy > sy0) & (yy < sy1)
     zone = dilate(path_mask(LEAF['dress'], (W, H)), 5) & ~bow & ~string
-    cand = (d > 14) & zone & ~hair_seed & ~purple
-    dress = fill_holes(keep_big(dilate(erode(cand, 1), 1), 600), 400)
-    grown = dress.copy()
-    for _ in range(24): grown |= dilate(grown, 1) & (d > 5) & zone & ~hair_seed & ~purple
-    dress |= dilate(erode(grown, 3), 3) & grown             # no hairline tendrils along body outlines
-    lilac = dilate((Bl > G+6) & (R > G-5) & (d > 12), 2)
-    dress |= dilate(bodysuit(Bh), 11) & (M[..., 3] > 0) & ~hair_seed & ~lilac & ~bow   # the bodysuit never shows
-    dress |= dilate(dress, 10) & zone & (Bh[..., 3] < 8) & (M[..., 3] > 0) & ~hair_seed & ~lilac  # soft outer edges
-    # Below the boot tops the renderer hides the bare feet of the base body,
-    # so the layer carries every painted pixel there (legs included).
-    dress |= zone & (yy >= 1118) & (M[..., 3] > 0) & ~hair_seed
-    out = M.copy(); out[..., 3] = np.where(dress, M[..., 3], 0)
-    save('fit-control-leaflight', to_frame(img(out)))
+    dress, erase = painted_layer(M, Bh, zone & ~hair_seed & ~lilac)
+    save_painted('leaflight', M, dress, erase)
     # Lavender Braid: every hair pixel of the same painting, drawn in front.
     hzone = dilate(path_mask(LEAF['hairBack'], (W, H)) | path_mask(LEAF['hairFront'], (W, H)), 8) & ~bow
     # Hair is everything painted there except skin (the braid shades the arm)
@@ -267,7 +285,7 @@ def build_hair(i):
     return save(f'fit-control-hair-{i}', img(A))
 
 if __name__ == '__main__':
-    hand = build_hand(); grove = build_grove(); build_leaflight(); build_leaf_bow()
+    hand = build_hand(); grove = build_grove(); build_leaflight(); build_leaf_bow(); build_painted('emberveil')
     hairs = {i: build_hair(i) for i in (3, 9, 10)}
     hairs[11] = Image.open(OUT/'fit-control-hair-11.webp')
     hairs[1] = Image.open(OUT/'fit-control-hair-1.webp')
@@ -275,8 +293,9 @@ if __name__ == '__main__':
     sheet = Image.new('RGB', (500*5, 800*3), '#dfe9ef')
     for r, (name, layer) in enumerate(dresses.items()):
         for c, h in enumerate((1, 3, 9, 10, 11)):
-            look = body.copy(); look.alpha_composite(layer.convert('RGBA'))
-            if name == 'emberveil': look.alpha_composite(hand)
+            er = np.array(Image.open(OUT/f'fit-control-{name}-erase.webp').convert('RGBA'))[..., 3] > 127
+            bb = B.copy(); bb[er, 3] = 0
+            look = img(bb); look.alpha_composite(layer.convert('RGBA'))
             look.alpha_composite(hairs[h].convert('RGBA')); sheet.paste(look, (c*500, r*800), look)
     sheet.save('/tmp/fitting-v2.png')
     print('Built pixel-accurate layers; review /tmp/fitting-v2.png')

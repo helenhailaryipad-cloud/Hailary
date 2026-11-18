@@ -507,7 +507,7 @@ function restoreFittingNeck(ctx,dress,drawBody){
 }
 let wardrobeCatalogReady=false;
 // Built by scripts/build-fitting-v2.py. Other items still use traced polygons.
-const wardrobePixelDresses=new Set(['grove','leaflight']),wardrobeMattedHandDresses=new Set(['emberveil']),wardrobePixelHairs=new Set([3,9,10,11]);
+const wardrobePixelDresses=new Set(['grove','leaflight','emberveil']),wardrobeMattedHandDresses=new Set(),wardrobePixelHairs=new Set([3,9,10,11]);
 const wardrobeHandPath='M'+fittingTemplate.hand.map(p=>p.join(' ')).join(' L')+' Z';
 const wardrobeGripPath='M378 360 Q386 351 397 360 Q413 364 411 374 L405 383 Q399 394 390 393 L378 385 L370 374 Z';
 function ensureWardrobeCatalog(){
@@ -526,7 +526,7 @@ function ensureWardrobeCatalog(){
   // Painted on the fixed body and extracted per pixel: the layer already
   // leaves the neck, shoulders and the hand on the hip untouched.
   if(wardrobePixelDresses.has(id)){
-   WonderWardrobe.register({id:'dress:'+id,kind:'dress',frame:[500,800],bodyCoverage,layers:[{slot:'garmentFront',asset:'fit-control-'+id}]});
+   WonderWardrobe.register({id:'dress:'+id,kind:'dress',frame:[500,800],bodyErase:'fit-control-'+id+'-erase',layers:[{slot:'garmentFront',asset:'fit-control-'+id}]});
    continue;
   }
   // Garment-only art that covers the hip: whole garment, then the matted hand.
