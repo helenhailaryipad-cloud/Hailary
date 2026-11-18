@@ -87,6 +87,16 @@ the player's best. Original art: lobby background, Sprout mascot, 8 ingredient t
 `build-fashion-extras.py`). Logic tests: `node scripts/test-pairs.mjs`. Game buttons need very specific selectors:
 global `#main button` rules set position, borders and `::before`.
 
+## Jungle Trek second pass (2026-11-18)
+The user sent photos of a reference runner-shooter (no text); Jungle Trek was restyled toward it with original art:
+painted clearing background (`trek-bg`), barrel sprite (`trek-barrel`), power-up orbs (`trek-pickup-1..3`), violet-gold
+teardrop shots, burst on hit, flame lanes, larger hero. The hero is the live wardrobe portrait
+(`registeredCombatBitmap()`), so the worn dress, hair, bow and wings show; a back-view runner is NOT done (it would need
+a back drawing for each of the 22 dresses). HUD: live ranking against six simulated AI rivals and gap to leader
+(`Trek.rivals`, `Trek.standing`), boost icons with seconds, thumb stick under the finger. Rules, rewards and the
+simulation are unchanged. `drawJungle` uses a flatter projection than before (render only). Sources in
+`art-source/trek/`, built by `build-fashion-extras.py`.
+
 ## In-chat playable preview (user requirement)
 The user wants to play the game inside the chat, and wants SHORT replies in Russian, no fluff.
 - Artifact: https://claude.ai/artifact/L9owNJPMaZjAsTmU3tDGs6 (private). After game changes, rebuild and republish:

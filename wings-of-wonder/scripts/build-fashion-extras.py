@@ -50,3 +50,15 @@ lobby = Image.open(SRC/'pairs/lobby.webp').convert('RGB').resize((768, 1152), Im
 save('pairs-lobby', lobby, 55)
 sprout = trim(SRC/'pairs/sprout.webp'); sprout.thumbnail((320, 320), Image.Resampling.LANCZOS)
 save('pairs-sprout', sprout, 70)
+
+# Jungle Trek: painted clearing, barrel and three power-up orbs.
+bg = Image.open(SRC/'trek/bg.webp').convert('RGB').resize((720, 1080), Image.Resampling.LANCZOS)
+save('trek-bg', bg, 55)
+barrel = trim(SRC/'trek/barrel.webp'); barrel = barrel.resize((360, round(barrel.height*360/barrel.width)), Image.Resampling.LANCZOS)
+save('trek-barrel', barrel, 70)
+sheet = Image.open(SRC/'trek/pickups.webp').convert('RGBA'); cw = sheet.width//3
+for n in range(3):
+    a = fit.arr(sheet.crop((n*cw, 0, (n+1)*cw, sheet.height))); a[..., 3] = np.where(a[..., 3] < 24, 0, a[..., 3])
+    keep = fit.keep_big(a[..., 3] > 0, 4000); a[..., 3] = np.where(fit.dilate(keep, 2), a[..., 3], 0)
+    orb = fit.img(fit.clean_rgb(a)); orb = orb.crop(orb.getbbox()); orb.thumbnail((200, 200), Image.Resampling.LANCZOS)
+    tile = Image.new('RGBA', (208, 208)); tile.alpha_composite(orb, ((208-orb.width)//2, (208-orb.height)//2)); save(f'trek-pickup-{n+1}', tile, 70)
