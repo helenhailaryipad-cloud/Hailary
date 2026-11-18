@@ -240,14 +240,7 @@ def build_leaflight():
     hair |= dilate(hair, 1) & (d > 8) & hzone & ~dress & ~skinish & ~strap
     ho = M.copy(); ho[..., 3] = np.where(hair, M[..., 3], 0)
     layer = save('fit-control-hair-11', to_frame(img(ho)))
-    # Wardrobe card: her head with the braid, like the other hairstyle cards. (The layer alone
-    # has gaps where the braid passes behind her arm; the body always covers them in the game.)
-    head = B.copy(); head[168:, :, 3] = 0
-    card = img(head); card.alpha_composite(layer)
-    c = arr(card); rows = np.arange(800)[:, None]
-    c[..., 3] *= np.clip((190-rows)/14, 0, 1)             # fade out where her arm hides the braid
-    card = img(c).crop((166, 40, 308, 221)).resize((154, 196), Image.Resampling.LANCZOS)
-    save('fit-icon-hair-11', card)
+
 
 # ---------- hairstyles painted on the bald base body (1024 x 1536) ----------
 # number -> True when the hair hangs down her back (that part is drawn behind body and clothes)
@@ -283,14 +276,17 @@ def build_painted_hair(i):
         save(f'fit-control-hair-{i}-back', to_frame(img(bo)), 70)
     out = P.copy(); out[..., 3] = np.maximum(np.where(m & ~back, 255, 0), face*255*(P[..., 3] > 100))
     layer = save(f'fit-control-hair-{i}', to_frame(img(out)), 72)
-    # Wardrobe card: her head with the hairstyle.
-    hb = B.copy(); hb[168:, :, 3] = 0
-    card = img(np.zeros_like(B))
-    if PAINTED_HAIR[i]: card.alpha_composite(Image.open(OUT/f'fit-control-hair-{i}-back.webp').convert('RGBA'))
-    card.alpha_composite(img(hb)); card.alpha_composite(layer)
-    c = arr(card); rows = np.arange(800)[:, None]; c[..., 3] *= np.clip((262-rows)/20, 0, 1)
-    card = img(c).crop((145, 22, 337, 266)).resize((154, 196), Image.Resampling.LANCZOS)
-    save(f'fit-icon-hair-{i}', card)
+
+def build_hair_cards():
+    """Wardrobe cards for every hairstyle: the same head, at the same size and place, wearing it."""
+    rows = np.arange(800)[:, None]
+    for i in range(1, 22):
+        card = Image.new('RGBA', FRAME)
+        back = OUT/f'fit-control-hair-{i}-back.webp'
+        if back.exists(): card.alpha_composite(Image.open(back).convert('RGBA'))
+        card.alpha_composite(body); card.alpha_composite(Image.open(OUT/f'fit-control-hair-{i}.webp').convert('RGBA'))
+        c = arr(card); c[..., 3] *= np.clip((214-rows)/30, 0, 1)        # fade out below the shoulders
+        save(f'fit-icon-hair-{i}', img(c).crop((166, 40, 330, 249)).resize((154, 196), Image.Resampling.LANCZOS))
 
 LEAF['grip'] = 'M746 639 Q767 633 784 644 Q798 638 813 647 Q839 655 837 680 Q840 701 820 718 Q800 733 781 721 Q761 712 752 692 Q741 675 746 639 Z'
 def build_leaf_bow():
@@ -376,6 +372,7 @@ if __name__ == '__main__':
         if want('hair'): build_hair(i)
     for i in PAINTED_HAIR:
         if want('newhair') or want(str(i)): build_painted_hair(i)
+    build_hair_cards()
     names = ['leaflight', 'grove', 'frostlace'] + PAINTED
     hair_ids = [3, 9, 10, 11] + list(PAINTED_HAIR)
     sheet = Image.new('RGB', (500*6, 800*((len(names)+5)//6)), '#dfe9ef')
