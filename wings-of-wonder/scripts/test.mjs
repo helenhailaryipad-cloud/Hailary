@@ -27,7 +27,7 @@ for(const dress of reinaDresses){
   const balance=S.gold;
   wearOutfit('reina',dress.id,false);wearOutfit('reina',dress.id,false);
   if(S.gold!==balance-dress.gold||!ownsOutfit(dress.id)||currentDress()!==dress.id||!valid(S))throw Error('Outfit purchase or ownership');
-  if(!reinaLookPath(true).replace(/[?][^#]*/, '').includes('ride-2.webp#dress-'+dress.id))throw Error('Mounted outfit');
+  if(!reinaLookPath(true).includes('#mounted-'+fittedDressId(dress.id)+'-'))throw Error('Mounted outfit');
 }
 S=defaults();
 S=defaults();S.gold=30000;openScreen('fashion');
@@ -348,7 +348,7 @@ vm.runInContext(`
  S=defaults();screen='fashion';const leafGold=S.gold;wearLeaflightSet();
  if(currentDress()!=='leaflight'||registeredLook().hair!==11||S.atelier.weapon!==11)throw Error('Leaflight equip incomplete');
  if(S.gold!==leafGold)throw Error('Free Leaflight charged gold');
- if(!reinaLookPath(true).includes('leaflight-riding'))throw Error('Mounted Leaflight reverted');
+ if(!reinaLookPath(true).includes('#mounted-leaflight-11'))throw Error('Mounted Leaflight reverted');
  if(!reinaLookPath(false).includes('leaflight'))throw Error('Standing Leaflight reverted');
  if(!ownsRegisteredDress('leaflight')||!styleOwned(styleSets.Hair,11))throw Error('Leaflight ownership missing');
  S=defaults();
@@ -358,16 +358,20 @@ console.log('PASS: Leaflight equip, free ownership and standing/mounted routing.
 vm.runInContext(`{
  S=defaults();screen='fashion';wearLeaflightSet();S.mountId='silver-tabby';
  fashionCategory='Hair';wearRegisteredLook('leaflight',2);
- if(currentMount()||registeredLook().hair!==2||registeredLook().dress!=='leaflight')throw Error('Hair change reverted mounted outfit');
- if(reinaLookPath(true).includes('#dress-'))throw Error('Legacy mounted Leaflight route');
+ if(!currentMount()||registeredLook().hair!==2||registeredLook().dress!=='leaflight')throw Error('Hair change reverted mounted outfit');
+ if(!reinaLookPath(true).includes('#mounted-leaflight-2'))throw Error('Mounted look does not follow the hairstyle');
  wearLeaflightSet();S.mountId='silver-tabby';fashionCategory='Weapons';stylePick=3;S.gold=10000;wearStyle();
- if(currentMount()||S.atelier.weapon!==3||registeredLook().dress!=='leaflight')throw Error('Weapon change reverted mounted outfit');
- wearLeaflightSet();S.mountId='silver-tabby';if(!currentMount()||!reinaLookPath(true).includes('leaflight-riding'))throw Error('Complete riding set broken');
+ if(!currentMount()||S.atelier.weapon!==3||registeredLook().dress!=='leaflight')throw Error('Weapon change reverted mounted outfit');
+ wearLeaflightSet();S.mountId='silver-tabby';if(!currentMount()||!reinaLookPath(true).includes('#mounted-leaflight-11'))throw Error('Complete riding set broken');
+ S.reinaLayers={dress:'emberveil',hair:9};if(!reinaLookPath(true).includes('#mounted-emberveil-9'))throw Error('Mounted look does not follow the dress');
+
  const meta=document.querySelector('meta[name="wonder-release"]');meta.content='release-a';const first=artPath('fit-control-body');meta.content='release-b';const second=artPath('fit-control-body');
  if(first===second||!second.endsWith('?v=release-b')||!registeredLookPath().includes('?v=release-b#registered-'))throw Error('Stale wardrobe cache');
  delete meta.content;S=defaults();
 }`,context);
-console.log('PASS: independent mounted hair/weapon changes preserve clothing without legacy collar; release-specific wardrobe URLs.');
+for(const id of vm.runInContext('fittingDresses.map(x=>x[0])',context))assert(fs.existsSync('src/assets/generated/fit-control-mount-'+id+'.webp'),'Missing mounted dress '+id);
+for(const id of vm.runInContext('fittingHairs.map(x=>x[0])',context))assert(fs.existsSync('src/assets/generated/fit-control-mounthair-'+id+'.webp'),'Missing mounted hair '+id);
+console.log('PASS: any dress and hairstyle can ride with its own mounted layers; release-specific wardrobe URLs.');
 
 await vm.runInContext(`(async()=>{
  S=defaults();screen='fashion';changeFashionTab('Wings');

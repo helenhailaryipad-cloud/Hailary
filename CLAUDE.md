@@ -43,12 +43,28 @@ To add or redo a dress: put a 1024x1536 transparent painting of base-v2.png wear
 add the id to `PAINTED` in `scripts/build-fitting-v2.py`, run `python3 scripts/build-fitting-v2.py <id>`, then
 render and LOOK at hand, neck, feet (`composeWardrobeCanvas` in the preview) before committing.
 
+## Mounted pose and battles (fourth pass, 2026-11-18)
+- Riding uses the same idea with its own base: `scripts/art-source/mounted/base.webp` (bald Reina in a bodysuit on the
+  Silver Tabby, made from `leaflight/riding.png`), plus one painting per dress (`dress-<id>.webp`) and per hairstyle
+  (`hair-<n>.webp`), all 1024x1024. `scripts/build-mounted.py` extracts `fit-control-mount-<id>` and
+  `fit-control-mounthair-<n>` (1024x936). The inner face comes from the hair painting through a soft ellipse.
+- `composeMountedCanvas(dress,hair)` in `app.js` draws base + dress + hair; `reinaLookPath(true)` returns a
+  `#mounted-<dress>-<hair>` key that the image load handler resolves. Any dress/hair can ride now (the old rule that
+  only the full Leaflight set could ride is gone). The mounted bow is always the Leafwind bow, whatever weapon is worn.
+- Battles: `drawReina` in `arena.js` cropped the 2x portrait as if it were 1x (only the top-left quarter showed); fixed.
+  Battles also use the wardrobe portrait on a fresh save now.
+- `save()` in `build-fitting-v2.py` blanks colour under transparent pixels (`clean_rgb`), which shrank layers a lot.
+  `leaflight-riding` and `skin2-look-*`/`skin2-parts-*` are no longer embedded. Hosted bundle: 32,246,347 bytes
+  (about 1.3 MB spare).
+- Sheets: `docs/wardrobe-review/fix5-*.png`.
+
 Still to do:
+- Mounted hair: small redraw specks can remain along the jaw at high zoom (hairs 2, 10); hair 8 has a dark spot in
+  the left tail that is in the painting itself.
 - User has not yet approved the nine repainted designs (details differ slightly from the old art).
-- Mounted (cat-rider) portraits, atelier portraits and combat sprites still show the OLD designs of these outfits.
+- Other screens not inspected yet: profile, bag/character sheets, rankings, Jungle Trek sprite, wings tab.
 - Hosted bundle is 33,499,960 bytes against a limit of about 33,554,432 (54 KB spare). `fit-control-hand`,
   `fit-mask-*` and `leaflight-master` are no longer embedded.
 - Hairs 1, 2, 4-8 still use the fixed front/back rectangle; hair portraits are low-res (154x196).
-- Not inspected yet: mounted pose, combat sprites, wings tab.
 - Fresh save shows short auburn hair (hair 1), not silver hair as the handover describes.
 - `dist/` was NOT rebuilt or published; the live site is still v301.

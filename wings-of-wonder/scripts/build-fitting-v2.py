@@ -96,7 +96,20 @@ def diff(p, b):
     """Largest channel difference with both images composited on mid grey."""
     def comp(a): al = a[..., 3:4]/255; return a[..., :3]*al + 128*(1-al)
     return np.abs(comp(p)-comp(b)).max(-1)
+def clean_rgb(a, bleed=6):
+    """Blank the colour hidden under transparent pixels (it would still be
+    compressed and shipped), keeping a few pixels of edge colour so lossy
+    compression cannot darken the outline."""
+    a = a.copy(); known = a[..., 3] > 0; col = a[..., :3].copy(); col[~known] = 0
+    for _ in range(bleed):
+        acc = np.zeros_like(col); cnt = np.zeros(known.shape, np.float32)
+        for dy, dx in ((0, 1), (0, -1), (1, 0), (-1, 0)):
+            k = np.roll(np.roll(known, dy, 0), dx, 1); acc += np.roll(np.roll(col, dy, 0), dx, 1)*k[..., None]; cnt += k
+        todo = ~known & (cnt > 0)
+        col[todo] = acc[todo]/cnt[todo][:, None]; known |= todo
+    a[..., :3] = col; return a
 def save(name, im, quality=80):
+    im = img(clean_rgb(arr(im)))
     im.save(OUT/(name+'.webp'), lossless=True)
     im.save(HOST/(name+'.avif'), quality=quality, speed=4)   # compact copy for the hosted bundle
     return im
