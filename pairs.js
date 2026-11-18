@@ -1,8 +1,9 @@
 // Harvest Pairs: tap two identical ingredients that a line with at most two turns can join.
-// Five boards, each larger than the last; the clock runs from the first board to the last.
+// Six boards, each larger than the last; the clock runs from the first board to the last.
 const Pairs = {
   // columns, rows, different ingredients
-  stages: [[2, 2, 2], [4, 3, 3], [4, 4, 4], [6, 5, 5], [6, 6, 6]],
+  stages: [[2, 2, 2], [4, 3, 3], [4, 4, 4], [6, 5, 5], [6, 6, 6], [6, 8, 8]],
+  bonusSeconds: 90,
   kinds: 8,
   shuffled(list, rng = Math.random) {
     const a = list.slice();
@@ -89,17 +90,17 @@ const Pairs = {
     if (g.stage + 1 >= this.stages.length) { g.ended = true; g.running = false; return false; }
     g.stage++; g.board = this.deal(g.stage, g.picks, rng); g.picked = -1; return true;
   },
-  reward(seconds) { return { gold: 300 + (seconds <= 60 ? 200 : 0), xp: 30 }; },
+  reward(seconds) { return { gold: 300 + (seconds <= this.bonusSeconds ? 200 : 0), xp: 30 }; },
   // Two rewarded runs per UTC day; more runs are practice for a better time.
   dailyRuns: 2,
   hintPenalty: 3,
   day(now) { return new Date(now === undefined ? Date.now() : now).toISOString().slice(0, 10); },
   runsLeft(save, now) { const d = save.pairsDaily; return Math.max(0, this.dailyRuns - (d && d.day === this.day(now) ? d.runs : 0)); },
   useRun(save, now) { const today = this.day(now), d = save.pairsDaily; save.pairsDaily = { day: today, runs: (d && d.day === today ? d.runs : 0) + 1 }; },
-  // Simulated rival times for the ranking board: fixed for one UTC day, between 0:41 and 1:38.
+  // Simulated rival times for the ranking board: fixed for one UTC day, between 1:05 and 2:19.
   rivals(names, now) {
     const today = this.day(now);
-    return names.map(name => { let h = 2166136261; for (const ch of name + today) h = Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0; return { name, seconds: 41 + h % 58, ai: true }; });
+    return names.map(name => { let h = 2166136261; for (const ch of name + today) h = Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0; return { name, seconds: 65 + h % 75, ai: true }; });
   },
   ranking(names, best, now) {
     const rows = this.rivals(names, now); if (best) rows.push({ name: 'You', seconds: best, you: true });
@@ -119,9 +120,9 @@ function showPairs() {
     <div class="pairs-rules"><h2>Rules</h2><ol>
       <li>Tap two matching ingredients to collect them, one after the other or both at once with two fingers.</li>
       <li>A pair joins only along a line with no more than two turns.</li>
-      <li>Clear five baskets, each larger than the last, as fast as you can.</li>
+      <li>Clear ${Pairs.stages.length} baskets, each larger than the last, as fast as you can.</li>
       <li>Stuck? Tap Sprout for a hint. Each hint adds ${Pairs.hintPenalty} seconds.</li>
-      <li>Reward: 300 gold and 30 XP, plus 200 gold under one minute, for ${Pairs.dailyRuns} runs each day. Leaving a run does not use one.</li>
+      <li>Reward: 300 gold and 30 XP, plus 200 gold under ${Pairs.clock(Pairs.bonusSeconds)}, for ${Pairs.dailyRuns} runs each day. Leaving a run does not use one.</li>
     </ol></div>
     <p class="pairs-runs">Rewarded runs today: <b>${left} / ${Pairs.dailyRuns}</b> · Best time <b>${best}</b></p>
     <button class="primary pairs-go" onclick="openPairsBoard()">Go challenge</button>
@@ -141,8 +142,8 @@ function openPairsBoard() {
     <div class="pairs-banner"><img class="pairs-cover" src="${artPath('pairs-cover')}" alt=""><img class="pairs-host" src="${reinaLookPath(false)}" alt="Reina"><h1>Harvest Pairs</h1></div>
     <div class="pairs-bar"><span>Stage <b id="pairsStage">1</b> / ${Pairs.stages.length}</span><span>Time <b id="pairsTime">0:00</b><i id="pairsPenalty" hidden>+${Pairs.hintPenalty}s</i></span></div>
     <div class="pairs-field"><div class="pairs-board" id="pairsBoard"></div><div class="pairs-panel" id="pairsPanel" hidden></div></div>
-    <button class="pairs-exit" onclick="go('pairs')" aria-label="Back to the Harvest Pairs lobby">‹</button>
-    <button class="pairs-hint" id="pairsHint" aria-label="Hint from Sprout, adds ${Pairs.hintPenalty} seconds"><img src="${artPath('pairs-sprout')}" alt="" draggable="false"></button>
+    <div class="pairs-foot"><button class="pairs-exit" onclick="go('pairs')" aria-label="Back to the Harvest Pairs lobby">‹</button>
+    <button class="pairs-hint" id="pairsHint" aria-label="Hint from Sprout, adds ${Pairs.hintPenalty} seconds"><img src="${artPath('pairs-sprout')}" alt="" draggable="false"></button></div>
   </section>`;
   startPairs();
 }

@@ -6534,7 +6534,7 @@ body[data-screen="pairs"] #stage #main{position:fixed!important;inset:0!importan
 .pairs-bar{display:flex;justify-content:space-between;padding:.55rem 1.2rem;background:linear-gradient(#9a6a3c,#7a4f2b);border-block:3px solid #d9b77a;font-weight:700;font-size:clamp(1rem,2.4svh,1.25rem);box-shadow:0 4px 10px #1e3a2466;z-index:1}
 .pairs-bar b{color:#9dff9a;font-variant-numeric:tabular-nums;margin-left:.2em}
 .pairs-field{position:relative;min-height:0;display:grid;place-items:center;padding:2% 2% 12%;container-type:size}
-.pairs-board{--cols:2;--rows:2;--cell:min(100cqw/6.8,100cqh/6.8);position:relative;width:calc(var(--cell)*(var(--cols) + .8));height:calc(var(--cell)*(var(--rows) + .8))}
+.pairs-board{--cols:2;--rows:2;--cell:min(100cqw/6.8,100cqh/6.8,100cqh/(var(--rows) + .8));position:relative;width:calc(var(--cell)*(var(--cols) + .8));height:calc(var(--cell)*(var(--rows) + .8))}
 #main .pairs-board .pairs-tile{position:absolute!important;overflow:visible;outline:0!important;border-image:none!important;margin:0;min-width:0;min-height:0;border-radius:0;box-shadow:none!important;border:0!important;background:none!important;left:calc(var(--cell)*(var(--x) + .4));top:calc(var(--cell)*(var(--y) + .4));width:var(--cell);height:var(--cell);padding:0;border:0;background:none;display:grid;place-items:center;cursor:pointer;touch-action:manipulation}
 #main .pairs-board .pairs-tile::before,#main .pairs-board .pairs-tile::after{content:none!important;display:none!important}
 .pairs-card{position:absolute;inset:4%;border-radius:12%;background:linear-gradient(#fbf6ea,#e6dcc6);box-shadow:0 3px 0 #a79f8b,0 5px 8px #1f3d2a66;transition:box-shadow .12s,background .12s;pointer-events:none}
@@ -6593,3 +6593,10 @@ body[data-screen="pairs"] #stage #main{position:fixed!important;inset:0!importan
 @keyframes pairs-line-out{70%{opacity:1}to{opacity:0}}
 .pairs-gate>small:only-child{padding:.5rem 1.4rem;border-radius:1.4rem;background:#1d4a3ae6}
 @media (prefers-reduced-motion:reduce){.pairs-tile.matched,.pairs-line polyline{animation-duration:.01s}}
+/* Harvest Pairs: controls sit in their own row under the board, so the tallest basket never runs under them */
+.pairs-screen{grid-template-rows:minmax(84px,20%) auto 1fr auto}
+.pairs-field{padding:1.5% 2%}
+.pairs-foot{display:flex;justify-content:space-between;align-items:center;padding:.2rem 4% max(.5rem,env(safe-area-inset-bottom,0px))}
+#main .pairs-screen .pairs-foot .pairs-exit,#main .pairs-screen .pairs-foot .pairs-hint{position:relative!important;inset:auto;flex:none}
+#main .pairs-screen .pairs-foot .pairs-exit{width:3rem;height:3rem;font-size:1.7rem}
+#main .pairs-screen .pairs-foot .pairs-hint{width:4.4rem;height:4.4rem}
