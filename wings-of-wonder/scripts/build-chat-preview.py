@@ -20,7 +20,8 @@ shutil.rmtree(out, ignore_errors=True); files.mkdir(parents=True)
 
 UNUSED = re.compile(r'^assets/generated/(?:fitting-|atelier-(?!icon-)|parts-|fit-mask-|skin2-|leaflight-(?:master|riding)|fit-control-hand\.)')
 PACKS = {'gear': re.compile(r'^assets/generated/gear-'), 'familiar': re.compile(r'^assets/generated/familiar-'),
-         'guardian': re.compile(r'^assets/generated/guardian-t'), 'fish': re.compile(r'^assets/moonwater/')}
+         'guardian': re.compile(r'^assets/generated/guardian-t'), 'fish': re.compile(r'^assets/moonwater/'),
+         'icons': re.compile(r'^assets/generated/(?:fit-icon-|atelier-icon-)'), 'bows': re.compile(r'^assets/generated/weapon-style-')}
 packed = {k: {} for k in PACKS}
 tracked = subprocess.run(['git', 'ls-files', 'src'], cwd=ROOT, capture_output=True, text=True, check=True).stdout.split('\n')
 for f in filter(None, tracked):
@@ -43,6 +44,10 @@ patch('generated-art.js', 'function artPath(id){', "function artPath(id){const p
 patch('gear-ui.js', 'src="assets/generated/gear-${template.slot}-t${eqRules().artTier(template.tier)}.webp?v=2">', 'src="${artPath(\'gear-\'+template.slot+\'-t\'+eqRules().artTier(template.tier))}">')
 patch('gear-data.js', "portrait:'assets/generated/familiar-'+index+'.webp?v=fullbody2'", "portrait:globalThis.WOW_PACK?.['assets/generated/familiar-'+index+'.webp']||'assets/generated/familiar-'+index+'.webp?v=fullbody2'")
 patch('fish-catalog.js', "const artUrl=fish=>'assets/moonwater/'+fish.id+'.avif';", "const artUrl=fish=>globalThis.WOW_PACK?.['assets/moonwater/'+fish.id+'.avif']||'assets/moonwater/'+fish.id+'.avif';")
+# Compare with the previous build so a republish sends only what changed and removes what is gone.
+import hashlib
+state = out.parent/(out.name+'-published.json')
+prev = json.loads(state.read_text()) if state.exists() else {}
 for page in ('fishing.html', 'fish-journal.html'):
     patch(page, '<script src="fish-catalog.js"></script>', '<script src="pack-fish.js"></script><script src="fish-catalog.js"></script>')
 
@@ -54,6 +59,10 @@ body = re.sub(r'</body>|</html>', '', body)
 (out/'wings-of-wonder.html').write_text('<title>Wings of Wonder</title>\n<meta name="theme-color" content="#172d36">\n<link rel="stylesheet" href="stage.css">\n' + body)
 
 names = sorted(str(p.relative_to(files)) for p in files.rglob('*') if p.is_file())
+now = {n: hashlib.md5((files/n).read_bytes()).hexdigest() for n in names}
+delta = {n: n for n in names if prev.get(n) != now[n]}; delta.update({n: None for n in prev if n not in now})
+(out/'files-delta.json').write_text(json.dumps(delta)); (out/'files-now.json').write_text(json.dumps(now))
+print(f'delta vs last published build: {sum(v is not None for v in delta.values())} to send, {sum(v is None for v in delta.values())} to remove (after publishing, copy files-now.json to {state.name})')
 for i in range(0, len(names), 250):
     (out/f'files-{i//250+1}.json').write_text(json.dumps({n: n for n in names[i:i+250]}))
 total = sum((files/n).stat().st_size for n in names)

@@ -198,7 +198,8 @@ def build_frostlace():  # Amethyst Lace, painted at 500 x 750
     P = arr(to_frame(Image.open(SRC/'fitting-control/b.png')))
     return save_painted('frostlace', P, *painted_layer(P, B))
 
-PAINTED = ['emberveil', 'dawnpetal', 'nightbloom', 'sunweave', 'tidal', 'willow', 'stardust', 'pearl', 'sapphire']
+PAINTED = ['emberveil', 'dawnpetal', 'nightbloom', 'sunweave', 'tidal', 'willow', 'stardust', 'pearl', 'sapphire',
+           'aurora', 'rosethorn', 'seafoam', 'ravenwing', 'sunflower', 'frostqueen', 'autumn', 'starlit', 'coral', 'jade']
 def build_painted(name):  # repainted on the base body at 1024 x 1536
     P = arr(Image.open(SRC/'fitting-control/painted'/(name+'.png')))
     return save_painted(name, P, *painted_layer(P, arr(body_hi)))
@@ -247,6 +248,49 @@ def build_leaflight():
     c[..., 3] *= np.clip((190-rows)/14, 0, 1)             # fade out where her arm hides the braid
     card = img(c).crop((166, 40, 308, 221)).resize((154, 196), Image.Resampling.LANCZOS)
     save('fit-icon-hair-11', card)
+
+# ---------- hairstyles painted on the bald base body (1024 x 1536) ----------
+# number -> True when the hair hangs down her back (that part is drawn behind body and clothes)
+PAINTED_HAIR = {12: True, 13: True, 14: False, 15: False, 16: False, 17: False, 18: False, 19: True, 20: True, 21: False}
+def build_painted_hair(i):
+    P = arr(Image.open(SRC/'fitting-control/hair'/f'hair-{i}.webp')); Bh = arr(body_hi); H, W = P.shape[:2]
+    yy, xx = np.mgrid[0:H, 0:W]; solid = Bh[..., 3] > 128
+    head = solid & (yy < 262) & (xx > 380) & (xx < 640)
+    d = diff(P, Bh)
+    same_skin = skin_like(P) & skin_like(Bh) & (d < 45)        # her skin, merely re-shaded
+    allow = (yy < 1150) & ~same_skin
+    core = keep_big(dilate(erode((d > 26) & allow, 1), 1), 60)
+    faint = (d > 6) & ((d > 12) | ~(skin_like(P) & skin_like(Bh)))
+    grown = core.copy()
+    for _ in range(12): grown |= dilate(grown, 1) & faint & allow
+    m = core | (dilate(erode(grown, 2), 2) & grown)
+    m = flood(m, [(x, y) for y, x in zip(*np.nonzero(m & dilate(head, 10)))])   # only hair that hangs from the head
+    m = fill_holes(m, 200) & (P[..., 3] > 100)
+    # On her skin, hairline-thin specks are re-drawn outlines, not hair.
+    on = m & solid; thick = dilate(erode(on, 2), 2) & on; hairbody = (m & ~solid) | thick
+    for c in components(on & ~thick):
+        if c.sum() < 500 and not (dilate(c, 1) & hairbody).any(): m &= ~c
+    # Inner face from the painting through a soft ellipse, so a fringe is never cut.
+    face = np.clip((1-np.sqrt(((xx-508)/76.0)**2+((yy-186)/80.0)**2))*5.5, 0, 1)*head
+    back = np.zeros_like(m)
+    if PAINTED_HAIR[i]:
+        # Below the jaw, hair outside her silhouette hangs behind her: it goes behind body and clothes.
+        back = m & (yy > 266) & ~solid
+        back = (back | (dilate(back, 3) & m & (yy > 266))) & ~head
+        # The back layer also carries a strip above the split, hidden under the front layer,
+        # so no hairline seam shows where the two meet.
+        bo = P.copy(); bo[..., 3] = np.where(back | (dilate(back, 8) & m & ~head), 255, 0)
+        save(f'fit-control-hair-{i}-back', to_frame(img(bo)), 70)
+    out = P.copy(); out[..., 3] = np.maximum(np.where(m & ~back, 255, 0), face*255*(P[..., 3] > 100))
+    layer = save(f'fit-control-hair-{i}', to_frame(img(out)), 72)
+    # Wardrobe card: her head with the hairstyle.
+    hb = B.copy(); hb[168:, :, 3] = 0
+    card = img(np.zeros_like(B))
+    if PAINTED_HAIR[i]: card.alpha_composite(Image.open(OUT/f'fit-control-hair-{i}-back.webp').convert('RGBA'))
+    card.alpha_composite(img(hb)); card.alpha_composite(layer)
+    c = arr(card); rows = np.arange(800)[:, None]; c[..., 3] *= np.clip((262-rows)/20, 0, 1)
+    card = img(c).crop((145, 22, 337, 266)).resize((154, 196), Image.Resampling.LANCZOS)
+    save(f'fit-icon-hair-{i}', card)
 
 LEAF['grip'] = 'M746 639 Q767 633 784 644 Q798 638 813 647 Q839 655 837 680 Q840 701 820 718 Q800 733 781 721 Q761 712 752 692 Q741 675 746 639 Z'
 def build_leaf_bow():
@@ -330,13 +374,18 @@ if __name__ == '__main__':
         if want(name): build_painted(name)
     for i in (3, 9, 10):
         if want('hair'): build_hair(i)
+    for i in PAINTED_HAIR:
+        if want('newhair') or want(str(i)): build_painted_hair(i)
     names = ['leaflight', 'grove', 'frostlace'] + PAINTED
-    sheet = Image.new('RGB', (500*6, 800*2), '#dfe9ef')
+    hair_ids = [3, 9, 10, 11] + list(PAINTED_HAIR)
+    sheet = Image.new('RGB', (500*6, 800*((len(names)+5)//6)), '#dfe9ef')
     for i, name in enumerate(names):
         er = np.array(Image.open(OUT/f'fit-control-{name}-erase.webp').convert('RGBA'))[..., 3] > 127
         bb = B.copy(); bb[er, 3] = 0
-        look = img(bb); look.alpha_composite(Image.open(OUT/f'fit-control-{name}.webp').convert('RGBA'))
-        look.alpha_composite(Image.open(OUT/f'fit-control-hair-{(3, 9, 10, 11)[i % 4]}.webp').convert('RGBA'))
+        h = hair_ids[i % len(hair_ids)]; look = Image.new('RGBA', (500, 800))
+        if (OUT/f'fit-control-hair-{h}-back.webp').exists(): look.alpha_composite(Image.open(OUT/f'fit-control-hair-{h}-back.webp').convert('RGBA'))
+        look.alpha_composite(img(bb)); look.alpha_composite(Image.open(OUT/f'fit-control-{name}.webp').convert('RGBA'))
+        look.alpha_composite(Image.open(OUT/f'fit-control-hair-{h}.webp').convert('RGBA'))
         sheet.paste(look, ((i % 6)*500, (i//6)*800), look)
     sheet.save('/tmp/fitting-v2.png')
     print('Built pixel-accurate layers; review /tmp/fitting-v2.png')

@@ -58,6 +58,23 @@ render and LOOK at hand, neck, feet (`composeWardrobeCanvas` in the preview) bef
   (about 1.3 MB spare).
 - Sheets: `docs/wardrobe-review/fix5-*.png`.
 
+## Second fashion collection (fifth pass, 2026-11-18)
+10 dresses, 10 hairstyles, 10 wings, 10 bows, all original designs painted by the image model, in Fashion:
+- Dresses `aurora rosethorn seafoam ravenwing sunflower frostqueen autumn starlit coral jade` (1200 gold): painted on
+  base-v2.png (text prompt only), sources in `fitting-control/painted/`, same pipeline as the first twelve.
+- Hair 12-21 (400 gold): painted on the bald base (`fitting-control/hair/hair-<n>.webp`), extracted by
+  `build_painted_hair()`; 12, 13, 19, 20 hang down the back and have a `-back` layer (`wardrobeBackHairs`). Cards:
+  `fit-icon-hair-<n>`.
+- Wings `fashion-wing-11..20` and bows `weapon-style-14..23`: `scripts/build-fashion-extras.py` (sources in
+  `art-source/wings`, `art-source/bows`). Weapon numbers 12 and 13 are reserved (legacy / original bow in the
+  compositor), so `styleSets.Weapons.names[11..12]` are null and cannot be bought.
+- Every new dress and hairstyle also has mounted art (`art-source/mounted/`). Wing-bonus regex in `gear-data.js`
+  accepts wings 1-20. Saves stay version 1 (ids are just new strings/numbers in existing fields).
+- `scripts/hosting-art` now has AVIF copies of `familiar-*` and `party-*` (build-time only), which freed about 5 MB:
+  hosted bundle 29.6 MB against the 32 MiB limit.
+- Wings are drawn about 1.5x larger from the shoulder blades; portraits with wings are wider and taller
+  (`wardrobeWingPad`, `wardrobeWingTop`), `.winged-portrait` and `drawReina` compensate.
+
 ## In-chat playable preview (user requirement)
 The user wants to play the game inside the chat, and wants SHORT replies in Russian, no fluff.
 - Artifact: https://claude.ai/artifact/L9owNJPMaZjAsTmU3tDGs6 (private). After game changes, rebuild and republish:
@@ -65,7 +82,9 @@ The user wants to play the game inside the chat, and wants SHORT replies in Russ
   `<scratchpad>/chat/wings-of-wonder.html` with `url` set to that link, `root` = `<scratchpad>/chat/files`, and only the
   CHANGED files in `files` (unchanged ones are kept). A first full upload needs two publishes (files-1.json, files-2.json).
 - Limits that shaped it: 511 files per artifact, no .glb, no external iframes. The builder drops unused art and packs
-  gear/familiar/guardian/fish icons into `pack-*.js` data URIs (438 files, about 43 MB).
+  gear/familiar/guardian/fish/wardrobe-card/bow icons into `pack-*.js` data URIs. The builder only sees files tracked by
+  git (commit new art first) and writes `files-delta.json` (what to send, `null` = remove) against
+  `<scratchpad>/chat-published.json`; copy `files-now.json` over that file after each publish.
 
 Still to do:
 - Mounted hair: small redraw specks can remain along the jaw at high zoom (hairs 2, 10); hair 8 has a dark spot in

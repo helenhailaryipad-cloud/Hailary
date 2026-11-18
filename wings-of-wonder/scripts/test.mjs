@@ -19,8 +19,8 @@ vm.runInContext(fs.readFileSync('src/minigame-engine.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/wardrobe-engine.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/app.js','utf8'),context);
 vm.runInContext(`
-S=defaults();S.gold=15000;openScreen('fashion');
-if(reinaDresses.length!==10)throw Error('Clothing catalog');
+S=defaults();S.gold=30000;openScreen('fashion');
+if(reinaDresses.length!==20)throw Error('Clothing catalog');
 for(const dress of reinaDresses){
   clothingPreview=dress.id;
   if(!reinaLookPath(false,2,dress.id).includes('#registered-'))throw Error('Old body renderer remains');
@@ -36,7 +36,12 @@ wearOutfit('reina','pearl',false);
 for(const category of ['Hair','Weapons']){
   changeFashionTab(category);
   const set=styleSets[category];
-  if(set.names.length!==11)throw Error('Missing fashion styles');
+  if(set.names.filter(Boolean).length!==21)throw Error('Missing fashion styles');
+  if(category==='Weapons'){
+    // 12 and 13 are the compositor's legacy and original bows, never purchasable styles.
+    for(const reserved of [12,13]){stylePick=reserved;const gold=S.gold;wearStyle();if(S.gold!==gold||S.atelier?.weapon===reserved)throw Error('Reserved bow number sold');}
+    stylePick=14;if(!styleFittingRoom(set).includes('Aurora Arc'))throw Error('New bow preview');
+  }
   for(let n=1;n<=10;n++){
     stylePick=n;
     const before=S.gold;
@@ -301,7 +306,7 @@ console.log('PASS: 100 collectable species, legacy catches, exact duplicate stat
 
 vm.runInContext(`
 S=defaults();S.gold=50000;openScreen('fashion');
-if(fittingDresses.length!==12||fittingHairs.length!==11)throw Error('Registered wardrobe incomplete');
+if(fittingDresses.length!==22||fittingHairs.length!==21)throw Error('Registered wardrobe incomplete');
 for(const {id,outfit} of reinaDresses){
  changeFashionTab('Dresses');clothingPreview=id;
  if(!registeredFashionRoom().includes(outfit==='Moonlit Ballerina'?'Amethyst Lace':outfit))throw Error('Missing garment choice');
@@ -371,7 +376,13 @@ vm.runInContext(`{
 }`,context);
 for(const id of vm.runInContext('fittingDresses.map(x=>x[0])',context))assert(fs.existsSync('src/assets/generated/fit-control-mount-'+id+'.webp'),'Missing mounted dress '+id);
 for(const id of vm.runInContext('fittingHairs.map(x=>x[0])',context))assert(fs.existsSync('src/assets/generated/fit-control-mounthair-'+id+'.webp'),'Missing mounted hair '+id);
-console.log('PASS: any dress and hairstyle can ride with its own mounted layers; release-specific wardrobe URLs.');
+for(const id of vm.runInContext('fittingDresses.map(x=>x[0])',context))for(const part of ['','-erase'])assert(fs.existsSync('src/assets/generated/fit-control-'+id+part+'.webp'),'Missing dress layer '+id+part);
+for(const id of vm.runInContext('fittingHairs.map(x=>x[0])',context))assert(fs.existsSync('src/assets/generated/fit-control-hair-'+id+'.webp'),'Missing hair layer '+id);
+for(const id of vm.runInContext('[...wardrobeBackHairs]',context))assert(fs.existsSync('src/assets/generated/fit-control-hair-'+id+'-back.webp'),'Missing back hair '+id);
+for(const wing of vm.runInContext('fashionWings.map(x=>x.id)',context))assert(fs.existsSync('src/assets/generated/'+wing+'.webp'),'Missing wings '+wing);
+for(const n of vm.runInContext("styleSets.Weapons.names.map((name,i)=>name&&i+1!==11?i+1:0).filter(Boolean)",context))assert(fs.existsSync('src/assets/generated/weapon-style-'+n+'.webp'),'Missing bow '+n);
+assert.equal(vm.runInContext("WonderGear.stats({...defaults(),reinaFashion:{wingSkin:'fashion-wing-20'}}).shieldHealth-WonderGear.stats(defaults()).shieldHealth",context),vm.runInContext('WonderGear.fashionTraits.wings',context),'New wings give no bonus');
+console.log('PASS: any dress and hairstyle can ride with its own mounted layers; release-specific wardrobe URLs; second collection art present.');
 
 await vm.runInContext(`(async()=>{
  S=defaults();screen='fashion';changeFashionTab('Wings');

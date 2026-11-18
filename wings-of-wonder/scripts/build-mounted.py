@@ -21,9 +21,11 @@ spec = importlib.util.spec_from_file_location('fit', ROOT/'scripts/build-fitting
 arr, img, dilate, erode, flood, components, keep_big, fill_holes, diff, skin_like, suit_mask = (fit.arr, fit.img, fit.dilate, fit.erode, fit.flood, fit.components, fit.keep_big, fit.fill_holes, fit.diff, fit.skin_like, fit.suit_mask)
 SRC = ROOT/'scripts/art-source/mounted'; OUT = ROOT/'src/assets/generated'; HOST = ROOT/'scripts/hosting-art'
 TOP, BOTTOM = 44, 980
-DRESSES = ['leaflight', 'grove', 'frostlace', 'emberveil', 'dawnpetal', 'nightbloom', 'sunweave', 'tidal', 'willow', 'stardust', 'pearl', 'sapphire']
-HAIRS = list(range(1, 12))
-WARM_HAIR = {1, 2, 4, 6}      # chestnut, copper, gold: hair tones close to skin outlines
+DRESSES = ['leaflight', 'grove', 'frostlace', 'emberveil', 'dawnpetal', 'nightbloom', 'sunweave', 'tidal', 'willow', 'stardust', 'pearl', 'sapphire',
+           'aurora', 'rosethorn', 'seafoam', 'ravenwing', 'sunflower', 'frostqueen', 'autumn', 'starlit', 'coral', 'jade']
+WIDE = set(DRESSES[12:])      # second collection: capes and trains may trail over the cat
+HAIRS = list(range(1, 22))
+WARM_HAIR = {1, 2, 4, 6, 13, 15, 19}      # chestnut, copper, gold: hair tones close to skin outlines
 
 def box(x0, y0, x1, y1):
     m = np.zeros((1024, 1024), bool); m[y0:y1, x0:x1] = True; return m
@@ -36,7 +38,9 @@ solid = B[..., 3] > 128
 # Her head: everything opaque above the collar line, left of the bow.
 HEAD = solid & box(405, 50, 562, 168)
 RIDER = box(150, 150, 760, 830)                   # where clothes may appear
+RIDER_WIDE = box(10, 150, 760, 880)
 HAIRZONE = box(290, 0, 650, 520)
+HAIRZONE_LONG = box(240, 0, 650, 680)             # hair down to the saddle
 SUIT = keep_big(suit_mask(B) & box(410, 190, 580, 440), 400)
 
 def region(P, allow, core_thr, noise=150):
@@ -49,7 +53,8 @@ def region(P, allow, core_thr, noise=150):
 
 def build_dress(name):
     P = arr(Image.open(SRC/f'dress-{name}.webp'))
-    m, d = region(P, RIDER & ~HEAD, 22)
+    zone = RIDER_WIDE if name in WIDE else RIDER
+    m, d = region(P, zone & ~HEAD, 22)
     m |= dilate(SUIT, 6) & RIDER & ~HEAD            # the bodysuit never shows
     m = fill_holes(m, 200) & (P[..., 3] > 100)
     out = P.copy(); out[..., 3] = np.where(m, 255, 0)
@@ -64,7 +69,7 @@ def build_hair(i):
     P = arr(Image.open(SRC/f'hair-{i}.webp'))
     d0 = diff(P, B)
     same_skin = skin_like(P) & skin_like(B) & (d0 < 45)     # her skin, merely re-shaded
-    m, d = region(P, HAIRZONE & ~same_skin, 26, 40)
+    m, d = region(P, (HAIRZONE_LONG if i >= 12 else HAIRZONE) & ~same_skin, 26, 40)
     # Only hair that hangs from the head (plus earrings on the ears), never stray repaint noise.
     m = flood(m, [(x, y) for y, x in zip(*np.nonzero(m & dilate(HEAD, 8)))])
     m = fill_holes(m, 120) & (P[..., 3] > 100)
@@ -88,9 +93,9 @@ if __name__ == '__main__':
         if want(n): build_dress(n)
     for i in HAIRS:
         if want(i): build_hair(i)
-    sheet = Image.new('RGB', (1024*4, 936*3), '#dfe9ef')
+    sheet = Image.new('RGB', (1024*4, 936*((len(DRESSES)+3)//4)), '#dfe9ef')
     for k, n in enumerate(DRESSES):
         look = base.copy(); look.alpha_composite(Image.open(OUT/f'fit-control-mount-{n}.webp').convert('RGBA'))
-        look.alpha_composite(Image.open(OUT/f'fit-control-mounthair-{HAIRS[k % 11]}.webp').convert('RGBA'))
+        look.alpha_composite(Image.open(OUT/f'fit-control-mounthair-{HAIRS[(k*5+11) % len(HAIRS)]}.webp').convert('RGBA'))
         sheet.paste(look, ((k % 4)*1024, (k//4)*936), look)
     sheet.save('/tmp/mounted.png'); print('Built mounted layers; review /tmp/mounted.png')
