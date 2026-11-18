@@ -168,7 +168,7 @@ function stats(save){const b=bonuses(save);
  if((look&1)||save.atelier?.hair)b.health=(b.health||0)+fashionTraits.hair;
  if(look&2)b.defense=(b.defense||0)+fashionTraits.clothing;
  if((look&4)||save.atelier?.weapon)b.attack=(b.attack||0)+fashionTraits.weapon;
- if(/^(?:w[0-3]|fashion-wing-(?:[1-9]|10))$/.test(save.reinaFashion?.wingSkin))b.shieldHealth=(b.shieldHealth||0)+fashionTraits.wings;
+ if(/^(?:w[0-3]|fashion-wing-(?:[1-9]|1\d|20))$/.test(save.reinaFashion?.wingSkin))b.shieldHealth=(b.shieldHealth||0)+fashionTraits.wings;
  const bowBonus=['roseguard','starfall','lilyveil','emberleaf'].reduce((total,id)=>{
    const rank=save.fashionBows?.[id];
    return Number.isSafeInteger(rank)&&rank>0 ? total+rank*20 : total;
