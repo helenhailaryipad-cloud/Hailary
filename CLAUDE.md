@@ -34,7 +34,9 @@ Done this way (third pass): ALL 12 dresses. `grove`, `frostlace` (b.png) and `le
 of the body; the other nine were repainted with the image model and their sources are in
 `scripts/art-source/fitting-control/painted/<id>.png`. Wardrobe card icons (`fit-icon-<id>`) are regenerated from
 the new layers. The polygon dress code, neck-opening paths and the pasted hand layer are removed from `app.js`.
-Hair 11 comes from the Leaflight painting; hairs 3, 9, 10 have ear/temple gaps filled.
+Hair 11 comes from the Leaflight painting and is split at the ear: below it the braid is `hairBack` (behind body,
+capes, sleeves). Hairs 3, 9, 10 have ear/temple gaps filled. A test build is published from branch `gh-pages`
+(contents of `wings-of-wonder/src`) at https://helenhailaryipad-cloud.github.io/Hailary/ - update it after changes.
 Sheets: `docs/wardrobe-review/fix1-*.png`, `fix2-three-approaches.png`, `fix3-*.png`.
 
 To add or redo a dress: put a 1024x1536 transparent painting of base-v2.png wearing it in `painted/<id>.png`,

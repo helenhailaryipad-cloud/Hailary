@@ -505,6 +505,8 @@ function ensureWardrobeCatalog(){
  for(const [id] of fittingHairs){
   const asset='fit-control-hair-'+id;
   // Per-pixel hair layers sit wholly in front; gaps beside the ear are filled in the art.
+  // Lavender Braid falls behind the shoulder: below the ear it sits behind the body, capes and sleeves.
+  if(id===11){WonderWardrobe.register({id:'hair:11',kind:'hair',layers:[{slot:'hairBack',asset,clip:'M0 133 H215 V800 H0 Z'},{slot:'hairFront',asset,exclude:['M0 135 H215 V800 H0 Z']}]});continue;}
   if(wardrobePixelHairs.has(id)){WonderWardrobe.register({id:'hair:'+id,kind:'hair',layers:[{slot:'hairFront',asset:'fit-control-hair-'+id}]});continue;}
   const layers=[{slot:'hairBack',asset,exclude:[hairFront]},{slot:'hairFront',asset,clip:hairFront}];
   WonderWardrobe.register({id:'hair:'+id,kind:'hair',layers});
