@@ -1,0 +1,7 @@
+Premium game polish, 12 November 2026
+
+Generated with the built-in image generator. Production asset: src/assets/generated/court-divider.webp. The transparent output was cropped to its alpha bounds, resized and encoded as WebP for the existing Worker asset budget. Original generation retained separately.
+
+Prompt: Create one production fantasy RPG UI ornament, a horizontal gold filigree divider for the premium mobile game Wings of Wonder. A tiny radiant emerald jewel at the exact center, graceful upward gold feather flourishes extending symmetrically left and right, fine warm champagne gold leaf and ivory details. Luxurious hand-painted cartoon fantasy game art, crisp polished bevels, tasteful soft golden glow, elegant and readable at small size. Wide horizontal composition occupying the central horizontal band, isolated on a genuinely transparent background. No text, letters, numbers, mockup, panels, icons or characters. A single usable decorative horizontal divider asset with transparent margins. It sits beneath English screen titles across an emerald-and-gold RPG interface.
+
+Animation and physics: six shooting frames use one reference scale and a fixed foot anchor. TD idle shares the shooting atlas to prevent design/proportion changes. Stored shot time drives the sequence, and a snapshot projectile settles damage only upon arrival. Merge runs at a bounded fixed 120 Hz with six collision solver passes, time-scaled friction and clamped boundaries. Rendering is decorative and does not alter rewards. Reduced motion uses static poses.

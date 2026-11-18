@@ -1,0 +1,7 @@
+node_modules/
+outputs/
+.wrangler/
+.env*
+.dev.vars*
+
+src/intro3d.bundle.js

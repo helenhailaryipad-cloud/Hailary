@@ -1,0 +1,3 @@
+Show Wings of Wonder as a playable in-chat project preview whenever presenting the game. Do not offer standalone URLs or downloadable builds unless the user asks for them.
+
+For each update, package the current checkout with node scripts/build.mjs --hosted and run node scripts/test.mjs. Publish that archive to this existing Site. Check the terminal publication status before presenting the in-chat Site card. If publication fails, report the blocker and do not present a file or the old card as an updated preview. The release fingerprint is available in /release.json and the page's wonder-release metadata.
