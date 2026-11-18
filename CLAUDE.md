@@ -58,6 +58,15 @@ render and LOOK at hand, neck, feet (`composeWardrobeCanvas` in the preview) bef
   (about 1.3 MB spare).
 - Sheets: `docs/wardrobe-review/fix5-*.png`.
 
+## In-chat playable preview (user requirement)
+The user wants to play the game inside the chat, and wants SHORT replies in Russian, no fluff.
+- Artifact: https://claude.ai/artifact/L9owNJPMaZjAsTmU3tDGs6 (private). After game changes, rebuild and republish:
+  `python3 wings-of-wonder/scripts/build-chat-preview.py <scratchpad>/chat`, then Artifact publish of
+  `<scratchpad>/chat/wings-of-wonder.html` with `url` set to that link, `root` = `<scratchpad>/chat/files`, and only the
+  CHANGED files in `files` (unchanged ones are kept). A first full upload needs two publishes (files-1.json, files-2.json).
+- Limits that shaped it: 511 files per artifact, no .glb, no external iframes. The builder drops unused art and packs
+  gear/familiar/guardian/fish icons into `pack-*.js` data URIs (438 files, about 43 MB).
+
 Still to do:
 - Mounted hair: small redraw specks can remain along the jaw at high zoom (hairs 2, 10); hair 8 has a dark spot in
   the left tail that is in the painting itself.
