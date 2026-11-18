@@ -19,19 +19,19 @@ for(let round=0;round<40;round++)for(let stage=0;stage<P.stages.length;stage++){
  assert.equal(Object.keys(count).length,kinds);assert.ok(Object.values(count).every(n=>n%2===0),'ingredients come in pairs');
  assert.ok(P.solvable(b),'dealt board can be cleared');
 }
-// A full run: taps select, match, advance through five stages and end exactly once.
+// A full run: taps select, match, advance through six stages and end exactly once.
 const g=P.create(rng);assert.equal(P.tap(g,0),null,'locked during the countdown');g.locked=false;
-let taps=0;while(!g.ended&&taps++<400){
+let taps=0;while(!g.ended&&taps++<600){
  let move=P.hint(g.board);if(!move){assert.ok(P.reshuffle(g.board,rng));move=P.hint(g.board)}
  assert.deepEqual({...P.tap(g,move[0])},{select:move[0]});
  const r=P.tap(g,move[1]);assert.ok(r.line.length>=2&&r.line.length<=4,'at most two turns');
  if(r.cleared)P.advance(g,rng);
 }
-assert.ok(g.ended&&!g.running&&g.stage===4);assert.equal(P.tap(g,0),null,'no taps after the end');
+assert.ok(g.ended&&!g.running&&g.stage===5);assert.equal(P.tap(g,0),null,'no taps after the end');
 // Selecting the same tile again clears the selection; a tile that cannot join becomes the new selection.
 const h=P.create(rng);h.locked=false;h.board={cols:2,rows:2,cells:[1,2,2,1]};
 assert.equal(P.tap(h,0).select,0);assert.equal(P.tap(h,0).select,-1);assert.equal(P.tap(h,0).select,0);assert.equal(P.tap(h,1).select,1);
-assert.deepEqual({...P.reward(59.9)},{gold:500,xp:30});assert.deepEqual({...P.reward(60.1)},{gold:300,xp:30});assert.equal(P.clock(75.9),'1:15');
+assert.deepEqual({...P.reward(89.9)},{gold:500,xp:30});assert.deepEqual({...P.reward(90.1)},{gold:300,xp:30});assert.equal(P.clock(75.9),'1:15');
 // Reshuffle keeps the same tiles in the same occupied slots.
 const stuck={cols:2,rows:2,cells:[1,2,2,1]};stuck.cells=[1,-1,-1,1];assert.ok(P.hint(stuck));
 // Two rewarded runs per UTC day, counted on completion; the count resets with the date.
@@ -40,6 +40,6 @@ assert.equal(P.runsLeft(save,noon),2);P.useRun(save,noon);assert.equal(P.runsLef
 assert.equal(P.runsLeft(save,next),2);P.useRun(save,next);assert.deepEqual({...save.pairsDaily},{day:'2026-11-19',runs:1});
 // Rival times are fixed within a day, labelled AI, and the player is ranked among them by time.
 const names=['Nyra','Kael','Pip'],r1=P.rivals(names,noon),r2=P.rivals(names,noon+3600000);
-assert.deepEqual(r1.map(r=>r.seconds),r2.map(r=>r.seconds));assert.ok(r1.every(r=>r.ai&&r.seconds>=41&&r.seconds<99));
+assert.deepEqual(r1.map(r=>r.seconds),r2.map(r=>r.seconds));assert.ok(r1.every(r=>r.ai&&r.seconds>=65&&r.seconds<140));
 const table=P.ranking(names,1,noon);assert.equal(table.length,4);assert.ok(table[0].you);assert.equal(P.ranking(names,0,noon).length,3);
-console.log('PASS Pairs: path rules, solvable deals, full five-stage run, selection, rewards, daily runs, ranking');
+console.log('PASS Pairs: path rules, solvable deals, full six-stage run, selection, rewards, daily runs, ranking');

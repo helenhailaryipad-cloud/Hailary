@@ -77,9 +77,9 @@ render and LOOK at hand, neck, feet (`composeWardrobeCanvas` in the preview) bef
 
 ## Harvest Pairs mini-game (2026-11-18)
 Home screen icon "Harvest Pairs" (right side, next to Fishing) or Mini Games -> Harvest Pairs (`src/pairs.js`, screen id `pairs`): tap two identical ingredients that a line with at most
-two turns can join; the line is drawn before the pair is collected. Five boards (2x2, 4x3, 4x4, 6x5, 6x6), one clock
-across all of them, paused during countdowns and while the page is hidden. Reward 300 gold + 30 XP, +200 gold under a
-minute, settled once; best time in optional save field `S.pairsBest` (seconds). Deals are always clearable; a stuck
+two turns can join; the line is drawn before the pair is collected. Six boards (2x2, 4x3, 4x4, 6x5, 6x6, 6x8 with all eight ingredients), one clock
+across all of them, paused during countdowns and while the page is hidden. Reward 300 gold + 30 XP, +200 gold under 1:30
+(`Pairs.bonusSeconds`), settled once; best time in optional save field `S.pairsBest` (seconds). Deals are always clearable; a stuck
 board reshuffles. Second pass: a lobby (`showPairs`: host, rules, runs, Rankings) opens the board (`openPairsBoard`);
 rewards only for 2 completed runs per UTC day (`S.pairsDaily {day, runs}`), further runs are practice; the Sprout mascot
 gives a hint for +3 s; taps act on `pointerdown` for every finger (two tiles touched at once pair up) and never wait for animations (input locks only during the gates); the ranking modal lists the six AI adventurers with simulated daily times, labelled AI, plus
