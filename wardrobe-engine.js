@@ -32,13 +32,15 @@
    ctx.clip(outer,'evenodd');
   }else ctx.clip(p);
  }
- async function render({dress,hair,weapon,wings,scale=2,load,createCanvas,body,bodyLayers=[]}){
+ async function render({dress,hair,weapon,wings,scale=2,load,createCanvas,body,bodyLayers=[],pad=0}){
   if(!Number.isFinite(scale)||scale<1||scale>4)throw Error('Invalid wardrobe scale');
   const selected=[dress,hair,weapon,wings].filter(Boolean).map(id=>{const it=items.get(id);if(!it)throw Error('Unknown wardrobe item '+id);return it;});
   const layers=[{slot:'body',asset:body,rect:frame.body},...selected.flatMap(it=>it.layers),...bodyLayers];
   const images=new Map(await Promise.all([...new Set([...layers.map(it=>it.asset),...selected.map(it=>it.bodyErase).filter(Boolean)])].map(async id=>[id,await load(id)])));
   // Nothing is returned until the complete dressed scene is decoded.
-  const canvas=createCanvas(500*scale,800*scale),ctx=canvas.getContext('2d');ctx.scale(scale,scale);
+  // `pad` adds transparent room on both sides (frame units) so large wings are not clipped;
+  // the 500 x 800 figure stays centred and the same size.
+  const canvas=createCanvas((500+2*pad)*scale,800*scale),ctx=canvas.getContext('2d');ctx.scale(scale,scale);ctx.translate(pad,0);
   ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
   const coverage=selected.filter(it=>it.kind==='dress').flatMap(it=>it.bodyCoverage||[]);
   // Per-pixel masks of body parts the outfit hides (a calf wider than its boot, bare toes).
@@ -60,7 +62,7 @@
    if(layer.clip)clip(ctx,layer.clip);
    if(layer.transform){const t=layer.transform;ctx.translate(t.x,t.y);ctx.rotate(t.rotation||0);ctx.scale(t.flipX?-1:1,1);}
    let rect=layer.rect||[0,0,500,800];
-   if(layer.fit){const [x,y,w,h]=layer.fit;const k=Math.min(w/image.width,h/image.height);rect=[x+(w-image.width*k)/2,y+(h-image.height*k)/2,image.width*k,image.height*k];}
+   if(layer.fit){const [x,y,w,h]=layer.fit;const k=Math.min(w/image.width,h/image.height);rect=[x+(w-image.width*k)/2,Math.max(layer.minTop??-Infinity,y+(h-image.height*k)/2),image.width*k,image.height*k];}
    if(layer.handle){const h=layer.handle,k=h.height/image.height;rect=[-image.width*k*h.x,-image.height*k*h.y,image.width*k,image.height*k];}
    if(!layer.strokeOnly)ctx.drawImage(image,...rect);
    if(layer.stroke){ctx.strokeStyle=layer.stroke.color;ctx.lineWidth=layer.stroke.width;ctx.stroke(new Path2D(layer.stroke.path));}
