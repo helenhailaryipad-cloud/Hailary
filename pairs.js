@@ -117,7 +117,7 @@ function showPairs() {
     <h1>Harvest Pairs</h1>
     <img class="pairs-lobby-host" src="${reinaLookPath(false)}" alt="Reina">
     <div class="pairs-rules"><h2>Rules</h2><ol>
-      <li>Tap two matching ingredients to collect them.</li>
+      <li>Tap two matching ingredients to collect them, one after the other or both at once with two fingers.</li>
       <li>A pair joins only along a line with no more than two turns.</li>
       <li>Clear five baskets, each larger than the last, as fast as you can.</li>
       <li>Stuck? Tap Sprout for a hint. Each hint adds ${Pairs.hintPenalty} seconds.</li>
@@ -197,7 +197,8 @@ function startPairs() {
       if (!Pairs.hint(g.board)) { Pairs.reshuffle(g.board); flash('Shuffled'); draw(); }
     }, 240);
   }
-  board.onpointerdown = event => { const tile = event.target.closest('.pairs-tile'); if (tile && event.isPrimary !== false) { event.preventDefault(); tapTile(tile); } };
+  // Every finger counts: two tiles touched at the same moment with two fingers pair up at once.
+  board.onpointerdown = event => { const tile = event.target.closest('.pairs-tile'); if (tile) { event.preventDefault(); tapTile(tile); } };
   board.onclick = event => { const tile = event.target.closest('.pairs-tile'); if (tile && event.detail === 0) tapTile(tile); };   // keyboard
   const hint = $('#pairsHint'), askHint = () => {
     if (game !== g || g.locked || g.ended) return;
