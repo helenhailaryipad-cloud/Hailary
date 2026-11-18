@@ -534,11 +534,11 @@ function wardrobeLeafPath(slot){
  return {path:leaflightSlots[slot],matrix:{a:500/1024,b:0,c:0,d:750/1536,e:0,f:40}};
 }
 // Large wings reach past the 500-wide figure frame; portraits with wings are this much wider on each side.
-const wardrobeWingPad=72;
+const wardrobeWingPad=140;
 async function composeWardrobeCanvas(dress,hair,weapon=0,wings=''){
  ensureWardrobeCatalog();
  const body='fit-control-body';
- if(wings&&!WonderWardrobe.get('wings:'+wings))WonderWardrobe.register({id:'wings:'+wings,kind:'wings',layers:[{slot:'wingsBack',asset:wings,fit:[-70,-30,590,480],minTop:2}]});
+ if(wings&&!WonderWardrobe.get('wings:'+wings))WonderWardrobe.register({id:'wings:'+wings,kind:'wings',layers:[{slot:'wingsBack',asset:wings,fit:[-135,-90,720,600],minTop:2}]});
  return WonderWardrobe.render({dress:'dress:'+fittedDressId(dress),hair:'hair:'+fittedHairId(hair),weapon:weapon?'weapon:'+weapon:null,wings:wings?'wings:'+wings:null,body,pad:wings?wardrobeWingPad:0,
   createCanvas:(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;},load:id=>styleImage(artPath(id))});
 }
