@@ -90,24 +90,59 @@ const Pairs = {
     g.stage++; g.board = this.deal(g.stage, g.picks, rng); g.picked = -1; return true;
   },
   reward(seconds) { return { gold: 300 + (seconds <= 60 ? 200 : 0), xp: 30 }; },
+  // Two rewarded runs per UTC day; more runs are practice for a better time.
+  dailyRuns: 2,
+  hintPenalty: 3,
+  day(now) { return new Date(now === undefined ? Date.now() : now).toISOString().slice(0, 10); },
+  runsLeft(save, now) { const d = save.pairsDaily; return Math.max(0, this.dailyRuns - (d && d.day === this.day(now) ? d.runs : 0)); },
+  useRun(save, now) { const today = this.day(now), d = save.pairsDaily; save.pairsDaily = { day: today, runs: (d && d.day === today ? d.runs : 0) + 1 }; },
+  // Simulated rival times for the ranking board: fixed for one UTC day, between 0:41 and 1:38.
+  rivals(names, now) {
+    const today = this.day(now);
+    return names.map(name => { let h = 2166136261; for (const ch of name + today) h = Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0; return { name, seconds: 41 + h % 58, ai: true }; });
+  },
+  ranking(names, best, now) {
+    const rows = this.rivals(names, now); if (best) rows.push({ name: 'You', seconds: best, you: true });
+    return rows.sort((a, b) => a.seconds - b.seconds);
+  },
   clock(seconds) { const s = Math.floor(seconds); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
 };
 const PAIRS_NAMES = ['Sun Peach', 'Moon Berries', 'Spotcap', 'Lucky Clover', 'Crystal Plum', 'Honey Acorn', 'Lotus Bud', 'Starfruit'];
 
+// Lobby: host, rules, today's rewarded runs and the ranking board.
 function showPairs() {
-  const best = S.pairsBest ? Pairs.clock(S.pairsBest) : '—';
-  $('#main').innerHTML = `<section class="pairs-screen">
-    <div class="pairs-banner"><img class="pairs-cover" src="${artPath('pairs-cover')}" alt=""><img class="pairs-host" src="${reinaLookPath(false)}" alt="Reina"><h1>Harvest Pairs</h1></div>
-    <div class="pairs-bar"><span>Stage <b id="pairsStage">1</b> / ${Pairs.stages.length}</span><span>Time <b id="pairsTime">0:00</b></span></div>
-    <div class="pairs-field"><div class="pairs-board" id="pairsBoard"></div>
-      <div class="pairs-panel" id="pairsPanel"><h2>Harvest Pairs</h2>
-        <p>Tap two matching ingredients to collect them. They must be joined by a line with no more than two turns.</p>
-        <p>Clear all five baskets as fast as you can.</p>
-        <p class="pairs-prize">${uiIcon('gold')}300 gold · ${uiIcon('exp')}30 XP · +200 gold under one minute</p>
-        <small>Best time · ${best}</small>
-        <button class="primary" onclick="startPairs()">Start</button></div></div>
+  const left = Pairs.runsLeft(S), best = S.pairsBest ? Pairs.clock(S.pairsBest) : '—';
+  $('#main').innerHTML = `<section class="pairs-screen pairs-lobby">
+    <img class="pairs-lobby-bg" src="${artPath('pairs-lobby')}" alt="">
+    <h1>Harvest Pairs</h1>
+    <img class="pairs-lobby-host" src="${reinaLookPath(false)}" alt="Reina">
+    <div class="pairs-rules"><h2>Rules</h2><ol>
+      <li>Tap two matching ingredients to collect them.</li>
+      <li>A pair joins only along a line with no more than two turns.</li>
+      <li>Clear five baskets, each larger than the last, as fast as you can.</li>
+      <li>Stuck? Tap Sprout for a hint. Each hint adds ${Pairs.hintPenalty} seconds.</li>
+      <li>Reward: 300 gold and 30 XP, plus 200 gold under one minute, for ${Pairs.dailyRuns} runs each day. Leaving a run does not use one.</li>
+    </ol></div>
+    <p class="pairs-runs">Rewarded runs today: <b>${left} / ${Pairs.dailyRuns}</b> · Best time <b>${best}</b></p>
+    <button class="primary pairs-go" onclick="openPairsBoard()">Go challenge</button>
+    <button class="pairs-rank" onclick="pairsRanking()"><img src="${artPath('hud-rank')}" alt=""><span>Rankings</span></button>
     <button class="pairs-exit" onclick="go('games')" aria-label="Leave Harvest Pairs">‹</button>
   </section>`;
+}
+function pairsRanking() {
+  const rows = Pairs.ranking(ADVENTURERS.map(a => a.name), S.pairsBest);
+  modal(`<p class="eyebrow">HARVEST PAIRS</p><h2>Today's best times</h2><ol class="pairs-ranking">${rows.map(r => `<li${r.you ? ' class="you"' : ''}><span>${esc(r.you ? S.name : r.name)}${r.ai ? ' <small>AI</small>' : ''}</span><b>${Pairs.clock(r.seconds)}</b></li>`).join('')}</ol><p><small>Rivals marked AI are simulated adventurers, not other players. Their times change each day.${S.pairsBest ? '' : ' Finish a run to enter the board.'}</small></p>`);
+}
+function openPairsBoard() {
+  if (game?.running) return;
+  $('#main').innerHTML = `<section class="pairs-screen">
+    <div class="pairs-banner"><img class="pairs-cover" src="${artPath('pairs-cover')}" alt=""><img class="pairs-host" src="${reinaLookPath(false)}" alt="Reina"><h1>Harvest Pairs</h1></div>
+    <div class="pairs-bar"><span>Stage <b id="pairsStage">1</b> / ${Pairs.stages.length}</span><span>Time <b id="pairsTime">0:00</b><i id="pairsPenalty" hidden>+${Pairs.hintPenalty}s</i></span></div>
+    <div class="pairs-field"><div class="pairs-board" id="pairsBoard"></div><div class="pairs-panel" id="pairsPanel" hidden></div></div>
+    <button class="pairs-exit" onclick="go('pairs')" aria-label="Back to the Harvest Pairs lobby">‹</button>
+    <button class="pairs-hint" id="pairsHint" aria-label="Hint from Sprout, adds ${Pairs.hintPenalty} seconds"><img src="${artPath('pairs-sprout')}" alt="" draggable="false"></button>
+  </section>`;
+  startPairs();
 }
 function startPairs() {
   if (game?.running || !$('#pairsBoard')) return;
@@ -123,22 +158,24 @@ function startPairs() {
   }
   function countdown(n) {
     if (game !== g) return;
-    g.locked = true; panel.hidden = false;
-    panel.innerHTML = `<small>${g.stage ? 'Basket cleared' : 'Get ready'}</small><strong class="pairs-count">${n}</strong>`;
+    g.locked = true; panel.hidden = false; panel.className = 'pairs-panel pairs-gate'; panel.parentElement.classList.add('gating');
+    panel.innerHTML = `<strong class="pairs-count">${n}</strong><small>${g.stage ? 'Basket ' + (g.stage + 1) + ' of ' + Pairs.stages.length : 'Starting soon'}</small>`;
     if (n > 1) setTimeout(() => countdown(n - 1), 600);
-    else setTimeout(() => { if (game !== g) return; panel.hidden = true; g.locked = false; last = performance.now(); }, 600);
+    else setTimeout(() => { if (game !== g) return; panel.hidden = true; panel.parentElement.classList.remove('gating'); g.locked = false; last = performance.now(); }, 600);
   }
   function finish() {
     if (g.rewarded) return; g.rewarded = true;
-    const seconds = Math.round(g.time * 10) / 10, prize = Pairs.reward(seconds), record = !S.pairsBest || seconds < S.pairsBest;
+    const seconds = Math.round(g.time * 10) / 10, record = !S.pairsBest || seconds < S.pairsBest, paid = Pairs.runsLeft(S) > 0;
     if (record) S.pairsBest = seconds;
-    const got = gain(prize.gold, 0, prize.xp);
-    panel.hidden = false;
-    panel.innerHTML = `<small>${record ? 'NEW BEST TIME' : 'HARVEST COMPLETE'}</small><h2>${Pairs.clock(seconds)}</h2><p>Best time · ${Pairs.clock(S.pairsBest)}</p><p class="pairs-prize">${uiIcon('gold')}${prize.gold} gold · ${uiIcon('exp')}${got.xp} XP</p><button class="primary" onclick="startPairs()">Play again</button><button onclick="go('games')">Mini Games</button>`;
+    let prizeLine = 'Practice run · rewards return tomorrow';
+    if (paid) { Pairs.useRun(S); const prize = Pairs.reward(seconds), got = gain(prize.gold, 0, prize.xp); prizeLine = `${uiIcon('gold')}${prize.gold} gold · ${uiIcon('exp')}${got.xp} XP`; } else save();
+    panel.hidden = false; panel.className = 'pairs-panel';
+    panel.innerHTML = `<small>${record ? 'NEW BEST TIME' : 'HARVEST COMPLETE'}</small><h2>${Pairs.clock(seconds)}</h2><p>Best time · ${Pairs.clock(S.pairsBest)}${g.hints ? ' · Hints used · ' + g.hints : ''}</p><p class="pairs-prize">${prizeLine}</p><button class="primary" onclick="startPairs()">Play again</button><button onclick="go('pairs')">Back to lobby</button>`;
   }
   board.onclick = event => {
     const tile = event.target.closest('.pairs-tile'); if (!tile) return;
     const result = Pairs.tap(g, +tile.dataset.i); if (!result) return;
+    board.querySelectorAll('.hinted').forEach(el => el.classList.remove('hinted'));
     if ('select' in result) { board.querySelectorAll('.pairs-tile').forEach(el => el.setAttribute('aria-pressed', +el.dataset.i === result.select)); return; }
     // Show both tiles joined, then collect them.
     g.locked = true;
@@ -153,6 +190,13 @@ function startPairs() {
       if (!Pairs.hint(g.board)) { Pairs.reshuffle(g.board); toast('No moves left · ingredients shuffled'); }
       draw(); g.locked = false;
     }, 260);
+  };
+  $('#pairsHint').onclick = () => {
+    if (game !== g || g.locked || g.ended) return;
+    const move = Pairs.hint(g.board); if (!move) return;
+    g.time += Pairs.hintPenalty; g.hints = (g.hints || 0) + 1; g.picked = -1;
+    board.querySelectorAll('.pairs-tile').forEach(el => { el.setAttribute('aria-pressed', 'false'); el.classList.toggle('hinted', move.includes(+el.dataset.i)); });
+    const note = $('#pairsPenalty'); note.hidden = false; clearTimeout(note.timer); note.timer = setTimeout(() => { note.hidden = true; }, 900);
   };
   function frame(now) {
     if (game !== g || !board.isConnected) return;

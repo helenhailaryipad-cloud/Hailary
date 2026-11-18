@@ -34,4 +34,12 @@ assert.equal(P.tap(h,0).select,0);assert.equal(P.tap(h,0).select,-1);assert.equa
 assert.deepEqual({...P.reward(59.9)},{gold:500,xp:30});assert.deepEqual({...P.reward(60.1)},{gold:300,xp:30});assert.equal(P.clock(75.9),'1:15');
 // Reshuffle keeps the same tiles in the same occupied slots.
 const stuck={cols:2,rows:2,cells:[1,2,2,1]};stuck.cells=[1,-1,-1,1];assert.ok(P.hint(stuck));
-console.log('PASS Pairs: path rules, solvable deals, full five-stage run, selection, rewards');
+// Two rewarded runs per UTC day, counted on completion; the count resets with the date.
+const save={},noon=Date.UTC(2026,10,18,12),next=noon+86400000;
+assert.equal(P.runsLeft(save,noon),2);P.useRun(save,noon);assert.equal(P.runsLeft(save,noon),1);P.useRun(save,noon);P.useRun(save,noon);assert.equal(P.runsLeft(save,noon),0);
+assert.equal(P.runsLeft(save,next),2);P.useRun(save,next);assert.deepEqual({...save.pairsDaily},{day:'2026-11-19',runs:1});
+// Rival times are fixed within a day, labelled AI, and the player is ranked among them by time.
+const names=['Nyra','Kael','Pip'],r1=P.rivals(names,noon),r2=P.rivals(names,noon+3600000);
+assert.deepEqual(r1.map(r=>r.seconds),r2.map(r=>r.seconds));assert.ok(r1.every(r=>r.ai&&r.seconds>=41&&r.seconds<99));
+const table=P.ranking(names,1,noon);assert.equal(table.length,4);assert.ok(table[0].you);assert.equal(P.ranking(names,0,noon).length,3);
+console.log('PASS Pairs: path rules, solvable deals, full five-stage run, selection, rewards, daily runs, ranking');

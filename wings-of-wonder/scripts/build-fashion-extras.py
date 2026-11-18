@@ -46,3 +46,7 @@ for n in range(8):
     save(f'pairs-tile-{n+1}', tile, 70)
 cover = Image.open(SRC/'pairs/cover.webp').convert('RGB').resize((1152, 768), Image.Resampling.LANCZOS)
 save('pairs-cover', cover, 55)
+lobby = Image.open(SRC/'pairs/lobby.webp').convert('RGB').resize((768, 1152), Image.Resampling.LANCZOS)
+save('pairs-lobby', lobby, 55)
+sprout = trim(SRC/'pairs/sprout.webp'); sprout.thumbnail((320, 320), Image.Resampling.LANCZOS)
+save('pairs-sprout', sprout, 70)

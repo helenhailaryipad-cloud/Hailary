@@ -80,7 +80,10 @@ Mini Games -> Harvest Pairs (`src/pairs.js`, screen id `pairs`): tap two identic
 two turns can join; the line is drawn before the pair is collected. Five boards (2x2, 4x3, 4x4, 6x5, 6x6), one clock
 across all of them, paused during countdowns and while the page is hidden. Reward 300 gold + 30 XP, +200 gold under a
 minute, settled once; best time in optional save field `S.pairsBest` (seconds). Deals are always clearable; a stuck
-board reshuffles. Original art: 8 ingredient tiles and a cover (`art-source/pairs/`, built by
+board reshuffles. Second pass: a lobby (`showPairs`: host, rules, runs, Rankings) opens the board (`openPairsBoard`);
+rewards only for 2 completed runs per UTC day (`S.pairsDaily {day, runs}`), further runs are practice; the Sprout mascot
+gives a hint for +3 s; the ranking modal lists the six AI adventurers with simulated daily times, labelled AI, plus
+the player's best. Original art: lobby background, Sprout mascot, 8 ingredient tiles and a cover (`art-source/pairs/`, built by
 `build-fashion-extras.py`). Logic tests: `node scripts/test-pairs.mjs`. Game buttons need very specific selectors:
 global `#main button` rules set position, borders and `::before`.
 
