@@ -6535,7 +6535,7 @@ body[data-screen="pairs"] #stage #main{position:fixed!important;inset:0!importan
 .pairs-bar b{color:#9dff9a;font-variant-numeric:tabular-nums;margin-left:.2em}
 .pairs-field{position:relative;min-height:0;display:grid;place-items:center;padding:2% 2% 12%;container-type:size}
 .pairs-board{--cols:2;--rows:2;--cell:min(100cqw/6.8,100cqh/6.8);position:relative;width:calc(var(--cell)*(var(--cols) + .8));height:calc(var(--cell)*(var(--rows) + .8))}
-#main .pairs-board .pairs-tile{position:absolute!important;overflow:visible;outline:0!important;border-image:none!important;margin:0;min-width:0;min-height:0;border-radius:0;box-shadow:none!important;transform:none;border:0!important;background:none!important;left:calc(var(--cell)*(var(--x) + .4));top:calc(var(--cell)*(var(--y) + .4));width:var(--cell);height:var(--cell);padding:0;border:0;background:none;display:grid;place-items:center;cursor:pointer;touch-action:manipulation}
+#main .pairs-board .pairs-tile{position:absolute!important;overflow:visible;outline:0!important;border-image:none!important;margin:0;min-width:0;min-height:0;border-radius:0;box-shadow:none!important;border:0!important;background:none!important;left:calc(var(--cell)*(var(--x) + .4));top:calc(var(--cell)*(var(--y) + .4));width:var(--cell);height:var(--cell);padding:0;border:0;background:none;display:grid;place-items:center;cursor:pointer;touch-action:manipulation}
 #main .pairs-board .pairs-tile::before,#main .pairs-board .pairs-tile::after{content:none!important;display:none!important}
 .pairs-card{position:absolute;inset:4%;border-radius:12%;background:linear-gradient(#fbf6ea,#e6dcc6);box-shadow:0 3px 0 #a79f8b,0 5px 8px #1f3d2a66;transition:box-shadow .12s,background .12s;pointer-events:none}
 .pairs-tile img{position:relative;width:74%;height:74%;object-fit:contain;pointer-events:none;transition:transform .12s}
@@ -6583,3 +6583,13 @@ body[data-screen="pairs"] #stage #main{position:fixed!important;inset:0!importan
 #main .pairs-screen button::before,#main .pairs-screen button::after{content:none!important;display:none!important}
 #main .pairs-screen .pairs-hint,#main .pairs-screen .pairs-rank{outline:0!important;border-image:none!important}
 .pairs-field.gating .pairs-board{visibility:hidden}
+/* Harvest Pairs: instant taps */
+#main .pairs-board{touch-action:none}
+#main .pairs-board .pairs-tile{touch-action:none;-webkit-tap-highlight-color:transparent}
+.pairs-card{transition:none}.pairs-tile img{transition:transform .06s}
+.pairs-tile.matched{pointer-events:none;animation:pairs-collect .24s ease-in forwards}
+@keyframes pairs-collect{60%{opacity:1;transform:scale(1.06)}to{opacity:0;transform:scale(.7)}}
+.pairs-line polyline{animation:pairs-line-out .24s ease-in forwards}
+@keyframes pairs-line-out{70%{opacity:1}to{opacity:0}}
+.pairs-gate>small:only-child{padding:.5rem 1.4rem;border-radius:1.4rem;background:#1d4a3ae6}
+@media (prefers-reduced-motion:reduce){.pairs-tile.matched,.pairs-line polyline{animation-duration:.01s}}
