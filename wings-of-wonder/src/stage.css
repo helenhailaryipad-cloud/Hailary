@@ -6519,3 +6519,6 @@ body[data-screen="jungle"] #stage #main{position:fixed!important;inset:0!importa
 body[data-screen="jungle"] .jungle-field{width:min(100%,60svh);max-height:100svh;border:0;border-radius:0}
 .jungle-field .jungle-overlay{transform:none;width:auto}.trek-top{z-index:3}.trek-controls{z-index:3}.jungle-field .jungle-overlay{z-index:4}
 #stage #main #trekPause{font-size:18px!important;line-height:26px!important;color:#fff4d7!important;text-indent:0!important}#stage #main #trekPause::before,#stage #main #trekPause::after{display:none!important}
+
+/* Portraits with wings have 100 extra frame units above the 800-unit figure: scale back up from the feet so Reina keeps her size. */
+.winged-portrait{transform:scale(1.125);transform-origin:50% 100%}

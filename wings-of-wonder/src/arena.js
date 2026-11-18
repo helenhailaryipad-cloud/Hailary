@@ -65,9 +65,11 @@ function drawReina(c,g,x,floor,width,height){const pose=reinaFrame(g),costume=eq
   c.save();c.translate(x,floor-lift);
   if(aim)c.scale(aim.facing,1);else if(pose.moving&&g.crawl.hero.tx<x)c.scale(-1,1);
   // The portrait is rendered at 2x: take the whole 500 x 740 figure area, not its top-left quarter.
-  // Portraits with wings are wider than the 500-unit figure frame: keep the figure's size and centre.
-  const k=(registered.naturalHeight||registered.height||800)/800,full=(registered.naturalWidth||registered.width||500*k)/k;
-  c.drawImage(registered,0,40*k,full*k,740*k,-w/2*full/500,-h,w*full/500,h);c.restore();return true;
+  // Portraits with wings carry extra room at the sides and top (rendered at 2x): map the
+  // 500 x 740 figure area onto the sprite box and let the wings extend beyond it.
+  const iw=(registered.naturalWidth||registered.width||1000)/2,ih=(registered.naturalHeight||registered.height||1600)/2;
+  const side=(iw-500)/2,top=ih-800,u=w/500,v=h/740;
+  c.drawImage(registered,-w/2-side*u,-h-(top+40)*v,iw*u,ih*v);c.restore();return true;
  }
  if(costume!=='reina'){
   const lift=motionAllowed()&&pose.moving?Math.abs(Math.sin(g.clock*9))*3:0;

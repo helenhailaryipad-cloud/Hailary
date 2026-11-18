@@ -32,15 +32,15 @@
    ctx.clip(outer,'evenodd');
   }else ctx.clip(p);
  }
- async function render({dress,hair,weapon,wings,scale=2,load,createCanvas,body,bodyLayers=[],pad=0}){
+ async function render({dress,hair,weapon,wings,scale=2,load,createCanvas,body,bodyLayers=[],pad=0,padTop=0}){
   if(!Number.isFinite(scale)||scale<1||scale>4)throw Error('Invalid wardrobe scale');
   const selected=[dress,hair,weapon,wings].filter(Boolean).map(id=>{const it=items.get(id);if(!it)throw Error('Unknown wardrobe item '+id);return it;});
   const layers=[{slot:'body',asset:body,rect:frame.body},...selected.flatMap(it=>it.layers),...bodyLayers];
   const images=new Map(await Promise.all([...new Set([...layers.map(it=>it.asset),...selected.map(it=>it.bodyErase).filter(Boolean)])].map(async id=>[id,await load(id)])));
   // Nothing is returned until the complete dressed scene is decoded.
-  // `pad` adds transparent room on both sides (frame units) so large wings are not clipped;
+  // `pad` (both sides) and `padTop` add transparent room, in frame units, so large wings are not clipped;
   // the 500 x 800 figure stays centred and the same size.
-  const canvas=createCanvas((500+2*pad)*scale,800*scale),ctx=canvas.getContext('2d');ctx.scale(scale,scale);ctx.translate(pad,0);
+  const canvas=createCanvas((500+2*pad)*scale,(800+padTop)*scale),ctx=canvas.getContext('2d');ctx.scale(scale,scale);ctx.translate(pad,padTop);
   ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
   const coverage=selected.filter(it=>it.kind==='dress').flatMap(it=>it.bodyCoverage||[]);
   // Per-pixel masks of body parts the outfit hides (a calf wider than its boot, bare toes).
