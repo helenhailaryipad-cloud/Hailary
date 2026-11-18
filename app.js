@@ -114,9 +114,8 @@ function currentMount(){
   const id = S.mountId === undefined && S.ridingSilverTabby ? 'silver-tabby' : S.mountId;
   return mounts.find(mount => mount.id === id);
 }
-function leaflightMountCompatible(){
- return S.reinaLayers?.dress!=='leaflight'||(S.reinaLayers.hair===11&&S.atelier?.weapon===11);
-}
+// Every dress and hairstyle has its own layer for the riding pose, so any look can ride.
+function leaflightMountCompatible(){return true;}
 function reconcileLeaflightMount(){
  if(!leaflightMountCompatible()&&(S.mountId||S.ridingSilverTabby)){
   S.mountId='';delete S.ridingSilverTabby;return true;
@@ -637,6 +636,13 @@ document.addEventListener('load',async event=>{
   const img=event.target;if(img.tagName!=='IMG')return;
   const src=img.src,icon=src.match(/#leaflight-icon-(hair|dress|bow)$/);
   if(icon){try{if(!styleRenderCache.has(src))styleRenderCache.set(src,renderLeaflightIcon(icon[1]));const result=await styleRenderCache.get(src);readyRegisteredLooks.set(src,result);if(img.src===src)img.src=result;}catch{img.alt='Style';}return;}
+  const ride=src.match(/#mounted-([a-z]+)-(11|10|[1-9])$/);
+  if(ride&&fittingDresses.some(([id])=>id===ride[1])){
+   if(!styleRenderCache.has(src))styleRenderCache.set(src,composeMountedCanvas(ride[1],+ride[2]).then(canvas=>canvas.toDataURL('image/png')));
+   try{const result=await styleRenderCache.get(src);readyRegisteredLooks.set(mountedLookKey(ride[1],+ride[2]),result);if(img.src===src)img.src=result;}
+   catch{styleRenderCache.delete(src);img.alt='Could not load Reina. Please reopen the garden.';}
+   return;
+  }
   const match=src.match(/#registered-([a-z]+)-(11|10|[1-9])-(\d+)(?:~([a-z0-9-]+))?$/);
   if(!match||!fittingDresses.some(([id])=>id===match[1]))return;
   if(!styleRenderCache.has(src))styleRenderCache.set(src,renderRegisteredLook(match[1],+match[2],+match[3],match[4]||''));
@@ -647,7 +653,7 @@ document.addEventListener('load',async event=>{
 const registeredCombatCache=new WardrobeCache(8);
 let lastRegisteredCombatImage=null;
 function registeredCombatBitmap(){
- if(typeof Image==='undefined'||!S.reinaLayers)return null;
+ if(typeof Image==='undefined')return null;
  const {dress,hair}=registeredLook(),weapon=S.atelier?.weapon||((S.reinaFashion?.equipped&4)?12:13);
  const wings=fashionWing().id,key=dress+'/'+hair+'/'+weapon+'/'+wings;
  if(!registeredCombatCache.has(key)){
@@ -663,13 +669,30 @@ function reinaWorldLookPath(){
 }
 function reinaLookPath(riding,mask=S.reinaFashion?.equipped||0,shared=S.costumes?.equipped?.reina,styles=S.atelier){
   if(!riding)return registeredLookPath(arguments.length>=3&&shared!==currentDress()?fittedDressId(shared):undefined,undefined,styles?.weapon||((mask&4)?12:13));
-  if(shared==='leaflight')return registeredLook().hair===11&&styles?.weapon===11?artPath('leaflight-riding'):registeredLookPath('leaflight',undefined,styles?.weapon||13);
-  if((mask & 2) && outfitCatalog[shared]?.reinaOnly)return artPath('look-'+(riding?'ride':'stand')+'-'+mask)+'#dress-'+shared;
-  if((mask & 2) && shared && shared!=='moonblossom' && outfitCatalog[shared]){
-    return artPath('look-'+(riding?'ride':'stand')+'-'+mask)+(riding&&[2,3,6,7].includes(mask)?'&':'?')+'outfit='+shared;
-  }
-  return artPath(mask ? 'look-'+(riding?'ride':'stand')+'-'+mask : riding ? currentMount().rider : equippedRanger());
+  return mountedLookPath();
 }
+// Riding pose: one fixed base (Reina on the Silver Tabby) plus the same dress and hair, painted
+// on that base and extracted per pixel by scripts/build-mounted.py.
+function mountedLookKey(dress,hair){
+ const release=artPath('fit-control-mount-base').split('?')[1]||'';
+ return 'wardrobe-placeholder.svg'+(release?'?'+release:'')+'#mounted-'+dress+'-'+hair;
+}
+function mountedLookPath(){
+ const {dress,hair}=registeredLook(),key=mountedLookKey(dress,hair);
+ return readyRegisteredLooks.get(key)||key;
+}
+async function composeMountedCanvas(dress,hair){
+ const [base,cloth,locks]=await Promise.all(['fit-control-mount-base','fit-control-mount-'+dress,'fit-control-mounthair-'+hair].map(id=>styleImage(artPath(id))));
+ const c=document.createElement('canvas');c.width=1024;c.height=936;const ctx=c.getContext('2d');
+ const part=(image,y0,y1)=>{ctx.save();ctx.beginPath();ctx.rect(0,y0,1024,y1-y0);ctx.clip();ctx.drawImage(image,0,0,1024,936);ctx.restore();};
+ ctx.drawImage(base,0,0,1024,936);
+ // The Lavender Braid hangs down her back: below the ear it goes behind capes and sleeves.
+ if(hair===11)part(locks,138,936);
+ ctx.drawImage(cloth,0,0,1024,936);
+ if(hair===11)part(locks,0,140);else ctx.drawImage(locks,0,0,1024,936);
+ return c;
+}
+
 function registeredFashionRoom(){
   const look=registeredLook(),isHair=fashionCategory==='Hair';
   const selected=isHair?(stylePick??look.hair):(clothingPreview??look.dress);
