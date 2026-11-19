@@ -10,6 +10,10 @@ g=T.create();g.row=999;g.hazardAt=999;g.foes=[{x:.62,z:.5,hp:6,kind:0},{x:-1.24,
 g=T.create();g.row=999;g.shot=999;g.hazardAt=0;g.foes=[{x:0,z:.3,hp:900,kind:0}];T.step(g,.05,()=>.5);assert.ok(g.foes[0].boom);assert.equal(g.hazards[0].x,0);
 for(let i=0;i<30;i++)T.step(g,.05,()=>.5);assert.equal(g.hp,3);assert.ok(!g.foes[0].dash);for(let i=0;i<6;i++)T.step(g,.05,()=>.5);assert.equal(g.hp,2);assert.ok(g.foes.length===0||g.foes[0].dash);
 g=T.create();g.row=999;g.shot=999;g.hazardAt=0;g.foes=[{x:0,z:.3,hp:900,kind:0}];T.step(g,.05,()=>.5);g.foes[0].dead=true;for(let i=0;i<50;i++)T.step(g,.05,()=>.5);assert.equal(g.hp,3);assert.equal(g.hazards.length,0);
+// Hit feedback: an arrow that lands leaves a pop and jolts the barrel; a hit on Reina shakes the view; a kill shows +50.
+g=T.create();g.row=999;g.hazardAt=999;g.foes=[{x:0,z:.8,hp:60,kind:0}];T.step(g,.05,()=>.5);assert.ok(g.pops.length>=1&&g.foes[0].flash>0);for(let i=0;i<10;i++)T.step(g,.05,()=>.5);assert.ok(g.pops.length<=40);
+g=T.create();T.hit(g);assert.ok(g.shake>0&&g.hitFlash>0&&g.texts.some(t=>t.text==='−1 ♥'));g=T.create();g.shield=5;T.hit(g);assert.ok(g.shake>0&&g.hp===3&&g.texts.some(t=>t.text==='Blocked!'));
+g=T.create();g.foes=[{x:0,z:.5,hp:1}];T.damage(g,g.foes[0],5);assert.ok(g.texts.some(t=>t.text==='+50'&&t.small)&&g.pops.some(e=>e.big));
 // Five lanes; a fire lane with no barrel snaps to the lane Reina stands in.
 assert.equal(T.lanes.length,5);assert.equal(T.lane(.4),.62);assert.equal(T.lane(-2),-1.24);
 // Bonuses are picked up anywhere on her figure, not only at her centre; far ones are not.

@@ -115,6 +115,12 @@ into turns (`g.lean`), pets trail (`g.pets`), and her own wings beat (`registere
 without wings, the wing art is drawn apart). The pasted wings of the Wings bonus and the hurt blink are gone. The
 shield is a honeycomb dome with a light sweep; fire is drawn as painted flame tongues (`tongue`), and the dragon
 turns toward the lane and breathes it from its jaws (`h.breath`). The newest finger steers (no stuck pointer).
+Hit feedback (sixth pass): `Trek.pop` rings where arrows, rockets, beam and lightning land (`g.pops`), struck barrels
+and the dragon jolt (`f.flash`), kills float `+50`; a hit on Reina shakes the view (`g.shake`), flashes a ring
+(`g.hitFlash`), floats `−1 ♥`, pulses the hearts and vibrates where supported; a blocked hit says `Blocked!`.
+Mini Games (`games()` in `app.js`): covers are preloaded 0.9 s after start (`preloadGameCovers`) and never lazy
+(`eagerArt`); best score/time sit under each title in `.booth-title span` with an explicit colour. The user saw the
+old best-score text as black on the iPad; that could not be reproduced in Chromium.
 
 ## Dungeon lobby (2026-11-19)
 `dungeonLobby()` in `world.js` was rebuilt after a reference screenshot: one guardian on stage with its name and
