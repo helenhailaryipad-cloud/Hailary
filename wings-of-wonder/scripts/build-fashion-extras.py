@@ -52,7 +52,7 @@ sprout = trim(SRC/'pairs/sprout.webp'); sprout.thumbnail((320, 320), Image.Resam
 save('pairs-sprout', sprout, 70)
 
 # Jungle Trek: painted clearing, barrel and three power-up orbs.
-bg = Image.open(SRC/'trek/bg.webp').convert('RGB').resize((720, 1080), Image.Resampling.LANCZOS)
+bg = Image.open(SRC/'trek/bg.webp').convert('RGB').resize((900, 1350), Image.Resampling.LANCZOS)   # the field is drawn up to 1200 px wide
 save('trek-bg', bg, 55)
 barrel = trim(SRC/'trek/barrel.webp'); barrel = barrel.resize((360, round(barrel.height*360/barrel.width)), Image.Resampling.LANCZOS)
 save('trek-barrel', barrel, 70)
@@ -72,6 +72,13 @@ for n in range(7, 32):
 sheet = Image.open(SRC/'trek/extras.webp').convert('RGBA'); cw, ch = sheet.width//3, sheet.height//2
 for n, name in enumerate(['trek-pickup-4', 'trek-pickup-5', 'trek-pickup-6', 'trek-bomb', 'trek-elec', 'trek-rocket']):
     a = fit.arr(sheet.crop(((n % 3)*cw, (n//3)*ch, (n % 3+1)*cw, (n//3+1)*ch))); a[..., 3] = np.where(a[..., 3] < 24, 0, a[..., 3])
+    keep = fit.keep_big(a[..., 3] > 0, 300); a[..., 3] = np.where(fit.dilate(keep, 2), a[..., 3], 0)
+    cut = fit.img(fit.clean_rgb(a)); cut = cut.crop(cut.getbbox()); cut.thumbnail((200, 200), Image.Resampling.LANCZOS)
+    tile = Image.new('RGBA', (208, 208)); tile.alpha_composite(cut, ((208-cut.width)//2, (208-cut.height)//2)); save(name, tile, 70)
+# Third sheet: sun beam, chain lightning and frost orbs. The painted halo around each orb is faded out at its rim.
+sheet = Image.open(SRC/'trek/orbs2.webp').convert('RGBA'); cw = sheet.width//3
+for n, name in enumerate(['trek-pickup-7', 'trek-pickup-8', 'trek-pickup-9']):
+    a = fit.arr(sheet.crop((n*cw, 0, (n+1)*cw, sheet.height))); a[..., 3] = (np.clip((a[..., 3].astype(float)-170)/70, 0, 1)*255).astype(np.uint8)
     keep = fit.keep_big(a[..., 3] > 0, 300); a[..., 3] = np.where(fit.dilate(keep, 2), a[..., 3], 0)
     cut = fit.img(fit.clean_rgb(a)); cut = cut.crop(cut.getbbox()); cut.thumbnail((200, 200), Image.Resampling.LANCZOS)
     tile = Image.new('RGBA', (208, 208)); tile.alpha_composite(cut, ((208-cut.width)//2, (208-cut.height)//2)); save(name, tile, 70)

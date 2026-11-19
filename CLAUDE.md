@@ -106,6 +106,15 @@ a blast), wings (rapid fire), shield, heart. A boss (3000 HP, `boss:true`, ember
 it gives +1000 and ends the run (`g.endAt`). Barrel HP grows every row. Rival finals are 2500-5000. Gold/XP caps, 90 s
 and 3 hearts are unchanged. Balance is tuned by bot simulation only, not by hand play. `drawJungle` uses a flatter projection than before (render only). Sources in
 `art-source/trek/`, built by `build-fashion-extras.py`.
+Fifth pass (2026-11-19, user feedback): a run is 63 s (`Trek.length`; rows stop at `lastRow` 43, dragon at `bossAt` 46 with
+`bossHp` 3600; rival finals 2400-4600). Three more bonuses: `laser` (sun beam, 6 s, burns her column), `chain` (9 s,
+lightning to the aimed barrel plus two neighbours), `frost` (8 s, barrels at 45% speed, arrows +3); orbs
+`trek-pickup-7..9` from `art-source/trek/orbs2.webp`. Picture: `trekSharp()` renders the 480x800 space at device
+resolution (up to 2.5x) and `trekMip()` keeps halved copies of sprites, so nothing is pixelated; Reina bobs, leans
+into turns (`g.lean`), pets trail (`g.pets`), and her own wings beat (`registeredCombatBitmap(true)` is the portrait
+without wings, the wing art is drawn apart). The pasted wings of the Wings bonus and the hurt blink are gone. The
+shield is a honeycomb dome with a light sweep; fire is drawn as painted flame tongues (`tongue`), and the dragon
+turns toward the lane and breathes it from its jaws (`h.breath`). The newest finger steers (no stuck pointer).
 
 ## Dungeon lobby (2026-11-19)
 `dungeonLobby()` in `world.js` was rebuilt after a reference screenshot: one guardian on stage with its name and
