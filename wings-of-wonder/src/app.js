@@ -972,8 +972,8 @@ function summonPets(count){
   const tier=chance<.04?'Super Rare':chance<.20?'Epic':chance<.55?'Rare':'Common';
   const pool=WonderGear.familiars.filter(p=>p.rarity===tier);
   const p=pool[Math.floor(Math.random()*pool.length)],owned=S.owned.includes(p.id);
-  if(owned)S.gold+=100;else S.owned.push(p.id);
-  cards.push(`<figure style="--pet-color:${p.color}">${dragonSVG(p)}<figcaption><strong>${p.name}</strong><small>${p.rarity} · ${owned?'+100 gold':'New'}</small></figcaption></figure>`);
+  if(owned){S.gold+=100;WonderGear.addPetSpare(S,p.id)}else S.owned.push(p.id);
+  cards.push(`<figure style="--pet-color:${p.color}">${dragonSVG(p)}<figcaption><strong>${p.name}</strong><small>${p.rarity} · ${owned?'+100 gold · +1 spare copy':'New'}</small></figcaption></figure>`);
  }
  save();showPetGallery();
  modal(`<h2>Pet Summon</h2><div class="pet-results">${cards.join('')}</div>`);

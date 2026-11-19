@@ -437,3 +437,26 @@ await vm.runInContext(`(async()=>{
  if(registeredLookPath().includes('fit-control-body'))throw Error('Technical body used as loading placeholder');
 })()`,context);
 console.log('PASS: atomic wings/weapons previews, stale requests ignored, technical body never used as placeholder.');
+// Pets: spare copies, synthesis, assist pages, and the rebuilt Pets room renders every page.
+vm.runInContext(`{
+ const r=WonderGear;S=defaults();
+ if(r.assistSlots(S)!==12||r.petTeam(S).length!==15)throw Error('A new hero has one page of twelve assist slots');
+ S.xp=49*WonderProgress.xpPerLevel;if(r.assistSlots(S)!==24)throw Error('Level 50 opens the second assist page');
+ S.xp=299*WonderProgress.xpPerLevel;if(r.assistSlots(S)!==48||r.petTeam(S).length!==51)throw Error('Level 300 opens all four assist pages');
+ S=defaults();const commons=r.familiars.filter(p=>p.rarity==='Common').map(p=>p.id),rares=r.familiars.filter(p=>p.rarity==='Rare').map(p=>p.id);
+ if(r.synthesizePet(S,'Rare',Array(6).fill(commons[0])))throw Error('Synthesis needs spare copies');
+ r.addPetSpare(S,commons[0],4);r.addPetSpare(S,commons[1],2);r.addPetSpare(S,'d0');
+ if(S.petSpares.d0!==undefined||!valid(S))throw Error('Only summoned pets have spare copies');
+ if(r.synthesizePet(S,'Rare',[...Array(5).fill(commons[0]),commons[1]]))throw Error('Cannot use more copies than she has');
+ if(r.synthesizePet(S,'Epic',[...Array(4).fill(commons[0]),commons[1],commons[1]]))throw Error('Six Commons do not make an Epic');
+ const made=r.synthesizePet(S,'Rare',[...Array(4).fill(commons[0]),commons[1],commons[1]],()=>0);
+ if(!made||made.id!==rares[0]||!made.isNew||!S.owned.includes(rares[0])||Object.keys(S.petSpares).length||!valid(S))throw Error('Six spare Commons make one random Rare and are used up');
+ r.addPetSpare(S,commons[2],6);const again=r.synthesizePet(S,'Rare',Array(6).fill(commons[2]),()=>0);
+ if(again.isNew||S.petSpares[rares[0]]!==1)throw Error('A pet she already has becomes a spare copy');
+ S.petSpares={d0:1};if(valid(S))throw Error('Invalid spare copies accepted');S.petSpares={[commons[0]]:0};if(valid(S))throw Error('Zero spare copies accepted');
+ S=defaults();S.gold=5000;openScreen('cityPet');
+ for(const page of ['Formation','Gallery','Assist','Badge','Synthesize']){petTab(page);const html=$('#main').innerHTML;if(!html.includes('den-top')||html.includes('<svg class="dragon-'))throw Error('Pets page '+page+' did not render with painted pets');}
+ petTab('Formation');const before=r.petLevel(S,'d0');petFeed();if(r.petLevel(S,'d0')!==before+1||S.gold!==4900)throw Error('Fast Feed raises the level for gold');
+ if(item('d0').title!=='GROVE DRAGONLING'||item('d0').name!=='Willow')throw Error('Pet titles match their paintings; names are unchanged');
+}`,context);
+console.log('PASS: pets: assist pages by level, spare copies, six-copy synthesis, validation, rebuilt Pets pages, Fast Feed.');

@@ -6846,7 +6846,7 @@ body[data-screen=games] #stage .portal-illustration{background:#244a3c}
 .den-side{position:absolute;right:0;top:4%;z-index:3;display:grid;gap:1.4cqh}
 #main .den .den-side button{display:grid;justify-items:center;gap:.15em;background:transparent;border:0;padding:0;font-size:2.6cqw;color:#eaf4ff;text-shadow:0 1px 2px #0b1a44}
 .den-side i{display:grid;place-items:center;width:2.2em;height:2.2em;font-size:1.6em;font-style:normal;background:radial-gradient(#7fd4ff,#2a5fae);border:1px solid #cfe6ff;clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%)}
-.den-starrow{position:absolute;left:0;right:0;bottom:0;z-index:3;margin:0!important;font-size:5cqw;color:#ffd84a;text-shadow:0 2px 3px #050b2a}.den-starrow s{text-decoration:none;color:#ffffff38}
+.den-starrow{position:absolute;left:0;right:0;bottom:0;z-index:3;margin:0!important;font-size:5cqw;color:#ff5a6e;text-shadow:0 2px 3px #050b2a,0 0 6px #7a0f24}.den-starrow s{text-decoration:none;color:#ffffff38}.den-starrow u{text-decoration:none;color:#8dff7a;margin:0 .5em;font-size:.7em;vertical-align:.15em}
 .den-panel{padding:.8cqh 2.4cqw 1cqh;background:#12295fa6;border:1px solid #7fb4ff55;border-radius:.5em}
 .den-panel h3{margin:0 0 .5cqh;font-size:1.08em}.den-panel p{margin:.4cqh 0 0!important}.den-panel>h3 b,.den-panel>p b{color:#8dff7a}
 .den-track{display:grid;grid-template-columns:repeat(6,1fr);align-items:end;gap:1cqw;padding:.4cqh 1cqw}
@@ -6858,8 +6858,41 @@ body[data-screen=games] #stage .portal-illustration{background:#244a3c}
 .den-track small{color:#cfe1ff}.den-track .on small{color:#ffd84a}
 .den-starup{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:2cqw;padding:0 2cqw}.den-starup .den-orb{grid-row:auto;width:9cqw}
 .den-grow{flex:1;min-height:0;display:flex;flex-direction:column}
-.den-assists{flex:1;min-height:0;display:grid;grid-template-columns:repeat(4,17.5cqw);justify-content:center;gap:1.2cqh 2.4cqw;align-content:start;padding-top:.4cqh;overflow:auto}
+.den-assists{flex:1;min-height:0;display:grid;grid-template-columns:repeat(4,14.6cqw);justify-content:center;gap:.3cqh 4.4cqw;align-content:start;padding-top:.4cqh;overflow:auto;scrollbar-width:none}.den-assists>div{display:grid;gap:.1cqh}
 .den-note{margin:0!important;color:#cfe1ff}
 .den-filters{display:flex;gap:1cqw;overflow-x:auto;flex:none;scrollbar-width:none}
 #main .den .den-filters button{flex:none;padding:.3em .9em;border:1px solid #5d8fd6;border-radius:99px;background:#16306a;color:#cfe1ff}
 #main .den .den-filters button[aria-pressed=true]{background:#ffe27a;color:#4a2f0c;border-color:#fff3c9}
+
+/* Pets, second pass: assist pages, gallery lines, Synthesize room, Congratulations */
+#main .den[data-page=Assist]{background:radial-gradient(1px 1px at 14% 12%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 82% 20%,#e3d4ff 50%,transparent 51%),radial-gradient(1px 1px at 40% 44%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 90% 62%,#fff 50%,transparent 51%),radial-gradient(ellipse at 50% 100%,#7a4fd6 0,transparent 55%),linear-gradient(#1a1f6e,#3a2fa8 55%,#5a3fc0)}
+.den-rule{display:flex;align-items:center;gap:2cqw;margin:0 0 .6cqh!important}.den-rule::before,.den-rule::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,#b9c8ff)}.den-rule::after{transform:scaleX(-1)}
+.den-pager{display:flex;justify-content:center;align-items:center;gap:1.4cqw;margin-top:.6cqh;flex:none}
+#main .den .den-pager button{min-width:2.4em;padding:.25em .5em;border:0;background:transparent;color:#aebcff;font:700 1.25em Georgia,serif}
+#main .den .den-pager button[aria-pressed=true]{color:#fff;text-shadow:0 0 8px #ffe27a;border-bottom:2px solid #ffe27a}
+#main .den .den-pager .den-shut{opacity:.45}
+.den-lock{flex:1;display:grid;place-items:center;margin:0!important;color:#d9ddff}
+.den-note i{display:inline-grid;place-items:center;width:1.4em;height:1.4em;margin-right:.6em;border-radius:50%;background:#fff;color:#2a2f8a;font-style:normal}
+.den-panel h3 span{margin-left:1.2em;color:#cfe1ff;font-weight:700}
+.den-synth{flex:1;min-height:0;display:grid;grid-template-columns:22cqw minmax(0,1fr);gap:2cqw}
+.den-tiers{display:grid;align-content:start;gap:.8cqh;padding-top:1cqh}
+#main .den .den-tiers button{padding:.7em .3em;border:1px solid #9fd0ff;border-radius:.3em;background:linear-gradient(#cfeaff,#9fcdf0);color:#274a80;font-size:.95em}
+#main .den .den-tiers button[aria-pressed=true]{background:linear-gradient(#ffe89a,#f0b548);border-color:#fff3c9;color:#5a3a12}
+.den-forge{display:flex;flex-direction:column;align-items:center;gap:1cqh;min-height:0}
+.den-ring{display:grid;place-items:center;width:46cqw;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#7fd4ff55 0 22%,transparent 23%),repeating-conic-gradient(from 0deg,#7fb4ff26 0 6deg,transparent 6deg 15deg),radial-gradient(circle,transparent 0 44%,#7fb4ff55 45% 47%,transparent 48% 62%,#7fb4ff33 63% 64%,transparent 65%)}
+#main .den .den-ring .den-mystery{position:relative;display:block;width:17cqw!important;aspect-ratio:1!important;border:2px solid var(--edge);border-radius:.6em;background:var(--bg);box-shadow:0 0 18px var(--edge);overflow:hidden}
+.den-mystery i{position:absolute;inset:0;display:grid;place-items:center;font:900 10cqw Georgia,serif;font-style:normal;color:#fff;text-shadow:0 2px 0 #0006}
+.den-banner{position:relative;z-index:2;margin:-5cqh 0 0!important;padding:.4em 2em;background:linear-gradient(90deg,transparent,#e8f2ff 12% 88%,transparent);color:#274a80}
+.den-mats{display:grid;grid-template-columns:repeat(4,13.5cqw);gap:1.6cqw;justify-content:center}.den-mats.den-two{grid-template-columns:repeat(2,13.5cqw);gap:14cqw}
+#main .den .den-mats .den-card{aspect-ratio:1}.den-mats .den-card img{top:6%;height:70%}.den-mats .den-card b{bottom:3%}
+.den-actions{display:flex;gap:2cqw;justify-content:center}#main .den .den-actions .den-gold{padding:.5em 1.4em;font-size:1.05em}
+.den-congrats{display:grid;justify-items:center;gap:10px;padding:8px 4px 4px;text-align:center;font:700 15px/1.2 Arial,sans-serif;color:#fff3d6;cursor:pointer}
+.den-congrats h2{margin:0;color:#ffd98a;text-shadow:0 0 10px #ff9a2a}
+.den-congrats h3{margin:0;font-size:22px}.den-congrats small{opacity:.8}
+.den-congrats .den-rarity{font-size:18px!important}
+.den-burst{display:grid;place-items:center;width:min(62vw,300px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#ffe9a066 0 30%,transparent 62%),repeating-conic-gradient(from 0deg,#ffcf6a55 0 8deg,transparent 8deg 20deg);animation:den-spin 14s linear infinite}
+.den-burst img{width:74%;height:74%;object-fit:contain;animation:den-spin 14s linear infinite reverse;filter:drop-shadow(0 6px 8px #0008)}
+@keyframes den-spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.den-burst,.den-burst img{animation:none}}
+.den-congrats .den-tag{font-size:14px;padding:.4em 1.2em}
+.den-assists .den-card{font-size:.86em}.den-assists .den-card b{bottom:13%}

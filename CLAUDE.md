@@ -192,8 +192,17 @@ of d0-d3 say what the paintings show (Grove Dragonling, Ember Drake, Moon Dragon
   shard line with Star-up (or Unlock for gold), strip of all 54 pets. Assist: 3 primary + 12 assist cards. Badge: forge.
 - Cards (`petCard`): rarity ribbon and colours (`petRarity`: c r e s l), painting, stars, name, level; the picker modal
   uses them too (`.den-picker`). Text buttons carry an empty svg (`denPlain`) so `decorateArt()` adds no stock icon.
-- No rules or save fields changed. Not done: pet gear/talent systems of the reference (we have none); familiar
-  paintings are 512 px and slightly soft on the big stage at 2x.
+- Second pass (eight more reference photos), with RULE changes in `gear-data.js`:
+  - Spare copies: a summon that lands on an owned familiar adds one (`S.petSpares {id:n}`, optional, validated; it
+    still gives +100 gold). Synthesize room (`petPage==='Synthesize'`, opened from Gallery): six spare copies of one
+    rarity make a random pet of the next (`synthChain`: Common->Rare->Epic->Super Rare, `synthNeed` 6,
+    `synthesizePet`); a pet she has already becomes a spare copy. Add fills the six places, Batch repeats while copies
+    last, the result opens a Congratulations modal (`synthShow`). Only familiars have copies; d0-d3 do not.
+  - Assist has four pages of twelve slots (`assistPages` = hero level 1, 50, 150, 300; `assistSlots`), so up to 48
+    assisting pets add their ATK to Reina. This raises late-game attack; the user asked for the reference layout.
+  - Gallery: red stars with the next star shown, Pet ATK and star bonus now -> next, Synthesize side button.
+- Not done: pet gear/talent/skins/evolution of the reference (we have none); familiar paintings are 512 px and
+  slightly soft on the big stage at 2x.
 
 ## In-chat playable preview (user requirement)
 The user wants to play the game inside the chat, and wants SHORT replies in Russian, no fluff.
