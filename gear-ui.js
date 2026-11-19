@@ -437,7 +437,13 @@ function companionPicked(key){
  const list=companionChoices(key),pick=companionPick[key];
  return list.find(x=>x.id===pick)||list.find(x=>x.id===(key==='mount'?chosenMount().id:WonderGear.companionSkin(S,key)?.id))||list[0];
 }
-function pickCompanion(id){if(companionChoices(companionKey).some(x=>x.id===id)){companionPick[companionKey]=id;cityCompanion();}}
+// Tapping an appearance she already owns puts it on at once (no second tap on Use); unowned ones are only previewed.
+function pickCompanion(id){
+ const key=companionKey;if(!companionChoices(key).some(x=>x.id===id))return;
+ companionPick[key]=id;
+ if(key!=='mount'&&companionOwns(key,id)&&companionWorn(key)!==id&&WonderGear.useCompanionSkin(S,key,id)){save();toast(companionChoices(key).find(x=>x.id===id).name+' is on');}
+ cityCompanion();
+}
 function companionAction(action,arg){
  const r=WonderGear,key=companionKey,v=r.companionState(S,key);
  if(action==='upgrade'||action==='tier'){
