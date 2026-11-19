@@ -168,11 +168,10 @@ preview, a scrollable strip of appearance cards, stats with Looks / Upgrade / Ti
 - Cards: cloaks, back items and mounts use separate paintings of the WHOLE item (`art-source/icons/`, built by
   `build-companions.py`; the build takes about 10 minutes); never crop a card picture. On the home screen the mounted
   hero is deliberately smaller (`.city-hero.riding`), and footsteps trail to the left behind her feet.
-  Footsteps (user request) lie flat as a track on the ground behind her heels and are drawn BEHIND her
-  (`.comp-steps`, `.fx-footprint`: `scaleX(-1) scaleY(.5)`, z-index below the figure); never across her legs.
-  On the home screen the track starts under her left heel and runs left along the ground (user drew this); the
-  markup order is pets, footsteps, hero, fairy (`cityCompanionEffects(['footprint'])` before the hero), so the pet
-  never hides it and she stands on its near end.
+  Footsteps (three rounds of user feedback): the track is BEHIND Reina. It starts under her heels and recedes
+  up-left into the distance, getting smaller, and is drawn behind her legs: `.comp-steps` in the room (behind
+  `.comp-figure`), `.fx-footprint` on the home screen (markup order: footsteps, pets, hero, fairy). Not across her
+  legs, not in front of her, not off to the side at foot level.
   Nothing is worn on a fresh save (`equipped:false`). Tapping a card she owns (the first of each slot is free)
   wears it at once (`pickCompanion`); unowned cards only preview until Buy & use. Screen id is `cityCompanion`.
 - Chat preview packs all `comp-*` art into `pack-comp.js` (file limit). Hosted bundle headroom after this: see build.
