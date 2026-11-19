@@ -168,12 +168,13 @@ preview, a scrollable strip of appearance cards, stats with Looks / Upgrade / Ti
 - Cards: cloaks, back items and mounts use separate paintings of the WHOLE item (`art-source/icons/`, built by
   `build-companions.py`; the build takes about 10 minutes); never crop a card picture. On the home screen the mounted
   hero is deliberately smaller (`.city-hero.riding`), and footsteps trail to the left behind her feet.
-  Footsteps (four rounds of user feedback): a STRAIGHT, even track directly BEHIND her legs. `stepTrack(id,cls)` in
-  `gear-ui.js` lays four single marks (`comp-step-<id>-mark`, cut from the trail picture by
-  `scripts/build-step-marks.py`) left and right in turn, smaller with distance, behind the figure: `.room-steps` in
-  the room, `.home-steps` on the home screen (markup order: footsteps, pets, hero, fairy). The diagonal trail picture
-  `comp-step-<id>` is only for the cards. Rejected by the user: across her legs, to the side at foot level, in
-  front of her, and a diagonal trail going off to the left.
+  Footsteps (five rounds of user feedback; the last was a sketch drawn on a screenshot, follow it): `stepTrack(id,cls)`
+  in `gear-ui.js` lays six single marks (`comp-step-<id>-mark`, cut from the trail picture by
+  `scripts/build-step-marks.py`): the largest between her feet, one small between her legs, the rest beside her left
+  leg and on back-left into the distance, smaller as they go; all drawn behind the figure. `.room-steps` in the room,
+  `.home-steps` on the home screen (markup order: footsteps, pets, hero, fairy); positions are in "stances" (see the
+  comment in `stage.css`). The diagonal trail picture `comp-step-<id>` is only for the cards. Rejected by the user:
+  across her legs, to the side at foot level, in front of her, one diagonal strip, and a track hidden behind the legs.
   Nothing is worn on a fresh save (`equipped:false`). Tapping a card she owns (the first of each slot is free)
   wears it at once (`pickCompanion`); unowned cards only preview until Buy & use. Screen id is `cityCompanion`.
 - Chat preview packs all `comp-*` art into `pack-comp.js` (file limit). Hosted bundle headroom after this: see build.

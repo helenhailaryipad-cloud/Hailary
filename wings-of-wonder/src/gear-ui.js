@@ -461,11 +461,12 @@ function companionAction(action,arg){
  save();cityCompanion();
 }
 // Fairy and footsteps beside Reina on the home screen. Cloak, back accessory and tail are part of her portrait.
-// Footsteps on Reina: four single marks in a straight track behind her legs, left and right in turn, smaller with
-// distance. (The diagonal trail picture comp-step-<id> is only for the cards.)
+// Footsteps on Reina, placed as the user sketched them: single marks that start between her feet and trail away
+// behind her to the back-left, smaller with distance, visible beside her leg. (The diagonal trail picture
+// comp-step-<id> is only for the cards.)
 function stepTrack(id,cls){
  const src=artPath('comp-step-'+id+'-mark');
- return '<span aria-hidden="true" class="step-track '+cls+'">'+[0,1,2,3].map(i=>'<img class="step-'+i+'" src="'+src+'" alt="">').join('')+'</span>';
+ return '<span aria-hidden="true" class="step-track '+cls+'">'+[0,1,2,3,4,5].map(i=>'<img class="step-'+i+'" src="'+src+'" alt="">').join('')+'</span>';
 }
 // Paint order on the home screen: pets, footsteps, Reina, fairy. The track starts under her heel, so it is drawn
 // before her and after the pets.

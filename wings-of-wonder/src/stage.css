@@ -6759,12 +6759,16 @@ body[data-screen=games] #stage .portal-illustration{background:#244a3c}
    and is drawn before the pets and before her (markup order: footsteps, pets, hero). */
 .fx-footprint{left:31%;top:55.2%;width:17%;height:9.4%;z-index:1;transform-origin:50% 100%;transform:scaleX(-1) scaleY(.85)}
 
-/* Footsteps as a straight, even track behind her legs: single marks, left and right in turn, receding. */
+/* Footsteps as the user sketched them on a screenshot: the nearest mark between her feet, the next ones beside her
+   left leg and on back-left into the distance, one small mark between her legs. The box is 2 x 1.4 "stances" (the
+   distance between her boots), with the midpoint between her feet at 70% / 93% of it. */
 .step-track{position:absolute;pointer-events:none;z-index:1}
-.step-track img{position:absolute;height:auto;transform:translate(-50%,-50%) scaleY(.8)}
-.step-track .step-0{left:37%;top:86%;width:31%}
-.step-track .step-1{left:63%;top:64%;width:25%;opacity:.96}
-.step-track .step-2{left:41%;top:45%;width:20%;opacity:.88}
-.step-track .step-3{left:59%;top:30%;width:16%;opacity:.74}
-.home-steps{left:37.3%;top:53.5%;width:20%;height:10%}
-.room-steps{left:18.5%;bottom:3.5%;width:52%;height:30%;z-index:0}
+.step-track img{position:absolute;height:auto;transform:translate(-50%,-50%) scaleY(.82)}
+.step-track .step-0{left:68%;top:67.9%;width:30%}
+.step-track .step-1{left:38%;top:52.1%;width:24.5%;opacity:.97}
+.step-track .step-2{left:39.5%;top:25%;width:18%;opacity:.9}
+.step-track .step-3{left:28.5%;top:26.4%;width:16.5%;opacity:.86}
+.step-track .step-4{left:20%;top:16.4%;width:13%;opacity:.74}
+.step-track .step-5{left:72.5%;top:37.1%;width:16%;opacity:.9}
+.home-steps{left:34.1%;top:54.7%;width:18.8%;height:9.15%}
+.room-steps{left:19.3%;bottom:2%;width:36%;aspect-ratio:2/1.4;z-index:0}
