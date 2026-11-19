@@ -568,11 +568,27 @@ function wardrobeLeafPath(slot){
 }
 // Large wings reach past the 500-wide figure frame; portraits with wings are this much wider on each side.
 const wardrobeWingPad=140,wardrobeWingTop=100;
-async function composeWardrobeCanvas(dress,hair,weapon=0,wings=''){
+// Cloak, back accessory and tail worn behind Reina (Companion screen). The tag "cloak.back.tail"
+// travels inside portrait keys so cached portraits never show a stale accessory.
+const wardrobeExtraKinds=['cloak','back','tail'],wardrobeExtraSlots={cloak:'cloakBack',back:'backItem',tail:'tailBack'};
+function wardrobeExtrasTag(override){
+ const ids=wardrobeExtraKinds.map(kind=>{
+  if(override&&kind in override)return override[kind]||'';
+  const v=WonderGear.companionState(S,kind);return v.equipped&&!v.hidden?WonderGear.companionSkin(S,kind).id:'';
+ });
+ return ids.some(Boolean)?ids.join('.'):'';
+}
+async function composeWardrobeCanvas(dress,hair,weapon=0,wings='',tag=wardrobeExtrasTag()){
  ensureWardrobeCatalog();
+ const extras=(tag||'').split('.').map((id,i)=>{
+  const kind=wardrobeExtraKinds[i];if(!id||!WonderGear.companionSkins[kind]?.some(skin=>skin.id===id))return null;
+  const key='extra:'+kind+':'+id;
+  if(!WonderWardrobe.get(key))WonderWardrobe.register({id:key,kind:'extra',layers:[{slot:wardrobeExtraSlots[kind],asset:'comp-'+kind+'-'+id}]});
+  return key;
+ }).filter(Boolean);
  const body='fit-control-body';
  if(wings&&!WonderWardrobe.get('wings:'+wings))WonderWardrobe.register({id:'wings:'+wings,kind:'wings',layers:[{slot:'wingsBack',asset:wings,fit:[-135,-115,720,600],minTop:2-wardrobeWingTop}]});
- return WonderWardrobe.render({dress:'dress:'+fittedDressId(dress),hair:'hair:'+fittedHairId(hair),weapon:weapon?'weapon:'+weapon:null,wings:wings?'wings:'+wings:null,body,pad:wings?wardrobeWingPad:0,padTop:wings?wardrobeWingTop:0,
+ return WonderWardrobe.render({dress:'dress:'+fittedDressId(dress),hair:'hair:'+fittedHairId(hair),weapon:weapon?'weapon:'+weapon:null,wings:wings?'wings:'+wings:null,extras,body,pad:wings?wardrobeWingPad:0,padTop:wings?wardrobeWingTop:0,
   createCanvas:(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;},load:id=>styleImage(artPath(id))});
 }
 async function composeRegisteredReina(dress,hair){
@@ -643,13 +659,13 @@ async function previewRegisteredSelection(category,id){
 }
 function previewRegisteredHair(hair){return previewRegisteredSelection('Hair',hair);}
 function previewRegisteredDress(dress){return previewRegisteredSelection('Dresses',dress);}
-function registeredLookKey(dress,hair,weapon=0,wings=''){
+function registeredLookKey(dress,hair,weapon=0,wings='',tag=wardrobeExtrasTag()){
  const release=artPath('fit-control-body').split('?')[1]||'';
- return 'wardrobe-placeholder.svg'+(release?'?'+release:'')+'#registered-'+dress+'-'+hair+'-'+weapon+(wings?'~'+wings:'');
+ return 'wardrobe-placeholder.svg'+(release?'?'+release:'')+'#registered-'+dress+'-'+hair+'-'+weapon+(wings?'~'+wings:'')+(tag?'!'+tag:'');
 }
-function registeredLookPath(dress=registeredLook().dress,hair=registeredLook().hair,weapon=0,wings=''){
+function registeredLookPath(dress=registeredLook().dress,hair=registeredLook().hair,weapon=0,wings='',tag=wardrobeExtrasTag()){
  dress=fittedDressId(dress);hair=fittedHairId(hair);
- const key=registeredLookKey(dress,hair,weapon,wings);
+ const key=registeredLookKey(dress,hair,weapon,wings,tag);
  return readyRegisteredLooks.get(key)||key;
 }
 async function previewRegisteredEquipment(category,id){
@@ -664,8 +680,8 @@ async function previewRegisteredEquipment(category,id){
   reinaAtelier();
  }catch{toast('Could not load this style. Please try again.');}
 }
-async function renderRegisteredLook(dress,hair,weapon,wings=''){
- return (await composeWardrobeCanvas(dress,hair,weapon,wings)).toDataURL('image/png');
+async function renderRegisteredLook(dress,hair,weapon,wings='',tag=wardrobeExtrasTag()){
+ return (await composeWardrobeCanvas(dress,hair,weapon,wings,tag)).toDataURL('image/png');
 }
 document.addEventListener('load',async event=>{
   const img=event.target;if(img.tagName!=='IMG')return;
@@ -678,10 +694,10 @@ document.addEventListener('load',async event=>{
    catch{styleRenderCache.delete(src);img.alt='Could not load Reina. Please reopen the garden.';}
    return;
   }
-  const match=src.match(/#registered-([a-z]+)-(\d+)-(\d+)(?:~([a-z0-9-]+))?$/);
+  const match=src.match(/#registered-([a-z]+)-(\d+)-(\d+)(?:~([a-z0-9-]+))?(?:!([a-z.]+))?$/);
   if(!match||!fittingDresses.some(([id])=>id===match[1]))return;
-  if(!styleRenderCache.has(src))styleRenderCache.set(src,renderRegisteredLook(match[1],+match[2],+match[3],match[4]||''));
-  try{const result=await styleRenderCache.get(src);readyRegisteredLooks.set(registeredLookKey(match[1],+match[2],+match[3],match[4]||''),result);if(img.src===src)img.src=result;}
+  if(!styleRenderCache.has(src))styleRenderCache.set(src,renderRegisteredLook(match[1],+match[2],+match[3],match[4]||'',match[5]||''));
+  try{const result=await styleRenderCache.get(src);readyRegisteredLooks.set(registeredLookKey(match[1],+match[2],+match[3],match[4]||'',match[5]||''),result);if(img.src===src)img.src=result;}
   catch{styleRenderCache.delete(src);img.alt='Could not load Reina. Please reopen Fashion.';}
 },true);
 // Canvas battles consume exactly the same assembled portrait as the wardrobe.
@@ -690,7 +706,7 @@ let lastRegisteredCombatImage=null;
 function registeredCombatBitmap(){
  if(typeof Image==='undefined')return null;
  const {dress,hair}=registeredLook(),weapon=S.atelier?.weapon||((S.reinaFashion?.equipped&4)?12:13);
- const wings=fashionWing().id,key=dress+'/'+hair+'/'+weapon+'/'+wings;
+ const wings=fashionWing().id,key=dress+'/'+hair+'/'+weapon+'/'+wings+'/'+wardrobeExtrasTag();
  if(!registeredCombatCache.has(key)){
   const entry={image:null};registeredCombatCache.set(key,entry);
   renderRegisteredLook(dress,hair,weapon,wings).then(styleImage).then(image=>{entry.image=image;}).catch(()=>registeredCombatCache.delete(key));

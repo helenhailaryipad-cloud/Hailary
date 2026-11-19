@@ -75,15 +75,43 @@ const companionTypes={
  mount:{name:'Mount',title:'Silver Tabby',art:'reina-silver-tabby',icon:'silver-tabby-icon',growth:{attack:3,health:120,penetration:0.1,defense:5}},
  cloak:{name:'Cloak',title:'Moonveil Mantle',art:'gear-armor-t3',icon:'gear-armor-t3',growth:{attack:2,health:80,elementalAttack:3,elementalDefense:3}},
  back:{name:'Back Accessory',title:'Adventurer’s Satchel',art:'hud-bag',icon:'hud-bag',growth:{attack:3,health:65,penetration:0.1,defense:2}},
- footprint:{name:'Footprint',title:'Starlit Steps',art:'reina-walk',icon:'gear-boots-t3',growth:{attack:2,health:50,elementalAttack:2,elementalDefense:2}}
+ footprint:{name:'Footprint',title:'Starlit Steps',art:'reina-walk',icon:'gear-boots-t3',growth:{attack:2,health:50,elementalAttack:2,elementalDefense:2}},
+ tail:{name:'Tail',title:'Fox Tail',art:'comp-tail-fox',icon:'comp-icon-tail-fox',growth:{attack:2,health:55,defense:2}}
 };
+// Appearances for each companion slot. The first one of every slot is free; the rest are bought
+// once with gold and listed in save.companionSkins as "slot:id". They change looks only, never stats.
+const companionSkinPrice={elf:800,cloak:600,back:500,footprint:300,tail:500};
+const companionSkins=Object.fromEntries(Object.entries({"elf": [["dreamveil", "Dreamveil"], ["bluebell", "Bluebell"], ["firefly", "Firefly Pixie"], ["rosebud", "Rosebud Sprite"], ["snowdrop", "Snowdrop Sylph"], ["sunny", "Sunbeam Sprite"], ["moonmoth", "Moon Moth"], ["leafling", "Leafling"], ["bubble", "Bubble Nymph"], ["starwisp", "Starwisp"], ["mushroom", "Mushroom Gnome"], ["candy", "Candy Pixie"], ["cloudlet", "Cloud Cherub"], ["acorn", "Acorn Sprite"], ["lotus", "Lotus Fairy"], ["spark", "Thunder Spark"], ["crystal", "Crystal Fairy"], ["honeybee", "Honeybee Fairy"], ["peach", "Peach Blossom"], ["lavender", "Lavender Dream"], ["prism", "Rainbow Prism"]], "cloak": [["moonveil", "Moonveil Mantle"], ["rosepetal", "Rose Petal Cape"], ["leafweave", "Emerald Leaf Cloak"], ["phoenix", "Phoenix Flame Cape"], ["frostfur", "Frost Crystal Mantle"], ["starnight", "Starry Night Cloak"], ["royal", "Royal Crimson Cape"], ["sunray", "Golden Sun Mantle"], ["oceanwave", "Ocean Wave Cape"], ["ravenfeather", "Shadow Raven Cloak"], ["butterfly", "Butterfly Wing Cape"], ["sakura", "Sakura Blossom Cape"], ["autumnleaf", "Autumn Leaf Cloak"], ["rainbowsilk", "Rainbow Silk Cape"], ["dragonscale", "Dragon Scale Mantle"], ["owlfeather", "Snow Owl Cloak"], ["amethyst", "Amethyst Crystal Cape"], ["peacock", "Peacock Feather Cloak"], ["honeycomb", "Honeycomb Amber Cape"], ["cloudmist", "Cloud Mist Mantle"]], "back": [["satchel", "Adventurer’s Satchel"], ["quiver", "Elven Quiver"], ["lute", "Songbird Lute"], ["lanternstaff", "Lantern Staff"], ["spellbooks", "Spellbook Pack"], ["twinblades", "Twin Blades"], ["crystalhalo", "Crystal Halo"], ["bunnypack", "Bunny Backpack"], ["harp", "Golden Harp"], ["banner", "Sky Garden Banner"]], "footprint": [["stars", "Starlit Steps"], ["petals", "Petal Path"], ["embers", "Ember Trail"], ["snow", "Snowflake Steps"], ["leaves", "Leaf Dance"], ["ripples", "Ripple Walk"], ["sparks", "Spark Steps"], ["hearts", "Heart Beats"], ["moons", "Moon Glow"], ["paws", "Rainbow Paws"]], "tail": [["fox", "Fox Tail"], ["kitsune", "Kitsune Tails"], ["tabby", "Tabby Tail"], ["dragon", "Drake Tail"], ["wolf", "Wolf Tail"], ["squirrel", "Squirrel Tail"], ["peacock", "Peacock Train"], ["phoenix", "Phoenix Plumes"], ["imp", "Imp Tail"], ["unicorn", "Unicorn Tail"]]}).map(([key,list])=>[key,list.map(([id,name],i)=>({id,name,cost:i?companionSkinPrice[key]:0}))]));
+function companionSkin(save,key){
+ const list=companionSkins[key];if(!list)return null;
+ return list.find(skin=>skin.id===save.companions?.[key]?.skin)||list[0];
+}
+function ownsCompanionSkin(save,key,id){
+ const skin=companionSkins[key]?.find(skin=>skin.id===id);
+ return !!skin&&(skin.cost===0||!!save.companionSkins?.includes(key+':'+id));
+}
+// Returns true when the skin is now in use; buys it first if needed and affordable.
+function useCompanionSkin(save,key,id){
+ const skin=companionSkins[key]?.find(skin=>skin.id===id);if(!skin)return false;
+ if(!ownsCompanionSkin(save,key,id)){
+  if(save.gold<skin.cost)return false;
+  save.gold-=skin.cost;save.companionSkins=[...(save.companionSkins||[]),key+':'+id];
+ }
+ (save.companions??={})[key]={...companionState(save,key),skin:id,equipped:true,hidden:false};return true;
+}
+function validCompanionSkins(list){
+ if(list===undefined)return true;
+ return Array.isArray(list)&&list.length<=80&&new Set(list).size===list.length&&list.every(entry=>{
+  if(typeof entry!=='string')return false;const [key,id]=entry.split(':');
+  return entry===key+':'+id&&!!companionSkins[key]?.some(skin=>skin.id===id&&skin.cost>0);});
+}
 function companionState(save,key){
  return {level:1,tier:1,form:0,hidden:false,equipped:false,...save.companions?.[key]};
 }
 function validCompanions(data){
  if(data===undefined)return true;
  return data!==null&&typeof data==='object'&&!Array.isArray(data)&&Object.entries(data).every(([key,v])=>
-  Object.hasOwn(companionTypes,key)&&v&&Number.isInteger(v.level)&&v.level>=1&&v.level<=100&&Number.isInteger(v.tier)&&v.tier>=1&&v.tier<=10&&Number.isInteger(v.form)&&v.form>=0&&v.form<=2&&typeof v.hidden==='boolean'&&typeof v.equipped==='boolean');
+  Object.hasOwn(companionTypes,key)&&v&&Number.isInteger(v.level)&&v.level>=1&&v.level<=100&&Number.isInteger(v.tier)&&v.tier>=1&&v.tier<=10&&Number.isInteger(v.form)&&v.form>=0&&v.form<=2&&typeof v.hidden==='boolean'&&typeof v.equipped==='boolean'&&(v.skin===undefined||!!companionSkins[key]?.some(skin=>skin.id===v.skin)));
 }
 function companionPoints(v){return v.level-1+(v.tier-1)*5}
 function improveCompanion(save,key,tier){
@@ -149,7 +177,9 @@ function petTeamAttack(s){
  return petTeam(s).reduce((sum,id)=>id?sum+petAttack(s,id)+badgeRank(s,id)*5:sum,0);
 }
 function validPets(s){
- if(!validCompanions(s.companions))return false;
+ if(!validCompanions(s.companions)||!validCompanionSkins(s.companionSkins))return false;
+ // A worn paid appearance must be owned.
+ for(const [key,v] of Object.entries(s.companions||{}))if(v.skin!==undefined&&!ownsCompanionSkin(s,key,v.skin))return false;
  for(const [ranks,max] of [[s.petBadges,20],[s.petStars,6]]){
   if(ranks!==undefined&&(!ranks||typeof ranks!=='object'||Array.isArray(ranks)||!Object.entries(ranks).every(([id,n])=>Object.hasOwn(petStarts,id)&&s.owned?.includes(id)&&Number.isInteger(n)&&n>=0&&n<=max)))return false;
  }
@@ -243,5 +273,5 @@ function rollBossTier(save,random){
 }
 function bossLoot(save,id,random=Math.random){const table=bossLootTables[id];if(!table)return null;const eq=state(save);save.equipment=eq;const materials=Object.fromEntries(materialDefs.map(m=>[m.id,table[m.id]||0]));for(const m of materialDefs)eq.materials[m.id]+=materials[m.id];const tier=rollBossTier(save,random),slot=table.slots[Math.min(table.slots.length-1,Math.max(0,Math.floor(random()*table.slots.length)))],drop=addDrop(save,tier,slot);if(drop.converted){eq.materials.stone+=15;materials.stone+=20;}else{drop.enhance=table.enhance;drop.stars=table.stars;}return {...materials,entry:drop.converted?null:drop,converted:!!drop.converted};}
 function grant(save,type,won,score=0){const eq=state(save);save.equipment=eq;let stones=type==='dungeon'?(won?12:3):type==='defense'?(won?8:2):type==='spar'?(won?2:0):Math.min(7,Math.floor(score/180));eq.materials.stone+=stones;let shard=won&&(type==='dungeon'||type==='defense')?3:0;eq.materials.shard+=shard;if(won&&type==='dungeon'){eq.materials.essence+=2;eq.materials.gem+=1}return {stone:stones,shard,gem:won&&type==='dungeon'?1:0,essence:won&&type==='dungeon'?2:0}}
-return Object.freeze({fashionTraits,companionTypes,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,starGearCount,starDonors,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
+return Object.freeze({fashionTraits,companionTypes,companionSkins,companionSkin,ownsCompanionSkin,useCompanionSkin,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,starGearCount,starDonors,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
 })();
