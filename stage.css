@@ -6790,7 +6790,7 @@ body[data-screen=games] #stage .portal-illustration{background:#244a3c}
 .den-flank{bottom:20%;height:60%;max-width:42%;filter:brightness(.78) saturate(.85) drop-shadow(0 .8cqh 1cqh #050b2a99);z-index:1}
 .den-flank-0{left:-3%}.den-flank-1{right:-3%}
 .den-glow{position:absolute;left:14%;right:14%;bottom:-2%;height:20%;background:radial-gradient(ellipse,#bfe6ff77 0,#7fb4ff33 40%,transparent 70%);z-index:0}
-.den-dim{filter:grayscale(.85) brightness(.45)}
+.den-dim{filter:drop-shadow(0 1.2cqh 1.4cqh #050b2a99)}   /* not collected yet: shown in full colour, marked by a badge, never greyed out */
 .den-name{position:absolute;left:0;right:0;bottom:0;z-index:3;margin:0!important;display:flex;align-items:center;justify-content:center;gap:.5em;font-size:4.2cqw!important;text-shadow:0 2px 3px #050b2a,0 0 8px #050b2a}
 .den em{font-style:normal}
 .den-name em,.den-rarity{padding:.12em .6em;border-radius:.3em;font-size:.62em;color:#1a1438;background:var(--edge);text-shadow:none}
@@ -6832,7 +6832,7 @@ body[data-screen=games] #stage .portal-illustration{background:#244a3c}
 .den-card small{position:absolute;left:0;right:0;bottom:1.5%;font-size:.72em;color:#e3efff;text-shadow:0 1px 2px #000}
 .den-card::selection{background:transparent}
 #main .den .den-card[aria-pressed=true],#modalBody .den-card[aria-pressed=true]{border-color:#ffe27a;box-shadow:0 0 0 2px #ffb93c,0 0 14px #ffb93c}
-.den-locked img{filter:grayscale(.9) brightness(.45)}.den-locked{opacity:.86}
+.den-locked small{color:#ffd98a}
 #main .den .den-empty{display:grid;place-content:center;gap:.3em;border:1px dashed #9bb5cc;background:#16306a88;--edge:#9bb5cc}
 .den-empty i{position:static;font-style:normal;font-size:1.8em}.den-empty small{position:static}
 #main .den .den-link{background:transparent;border:0;padding:.2em;text-decoration:underline;font-size:.95em;color:#e8f2ff;min-height:1.5em;display:block}
@@ -6929,3 +6929,7 @@ body[data-screen=games] #stage .portal-illustration{background:#244a3c}
 #modalBody .den-summoned{grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;font-size:clamp(9px,1.55vw,14px)}
 #modalBody .den-card small{white-space:nowrap;overflow:hidden}
 #modalBody .den-congrats{width:100%;box-sizing:border-box}
+
+/* Pets not collected yet: full colour, with a padlock chip on the card and a ribbon on the stage */
+.den-card .den-lockchip{position:absolute;right:3%;top:3%;z-index:2;display:grid;place-items:center;width:1.7em;height:1.7em;border-radius:50%;background:#0c173fd9;border:1px solid #ffd98a;font-size:.8em;font-style:normal;line-height:1}
+.den-stage .den-notyet{position:absolute;left:50%;top:3%;z-index:3;transform:translateX(-50%);padding:.3em 1.2em;border-radius:99px;background:#0c173fd9;border:1px solid #ffd98a;color:#ffe9b8;white-space:nowrap;font-size:1.02em}
