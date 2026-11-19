@@ -461,12 +461,19 @@ function companionAction(action,arg){
  save();cityCompanion();
 }
 // Fairy and footsteps beside Reina on the home screen. Cloak, back accessory and tail are part of her portrait.
+// Footsteps on Reina: four single marks in a straight track behind her legs, left and right in turn, smaller with
+// distance. (The diagonal trail picture comp-step-<id> is only for the cards.)
+function stepTrack(id,cls){
+ const src=artPath('comp-step-'+id+'-mark');
+ return '<span aria-hidden="true" class="step-track '+cls+'">'+[0,1,2,3].map(i=>'<img class="step-'+i+'" src="'+src+'" alt="">').join('')+'</span>';
+}
 // Paint order on the home screen: pets, footsteps, Reina, fairy. The track starts under her heel, so it is drawn
 // before her and after the pets.
 function cityCompanionEffects(keys=['elf','footprint']){
  return keys.map(key=>{
   const v=WonderGear.companionState(S,key);
   if(!v.equipped||v.hidden||key==='footprint'&&currentMount())return '';
+  if(key==='footprint')return stepTrack(WonderGear.companionSkin(S,key).id,'home-steps');
   return '<span aria-hidden="true" class="city-companion-effect fx-'+key+'"><img src="'+companionIcon(key,WonderGear.companionSkin(S,key).id)+'" alt=""></span>';
  }).join('');
 }
@@ -483,7 +490,7 @@ function cityCompanion(){
  const look=registeredLook(),weapon=S.atelier?.weapon||((S.reinaFashion?.equipped&4)?12:13);
  const preview=key==='mount'?'<img class="comp-figure" src="'+mountedLookPath(pick.id)+'" alt="Reina riding '+esc(pick.name)+'">'
   :key==='elf'?'<img class="comp-figure comp-float" src="'+companionIcon(key,pick.id)+'" alt="'+esc(pick.name)+'">'
-  :key==='footprint'?'<img class="comp-figure" src="'+registeredLookPath(look.dress,look.hair,weapon,'','')+'" alt="Reina"><img class="comp-steps" src="'+companionIcon(key,pick.id)+'" alt="'+esc(pick.name)+'">'
+  :key==='footprint'?'<img class="comp-figure" src="'+registeredLookPath(look.dress,look.hair,weapon,'','')+'" alt="Reina">'+stepTrack(pick.id,'room-steps')
   :'<img class="comp-figure" src="'+registeredLookPath(look.dress,look.hair,weapon,'',wardrobeExtrasTag({[key]:pick.id}))+'" alt="Reina with '+esc(pick.name)+'">';
  const cards=list.map(x=>'<button class="comp-card" aria-pressed="'+(x.id===pick.id)+'" onclick="pickCompanion(\''+x.id+'\')"><img src="'+companionIcon(key,x.id)+'" alt="" loading="lazy"><span>'+esc(x.name)+'</span>'+(worn===x.id?'<em>In use</em>':companionOwns(key,x.id)?'':'<em class="price">'+fmt(x.cost)+'</em>')+'</button>').join('');
  const previous=document.querySelector?.('.comp-cards'),scroll=previous?.dataset?.key===key?previous.scrollLeft:0;
