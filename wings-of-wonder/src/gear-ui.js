@@ -412,11 +412,10 @@ function cityPet(){
  $('#main').innerHTML='<section class="spirit-room" data-page="'+petPage+'"><strong class="spirit-ribbon">'+petPage+'</strong><div class="spirit-body">'+body+'</div><div class="spirit-nav"><button aria-label="Back to city" onclick="go(\'home\')">‹</button>'+petPages.map((page,i)=>'<button aria-pressed="'+(page===petPage)+'" onclick="petTab(\''+page+'\')">'+artImage(['hud-pet','hud-bag','hud-companion','hud-forge'][i],'')+page+'</button>').join('')+'</div></section>';
 }
 
-let companionKey='elf',companionMode='Upgrade';
+let companionKey='elf',companionMode='Upgrade',companionPick={};
 const companionForms=['Classic','Moonlight','Sunfire'];
 function companionModes(key){
- if(key==='back')return ['Morphing'];
- return ['elf','mount'].includes(key)?['Upgrade','Tier-up','Morphing','Equip']:['Upgrade','Morphing'];
+ return key==='mount'?['Looks','Upgrade','Tier-up']:['Looks','Upgrade','Tier-up'];
 }
 function companionTab(key,mode){
  if(!WonderGear.companionTypes[key])return;
@@ -424,41 +423,69 @@ function companionTab(key,mode){
  companionMode=companionModes(key).includes(mode)?mode:companionModes(key)[0];
  cityCompanion();
 }
+// Art for one appearance of a slot: its card picture, and what the home screen shows.
+function companionIcon(key,id){
+ if(key==='mount')return artPath(mounts.find(m=>m.id===id)?.icon||mounts[0].icon);
+ if(key==='elf')return artPath(id==='dreamveil'?WonderGear.companionTypes.elf.art:'comp-elf-'+id);
+ if(key==='footprint')return artPath('comp-step-'+id);
+ return artPath('comp-icon-'+key+'-'+id);
+}
+function companionChoices(key){return key==='mount'?mounts.map(m=>({id:m.id,name:m.name,cost:m.cost})):WonderGear.companionSkins[key]||[];}
+function companionOwns(key,id){return key==='mount'?ownsMount(id):WonderGear.ownsCompanionSkin(S,key,id);}
+function companionWorn(key){return key==='mount'?(currentMount()?.id||''):(()=>{const v=WonderGear.companionState(S,key);return v.equipped?WonderGear.companionSkin(S,key).id:''})();}
+function companionPicked(key){
+ const list=companionChoices(key),pick=companionPick[key];
+ return list.find(x=>x.id===pick)||list.find(x=>x.id===(key==='mount'?chosenMount().id:WonderGear.companionSkin(S,key)?.id))||list[0];
+}
+function pickCompanion(id){if(companionChoices(companionKey).some(x=>x.id===id)){companionPick[companionKey]=id;cityCompanion();}}
 function companionAction(action,arg){
  const r=WonderGear,key=companionKey,v=r.companionState(S,key);
  if(action==='upgrade'||action==='tier'){
   if(!r.improveCompanion(S,key,action==='tier'))return;
- }else{
-  if(action==='form'&&Number.isInteger(arg)&&arg>=0&&arg<=2&&v.level>=[1,5,10][arg])v.form=arg;
-  else if(action==='hide')v.hidden=!v.hidden;
-  else if(action==='equip'){
-   if(key==='mount'){S.mountId=currentMount()?'':chosenMount().id;delete S.ridingSilverTabby}
-   else v.equipped=!v.equipped;
-  }else return;
-  (S.companions??={})[key]=v;
- }
+ }else if(action==='use'){
+  const pick=companionPicked(key);
+  if(key==='mount'){
+   if(!ownsMount(pick.id)){if(S.gold<pick.cost){toast('Not enough gold');return}S.gold-=pick.cost;S.mountsOwned=[...new Set([...(S.mountsOwned||[]),pick.id])];}
+   S.mountPick=pick.id;S.mountId=pick.id;delete S.ridingSilverTabby;
+  }else if(!r.useCompanionSkin(S,key,pick.id)){toast('Not enough gold');return}
+ }else if(action==='remove'){
+  if(key==='mount'){S.mountId='';delete S.ridingSilverTabby}
+  else (S.companions??={})[key]={...v,equipped:false};
+ }else return;
  save();cityCompanion();
 }
+// Fairy and footsteps beside Reina on the home screen. Cloak, back accessory and tail are part of her portrait.
 function cityCompanionEffects(){
- return ['back','cloak','footprint'].map(key=>{
+ return ['elf','footprint'].map(key=>{
   const v=WonderGear.companionState(S,key);
-  if(!v.equipped||v.hidden)return '';
-  return '<span aria-hidden="true" class="city-companion-effect fx-'+key+' form-'+v.form+'">'+(key==='footprint'?'<i></i><i></i><i></i>':key==='cloak'?'<span class="moonveil-cloak"></span>':artImage(WonderGear.companionTypes[key].art,''))+'</span>';
+  if(!v.equipped||v.hidden||key==='footprint'&&currentMount())return '';
+  return '<span aria-hidden="true" class="city-companion-effect fx-'+key+'"><img src="'+companionIcon(key,WonderGear.companionSkin(S,key).id)+'" alt=""></span>';
  }).join('');
 }
 function cityCompanion(){
  const r=WonderGear,key=companionKey,t=r.companionTypes[key],v=r.companionState(S,key);
  const labels={attack:'ATK',health:'HP',defense:'DEF',penetration:'ARP %',elementalAttack:'ELEM. ATK',elementalDefense:'ELEM. DEF'};
- const tier=companionMode==='Tier-up'||key==='back'&&v.level>=v.tier*5&&v.tier<10,points=r.companionPoints(v);
+ const tier=companionMode==='Tier-up',points=r.companionPoints(v);
  const price=tier?v.tier*5:v.level*100,balance=tier?r.state(S).materials.shard:S.gold;
- const equipped=key==='mount'?!!currentMount():v.equipped;
+ const list=companionChoices(key),pick=companionPicked(key),worn=companionWorn(key),owned=companionOwns(key,pick.id),inUse=worn===pick.id;
  const statRows=Object.entries(t.growth).map(([k,n])=>'<div><b>'+labels[k]+'</b><span>'+fmtCompanion(n*points)+'</span><em>↑ '+fmtCompanion(n*(tier?5:1))+'</em></div>').join('');
- const modes=companionModes(key),nav=Object.entries(r.companionTypes).map(([k,x])=>'<button aria-pressed="'+(k===key)+'" onclick="companionTab(\''+k+'\')">'+artImage(x.icon,'')+x.name+'</button>').join('');
- const equip='<button class="spirit-gold" onclick="companionAction(\'equip\')">'+(equipped?(key==='mount'?'Dismount':'Unequip'):(key==='mount'?'Ride':'Equip'))+'</button>';
- const upgrade='<small>'+ (tier?'Tier '+v.tier+' · Requires Lv. '+v.tier*5:'Lv. '+v.level+' / 100')+'</small><progress value="'+(tier?Math.min(v.level,v.tier*5):v.level)+'" max="'+(tier?v.tier*5:100)+'"></progress><button class="spirit-gold" onclick="companionAction(\''+(tier?'tier':'upgrade')+'\')" '+(balance<price||(tier?v.tier>=10||v.level<v.tier*5:v.level>=100)?'disabled':'')+'>'+(tier?'Tier up':'Upgrade')+'</button><small>'+fmt(price)+(tier?' shards':' gold')+'</small>';
- const forms=companionForms.map((name,i)=>'<button aria-pressed="'+(v.form===i)+'" class="form-'+i+'" onclick="companionAction(\'form\','+i+')" '+(v.level<[1,5,10][i]?'disabled':'')+'>'+artImage(t.icon,'')+'<small>'+name+(v.level<[1,5,10][i]?' · Lv.'+[1,5,10][i]:'')+'</small></button>').join('');
- const preview=key==='cloak'?'<div class="moonveil-cloak" role="img" aria-label="Moonveil Mantle"><i>✦</i></div>':key==='footprint'?'<div class="step-marks"><i></i><i></i><i></i></div><img src="'+reinaLookPath(false)+'" alt="Reina">':artImage(t.art,t.title);
- $('#main').innerHTML='<section class="spirit-room companion-room"><div class="satchel-top"><strong>'+t.name+'</strong>'+[['gold',S.gold],['wishes',S.tickets],['crystals',S.scales]].map(([i,n])=>'<span>'+uiIcon(i)+fmt(n)+'</span>').join('')+'</div><header><h2>Lv.'+v.level+' '+t.title+'</h2><b class="spirit-value">⚔ '+fmt(Object.values(t.growth).reduce((a,b)=>a+b,0)*points)+'</b></header><div class="companion-show">'+(key==='mount'?'':'<label><input type="checkbox" '+(v.hidden?'checked':'')+' onchange="companionAction(\'hide\')"> Hide</label>')+'<div class="companion-object form-'+v.form+'">'+preview+'</div></div><div class="companion-forms">'+forms+'</div><section class="companion-stats"><div>'+statRows+'</div><div>'+(companionMode==='Equip'?equip:companionMode==='Morphing'&&key!=='back'?equip:upgrade)+(key==='back'?equip:'')+'</div></section><div class="companion-modes">'+modes.map(m=>'<button aria-pressed="'+(m===companionMode)+'" onclick="companionTab(\''+key+'\',\''+m+'\')">'+m+'</button>').join('')+'</div><div class="spirit-nav"><button aria-label="Back to city" onclick="go(\'home\')">‹</button>'+nav+'</div></section>';
+ const nav=Object.entries(r.companionTypes).map(([k,x])=>'<button aria-pressed="'+(k===key)+'" onclick="companionTab(\''+k+'\')"><img src="'+companionIcon(k,k==='mount'?chosenMount().id:r.companionSkin(S,k).id)+'" alt=""><span>'+x.name+'</span></button>').join('');
+ const upgrade='<small>'+(tier?'Tier '+v.tier+' · needs Lv. '+v.tier*5:'Lv. '+v.level+' / 100')+'</small><progress value="'+(tier?Math.min(v.level,v.tier*5):v.level)+'" max="'+(tier?v.tier*5:100)+'"></progress><button class="spirit-gold" onclick="companionAction(\''+(tier?'tier':'upgrade')+'\')" '+(balance<price||(tier?v.tier>=10||v.level<v.tier*5:v.level>=100)?'disabled':'')+'>'+(tier?'Tier up':'Upgrade')+'</button><small>'+fmt(price)+(tier?' shards':' gold')+'</small>';
+ const use='<strong>'+esc(pick.name)+'</strong><small>'+(owned?(inUse?'In use':'Owned'):fmt(pick.cost)+' gold')+'</small>'+(inUse?'<button onclick="companionAction(\'remove\')">'+(key==='mount'?'Dismount':'Take off')+'</button>':'<button class="spirit-gold" onclick="companionAction(\'use\')" '+(!owned&&S.gold<pick.cost?'disabled':'')+'>'+(owned?(key==='mount'?'Ride':'Use'):'Buy &amp; '+(key==='mount'?'ride':'use'))+'</button>');
+ const look=registeredLook(),weapon=S.atelier?.weapon||((S.reinaFashion?.equipped&4)?12:13);
+ const preview=key==='mount'?'<img class="comp-figure" src="'+mountedLookPath(pick.id)+'" alt="Reina riding '+esc(pick.name)+'">'
+  :key==='elf'?'<img class="comp-figure comp-float" src="'+companionIcon(key,pick.id)+'" alt="'+esc(pick.name)+'">'
+  :key==='footprint'?'<img class="comp-figure" src="'+registeredLookPath(look.dress,look.hair,weapon,'','')+'" alt="Reina"><img class="comp-steps" src="'+companionIcon(key,pick.id)+'" alt="'+esc(pick.name)+'">'
+  :'<img class="comp-figure" src="'+registeredLookPath(look.dress,look.hair,weapon,'',wardrobeExtrasTag({[key]:pick.id}))+'" alt="Reina with '+esc(pick.name)+'">';
+ const cards=list.map(x=>'<button class="comp-card" aria-pressed="'+(x.id===pick.id)+'" onclick="pickCompanion(\''+x.id+'\')"><img src="'+companionIcon(key,x.id)+'" alt="" loading="lazy"><span>'+esc(x.name)+'</span>'+(worn===x.id?'<em>In use</em>':companionOwns(key,x.id)?'':'<em class="price">'+fmt(x.cost)+'</em>')+'</button>').join('');
+ const previous=document.querySelector?.('.comp-cards'),scroll=previous?.dataset?.key===key?previous.scrollLeft:0;
+ $('#main').innerHTML='<section class="comp-room"><div class="comp-top"><strong>'+t.name+' · Lv.'+v.level+'</strong>'+[['gold',S.gold],['wishes',S.tickets],['crystals',S.scales]].map(([i,n])=>'<span>'+uiIcon(i)+fmt(n)+'</span>').join('')+'</div>'
+  +'<div class="comp-stage"><h2>'+esc(pick.name)+'</h2>'+preview+'</div>'
+  +'<div class="comp-cards" data-key="'+key+'">'+cards+'</div>'
+  +'<div class="comp-panel"><div class="comp-stats">'+statRows+'</div><div class="comp-action">'+(companionMode==='Looks'?use:upgrade)+'</div></div>'
+  +'<div class="comp-modes">'+companionModes(key).map(m=>'<button aria-pressed="'+(m===companionMode)+'" onclick="companionTab(\''+key+'\',\''+m+'\')">'+m+'</button>').join('')+'</div>'
+  +'<div class="comp-nav"><button class="comp-back" aria-label="Back to city" onclick="go(\'home\')">‹</button>'+nav+'</div></section>';
+ const strip=document.querySelector?.('.comp-cards');if(strip)strip.scrollLeft=scroll;
 }
 function fmtCompanion(n){return Number(n.toFixed(1)).toLocaleString('en-US')}
 

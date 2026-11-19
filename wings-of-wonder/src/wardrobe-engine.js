@@ -2,10 +2,10 @@
 (function(root){
  'use strict';
  const frame=Object.freeze({width:500,height:800,body:Object.freeze([0,40,500,750]),anchors:Object.freeze({neck:[231,162],back:[240,206],hand:[218,300],grip:[390,375]})});
- const slots=Object.freeze(['wingsBack','hairBack','garmentBack','body','boots','garmentFront','sleeves','handFront','weapon','gripFingers','hairFront','accessoriesFront']);
+ const slots=Object.freeze(['wingsBack','cloakBack','backItem','tailBack','hairBack','garmentBack','body','boots','garmentFront','sleeves','handFront','weapon','gripFingers','hairFront','accessoriesFront']);
  const items=new Map();
  function register(item){
-  if(!item||!item.id||!['dress','hair','weapon','wings'].includes(item.kind))throw Error('Invalid wardrobe item');
+  if(!item||!item.id||!['dress','hair','weapon','wings','extra'].includes(item.kind))throw Error('Invalid wardrobe item');
   if(item.frame&&(item.frame[0]!==500||item.frame[1]!==800))throw Error('Wardrobe frame must be 500 x 800');
   if(!Array.isArray(item.layers)||!item.layers.length)throw Error('Missing wardrobe layers');
   for(const layer of item.layers){
@@ -32,9 +32,9 @@
    ctx.clip(outer,'evenodd');
   }else ctx.clip(p);
  }
- async function render({dress,hair,weapon,wings,scale=2,load,createCanvas,body,bodyLayers=[],pad=0,padTop=0}){
+ async function render({dress,hair,weapon,wings,extras=[],scale=2,load,createCanvas,body,bodyLayers=[],pad=0,padTop=0}){
   if(!Number.isFinite(scale)||scale<1||scale>4)throw Error('Invalid wardrobe scale');
-  const selected=[dress,hair,weapon,wings].filter(Boolean).map(id=>{const it=items.get(id);if(!it)throw Error('Unknown wardrobe item '+id);return it;});
+  const selected=[dress,hair,weapon,wings,...extras].filter(Boolean).map(id=>{const it=items.get(id);if(!it)throw Error('Unknown wardrobe item '+id);return it;});
   const layers=[{slot:'body',asset:body,rect:frame.body},...selected.flatMap(it=>it.layers),...bodyLayers];
   const images=new Map(await Promise.all([...new Set([...layers.map(it=>it.asset),...selected.map(it=>it.bodyErase).filter(Boolean)])].map(async id=>[id,await load(id)])));
   // Nothing is returned until the complete dressed scene is decoded.

@@ -130,6 +130,21 @@ tide-turtle, thunder-tiger, snow-owl, rainbow-phoenix, midnight-steed, honey-bea
   `#mounted-<dress>-<hair>~<mount>` (no suffix for the tabby). Mounts are cosmetic: no stats.
 - 62 more build-time AVIF copies in `scripts/hosting-art` keep the hosted bundle under the limit (about 1.8 MB spare).
 
+## Companion room and appearances (2026-11-19)
+Home -> Companion (`cityCompanion()` in `gear-ui.js`) was rebuilt (`.comp-room`; the old layout was broken). Six slot
+tabs: Elf, Mount, Cloak, Back Accessory, Footprint, Tail (new slot `tail` in `companionTypes`). Each tab shows a large
+preview, a scrollable strip of appearance cards, stats with Looks / Upgrade / Tier-up modes.
+- Catalog in `gear-data.js`: `companionSkins` = 21 elves (Dreamveil + 20), 20 cloaks, 10 back accessories, 10 footsteps,
+  10 tails. First of each slot is free; others cost gold once (`companionSkinPrice`), owned list in optional save field
+  `S.companionSkins` ("slot:id"), worn one in `S.companions[slot].skin`. Validation rejects unowned or unknown skins.
+  Appearances never change stats. The Mount tab lists the same 21 mounts as Fashion.
+- Art: `scripts/build-companions.py` from `art-source/companions/`. Cloaks, back items and tails are paintings of the
+  bald base body; the layer is what lies OUTSIDE her silhouette (`comp-<kind>-<id>`), drawn behind the body through new
+  engine slots `cloakBack, backItem, tailBack` (after `wingsBack`), so they work under every dress. Portrait keys carry
+  `!cloak.back.tail` (`wardrobeExtrasTag()`), so they show on the home screen and in battles, not when riding.
+- Fairy (`comp-elf-<id>`) and footsteps (`comp-step-<id>`) are overlays on the home screen (`cityCompanionEffects`).
+- Chat preview packs all `comp-*` art into `pack-comp.js` (file limit). Hosted bundle headroom after this: see build.
+
 ## In-chat playable preview (user requirement)
 The user wants to play the game inside the chat, and wants SHORT replies in Russian, no fluff.
 - Artifact: https://claude.ai/artifact/L9owNJPMaZjAsTmU3tDGs6 (private). After game changes, rebuild and republish:

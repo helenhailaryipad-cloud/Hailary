@@ -6686,3 +6686,44 @@ body[data-screen="dungeons"] #main{overflow-y:auto!important;overflow-x:hidden!i
 .lobby-place{position:relative;z-index:1;background:#12244ae6}
 .lobby-boss{overflow:hidden}
 @container (max-width:520px){.dungeon-lobby{grid-template-rows:auto minmax(15rem,1fr) auto auto auto}}
+
+/* Companion room: preview, appearance cards, stats/action, modes, slot tabs */
+body[data-screen="cityCompanion"] #main{padding:0!important;overflow:hidden!important}
+.comp-room{height:100%;min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto auto auto auto;color:#f1f6ff;background:radial-gradient(120% 70% at 50% 30%,#3d5fa3 0,#274774 48%,#1e2f5a 100%);container-type:inline-size;overflow:hidden}
+.comp-top{display:flex;align-items:center;gap:.6rem;padding:.45rem .8rem;font-size:clamp(.85rem,3cqw,1.1rem)}
+.comp-top strong{margin-right:auto;font-size:clamp(1.05rem,4cqw,1.5rem)}.comp-top span{display:flex;align-items:center;gap:.2rem}.comp-top .gpt-icon{width:1.4em;height:1.4em}
+.comp-stage{position:relative;min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr);justify-items:center}
+.comp-stage h2{margin:0;font-size:clamp(1.1rem,4.6cqw,1.8rem);color:#ffe27a;text-shadow:0 2px 0 #3a2a10}
+.comp-figure{min-height:0;height:100%;max-width:96%;object-fit:contain;filter:drop-shadow(0 10px 12px #0b153088)}
+.comp-float{height:70%;align-self:center;animation:comp-bob 2.4s ease-in-out infinite alternate}
+@keyframes comp-bob{to{transform:translateY(-5%)}}
+.comp-steps{position:absolute;left:50%;bottom:1%;width:34%;transform:translateX(-12%);pointer-events:none}
+.comp-cards{display:flex;gap:.4rem;padding:.4rem .6rem;overflow-x:auto;scrollbar-width:thin;-webkit-overflow-scrolling:touch;background:#16284ecc;border-block:1px solid #7194c7}
+#main .comp-room .comp-card{position:relative;flex:0 0 clamp(4.6rem,19cqw,6.6rem);min-width:0;min-height:0;padding:.25rem .15rem .3rem;display:grid;justify-items:center;gap:.1rem;border-radius:.5rem;border:1px solid #5f86c4;background:linear-gradient(#27477f,#1d3663);color:#fff7dc;box-shadow:none}
+#main .comp-room .comp-card[aria-pressed="true"]{border:2px solid #fff3b8;background:linear-gradient(#3aa0de,#2a6fb6)}
+.comp-card img{width:100%;height:clamp(3.4rem,14cqw,5rem);object-fit:contain}
+.comp-card span{font-size:clamp(.62rem,2.3cqw,.82rem);line-height:1.1;min-height:2.2em;display:grid;align-items:center;text-align:center}
+.comp-card em{font-style:normal;font-weight:700;font-size:clamp(.6rem,2.1cqw,.76rem);color:#8dff8a}.comp-card em.price{color:#ffe27a}
+.comp-panel{display:grid;grid-template-columns:1.2fr 1fr;align-items:center;gap:.5rem;padding:.4rem .8rem;background:#1b3158e6}
+.comp-stats>div{display:grid;grid-template-columns:1.5fr 1fr 1fr;padding:.12em 0;font-size:clamp(.78rem,2.8cqw,1rem)}.comp-stats em{color:#bade76;font-style:normal}
+.comp-action{display:grid;justify-items:center;gap:.2rem;padding-left:.5rem;border-left:1px dashed #7894af;text-align:center}
+.comp-action strong{font-size:clamp(.9rem,3.2cqw,1.15rem)}.comp-action small{font-size:clamp(.72rem,2.5cqw,.9rem);opacity:.9}.comp-action progress{width:85%;height:.5em;accent-color:#b5d978}
+#main .comp-room .comp-action button{min-width:min(9rem,34cqw);min-height:2.5rem;font-size:clamp(.95rem,3.4cqw,1.2rem)}
+.comp-modes{display:flex;gap:.3rem;padding:.3rem .6rem;background:#16284e}
+#main .comp-room .comp-modes button{flex:1;min-width:0;min-height:2.2rem;padding:.15rem;border-radius:.4rem;border:1px solid #5f86c4;background:#2b4b86;color:#dbe9ff;font-size:clamp(.85rem,3.1cqw,1.1rem);box-shadow:none}
+#main .comp-room .comp-modes button[aria-pressed="true"]{background:linear-gradient(#3ea6e6,#2b7fc9);border-color:#e9f6ff;color:#fff}
+.comp-nav{display:flex;align-items:stretch;background:#132445;border-top:1px solid #8798b1}
+#main .comp-room .comp-nav button{flex:1;min-width:0;min-height:0;padding:.25rem .1rem .35rem;display:grid;justify-items:center;gap:.05rem;border:0;border-radius:0;background:none;color:#e6efff;font-size:clamp(.62rem,2.3cqw,.82rem);line-height:1.05;box-shadow:none}
+#main .comp-room .comp-nav button[aria-pressed="true"]{background:#8a5a2ecc;color:#ffe9b5}
+.comp-nav img{width:clamp(2rem,8cqw,2.8rem);height:clamp(2rem,8cqw,2.8rem);object-fit:contain}
+#main .comp-room .comp-nav .comp-back{flex:0 0 12%;font-size:1.6rem}
+#main .comp-room button::before,#main .comp-room button::after{content:none!important;display:none!important}
+#main .comp-room button{outline:0!important;border-image:none!important}
+.comp-room .action-art-icon{display:none!important}
+/* Home screen: fairy and footsteps */
+.fx-elf{left:60%;top:35%;width:15%;height:13%;z-index:3;animation:comp-bob 2.2s ease-in-out infinite alternate}
+.fx-footprint{left:40%;top:60.5%;width:16%;height:6%;z-index:0;transform:none;display:block}
+.fx-elf img,.fx-footprint img{width:100%;height:100%;object-fit:contain}
+@media (prefers-reduced-motion:reduce){.comp-float,.fx-elf{animation:none}}
+.comp-top{padding-left:5.2rem}
+.comp-nav img{width:clamp(2.2rem,9cqw,3.1rem);height:clamp(2.2rem,9cqw,3.1rem)}

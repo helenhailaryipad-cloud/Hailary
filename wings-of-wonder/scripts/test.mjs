@@ -396,6 +396,28 @@ vm.runInContext(`{
  screen='home';S=defaults();
 }`,context);
 for(const m of vm.runInContext('mounts.slice(1).map(m=>m.id)',context))for(const f of ['fit-control-ride-','mount-icon-'])assert(fs.existsSync('src/assets/generated/'+f+m+'.webp'),'Missing mount art '+f+m);
+vm.runInContext(`{
+ S=defaults();S.gold=2000;const G=WonderGear,count=Object.fromEntries(Object.entries(G.companionSkins).map(([k,l])=>[k,l.length]));
+ if(count.elf!==21||count.cloak!==20||count.back!==10||count.footprint!==10||count.tail!==10)throw Error('Companion catalog');
+ if(wardrobeExtrasTag()!=='')throw Error('Fresh save wears an accessory');
+ if(!G.useCompanionSkin(S,'cloak','moonveil')||S.gold!==2000)throw Error('First appearance is free');
+ if(!G.useCompanionSkin(S,'cloak','royal')||S.gold!==1400||!G.useCompanionSkin(S,'cloak','royal')||S.gold!==1400)throw Error('Appearance bought once');
+ if(!G.useCompanionSkin(S,'tail','kitsune')||wardrobeExtrasTag()!=='royal..kitsune')throw Error('Accessory tag');
+ if(!registeredLookPath().endsWith('!royal..kitsune')||registeredLookPath(undefined,undefined,0,'','').includes('!'))throw Error('Portrait key ignores accessories');
+ S.companions.cloak.hidden=true;if(wardrobeExtrasTag()!=='..kitsune')throw Error('Hidden accessory still drawn');S.companions.cloak.hidden=false;
+ S.gold=10;if(G.useCompanionSkin(S,'elf','bluebell')||G.ownsCompanionSkin(S,'elf','bluebell'))throw Error('Appearance sold without gold');
+ if(G.useCompanionSkin(S,'cloak','nope')||G.useCompanionSkin(S,'wings','x'))throw Error('Unknown appearance accepted');
+ if(!valid(S))throw Error('Valid companion save rejected');
+ const forged=JSON.parse(JSON.stringify(S));forged.companions.elf={level:1,tier:1,form:0,hidden:false,equipped:true,skin:'prism'};if(valid(forged))throw Error('Unowned appearance accepted');
+ const junk=JSON.parse(JSON.stringify(S));junk.companionSkins=['cloak:royal','cloak:royal'];if(valid(junk))throw Error('Duplicate ownership accepted');
+ const before=JSON.stringify(G.stats(defaults())),worn=defaults();G.useCompanionSkin(worn,'tail','fox');if(JSON.stringify(G.stats(worn))!==before)throw Error('Appearance changed stats');
+ S=defaults();
+}`,context);
+for(const [key,list] of Object.entries(vm.runInContext('JSON.parse(JSON.stringify(WonderGear.companionSkins))',context)))for(const skin of list){
+ const files=key==='elf'?(skin.id==='dreamveil'?[]:['comp-elf-'+skin.id]):key==='footprint'?['comp-step-'+skin.id]:['comp-'+key+'-'+skin.id,'comp-icon-'+key+'-'+skin.id];
+ for(const f of files)assert(fs.existsSync('src/assets/generated/'+f+'.webp'),'Missing companion art '+f);
+}
+console.log('PASS: companion appearances: catalog, free first look, buy once, no sale without gold, validation, stats unchanged, art present.');
 console.log('PASS: 20 extra mounts: purchase once, ride/dismount keeps the choice, no sale without gold, art present.');
 console.log('PASS: any dress and hairstyle can ride with its own mounted layers; release-specific wardrobe URLs; second collection art present.');
 
