@@ -64,7 +64,7 @@ more:[['more','Menu'],['world','Realm'],['rankings','Rankings'],['quests','Quest
 };
 function nav(){
 if(screen==='fashion'){
- $('#nav').innerHTML=['Dresses','Hair','Weapons','Wings'].map(name=>`<button aria-pressed="${fashionCategory===name}" onclick="changeFashionTab('${name}')">${name}</button>`).join('');
+ $('#nav').innerHTML=['Dresses','Hair','Weapons','Wings','Mounts'].map(name=>`<button aria-pressed="${fashionCategory===name}" onclick="changeFashionTab('${name}')">${name}</button>`).join('');
  return;
 }
 const selected=screen==='collection'&&filter==='wings'?'wings':screen;
@@ -106,9 +106,13 @@ function showFishJournal(){
 function openScreen(id){if(screen==='isleArena')leaveIsleArena();if(screen==='cityExplore')leaveExploreFight();if(id==='eliteSale'){eliteTab=0;eliteHero='reina';}if(id==='cityHunting'){huntMode=0;huntFloor=WonderGear.unlockedTier(S);huntSlot=0;}if(id==='cityBounty'){bountyPage=0;bountyRank=0;}if(id==='cityGameplay'){playSection=0;playMaterial=0;playTier=3;}if(id==='cityDaily')dailyPage=0;if(id==='cityForge'){smithPage='Forge';smithMode='Identify';smithUid=null;}if(id==='citySkin'){skinTab=0;skinMode='Upgrade';skinVariant=0;skinHidden=false;}if(id==='cityCompanion'){companionKey='elf';companionMode='Upgrade';}if(id==='cityPet'){petPage='Formation';petFocus=S.dragon;}const restoreDrawer=id==='home'&&returnToDrawer;if(id==='home'){cityExpanded=true;returnToDrawer=false;}if(id==='fashion'){stylePick=null;clothingPreview=undefined;reinaPreview=S.reinaFashion?.equipped || 0;wingPreview=S.reinaFashion?.wingSkin||'';fashionCategory='Dresses';}stopGame();screen=id;nav();render();if(restoreDrawer)toggleCityDrawer();$('#main').scrollTop=0;$('#main').scrollLeft=0;window.WonderEffects?.enter?.()}
 function render(){document.body.classList.remove('is-3d');document.body.dataset.screen=screen;wallet();nav();if(screen==='isleArena')renderIsleArena();else if(screen==='eliteSale')eliteStore();else if(screen==='cloudWar')cityCloudWar();else if(screen==='cityExplore')cityExplore();else if(screen==='cityHunting')cityHunting();else if(screen==='cityBounty')cityBounty();else if(screen==='cityGameplay')cityGameplay();else if(screen==='cityDaily')cityDaily();else if(screen==='cityForge')cityForge();else if(screen==='citySkin')citySkin();else if(screen==='cityCompanion')cityCompanion();else if(screen==='cityPet')cityPet();else if(screen==='cityCraft')cityCraft();else if(screen==='cityBag')cityBag();else if(screen==='character')reinaCharacter();else if(screen==='fashion')reinaAtelier();else if(screen==='attributes')characterSheet();else if(['inventory','forge','warehouse'].includes(screen))gearWorkspace();else if(screen==='profile')heroProfile();else if(screen==='home')home();else if(screen==='intro')intro();else if(screen==='more')moreMenu();else if(screen==='bag')bag();else if(screen==='collection')collection();else if(screen==='wish')wish();else if(screen==='games')games();else if(screen==='cards')showFishJournal();else if(screen==='fishing')$('#main').innerHTML=`<iframe title="Moonwater Fishing" src="fishing.html" style="display:block;width:100%;height:100%;min-height:290px;border:0;border-radius:12px"></iframe>`;else if(screen==='world')realm();else if(screen==='rankings')rankings();else if(screen==='quests')questBoard();else if(screen==='expLobby')expLobby();else if(screen==='dungeons')dungeonLobby();else if(screen==='settings')settings();else if(screen==='defense')startDefense();else if(screen==='merge')startMerge();else if(screen==='jungle')showJungle();else if(screen==='pairs')showPairs();else if(screen==='vale')startVale();requestAnimationFrame(decorateArt)}
 function renderHeroReadout(st){$('#profileReadout').innerHTML=`<div class="profile-face"><img src="assets/generated/reina-avatar.webp" alt="Reina"><b>Lv. ${level()}</b></div><div class="profile-vitals"><strong aria-label="Combat power ${fmt(st.power)}">${uiIcon('power')}<small>Power</small>${fmt(st.power)}</strong><span class="profile-hp">HP ${fmt(st.health)}</span></div>`;}
+// Every mount shares one rider pose and saddle, so each dress and hairstyle fits all of them.
+// `base` is the mount under the bald rider (scripts/build-mounted.py); the Silver Tabby is free.
 const mounts = [
-  {id:'silver-tabby', name:'Silver Tabby', rarity:'Common', icon:'silver-tabby-icon', rider:'reina-silver-tabby'}
+  {id:'silver-tabby', name:'Silver Tabby', rarity:'Common', icon:'silver-tabby-icon', rider:'reina-silver-tabby', base:'fit-control-mount-base', cost:0},
+  ...[["moon-unicorn", "Moonlight Unicorn"], ["emerald-stag", "Emerald Stag"], ["ember-fox", "Ember Fox"], ["azure-drake", "Azure Drake"], ["golden-gryphon", "Golden Gryphon"], ["frost-wolf", "Frost Wolf"], ["rose-pegasus", "Rose Pegasus"], ["star-kirin", "Starlight Kirin"], ["amethyst-panther", "Amethyst Panther"], ["sunfire-lion", "Sunfire Lion"], ["cloud-ram", "Cloud Ram"], ["tide-turtle", "Tide Turtle"], ["thunder-tiger", "Thunder Tiger"], ["snow-owl", "Snowfeather Owl"], ["rainbow-phoenix", "Rainbow Phoenix"], ["midnight-steed", "Midnight Steed"], ["honey-bear", "Honey Bear"], ["lotus-koi", "Lotus Koi"], ["moon-rabbit", "Moon Rabbit"], ["bamboo-panda", "Bamboo Panda"]].map(([id,name])=>({id,name,rarity:'Rare',icon:'mount-icon-'+id,base:'fit-control-ride-'+id,cost:1500}))
 ];
+function ownsMount(id){return id==='silver-tabby'||Boolean(S.mountsOwned?.includes(id));}
 function currentMount(){
   reconcileLeaflightMount();
   const id = S.mountId === undefined && S.ridingSilverTabby ? 'silver-tabby' : S.mountId;
@@ -122,13 +126,15 @@ function reconcileLeaflightMount(){
  }
  return false;
 }
+// The mount Reina last chose in Fashion; riding and dismounting keep that choice.
+function chosenMount(){return mounts.find(m=>m.id===S.mountPick&&ownsMount(m.id))||mounts[0];}
 function toggleMount(){
   if(!leaflightMountCompatible()){toast('This combination is shown standing. The complete Leaflight set supports riding.');return;}
-  S.mountId = currentMount() ? '' : mounts[0].id;
+  S.mountId = currentMount() ? '' : chosenMount().id;
   delete S.ridingSilverTabby;
   save();
   if(screen==='profile')heroProfile();else home();
-  document.querySelector('.mount-toggle')?.focus({preventScroll:true});
+  document.querySelector('.mount-toggle')?.focus?.({preventScroll:true});
 }
 const partyWardrobe = {
   paladin:{label:'Paladin', outfit:'Roseguard', id:'roseguard', gold:1200},
@@ -160,10 +166,10 @@ function fashionCard(name,icon,selected,click){
 }
 function fashionShowcase({portrait,alt,title,bonus,owned,price,equipped,action,cards,extra='',stage=''}){
   const category=fashionCategory;
-  const tabs=['Dresses','Hair','Weapons','Wings'].map(tab=>`<button aria-pressed="${tab===category}" onclick="changeFashionTab('${tab}')">${tab}</button>`).join('');
+  const tabs=['Dresses','Hair','Weapons','Wings','Mounts'].map(tab=>`<button aria-pressed="${tab===category}" onclick="changeFashionTab('${tab}')">${tab}</button>`).join('');
   const current=stats();
-  const active={Dresses:Boolean(currentDress()), Hair:Boolean(wornStyle(styleSets.Hair)), Weapons:Boolean(wornStyle(styleSets.Weapons)),Wings:Boolean(S.reinaFashion?.wingSkin)};
-  const [key,amount]={Dresses:['defense',WonderGear.fashionTraits.clothing],Hair:['health',WonderGear.fashionTraits.hair],Weapons:['attack',WonderGear.fashionTraits.weapon],Wings:['shieldHealth',WonderGear.fashionTraits.wings]}[category];
+  const active={Dresses:Boolean(currentDress()), Hair:Boolean(wornStyle(styleSets.Hair)), Weapons:Boolean(wornStyle(styleSets.Weapons)),Wings:Boolean(S.reinaFashion?.wingSkin),Mounts:false};
+  const [key,amount]={Dresses:['defense',WonderGear.fashionTraits.clothing],Hair:['health',WonderGear.fashionTraits.hair],Weapons:['attack',WonderGear.fashionTraits.weapon],Wings:['shieldHealth',WonderGear.fashionTraits.wings]}[category]||['',0];
   const delta=(Number(Boolean(bonus))-Number(active[category]))*amount;
   const fields=[['attack','ATK'],['health','HP'],['defense','DEF']];
   if(category==='Wings')fields.push(['shieldHealth','Shield HP']);
@@ -239,6 +245,22 @@ function wingFittingRoom(){
     <div class="fashion-model"><img src="${portrait}" alt="Reina wearing ${selected.name}"></div>
   </div>`;
   return fashionShowcase({portrait,alt:'Reina',title:selected.name,bonus:selected.id?'+'+WonderGear.fashionTraits.wings+' Shield HP':'',owned:price===0,price,equipped:selected.id===worn,action:'wearFashionWings()',stage,cards,extra:screen==='citySkin'?`<button class="shared-fashion" onclick="switchSkin(0,'Upgrade',0)">Back to Wings</button>`:'' });
+}
+// Mounts tab: Reina in her current look on the chosen mount.
+let mountPreview='';
+function mountFittingRoom(){
+  const selected=mounts.find(m=>m.id===mountPreview)||chosenMount(),riding=currentMount()?.id===selected.id,owned=ownsMount(selected.id);
+  const cards=mounts.map(m=>fashionCard(m.name,artPath(m.icon),m.id===selected.id,`mountPreview='${m.id}';reinaAtelier()`)).join('');
+  const portrait=mountedLookPath(selected.id);
+  const stage=`<div class="fashion-stage mount-gallery"><h2>${selected.name}</h2><div class="fashion-model"><img src="${portrait}" alt="Reina riding ${selected.name}"></div></div>`;
+  return fashionShowcase({portrait,alt:'Reina',title:selected.name,bonus:'',owned,price:selected.cost,equipped:riding,action:'rideFashionMount()',stage,cards});
+}
+function rideFashionMount(){
+  if(screen!=='fashion'||fashionCategory!=='Mounts')return;
+  const mount=mounts.find(m=>m.id===mountPreview);if(!mount)return;
+  if(!ownsMount(mount.id)){if(S.gold<mount.cost){toast('Not enough gold');return}S.gold-=mount.cost;S.mountsOwned=[...new Set([...(S.mountsOwned||[]),mount.id])];}
+  S.mountPick=mount.id;S.mountId=mount.id;delete S.ridingSilverTabby;
+  save();reinaAtelier();toast('Riding '+mount.name);
 }
 function wearFashionWings(){
   if((screen!=='fashion'&&!(screen==='citySkin'&&skinMode==='Appearance'))||fashionCategory!=='Wings')return;
@@ -414,7 +436,7 @@ const styleSets={
     'Aurora Arc','Thornrose Longbow','Pearl Tide','Ravenfeather','Sunflower Bough','Frostspire','Maple Whisper','Stargazer','Corsair Coral','Jade Phoenix']}
 };
 let stylePick=null;
-function changeFashionTab(tab){++fashionPreviewRequest;fashionCategory=tab;if(tab==='Wings'){wingPreview=S.reinaFashion?.wingSkin||fashionWings[0].id;}stylePick=null;clothingPreview=undefined;reinaAtelier()}
+function changeFashionTab(tab){++fashionPreviewRequest;fashionCategory=tab;if(tab==='Wings'){wingPreview=S.reinaFashion?.wingSkin||fashionWings[0].id;}if(tab==='Mounts')mountPreview=currentMount()?.id||chosenMount().id;stylePick=null;clothingPreview=undefined;reinaAtelier()}
 function wornStyle(set){
   return S.atelier?.[set.slot] || ((S.reinaFashion?.equipped & set.bit)?-1:0);
 }
@@ -649,10 +671,10 @@ document.addEventListener('load',async event=>{
   const img=event.target;if(img.tagName!=='IMG')return;
   const src=img.src,icon=src.match(/#leaflight-icon-(hair|dress|bow)$/);
   if(icon){try{if(!styleRenderCache.has(src))styleRenderCache.set(src,renderLeaflightIcon(icon[1]));const result=await styleRenderCache.get(src);readyRegisteredLooks.set(src,result);if(img.src===src)img.src=result;}catch{img.alt='Style';}return;}
-  const ride=src.match(/#mounted-([a-z]+)-(\d+)$/);
+  const ride=src.match(/#mounted-([a-z]+)-(\d+)(?:~([a-z-]+))?$/);
   if(ride&&fittingDresses.some(([id])=>id===ride[1])){
-   if(!styleRenderCache.has(src))styleRenderCache.set(src,composeMountedCanvas(ride[1],+ride[2]).then(canvas=>canvas.toDataURL('image/png')));
-   try{const result=await styleRenderCache.get(src);readyRegisteredLooks.set(mountedLookKey(ride[1],+ride[2]),result);if(img.src===src)img.src=result;}
+   if(!styleRenderCache.has(src))styleRenderCache.set(src,composeMountedCanvas(ride[1],+ride[2],ride[3]||'silver-tabby').then(canvas=>canvas.toDataURL('image/png')));
+   try{const result=await styleRenderCache.get(src);readyRegisteredLooks.set(mountedLookKey(ride[1],+ride[2],ride[3]||'silver-tabby'),result);if(img.src===src)img.src=result;}
    catch{styleRenderCache.delete(src);img.alt='Could not load Reina. Please reopen the garden.';}
    return;
   }
@@ -686,16 +708,17 @@ function reinaLookPath(riding,mask=S.reinaFashion?.equipped||0,shared=S.costumes
 }
 // Riding pose: one fixed base (Reina on the Silver Tabby) plus the same dress and hair, painted
 // on that base and extracted per pixel by scripts/build-mounted.py.
-function mountedLookKey(dress,hair){
+function mountedLookKey(dress,hair,mount='silver-tabby'){
  const release=artPath('fit-control-mount-base').split('?')[1]||'';
- return 'wardrobe-placeholder.svg'+(release?'?'+release:'')+'#mounted-'+dress+'-'+hair;
+ return 'wardrobe-placeholder.svg'+(release?'?'+release:'')+'#mounted-'+dress+'-'+hair+(mount==='silver-tabby'?'':'~'+mount);
 }
-function mountedLookPath(){
- const {dress,hair}=registeredLook(),key=mountedLookKey(dress,hair);
+function mountedLookPath(mount=currentMount()?.id||'silver-tabby'){
+ const {dress,hair}=registeredLook(),key=mountedLookKey(dress,hair,mount);
  return readyRegisteredLooks.get(key)||key;
 }
-async function composeMountedCanvas(dress,hair){
- const [base,cloth,locks]=await Promise.all(['fit-control-mount-base','fit-control-mount-'+dress,'fit-control-mounthair-'+hair].map(id=>styleImage(artPath(id))));
+async function composeMountedCanvas(dress,hair,mount='silver-tabby'){
+ const steed=mounts.find(m=>m.id===mount)||mounts[0];
+ const [base,cloth,locks]=await Promise.all([steed.base,'fit-control-mount-'+dress,'fit-control-mounthair-'+hair].map(id=>styleImage(artPath(id))));
  const c=document.createElement('canvas');c.width=1024;c.height=936;const ctx=c.getContext('2d');
  const part=(image,y0,y1)=>{ctx.save();ctx.beginPath();ctx.rect(0,y0,1024,y1-y0);ctx.clip();ctx.drawImage(image,0,0,1024,936);ctx.restore();};
  ctx.drawImage(base,0,0,1024,936);
@@ -775,10 +798,10 @@ function reinaAtelier(){
     const gallery=document.querySelector('.fashion-cards');if(gallery)gallery.scrollTop=scroll;
     return;
   }
-  if(styleSets[fashionCategory]||fashionCategory==='Wings'||(!inSkin&&fashionCategory==='Dresses')){
+  if(styleSets[fashionCategory]||fashionCategory==='Wings'||fashionCategory==='Mounts'||(!inSkin&&fashionCategory==='Dresses')){
     const previous=document.querySelector('.fashion-showcase');
     const scroll=previous?.dataset?.category===fashionCategory?previous.querySelector('.fashion-cards').scrollTop:0;
-    $('#main').innerHTML=fashionCategory==='Wings'?wingFittingRoom():styleSets[fashionCategory]?styleFittingRoom(styleSets[fashionCategory]):fittingRoom();
+    $('#main').innerHTML=fashionCategory==='Mounts'?mountFittingRoom():fashionCategory==='Wings'?wingFittingRoom():styleSets[fashionCategory]?styleFittingRoom(styleSets[fashionCategory]):fittingRoom();
     const gallery=document.querySelector('.fashion-cards');
     if(gallery)gallery.scrollTop=scroll;
     return;
