@@ -25,6 +25,7 @@ DRESSES = ['leaflight', 'grove', 'frostlace', 'emberveil', 'dawnpetal', 'nightbl
            'aurora', 'rosethorn', 'seafoam', 'ravenwing', 'sunflower', 'frostqueen', 'autumn', 'starlit', 'coral', 'jade']
 WIDE = set(DRESSES[12:])      # second collection: capes and trains may trail over the cat
 HAIRS = list(range(1, 22))
+GREY_HAIR = {2, 10, 12, 17}   # pearl, black, silver, white hair: neutral colours are the hair itself
 WARM_HAIR = {1, 2, 4, 6, 13, 15, 19}      # chestnut, copper, gold: hair tones close to skin outlines
 
 def box(x0, y0, x1, y1):
@@ -57,6 +58,7 @@ def build_dress(name):
     m, d = region(P, zone & ~HEAD, 22)
     m |= dilate(SUIT, 6) & RIDER & ~HEAD            # the bodysuit never shows
     m = fill_holes(m, 200) & (P[..., 3] > 100)
+    m = off_the_cat(m, P) & (P[..., 3] > 100)
     out = P.copy(); out[..., 3] = np.where(m, 255, 0)
     return save('fit-control-mount-'+name, out, 60)
 
@@ -79,6 +81,7 @@ def build_hair(i):
     hairbody = (m & ~HEAD) | thick
     for c in components(on_head & ~thick):
         if c.sum() < 400 and not (dilate(c, 1) & hairbody).any(): m &= ~c
+    R = rider_mask(); m &= ~(solid & ~dilate(R, 2) & neutral(B) & neutral(P) & ~HEAD) if i not in GREY_HAIR else True
     if i not in WARM_HAIR:
         # Skin and skin-outline tones on her head are never this hair (gold ornaments are kept).
         R, G, Bl = P[..., 0], P[..., 1], P[..., 2]
@@ -86,9 +89,65 @@ def build_hair(i):
     out = P.copy(); out[..., 3] = np.maximum(np.where(m, 255, 0), FACE_SOFT*255*(P[..., 3] > 100))
     return save('fit-control-mounthair-'+str(i), out, 60)
 
+_cache = {}
+def mount_paintings():
+    if 'paints' not in _cache: _cache['paints'] = {k: arr(Image.open(SRC/f'ride-{k}.webp')) for k in MOUNTS}
+    return _cache['paints']
+def rider_mask():
+    """The rider herself: the pixels that stay the same in (almost) every mount painting."""
+    if 'rider' not in _cache:
+        paints = mount_paintings()
+        same = sum((diff(P, B) < 26).astype(np.int32) for P in paints.values())
+        rider = (same >= len(paints)-2) & (B[..., 3] > 128)
+        _cache['rider'] = keep_big(dilate(erode(rider, 2), 2), 3000)
+    return _cache['rider']
+def neutral(a, spread=30):
+    return (a[..., :3].max(-1)-a[..., :3].min(-1)) < spread
+def off_the_cat(m, P):
+    """Layers were painted on the Silver Tabby, and the painter also re-drew bits of its fur. Those
+    grey fur pixels must not travel to other mounts: drop grey pixels that sit on the cat's fur,
+    keep only what hangs together with the rider, then close the holes this leaves inside cloth."""
+    R = rider_mask()
+    fur = solid & ~dilate(R, 2) & neutral(B)
+    m = m & ~(fur & neutral(P))
+    m = dilate(erode(m, 1), 1) & m
+    near = dilate(R, 12); out = np.zeros_like(m)
+    for c in components(m):
+        if c.sum() >= 150 and (c & near).any(): out |= c
+    return fill_holes(out, 5000)
+
+# ---------- extra mounts: the same rider and saddle on a different creature ----------
+MOUNTS = ["moon-unicorn", "emerald-stag", "ember-fox", "azure-drake", "golden-gryphon", "frost-wolf", "rose-pegasus", "star-kirin", "amethyst-panther", "sunfire-lion", "cloud-ram", "tide-turtle", "thunder-tiger", "snow-owl", "rainbow-phoenix", "midnight-steed", "honey-bear", "lotus-koi", "moon-rabbit", "bamboo-panda"]
+def build_mounts():
+    """Each source is the base with only the cat replaced. The rider and saddle are whatever stays the
+    same in (almost) every painting; those pixels are copied from the base, so every dress and hair
+    layer made for the Silver Tabby lines up exactly on every mount."""
+    paints = mount_paintings(); rider = rider_mask()
+    soft = np.array(Image.fromarray((erode(rider, 1)*255).astype(np.uint8)).filter(__import__('PIL.ImageFilter', fromlist=['x']).GaussianBlur(1.2))).astype(np.float32)/255
+    for k, P in paints.items():
+        out = P.copy(); a = soft[..., None]
+        out[..., :3] = B[..., :3]*a + P[..., :3]*(1-a); out[..., 3] = np.maximum(P[..., 3], B[..., 3]*soft)
+        out[..., 3] = np.where(out[..., 3] < 24, 0, out[..., 3])
+        # Shown at a few hundred pixels: stored at 832 x 760 to keep the hosted bundle under its limit.
+        full = img(fit.clean_rgb(out)).crop((0, TOP, 1024, BOTTOM)).resize((832, 760), Image.Resampling.LANCZOS)
+        full.save(OUT/f'fit-control-ride-{k}.webp', quality=90, method=6); full.save(HOST/f'fit-control-ride-{k}.avif', quality=46, speed=4)
+        # Card picture: the creature's head, taken from the part of the painting that is not rider or saddle.
+        beast = (P[..., 3] > 128) & ~dilate(rider, 6) & ~dilate(solid & box(540, 0, 722, 432), 5)   # not the rider, not her bow
+        beast = keep_big(beast, 4000); cols = np.nonzero(beast.any(0))[0]; right = int(cols.max())
+        zone = beast[:, max(0, right-330):right+1]; top = int(np.nonzero(zone.any(1))[0].min())
+        x0, y0 = max(0, right-330), max(0, top-12)
+        head = img(fit.clean_rgb(np.where(beast[..., None], P, 0))).crop((x0, y0, x0+345, y0+345))
+        h = arr(head); h[..., 3] *= np.clip((np.arange(345)[None, :]-18)/70.0, 0, 1)*np.clip((345-np.arange(345)[:, None])/50.0, 0, 1)   # soft left and bottom edges
+        head = img(h).resize((176, 176), Image.Resampling.LANCZOS)
+        head.save(OUT/f'mount-icon-{k}.webp', quality=90, method=6); head.save(HOST/f'mount-icon-{k}.avif', quality=62, speed=4)
+    return rider
+
 if __name__ == '__main__':
     only = set(sys.argv[1:]); want = lambda n: not only or str(n) in only
     base = save('fit-control-mount-base', B, 62)
+    if want('mounts') or not only:
+        rider = build_mounts(); Image.fromarray((rider*255).astype(np.uint8)).save('/tmp/mounted-rider-mask.png')
+    if only == {'mounts'}: sys.exit()
     for n in DRESSES:
         if want(n): build_dress(n)
     for i in HAIRS:

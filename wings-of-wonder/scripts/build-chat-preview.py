@@ -21,7 +21,7 @@ shutil.rmtree(out, ignore_errors=True); files.mkdir(parents=True)
 UNUSED = re.compile(r'^assets/generated/(?:fitting-|atelier-(?!icon-)|parts-|fit-mask-|skin2-|leaflight-(?:master|riding)|fit-control-hand\.)')
 PACKS = {'gear': re.compile(r'^assets/generated/gear-'), 'familiar': re.compile(r'^assets/generated/familiar-'),
          'guardian': re.compile(r'^assets/generated/guardian-t'), 'fish': re.compile(r'^assets/moonwater/'),
-         'icons': re.compile(r'^assets/generated/(?:fit-icon-|atelier-icon-)'), 'bows': re.compile(r'^assets/generated/weapon-style-')}
+         'icons': re.compile(r'^assets/generated/(?:fit-icon-|atelier-icon-|mount-icon-)'), 'bows': re.compile(r'^assets/generated/weapon-style-')}
 packed = {k: {} for k in PACKS}
 tracked = subprocess.run(['git', 'ls-files', 'src'], cwd=ROOT, capture_output=True, text=True, check=True).stdout.split('\n')
 for f in filter(None, tracked):

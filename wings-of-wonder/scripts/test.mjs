@@ -382,6 +382,21 @@ for(const id of vm.runInContext('[...wardrobeBackHairs]',context))assert(fs.exis
 for(const wing of vm.runInContext('fashionWings.map(x=>x.id)',context))assert(fs.existsSync('src/assets/generated/'+wing+'.webp'),'Missing wings '+wing);
 for(const n of vm.runInContext("styleSets.Weapons.names.map((name,i)=>name&&i+1!==11?i+1:0).filter(Boolean)",context))assert(fs.existsSync('src/assets/generated/weapon-style-'+n+'.webp'),'Missing bow '+n);
 assert.equal(vm.runInContext("WonderGear.stats({...defaults(),reinaFashion:{wingSkin:'fashion-wing-20'}}).shieldHealth-WonderGear.stats(defaults()).shieldHealth",context),vm.runInContext('WonderGear.fashionTraits.wings',context),'New wings give no bonus');
+vm.runInContext(`{
+ S=defaults();S.gold=5000;screen='fashion';fashionCategory='Mounts';
+ if(mounts.length!==21||chosenMount().id!=='silver-tabby')throw Error('Mount catalog');
+ mountPreview='moon-unicorn';if(ownsMount('moon-unicorn'))throw Error('Unbought mount owned');
+ const gold=S.gold;rideFashionMount();rideFashionMount();
+ if(S.gold!==gold-1500||!ownsMount('moon-unicorn')||currentMount().id!=='moon-unicorn'||!valid(S))throw Error('Mount purchase');
+ if(!reinaLookPath(true).endsWith('~moon-unicorn'))throw Error('Mounted look ignores the mount');
+ toggleMount();if(currentMount())throw Error('Dismount');toggleMount();if(currentMount().id!=='moon-unicorn')throw Error('Ride forgot the chosen mount');
+ S.gold=10;mountPreview='ember-fox';rideFashionMount();if(ownsMount('ember-fox')||currentMount().id!=='moon-unicorn')throw Error('Mount sold without gold');
+ mountPreview='silver-tabby';rideFashionMount();if(currentMount().id!=='silver-tabby'||reinaLookPath(true).includes('~'))throw Error('Free tabby');
+ S.mountPick='not-a-mount';if(chosenMount().id!=='silver-tabby')throw Error('Unknown mount pick');
+ screen='home';S=defaults();
+}`,context);
+for(const m of vm.runInContext('mounts.slice(1).map(m=>m.id)',context))for(const f of ['fit-control-ride-','mount-icon-'])assert(fs.existsSync('src/assets/generated/'+f+m+'.webp'),'Missing mount art '+f+m);
+console.log('PASS: 20 extra mounts: purchase once, ride/dismount keeps the choice, no sale without gold, art present.');
 console.log('PASS: any dress and hairstyle can ride with its own mounted layers; release-specific wardrobe URLs; second collection art present.');
 
 await vm.runInContext(`(async()=>{

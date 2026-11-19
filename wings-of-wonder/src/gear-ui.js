@@ -432,7 +432,7 @@ function companionAction(action,arg){
   if(action==='form'&&Number.isInteger(arg)&&arg>=0&&arg<=2&&v.level>=[1,5,10][arg])v.form=arg;
   else if(action==='hide')v.hidden=!v.hidden;
   else if(action==='equip'){
-   if(key==='mount'){S.mountId=currentMount()?'':mounts[0].id;delete S.ridingSilverTabby}
+   if(key==='mount'){S.mountId=currentMount()?'':chosenMount().id;delete S.ridingSilverTabby}
    else v.equipped=!v.equipped;
   }else return;
   (S.companions??={})[key]=v;
