@@ -461,8 +461,10 @@ function companionAction(action,arg){
  save();cityCompanion();
 }
 // Fairy and footsteps beside Reina on the home screen. Cloak, back accessory and tail are part of her portrait.
-function cityCompanionEffects(){
- return ['elf','footprint'].map(key=>{
+// Paint order on the home screen: pets, footsteps, Reina, fairy. The track starts under her heel, so it is drawn
+// before her and after the pets.
+function cityCompanionEffects(keys=['elf','footprint']){
+ return keys.map(key=>{
   const v=WonderGear.companionState(S,key);
   if(!v.equipped||v.hidden||key==='footprint'&&currentMount())return '';
   return '<span aria-hidden="true" class="city-companion-effect fx-'+key+'"><img src="'+companionIcon(key,WonderGear.companionSkin(S,key).id)+'" alt=""></span>';
