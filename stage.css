@@ -6727,3 +6727,18 @@ body[data-screen="cityCompanion"] #main{padding:0!important;overflow:hidden!impo
 @media (prefers-reduced-motion:reduce){.comp-float,.fx-elf{animation:none}}
 .comp-top{padding-left:5.2rem}
 .comp-nav img{width:clamp(2.2rem,9cqw,3.1rem);height:clamp(2.2rem,9cqw,3.1rem)}
+
+/* Mounted Reina on the home screen: smaller, so the mount does not cover the buttons around her */
+.city-hud .city-hero.riding{left:32.5%;top:41%;width:35%;height:24%}
+.city-hud .city-wings.riding{left:25%;top:37%;width:50%;height:20%}
+/* Footsteps trail away behind her, starting at her feet */
+.fx-footprint{left:33%;top:59.5%;width:18%;height:6.5%;transform:scaleX(-1)}
+.comp-steps{left:auto;right:47%;bottom:3%;width:36%;transform:scaleX(-1)}
+/* Cards: picture, two-line name, price, never overlapping */
+#main .comp-room .comp-card{grid-template-rows:auto 2.3em 1.15em;align-items:center;overflow:hidden}
+.comp-card span{font-size:clamp(.6rem,2.2cqw,.8rem);line-height:1.12;max-height:2.3em;overflow:hidden}
+.comp-card em{line-height:1.15}
+.comp-card img{height:clamp(3.8rem,15cqw,5.4rem)}
+.fashion-card img{object-fit:contain}
+.fx-footprint{left:29.5%}
+.comp-steps{right:54%}
