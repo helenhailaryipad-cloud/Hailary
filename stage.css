@@ -6742,3 +6742,4 @@ body[data-screen="cityCompanion"] #main{padding:0!important;overflow:hidden!impo
 .fashion-card img{object-fit:contain}
 .fx-footprint{left:29.5%}
 .comp-steps{right:54%}
+.trek-buffs{bottom:13%;gap:1.6cqw}.trek-buffs span{display:none}.trek-buffs span.on{display:grid}.trek-buffs b{right:-6px;font-size:max(12px,2.9cqw)}
