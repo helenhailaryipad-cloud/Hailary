@@ -12,10 +12,24 @@ for(let i=0;i<30;i++)T.step(g,.05,()=>.5);assert.equal(g.hp,3);assert.ok(!g.foes
 g=T.create();g.row=999;g.shot=999;g.hazardAt=0;g.foes=[{x:0,z:.3,hp:900,kind:0}];T.step(g,.05,()=>.5);g.foes[0].dead=true;for(let i=0;i<50;i++)T.step(g,.05,()=>.5);assert.equal(g.hp,3);assert.equal(g.hazards.length,0);
 // Five lanes; a fire lane with no barrel snaps to the lane Reina stands in.
 assert.equal(T.lanes.length,5);assert.equal(T.lane(.4),.62);assert.equal(T.lane(-2),-1.24);
+// Bonuses are picked up anywhere on her figure, not only at her centre; far ones are not.
+g=T.create();g.row=999;g.hazardAt=999;g.shot=999;g.drops=[{x:.45,z:.66,kind:'shield'},{x:.9,z:.7,kind:'heart'},{x:0,z:.4,kind:'wings'}];T.step(g,.01);assert.equal(g.shield,9);assert.equal(g.drops.length,2);
+// Weapons: more arrows per volley (capped at four), stronger arrows, rockets with a blast.
+g=T.create();g.row=999;g.hazardAt=999;T.collect(g,'multi');T.collect(g,'multi');T.step(g,.01);assert.equal(g.bolts.length,3);for(let i=0;i<5;i++)T.collect(g,'multi');assert.equal(g.arrows,4);
+g=T.create();g.row=999;g.hazardAt=999;T.collect(g,'power');g.foes=[{x:0,z:.8,hp:8,kind:0}];T.step(g,.05);assert.equal(g.score,50,'a power arrow deals 8');
+g=T.create();g.row=999;g.hazardAt=999;g.shot=999;T.collect(g,'rocket');g.foes=[{x:0,z:.5,hp:60,kind:0},{x:.4,z:.5,hp:60,kind:0},{x:1.24,z:.5,hp:60,kind:0}];for(let i=0;i<20&&g.score<100;i++)T.step(g,.05);assert.equal(g.score,100,'one rocket breaks both close barrels');assert.equal(g.foes.length,1);
+assert.equal(T.nextDrop(Object.assign(T.create(),{arrows:4})),'rocket');assert.equal(T.nextDrop(Object.assign(T.create(),{dropCount:6})),'shield','no heart at full health');
+// Storm barrel: lightning chains to neighbours and on through other storm barrels. Bomb barrel: one blast nearby.
+g=T.create();g.foes=[{x:0,z:.5,hp:1,type:'elec'},{x:.62,z:.5,hp:40,type:'elec'},{x:1.24,z:.5,hp:40},{x:-1.24,z:.1,hp:40}];T.damage(g,g.foes[0],5);assert.deepEqual(g.foes.map(f=>!!f.dead),[true,true,true,false]);assert.equal(g.score,150);assert.ok(g.arcs.length>=2);
+g=T.create();g.foes=[{x:0,z:.5,hp:1,type:'bomb'},{x:.62,z:.55,hp:90},{x:1.24,z:.5,hp:90},{x:0,z:.2,hp:90}];T.damage(g,g.foes[0],5);assert.deepEqual(g.foes.map(f=>!!f.dead),[true,true,false,false]);assert.equal(g.blasts.length,1);
+// Barrels appear far away; the boss arrives late, can be beaten for a bonus, and the run then ends once.
+g=T.create();T.step(g,.01,()=>.9);assert.ok(g.foes.length===5&&g.foes.every(f=>f.z<0));
+g=T.create();g.row=999;g.hazardAt=999;g.shot=999;g.time=66;T.step(g,.01);const boss=g.foes.find(f=>f.boss);assert.ok(boss&&boss.hp===3000);T.step(g,.01);assert.equal(g.foes.filter(f=>f.boss).length,1);
+T.damage(g,boss,3000);assert.ok(g.bossDown);assert.equal(g.score,1000);for(let i=0;i<40&&g.running;i++)T.step(g,.05);assert.ok(g.ended&&g.time<70);
 // Live ranking: rivals are fixed for a day, earn their score over the run, and the gap is to the leader.
 {const day=Date.UTC(2026,10,18,12),r=T.rivals(['Nyra','Kael','Pip'],day);assert.deepEqual(r.map(x=>x.final),T.rivals(['Nyra','Kael','Pip'],day+3600000).map(x=>x.final));
- assert.ok(r.every(x=>x.final>=1500&&x.final<=3500&&x.final%50===0));
+ assert.ok(r.every(x=>x.final>=2500&&x.final<=5000&&x.final%50===0));
  const start=T.standing(r,0,0);assert.equal(start.rank,1);assert.equal(start.gap,0);
  const end=T.standing(r,0,90);assert.equal(end.rank,4);assert.equal(end.gap,Math.max(...r.map(x=>x.final)));
  const top=T.standing(r,99999,90);assert.equal(top.rank,1);assert.equal(top.gap,0);assert.equal(top.of,4);}
-console.log('PASS Jungle: swept hits, shield, invulnerability, buffs, hazard warning, aimed shots, Boom charge, timer, bounded simulation');
+console.log('PASS Jungle: swept hits, shield, invulnerability, buffs, hazard warning, aimed shots, Rush charge, wide pickup, weapons, storm and bomb barrels, boss, timer, bounded simulation');

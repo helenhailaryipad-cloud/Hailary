@@ -67,3 +67,11 @@ for n in range(3):
 for n in range(7, 32):
     g = trim(SRC/'guardians'/f'guardian-t{n}.webp'); g.thumbnail((600, 600), Image.Resampling.LANCZOS)
     save(f'guardian-t{n}', g, 46)   # 25 images: keep the hosted bundle well under its limit
+
+# Jungle Trek second set: three more bonus orbs, bomb, storm crystal, rocket (3 x 2 sheet).
+sheet = Image.open(SRC/'trek/extras.webp').convert('RGBA'); cw, ch = sheet.width//3, sheet.height//2
+for n, name in enumerate(['trek-pickup-4', 'trek-pickup-5', 'trek-pickup-6', 'trek-bomb', 'trek-elec', 'trek-rocket']):
+    a = fit.arr(sheet.crop(((n % 3)*cw, (n//3)*ch, (n % 3+1)*cw, (n//3+1)*ch))); a[..., 3] = np.where(a[..., 3] < 24, 0, a[..., 3])
+    keep = fit.keep_big(a[..., 3] > 0, 300); a[..., 3] = np.where(fit.dilate(keep, 2), a[..., 3], 0)
+    cut = fit.img(fit.clean_rgb(a)); cut = cut.crop(cut.getbbox()); cut.thumbnail((200, 200), Image.Resampling.LANCZOS)
+    tile = Image.new('RGBA', (208, 208)); tile.alpha_composite(cut, ((208-cut.width)//2, (208-cut.height)//2)); save(name, tile, 70)

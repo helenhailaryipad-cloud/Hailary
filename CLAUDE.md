@@ -97,7 +97,14 @@ a back drawing for each of the 22 dresses). HUD: live ranking against six simula
 five lanes (`Trek.lanes`) with a row every 2.2 s and random gaps, arrows aimed at the nearest barrel (`Trek.aim`,
 bolts carry `vx`), and Boom barrels: every other danger lane belongs to a marked barrel that warns for 1.6 s and then
 charges down its lane; breaking it first cancels the charge ("Defused"). Floating notes (`g.texts`) for pickups.
-Rival finals are 1500-3500. Rewards (gold/XP caps, 90 s, 3 hearts, boost every 4th kill) are unchanged. `drawJungle` uses a flatter projection than before (render only). Sources in
+Fourth pass (2026-11-19, user feedback): barrels spawn farther and smaller (`Trek.far`
+= -0.13, new projection in `drawJungle`); bonuses are collected anywhere on her figure (z 0.64-1.02, |dx| < 0.52);
+storm barrels (`type:'elec'`) chain lightning to three neighbours and through other storm barrels; bomb barrels
+(`type:'bomb'`) blast neighbours; the charging barrel is now labelled Rush. Bonuses every 4th kill in `dropOrder`:
+multi (arrows up to 4, permanent), power (+2 damage, up to 3, changes arrow colour), rocket (10 s of homing rockets with
+a blast), wings (rapid fire), shield, heart. A boss (3000 HP, `boss:true`, emberpeak art, HP bar) arrives at 66 s; beating
+it gives +1000 and ends the run (`g.endAt`). Barrel HP grows every row. Rival finals are 2500-5000. Gold/XP caps, 90 s
+and 3 hearts are unchanged. Balance is tuned by bot simulation only, not by hand play. `drawJungle` uses a flatter projection than before (render only). Sources in
 `art-source/trek/`, built by `build-fashion-extras.py`.
 
 ## Dungeon lobby (2026-11-19)
