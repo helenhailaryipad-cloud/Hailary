@@ -168,6 +168,8 @@ preview, a scrollable strip of appearance cards, stats with Looks / Upgrade / Ti
 - Cards: cloaks, back items and mounts use separate paintings of the WHOLE item (`art-source/icons/`, built by
   `build-companions.py`; the build takes about 10 minutes); never crop a card picture. On the home screen the mounted
   hero is deliberately smaller (`.city-hero.riding`), and footsteps trail to the left behind her feet.
+  Footsteps (user request) lie flat as a track on the ground behind her heels and are drawn BEHIND her
+  (`.comp-steps`, `.fx-footprint`: `scaleX(-1) scaleY(.5)`, z-index below the figure); never across her legs.
 - Chat preview packs all `comp-*` art into `pack-comp.js` (file limit). Hosted bundle headroom after this: see build.
 
 ## In-chat playable preview (user requirement)
