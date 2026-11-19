@@ -349,14 +349,22 @@ function recommendPets(){
  const primary=ids.slice(0,3),assist=WonderGear.petTeam(S).slice(3).map(id=>primary.includes(id)?null:id);
  petFocus=primary[0];setPetTeam([...Array.from({length:3},(_,i)=>primary[i]||null),...assist]);
 }
-function petTile(id,click,label,selected=false){
- if(!id)return '<button class="spirit-empty" onclick="'+click+'" aria-label="'+label+'">+<small>'+label+'</small></button>';
- const p=item(id);
- return '<button class="spirit-card" style="--edge:'+p.color+'" aria-pressed="'+selected+'" onclick="'+click+'"><small>'+p.rarity+'</small>'+dragonSVG(p)+'<b>'+p.name+'</b><small>'+label+'</small></button>';
+// Pet rooms (rebuilt after the user's reference photos): painted pets everywhere, cards with a rarity ribbon and stars.
+let petMode='Feeding';
+const petModes=['Feeding','Stars','Badge'];
+const petRarity={Common:['Common','c'],Rare:['Rare','r'],Epic:['Epic','e'],'Super Rare':['S.Rare','s'],Legendary:['Legend','l']};
+// An empty svg keeps decorateArt() from adding a stock icon to a text button.
+const denPlain='<svg class="den-x" width="0" height="0" aria-hidden="true"></svg>';
+function petPicture(p){return p.portrait||artPath(p.id)}
+function petStarCount(id){return id==='d1'?S.emberStars||0:S.petStars?.[id]||0}
+function petCard(id,click,label,selected=false){
+ if(!id)return '<button class="den-card den-empty" onclick="'+click+'" aria-label="'+label+'">'+denPlain+'<i>+</i><small>'+label+'</small></button>';
+ const p=item(id),[tag,key]=petRarity[p.rarity]||[p.rarity,'r'],stars=petStarCount(id);
+ return '<button class="den-card den-'+key+(S.owned.includes(id)?'':' den-locked')+'" aria-pressed="'+selected+'" aria-label="'+esc(p.name)+', '+p.rarity+', '+label+'" onclick="'+click+'"><em>'+tag+'</em><img src="'+petPicture(p)+'" alt="" draggable="false"><span class="den-stars">'+'★'.repeat(stars)+'</span><b>'+esc(p.name)+'</b><small>'+label+'</small></button>';
 }
 function pickPet(slot){
  const team=WonderGear.petTeam(S),owned=ITEMS.filter(p=>p.type==='dragon'&&S.owned.includes(p.id));
- modal('<h2>'+ (slot<3?'Primary Pet':'Pet Assist')+'</h2><div class="spirit-picker">'+owned.map(p=>petTile(p.id,"assignPet("+slot+",'"+p.id+"')",team.includes(p.id)?'Deployed':'Select',team[slot]===p.id)).join('')+'</div>'+(slot&&team[slot]?'<button onclick="assignPet('+slot+',null)">Remove</button>':''));
+ modal('<h2>'+ (slot<3?'Primary Pet':'Pet Assist')+'</h2><div class="den-picker">'+owned.map(p=>petCard(p.id,"assignPet("+slot+",'"+p.id+"')",team.includes(p.id)?'Deployed':'Select',team[slot]===p.id)).join('')+'</div>'+(slot&&team[slot]?'<button onclick="assignPet('+slot+',null)">Remove</button>':''));
 }
 function petFeed(){
  if(WonderGear.trainPet(S,petFocus)){save();cityPet()}
@@ -388,28 +396,57 @@ function cityPet(){
  const rules=WonderGear,team=rules.petTeam(S),pets=ITEMS.filter(p=>p.type==='dragon');
  if(!petFocus||petPage==='Formation'&&!team.slice(0,3).includes(petFocus))petFocus=S.dragon;
  if(petPage==='Badge'&&emblemFilter!=='All'&&item(petFocus).rarity!==emblemFilter)petFocus=pets.find(p=>p.rarity===emblemFilter)?.id||S.dragon;
- const p=item(petFocus),owned=S.owned.includes(p.id),lv=rules.petLevel(S,p.id),atk=rules.petAttack(S,p.id),rank=rules.badgeRank(S,p.id);
+ const p=item(petFocus),owned=S.owned.includes(p.id),lv=rules.petLevel(S,p.id),atk=rules.petAttack(S,p.id),rank=rules.badgeRank(S,p.id),stars=petStarCount(p.id);
+ const [tag,key]=petRarity[p.rarity]||[p.rarity,'r'],kind=p.title.toLowerCase().replace(/\b\w/g,c=>c.toUpperCase());
+ const shards=rules.state(S).materials.shard,starShards=p.id==='d1'?S.emberShards||0:shards,teamAtk=rules.petTeamAttack(S);
  const switchTo=(page,id)=>"petTab('"+page+"','"+id+"')";
- const strip=(list,page)=>'<div class="spirit-strip">'+list.map(q=>petTile(q.id,switchTo(page,q.id),S.owned.includes(q.id)?'Lv. '+rules.petLevel(S,q.id):'Locked',q.id===p.id)).join('')+'</div>';
- const portrait='<div class="spirit-model">'+dragonSVG(p)+'</div>';
- const title='<h2>'+p.name+'</h2><span>'+p.rarity+' · Lv. '+lv+'</span>';
- const primary=team.slice(0,3).map((id,i)=>'<div>'+petTile(id,id?switchTo('Formation',id):'pickPet('+i+')',id?'Lv. '+rules.petLevel(S,id):'Deploy',id===p.id)+(id?'<button class="spirit-link" onclick="pickPet('+i+')">Replace</button>':'')+'</div>').join('');
- let body;
+ const art=(q,cls)=>'<img class="'+cls+'" src="'+petPicture(q)+'" alt="'+esc(q.name)+'" draggable="false">';
+ const strip=(list,page)=>'<div class="den-strip">'+list.map(q=>petCard(q.id,switchTo(page,q.id),S.owned.includes(q.id)?'Lv. '+rules.petLevel(S,q.id):'Locked',q.id===p.id)).join('')+'</div>';
+ const lineup='<div class="den-lineup">'+team.slice(0,3).map((id,i)=>'<div>'+petCard(id,id?switchTo('Formation',id):'pickPet('+i+')',id?'Lv. '+rules.petLevel(S,id):'Deploy',id===p.id)+(id?'<button class="den-link" onclick="pickPet('+i+')">'+denPlain+'Replace</button>':'<span class="den-link"></span>')+'</div>').join('')+'</div>';
+ const power=n=>'<div class="den-power">⚔ <b>'+fmt(n)+'</b></div>';
+ const up=n=>'<i class="den-up">▲ '+n+'</i>';
+ const gem='<span class="den-gem" aria-hidden="true">◆</span>';
+ // One purchase line: what you have, what it costs, and the golden button.
+ const buy=(m)=>'<div class="den-cost">'+(m.max?'Maximum reached':m.icon+'<b class="'+(m.have<m.cost?'low':'')+'">'+fmt(m.have)+'</b> / '+fmt(m.cost)+' '+m.unit)+'</div><button class="den-gold" onclick="'+m.act+'" '+(m.max||m.have<m.cost||m.off?'disabled':'')+'>'+denPlain+(m.max?'Max':m.label)+'</button>';
+ const offers={
+  Feeding:{have:S.gold,cost:lv*100,unit:'gold',max:lv>=rules.petCap,label:'Fast Feed',act:'petFeed()',icon:uiIcon('gold')},
+  Stars:{have:starShards,cost:10*(stars+1),unit:p.id==='d1'?'Ember shards':'shards',max:stars>=6,label:'Star-up',act:'starPet()',icon:gem,off:!owned},
+  Badge:{have:shards,cost:5*(rank+1),unit:'shards',max:rank>=20,label:'Forge Badge',act:'forgePetBadge()',icon:gem,off:!owned}
+ };
+ let body,top='';
  if(petPage==='Formation'){
-  const other=team.slice(0,3).filter(id=>id&&id!==p.id);
-  body='<div class="spirit-scene"><div class="spirit-value">⚔ '+fmt(rules.petTeamAttack(S))+'</div><button class="spirit-recommend" onclick="recommendPets()">Recommended<br>Lineup</button><div class="spirit-flanks">'+other.map(id=>dragonSVG(item(id))).join('')+'</div>'+portrait+'</div><section class="spirit-panel">'+title+'<progress max="'+rules.petCap+'" value="'+lv+'"></progress><p>ATK '+fmt(atk)+'　·　Badge ATK +'+rank*5+'</p><button class="spirit-gold" onclick="petFeed()" '+(lv>=rules.petCap||S.gold<lv*100?'disabled':'')+'>'+(lv>=rules.petCap?'Max level':'Fast Feed · '+fmt(lv*100)+' gold')+'</button></section><div class="spirit-lineup">'+primary+'</div>';
+  const flank=team.slice(0,3).filter(id=>id&&id!==p.id).map(id=>item(id));
+  top=power(teamAtk)+'<button class="den-rec" onclick="recommendPets()">'+denPlain+'<i>✦</i>Recommended<br>Lineup</button>';
+  body='<div class="den-stage">'+flank.map((q,i)=>art(q,'den-flank den-flank-'+i)).join('')+'<span class="den-glow"></span>'+art(p,'den-main')+'<h2 class="den-name"><em class="den-'+key+'">'+tag+'</em>'+esc(p.name)+'</h2></div>'
+   +'<div class="den-skills"><div><span class="den-orb">'+art(p,'')+'<u>'+rank+'</u></span><small>Deploy</small><b class="den-tag o">Team ATK +'+fmt(atk+rank*5)+'</b><b class="den-tag v">Badge Lv.'+rank+' · +'+rank*5+'</b></div>'
+   +'<div><span class="den-orb den-aura den-'+key+'">✦</span><small>Aura</small><b class="den-tag o">'+kind+'</b><b class="den-tag v">Stars '+stars+'/6 · +'+stars*30+'</b></div></div>'
+   +'<div class="den-level"><span>Lv. '+lv+'</span></div>'
+   +'<div class="den-exp"><small>LEVEL</small><span><i style="width:'+lv/rules.petCap*100+'%"></i><b>'+lv+' / '+rules.petCap+'</b></span></div>'
+   +'<div class="den-stats"><span>ATK : <b>'+fmt(atk)+'</b>'+(lv<rules.petCap?up(12):'')+'</span><span>BADGE : <b>+'+rank*5+'</b>'+(rank<20?up(5):'')+'</span><span>STARS : <b>+'+stars*30+'</b>'+(stars<6?up(30):'')+'</span><span>TEAM : <b>'+fmt(teamAtk)+'</b></span></div>'
+   +buy(offers[petMode])
+   +'<div class="den-modes">'+petModes.map(x=>'<button aria-pressed="'+(x===petMode)+'" onclick="petMode=\''+x+'\';cityPet()">'+denPlain+'Pet '+x+'</button>').join('')+'</div>'
+   +lineup;
  }else if(petPage==='Assist'){
-  body='<div class="spirit-value">⚔ '+fmt(rules.petTeamAttack(S))+'</div><section class="spirit-panel"><h2>Primary Pet</h2><div class="spirit-lineup">'+primary+'</div></section><section class="spirit-panel spirit-support"><h2>Pet Assist</h2><div class="spirit-assists">'+team.slice(3).map((id,i)=>petTile(id,'pickPet('+(i+3)+')',id?'Replace':'Assign')).join('')+'</div></section><p>Deployed pets contribute their full ATK.</p>';
+  top=power(teamAtk);
+  body='<section class="den-panel"><h3>Primary Pets</h3>'+lineup+'</section><section class="den-panel den-grow"><h3>Pet Assist</h3><div class="den-assists">'+team.slice(3).map((id,i)=>petCard(id,'pickPet('+(i+3)+')',id?'Replace':'Assign')).join('')+'</div></section><p class="den-note">Deployed and assisting pets all add their full ATK.</p>';
  }else if(petPage==='Gallery'){
-  const stars=p.id==='d1'?S.emberStars||0:S.petStars?.[p.id]||0;
-  const shards=p.id==='d1'?S.emberShards||0:rules.state(S).materials.shard;
-  const starControl=owned?'<p>'+('★'.repeat(stars))+('☆'.repeat(6-stars))+'</p><button class="spirit-gold" onclick="starPet()" '+(stars>=6||shards<10*(stars+1)?'disabled':'')+'>'+ (stars>=6?'Max stars':'Star-up · '+10*(stars+1)+(p.id==='d1'?' Ember shards':' shards'))+'</button> ':'';
-  body='<header>'+title+'</header>'+portrait+'<section class="spirit-panel"><h2>ATK '+fmt(atk)+'</h2><p>'+p.title+' · '+(team.includes(p.id)?'Deployed':owned?'Collected':'Uncollected')+'</p>'+starControl+'<button class="spirit-gold" onclick="'+(owned?"petTab('Badge','"+p.id+"')":"petUnlock()")+'" '+(!owned&&S.gold<p.cost?'disabled':'')+'>'+(owned?'View Badge':'Unlock · '+fmt(p.cost)+' gold')+'</button> <button class="spirit-link" onclick="filter=\'dragon\';go(\'collection\')">Pet Summon</button></section>'+strip(pets,'Gallery');
+  top=power(atk);
+  const state=team.includes(p.id)?'Deployed':owned?'Collected':'Not collected';
+  body='<div class="den-head"><em class="den-rarity den-'+key+'">'+tag+'</em><div><h2>'+esc(p.name)+'</h2><small>'+kind+' · '+state+'</small></div></div>'
+   +'<div class="den-stage den-solo"><span class="den-glow"></span>'+art(p,'den-main'+(owned?'':' den-dim'))+'<div class="den-side"><button onclick="filter=\'dragon\';go(\'collection\')">'+denPlain+'<i>✧</i>Summon</button><button onclick="'+switchTo('Badge',p.id)+'">'+denPlain+'<i>⬟</i>Badge</button></div><p class="den-starrow">'+'★'.repeat(stars)+'<s>'+'★'.repeat(6-stars)+'</s></p></div>'
+   +'<section class="den-panel"><h3>Each star adds <b>+30 ATK</b></h3><div class="den-track">'+[1,2,3,4,5,6].map(n=>'<span class="'+(n<=stars?'on':'')+'"><b>+'+n*30+'</b><small>★'+n+'</small></span>').join('')+'</div><p>Total star bonus: <b>+'+stars*30+' ATK</b></p></section>'
+   +'<div class="den-starup"><span class="den-orb">'+art(p,'')+'</span>'+(owned?buy(offers.Stars):buy({have:S.gold,cost:p.cost,unit:'gold',label:'Unlock',act:'petUnlock()',icon:uiIcon('gold')}))+'</div>'
+   +strip(pets,'Gallery');
  }else{
-  const shards=rules.state(S).materials.shard,cost=5*(rank+1);
-  body='<header><h2>Level '+rank+' · '+p.name+' Badge</h2><span>Exclusive Pet · '+p.name+'</span></header>'+portrait+'<section class="spirit-panel"><h2>Badge Forge</h2><p>Bonus ATK +'+rank*5+(rank<20?' → +'+(rank+1)*5:'')+'</p><progress value="'+Math.min(shards,cost)+'" max="'+cost+'"></progress><button class="spirit-gold" onclick="forgePetBadge()" '+(!owned||rank>=20||shards<cost?'disabled':'')+'>'+(rank>=20?'Max level':owned?'Forge · '+shards+'/'+cost+' shards':'Unlock pet in Gallery')+'</button></section>'+strip(pets.filter(q=>emblemFilter==='All'||q.rarity===emblemFilter),'Badge')+'<div class="spirit-filters">'+['All',...new Set(pets.map(q=>q.rarity))].map(f=>'<button aria-pressed="'+(emblemFilter===f)+'" onclick="emblemFilter=\''+f+'\';cityPet()">'+f+'</button>').join('')+'</div>';
+  top=power(atk+rank*5);
+  body='<div class="den-head"><em class="den-rarity den-'+key+'">'+tag+'</em><div><h2>'+esc(p.name)+' Badge · Lv. '+rank+'</h2><small>Exclusive to '+esc(p.name)+'</small></div></div>'
+   +'<div class="den-stage den-solo"><span class="den-glow"></span>'+art(p,'den-main'+(owned?'':' den-dim'))+'</div>'
+   +'<section class="den-panel"><h3>Badge Forge</h3><p>Bonus ATK <b>+'+rank*5+'</b>'+(rank<20?' → <b>+'+(rank+1)*5+'</b>':'')+'</p><div class="den-exp"><small>RANK</small><span><i style="width:'+rank/20*100+'%"></i><b>'+rank+' / 20</b></span></div></section>'
+   +'<div class="den-starup"><span class="den-orb">'+art(p,'')+'</span>'+(owned?buy(offers.Badge):'<div class="den-cost">Unlock this pet in Gallery first</div>')+'</div>'
+   +strip(pets.filter(q=>emblemFilter==='All'||q.rarity===emblemFilter),'Badge')
+   +'<div class="den-filters">'+['All',...new Set(pets.map(q=>q.rarity))].map(f=>'<button aria-pressed="'+(emblemFilter===f)+'" onclick="emblemFilter=\''+f+'\';cityPet()">'+denPlain+f+'</button>').join('')+'</div>';
  }
- $('#main').innerHTML='<section class="spirit-room" data-page="'+petPage+'"><strong class="spirit-ribbon">'+petPage+'</strong><div class="spirit-body">'+body+'</div><div class="spirit-nav"><button aria-label="Back to city" onclick="go(\'home\')">‹</button>'+petPages.map((page,i)=>'<button aria-pressed="'+(page===petPage)+'" onclick="petTab(\''+page+'\')">'+artImage(['hud-pet','hud-bag','hud-companion','hud-forge'][i],'')+page+'</button>').join('')+'</div></section>';
+ $('#main').innerHTML='<section class="spirit-room den" data-page="'+petPage+'"><div class="den-top"><strong class="den-ribbon">'+petPage+'</strong>'+top+'</div><div class="den-body">'+body+'</div><div class="spirit-nav"><button aria-label="Back to city" onclick="go(\'home\')">‹</button>'+petPages.map((page,i)=>'<button aria-pressed="'+(page===petPage)+'" onclick="petTab(\''+page+'\')">'+artImage(['hud-pet','hud-bag','hud-companion','hud-forge'][i],'')+page+'</button>').join('')+'</div></section>';
 }
 
 let companionKey='elf',companionMode='Upgrade',companionPick={};

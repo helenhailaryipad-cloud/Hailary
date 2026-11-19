@@ -1,10 +1,10 @@
 'use strict';
 const $=s=>document.querySelector(s), fmt=n=>Math.floor(n).toLocaleString('en-US');
 const ITEMS=[
-{id:'d0',type:'dragon',name:'Willow',title:'GROVE RABBIT',color:'#8bc7aa',accent:'#eff2b3',rarity:'Rare',cost:0,power:60,desc:'A curious little guardian of the enchanted grove.'},
-{id:'d1',type:'dragon',name:'Emberheart',title:'EMBER FOX',color:'#e79272',accent:'#ffe3a0',rarity:'Epic',cost:2200,power:150,desc:'Warm-hearted, fearless, and a little mischievous.'},
-{id:'d2',type:'dragon',name:'Moonwhisper',title:'MOON OWL',color:'#b8a4e2',accent:'#c9edfa',rarity:'Epic',cost:2800,power:190,desc:'Carries a thousand constellations beneath her wings.'},
-{id:'d3',type:'dragon',name:'Aurora',title:'STAR FAWN',color:'#9ad8df',accent:'#ffe5ba',rarity:'Legendary',cost:5000,power:280,desc:'Her golden antlers catch the first morning light.'},
+{id:'d0',type:'dragon',name:'Willow',title:'GROVE DRAGONLING',color:'#8bc7aa',accent:'#eff2b3',rarity:'Rare',cost:0,power:60,desc:'A curious little guardian of the enchanted grove.'},
+{id:'d1',type:'dragon',name:'Emberheart',title:'EMBER DRAKE',color:'#e79272',accent:'#ffe3a0',rarity:'Epic',cost:2200,power:150,desc:'Warm-hearted, fearless, and a little mischievous.'},
+{id:'d2',type:'dragon',name:'Moonwhisper',title:'MOON DRAGON',color:'#b8a4e2',accent:'#c9edfa',rarity:'Epic',cost:2800,power:190,desc:'Carries a thousand constellations beneath her wings.'},
+{id:'d3',type:'dragon',name:'Aurora',title:'STAR DRAGON',color:'#9ad8df',accent:'#ffe5ba',rarity:'Legendary',cost:5000,power:280,desc:'Her golden antlers catch the first morning light.'},
 {id:'w0',type:'wings',name:'Dewlight',title:'GROVE WINGS',color:'#9bcbb9',accent:'#f6edc3',rarity:'Rare',cost:0,power:40,desc:'Soft as a summer breeze. Your first pair of wings.'},
 {id:'w1',type:'wings',name:'Roseveil',title:'BLOSSOM WINGS',color:'#e4a7c3',accent:'#fff0d7',rarity:'Epic',cost:1800,power:120,desc:'A cascade of rose petals and golden starlight.'},
 {id:'w2',type:'wings',name:'Starweaver',title:'ASTRAL WINGS',color:'#aa9bdd',accent:'#d4efff',rarity:'Epic',cost:2600,power:180,desc:'Woven from moonlight, made for impossible dreams.'},
