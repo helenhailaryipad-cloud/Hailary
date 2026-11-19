@@ -703,15 +703,17 @@ document.addEventListener('load',async event=>{
 // Canvas battles consume exactly the same assembled portrait as the wardrobe.
 const registeredCombatCache=new WardrobeCache(8);
 let lastRegisteredCombatImage=null;
-function registeredCombatBitmap(){
+// noWings: the same portrait without wings, for games that draw the wings themselves so they can beat.
+function registeredCombatBitmap(noWings){
  if(typeof Image==='undefined')return null;
  const {dress,hair}=registeredLook(),weapon=S.atelier?.weapon||((S.reinaFashion?.equipped&4)?12:13);
- const wings=fashionWing().id,key=dress+'/'+hair+'/'+weapon+'/'+wings+'/'+wardrobeExtrasTag();
+ const wings=noWings?'':fashionWing()?.id||'',key=dress+'/'+hair+'/'+weapon+'/'+wings+'/'+wardrobeExtrasTag()+(noWings?'/bare':'');
  if(!registeredCombatCache.has(key)){
   const entry={image:null};registeredCombatCache.set(key,entry);
   renderRegisteredLook(dress,hair,weapon,wings).then(styleImage).then(image=>{entry.image=image;}).catch(()=>registeredCombatCache.delete(key));
  }
  const image=registeredCombatCache.get(key)?.image;
+ if(noWings)return image||null;
  if(image)lastRegisteredCombatImage=image;
  return image||lastRegisteredCombatImage;
 }
