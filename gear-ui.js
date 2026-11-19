@@ -366,6 +366,34 @@ function pickPet(slot){
  const team=WonderGear.petTeam(S),owned=ITEMS.filter(p=>p.type==='dragon'&&S.owned.includes(p.id));
  modal('<h2>'+ (slot<3?'Primary Pet':'Pet Assist')+'</h2><div class="den-picker">'+owned.map(p=>petCard(p.id,"assignPet("+slot+",'"+p.id+"')",team.includes(p.id)?'Deployed':'Select',team[slot]===p.id)).join('')+'</div>'+(slot&&team[slot]?'<button onclick="assignPet('+slot+',null)">Remove</button>':''));
 }
+// Assist pages and the Synthesize room.
+let assistPage=0,synthTier='Rare',synthPicks=[];
+function assistTurn(n){const pages=WonderGear.assistPages.length;assistPage=(n+pages)%pages;cityPet()}
+function synthSpares(){const from=WonderGear.synthChain[synthTier];return WonderGear.familiars.filter(p=>p.rarity===from&&WonderGear.petSpares(S,p.id)>0)}
+function synthFree(id){return WonderGear.petSpares(S,id)-synthPicks.filter(x=>x===id).length}
+function synthSet(tier){if(WonderGear.synthChain[tier]){synthTier=tier;synthPicks=[];cityPet()}}
+function synthAdd(){
+ // Fill the empty places, taking from the pets with the most spare copies first.
+ while(synthPicks.length<WonderGear.synthNeed){const next=synthSpares().filter(p=>synthFree(p.id)>0).sort((a,b)=>synthFree(b.id)-synthFree(a.id))[0];if(!next)break;synthPicks.push(next.id)}
+ if(!synthPicks.length)toast('No spare '+WonderGear.synthChain[synthTier]+' copies yet. Summon pets to get them.');
+ cityPet();
+}
+function synthDrop(i){synthPicks.splice(i,1);cityPet()}
+function synthShow(results){
+ const one=results.length===1,r=results[0],p=item(r.id),[tag,key]=petRarity[p.rarity]||[p.rarity,'r'];
+ const body=one?'<em class="den-rarity den-'+key+'">'+tag+'</em><div class="den-burst"><img src="'+petPicture(p)+'" alt="'+esc(p.name)+'"></div><h3>'+esc(p.name)+'</h3><b class="den-tag '+(r.isNew?'o':'v')+'">'+(r.isNew?'New pet!':'Already yours · +1 spare copy')+'</b>'
+  :'<div class="den-picker">'+results.map(x=>petCard(x.id,'',x.isNew?'New!':'+1 copy')).join('')+'</div>';
+ modal('<div class="den-congrats" onclick="$(\'#modal\').close()"><h2>Congratulations</h2>'+body+'<small>Tap anywhere to close</small></div>');
+}
+function synthRun(batch){
+ const need=WonderGear.synthNeed,results=[];
+ if(batch){synthPicks=[];for(;;){while(synthPicks.length<need){const next=synthSpares().filter(p=>synthFree(p.id)>0).sort((a,b)=>synthFree(b.id)-synthFree(a.id))[0];if(!next)break;synthPicks.push(next.id)}
+   if(synthPicks.length<need)break;const r=WonderGear.synthesizePet(S,synthTier,synthPicks);synthPicks=[];if(!r)break;results.push(r)}}
+ else{if(synthPicks.length<need){toast('Add '+need+' spare copies first.');return}const r=WonderGear.synthesizePet(S,synthTier,synthPicks);if(r)results.push(r)}
+ synthPicks=[];
+ if(!results.length){toast('Not enough spare '+WonderGear.synthChain[synthTier]+' copies ('+need+' needed).');cityPet();return}
+ save();cityPet();synthShow(results);
+}
 function petFeed(){
  if(WonderGear.trainPet(S,petFocus)){save();cityPet()}
 }
@@ -428,15 +456,32 @@ function cityPet(){
    +lineup;
  }else if(petPage==='Assist'){
   top=power(teamAtk);
-  body='<section class="den-panel"><h3>Primary Pets</h3>'+lineup+'</section><section class="den-panel den-grow"><h3>Pet Assist</h3><div class="den-assists">'+team.slice(3).map((id,i)=>petCard(id,'pickPet('+(i+3)+')',id?'Replace':'Assign')).join('')+'</div></section><p class="den-note">Deployed and assisting pets all add their full ATK.</p>';
+  const pages=rules.assistPages,open=rules.assistSlots(S)/12,roman=['I','II','III','IV'];
+  if(assistPage>=pages.length)assistPage=0;
+  const first=3+assistPage*12,locked=assistPage>=open;
+  const cells=locked?'<p class="den-lock">Page '+roman[assistPage]+' opens at hero level '+pages[assistPage]+'.</p>'
+   :'<div class="den-assists">'+team.slice(first,first+12).map((id,i)=>'<div>'+petCard(id,'pickPet('+(first+i)+')',id?'Lv. '+rules.petLevel(S,id):'Assign')+(id?'<button class="den-link" onclick="pickPet('+(first+i)+')">'+denPlain+'Replace</button>':'<span class="den-link"></span>')+'</div>').join('')+'</div>';
+  body='<section class="den-panel"><h3 class="den-rule"><span>Primary Pet</span></h3>'+lineup+'</section><section class="den-panel den-grow"><h3 class="den-rule"><span>Pet Assist</span></h3>'+cells
+   +'<div class="den-pager"><button aria-label="Previous page" onclick="assistTurn('+(assistPage-1)+')">'+denPlain+'◀</button>'+pages.map((lv,i)=>'<button aria-pressed="'+(i===assistPage)+'" class="'+(i>=open?'den-shut':'')+'" aria-label="Page '+roman[i]+(i>=open?', opens at level '+lv:'')+'" onclick="assistTurn('+i+')">'+denPlain+roman[i]+'</button>').join('')+'<button aria-label="Next page" onclick="assistTurn('+(assistPage+1)+')">'+denPlain+'▶</button></div></section><p class="den-note"><i>!</i>Deployed and assisting pets all add their full ATK.</p>';
  }else if(petPage==='Gallery'){
   top=power(atk);
   const state=team.includes(p.id)?'Deployed':owned?'Collected':'Not collected';
   body='<div class="den-head"><em class="den-rarity den-'+key+'">'+tag+'</em><div><h2>'+esc(p.name)+'</h2><small>'+kind+' · '+state+'</small></div></div>'
-   +'<div class="den-stage den-solo"><span class="den-glow"></span>'+art(p,'den-main'+(owned?'':' den-dim'))+'<div class="den-side"><button onclick="filter=\'dragon\';go(\'collection\')">'+denPlain+'<i>✧</i>Summon</button><button onclick="'+switchTo('Badge',p.id)+'">'+denPlain+'<i>⬟</i>Badge</button></div><p class="den-starrow">'+'★'.repeat(stars)+'<s>'+'★'.repeat(6-stars)+'</s></p></div>'
-   +'<section class="den-panel"><h3>Each star adds <b>+30 ATK</b></h3><div class="den-track">'+[1,2,3,4,5,6].map(n=>'<span class="'+(n<=stars?'on':'')+'"><b>+'+n*30+'</b><small>★'+n+'</small></span>').join('')+'</div><p>Total star bonus: <b>+'+stars*30+' ATK</b></p></section>'
+   +'<div class="den-stage den-solo"><span class="den-glow"></span>'+art(p,'den-main'+(owned?'':' den-dim'))+'<div class="den-side"><button onclick="filter=\'dragon\';go(\'collection\')">'+denPlain+'<i>✧</i>Summon</button><button onclick="petTab(\'Synthesize\')">'+denPlain+'<i>❖</i>Synthesize</button><button onclick="'+switchTo('Badge',p.id)+'">'+denPlain+'<i>⬟</i>Badge</button></div><p class="den-starrow">'+(stars?'★'.repeat(stars):'<s>☆</s>')+(stars<6?'<u>▲</u>'+'★'.repeat(stars+1):'')+'</p></div>'
+   +'<section class="den-panel"><h3>Pet ATK <b>'+fmt(atk)+'</b>'+(stars<6?' ▲ <b>'+fmt(atk+30)+'</b>':'')+' <span>Star bonus <b>+'+stars*30+'</b>'+(stars<6?' ▲ <b>+'+(stars+1)*30+'</b>':'')+'</span></h3><div class="den-track">'+[1,2,3,4,5,6].map(n=>'<span class="'+(n<=stars?'on':'')+'"><b>'+(n<=stars?'✦':'+'+n*30)+'</b><small>★'+n+'</small></span>').join('')+'</div><p>Total star bonus: <b>+'+stars*30+' ATK</b>'+(rules.petSpares(S,p.id)?' · spare copies <b>×'+rules.petSpares(S,p.id)+'</b>':'')+'</p></section>'
    +'<div class="den-starup"><span class="den-orb">'+art(p,'')+'</span>'+(owned?buy(offers.Stars):buy({have:S.gold,cost:p.cost,unit:'gold',label:'Unlock',act:'petUnlock()',icon:uiIcon('gold')}))+'</div>'
    +strip(pets,'Gallery');
+ }else if(petPage==='Synthesize'){
+  const need=rules.synthNeed,from=rules.synthChain[synthTier],[stag,skey]=petRarity[synthTier],[,fkey]=petRarity[from];
+  synthPicks=synthPicks.filter((id,i)=>rules.petSpares(S,id)>=synthPicks.slice(0,i+1).filter(x=>x===id).length).slice(0,need);
+  const total=synthSpares().reduce((n,q)=>n+rules.petSpares(S,q.id),0);
+  const slot=i=>{const id=synthPicks[i];if(!id)return '<button class="den-card den-empty" aria-label="Add a spare copy" onclick="synthAdd()">'+denPlain+'<i>+</i></button>';const q=item(id);return '<button class="den-card den-'+fkey+'" aria-label="Remove '+esc(q.name)+'" onclick="synthDrop('+i+')"><img src="'+petPicture(q)+'" alt=""><b>'+esc(q.name)+'</b></button>'};
+  body='<div class="den-synth"><div class="den-tiers">'+['Super Rare','Epic','Rare'].map(t=>'<button aria-pressed="'+(t===synthTier)+'" onclick="synthSet(\''+t+'\')">'+denPlain+t+'</button>').join('')+'</div>'
+   +'<div class="den-forge"><div class="den-ring"><span class="den-card den-'+skey+' den-mystery"><em>'+stag+'</em><i>?</i></span></div><p class="den-banner">Randomly synthesize a '+synthTier+' pet</p>'
+   +'<div class="den-mats den-two">'+slot(0)+slot(1)+'</div><div class="den-mats">'+[2,3,4,5].map(slot).join('')+'</div>'
+   +'<p class="den-note">Spare '+from+' copies available: <b>'+total+'</b> · '+need+' make one '+synthTier+' pet</p>'
+   +'<div class="den-actions"><button class="den-gold" onclick="synthRun(true)" '+(total<need?'disabled':'')+'>'+denPlain+'Batch</button><button class="den-gold" onclick="synthAdd()" '+(synthPicks.length>=need?'disabled':'')+'>'+denPlain+'Add</button><button class="den-gold" onclick="synthRun(false)" '+(synthPicks.length<need?'disabled':'')+'>'+denPlain+'Synthesize</button></div>'
+   +'<p class="den-note">A summon that lands on a pet you already have gives a spare copy.</p></div></div>';
  }else{
   top=power(atk+rank*5);
   body='<div class="den-head"><em class="den-rarity den-'+key+'">'+tag+'</em><div><h2>'+esc(p.name)+' Badge · Lv. '+rank+'</h2><small>Exclusive to '+esc(p.name)+'</small></div></div>'
@@ -446,7 +491,7 @@ function cityPet(){
    +strip(pets.filter(q=>emblemFilter==='All'||q.rarity===emblemFilter),'Badge')
    +'<div class="den-filters">'+['All',...new Set(pets.map(q=>q.rarity))].map(f=>'<button aria-pressed="'+(emblemFilter===f)+'" onclick="emblemFilter=\''+f+'\';cityPet()">'+denPlain+f+'</button>').join('')+'</div>';
  }
- $('#main').innerHTML='<section class="spirit-room den" data-page="'+petPage+'"><div class="den-top"><strong class="den-ribbon">'+petPage+'</strong>'+top+'</div><div class="den-body">'+body+'</div><div class="spirit-nav"><button aria-label="Back to city" onclick="go(\'home\')">‹</button>'+petPages.map((page,i)=>'<button aria-pressed="'+(page===petPage)+'" onclick="petTab(\''+page+'\')">'+artImage(['hud-pet','hud-bag','hud-companion','hud-forge'][i],'')+page+'</button>').join('')+'</div></section>';
+ $('#main').innerHTML='<section class="spirit-room den" data-page="'+petPage+'"><div class="den-top"><strong class="den-ribbon">'+petPage+'</strong>'+top+'</div><div class="den-body">'+body+'</div><div class="spirit-nav"><button aria-label="'+(petPage==='Synthesize'?'Back to Gallery':'Back to city')+'" onclick="'+(petPage==='Synthesize'?'petTab(\'Gallery\')':'go(\'home\')')+'">‹</button>'+petPages.map((page,i)=>'<button aria-pressed="'+(page===petPage||petPage==='Synthesize'&&page==='Gallery')+'" onclick="petTab(\''+page+'\')">'+artImage(['hud-pet','hud-bag','hud-companion','hud-forge'][i],'')+page+'</button>').join('')+'</div></section>';
 }
 
 let companionKey='elf',companionMode='Upgrade',companionPick={};

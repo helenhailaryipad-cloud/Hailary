@@ -157,6 +157,23 @@ function evolveEmber(s){
  if(s.owned.includes('d1'))s.emberStars=stars+1;else s.owned.push('d1');
  return true;
 }
+// Assist slots come in pages of twelve; a page opens when Reina reaches its level.
+const assistPages=[1,50,150,300];
+function assistSlots(s){const lv=globalThis.WonderProgress.level(s.xp||0);return 12*assistPages.filter(n=>lv>=n).length}
+// Spare copies: a summon that lands on a pet she already has adds one. Six spare copies of one rarity can be
+// synthesized into a random pet of the next rarity (a new pet, or a spare copy of it if she has it already).
+const synthChain={Rare:'Common',Epic:'Rare','Super Rare':'Epic'},synthNeed=6;
+function petSpares(s,id){const n=s.petSpares?.[id];return Number.isInteger(n)&&n>0?n:0}
+function addPetSpare(s,id,n=1){if(Object.hasOwn(familiarById,id))(s.petSpares??={})[id]=petSpares(s,id)+n}
+function synthesizePet(s,tier,ids,rng=Math.random){
+ const from=synthChain[tier];if(!from||!Array.isArray(ids)||ids.length!==synthNeed)return null;
+ const use={};for(const id of ids){if(familiarById[id]?.rarity!==from)return null;use[id]=(use[id]||0)+1}
+ if(Object.entries(use).some(([id,n])=>petSpares(s,id)<n))return null;
+ for(const [id,n] of Object.entries(use)){const left=petSpares(s,id)-n;if(left)s.petSpares[id]=left;else delete s.petSpares[id]}
+ const pool=familiars.filter(p=>p.rarity===tier),p=pool[Math.min(pool.length-1,Math.floor(rng()*pool.length))],isNew=!s.owned.includes(p.id);
+ if(isNew)s.owned.push(p.id);else addPetSpare(s,p.id);
+ return {id:p.id,isNew};
+}
 function petAttack(s,id){return (familiarById[id]?.power??[60,150,190,280][Number(id.slice(1))])+12*(petLevel(s,id)-petStarts[id])+30*(id==='d1'?s.emberStars||0:s.petStars?.[id]||0)}
 function petTeam(s){
  const used=new Set([s.dragon]);
@@ -167,7 +184,7 @@ function petTeam(s){
    used.add(id);return id;
   });
  }
- return [s.dragon,...slots(s.petPartners,2),...slots(s.petAssist,12)];
+ return [s.dragon,...slots(s.petPartners,2),...slots(s.petAssist,assistSlots(s))];
 }
 function badgeRank(s,id){
  const n=s.petBadges?.[id];
@@ -184,6 +201,7 @@ function validPets(s){
   if(ranks!==undefined&&(!ranks||typeof ranks!=='object'||Array.isArray(ranks)||!Object.entries(ranks).every(([id,n])=>Object.hasOwn(petStarts,id)&&s.owned?.includes(id)&&Number.isInteger(n)&&n>=0&&n<=max)))return false;
  }
  if(s.emberShards!==undefined&&(!Number.isSafeInteger(s.emberShards)||s.emberShards<0))return false;
+ if(s.petSpares!==undefined&&(!s.petSpares||typeof s.petSpares!=='object'||Array.isArray(s.petSpares)||!Object.entries(s.petSpares).every(([id,n])=>Object.hasOwn(familiarById,id)&&Number.isInteger(n)&&n>0&&n<=9999)))return false;
  if(s.emberStars!==undefined&&(!Number.isInteger(s.emberStars)||s.emberStars<0||s.emberStars>6||!s.owned?.includes('d1')))return false;
  return s.petLevels===undefined||(s.petLevels!==null&&typeof s.petLevels==='object'&&!Array.isArray(s.petLevels)&&Object.entries(s.petLevels).every(([id,n])=>Object.hasOwn(petStarts,id)&&s.owned?.includes(id)&&Number.isInteger(n)&&n>=petStarts[id]&&n<=petCap))}
 function trainPet(s,id){
@@ -273,5 +291,5 @@ function rollBossTier(save,random){
 }
 function bossLoot(save,id,random=Math.random){const table=bossLootTables[id];if(!table)return null;const eq=state(save);save.equipment=eq;const materials=Object.fromEntries(materialDefs.map(m=>[m.id,table[m.id]||0]));for(const m of materialDefs)eq.materials[m.id]+=materials[m.id];const tier=rollBossTier(save,random),slot=table.slots[Math.min(table.slots.length-1,Math.max(0,Math.floor(random()*table.slots.length)))],drop=addDrop(save,tier,slot);if(drop.converted){eq.materials.stone+=15;materials.stone+=20;}else{drop.enhance=table.enhance;drop.stars=table.stars;}return {...materials,entry:drop.converted?null:drop,converted:!!drop.converted};}
 function grant(save,type,won,score=0){const eq=state(save);save.equipment=eq;let stones=type==='dungeon'?(won?12:3):type==='defense'?(won?8:2):type==='spar'?(won?2:0):Math.min(7,Math.floor(score/180));eq.materials.stone+=stones;let shard=won&&(type==='dungeon'||type==='defense')?3:0;eq.materials.shard+=shard;if(won&&type==='dungeon'){eq.materials.essence+=2;eq.materials.gem+=1}return {stone:stones,shard,gem:won&&type==='dungeon'?1:0,essence:won&&type==='dungeon'?2:0}}
-return Object.freeze({fashionTraits,companionTypes,companionSkins,companionSkin,ownsCompanionSkin,useCompanionSkin,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,starGearCount,starDonors,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
+return Object.freeze({assistPages,assistSlots,synthChain,synthNeed,petSpares,addPetSpare,synthesizePet,fashionTraits,companionTypes,companionSkins,companionSkin,ownsCompanionSkin,useCompanionSkin,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,starGearCount,starDonors,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
 })();
