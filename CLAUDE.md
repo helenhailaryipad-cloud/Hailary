@@ -170,6 +170,7 @@ preview, a scrollable strip of appearance cards, stats with Looks / Upgrade / Ti
   hero is deliberately smaller (`.city-hero.riding`), and footsteps trail to the left behind her feet.
   Footsteps (user request) lie flat as a track on the ground behind her heels and are drawn BEHIND her
   (`.comp-steps`, `.fx-footprint`: `scaleX(-1) scaleY(.5)`, z-index below the figure); never across her legs.
+  On the home screen the track sits just BELOW the left pet's feet (y 62.6-68.8%): higher up the pet hides it.
 - Chat preview packs all `comp-*` art into `pack-comp.js` (file limit). Hosted bundle headroom after this: see build.
 
 ## In-chat playable preview (user requirement)
