@@ -143,6 +143,9 @@ preview, a scrollable strip of appearance cards, stats with Looks / Upgrade / Ti
   engine slots `cloakBack, backItem, tailBack` (after `wingsBack`), so they work under every dress. Portrait keys carry
   `!cloak.back.tail` (`wardrobeExtrasTag()`), so they show on the home screen and in battles, not when riding.
 - Fairy (`comp-elf-<id>`) and footsteps (`comp-step-<id>`) are overlays on the home screen (`cityCompanionEffects`).
+- Cards: cloaks, back items and mounts use separate paintings of the WHOLE item (`art-source/icons/`, built by
+  `build-companions.py`; the build takes about 10 minutes); never crop a card picture. On the home screen the mounted
+  hero is deliberately smaller (`.city-hero.riding`), and footsteps trail to the left behind her feet.
 - Chat preview packs all `comp-*` art into `pack-comp.js` (file limit). Hosted bundle headroom after this: see build.
 
 ## In-chat playable preview (user requirement)

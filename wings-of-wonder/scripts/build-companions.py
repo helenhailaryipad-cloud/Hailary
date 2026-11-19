@@ -27,6 +27,14 @@ def icon(im, size=132):
     cut = im.crop(im.getbbox()); cut.thumbnail((size-8, size-8), Image.Resampling.LANCZOS)
     tile = Image.new('RGBA', (size, size)); tile.alpha_composite(cut, ((size-cut.width)//2, (size-cut.height)//2)); return tile
 
+def whole_item(path):
+    a = arr(Image.open(path)); a[..., 3] = np.where(a[..., 3] < 24, 0, a[..., 3])
+    keep = keep_big(a[..., 3] > 0, 200); a[..., 3] = np.where(dilate(keep, 3), a[..., 3], 0)
+    return img(fit.clean_rgb(a))
+def icon(im, size=168):
+    cut = im.crop(im.getbbox()); cut.thumbnail((size-8, size-8), Image.Resampling.LANCZOS)
+    tile = Image.new('RGBA', (size, size)); tile.alpha_composite(cut, ((size-cut.width)//2, (size-cut.height)//2)); return tile
+
 def behind_layer(kind, key):
     P = arr(Image.open(SRC/f'{kind}-{key}.webp')); d = diff(P, B)
     m = (P[..., 3] > 110) & (d > 24) & ~dilate(BODY, 1)
@@ -44,7 +52,10 @@ def behind_layer(kind, key):
         col[todo] = acc[todo]/cnt[todo][:, None]; known |= todo
     out[..., :3] = col; out[..., 3] = np.where(known, 255, 0)
     save(f'comp-{kind}-{key}', fit.to_frame(img(fit.clean_rgb(out, 2))))
-    save(f'comp-icon-{kind}-{key}', icon(art), 55)
+    # Cards for cloaks and back items use a separate painting of the whole item (art-source/icons):
+    # the layer alone has a body-shaped hole in it.
+    whole = ROOT/'scripts/art-source/icons'/f'{kind}-{key}.webp'
+    save(f'comp-icon-{kind}-{key}', icon(whole_item(whole)) if whole.exists() else icon(art), 55)
 
 def sheet(name, cols, rows, keys, prefix, size):
     for s in range(len(keys)//(cols*rows)):
@@ -58,6 +69,9 @@ def sheet(name, cols, rows, keys, prefix, size):
 if __name__ == '__main__':
     for kind in ('cloak', 'back', 'tail'):
         for key in IDS[kind]: behind_layer(kind, key)
+    # Mount cards: the whole creature without rider or saddle.
+    for path in sorted((ROOT/'scripts/art-source/icons').glob('mount-*.webp')):
+        save('mount-icon-'+path.stem[6:], icon(whole_item(path), 200), 55)
     sheet('elves', 2, 2, IDS['elf'], 'comp-elf', 300)
     sheet('steps', 3, 2, IDS['step'], 'comp-step', 280)
     print('Built companion art')

@@ -131,15 +131,7 @@ def build_mounts():
         # Shown at a few hundred pixels: stored at 832 x 760 to keep the hosted bundle under its limit.
         full = img(fit.clean_rgb(out)).crop((0, TOP, 1024, BOTTOM)).resize((832, 760), Image.Resampling.LANCZOS)
         full.save(OUT/f'fit-control-ride-{k}.webp', quality=90, method=6); full.save(HOST/f'fit-control-ride-{k}.avif', quality=46, speed=4)
-        # Card picture: the creature's head, taken from the part of the painting that is not rider or saddle.
-        beast = (P[..., 3] > 128) & ~dilate(rider, 6) & ~dilate(solid & box(540, 0, 722, 432), 5)   # not the rider, not her bow
-        beast = keep_big(beast, 4000); cols = np.nonzero(beast.any(0))[0]; right = int(cols.max())
-        zone = beast[:, max(0, right-330):right+1]; top = int(np.nonzero(zone.any(1))[0].min())
-        x0, y0 = max(0, right-330), max(0, top-12)
-        head = img(fit.clean_rgb(np.where(beast[..., None], P, 0))).crop((x0, y0, x0+345, y0+345))
-        h = arr(head); h[..., 3] *= np.clip((np.arange(345)[None, :]-18)/70.0, 0, 1)*np.clip((345-np.arange(345)[:, None])/50.0, 0, 1)   # soft left and bottom edges
-        head = img(h).resize((176, 176), Image.Resampling.LANCZOS)
-        head.save(OUT/f'mount-icon-{k}.webp', quality=90, method=6); head.save(HOST/f'mount-icon-{k}.avif', quality=62, speed=4)
+        # Card pictures (whole creature) are built by build-companions.py from art-source/icons.
     return rider
 
 if __name__ == '__main__':
