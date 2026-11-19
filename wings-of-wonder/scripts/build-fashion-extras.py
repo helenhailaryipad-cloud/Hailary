@@ -62,3 +62,8 @@ for n in range(3):
     keep = fit.keep_big(a[..., 3] > 0, 4000); a[..., 3] = np.where(fit.dilate(keep, 2), a[..., 3], 0)
     orb = fit.img(fit.clean_rgb(a)); orb = orb.crop(orb.getbbox()); orb.thumbnail((200, 200), Image.Resampling.LANCZOS)
     tile = Image.new('RGBA', (208, 208)); tile.alpha_composite(orb, ((208-orb.width)//2, (208-orb.height)//2)); save(f'trek-pickup-{n+1}', tile, 70)
+
+# Tier guardians (bosses 7-31): repainted at high resolution from the old 240 px sprites, same designs.
+for n in range(7, 32):
+    g = trim(SRC/'guardians'/f'guardian-t{n}.webp'); g.thumbnail((600, 600), Image.Resampling.LANCZOS)
+    save(f'guardian-t{n}', g, 46)   # 25 images: keep the hosted bundle well under its limit

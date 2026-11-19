@@ -109,6 +109,12 @@ of the chosen tier as cards (Open / Cleared xN / Locked), then Enter with stamin
 shown); entry rules are unchanged (`launchBattle` checks level and stamina). Use `div`, not `header/nav/footer`, inside
 `#main`, and note `decorateArt()` prepends icons to icon-less buttons after every click.
 
+## Sharp guardian art (2026-11-19)
+The 25 tier guardians (`guardian-t7..t31`) were 240 px sprites stretched on the lobby stage. They were repainted at
+1024 px by the image model from the old sprites (same designs), sources in `art-source/guardians/`, built to 600 px by
+`build-fashion-extras.py`. The nine named bosses (mistwood ... sunspire) were already 700 px. Hosted bundle headroom
+is about 1.86 MB after this.
+
 ## In-chat playable preview (user requirement)
 The user wants to play the game inside the chat, and wants SHORT replies in Russian, no fluff.
 - Artifact: https://claude.ai/artifact/L9owNJPMaZjAsTmU3tDGs6 (private). After game changes, rebuild and republish:
