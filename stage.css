@@ -6743,3 +6743,12 @@ body[data-screen="cityCompanion"] #main{padding:0!important;overflow:hidden!impo
 .fx-footprint{left:29.5%}
 .comp-steps{right:54%}
 .trek-buffs{bottom:13%;gap:1.6cqw}.trek-buffs span{display:none}.trek-buffs span.on{display:grid}.trek-buffs b{right:-6px;font-size:max(12px,2.9cqw)}
+
+/* Mini Games cards: title with one readable line under it (best score, best time). */
+body[data-screen=games] #stage .portal-game-info .booth-title{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0}
+body[data-screen=games] #stage .portal-game-info .booth-title span{display:block;font-size:14px;line-height:1.2;font-weight:700;color:#ffe9ac!important;-webkit-text-fill-color:#ffe9ac;opacity:1;text-shadow:0 1px 3px #06140f,0 0 6px #06140f;white-space:nowrap}
+body[data-screen=games] #stage .portal-illustration{background:#244a3c}
+.trek-top small,.trek-top strong,.trek-rank{color:#fff4d7;-webkit-text-fill-color:currentColor}
+.trek-top #trekLives{display:inline-block;transform-origin:70% 50%}
+.trek-top #trekLives.hit{animation:trekHit .5s ease-out}
+@keyframes trekHit{0%{transform:scale(1.55);filter:brightness(2.2)}60%{transform:scale(.94)}100%{transform:none;filter:none}}
