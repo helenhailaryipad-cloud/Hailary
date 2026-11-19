@@ -179,6 +179,22 @@ preview, a scrollable strip of appearance cards, stats with Looks / Upgrade / Ti
   wears it at once (`pickCompanion`); unowned cards only preview until Buy & use. Screen id is `cityCompanion`.
 - Chat preview packs all `comp-*` art into `pack-comp.js` (file limit). Hosted bundle headroom after this: see build.
 
+## Pets tab (2026-11-19)
+Home -> Pet (`cityPet()` in `gear-ui.js`, screen id `cityPet`) was rebuilt after four reference photos (root
+`.spirit-room.den`, classes `den-*` in `stage.css`). It always showed flat vector animals (`dragonSVG`) for d0-d3 although
+painted art existed; now every pet uses its painting (`petPicture`: `d0..d3.webp`, `familiar-<n>.webp`), and the titles
+of d0-d3 say what the paintings show (Grove Dragonling, Ember Drake, Moon Dragon, Star Dragon; names unchanged).
+- Formation: team power, Recommended Lineup, a stage with the chosen pet in front and the other two deployed pets
+  behind, two skill rows whose tags are REAL numbers (team ATK, badge, kind, stars), level bar, four stats with the
+  gain of the next upgrade, one cost line and golden button for the mode chosen in the sub-tabs Pet Feeding / Pet Stars
+  / Pet Badge (`petMode`; `petFeed`, `starPet`, `forgePetBadge`), then the three deployed cards with Replace.
+- Gallery: rarity badge, name, big art, Summon and Badge side buttons, star row, six-node star track (+30 ATK each),
+  shard line with Star-up (or Unlock for gold), strip of all 54 pets. Assist: 3 primary + 12 assist cards. Badge: forge.
+- Cards (`petCard`): rarity ribbon and colours (`petRarity`: c r e s l), painting, stars, name, level; the picker modal
+  uses them too (`.den-picker`). Text buttons carry an empty svg (`denPlain`) so `decorateArt()` adds no stock icon.
+- No rules or save fields changed. Not done: pet gear/talent systems of the reference (we have none); familiar
+  paintings are 512 px and slightly soft on the big stage at 2x.
+
 ## In-chat playable preview (user requirement)
 The user wants to play the game inside the chat, and wants SHORT replies in Russian, no fluff.
 - Artifact: https://claude.ai/artifact/L9owNJPMaZjAsTmU3tDGs6 (private). After game changes, rebuild and republish:
