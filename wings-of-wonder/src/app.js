@@ -578,7 +578,7 @@ function wardrobeExtrasTag(override){
  });
  return ids.some(Boolean)?ids.join('.'):'';
 }
-async function composeWardrobeCanvas(dress,hair,weapon=0,wings='',tag=wardrobeExtrasTag()){
+async function composeWardrobeCanvas(dress,hair,weapon=0,wings='',tag=wardrobeExtrasTag(),only=null){
  ensureWardrobeCatalog();
  const extras=(tag||'').split('.').map((id,i)=>{
   const kind=wardrobeExtraKinds[i];if(!id||!WonderGear.companionSkins[kind]?.some(skin=>skin.id===id))return null;
@@ -588,7 +588,7 @@ async function composeWardrobeCanvas(dress,hair,weapon=0,wings='',tag=wardrobeEx
  }).filter(Boolean);
  const body='fit-control-body';
  if(wings&&!WonderWardrobe.get('wings:'+wings))WonderWardrobe.register({id:'wings:'+wings,kind:'wings',layers:[{slot:'wingsBack',asset:wings,fit:[-135,-115,720,600],minTop:2-wardrobeWingTop}]});
- return WonderWardrobe.render({dress:'dress:'+fittedDressId(dress),hair:'hair:'+fittedHairId(hair),weapon:weapon?'weapon:'+weapon:null,wings:wings?'wings:'+wings:null,extras,body,pad:wings?wardrobeWingPad:0,padTop:wings?wardrobeWingTop:0,
+ return WonderWardrobe.render({dress:'dress:'+fittedDressId(dress),hair:'hair:'+fittedHairId(hair),weapon:weapon?'weapon:'+weapon:null,wings:wings?'wings:'+wings:null,extras,body,only,pad:wings?wardrobeWingPad:0,padTop:wings?wardrobeWingTop:0,
   createCanvas:(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;},load:id=>styleImage(artPath(id))});
 }
 async function composeRegisteredReina(dress,hair){
@@ -716,6 +716,21 @@ function registeredCombatBitmap(noWings){
  if(noWings)return image||null;
  if(image)lastRegisteredCombatImage=image;
  return image||lastRegisteredCombatImage;
+}
+// Jungle Trek animates the shot: it needs the figure without her bow, the bow alone, and the fingers that close over
+// the grip, all in the same 500 x 800 frame (canvases at 2x, no wings). Null until all three are painted.
+const registeredCombatParts=new WardrobeCache(4);
+function registeredCombatLayers(){
+ if(typeof document==='undefined'||typeof WonderWardrobe==='undefined')return null;
+ const {dress,hair}=registeredLook(),weapon=S.atelier?.weapon||((S.reinaFashion?.equipped&4)?12:13),tag=wardrobeExtrasTag(),key=dress+'/'+hair+'/'+weapon+'/'+tag;
+ if(!registeredCombatParts.has(key)){
+  const entry={ready:false};registeredCombatParts.set(key,entry);
+  const hand=['weapon','gripFingers'],rest=WonderWardrobe.slots.filter(slot=>!hand.includes(slot));
+  Promise.all([rest,['weapon'],['gripFingers']].map(only=>composeWardrobeCanvas(dress,hair,weapon,'',tag,only)))
+   .then(([figure,bow,fingers])=>Object.assign(entry,{figure,bow,fingers,ready:true})).catch(()=>registeredCombatParts.delete(key));
+ }
+ const entry=registeredCombatParts.get(key);
+ return entry?.ready?entry:null;
 }
 function reinaWorldLookPath(){
  return registeredLookPath(undefined,undefined,S.atelier?.weapon||((S.reinaFashion?.equipped&4)?12:13),fashionWing().id);

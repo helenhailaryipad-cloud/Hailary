@@ -32,7 +32,8 @@
    ctx.clip(outer,'evenodd');
   }else ctx.clip(p);
  }
- async function render({dress,hair,weapon,wings,extras=[],scale=2,load,createCanvas,body,bodyLayers=[],pad=0,padTop=0}){
+ // `only` (a list of slots) renders just those layers, in the same frame: used to animate the bow apart from the figure.
+ async function render({dress,hair,weapon,wings,extras=[],scale=2,load,createCanvas,body,bodyLayers=[],pad=0,padTop=0,only=null}){
   if(!Number.isFinite(scale)||scale<1||scale>4)throw Error('Invalid wardrobe scale');
   const selected=[dress,hair,weapon,wings,...extras].filter(Boolean).map(id=>{const it=items.get(id);if(!it)throw Error('Unknown wardrobe item '+id);return it;});
   const layers=[{slot:'body',asset:body,rect:frame.body},...selected.flatMap(it=>it.layers),...bodyLayers];
@@ -47,6 +48,7 @@
   const erase=selected.filter(it=>it.kind==='dress'&&it.bodyErase).map(it=>images.get(it.bodyErase));
   for(const layer of layers.map((it,index)=>({...it,index})).sort((a,b)=>slots.indexOf(a.slot)-slots.indexOf(b.slot)||a.index-b.index)){
    const image=images.get(layer.asset);
+   if(only&&!only.includes(layer.slot))continue;
    if(layer.slot==='body'&&erase.length){
     // Cut the hidden parts out of the body alone, never out of wings or hair behind it.
     const own=createCanvas(500*scale,800*scale),b=own.getContext('2d');b.scale(scale,scale);

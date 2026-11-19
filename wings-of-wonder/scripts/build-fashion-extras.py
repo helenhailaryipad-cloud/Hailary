@@ -7,6 +7,7 @@ position of each bow for the wardrobe catalog in src/app.js.
 
     python3 scripts/build-fashion-extras.py
 """
+import re
 from pathlib import Path
 import importlib.util
 import numpy as np
@@ -67,6 +68,12 @@ for n in range(3):
 for n in range(7, 32):
     g = trim(SRC/'guardians'/f'guardian-t{n}.webp'); g.thumbnail((600, 600), Image.Resampling.LANCZOS)
     save(f'guardian-t{n}', g, 46)   # 25 images: keep the hosted bundle well under its limit
+# Canvas battles crop each guardian to the bounds stored in art-meta.js: keep them in step with the art.
+meta = Path('src/art-meta.js'); text = meta.read_text()
+for n in range(7, 32):
+    im = Image.open(OUT/f'guardian-t{n}.webp').convert('RGBA'); x0, y0, x1, y1 = im.getchannel('A').point(lambda a: 255 if a > 24 else 0).getbbox()
+    text = re.sub(r'"guardian-t%d": \{"bounds": \[[0-9, ]+\]\}' % n, '"guardian-t%d": {"bounds": [%d, %d, %d, %d]}' % (n, x0, y0, x1-x0, y1-y0), text)
+meta.write_text(text)
 
 # Jungle Trek second set: three more bonus orbs, bomb, storm crystal, rocket (3 x 2 sheet).
 sheet = Image.open(SRC/'trek/extras.webp').convert('RGBA'); cw, ch = sheet.width//3, sheet.height//2
@@ -82,3 +89,25 @@ for n, name in enumerate(['trek-pickup-7', 'trek-pickup-8', 'trek-pickup-9']):
     keep = fit.keep_big(a[..., 3] > 0, 300); a[..., 3] = np.where(fit.dilate(keep, 2), a[..., 3], 0)
     cut = fit.img(fit.clean_rgb(a)); cut = cut.crop(cut.getbbox()); cut.thumbnail((200, 200), Image.Resampling.LANCZOS)
     tile = Image.new('RGBA', (208, 208)); tile.alpha_composite(cut, ((208-cut.width)//2, (208-cut.height)//2)); save(name, tile, 70)
+# Reward chests (closed and open) and the four painted frames of the bow-shot flash.
+sheet = Image.open(SRC/'trek/chests.webp').convert('RGBA'); cw = sheet.width//2
+for n, name in enumerate(['trek-chest', 'trek-chest-open']):
+    a = fit.arr(sheet.crop((n*cw, 0, (n+1)*cw, sheet.height))); a[..., 3] = np.where(a[..., 3] < 24, 0, a[..., 3])
+    cut = fit.img(fit.clean_rgb(a)); cut = cut.crop(cut.getbbox()); cut.thumbnail((300, 300), Image.Resampling.LANCZOS); save(name, cut, 70)
+sheet = Image.open(SRC/'trek/shotfx.webp').convert('RGBA'); solid = (np.array(sheet)[..., 3] > 20).sum(0) > 0
+runs, start = [], None   # the four frames are the four widest runs of painted columns
+for x, on in enumerate(list(solid)+[False]):
+    if on and start is None: start = x
+    if not on and start is not None:
+        if runs and start-runs[-1][1] < 40: runs[-1][1] = x
+        else: runs.append([start, x])
+        start = None
+runs = sorted(sorted(runs, key=lambda r: r[0]-r[1])[:4])
+strip = Image.new('RGBA', (4*192, 192)); cuts = []
+for x0, x1 in runs:
+    cut = sheet.crop((x0, 0, x1, sheet.height)); box = Image.fromarray(((np.array(cut)[..., 3] > 20)*255).astype(np.uint8)).getbbox(); cuts.append(cut.crop(box))
+k = 186/max(max(c.size) for c in cuts)   # one scale for all four, so the flash really grows
+for n, cut in enumerate(cuts):
+    cut = cut.resize((max(1, round(cut.width*k)), max(1, round(cut.height*k))), Image.Resampling.LANCZOS)
+    strip.alpha_composite(cut, (n*192+(192-cut.width)//2, (192-cut.height)//2))
+save('trek-shot', fit.img(fit.clean_rgb(fit.arr(strip))), 70)

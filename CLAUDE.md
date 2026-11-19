@@ -118,6 +118,28 @@ turns toward the lane and breathes it from its jaws (`h.breath`). The newest fin
 Hit feedback (sixth pass): `Trek.pop` rings where arrows, rockets, beam and lightning land (`g.pops`), struck barrels
 and the dragon jolt (`f.flash`), kills float `+50`; a hit on Reina shakes the view (`g.shake`), flashes a ring
 (`g.hitFlash`), floats `−1 ♥`, pulses the hearts and vibrates where supported; a blocked hit says `Blocked!`.
+Seventh pass (2026-11-19, user: "too easy; stronger sub-bosses; bosses should explode beautifully; chests at the end;
+animate her shot with the image model"):
+- Sub-bosses (`Trek.subs`): Thornback (guardian-t15, 1100 HP, at 13 s) lines up with Reina, warns and rushes down her
+  lane, then walks back in until beaten; Stormwing (guardian-t19, 2000 HP, at 29 s) strafes and strikes three
+  neighbouring lanes at once. Each gives +300 score, a bonus and a chest. The dragon has 4500 HP and is enraged below
+  half (breathes sooner, second lane alight). Warnings are shorter (hazards start at age .35-.7 of the 1.6 s),
+  barrels speed up over the run, a barrel hits within .36 of its lane (no safe spot between lanes).
+- Finale: beating the dragon stops the clock (`g.finale`, `finaleLength` 3.8 s): it shakes with small blasts and rays
+  (`g.booms`), bursts (white flash `g.whiteout`, two ground rings, burning pieces `g.debris`), three chests fly out and
+  open (`g.chests`, `Trek.chest`), the remaining barrels pop, then the run ends. `Trek.effects` holds everything that
+  only fades or flies. If time runs out first the result says THE DRAGON ESCAPED.
+- Rewards: `g.loot {gold,wishes,chests}`: 120 gold per sub-boss chest, 150 per dragon chest (three) plus 20 wishes,
+  on top of barrel gold (cap 800) and XP (cap 80). HUD shows gold so far; the end panel (`.trek-result`) shows five
+  chests (open = earned), prize tiles and the breakdown. Chest art `trek-chest`, `trek-chest-open`.
+- Shot animation: `registeredCombatLayers()` (`app.js`) renders the worn look as three canvases through the new engine
+  option `only` (figure without bow, bow alone, fingers over the grip). In a run the bow is raised, turns about her
+  hand and kicks with every volley (`g.kick`), a four-frame painted flash (`trek-shot`, image model) plays at the bow
+  and the arrows leave from the bow. Her ARMS do not move: a drawn pose (pulling the string) would need a repaint of
+  every dress and hairstyle per frame; offered to the user as a separate job.
+- Bots with human-like reaction delays (`/tmp` sim, not in repo): slow 42% win, medium 72%, perfect 80%.
+- Found and fixed: `art-meta.js` still held the 240 px bounds of the old tier guardians, so canvas battles drew only
+  the top-left corner of the sharp 600 px art (tier dungeon bosses). `build-fashion-extras.py` now rewrites the bounds.
 Mini Games (`games()` in `app.js`): covers are preloaded 0.9 s after start (`preloadGameCovers`) and never lazy
 (`eagerArt`); best score/time sit under each title in `.booth-title span` with an explicit colour. The user saw the
 old best-score text as black on the iPad; that could not be reproduced in Chromium.
