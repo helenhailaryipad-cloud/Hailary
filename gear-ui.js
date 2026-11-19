@@ -321,7 +321,9 @@ function cityCraft(){
  $('#main').innerHTML=`<section class="satchel loom"><div class="satchel-top"><strong>Gear Crafting</strong>${[['gold',S.gold],['wishes',S.tickets],['crystals',S.scales]].map(([i,n])=>`<span>${uiIcon(i)}${fmt(n)}</span>`).join('')}</div><div class="loom-body"><aside>${[1,2,3,4,5].map(n=>`<button aria-pressed="${craftBand===n}" onclick="craftFilter(${n},null,craftGroup)">${n}-Star Gear</button>${craftBand===n?tiers.map(t=>`<button class="loom-tier" aria-pressed="${t===craftTier}" onclick="craftFilter(craftBand,${t},craftGroup)">T${t} Gear</button>`).join(''):''}`).join('')}</aside><div class="loom-work">${e?`<div class="loom-orbit"><div>${gearArt(r.catalog[e.template])}</div></div><h2>${r.catalog[e.template].name}</h2><strong>${e.stars} → ${craftBand} ★ · T${craftTier}</strong><p>${craftTier>r.unlockedTier(S)?'Requires Lv. '+r.requiredLevel(craftTier):'Success rate: 100% with all materials'}</p><div class="loom-inputs">${Array.from({length:r.starGearCount},(_,i)=>{const d=donors.find(x=>x.uid===craftInputs[i]);return d?tile(d,'craftAdd('+d.uid+')',true):'<span>+</span>'}).join('')}</div><p>${craftInputs.length} / ${r.starGearCount} spare items · ${priceText(price)}</p><div class="loom-options">${donors.map(x=>tile(x,'craftAdd('+x.uid+')',craftInputs.includes(x.uid))).join('')}</div><div class="loom-buttons"><button onclick="craftBatch([${choices.map(x=>x.uid).join(',')}])">Batch</button><button onclick="craftAdd()" ${donors.length?'':'disabled'}>Add</button><button onclick="craftCommit('${equipmentStamp(e)}')" ${ready?'':'disabled'}>Synthesize</button></div><div class="loom-options">${choices.map(x=>tile(x,'craftSelect('+x.uid+')',x===e)).join('')}</div>`:'<p>No matching equipment in your bag.</p>'}</div></div><div class="satchel-tabs">${groups.map(g=>`<button aria-pressed="${g===craftGroup}" onclick="craftFilter(craftBand,null,'${g}')">${g}</button>`).join('')}</div>${satchelNav()}</section>`;
 }
 
-let petPage='Formation',petFocus=null,emblemFilter='All';
+let petPage='Formation',petFocus=null,emblemFilter='All',petBack='',petBackNext='';
+// Leaving the room: back to Wonders when it was opened from the Pets tab there, otherwise to the city.
+function petLeave(){if(petBack==='wonders'){petBack='';filter='wings';go('collection')}else go('home')}
 const petPages=['Formation','Gallery','Assist','Badge'];
 function petTab(page,id){
  petPage=page;petFocus=id||petFocus||S.dragon;if(page==='Badge'&&id)emblemFilter='All';cityPet();
@@ -467,10 +469,19 @@ function cityPet(){
   top=power(atk);
   const state=team.includes(p.id)?'Deployed':owned?'Collected':'Not collected';
   body='<div class="den-head"><em class="den-rarity den-'+key+'">'+tag+'</em><div><h2>'+esc(p.name)+'</h2><small>'+kind+' · '+state+'</small></div></div>'
-   +'<div class="den-stage den-solo"><span class="den-glow"></span>'+art(p,'den-main'+(owned?'':' den-dim'))+'<div class="den-side"><button onclick="filter=\'dragon\';go(\'collection\')">'+denPlain+'<i>✧</i>Summon</button><button onclick="petTab(\'Synthesize\')">'+denPlain+'<i>❖</i>Synthesize</button><button onclick="'+switchTo('Badge',p.id)+'">'+denPlain+'<i>⬟</i>Badge</button></div><p class="den-starrow">'+(stars?'★'.repeat(stars):'<s>☆</s>')+(stars<6?'<u>▲</u>'+'★'.repeat(stars+1):'')+'</p></div>'
+   +'<div class="den-stage den-solo"><span class="den-glow"></span>'+art(p,'den-main'+(owned?'':' den-dim'))+'<div class="den-side"><button onclick="petTab(\'Summon\')">'+denPlain+'<i>✧</i>Summon</button><button onclick="petTab(\'Synthesize\')">'+denPlain+'<i>❖</i>Synthesize</button><button onclick="'+switchTo('Badge',p.id)+'">'+denPlain+'<i>⬟</i>Badge</button></div><p class="den-starrow">'+(stars?'★'.repeat(stars):'<s>☆</s>')+(stars<6?'<u>▲</u>'+'★'.repeat(stars+1):'')+'</p></div>'
    +'<section class="den-panel"><h3>Pet ATK <b>'+fmt(atk)+'</b>'+(stars<6?' ▲ <b>'+fmt(atk+30)+'</b>':'')+' <span>Star bonus <b>+'+stars*30+'</b>'+(stars<6?' ▲ <b>+'+(stars+1)*30+'</b>':'')+'</span></h3><div class="den-track">'+[1,2,3,4,5,6].map(n=>'<span class="'+(n<=stars?'on':'')+'"><b>'+(n<=stars?'✦':'+'+n*30)+'</b><small>★'+n+'</small></span>').join('')+'</div><p>Total star bonus: <b>+'+stars*30+' ATK</b>'+(rules.petSpares(S,p.id)?' · spare copies <b>×'+rules.petSpares(S,p.id)+'</b>':'')+'</p></section>'
    +'<div class="den-starup"><span class="den-orb">'+art(p,'')+'</span>'+(owned?buy(offers.Stars):buy({have:S.gold,cost:p.cost,unit:'gold',label:'Unlock',act:'petUnlock()',icon:uiIcon('gold')}))+'</div>'
    +strip(pets,'Gallery');
+ }else if(petPage==='Summon'){
+  // Pet Summon lives in the room now: wishes in, a random familiar out; one she has already becomes a spare copy.
+  const odds=[['Common','c',45],['Rare','r',35],['Epic','e',16],['Super Rare','s',4]],have=WonderGear.familiars.filter(q=>S.owned.includes(q.id)).length;
+  const call=(n)=>'<button class="den-gold" onclick="summonPets('+n+')" '+(S.tickets<n*50?'disabled':'')+'>'+denPlain+'Summon ×'+n+'<small>'+fmt(n*50)+' wishes</small></button>';
+  body='<div class="den-forge den-summon"><div class="den-ring"><span class="den-card den-s den-mystery"><em>Pet</em><i>?</i></span></div><p class="den-banner">Summon a random pet with wishes</p>'
+   +'<div class="den-odds">'+odds.map(([name,key,n])=>'<span class="den-'+key+'"><b>'+n+'%</b><small>'+name+'</small></span>').join('')+'</div>'
+   +'<div class="den-cost">'+uiIcon('wishes')+'<b class="'+(S.tickets<50?'low':'')+'">'+fmt(S.tickets)+'</b> wishes · collected <b>'+have+'</b> / '+WonderGear.familiars.length+'</div>'
+   +'<div class="den-actions">'+call(1)+call(10)+'</div>'
+   +'<p class="den-note">Rare includes fairies. A pet you already have gives 100 gold and a spare copy for <u onclick="petTab(\'Synthesize\')">Synthesize</u>.</p></div>';
  }else if(petPage==='Synthesize'){
   const need=rules.synthNeed,from=rules.synthChain[synthTier],[stag,skey]=petRarity[synthTier],[,fkey]=petRarity[from];
   synthPicks=synthPicks.filter((id,i)=>rules.petSpares(S,id)>=synthPicks.slice(0,i+1).filter(x=>x===id).length).slice(0,need);
@@ -491,7 +502,8 @@ function cityPet(){
    +strip(pets.filter(q=>emblemFilter==='All'||q.rarity===emblemFilter),'Badge')
    +'<div class="den-filters">'+['All',...new Set(pets.map(q=>q.rarity))].map(f=>'<button aria-pressed="'+(emblemFilter===f)+'" onclick="emblemFilter=\''+f+'\';cityPet()">'+denPlain+f+'</button>').join('')+'</div>';
  }
- $('#main').innerHTML='<section class="spirit-room den" data-page="'+petPage+'"><div class="den-top"><strong class="den-ribbon">'+petPage+'</strong>'+top+'</div><div class="den-body">'+body+'</div><div class="spirit-nav"><button aria-label="'+(petPage==='Synthesize'?'Back to Gallery':'Back to city')+'" onclick="'+(petPage==='Synthesize'?'petTab(\'Gallery\')':'go(\'home\')')+'">‹</button>'+petPages.map((page,i)=>'<button aria-pressed="'+(page===petPage||petPage==='Synthesize'&&page==='Gallery')+'" onclick="petTab(\''+page+'\')">'+artImage(['hud-pet','hud-bag','hud-companion','hud-forge'][i],'')+page+'</button>').join('')+'</div></section>';
+ const side=petPage==='Synthesize'||petPage==='Summon';   // side rooms of the Gallery
+ $('#main').innerHTML='<section class="spirit-room den" data-page="'+petPage+'"><div class="den-top"><strong class="den-ribbon">'+petPage+'</strong>'+top+'</div><div class="den-body">'+body+'</div><div class="spirit-nav"><button aria-label="'+(side?'Back to Gallery':petBack==='wonders'?'Back to Wonders':'Back to city')+'" onclick="'+(side?'petTab(\'Gallery\')':'petLeave()')+'">‹</button>'+petPages.map((page,i)=>'<button aria-pressed="'+(page===petPage||side&&page==='Gallery')+'" onclick="petTab(\''+page+'\')">'+artImage(['hud-pet','hud-bag','hud-companion','hud-forge'][i],'')+page+'</button>').join('')+'</div></section>';
 }
 
 let companionKey='elf',companionMode='Upgrade',companionPick={};

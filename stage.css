@@ -6911,3 +6911,21 @@ body[data-screen=games] #stage .portal-illustration{background:#244a3c}
 .trek-prizes b{font-size:22px;color:#ffe27a;line-height:1.1}.trek-prizes small{font-size:11px;letter-spacing:1px;color:#d9ecdf;text-transform:uppercase}
 .trek-result p{margin:0;font-size:13px;line-height:1.5}.trek-result p i{opacity:.7;font-size:11px}
 @media (prefers-reduced-motion:reduce){.trek-chests img{animation:none}}
+
+/* Pets: Summon page inside the room */
+.den-summon{flex:1;justify-content:center;gap:1.6cqh}
+.den-summon .den-ring{width:52cqw}.den-summon .den-banner{margin-top:-6cqh!important}
+.den-odds{display:grid;grid-template-columns:repeat(4,1fr);gap:1.6cqw;width:100%}
+.den-odds span{display:grid;gap:.2em;padding:.6em .2em;border-radius:.5em;border:1px solid var(--edge);background:var(--bg)}
+.den-odds b{font-size:1.35em;color:#fff}.den-odds small{color:#e8f2ff}
+#main .den .den-summon .den-gold{display:grid;gap:.15em;padding:.55em 2em;font-size:1.15em}
+.den-summon .den-gold small{font-size:.68em;font-weight:700}
+.den-note u{color:#ffe27a;cursor:pointer}
+.den-summoned{grid-template-columns:repeat(auto-fill,minmax(78px,1fr));max-height:60vh;cursor:pointer}
+#modalBody .den-summoned .den-card{pointer-events:none}
+/* Pet cards inside a modal never run past its edges */
+#modalBody .den-picker{grid-template-columns:repeat(4,minmax(0,1fr));width:100%;max-width:100%;margin:0;box-sizing:border-box;justify-content:stretch}
+#modalBody .den-picker{font-size:clamp(11px,1.9vw,17px)}
+#modalBody .den-summoned{grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;font-size:clamp(9px,1.55vw,14px)}
+#modalBody .den-card small{white-space:nowrap;overflow:hidden}
+#modalBody .den-congrats{width:100%;box-sizing:border-box}
