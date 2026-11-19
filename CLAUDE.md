@@ -100,6 +100,15 @@ charges down its lane; breaking it first cancels the charge ("Defused"). Floatin
 Rival finals are 1500-3500. Rewards (gold/XP caps, 90 s, 3 hearts, boost every 4th kill) are unchanged. `drawJungle` uses a flatter projection than before (render only). Sources in
 `art-source/trek/`, built by `build-fashion-extras.py`.
 
+## Dungeon lobby (2026-11-19)
+`dungeonLobby()` in `world.js` was rebuilt after a reference screenshot: one guardian on stage with its name and
+recommended level (green when met), a left column (Boss info, Treasure, Quests, Party, EXP trial, with badges), a
+Rewards column (gold, gear, materials, XP, first-clear bonus), a scrollable strip of all tier tabs, the five guardians
+of the chosen tier as cards (Open / Cleared xN / Locked), then Enter with stamina. State: `lobbyDungeon`, `lobbyTier`;
+`lobbyPick`, `lobbyTierPick`, `dungeonRules`. All tiers can be browsed (before, only the current tier plus two were
+shown); entry rules are unchanged (`launchBattle` checks level and stamina). Use `div`, not `header/nav/footer`, inside
+`#main`, and note `decorateArt()` prepends icons to icon-less buttons after every click.
+
 ## In-chat playable preview (user requirement)
 The user wants to play the game inside the chat, and wants SHORT replies in Russian, no fluff.
 - Artifact: https://claude.ai/artifact/L9owNJPMaZjAsTmU3tDGs6 (private). After game changes, rebuild and republish:
