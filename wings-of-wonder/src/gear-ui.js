@@ -362,7 +362,7 @@ function petStarCount(id){return id==='d1'?S.emberStars||0:S.petStars?.[id]||0}
 function petCard(id,click,label,selected=false){
  if(!id)return '<button class="den-card den-empty" onclick="'+click+'" aria-label="'+label+'">'+denPlain+'<i>+</i><small>'+label+'</small></button>';
  const p=item(id),[tag,key]=petRarity[p.rarity]||[p.rarity,'r'],stars=petStarCount(id);
- return '<button class="den-card den-'+key+(S.owned.includes(id)?'':' den-locked')+'" aria-pressed="'+selected+'" aria-label="'+esc(p.name)+', '+p.rarity+', '+label+'" onclick="'+click+'"><em>'+tag+'</em><img src="'+petPicture(p)+'" alt="" draggable="false"><span class="den-stars">'+'★'.repeat(stars)+'</span><b>'+esc(p.name)+'</b><small>'+label+'</small></button>';
+ return '<button class="den-card den-'+key+(S.owned.includes(id)?'':' den-locked')+'" aria-pressed="'+selected+'" aria-label="'+esc(p.name)+', '+p.rarity+', '+label+'" onclick="'+click+'"><em>'+tag+'</em>'+(S.owned.includes(id)?'':'<i class="den-lockchip" aria-hidden="true">🔒</i>')+'<img src="'+petPicture(p)+'" alt="" draggable="false"><span class="den-stars">'+'★'.repeat(stars)+'</span><b>'+esc(p.name)+'</b><small>'+label+'</small></button>';
 }
 function pickPet(slot){
  const team=WonderGear.petTeam(S),owned=ITEMS.filter(p=>p.type==='dragon'&&S.owned.includes(p.id));
@@ -469,7 +469,7 @@ function cityPet(){
   top=power(atk);
   const state=team.includes(p.id)?'Deployed':owned?'Collected':'Not collected';
   body='<div class="den-head"><em class="den-rarity den-'+key+'">'+tag+'</em><div><h2>'+esc(p.name)+'</h2><small>'+kind+' · '+state+'</small></div></div>'
-   +'<div class="den-stage den-solo"><span class="den-glow"></span>'+art(p,'den-main'+(owned?'':' den-dim'))+'<div class="den-side"><button onclick="petTab(\'Summon\')">'+denPlain+'<i>✧</i>Summon</button><button onclick="petTab(\'Synthesize\')">'+denPlain+'<i>❖</i>Synthesize</button><button onclick="'+switchTo('Badge',p.id)+'">'+denPlain+'<i>⬟</i>Badge</button></div><p class="den-starrow">'+(stars?'★'.repeat(stars):'<s>☆</s>')+(stars<6?'<u>▲</u>'+'★'.repeat(stars+1):'')+'</p></div>'
+   +'<div class="den-stage den-solo"><span class="den-glow"></span>'+art(p,'den-main'+(owned?'':' den-dim'))+(owned?'':'<span class="den-notyet">🔒 Not collected yet</span>')+'<div class="den-side"><button onclick="petTab(\'Summon\')">'+denPlain+'<i>✧</i>Summon</button><button onclick="petTab(\'Synthesize\')">'+denPlain+'<i>❖</i>Synthesize</button><button onclick="'+switchTo('Badge',p.id)+'">'+denPlain+'<i>⬟</i>Badge</button></div><p class="den-starrow">'+(stars?'★'.repeat(stars):'<s>☆</s>')+(stars<6?'<u>▲</u>'+'★'.repeat(stars+1):'')+'</p></div>'
    +'<section class="den-panel"><h3>Pet ATK <b>'+fmt(atk)+'</b>'+(stars<6?' ▲ <b>'+fmt(atk+30)+'</b>':'')+' <span>Star bonus <b>+'+stars*30+'</b>'+(stars<6?' ▲ <b>+'+(stars+1)*30+'</b>':'')+'</span></h3><div class="den-track">'+[1,2,3,4,5,6].map(n=>'<span class="'+(n<=stars?'on':'')+'"><b>'+(n<=stars?'✦':'+'+n*30)+'</b><small>★'+n+'</small></span>').join('')+'</div><p>Total star bonus: <b>+'+stars*30+' ATK</b>'+(rules.petSpares(S,p.id)?' · spare copies <b>×'+rules.petSpares(S,p.id)+'</b>':'')+'</p></section>'
    +'<div class="den-starup"><span class="den-orb">'+art(p,'')+'</span>'+(owned?buy(offers.Stars):buy({have:S.gold,cost:p.cost,unit:'gold',label:'Unlock',act:'petUnlock()',icon:uiIcon('gold')}))+'</div>'
    +strip(pets,'Gallery');
@@ -496,7 +496,7 @@ function cityPet(){
  }else{
   top=power(atk+rank*5);
   body='<div class="den-head"><em class="den-rarity den-'+key+'">'+tag+'</em><div><h2>'+esc(p.name)+' Badge · Lv. '+rank+'</h2><small>Exclusive to '+esc(p.name)+'</small></div></div>'
-   +'<div class="den-stage den-solo"><span class="den-glow"></span>'+art(p,'den-main'+(owned?'':' den-dim'))+'</div>'
+   +'<div class="den-stage den-solo"><span class="den-glow"></span>'+art(p,'den-main'+(owned?'':' den-dim'))+(owned?'':'<span class="den-notyet">🔒 Not collected yet</span>')+'</div>'
    +'<section class="den-panel"><h3>Badge Forge</h3><p>Bonus ATK <b>+'+rank*5+'</b>'+(rank<20?' → <b>+'+(rank+1)*5+'</b>':'')+'</p><div class="den-exp"><small>RANK</small><span><i style="width:'+rank/20*100+'%"></i><b>'+rank+' / 20</b></span></div></section>'
    +'<div class="den-starup"><span class="den-orb">'+art(p,'')+'</span>'+(owned?buy(offers.Badge):'<div class="den-cost">Unlock this pet in Gallery first</div>')+'</div>'
    +strip(pets.filter(q=>emblemFilter==='All'||q.rarity===emblemFilter),'Badge')
