@@ -6755,4 +6755,5 @@ body[data-screen=games] #stage .portal-illustration{background:#244a3c}
 /* Footsteps: a flat track on the ground behind her heels, drawn behind her (never across her legs). */
 .comp-stage .comp-figure{position:relative;z-index:1}
 .comp-steps{z-index:0;right:50%;bottom:1%;width:46%;transform-origin:50% 100%;transform:scaleX(-1) scaleY(.5)}
-.fx-footprint{left:16%;top:52.6%;width:27%;height:12.4%;z-index:0;transform-origin:50% 100%;transform:scaleX(-1) scaleY(.5)}
+/* On the home screen the track runs just below the pet's feet, so the pet never hides it. */
+.fx-footprint{left:14%;top:56.4%;width:29%;height:12.4%;z-index:0;transform-origin:50% 100%;transform:scaleX(-1) scaleY(.5)}
