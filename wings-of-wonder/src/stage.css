@@ -6758,3 +6758,13 @@ body[data-screen=games] #stage .portal-illustration{background:#244a3c}
 /* The track lies BEHIND Reina: it starts under her heels and recedes up-left into the distance, getting smaller,
    and is drawn before the pets and before her (markup order: footsteps, pets, hero). */
 .fx-footprint{left:31%;top:55.2%;width:17%;height:9.4%;z-index:1;transform-origin:50% 100%;transform:scaleX(-1) scaleY(.85)}
+
+/* Footsteps as a straight, even track behind her legs: single marks, left and right in turn, receding. */
+.step-track{position:absolute;pointer-events:none;z-index:1}
+.step-track img{position:absolute;height:auto;transform:translate(-50%,-50%) scaleY(.8)}
+.step-track .step-0{left:37%;top:86%;width:31%}
+.step-track .step-1{left:63%;top:64%;width:25%;opacity:.96}
+.step-track .step-2{left:41%;top:45%;width:20%;opacity:.88}
+.step-track .step-3{left:59%;top:30%;width:16%;opacity:.74}
+.home-steps{left:37.3%;top:53.5%;width:20%;height:10%}
+.room-steps{left:18.5%;bottom:3.5%;width:52%;height:30%;z-index:0}
