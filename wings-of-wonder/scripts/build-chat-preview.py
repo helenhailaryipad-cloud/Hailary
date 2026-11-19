@@ -42,7 +42,7 @@ def patch(rel, old, new):
     assert old in s, (rel, old); p.write_text(s.replace(old, new))
 patch('generated-art.js', 'function artPath(id){', "function artPath(id){const packedArt=globalThis.WOW_PACK?.['assets/generated/'+id+'.webp'];if(packedArt)return packedArt;")
 patch('gear-ui.js', 'src="assets/generated/gear-${template.slot}-t${eqRules().artTier(template.tier)}.webp?v=2">', 'src="${artPath(\'gear-\'+template.slot+\'-t\'+eqRules().artTier(template.tier))}">')
-patch('gear-data.js', "portrait:'assets/generated/familiar-'+index+'.webp?v=fullbody2'", "portrait:globalThis.WOW_PACK?.['assets/generated/familiar-'+index+'.webp']||'assets/generated/familiar-'+index+'.webp?v=fullbody2'")
+patch('gear-data.js', "portrait:'assets/generated/familiar-'+index+'.webp?v=sharp3'", "portrait:globalThis.WOW_PACK?.['assets/generated/familiar-'+index+'.webp']||'assets/generated/familiar-'+index+'.webp?v=fullbody2'")
 patch('fish-catalog.js', "const artUrl=fish=>'assets/moonwater/'+fish.id+'.avif';", "const artUrl=fish=>globalThis.WOW_PACK?.['assets/moonwater/'+fish.id+'.avif']||'assets/moonwater/'+fish.id+'.avif';")
 # Compare with the previous build so a republish sends only what changed and removes what is gone.
 import hashlib

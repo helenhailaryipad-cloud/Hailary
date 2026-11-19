@@ -239,6 +239,13 @@ of d0-d3 say what the paintings show (Grove Dragonling, Ember Drake, Moon Dragon
   for d0-d3 everywhere; the flat drawing remains only for Emberheart's evolution preview (explicit `stars`).
   `showPetGallery` is no longer reachable from the UI.
 
+- Sharp, visible pets (user sent a screenshot of a grey silhouette: "where are they, draw them clearly"): pets not
+  collected yet are shown in FULL COLOUR with a padlock chip on the card and a "Not collected yet" ribbon on the stage
+  (never grey them out again). The 50 familiars were repainted at 1024 px by the image model from the old 512 px
+  paintings (same designs, crisper outlines, no haze); sources in `art-source/familiars/`, built to 720 px by
+  `scripts/build-familiars.py` (takes about 5 minutes; run it in the background). Cache tag `?v=sharp3` in
+  `gear-data.js` (the chat builder patches that exact string). Hosted bundle headroom about 1.13 MB.
+
 ## In-chat playable preview (user requirement)
 The user wants to play the game inside the chat, and wants SHORT replies in Russian, no fluff.
 - Artifact: https://claude.ai/artifact/L9owNJPMaZjAsTmU3tDGs6 (private). After game changes, rebuild and republish:
