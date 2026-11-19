@@ -3,8 +3,43 @@ const CRAWL_ROOMS=['Outer Gate','Guardian Hall','Boss Sanctum'];
 const BOSS_STANDOFF = 265;
 // This lane leaves room above a fully extended wing and below the boss's feet.
 const BOSS_LANE = {right:520, top:358, bottom:390};
+// Reina's deployed pets (the three Primary Pets) come into every hall with her. They trail behind her and, once the
+// enemy is engaged, each sends a bolt every 2.4 s for 35% of its own ATK. This is on top of the ATK they lend Reina.
+const PET_SPOTS=[[-66,12],[-120,-24],[-140,40]],PET_HIT=.35,PET_PACE=2.4;
+function petArtId(id){return Number(id.slice(1))>3?'familiar-'+id.slice(1):id}
+function crawlPets(g){
+ const a=g.crawl;if(a.pets)return a.pets;
+ const ids=typeof WonderGear==='undefined'||typeof S==='undefined'?[]:WonderGear.petTeam(S).slice(0,3).filter(Boolean);
+ a.pets=ids.map((id,i)=>({id,i,x:a.hero.x+PET_SPOTS[i][0],y:a.hero.y+PET_SPOTS[i][1],cd:1.2+i*.8,kick:0}));a.petShots=[];
+ return a.pets;
+}
+function movePets(g,dt){
+ const a=g.crawl,h=a.hero,shift=g.ally?-44:0;
+ for(const p of crawlPets(g)){
+  const tx=Math.max(34,h.x+PET_SPOTS[p.i][0]+shift),ty=Math.max(238,Math.min(412,h.y+PET_SPOTS[p.i][1])),k=Math.min(1,dt*(4.4-p.i*.7));
+  p.moving=Math.hypot(tx-p.x,ty-p.y)>4;p.x+=(tx-p.x)*k;p.y+=(ty-p.y)*k;p.kick=Math.max(0,p.kick-dt);
+ }
+ for(const shot of a.petShots)shot.life-=dt;a.petShots=a.petShots.filter(shot=>shot.life>0);
+}
+function petSupport(g,dt){
+ const a=g.crawl;if(!a||g.ended||a.exitReady||!a.engaged||g.enemy.hp<=0||g.transition>0)return false;
+ const pets=crawlPets(g);
+ if(pets.length&&!a.petsHailed){a.petsHailed=true;battleLog(pets.map(p=>item(p.id).name).join(', ')+(pets.length>1?' fight':' fights')+' beside REINA.');}
+ for(const p of pets){
+  p.cd-=dt;if(p.cd>0)continue;p.cd=PET_PACE;p.kick=.28;
+  a.petShots.push({x:p.x+16,y:p.y-34,tx:a.enemy.x,ty:a.enemy.y-(g.enemy.boss?110:70),life:.36,max:.36,color:item(p.id).color});
+  battleDamage(Math.round(WonderGear.petAttack(S,p.id)*PET_HIT));
+  if(g.ended||a.exitReady||g.transition>0)return true;
+ }
+ return false;
+}
+function drawCrawlPet(c,g,p){
+ const still=!motionAllowed(),hop=still?0:p.moving?Math.abs(Math.sin(g.clock*9+p.i*1.7))*7:Math.sin(g.clock*2.6+p.i*2)*2+2,lunge=still?0:p.kick*46;
+ c.save();c.fillStyle='rgba(20,28,40,.34)';c.beginPath();c.ellipse(p.x,p.y+6,28-hop*.6,7,0,0,Math.PI*2);c.fill();
+ drawArtSprite(c,petArtId(p.id),p.x+lunge,p.y+7-hop,76,76);c.restore();
+}
 function setupCrawl(g){g.crawl={hero:{x:118,y:330,tx:285,ty:310},enemy:{x:520,y:300},engaged:false,exitReady:false,shots:[],danger:null,roomTime:0};}
-function crawlRoom(g){const a=g.crawl;a.hero={x:118,y:330,tx:285,ty:310};a.enemy={x:520,y:g.stage===2?BOSS_LANE.top:300};a.engaged=false;a.exitReady=false;a.shots=[];a.danger=null;a.roomTime=0;g.transition=0;}
+function crawlRoom(g){const a=g.crawl;a.hero={x:118,y:330,tx:285,ty:310};a.enemy={x:520,y:g.stage===2?BOSS_LANE.top:300};a.engaged=false;a.exitReady=false;a.shots=[];a.danger=null;a.roomTime=0;g.transition=0;if(a.pets){for(const p of a.pets){p.x=a.hero.x+PET_SPOTS[p.i][0];p.y=a.hero.y+PET_SPOTS[p.i][1];p.cd=1.2+p.i*.8;p.kick=0}a.petShots=[]}}
 function moveRanger(x,y){const g=game;if(!g?.crawl||g.ended||gamePaused||!Number.isFinite(x)||!Number.isFinite(y))return;g.crawl.hero.tx=Math.max(84,Math.min(640,x));g.crawl.hero.ty=Math.max(235,Math.min(406,y));}
 function beginCrawlDodge(g){
  const {hero,enemy,danger}=g.crawl;
@@ -29,7 +64,7 @@ function crawlShot(g,enemy=false,burst=false,strike=null){
  a.shots.push({...from,tx:to.x,ty:to.y,life,max:life,enemy,burst,strike});
  
 }
-function updateCrawl(g,dt){const a=g.crawl;a.roomTime+=dt;for(const p of a.shots)p.life-=dt;const impacts=a.shots.filter(p=>p.strike&&p.life<=0);a.shots=a.shots.filter(p=>p.life>0);const h=a.hero;
+function updateCrawl(g,dt){const a=g.crawl;a.roomTime+=dt;movePets(g,dt);for(const p of a.shots)p.life-=dt;const impacts=a.shots.filter(p=>p.strike&&p.life<=0);a.shots=a.shots.filter(p=>p.life>0);const h=a.hero;
 if(g.enemy.boss && g.enemy.hp>0 && !a.exitReady) h.tx=Math.min(h.tx,a.enemy.x-BOSS_STANDOFF);
 const dist=Math.hypot(h.tx-h.x,h.ty-h.y),step=Math.min(dist,(h.dodgeUntil>g.clock?320:180)*dt);if(dist>.5){h.x+=(h.tx-h.x)/dist*step;h.y+=(h.ty-h.y)/dist*step;}
 for(const p of impacts){if(!a.exitReady)enemyStrike(p.strike.multiplier,p.strike.special,p.strike.danger);if(g.ended)return true;}
@@ -81,12 +116,16 @@ c.restore();
 
 if(g.enemy.hp>0){c.save();c.translate(e.x,e.y);c.scale(g.enemy.boss?.88:.68,g.enemy.boss?.88:.68);c.translate(-520,-290);drawDungeonCreature(c,{...g,clock:motionAllowed()?g.clock:0});c.restore();if(!g.enemy.boss){c.fillStyle='#193444';c.fillRect(e.x-52,e.y-175,104,7);c.fillStyle=color;c.fillRect(e.x-52,e.y-175,104*g.enemy.hp/g.enemy.maxhp,7);}}
 
+// Pets standing farther back are drawn before Reina, nearer ones after her.
+const crew=crawlPets(g);for(const p of crew)if(p.y<=h.y)drawCrawlPet(c,g,p);
 c.save();
 c.shadowColor='rgba(40,31,48,.78)';
 c.shadowBlur=3;
 c.shadowOffsetY=1;
 drawReina(c,g,h.x,h.y+5,135,180);
 c.restore();
+for(const p of crew)if(p.y>h.y)drawCrawlPet(c,g,p);
+for(const shot of motionAllowed()?a.petShots:[]){const t=1-shot.life/shot.max,x=shot.x+(shot.tx-shot.x)*t,y=shot.y+(shot.ty-shot.y)*t-Math.sin(t*Math.PI)*20;c.save();c.globalCompositeOperation='lighter';for(const [r,alpha] of [[20,.55],[11,1]]){const glow=c.createRadialGradient(x,y,0,x,y,r);glow.addColorStop(0,'#ffffff');glow.addColorStop(.4,shot.color);glow.addColorStop(1,'rgba(255,255,255,0)');c.globalAlpha=alpha;c.fillStyle=glow;c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fill();}c.restore();}
 if(g.expRun?.party.length>1){const ally=ADVENTURERS.find(b=>b.id===g.expRun.party[1]);drawArtSprite(c,ally.id,h.x+55,h.y,65,105);}if(g.ally){drawArtSprite(c,g.ally.id,h.x-55,h.y,65,105);}
 for(const p of motionAllowed()?a.shots:[]){if(!p.enemy&&p.life>.37)continue;const t=p.enemy?1-p.life/p.max:Math.max(0,1-p.life/.37),x=p.x+(p.tx-p.x)*t,dy=p.ty-p.y,initial=bowSlope*Math.abs(p.tx-p.x),y=p.y+(p.enemy?dy*t:initial*t+(dy-initial)*t*t);drawSpell(c,p.enemy?'fire':'arrow',x,y,p.burst?98:70,45,g.clock,Math.atan2(p.enemy?dy:initial+2*(dy-initial)*t,p.tx-p.x));}
 for(const fx of motionAllowed()?g.effects:[]){if(fx.type==='dodge')continue;c.save();c.globalAlpha=Math.min(1,fx.life*2);if(fx.type==='beam'){drawRasterFX(c,'impact',e.x,e.y-60,100);}else drawSpell(c,fx.type==='heal'?'heal':'wind',h.x,h.y-45,150,130,g.clock);c.restore();}paintImpacts(c,g);drawBattleAtmosphere(c,g);c.globalAlpha=1;

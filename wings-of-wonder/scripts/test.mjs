@@ -460,3 +460,19 @@ vm.runInContext(`{
  if(item('d0').title!=='GROVE DRAGONLING'||item('d0').name!=='Willow')throw Error('Pet titles match their paintings; names are unchanged');
 }`,context);
 console.log('PASS: pets: assist pages by level, spare copies, six-copy synthesis, validation, rebuilt Pets pages, Fast Feed.');
+// Pets fight in the dungeon halls beside Reina.
+vm.runInContext(`{
+ stopGame();S=defaults();S.owned.push('d1','d37');S.petPartners=['d1','d37'];const keepRandom=Math.random;Math.random=()=>.5;
+ startBattle('dungeon','mistwood');const g=game,a=g.crawl;updateCrawl(g,.016);
+ if(a.pets.map(p=>p.id).join()!=='d0,d1,d37')throw Error('The three Primary Pets enter the hall with Reina');
+ if(!a.pets.every(p=>p.x<a.hero.x))throw Error('Pets stand behind Reina');
+ g.enemy.hp=g.enemy.maxhp=1e7;const hp=g.enemy.hp;petSupport(g,5);if(g.enemy.hp!==hp)throw Error('Pets hold fire until the enemy is engaged');
+ a.engaged=true;g.stats.damageBonus=0;g.stats.penetration=0;for(const p of a.pets)p.cd=0;petSupport(g,.01);
+ const dealt=a.pets.reduce((n,p)=>n+Math.round(WonderGear.petAttack(S,p.id)*PET_HIT),0);
+ if(hp-g.enemy.hp!==dealt||a.petShots.length!==3||!g.log.some(x=>x.includes('fight beside REINA')))throw Error('Each pet strikes for 35% of its ATK');
+ petSupport(g,.5);if(hp-g.enemy.hp!==dealt)throw Error('Pets wait 2.4 s between bolts');
+ a.hero.x=400;a.hero.y=300;for(let i=0;i<120;i++)movePets(g,.016);if(Math.abs(a.pets[0].x-(400+PET_SPOTS[0][0]))>2)throw Error('Pets follow Reina');
+ if(petArtId('d2')!=='d2'||petArtId('d37')!=='familiar-37')throw Error('Pet art ids');
+ Math.random=keepRandom;stopGame();
+}`,context);
+console.log('PASS: pets in dungeons: enter with Reina, follow her, hold fire until engaged, strike for 35% ATK every 2.4 s.');

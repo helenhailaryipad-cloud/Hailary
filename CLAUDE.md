@@ -203,6 +203,12 @@ of d0-d3 say what the paintings show (Grove Dragonling, Ember Drake, Moon Dragon
   - Gallery: red stars with the next star shown, Pet ATK and star bonus now -> next, Synthesize side button.
 - Not done: pet gear/talent/skins/evolution of the reference (we have none); familiar paintings are 512 px and
   slightly soft on the big stage at 2x.
+- Pets fight beside Reina (user: "these pets are also fighting in dungeons and always with Reina"): in every crawl
+  hall (dungeons and EXP dungeon) the three Primary Pets trail behind her (`crawlPets`, `movePets`, `PET_SPOTS` in
+  `dungeon-crawl.js`) and, once the enemy is engaged, each sends a bolt every 2.4 s for 35% of its own ATK
+  (`petSupport`, called from `updateBattle` in `world.js`; `PET_HIT`, `PET_PACE`). This is extra damage on top of the
+  ATK the pets already lend Reina. Jungle Trek shows her first two deployed pets instead of fixed d0/d1 (`trekCrew`).
+  `petArtId(id)` maps a pet id to its art id. Spars and Castle Defense do not show pets.
 
 ## In-chat playable preview (user requirement)
 The user wants to play the game inside the chat, and wants SHORT replies in Russian, no fluff.
