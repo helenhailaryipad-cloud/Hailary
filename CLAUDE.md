@@ -232,6 +232,13 @@ of d0-d3 say what the paintings show (Grove Dragonling, Ember Drake, Moon Dragon
   ATK the pets already lend Reina. Jungle Trek shows her first two deployed pets instead of fixed d0/d1 (`trekCrew`).
   `petArtId(id)` maps a pet id to its art id. Spars and Castle Defense do not show pets.
 
+- Pets in the tab (user: "launch pets in the tab"): Wonders -> Pets (`collection()` with `filter==='dragon'`, also the
+  Pets section tab) now opens the Pets room instead of the old flat-animal gallery; `petBack`/`petLeave()` make its
+  back arrow return to Wonders (Wings), or to the city when opened from there. Pet Summon moved into the room
+  (`petPage==='Summon'`, from Gallery; `summonPets` shows painted `petCard` results). `dragonSVG` returns the painting
+  for d0-d3 everywhere; the flat drawing remains only for Emberheart's evolution preview (explicit `stars`).
+  `showPetGallery` is no longer reachable from the UI.
+
 ## In-chat playable preview (user requirement)
 The user wants to play the game inside the chat, and wants SHORT replies in Russian, no fluff.
 - Artifact: https://claude.ai/artifact/L9owNJPMaZjAsTmU3tDGs6 (private). After game changes, rebuild and republish:

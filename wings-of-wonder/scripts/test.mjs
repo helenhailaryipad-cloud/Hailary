@@ -476,3 +476,18 @@ vm.runInContext(`{
  Math.random=keepRandom;stopGame();
 }`,context);
 console.log('PASS: pets in dungeons: enter with Reina, follow her, hold fire until engaged, strike for 35% ATK every 2.4 s.');
+// The Pets tab of Wonders opens the new Pets room; Summon lives inside it; the flat pet drawings are gone.
+vm.runInContext(`{
+ stopGame();S=defaults();filter='dragon';openScreen('collection');
+ if(screen!=='cityPet'||petBack!=='wonders'||!$('#main').innerHTML.includes('den-top'))throw Error('Wonders > Pets opens the Pets room');
+ petLeave();if(screen!=='collection'||filter!=='wings')throw Error('Its back arrow returns to Wonders (Wings)');
+ chooseSectionPage('collection');if(screen!=='cityPet')throw Error('The Pets section tab opens the Pets room');
+ openScreen('home');openScreen('cityPet');if(petBack!=='')throw Error('Opened from the city, it returns to the city');
+ petTab('Summon');if(!$('#main').innerHTML.includes('summonPets(10)'))throw Error('Summon page is inside the room');
+ S.tickets=500;const had=S.owned.length,keep=Math.random;Math.random=()=>.99;summonPets(10);Math.random=keep;
+ if(S.tickets!==0||S.owned.length!==had+1||screen!=='cityPet'||petPage!=='Summon')throw Error('Summoning spends wishes and stays in the room');
+ const pulled=S.owned[S.owned.length-1];if(S.petSpares[pulled]!==9||!valid(S))throw Error('Repeats of one pet become spare copies');
+ for(const id of ['d0','d1','d2','d3'])if(dragonSVG(item(id)).includes('<svg')||!dragonSVG(item(id)).includes(id+'.webp'))throw Error('Painted art for '+id);
+ if(!dragonSVG(item('d1'),5).includes('<svg'))throw Error('Evolution preview keeps its star forms');
+}`,context);
+console.log('PASS: Wonders > Pets opens the Pets room and returns; Summon inside the room; painted pets replace the flat drawings.');
