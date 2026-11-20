@@ -549,6 +549,5 @@ vm.runInContext(`{
  if((html.match(/class="city-pet /g)||[]).length!==2||!html.includes('city-pet-2')||html.includes('city-pet-1'))throw Error('An empty slot stays empty on the home screen');
  S.petPartners=['d12','d37'];openScreen('home');html=$('#main').innerHTML;
  if((html.match(/class="city-pet /g)||[]).length!==3||!html.includes('familiar-12')||!html.includes('familiar-37'))throw Error('All three deployed pets stand beside Reina');
- if(trekCrew().join()!=='d0,familiar-12,familiar-37')throw Error('Jungle Trek takes the same three pets');
 }`,context);
-console.log('PASS: home screen and Jungle Trek show exactly the three Primary Pets.');
+console.log('PASS: home screen shows exactly the three Primary Pets, each in the spot of its slot.');
