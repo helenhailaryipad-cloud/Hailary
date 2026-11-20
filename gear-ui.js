@@ -369,7 +369,7 @@ function petGearUp(times){
  save();cityPet();
 }
 function petGearSetInfo(){
- const r=WonderGear;modal('<h2>Gear set</h2><p>Each Primary Pet slot holds eight pieces. Ten levels make one tier (T1 to T10); the first level of a new tier also costs shards.</p><p>The set bonus follows the <b>lowest</b> tier among the eight pieces: the pet in that slot deals <b>+'+r.petGearSetStep+'%</b> bolt damage per tier.</p><p>Horn Caps, Fang Guard, Claw Gauntlet and Spirit Orb add pet ATK (+'+r.petGearStep.atk+' a level). Collar and Chest Plate add Reina HP (+'+r.petGearStep.hp+'). Wing Brace and Tail Ring add Reina DEF (+'+r.petGearStep.def+').</p><p>Gear stays in the slot when you replace the pet.</p>');
+ const r=WonderGear;popup('<h2>Gear set</h2><p>Each Primary Pet slot holds eight pieces. Ten levels make one tier (T1 to T10); the first level of a new tier also costs shards.</p><p>The set bonus follows the <b>lowest</b> tier among the eight pieces: the pet in that slot deals <b>+'+r.petGearSetStep+'%</b> bolt damage per tier.</p><p>Horn Caps, Fang Guard, Claw Gauntlet and Spirit Orb add pet ATK (+'+r.petGearStep.atk+' a level). Collar and Chest Plate add Reina HP (+'+r.petGearStep.hp+'). Wing Brace and Tail Ring add Reina DEF (+'+r.petGearStep.def+').</p><p>Gear stays in the slot when you replace the pet.</p>');
 }
 function talentGo(slot){talentSlotPick=slot;talentCell=-1;talentTab='Common';talentPending=null;petTab('Talent')}
 function talentPickSlot(slot){if(WonderGear.petTeam(S)[slot]){talentSlotPick=slot;talentCell=-1;talentPending=null;cityPet()}}
@@ -391,11 +391,11 @@ function talentKeep(yes){
 function talentLock(){if(WonderGear.lockTalent(S,talentSlotPick,talentCell)){save();cityPet()}}
 function talentForget(){if(WonderGear.forgetTalent(S,talentSlotPick,talentCell)){save();talentCell=-1;cityPet()}}
 function talentRow(t,extra=''){return '<div class="den-trow">'+talentIcon(t.id)+'<div><b>'+t.name+'</b><small>'+(t.kind==='atk'?'Attack':'Guard')+' · passive</small><p>'+t.text+'</p></div>'+extra+'</div>'}
-function talentGuide(){const r=WonderGear;modal('<h2>Pet talents</h2><p>Learn inscribes a random talent this slot does not have: into an empty cell, or over a random unlocked one. A locked talent is safe, but every lock makes Learn 50% dearer. Talents work while a pet stands in the slot.</p><div class="den-tlist">'+r.petTalents.map(t=>talentRow(t)).join('')+'<div class="den-trow">'+denIcon('misc',2,4,1)+'<div><b>'+r.talentSupreme.name+'</b><small>Supreme</small><p>'+r.talentSupreme.text+'</p></div></div></div>')}
-function talentLogShow(){modal('<h2>Learning log</h2>'+(talentLog.length?'<div class="den-tlist">'+talentLog.slice(0,20).map(x=>'<p>'+esc(x)+'</p>').join('')+'</div>':'<p>Nothing learned yet in this visit.</p>'))}
+function talentGuide(){const r=WonderGear;popup('<h2>Pet talents</h2><p>Learn inscribes a random talent this slot does not have: into an empty cell, or over a random unlocked one. A locked talent is safe, but every lock makes Learn 50% dearer. Talents work while a pet stands in the slot.</p><div class="den-tlist">'+r.petTalents.map(t=>talentRow(t)).join('')+'<div class="den-trow">'+denIcon('misc',2,4,1)+'<div><b>'+r.talentSupreme.name+'</b><small>Supreme</small><p>'+r.talentSupreme.text+'</p></div></div></div>')}
+function talentLogShow(){popup('<h2>Learning log</h2>'+(talentLog.length?'<div class="den-tlist">'+talentLog.slice(0,20).map(x=>'<p>'+esc(x)+'</p>').join('')+'</div>':'<p>Nothing learned yet in this visit.</p>'))}
 function talentTargetPick(){
  const r=WonderGear,v=r.talentState(S).slots[talentSlotPick];
- modal('<h2>Learn target</h2><p>The chosen talent is four times as likely to come up for Slot '+(talentSlotPick+1)+'.</p><div class="den-tlist">'+r.petTalents.filter(t=>!v.cells.includes(t.id)).map(t=>talentRow(t,'<button onclick="talentSetTarget(\''+t.id+'\')">'+(v.target===t.id?'Chosen':'Choose')+'</button>')).join('')+'</div>'+(v.target?'<button onclick="talentSetTarget(\'\')">No target</button>':''));
+ popup('<h2>Learn target</h2><p>The chosen talent is four times as likely to come up for Slot '+(talentSlotPick+1)+'.</p><div class="den-tlist">'+r.petTalents.filter(t=>!v.cells.includes(t.id)).map(t=>talentRow(t,'<button onclick="talentSetTarget(\''+t.id+'\')">'+denPlain+(v.target===t.id?'Chosen':'Choose')+'</button>')).join('')+'</div>'+(v.target?'<button onclick="talentSetTarget(\'\')">'+denPlain+'No target</button>':''));
 }
 function talentSetTarget(id){if(WonderGear.setTalentTarget(S,talentSlotPick,id)){save();$('#modal').close();cityPet()}}
 function talentBuy(id){
@@ -407,8 +407,8 @@ function talentBuy(id){
 }
 function talentExchange(){
  const r=WonderGear,count=rarity=>r.familiars.filter(p=>p.rarity===rarity).reduce((n,p)=>n+r.petSpares(S,p.id),0);
- modal('<h2>Fragment exchange</h2><p>Turn spare pet copies into talent seals.</p><div class="den-tlist">'+Object.entries(r.sealRates).map(([rarity,rate])=>{const n=count(rarity);return '<div class="den-trow">'+denIcon('misc',0,4,1)+'<div><b>'+rarity+' copies ×'+n+'</b><small>'+rate+' seals each</small></div><button '+(n?'':'disabled')+' onclick="talentTrade(\''+rarity+'\')">+'+fmt(n*rate)+'</button></div>'}).join('')
-  +'<div class="den-trow">'+denIcon('misc',0,4,1)+'<div><b>'+fmt(r.sealGold.gold)+' gold</b><small>You have '+fmt(S.gold)+'</small></div><button '+(S.gold<r.sealGold.gold?'disabled':'')+' onclick="talentTrade(\'gold\')">+'+r.sealGold.seals+'</button></div></div><p>Seals also come from dungeon guardians (+30) and Jungle Trek chests (+10 each).</p>');
+ popup('<h2>Fragment exchange</h2><p>Turn spare pet copies into talent seals.</p><div class="den-tlist">'+Object.entries(r.sealRates).map(([rarity,rate])=>{const n=count(rarity);return '<div class="den-trow">'+denIcon('misc',0,4,1)+'<div><b>'+rarity+' copies ×'+n+'</b><small>'+rate+' seals each</small></div><button '+(n?'':'disabled')+' onclick="talentTrade(\''+rarity+'\')">'+denPlain+'+'+fmt(n*rate)+'</button></div>'}).join('')
+  +'<div class="den-trow">'+denIcon('misc',0,4,1)+'<div><b>'+fmt(r.sealGold.gold)+' gold</b><small>You have '+fmt(S.gold)+'</small></div><button '+(S.gold<r.sealGold.gold?'disabled':'')+' onclick="talentTrade(\'gold\')">'+denPlain+'+'+r.sealGold.seals+'</button></div></div><p>Seals also come from dungeon guardians (+30) and Jungle Trek chests (+10 each).</p>');
 }
 function talentTrade(kind){
  const got=kind==='gold'?(WonderGear.buySeals(S)?WonderGear.sealGold.seals:0):WonderGear.exchangeSpares(S,kind);
@@ -426,7 +426,7 @@ function petCard(id,click,label,selected=false){
 }
 function pickPet(slot){
  const team=WonderGear.petTeam(S),owned=ITEMS.filter(p=>p.type==='dragon'&&S.owned.includes(p.id));
- modal('<h2>'+ (slot<3?'Primary Pet':'Pet Assist')+'</h2><div class="den-picker">'+owned.map(p=>petCard(p.id,"assignPet("+slot+",'"+p.id+"')",team.includes(p.id)?'Deployed':'Select',team[slot]===p.id)).join('')+'</div>'+(slot&&team[slot]?'<button onclick="assignPet('+slot+',null)">Remove</button>':''));
+ popup('<h2>'+ (slot<3?'Primary Pet':'Pet Assist')+'</h2><div class="den-picker">'+owned.map(p=>petCard(p.id,"assignPet("+slot+",'"+p.id+"')",team.includes(p.id)?'Deployed':'Select',team[slot]===p.id)).join('')+'</div>'+(slot&&team[slot]?'<button onclick="assignPet('+slot+',null)">'+denPlain+'Remove</button>':''));
 }
 // Assist pages and the Synthesize room.
 let assistPage=0,synthTier='Rare',synthPicks=[];
@@ -445,7 +445,7 @@ function synthShow(results){
  const one=results.length===1,r=results[0],p=item(r.id),[tag,key]=petRarity[p.rarity]||[p.rarity,'r'];
  const body=one?'<em class="den-rarity den-'+key+'">'+tag+'</em><div class="den-burst"><img src="'+petPicture(p)+'" alt="'+esc(p.name)+'"></div><h3>'+esc(p.name)+'</h3><b class="den-tag '+(r.isNew?'o':'v')+'">'+(r.isNew?'New pet!':'Already yours · +1 spare copy')+'</b>'
   :'<div class="den-picker">'+results.map(x=>petCard(x.id,'',x.isNew?'New!':'+1 copy')).join('')+'</div>';
- modal('<div class="den-congrats" onclick="$(\'#modal\').close()"><h2>Congratulations</h2>'+body+'<small>Tap anywhere to close</small></div>');
+ popup('<div class="den-congrats" onclick="$(\'#modal\').close()"><h2>Congratulations</h2>'+body+'<small>Tap anywhere to close</small></div>');
 }
 function synthRun(batch){
  const need=WonderGear.synthNeed,results=[];

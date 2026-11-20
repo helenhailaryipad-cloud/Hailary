@@ -25,7 +25,9 @@ function toast(t){$('#toast').textContent=t;$('#toast').classList.add('show');cl
 function save(){reconcileLeaflightMount();S.updated=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch{toast('Device storage is unavailable. Export a backup.')}wallet();if(cloudReady&&!cloudBlocked){clearTimeout(saveTimer);saveTimer=setTimeout(syncCloud,900)}}
 function wallet(){const compact=n=>n>=1000?new Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:1}).format(n):fmt(n);for(const [id,value,icon,label] of [['gold',S.gold,'◈','gold'],['tickets',S.tickets,'✧','wishes'],['scales',S.scales,'◇','scales']]){const cell=$('#'+id);cell.innerHTML=uiIcon(id==='gold'?'gold':id==='tickets'?'wishes':'crystals')+compact(value)+' <small>'+label+'</small>';cell.title=fmt(value)+' '+label;cell.setAttribute('aria-label',fmt(value)+' '+label)}}
 function gain(g,t,x){const awardedXP=globalThis.WonderProgress.award(S,x,stats().expBonus);S.gold+=g;S.tickets+=t;save();return {gold:g,wishes:t,xp:awardedXP}}
-function modal(html,closeLabel='Close'){const closeButton=$('#modal').querySelector?.(':scope > button');if(closeButton){closeButton.innerHTML=uiIcon('close');closeButton.title=closeLabel;closeButton.setAttribute('aria-label',closeLabel)}$('#modal').classList.remove('gear-modal');$('#modalBody').classList.toggle('result-screen',html.includes('class="rewards"')||html.includes('class="exp-victory"'));$('#modalBody').innerHTML=(html.includes('class="rewards"')||html.includes('class="exp-victory"')?'<div class="result-medallion">'+uiIcon('laurel')+'</div>':'')+html;$('#modal').showModal();$('#modal').scrollTop=0;requestAnimationFrame(decorateArt)}
+// A small pop-up card in the middle of the screen (Pets room): same dialog, compact look, no Menu button.
+function popup(html){modal(html);$('#modal').classList.add('den-pop')}
+function modal(html,closeLabel='Close'){const closeButton=$('#modal').querySelector?.(':scope > button');if(closeButton){closeButton.innerHTML=uiIcon('close');closeButton.title=closeLabel;closeButton.setAttribute('aria-label',closeLabel)}$('#modal').classList.remove('gear-modal','den-pop');$('#modalBody').classList.toggle('result-screen',html.includes('class="rewards"')||html.includes('class="exp-victory"'));$('#modalBody').innerHTML=(html.includes('class="rewards"')||html.includes('class="exp-victory"')?'<div class="result-medallion">'+uiIcon('laurel')+'</div>':'')+html;$('#modal').showModal();$('#modal').scrollTop=0;requestAnimationFrame(decorateArt)}
 function esc(t){return String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function visualTier(it){return Math.max(0,Math.min(3,Number(it.id.slice(1))||0))}
 function tierGlow(it){const tier=visualTier(it);return [' drop-shadow(0 1px 1px #e0f4e766)',` drop-shadow(0 0 3px ${it.color}66)`,` drop-shadow(0 0 7px ${it.color}aa) drop-shadow(0 0 15px ${it.accent}55)`,` drop-shadow(0 0 9px ${it.accent}dd) drop-shadow(0 0 22px ${it.color}aa)`][tier]}
@@ -993,7 +995,7 @@ function summonPets(count){
   cards.push(petCard(p.id,'',owned?'+1 copy':'New!'));
  }
  save();if(screen==='cityPet')cityPet();else showPetGallery();
- modal(`<div class="den-congrats" onclick="$('#modal').close()"><h2>Pet Summon</h2><div class="den-picker den-summoned">${cards.join('')}</div><small>Tap anywhere to close</small></div>`);
+ popup(`<div class="den-congrats" onclick="$('#modal').close()"><h2>Pet Summon</h2><div class="den-picker den-summoned">${cards.join('')}</div><small>Tap anywhere to close</small></div>`);
 }
 function showPetGallery(id=selectedPetId||S.dragon){
  const pet=item(id),rules=WonderGear,lv=rules.petLevel(S,id),attack=rules.petAttack(S,id);
