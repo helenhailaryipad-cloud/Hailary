@@ -31,6 +31,20 @@ function talentGuard(g,dt){
  if(t.stand&&g.hp>0&&g.hp<g.maxhp*.3&&g.standCD<=0){g.standCD=60;const heal=Math.round(g.maxhp*.15*t.stand);g.hp=Math.min(g.maxhp,g.hp+heal);
   g.particles.push({text:'LAST STAND +'+heal,x:a.hero.x-60,y:a.hero.y-130,color:'#b6ff9e',life:1.4});battleLog('Last Stand restores '+heal+' health.')}
 }
+// A hit has landed on Reina: pets with Riposte answer at once, pets with Aftershock charge their next bolt.
+function petCounter(g){
+ const a=g.crawl;if(!a||g.ended||a.exitReady||g.enemy.hp<=0||typeof WonderGear==='undefined'||typeof S==='undefined')return;
+ for(const p of crawlPets(g)){
+  const have=WonderGear.talentIds(S,p.slot);
+  if(have.includes('aftershock'))p.charged=true;
+  if(!have.includes('riposte')||g.clock-(p.riposteAt??-99)<WonderGear.riposteEvery)continue;
+  p.riposteAt=g.clock;p.kick=.28;
+  a.petShots.push({x:p.x+16,y:p.y-34,tx:a.enemy.x,ty:a.enemy.y-(g.enemy.boss?110:70),life:.3,max:.3,color:'#7fffd0'});
+  g.particles.push({text:'RIPOSTE',x:p.x-20,y:p.y-70,color:'#7fffd0',life:.9});
+  battleDamage(WonderGear.petBolt(S,p.slot,p.id,{riposte:true,enemyRatio:g.enemy.hp/g.enemy.maxhp,boss:!!g.enemy.boss,count:0}));
+  if(g.ended||a.exitReady||g.transition>0)return;
+ }
+}
 function petSupport(g,dt){
  const a=g.crawl;if(!a||g.ended)return false;
  if(typeof WonderGear!=='undefined'&&typeof S!=='undefined')talentGuard(g,dt);
@@ -40,7 +54,7 @@ function petSupport(g,dt){
  for(const p of pets){
   p.cd-=dt;if(p.cd>0)continue;p.cd=WonderGear.petBoltPace(S,p.slot);p.kick=.28;p.count++;
   a.petShots.push({x:p.x+16,y:p.y-34,tx:a.enemy.x,ty:a.enemy.y-(g.enemy.boss?110:70),life:.36,max:.36,color:item(p.id).color});
-  battleDamage(WonderGear.petBolt(S,p.slot,p.id,{first:!p.fired,enemyRatio:g.enemy.hp/g.enemy.maxhp,boss:!!g.enemy.boss,count:p.count}));p.fired=true;
+  battleDamage(WonderGear.petBolt(S,p.slot,p.id,{first:!p.fired,enemyRatio:g.enemy.hp/g.enemy.maxhp,boss:!!g.enemy.boss,count:p.count,charged:!!p.charged}));p.fired=true;p.charged=false;
   if(g.ended||a.exitReady||g.transition>0)return true;
  }
  return false;

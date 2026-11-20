@@ -495,7 +495,7 @@ console.log('PASS: Wonders > Pets opens the Pets room and returns; Summon inside
 vm.runInContext(`{
  const r=WonderGear;stopGame();S=defaults();
  const t0=r.talentState(S);if(t0.seals!==300||t0.books!==0||t0.slots.length!==3||t0.slots[0].open!==6||S.petTalents!==undefined)throw Error('Talents start with 300 seals and six open cells, without touching the save');
- if(r.petTalents.length!==24||new Set(r.petTalents.map(t=>t.id)).size!==24||r.petTalents.filter(t=>t.top).length!==3)throw Error('Twenty-four talents, three of them Top');
+ if(r.petTalents.length!==26||new Set(r.petTalents.map(t=>t.id)).size!==26||r.petTalents.filter(t=>t.top).length!==3)throw Error('Twenty-six talents, three of them Top');
  const base=stats().attack;
  let roll=r.learnTalent(S,0,()=>0);if(!roll||roll.id!=='fang'||roll.cell!==0||r.talentState(S).seals!==240||!valid(S))throw Error('Learn inscribes a random talent into the first empty cell for 60 seals');
  r.lockTalent(S,0,0);if(r.learnCost(S,0)!==90)throw Error('Each lock makes Learn 50% dearer');
@@ -547,6 +547,14 @@ vm.runInContext(`{
  startBattle('dungeon','mistwood');game.crawl.engaged=true;game.hp=Math.round(game.maxhp*.2);const low=game.hp;petSupport(game,.01);
  if(game.hp!==low+Math.round(game.maxhp*.15))throw Error('Last Stand restores 15% below 30% health');
  game.hp=low;petSupport(game,.01);if(game.hp!==low)throw Error('Last Stand waits 60 seconds');stopGame();
+ // Counter talents: Riposte answers a hit on Reina (once every 3 s); Aftershock doubles the pet's next bolt.
+ S.petTalents={seals:0,books:0,slots:[{open:6,cells:['riposte','aftershock',null,null,null,null,...Array(9).fill(null)],locks:[],target:''},...r.talentState(S).slots.slice(1)]};
+ const keepRand=Math.random;Math.random=()=>.99;startBattle('dungeon','mistwood');{const g=game,a=g.crawl;updateCrawl(g,.016);a.engaged=true;g.enemy.hp=g.enemy.maxhp=1e7;g.enemy.attack=10;g.stats.damageBonus=0;g.stats.penetration=0;g.stats.dodge=0;g.stats.block=0;g.hp=g.maxhp=1e6;
+  const bolt=r.petBolt(S,0,'d0',{count:1}),back=r.petBolt(S,0,'d0',{riposte:true}),hp0=g.enemy.hp;enemyStrike(1);if(back!==Math.round((r.petAttack(S,'d0')+r.petGearBonus(S,0).atk)*.35*(1+r.petGearBonus(S,0).dmg/100)*.6))throw Error('A riposte is 60% of a bolt');
+  if(hp0-g.enemy.hp!==back||!a.pets[0].charged)throw Error('Riposte strikes back for 60% of a bolt and Aftershock charges');
+  enemyStrike(1);if(hp0-g.enemy.hp!==back)throw Error('Riposte waits three seconds');
+  const hp1=g.enemy.hp;a.pets[0].cd=0;petSupport(g,.01);if(hp1-g.enemy.hp!==r.petBolt(S,0,'d0',{count:1,charged:true})||r.petBolt(S,0,'d0',{count:1,charged:true})<=bolt||a.pets[0].charged)throw Error('Aftershock doubles the next bolt once');}
+ Math.random=keepRand;stopGame();
 }`,context);
 console.log('PASS: pet talents (learn, lock, prophecy, target, scrolls, exchange), pet gear (tiers, set), bolt maths, pages, Last Stand.');
 // Home shows exactly the pets placed in the three Primary Pet slots, each in the spot of its slot.

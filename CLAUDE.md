@@ -298,6 +298,12 @@ of d0-d3 say what the paintings show (Grove Dragonling, Ember Drake, Moon Dragon
   gold card and a star chip. Icons: `art-source/pets/extra.webp`, atlas `comp-pet-talents` is now 4 x 6.
   Notes in the Pets room are a small pill at the top (`body[data-screen=cityPet] .toast`), not a big banner.
 
+- Counter talents (the reference has "Counter" and "Counter shake"; user: add them if worth it): 26 talents now.
+  Riposte (guard): when a hit lands on Reina the pet strikes back at once for 60% of a bolt, once every 3 s
+  (`petCounter(g)` in `dungeon-crawl.js`, called at the end of `enemyStrike` in `world.js`; `riposteShare`,
+  `riposteEvery`). Aftershock (attack): a hit on Reina charges the pet (`p.charged`), its next bolt deals double.
+  Icons in `art-source/pets/counter.webp` (atlas row 7).
+
 ## Back buttons (2026-11-20)
 User circled a tiny "‹" in a corner: "check all back buttons everywhere, draw them clearer, not so small, with a special
 icon in the style of our game". One painted icon, `ui-back.webp` (gold-rimmed blue disc, ivory arrow; image model;
