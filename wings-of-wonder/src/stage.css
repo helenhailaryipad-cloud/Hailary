@@ -6779,7 +6779,7 @@ body[data-screen=games] #stage .portal-illustration{background:#244a3c}
 #main .den button{border-image:none!important;outline:0!important;min-width:0;min-height:0}
 .den .den-x{display:none}
 .den-top{position:relative;display:flex;align-items:flex-start;justify-content:space-between;min-height:10.5cqh;padding:1cqh 2cqw 0}
-.den-ribbon{margin-left:max(74px,11.5cqw);padding:.38em 1.7em .38em 1em;background:linear-gradient(90deg,#3f8fd0,#2a5fae);clip-path:polygon(0 0,100% 0,92% 100%,0 100%);font-size:3.6cqw;letter-spacing:.02em;text-shadow:0 1px 2px #0b1a44}
+.den-ribbon{padding:.38em 1.7em .38em 1em;background:linear-gradient(90deg,#3f8fd0,#2a5fae);clip-path:polygon(0 0,100% 0,92% 100%,0 100%);font-size:3.6cqw;letter-spacing:.02em;text-shadow:0 1px 2px #0b1a44}
 .den-power{position:absolute;left:50%;top:5.4cqh;transform:translateX(-50%);padding:.2em 1.1em;border-radius:99px;background:#0c173fb8;border:1px solid #7fb4ff66;font-size:4.4cqw;color:#ffd98a;white-space:nowrap}.den-power b{color:#fff3c9}
 #main .den .den-rec{display:grid;justify-items:center;gap:.2em;padding:.2em .5em;background:transparent;border:0;font-size:2.5cqw;line-height:1.1;color:#eaf4ff;text-shadow:0 1px 2px #0b1a44}
 .den-rec i{display:grid;place-items:center;width:2.3em;height:2.3em;font-size:1.5em;font-style:normal;color:#fff;background:radial-gradient(#7fd4ff,#2a5fae);border:1px solid #cfe6ff;clip-path:polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%)}
@@ -7030,3 +7030,20 @@ body[data-screen=games] #stage .portal-illustration{background:#244a3c}
 #stage #modal.den-pop .den-summoned .den-card small{font-size:9px}
 #stage #modal.den-pop .den-card img{height:58%}
 #stage #modal.den-pop .den-congrats small{font-size:12px}
+
+/* ===== Back buttons: one painted icon everywhere (ui-back.webp), never a thin "<" glyph, never smaller than 52 px ===== */
+html body #stage button[data-back][data-back]{outline:0!important;border-image:none!important;font-size:0!important;line-height:0!important;color:transparent!important;text-shadow:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;box-sizing:border-box;padding:5px!important;min-width:52px!important;min-height:52px!important;background:url(assets/generated/ui-back.webp) center/contain no-repeat content-box!important;filter:drop-shadow(0 2px 3px #0009);cursor:pointer;opacity:1!important}
+html body #stage button[data-back][data-back]::before,html body #stage button[data-back][data-back]::after{content:none!important;display:none!important}
+html body #stage button[data-back][data-back]:active{transform:scale(.9)}
+#stage .spirit-nav button[data-back]{flex:0 0 17%!important;padding:4px!important;background-color:transparent!important}
+#main .comp-room .comp-nav .comp-back[data-back]{flex:0 0 17%!important}
+#main .pairs-exit[data-back]{width:3.6rem;height:3.6rem;background-color:transparent!important}
+#main .pairs-screen .pairs-foot .pairs-exit[data-back]{width:3.4rem;height:3.4rem}
+#stage .trek-controls button[data-back]{width:58px;height:58px;pointer-events:auto}
+/* the same icon inside text buttons ("Back", "Back to Mini Games") */
+.gpt-icon.back-ico{background:url(assets/generated/ui-back.webp) center/contain no-repeat!important}
+/* "Menu" (return to the city from any screen): the icon and the word in one pill */
+#stage .return-to-menu{min-height:48px;padding:3px 16px 3px 50px;border-radius:99px;font-size:16px;background:url(assets/generated/ui-back.webp) 4px center/40px 40px no-repeat,#332b40f2}
+#stage>.return-to-menu{right:auto;left:max(6px,env(safe-area-inset-left))}
+/* A screen with its own Back icon does not also need the Menu pill (it used to cover the screen's title). */
+body:has(#main button[data-back]) #stage>.return-to-menu{display:none}

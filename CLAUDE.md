@@ -286,6 +286,19 @@ of d0-d3 say what the paintings show (Grove Dragonling, Ember Drake, Moon Dragon
   `modal()` removes the class again. Use `popup` for new information and choice windows; buttons in them need
   `denPlain` too. The user plays in the chat's side pane (about 590 x 690 px), so check pop-ups at that size.
 
+## Back buttons (2026-11-20)
+User circled a tiny "‹" in a corner: "check all back buttons everywhere, draw them clearer, not so small, with a special
+icon in the style of our game". One painted icon, `ui-back.webp` (gold-rimmed blue disc, ivory arrow; image model;
+`art-source/ui/back.webp`, `scripts/build-ui-icons.py`), is now the only Back sign:
+- Corner back buttons carry the attribute `data-back` (their "‹" text stays for screen readers but is invisible): all
+  city rooms (`.spirit-nav`, `.comp-back`), Harvest Pairs, Jungle Trek. CSS at the end of `stage.css` draws the icon,
+  at least 52 px, without frames. A new room's back button only needs `data-back`.
+- `uiIcon('back')` returns the same icon (`.back-ico`), so text buttons "Back", "Back to ...", "Return to ..." and
+  "Hero" get it too (`actionArtName`).
+- The global "Menu" pill (`.return-to-menu`) shows the icon plus the word, sits top-left, and is hidden on screens
+  that have their own `data-back` button (`body:has(...)`), where it used to cover the title.
+Checked on 36 screens at 590 x 690. Never use a bare "‹" or "←" for going back again.
+
 ## In-chat playable preview (user requirement)
 The user wants to play the game inside the chat, and wants SHORT replies in Russian, no fluff.
 - Artifact: https://claude.ai/artifact/L9owNJPMaZjAsTmU3tDGs6 (private). After game changes, rebuild and republish:
