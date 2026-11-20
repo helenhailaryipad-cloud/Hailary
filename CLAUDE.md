@@ -278,6 +278,7 @@ of d0-d3 say what the paintings show (Grove Dragonling, Ember Drake, Moon Dragon
   chosen window"): the home screen shows exactly the pets of the three Primary Pet slots (`home()` in `app.js`,
   `.city-pet-<slot>`: slot 1 left, slot 2 right, slot 3 in front on the stone circle); an empty slot shows nothing, no
   stand-in pet any more. Jungle Trek runs with all three (`trekCrew`, `g.pets[3]`); dungeons already did.
+  Second request: larger and closer to her (pets 21-22% wide, about a third of her height, touching her sides).
 
 ## In-chat playable preview (user requirement)
 The user wants to play the game inside the chat, and wants SHORT replies in Russian, no fluff.
