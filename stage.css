@@ -7061,3 +7061,16 @@ body:has(#main button[data-back]) #stage>.return-to-menu{display:none}
 #stage #modal.den-pop .den-gold{display:inline-flex;align-items:center;gap:.3em;padding:8px 26px;border:0;background:linear-gradient(#ffe89a,#f0b548 60%,#d9942e);color:#5a3a12;font:700 16px Arial,sans-serif;clip-path:polygon(7% 0,93% 0,100% 50%,93% 100%,7% 100%,0 50%)}
 #stage #modal.den-pop .den-gold:disabled{filter:grayscale(.7) brightness(.8);opacity:.75}
 #stage #modal.den-pop .den-gold .den-ico{display:inline-block;width:1.4em}
+
+/* Talent Shop: Top wares stand out; small star chip on their art */
+.den-wareart{position:relative;display:block;width:42%}.den-wareart>.den-ico{width:100%}
+.den-kindchip{position:absolute;left:-14%;top:-8%;font-style:normal;font-size:1.1em;color:#ffd84a;text-shadow:0 1px 2px #5a2a00,0 0 4px #5a2a00}
+#main .den .den-topware{background:linear-gradient(#fff6d6,#ffd98a);box-shadow:0 0 0 2px #ffb93c,0 2px 6px #0007}
+#main .den .den-ware small{font-size:.8em!important;line-height:1.15!important;font-weight:400}
+#main .den .den-ware b{font-size:.95em;line-height:1.1}
+#main .den .den-trow small{font-size:.85em!important;line-height:1.2!important}
+#main .den .den-trow p{font-size:.95em}
+#main .den .den-topware b{color:#8a4a00}
+/* Pets room: a small note at the top instead of a big banner over the buttons */
+body[data-screen=cityPet] #stage .toast{top:5.2%!important;bottom:auto!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:auto!important;max-width:72%!important;min-height:0!important;padding:7px 16px!important;border-radius:99px!important;font:700 14px/1.25 Arial,sans-serif!important;text-align:center}
+#main .den .den-check small{font-size:.8em!important}
