@@ -360,7 +360,8 @@ let gearPick=0,talentSlotPick=0,talentCell=-1,talentTab='Common',talentProphecy=
 function petArtVars(){const root=document.documentElement;if(!root?.style?.setProperty||root.style.getPropertyValue('--pet-tal'))return;
  for(const [key,id] of [['tal','comp-pet-talents'],['gear','comp-pet-gear'],['misc','comp-pet-misc']])root.style.setProperty('--pet-'+key,'url("'+artPath(id)+'")')}
 const denIcon=(sheet,n,cols,rows)=>'<i class="den-ico" style="background-image:var(--pet-'+sheet+');background-size:'+cols*100+'% '+rows*100+'%;background-position:'+(n%cols)/(cols-1)*100+'% '+(rows>1?Math.floor(n/cols)/(rows-1)*100:0)+'%"></i>';
-const talentIcon=id=>denIcon('tal',WonderGear.petTalents.findIndex(t=>t.id===id),4,4);
+const talentIcon=id=>denIcon('tal',WonderGear.petTalents.findIndex(t=>t.id===id),4,Math.ceil(WonderGear.petTalents.length/4));
+const talentKind=t=>(t.top?'Top ':'')+(t.kind==='atk'?'Attack':'Guard');
 const talentOf=id=>WonderGear.petTalents.find(t=>t.id===id);
 function petGearUp(times){
  const slot=WonderGear.petTeam(S).indexOf(petFocus);let done=0;
@@ -390,27 +391,27 @@ function talentKeep(yes){
 }
 function talentLock(){if(WonderGear.lockTalent(S,talentSlotPick,talentCell)){save();cityPet()}}
 function talentForget(){if(WonderGear.forgetTalent(S,talentSlotPick,talentCell)){save();talentCell=-1;cityPet()}}
-function talentRow(t,extra=''){return '<div class="den-trow">'+talentIcon(t.id)+'<div><b>'+t.name+'</b><small>'+(t.kind==='atk'?'Attack':'Guard')+' · passive</small><p>'+t.text+'</p></div>'+extra+'</div>'}
+function talentRow(t,extra=''){return '<div class="den-trow">'+talentIcon(t.id)+'<div><b>'+t.name+'</b><small>'+talentKind(t)+' · passive'+(t.top?' · scroll only':'')+'</small><p>'+t.text+'</p></div>'+extra+'</div>'}
 function talentGuide(){const r=WonderGear;popup('<h2>Pet talents</h2><p>Learn inscribes a random talent this slot does not have: into an empty cell, or over a random unlocked one. A locked talent is safe, but every lock makes Learn 50% dearer. Talents work while a pet stands in the slot.</p><div class="den-tlist">'+r.petTalents.map(t=>talentRow(t)).join('')+'<div class="den-trow">'+denIcon('misc',2,4,1)+'<div><b>'+r.talentSupreme.name+'</b><small>Supreme</small><p>'+r.talentSupreme.text+'</p></div></div></div>')}
 function talentLogShow(){popup('<h2>Learning log</h2>'+(talentLog.length?'<div class="den-tlist">'+talentLog.slice(0,20).map(x=>'<p>'+esc(x)+'</p>').join('')+'</div>':'<p>Nothing learned yet in this visit.</p>'))}
 function talentTargetPick(){
  const r=WonderGear,v=r.talentState(S).slots[talentSlotPick];
- popup('<h2>Learn target</h2><p>The chosen talent is four times as likely to come up for Slot '+(talentSlotPick+1)+'.</p><div class="den-tlist">'+r.petTalents.filter(t=>!v.cells.includes(t.id)).map(t=>talentRow(t,'<button onclick="talentSetTarget(\''+t.id+'\')">'+denPlain+(v.target===t.id?'Chosen':'Choose')+'</button>')).join('')+'</div>'+(v.target?'<button onclick="talentSetTarget(\'\')">'+denPlain+'No target</button>':''));
+ popup('<h2>Learn target</h2><p>The chosen talent is four times as likely to come up for Slot '+(talentSlotPick+1)+'.</p><div class="den-tlist">'+r.petTalents.filter(t=>!t.top&&!v.cells.includes(t.id)).map(t=>talentRow(t,'<button onclick="talentSetTarget(\''+t.id+'\')">'+denPlain+(v.target===t.id?'Chosen':'Choose')+'</button>')).join('')+'</div>'+(v.target?'<button onclick="talentSetTarget(\'\')">'+denPlain+'No target</button>':''));
 }
 function talentSetTarget(id){if(WonderGear.setTalentTarget(S,talentSlotPick,id)){save();$('#modal').close();cityPet()}}
 function talentBuy(id){
  const r=WonderGear,st=r.talentState(S),v=st.slots[talentSlotPick];
  if(id==='book'){if(!r.buyTalentBook(S)){toast('Not enough talent seals.');return}}
- else if(!r.buyTalentScroll(S,talentSlotPick,id)){toast(v.cells.includes(id)?'Slot '+(talentSlotPick+1)+' already has this talent.':st.seals<r.talentScroll?'Not enough talent seals.':'No empty cell in Slot '+(talentSlotPick+1)+'. Open one or forget a talent.');return}
+ else if(!r.buyTalentScroll(S,talentSlotPick,id)){toast(v.cells.includes(id)?'Slot '+(talentSlotPick+1)+' already has this talent.':st.seals<r.talentPrice(id)?'Not enough talent seals.':'No empty cell in Slot '+(talentSlotPick+1)+'. Open one or forget a talent.');return}
  else talentLog.unshift('Slot '+(talentSlotPick+1)+': '+talentOf(id).name+' inscribed from a scroll');
  save();if($('#modal').open)$('#modal').close();cityPet();toast(id==='book'?'Prophecy Book bought':talentOf(id).name+' inscribed in Slot '+(talentSlotPick+1));
 }
 // Tapping a ware shows what it is first (a small item card); buying is the button inside.
 function talentWare(id){
  const r=WonderGear,st=r.talentState(S),v=st.slots[talentSlotPick],book=id==='book',t=book?null:talentOf(id);if(!book&&!t)return;
- const price=book?r.talentBook:r.talentScroll,has=!book&&v.cells.includes(id),empty=v.cells.some((x,n)=>n<v.open&&!x);
+ const price=book?r.talentBook:r.talentPrice(id),has=!book&&v.cells.includes(id),empty=v.cells.some((x,n)=>n<v.open&&!x);
  const why=has?'Slot '+(talentSlotPick+1)+' already has this talent.':!book&&!empty?'No empty cell in Slot '+(talentSlotPick+1)+'. Open one or forget a talent.':st.seals<price?'Not enough talent seals.':'';
- popup('<div class="den-item"><div class="den-item-head">'+(book?denIcon('misc',1,4,1):talentIcon(id))+'<div><b>'+(book?'Prophecy Book':t.name)+'</b><small>Type: <u>'+(book?'Pet talent book':(t.kind==='atk'?'Attack':'Guard')+' talent scroll')+'</u></small><small>'+(book?'You have: '+st.books:'For: Slot '+(talentSlotPick+1))+'</small></div></div>'
+ popup('<div class="den-item"><div class="den-item-head">'+(book?denIcon('misc',1,4,1):talentIcon(id))+'<div><b>'+(book?'Prophecy Book':t.name)+'</b><small>Type: <u>'+(book?'Pet talent book':talentKind(t)+' talent scroll')+'</u></small><small>'+(book?'You have: '+st.books:'For: Slot '+(talentSlotPick+1))+'</small></div></div>'
   +'<h3>◆ Item Description</h3><p>'+(book?'Tick Prophecy before Learn: one book shows which talent would be inscribed, and you choose to keep it or let it go.':t.text+' The scroll inscribes it into the first empty cell of the slot.')+'</p>'
   +(why?'<p class="den-why">'+why+'</p>':'')
   +'<div class="den-actions"><button class="den-gold" onclick="talentBuy(\''+id+'\')" '+(why?'disabled':'')+'>'+denPlain+'Buy · '+denIcon('misc',0,4,1)+price+'</button></div></div>');
@@ -585,11 +586,11 @@ function cityPet(){
     +slots;
   }else{
    const empty=v.cells.some((id,n)=>n<v.open&&!id);
-   const ware=(id,icon,name,price,note,off)=>'<button class="den-ware'+(off?' den-off':'')+'" onclick="talentWare(\''+id+'\')">'+denPlain+'<b>'+name+'</b>'+icon+'<small>'+note+'</small><em>'+misc(0)+price+'</em></button>';
+   const ware=(id,icon,name,price,note,off,kind='')=>'<button class="den-ware'+(off?' den-off':'')+(kind==='top'?' den-topware':'')+'" onclick="talentWare(\''+id+'\')">'+denPlain+'<b>'+name+'</b><span class="den-wareart">'+icon+(kind?'<i class="den-kindchip" aria-hidden="true">'+(kind==='top'?'★':'')+'</i>':'')+'</span><small>'+note+'</small><em>'+misc(0)+fmt(price)+'</em></button>';
    body='<div class="den-shophead">'+artImage('pairs-sprout','Sprout the shopkeeper')+'<div><h2>Talent Shop</h2><p>A scroll inscribes the talent you choose into the first empty cell of the slot below.</p><button class="den-plain" onclick="talentExchange()">'+denPlain+'✦ Fragment exchange</button></div></div>'
     +slots
     +'<div class="den-wares">'+ware('book',misc(1),'Prophecy Book',rules.talentBook,'Shows a Learn result first',st.seals<rules.talentBook)
-    +rules.petTalents.map(t=>{const has=v.cells.includes(t.id);return ware(t.id,talentIcon(t.id),t.name,rules.talentScroll,has?'In Slot '+(talentSlotPick+1)+' already':empty?(t.kind==='atk'?'Attack':'Guard'):'No empty cell',has||!empty||st.seals<rules.talentScroll)}).join('')+'</div>';
+    +rules.petTalents.map(t=>{const has=v.cells.includes(t.id),price=rules.talentPrice(t.id);return ware(t.id,talentIcon(t.id),t.name,price,has?'In Slot '+(talentSlotPick+1)+' already':empty?talentKind(t):'No empty cell',has||!empty||st.seals<price,t.top?'top':t.kind)}).join('')+'</div>';
   }
  }else if(petPage==='Summon'){
   // Pet Summon lives in the room now: wishes in, a random familiar out; one she has already becomes a spare copy.

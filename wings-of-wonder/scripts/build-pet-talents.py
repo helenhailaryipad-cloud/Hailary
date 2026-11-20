@@ -3,7 +3,8 @@
 
 Sources are painted sprite sheets (scripts/art-source/pets). Each icon is cut from its grid cell, trimmed and set on a
 144 px tile; the tiles are packed into three atlases that the room shows through CSS variables:
-  comp-pet-talents.webp  4 x 4: attack talents (rows 1-2), guard talents (rows 3-4), in the order of petTalents
+  comp-pet-talents.webp  4 x 6: attack (rows 1-2), guard (rows 3-4), second shelf (row 5 attack, row 6 guard),
+                         in the order of petTalents
   comp-pet-gear.webp     4 x 2: in the order of petGearPieces
   comp-pet-misc.webp     4 x 1: seal, prophecy book, supreme badge, scroll
 The comp- prefix puts them into pack-comp.js in the chat preview (no extra files).
@@ -30,6 +31,6 @@ def atlas(name, icons, cols):
     for n, icon in enumerate(icons): sheet.alpha_composite(icon, ((n % cols)*TILE, (n//cols)*TILE))
     sheet.save(OUT/f'{name}.webp', quality=90, method=6); print(name, sheet.size, (OUT/f'{name}.webp').stat().st_size)
 
-atlas('comp-pet-talents', tiles('attack', 4, 2)+tiles('guard', 4, 2), 4)
+atlas('comp-pet-talents', tiles('attack', 4, 2)+tiles('guard', 4, 2)+tiles('extra', 4, 2), 4)
 atlas('comp-pet-gear', tiles('gear', 4, 2), 4)
 atlas('comp-pet-misc', tiles('misc', 4, 1), 4)

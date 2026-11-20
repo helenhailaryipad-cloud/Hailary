@@ -495,7 +495,7 @@ console.log('PASS: Wonders > Pets opens the Pets room and returns; Summon inside
 vm.runInContext(`{
  const r=WonderGear;stopGame();S=defaults();
  const t0=r.talentState(S);if(t0.seals!==300||t0.books!==0||t0.slots.length!==3||t0.slots[0].open!==6||S.petTalents!==undefined)throw Error('Talents start with 300 seals and six open cells, without touching the save');
- if(r.petTalents.length!==16||new Set(r.petTalents.map(t=>t.id)).size!==16)throw Error('Sixteen talents');
+ if(r.petTalents.length!==24||new Set(r.petTalents.map(t=>t.id)).size!==24||r.petTalents.filter(t=>t.top).length!==3)throw Error('Twenty-four talents, three of them Top');
  const base=stats().attack;
  let roll=r.learnTalent(S,0,()=>0);if(!roll||roll.id!=='fang'||roll.cell!==0||r.talentState(S).seals!==240||!valid(S))throw Error('Learn inscribes a random talent into the first empty cell for 60 seals');
  r.lockTalent(S,0,0);if(r.learnCost(S,0)!==90)throw Error('Each lock makes Learn 50% dearer');
@@ -503,12 +503,16 @@ vm.runInContext(`{
  let v=r.talentState(S).slots[0];if(v.cells.slice(0,6).join()!=='fang,surge,haste,star,pounce,bite')throw Error('Cells fill in order');
  r.addSeals(S,90);roll=r.learnTalent(S,0,()=>0);v=r.talentState(S).slots[0];
  if(roll.cell!==1||roll.replaces!=='surge'||v.cells[0]!=='fang'||v.cells[1]!=='giant')throw Error('A full slot overwrites an unlocked talent, never a locked one');
- r.setTalentTarget(S,0,'bond');r.addSeals(S,500);r.buyTalentBook(S);const held=r.learnTalent(S,0,()=>.3,true);v=r.talentState(S);
+ r.setTalentTarget(S,0,'bond');r.addSeals(S,500);r.buyTalentBook(S);const held=r.learnTalent(S,0,()=>.2,true);v=r.talentState(S);
  if(!held.held||held.id!=='bond'||v.books!==0||v.slots[0].cells.includes('bond'))throw Error('Prophecy shows the result first; the target is likelier');
  if(!r.keepTalent(S,0,held)||!r.talentState(S).slots[0].cells.includes('bond')||stats().attack<=base)throw Error('Keeping it inscribes it; Bonded Might raises Reina ATK');
  const seals=r.talentState(S).seals;if(r.buyTalentScroll(S,0,'mend'))throw Error('A scroll needs an empty cell');
  if(!r.openTalentCell(S,0)||r.talentState(S).seals!==seals-50||!r.buyTalentScroll(S,0,'mend')||r.talentState(S).slots[0].cells[6]!=='mend')throw Error('Open a cell for seals, then inscribe a scroll');
  if(r.guardTalents(S).mend!==1||r.guardTalents(S).stand!==0)throw Error('Healing talents are counted');
+ // Top talents: never from Learn, never a Learn target, dearer scrolls.
+ for(let i=0;i<40;i++){const x=r.rollTalent(S,1,Math.random);if(!x||r.petTalents.find(t=>t.id===x.id).top)throw Error('Learn never rolls a Top talent')}
+ if(r.setTalentTarget(S,1,'apexfury')||r.talentPrice('apexfury')!==1000||r.talentPrice('fang')!==400)throw Error('Top talents are scroll only and cost more');
+ {const had=r.talentState(S).seals;r.addSeals(S,1000);if(!r.buyTalentScroll(S,1,'apexaegis')||r.talentState(S).seals!==had||!r.talentIds(S,1).includes('apexaegis')||!valid(S))throw Error('A Top scroll inscribes its talent')}
  if(!r.forgetTalent(S,0,6)||r.guardTalents(S).mend!==0||!valid(S))throw Error('Forget frees a cell');
  const fam=r.familiars.find(p=>p.rarity==='Common').id;r.addPetSpare(S,fam,3);const before=r.talentState(S).seals;
  if(r.exchangeSpares(S,'Common')!==60||r.talentState(S).seals!==before+60||r.petSpares(S,fam)!==0)throw Error('Spare copies become seals');
@@ -519,6 +523,9 @@ vm.runInContext(`{
  S.petTalents={seals:0,books:0,slots:[{open:6,cells:['fang','pounce','giant',null,null,null,...Array(9).fill(null)],locks:[],target:''},...r.talentState(S).slots.slice(1)]};
  if(r.petBolt(S,0,'d0',{first:true,boss:true,count:1},()=>.5)!==Math.round(r.petAttack(S,'d0')*.35*1.25*3*1.3)||r.petBolt(S,1,'d0',{first:true,boss:true,count:1},()=>.5)!==plain)throw Error('Talents of a slot shape only that slot');
  if(r.petBoltPace(S,0)!==2.4)throw Error('Pace without Quick Wing');
+ S.petTalents.slots[1].cells=['venom','flux','apexfury',null,null,null,...Array(9).fill(null)];
+ if(r.petBolt(S,1,'d0',{count:3},()=>.5)!==Math.round(r.petAttack(S,'d0')*.35*1.12*1.6*1.5))throw Error('Venom Fang, Tidal Flux and Apex Fury multiply');
+ S.petTalents.slots[1].cells=Array(15).fill(null);
  S.gold=200;const hp=stats().health,team=r.petTeamAttack(S);
  if(!r.upgradePetGear(S,0,0)||S.gold!==0||r.petGearLevels(S,0)[0]!==1||r.petTeamAttack(S)!==team+4||r.upgradePetGear(S,0,0)||!valid(S))throw Error('Forging a horn piece costs gold and adds pet ATK');
  S.gold=1e7;for(let i=0;i<10;i++)r.upgradePetGear(S,0,3);if(r.petGearLevels(S,0)[3]!==10||stats().health!==hp+300)throw Error('Collar adds Reina HP');

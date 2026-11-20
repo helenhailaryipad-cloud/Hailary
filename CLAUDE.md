@@ -291,6 +291,13 @@ of d0-d3 say what the paintings show (Grove Dragonling, Ember Drake, Moon Dragon
   it cannot be bought; Buy with the price). Buying happens only from that card (`talentBuy`). Wares that cannot be
   bought are dimmed (`.den-off`) but still open their card. Reuse the `.den-item` card for other shops.
 
+- Full talent shelf (eight more shop photos: about twenty talent books, some named "Top ..."): `petTalents` now has
+  24 talents, twelve attack and twelve guard. New: Venom Fang, Tidal Flux, Loyal Heart (Crit +2%), Swift Bond
+  (Speed +4), Calm Mind (Crit RES +3%), and three `top` talents (Apex Fury, Apex Star, Apex Aegis) that never come
+  from Learn or Learn Target, only from a 1,000-seal scroll (`talentTopScroll`, `talentPrice(id)`); Top wares have a
+  gold card and a star chip. Icons: `art-source/pets/extra.webp`, atlas `comp-pet-talents` is now 4 x 6.
+  Notes in the Pets room are a small pill at the top (`body[data-screen=cityPet] .toast`), not a big banner.
+
 ## Back buttons (2026-11-20)
 User circled a tiny "‹" in a corner: "check all back buttons everywhere, draw them clearer, not so small, with a special
 icon in the style of our game". One painted icon, `ui-back.webp` (gold-rimmed blue disc, ivory arrow; image model;

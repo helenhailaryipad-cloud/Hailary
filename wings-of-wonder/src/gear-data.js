@@ -196,7 +196,7 @@ function petTeamAttack(s){
 // ---- Pet talents and pet gear. Both belong to the three Primary Pet SLOTS, so they stay when a pet is replaced. ----
 // Talents: each slot has fifteen cells (six open at first). Learn inscribes a random talent the slot does not have:
 // into an empty open cell, or over a random unlocked one. Seals pay for everything.
-const talentCells=15,talentFree=6,talentLearn=60,talentBook=50,talentScroll=400,talentSupremeAt=12,talentStart=300;
+const talentCells=15,talentFree=6,talentLearn=60,talentBook=50,talentScroll=400,talentTopScroll=1000,talentSupremeAt=12,talentStart=300;
 const petHit=.35,petPace=2.4;
 const petTalents=[
  {id:'fang',name:'Keen Fang',kind:'atk',text:'This pet\'s bolts deal 25% more damage.'},
@@ -214,8 +214,18 @@ const petTalents=[
  {id:'ward',name:'Spirit Ward',kind:'def',text:'Reina takes 2% less damage.',stat:['damageReduction',2]},
  {id:'step',name:'Lucky Step',kind:'def',text:'Reina gains Dodge +2%.',stat:['dodge',2]},
  {id:'dawn',name:'Dawn Barrier',kind:'def',text:'Reina gains Shield HP +80.',stat:['shieldHealth',80]},
- {id:'stone',name:'Stone Skin',kind:'def',text:'Reina gains Block +3%.',stat:['block',3]}
+ {id:'stone',name:'Stone Skin',kind:'def',text:'Reina gains Block +3%.',stat:['block',3]},
+ // Second shelf of the shop. `top` talents are stronger, cost more, and never come from Learn: only from a scroll.
+ {id:'venom',name:'Venom Fang',kind:'atk',text:'Each bolt this pet has already landed in the run adds 6% damage to its next ones, up to 30%.'},
+ {id:'flux',name:'Tidal Flux',kind:'atk',text:'Every third bolt of this pet deals 60% more damage.'},
+ {id:'apexfury',name:'Apex Fury',kind:'atk',top:true,text:'This pet\'s bolts deal 50% more damage.'},
+ {id:'apexstar',name:'Apex Star',kind:'atk',top:true,text:'This pet\'s bolts have a 30% chance to deal triple damage.'},
+ {id:'loyal',name:'Loyal Heart',kind:'def',text:'Reina gains Crit Rate +2%.',stat:['crit',2]},
+ {id:'swift',name:'Swift Bond',kind:'def',text:'Reina gains Speed +4.',stat:['speed',4]},
+ {id:'calm',name:'Calm Mind',kind:'def',text:'Reina gains Crit RES +3%.',stat:['critResistance',3]},
+ {id:'apexaegis',name:'Apex Aegis',kind:'def',top:true,text:'Reina takes 5% less damage.',stat:['damageReduction',5]}
 ];
+const talentPrice=id=>talentById[id]?.top?talentTopScroll:talentScroll;
 const talentById=Object.fromEntries(petTalents.map(t=>[t.id,t]));
 const talentSupreme={name:'Dragon\'s Roar',text:'Every fifth bolt of this pet deals triple damage. Awakens when '+talentSupremeAt+' talents are inscribed in this slot.'};
 function talentState(s){
@@ -243,7 +253,7 @@ function openTalentCell(s,slot){
 function learnCost(s,slot){return Math.round(talentLearn*(1+.5*talentState(s).slots[slot].locks.length))}
 // What a Learn would do: which talent, into which cell, and what it would overwrite. Null when nothing can change.
 function rollTalent(s,slot,rng=Math.random){
- const v=talentState(s).slots[slot],pool=petTalents.filter(t=>!v.cells.includes(t.id));if(!pool.length)return null;
+ const v=talentState(s).slots[slot],pool=petTalents.filter(t=>!t.top&&!v.cells.includes(t.id));if(!pool.length)return null;
  const empty=v.cells.findIndex((id,n)=>n<v.open&&!id),free=v.cells.map((id,n)=>n).filter(n=>n<v.open&&!v.locks.includes(n));
  if(empty<0&&!free.length)return null;
  const weights=pool.map(t=>t.id===v.target?4:1),total=weights.reduce((a,b)=>a+b,0);let at=rng()*total,pick=pool[pool.length-1];
@@ -274,12 +284,12 @@ function forgetTalent(s,slot,cell){
  v.cells[cell]=null;v.locks=v.locks.filter(n=>n!==cell);s.petTalents=t;return true;
 }
 function setTalentTarget(s,slot,id){
- if(!talentSlot(slot)||id!==''&&!Object.hasOwn(talentById,id))return false;const t=talentState(s);t.slots[slot].target=id;s.petTalents=t;return true;
+ if(!talentSlot(slot)||id!==''&&(!Object.hasOwn(talentById,id)||talentById[id].top))return false;const t=talentState(s);t.slots[slot].target=id;s.petTalents=t;return true;
 }
 // Talent Shop: a scroll inscribes one chosen talent into the first empty open cell of a slot.
 function buyTalentScroll(s,slot,id){
  if(!talentSlot(slot)||!Object.hasOwn(talentById,id))return false;const t=talentState(s),v=t.slots[slot],cell=v.cells.findIndex((x,n)=>n<v.open&&!x);
- if(t.seals<talentScroll||cell<0||v.cells.includes(id))return false;t.seals-=talentScroll;v.cells[cell]=id;s.petTalents=t;return true;
+ if(t.seals<talentPrice(id)||cell<0||v.cells.includes(id))return false;t.seals-=talentPrice(id);v.cells[cell]=id;s.petTalents=t;return true;
 }
 function buyTalentBook(s){const t=talentState(s);if(t.seals<talentBook||t.books>=9999)return false;t.seals-=talentBook;t.books++;s.petTalents=t;return true}
 const sealRates={Common:20,Rare:50,Epic:120,'Super Rare':300},sealGold={gold:1000,seals:100};
@@ -325,6 +335,10 @@ function petBolt(s,slot,id,ctx={},rng=Math.random){
  if(have.has('pounce')&&ctx.first)dmg*=3;
  if(have.has('bite')&&ctx.enemyRatio<.3)dmg*=1.4;
  if(have.has('giant')&&ctx.boss)dmg*=1.3;
+ if(have.has('venom'))dmg*=1+Math.min(5,Math.max(0,(ctx.count||1)-1))*.06;
+ if(have.has('flux')&&ctx.count>0&&ctx.count%3===0)dmg*=1.6;
+ if(have.has('apexfury'))dmg*=1.5;
+ if(have.has('apexstar')&&rng()<.3)dmg*=3;
  if(have.size>=talentSupremeAt&&ctx.count>0&&ctx.count%5===0)dmg*=3;
  return Math.round(dmg);
 }
@@ -431,5 +445,5 @@ function rollBossTier(save,random){
 }
 function bossLoot(save,id,random=Math.random){const table=bossLootTables[id];if(!table)return null;const eq=state(save);save.equipment=eq;const materials=Object.fromEntries(materialDefs.map(m=>[m.id,table[m.id]||0]));for(const m of materialDefs)eq.materials[m.id]+=materials[m.id];const tier=rollBossTier(save,random),slot=table.slots[Math.min(table.slots.length-1,Math.max(0,Math.floor(random()*table.slots.length)))],drop=addDrop(save,tier,slot);if(drop.converted){eq.materials.stone+=15;materials.stone+=20;}else{drop.enhance=table.enhance;drop.stars=table.stars;}return {...materials,entry:drop.converted?null:drop,converted:!!drop.converted};}
 function grant(save,type,won,score=0){const eq=state(save);save.equipment=eq;let stones=type==='dungeon'?(won?12:3):type==='defense'?(won?8:2):type==='spar'?(won?2:0):Math.min(7,Math.floor(score/180));eq.materials.stone+=stones;let shard=won&&(type==='dungeon'||type==='defense')?3:0;eq.materials.shard+=shard;if(won&&type==='dungeon'){eq.materials.essence+=2;eq.materials.gem+=1}return {stone:stones,shard,gem:won&&type==='dungeon'?1:0,essence:won&&type==='dungeon'?2:0}}
-return Object.freeze({talentCells,talentFree,talentLearn,talentBook,talentScroll,talentSupremeAt,talentSupreme,petTalents,talentState,talentIds,supremeReady,addSeals,openCellCost,openTalentCell,learnCost,rollTalent,keepTalent,learnTalent,lockTalent,forgetTalent,setTalentTarget,buyTalentScroll,buyTalentBook,sealRates,sealGold,buySeals,exchangeSpares,talentBonus,guardTalents,petGearPieces,petGearMax,petGearStep,petGearSetStep,petGearLevels,petGearTier,petGearCost,petGearBonus,upgradePetGear,petBolt,petBoltPace,petHit,petPace,assistPages,assistSlots,synthChain,synthNeed,petSpares,addPetSpare,synthesizePet,fashionTraits,companionTypes,companionSkins,companionSkin,ownsCompanionSkin,useCompanionSkin,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,starGearCount,starDonors,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
+return Object.freeze({talentCells,talentFree,talentLearn,talentBook,talentScroll,talentTopScroll,talentPrice,talentSupremeAt,talentSupreme,petTalents,talentState,talentIds,supremeReady,addSeals,openCellCost,openTalentCell,learnCost,rollTalent,keepTalent,learnTalent,lockTalent,forgetTalent,setTalentTarget,buyTalentScroll,buyTalentBook,sealRates,sealGold,buySeals,exchangeSpares,talentBonus,guardTalents,petGearPieces,petGearMax,petGearStep,petGearSetStep,petGearLevels,petGearTier,petGearCost,petGearBonus,upgradePetGear,petBolt,petBoltPace,petHit,petPace,assistPages,assistSlots,synthChain,synthNeed,petSpares,addPetSpare,synthesizePet,fashionTraits,companionTypes,companionSkins,companionSkin,ownsCompanionSkin,useCompanionSkin,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,starGearCount,starDonors,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
 })();
