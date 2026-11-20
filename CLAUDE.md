@@ -280,6 +280,12 @@ of d0-d3 say what the paintings show (Grove Dragonling, Ember Drake, Moon Dragon
   stand-in pet any more. Jungle Trek runs with all three (`trekCrew`, `g.pets[3]`); dungeons already did.
   Second request: larger and closer to her (pets 21-22% wide, about a third of her height, touching her sides).
 
+- Pop-ups, not full-screen dialogs (user, with a screenshot of the talent guide filling the screen): every dialog of
+  the Pets room opens through `popup(html)` (`app.js`), which is `modal()` plus the class `den-pop` on `#modal`: a card
+  at most 430 px wide and 74% of the height, centred, small text, scrolls inside, no "Menu" button under it.
+  `modal()` removes the class again. Use `popup` for new information and choice windows; buttons in them need
+  `denPlain` too. The user plays in the chat's side pane (about 590 x 690 px), so check pop-ups at that size.
+
 ## In-chat playable preview (user requirement)
 The user wants to play the game inside the chat, and wants SHORT replies in Russian, no fluff.
 - Artifact: https://claude.ai/artifact/L9owNJPMaZjAsTmU3tDGs6 (private). After game changes, rebuild and republish:
