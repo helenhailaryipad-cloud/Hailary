@@ -6047,7 +6047,7 @@ body[data-screen=cityBag] #stage>#main{inset:0!important;width:100%;height:100%;
 .satchel-grid,.satchel-choice{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:1cqw}.satchel-choice img{width:100%}
 .satchel-stack .equipment-art,.satchel-stack>svg,.satchel-stack>img{width:80%;height:80%;object-fit:contain}.satchel-stack b{position:absolute;bottom:3%;right:4%;font-size:2.3cqw}
 .satchel-foot{background:#2a4f62;padding:1%}.satchel-foot span{margin-right:auto;font-size:2.8cqw}#stage #main .satchel-foot button{background:#d7b270;color:#352c31;border-radius:8px;padding:.42em .55em}
-.satchel-nav{justify-content:end;background:#253b56}.satchel-nav img{width:8cqw;height:4.6cqh;object-fit:contain}.satchel-nav button{font-size:2.7cqw!important;width:17%}.satchel-nav button:first-child{margin-right:auto!important;width:9%;font-size:6cqw!important}.satchel-nav button:nth-child(2){color:#ffda87!important}
+.satchel-nav{justify-content:end;background:#253b56}.satchel-nav img{width:8cqw;height:4.6cqh;object-fit:contain}.satchel-nav button{font-size:2.7cqw!important;width:17%}.satchel-nav button:first-child{margin-right:auto!important;width:9%;font-size:6cqw!important}.satchel-nav button[aria-current]{color:#ffda87!important}
 #stage #main .satchel-actions{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));justify-items:center}
 #stage #main .satchel-actions button{width:100%;height:100%;align-content:center;overflow:hidden}
 #stage #main .satchel-actions button :is(.pet-portrait,.generated-image){width:10cqw!important;height:5cqh!important;max-width:100%;min-width:0}
@@ -7072,5 +7072,53 @@ body:has(#main button[data-back]) #stage>.return-to-menu{display:none}
 #main .den .den-trow p{font-size:.95em}
 #main .den .den-topware b{color:#8a4a00}
 /* Pets room: a small note at the top instead of a big banner over the buttons */
-body[data-screen=cityPet] #stage .toast{top:5.2%!important;bottom:auto!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:auto!important;max-width:72%!important;min-height:0!important;padding:7px 16px!important;border-radius:99px!important;font:700 14px/1.25 Arial,sans-serif!important;text-align:center}
+body:is([data-screen=cityPet],[data-screen=cityBag],[data-screen=cityVault],[data-screen=cityDevour],[data-screen=cityCraft]) #stage .toast{top:5.2%!important;bottom:auto!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:auto!important;max-width:72%!important;min-height:0!important;padding:7px 16px!important;border-radius:99px!important;font:700 14px/1.25 Arial,sans-serif!important;text-align:center}
 #main .den .den-check small{font-size:.8em!important}
+
+/* Bag contents, warehouse and Devour (2026-11-20). Tiles share .satchel-stack; --rarity colours frame and plate. */
+body:is([data-screen=cityVault],[data-screen=cityDevour]) #stage{width:min(100%,55dvh);margin-inline:auto}
+body:is([data-screen=cityVault],[data-screen=cityDevour]) #stage>:is(header,nav,footer){display:none!important}
+body:is([data-screen=cityVault],[data-screen=cityDevour]) #stage>#main{inset:0!important;width:100%;height:100%;padding:0!important;display:block;overflow:auto}
+.bag-ico{display:block;width:84%;aspect-ratio:1;background:var(--bag-items) no-repeat;background-size:400% 400%;font-style:normal;flex:none}
+#stage #main .satchel .bag-tile{background:linear-gradient(160deg,color-mix(in srgb,var(--rarity) 62%,#1c2244),color-mix(in srgb,var(--rarity) 24%,#1c2244));border-width:3px}
+#stage #main .satchel .bag-tile b{right:5%;bottom:2%;font:700 2.5cqw/1 Arial,sans-serif;color:#fff;text-shadow:0 1px 0 #000,0 0 3px #000,0 0 3px #000}
+#stage #main .satchel .bag-tile .den-ico{width:80%}
+#stage #main .satchel .bag-tile>img{width:100%;height:100%;object-fit:cover;object-position:50% 20%}
+#stage #main .satchel .bag-tile .gpt-icon{width:70%;height:70%}
+.bag-bar{position:absolute;left:4%;right:4%;bottom:3%;height:17%;border-radius:1em;background:#101832d9;overflow:hidden;font-style:normal}
+.bag-bar u{position:absolute;inset:0 auto 0 0;background:linear-gradient(#b8ff8a,#4fc24c)}
+.bag-bar span{position:absolute;inset:0;display:grid;place-items:center;font:700 2cqw/1 Arial,sans-serif;color:#fff;text-shadow:0 1px 1px #000}
+.bag-empty{aspect-ratio:1;border-radius:5%;background:#1b2f4d8c;border:1px solid #ffffff17;box-sizing:border-box}
+#stage #main .satchel :is(.satchel-stack,.equipment-cell)[aria-pressed=true]{outline:3px solid #ffe27a;outline-offset:-1px;box-shadow:0 0 0 2px #2b1c08,0 0 10px #ffd95a}
+#stage #main .satchel-foot button:disabled{filter:grayscale(.8);opacity:.6}
+.vault{grid-template-rows:5.6% minmax(0,1fr) 8% 4.5% minmax(0,1fr) 7% 8%}
+.vault-hint{display:flex;align-items:center;gap:2%;padding:0 1.5%;background:#264563b3;border:1px solid #7392a4;border-top:0;font-size:2.8cqw}
+.vault-hint span{margin-right:auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#stage #main .vault-hint button{background:#d7b270;color:#352c31;border-radius:8px;padding:.42em .7em;white-space:nowrap}
+.maw-room{grid-template-rows:5.6% 34% minmax(0,1fr) 7% 8%}
+.maw-stage{position:relative;display:grid;grid-template-columns:42% minmax(0,1fr);align-items:center;gap:2%;padding:0 3%;min-height:0;background:radial-gradient(ellipse at 24% 55%,#a56bff55,transparent 55%)}
+.maw-pic{width:100%;height:100%;max-height:30cqh;object-fit:contain;filter:drop-shadow(0 6px 8px #0008);animation:maw-idle 3.2s ease-in-out infinite}
+.maw-pic.chomp{animation:maw-chomp .7s ease-out}
+@keyframes maw-idle{50%{transform:translateY(-2.5%) scale(1.02)}}
+@keyframes maw-chomp{0%{transform:scale(1)}25%{transform:scale(1.14,.86)}55%{transform:scale(.93,1.1)}100%{transform:scale(1)}}
+.maw-info{display:grid;gap:1.4cqh;min-width:0}
+.maw-info h2{margin:0;font:700 4.4cqw/1.1 Arial,sans-serif;color:#fff2cf}.maw-info h2 b{display:block;color:#ffd86b;font-size:1.15em}
+.maw-bar{position:relative;height:3.4cqh;border-radius:2em;background:#101832d9;border:1px solid #8fa6d8;overflow:hidden}
+.maw-bar i,.maw-bar u{position:absolute;inset:0 auto 0 0}.maw-bar u{background:#fff3a6aa}.maw-bar i{background:linear-gradient(#d9a5ff,#8b4be0);z-index:1}
+.maw-bar span{position:absolute;inset:0;z-index:2;display:grid;place-items:center;font:700 2.6cqw/1 Arial,sans-serif;color:#fff;text-shadow:0 1px 1px #000}
+.maw-stats{display:grid;gap:.6cqh;font:700 2.9cqw/1.2 Arial,sans-serif}.maw-stats span{display:flex;align-items:center;gap:.4em}.maw-stats b{color:#fff}.maw-stats em{font-style:normal;color:#9dff8a}
+#stage #main .satchel .maw-help{position:absolute;top:4%;right:3%;width:7cqw;height:7cqw;border-radius:50%;background:#ffffff26;border:1px solid #ffffff66;font:700 4cqw/1 Arial,sans-serif;color:#fff}
+.maw-none{margin:8% 6%;text-align:center;font:400 3.2cqw/1.4 Arial,sans-serif;color:#d7e4ff}
+.satchel-nav button[aria-current] img{filter:drop-shadow(0 0 4px #ffd86b)}
+/* Item card and the "You received" list in the pop-up */
+.den-item-head.bag-head{background:linear-gradient(135deg,color-mix(in srgb,var(--rarity) 85%,#fff),color-mix(in srgb,var(--rarity) 70%,#1c2244))}
+.den-item-head :is(.bag-ico,.equipment-art,img,.gpt-icon){width:64px;height:64px;object-fit:contain;filter:drop-shadow(0 2px 2px #0006)}
+.den-item-head .bag-ico{aspect-ratio:auto}
+#stage #modal.den-pop .den-item .den-actions{gap:10px}
+.bag-gains{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;margin:8px 2px 12px}
+.bag-gain{position:relative;display:grid;justify-items:center;gap:2px;padding:6px 4px;border-radius:10px;border:2px solid var(--rarity);background:linear-gradient(160deg,color-mix(in srgb,var(--rarity) 45%,#1c2244),#1c2244)}
+.bag-gain :is(.bag-ico,.den-ico,.equipment-art,img,.gpt-icon){width:52px;height:52px;object-fit:contain;aspect-ratio:auto}
+.satchel .den-x{display:none}
+#stage #modal .bag-gain :is(img,.gear-illustration){width:52px;height:52px}
+.bag-gain{align-content:start}
+.bag-gain b{font:700 14px/1 Arial,sans-serif;color:#fff}.bag-gain small{font:400 11px/1.15 Arial,sans-serif!important;color:#dfe8ff;text-align:center}

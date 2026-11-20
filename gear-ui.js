@@ -6,10 +6,10 @@ function equipmentIcon(index,extra=''){return `<span class="equipment-art ${extr
 function gearArt(template){
   return `<img class="gear-illustration" alt="" src="assets/generated/gear-${template.slot}-t${eqRules().artTier(template.tier)}.webp?v=2">`;
 }
-function equipmentCell(entry,{compact=false,equipped=false,warehouse=false,forge=false}={}){const r=eqRules(),t=r.catalog[entry.template];
- const action=forge?`selectForgePiece(${entry.uid})`:warehouse?`transferGear(${entry.uid},${!entry.stored})`:`openEquipment(${entry.uid})`;
+function equipmentCell(entry,{compact=false,equipped=false,warehouse=false,forge=false,act=null,pressed=null}={}){const r=eqRules(),t=r.catalog[entry.template];
+ const action=act?act:forge?`selectForgePiece(${entry.uid})`:warehouse?`transferGear(${entry.uid},${!entry.stored})`:`openEquipment(${entry.uid})`;
  const purpose=warehouse?(entry.stored?'Withdraw ':'Deposit '):'';
- return `<button data-tier="${t.tier}" data-stars="${entry.stars}" class="equipment-cell rarity-${t.grade} slot-${t.slot} ${equipped?'is-worn':''} ${compact?'compact-cell':''}" style="--rarity:${t.color}" aria-label="${purpose}${t.name}, Tier ${t.tier}, ${entry.stars} stars, enhance ${entry.enhance}${equipped?', equipped':''}" onclick="${action}"><span class="gear-tier">T${t.tier}</span><span class="gear-stars">${uiIcon('star','badge-icon')}${entry.stars}</span>${gearArt(t)}${entry.enhance>0?`<span class="gear-enhance">+${entry.enhance}</span>`:''}${equipped?`<span class="worn-dot">${uiIcon('check','badge-icon')}</span>`:''}${entry.gems?`<span class="gear-gems ${equipped?'worn-gems':''}">${uiIcon('gem','badge-icon')}${entry.gems}</span>`:''}</button>`}
+ return `<button data-tier="${t.tier}" data-stars="${entry.stars}" class="equipment-cell rarity-${t.grade} slot-${t.slot} ${equipped?'is-worn':''} ${compact?'compact-cell':''}" style="--rarity:${t.color}" aria-label="${purpose}${t.name}, Tier ${t.tier}, ${entry.stars} stars, enhance ${entry.enhance}${equipped?', equipped':''}" ${pressed===null?'':'aria-pressed="'+pressed+'"'} onclick="${action}"><span class="gear-tier">T${t.tier}</span><span class="gear-stars">${uiIcon('star','badge-icon')}${entry.stars}</span>${gearArt(t)}${entry.enhance>0?`<span class="gear-enhance">+${entry.enhance}</span>`:''}${equipped?`<span class="worn-dot">${uiIcon('check','badge-icon')}</span>`:''}${entry.gems?`<span class="gear-gems ${equipped?'worn-gems':''}">${uiIcon('gem','badge-icon')}${entry.gems}</span>`:''}</button>`}
 function loadoutCell(eq,slot,compact=false){
  const entry=eq.items.find(i=>i.uid===eq.equipped[slot.id]);
  if(entry)return equipmentCell(entry,{equipped:true,compact});
@@ -112,7 +112,7 @@ gearDialog.addEventListener('cancel',event=>{
   toggleEquipmentMenu();
  }
 });
-function refreshEquipmentSurface(){if(screen==='cityBag')cityBag();else if(['inventory','forge','warehouse'].includes(screen))gearWorkspace();else if(screen==='bag')bag();else if(screen==='home')home();wallet()}
+function refreshEquipmentSurface(){if(screen==='cityBag')cityBag();else if(screen==='cityVault')cityVault();else if(screen==='cityDevour')cityDevour();else if(['inventory','forge','warehouse'].includes(screen))gearWorkspace();else if(screen==='bag')bag();else if(screen==='home')home();wallet()}
 function equipmentAction(uid,action,expected){if(gearActionLock)return;if(action==='star'){$('#modal').close();openStarForge(uid);return}const eq=eqRules().state(S),entry=eq.items.find(i=>i.uid===uid);if(!entry||equipmentStamp(entry)!==expected){toast('This item changed. Open it again.');return}gearActionLock=true;try{const result=eqRules().perform(S,uid,action);if(!result.ok){toast(result.error);return}save();refreshEquipmentSurface();$('#modal').close();openEquipment(uid);toast(action==='equip'?'Item equipped':action==='craft'?'Next tier crafted. All upgrades kept.':'Equipment improved')}finally{setTimeout(()=>gearActionLock=false,220)}}
 function autoEquipBest(){const r=eqRules(),eq=r.state(S),changed=new Set();for(let pass=0;pass<3;pass++){let improved=false;for(const slot of r.slots){let bestUid=eq.equipped[slot.id],bestPower=r.stats({...S,equipment:eq}).power;for(const candidate of eq.items.filter(i=>!i.stored&&r.catalog[i.template].tier<=r.unlockedTier(S)&&r.catalog[i.template].slot===slot.id)){const power=r.stats({...S,equipment:{...eq,equipped:{...eq.equipped,[slot.id]:candidate.uid}}}).power;if(power>bestPower){bestPower=power;bestUid=candidate.uid}}if(bestUid!==eq.equipped[slot.id]){eq.equipped[slot.id]=bestUid;changed.add(slot.id);improved=true}}if(!improved)break}if(changed.size){S.equipment=eq;save();bag();toast(changed.size+' equipment slots improved')}else {const locked=eq.items.filter(i=>!i.stored&&r.catalog[i.template].tier>r.unlockedTier(S)).map(i=>r.catalog[i.template].tier);toast(locked.length?'Best available gear equipped. T'+Math.min(...locked)+' requires Lv. '+r.requiredLevel(Math.min(...locked))+'.':'Your strongest items are already equipped')}}
 function confirmSalvage(uid){const r=eqRules(),eq=r.state(S),entry=eq.items.find(i=>i.uid===uid);if(!entry||r.equipped(eq,uid))return;const t=r.catalog[entry.template];modal(`<p class="eyebrow">SALVAGE SPARE EQUIPMENT</p><h2>${t.name}</h2><p>This spare item will become ${3+t.grade*3+entry.enhance} enhancement crystals and ${50*(t.grade+1)} gold. Socketed gems and ${entry.stars} star shards are recovered.</p><p class="rules">This item will be removed. Equipped items are protected.</p><button onclick="openEquipment(${uid})">Keep item</button> <button class="primary" onclick="salvageEquipment(${uid})">Salvage this item</button>`)}
@@ -224,7 +224,7 @@ function transferGear(uid,stored){
  const eq=eqRules().state(S),entry=eq.items.find(e=>e.uid===uid);
  if(!entry||eqRules().equipped(eq,uid)||Boolean(entry.stored)===stored)return;
  if(stored)entry.stored=true;else delete entry.stored;
- S.equipment=eq;save();gearWorkspace();
+ S.equipment=eq;save();refreshEquipmentSurface();
 }
 
 function reinaCharacter(records=false){
@@ -241,35 +241,144 @@ function reinaCharacter(records=false){
  <div class="reina-sheet-nav"><button data-back aria-label="Back to city" onclick="go('home')">‹</button><button aria-pressed="${!records}" onclick="reinaCharacter()">${uiIcon('hero')}Character</button><button aria-pressed="${records}" onclick="reinaCharacter(true)">${uiIcon('laurel')}Achievements</button></div></section>`;
 }
 
-let cityBagFilter='Common',cityBagOrder='slot';
+let cityBagFilter='Common',cityBagOrder='slot',vaultSel='',vaultTab='Common',vaultOrder='slot',devourPicks=[];
+const bagUseMany=50,bagPetCapacity=100;
 function cityBagPick(mode){
- const r=eqRules(),eq=r.state(S),spares=mode==='Convert',devour=mode==='Devour';
- const choices=eq.items.filter(e=>!e.stored&&(spares?!e.starter&&!r.equipped(eq,e.uid):devour||r.equipped(eq,e.uid)));
+ const r=eqRules(),eq=r.state(S),spares=mode==='Convert';
+ const choices=eq.items.filter(e=>!e.stored&&(spares?!e.starter&&!r.equipped(eq,e.uid):r.equipped(eq,e.uid)));
  const pick=e=>{
-  const action=spares?`confirmSalvage(${e.uid})`:devour?`$('#modal').close();openStarForge(${e.uid})`:`openEquipment(${e.uid},'upgrades',${mode==='Gem'?2:mode==='Star'?1:0})`;
+  const action=spares?`confirmSalvage(${e.uid})`:`openEquipment(${e.uid},'upgrades',${mode==='Gem'?2:mode==='Star'?1:0})`;
   return `<button aria-label="${r.catalog[e.template].name}" onclick="${action}">${gearArt(r.catalog[e.template])}</button>`;
  };
- modal(`<h2>${mode}</h2><p>${spares?'Select spare gear to convert into materials.':devour?'Select the item to strengthen with spare equipment.':'Choose equipped gear.'}</p><div class="satchel-choice">${choices.map(pick).join('')||'No eligible equipment.'}</div>`);
+ modal(`<h2>${mode}</h2><p>${spares?'Select spare gear to convert into materials.':'Choose equipped gear.'}</p><div class="satchel-choice">${choices.map(pick).join('')||'No eligible equipment.'}</div>`);
 }
+// ---- Bag contents: stacks, materials and pet items next to the equipment -------------------------------------------
+function bagArtVars(){const root=document.documentElement;if(!root?.style?.setProperty||root.style.getPropertyValue('--bag-items'))return;root.style.setProperty('--bag-items','url("'+artPath('comp-bag-items')+'")')}
+const bagIcon=id=>{const n=WonderGear.bagItems.findIndex(i=>i.id===id);return '<i class="bag-ico" style="background-position:'+(n%4)/3*100+'% '+Math.floor(n/4)/3*100+'%"></i>'};
+const bagHue=k=>WonderGear.bagRarity[k][1];
+const bagNum=n=>n>=1e4?new Intl.NumberFormat('en',{notation:'compact',maximumFractionDigits:1}).format(n):String(n);
+const bagNotes={stone:'Used to enhance equipment. Earn crystals in dungeons and mini-games.',shard:'Used to add stars to equipment and pets. Earn shards from dungeon and Castle Defense victories.',gem:'Socket into equipment for attack, piercing, health or defense. Earn gems by clearing dungeons.',synthesis:'Needed to craft the next equipment tier. Earn up to two per day from the Forge keeper, or buy one in Gear Crafting.',essence:'Crafts the next equipment tier while keeping all upgrades. Earn essence from dungeon bosses.'};
+// What one tab holds, as tiles. where: 'bag' or 'vault'; petTab: the view has its own Pet tab.
+function bagThings(tab,where='bag',petTab=true,order='slot'){
+ const r=WonderGear,eq=r.state(S),vault=where==='vault',out=[],all=tab==='ALL';
+ const stack=(key,icon,n,hue,name,rank=0)=>out.push({key,n,hue,name,rank,html:icon+'<b>'+bagNum(n)+'</b>'});
+ const items=want=>{for(const i of r.bagItems){const n=vault?r.vaultCount(S,'i:'+i.id):r.bagCount(S,i.id);if(n&&want(i))stack('i:'+i.id,bagIcon(i.id),n,bagHue(i.rarity),i.name,'bpor'.indexOf(i.rarity))}};
+ if(tab==='Common'||all){
+  items(i=>all||!petTab||!i.pet);
+  const gear=eq.items.filter(e=>vault?e.stored:!e.stored&&!r.equipped(eq,e.uid)).sort((a,b)=>order==='power'?r.detail(b).power-r.detail(a).power:r.slots.findIndex(s=>s.id===r.catalog[a.template].slot)-r.slots.findIndex(s=>s.id===r.catalog[b.template].slot)||a.uid-b.uid);
+  for(const e of gear)out.push({key:'g:'+e.uid,gear:e,name:r.catalog[e.template].name,rank:r.catalog[e.template].grade});
+ }
+ if(tab==='Materials'||all){
+  for(const m of r.materialDefs){const n=vault?r.vaultCount(S,'m:'+m.id):eq.materials[m.id];if(n>0)stack('m:'+m.id,equipmentIcon(m.icon),n,m.color,m.name,1)}
+  if(!vault){const t=r.talentState(S);if(t.seals>0)stack('t:seals',denIcon('misc',0,4,1),t.seals,bagHue('p'),'Talent Seal',1);if(t.books>0)stack('t:books',denIcon('misc',1,4,1),t.books,bagHue('o'),'Prophecy Book',2)}
+ }
+ if((tab==='Pet'||all)&&!vault){
+  if(tab==='Pet')items(i=>i.pet);
+  for(const p of r.familiars){const n=r.petSpares(S,p.id);if(n)out.push({key:'p:'+p.id,n,hue:bagHue({Common:'b',Rare:'p',Epic:'o'}[p.rarity]||'r'),name:p.name,rank:2,html:'<img src="'+petPicture(p)+'" alt=""><em class="bag-bar"><u style="width:'+Math.min(100,n/r.synthNeed*100)+'%"></u><span>'+n+'/'+r.synthNeed+'</span></em>'})}
+  if(S.emberShards>0)stack('t:ember',uiIcon('gem'),S.emberShards,bagHue('r'),'Ember Shard',3);
+ }
+ return order==='power'?out.map((t,i)=>[t,i]).sort((a,b)=>b[0].rank-a[0].rank||a[1]-b[1]).map(x=>x[0]):out;
+}
+function bagTile(t,click,pressed=null){
+ if(t.gear)return equipmentCell(t.gear,{act:click,pressed});
+ return `<button class="satchel-stack bag-tile" style="--rarity:${t.hue}" aria-label="${esc(t.name)}, ${t.n}" ${pressed===null?'':'aria-pressed="'+pressed+'"'} onclick="${click}">${denPlain}${t.html}</button>`;
+}
+function bagPad(cells,least=18){while(cells.length<least||cells.length%6)cells.push('<span class="bag-empty"></span>');return cells.join('')}
+function bagCard(icon,hue,name,type,have,text,buttons=''){
+ popup('<div class="den-item"><div class="den-item-head bag-head" style="--rarity:'+hue+'">'+icon+'<div><b>'+esc(name)+'</b><small>Type: <u>'+type+'</u></small><small>You have: '+fmt(have)+'</small></div></div><h3>◆ Item Description</h3><p>'+text+'</p>'+(buttons?'<div class="den-actions">'+buttons+'</div>':'')+'</div>');
+}
+function bagOpen(key){
+ const r=WonderGear,id=key.slice(2),gold=(label,action)=>'<button class="den-gold" onclick="'+action+'">'+denPlain+label+'</button>';
+ if(key[0]==='i'){const i=r.bagItemById[id],n=r.bagCount(S,id);if(!i||!n)return;const many=Math.min(n,bagUseMany);
+  bagCard(bagIcon(id),bagHue(i.rarity),i.name,i.kind,n,i.text,gold('Use',"bagUse('"+id+"',1)")+(many>1?gold('Use '+many,"bagUse('"+id+"',"+many+")"):''))}
+ else if(key[0]==='m'){const m=r.materialDefs.find(m=>m.id===id);if(m)bagCard(equipmentIcon(m.icon),m.color,m.name,'Material',r.state(S).materials[id],bagNotes[id])}
+ else if(key==='t:seals')bagCard(denIcon('misc',0,4,1),bagHue('p'),'Talent Seal','Pet material',r.talentState(S).seals,'Pays for learning pet talents and for scrolls in the Talent Shop. Dungeon guardians and Jungle Trek chests give seals.',gold('Pet Talent',"$('#modal').close();go('cityPet');talentGo(0)"));
+ else if(key==='t:books')bagCard(denIcon('misc',1,4,1),bagHue('o'),'Prophecy Book','Pet material',r.talentState(S).books,'Shows which talent Learn would inscribe before you decide to keep it.',gold('Pet Talent',"$('#modal').close();go('cityPet');talentGo(0)"));
+ else if(key==='t:ember')bagCard(uiIcon('gem'),bagHue('r'),'Ember Shard','Pet material',S.emberShards||0,'Raises the stars of the Ember Drake. Every dungeon victory gives ten.');
+ else if(key[0]==='p'){const p=r.familiars.find(p=>p.id===id);if(p)bagCard('<img src="'+petPicture(p)+'" alt="">',bagHue({Common:'b',Rare:'p',Epic:'o'}[p.rarity]||'r'),p.name,p.rarity+' pet copy',r.petSpares(S,id),'A spare copy of a pet Reina already has. Six copies of one rarity can be synthesized into a pet of the next rarity.',gold('Synthesize',"$('#modal').close();go('cityPet');petTab('Synthesize')"))}
+}
+function bagGain(g){
+ const r=WonderGear,cell=(icon,n,name,hue='#58b7ff')=>'<span class="bag-gain" style="--rarity:'+hue+'">'+icon+(n?'<b>+'+bagNum(n)+'</b>':'')+'<small>'+esc(name)+'</small></span>';
+ if(g.kind==='gold')return cell(uiIcon('gold'),g.n,'Gold',bagHue('o'));
+ if(g.kind==='xp')return cell(uiIcon('exp'),g.n,'XP');
+ if(g.kind==='tickets')return cell(uiIcon('wishes'),g.n,'Wishes',bagHue('p'));
+ if(g.kind==='seals')return cell(denIcon('misc',0,4,1),g.n,'Talent seals',bagHue('p'));
+ if(g.kind==='stamina')return cell(bagIcon('stam'),g.n,'Boss stamina');
+ if(g.kind==='material'){const m=r.materialDefs.find(m=>m.id===g.id);return cell(equipmentIcon(m.icon),g.n,m.name,m.color)}
+ if(g.kind==='item'){const i=r.bagItemById[g.id];return cell(bagIcon(g.id),g.n,i.name,bagHue(i.rarity))}
+ if(g.kind==='gear'){const t=r.catalog[g.template];return cell(gearArt(t),0,'T'+t.tier+' '+t.name,t.color)}
+ if(g.kind==='pet'){const p=r.familiars.find(p=>p.id===g.id);return cell('<img src="'+petPicture(p)+'" alt="">',0,p.name+(g.spare?' (copy)':''),bagHue('o'))}
+ return '';
+}
+function bagUse(id,count){
+ const r=WonderGear,result=r.useBagItem(S,id,count);
+ if(!result.ok){toast(result.error);return}
+ save();$('#modal').close();refreshEquipmentSurface();
+ const left=r.bagCount(S,id);
+ popup('<h2>You received</h2><div class="bag-gains">'+result.gains.map(bagGain).join('')+'</div>'+(left?'<div class="den-actions"><button class="den-gold" onclick="bagUse(\''+id+'\',1)">'+denPlain+'Use another · '+left+' left</button></div>':''));
+}
+const satchelWallet=()=>[['gold',S.gold],['wishes',S.tickets],['crystals',S.scales]].map(([icon,n])=>`<span>${uiIcon(icon)}${new Intl.NumberFormat('en',{notation:'compact'}).format(n)}</span>`).join('');
 function cityBag(){
- const r=eqRules(),eq=r.state(S),pet=item(S.dragon);
+ const r=eqRules(),eq=r.state(S),pet=item(S.dragon);bagArtVars();petArtVars();
  const rails=start=>r.slots.slice(start,start+5).map(slot=>loadoutCell(eq,slot)).join('');
- const gear=eq.items.filter(e=>!e.stored).sort((a,b)=>cityBagOrder==='power'?r.detail(b).power-r.detail(a).power:r.catalog[a.template].slot.localeCompare(r.catalog[b.template].slot)||a.uid-b.uid);
- const cells=[];
- if(['Common','ALL'].includes(cityBagFilter))cells.push(...gear.map(e=>equipmentCell(e,{equipped:r.equipped(eq,e.uid)})));
- if(['Materials','ALL'].includes(cityBagFilter))cells.push(...r.materialDefs.map(m=>`<button class="satchel-stack" style="--rarity:${m.color}" aria-label="${m.name}" onclick="materialInfo('${m.id}')">${equipmentIcon(m.icon)}<b>${fmt(eq.materials[m.id])}</b></button>`));
- if(['Pet','ALL'].includes(cityBagFilter))cells.push(...S.owned.map(item).filter(it=>it?.type==='dragon').map(it=>`<button class="satchel-stack" aria-label="${it.name}" onclick="selectedPetId='${it.id}';chooseSectionPage('collection')">${dragonSVG(it)}<b>Lv.${r.petLevel(S,it.id)}</b></button>`));
- const wallet=[['gold',S.gold],['wishes',S.tickets],['crystals',S.scales]].map(([icon,n])=>`<span>${uiIcon(icon)}${new Intl.NumberFormat('en',{notation:'compact'}).format(n)}</span>`).join('');
- $('#main').innerHTML=`<section class="satchel"><div class="satchel-top"><strong>Bag</strong>${wallet}</div><h1>Lv. ${level()} &nbsp;${esc(S.name)}</h1>
+ const things=bagThings(cityBagFilter,'bag',true,cityBagOrder),petTab=cityBagFilter==='Pet';
+ $('#main').innerHTML=`<section class="satchel"><div class="satchel-top"><strong>Bag</strong>${satchelWallet()}</div><h1>Lv. ${level()} &nbsp;${esc(S.name)}</h1>
  <div class="satchel-stage"><div class="satchel-rail">${rails(0)}</div><div class="satchel-model"><div class="satchel-wings">${artImage(S.wings,'')}</div><img src="${reinaLookPath(false)}" alt="Reina"></div><div class="satchel-rail">${rails(5)}</div></div>
  <div class="satchel-actions"><button aria-label="Equipped wings" onclick="chooseSectionPage('wings')">${artImage(S.wings,'')}</button>${[['gem','Gem'],['star','Star'],['equipment','Enhance']].map(([i,n])=>`<button onclick="cityBagPick('${n}')">${uiIcon(i)}${n}</button>`).join('')}<button aria-label="Equipped pet" onclick="selectedPetId=S.dragon;chooseSectionPage('collection')">${dragonSVG(pet)}</button></div>
- <div class="satchel-tabs">${['Common','Materials','Pet','ALL'].map(t=>`<button aria-pressed="${t===cityBagFilter}" onclick="cityBagFilter='${t}';cityBag()">${t}</button>`).join('')}</div>
- <div class="satchel-scroll"><div class="satchel-grid">${cells.join('')}</div></div>
- <div class="satchel-foot"><span>Capacity: ${eq.items.length}/80</span><button onclick="cityBagPick('Convert')">Convert</button><button onclick="cityBagPick('Devour')">Devour</button><button onclick="cityBagOrder=cityBagOrder==='slot'?'power':'slot';cityBag();toast('Sorted by '+cityBagOrder)">Sort</button></div>
- ${satchelNav()}</section>`;
+ <div class="satchel-tabs">${['Common','Materials','Pet','ALL'].map(t=>`<button aria-pressed="${t===cityBagFilter}" onclick="cityBagFilter='${t}';cityBag()">${denPlain}${t}</button>`).join('')}</div>
+ <div class="satchel-scroll"><div class="satchel-grid">${bagPad(things.map(t=>t.gear?equipmentCell(t.gear):bagTile(t,"bagOpen('"+t.key+"')")))}</div></div>
+ <div class="satchel-foot"><span>Capacity: ${petTab?things.length+'/'+bagPetCapacity:r.bagUsed(S)+'/'+r.bagCapacity}</span><button onclick="cityBagPick('Convert')">Convert</button><button onclick="go('cityDevour')">Devour</button><button onclick="cityBagOrder=cityBagOrder==='slot'?'power':'slot';cityBag();toast(cityBagOrder==='power'?'Sorted by rarity':'Sorted by kind')">Sort</button></div>
+ ${satchelNav('Bag')}</section>`;
+}
+// ---- Warehouse: the first tap chooses a thing, the second tap on it moves it ---------------------------------------
+function vaultTap(side,key){
+ const mark=side+'|'+key;
+ if(vaultSel!==mark){vaultSel=mark;cityVault();return}
+ vaultShift();
+}
+function vaultShift(){
+ const r=WonderGear,[side,key]=vaultSel.split('|');let done=false;
+ if(key?.[0]==='g'){const eq=r.state(S),e=eq.items.find(x=>x.uid===Number(key.slice(2)));if(e&&!r.equipped(eq,e.uid)){if(e.stored)delete e.stored;else e.stored=true;S.equipment=eq;done=true}}
+ else if(key)done=r.vaultMove(S,key,side==='b');
+ vaultSel='';if(done)save();cityVault();
+}
+function cityVault(){
+ const r=WonderGear;bagArtVars();petArtVars();
+ const stored=bagThings('ALL','vault',false,vaultOrder),mine=bagThings(vaultTab,'bag',false,cityBagOrder).filter(t=>!t.key.startsWith('t:'));
+ const tile=side=>t=>bagTile(t,"vaultTap('"+side+"','"+t.key+"')",vaultSel===side+'|'+t.key);
+ const picked=[...stored.map(t=>['v',t]),...mine.map(t=>['b',t])].find(([side,t])=>side+'|'+t.key===vaultSel);
+ if(!picked)vaultSel='';
+ $('#main').innerHTML=`<section class="satchel vault"><div class="satchel-top"><strong>Warehouse</strong>${satchelWallet()}</div>
+ <div class="satchel-scroll"><div class="satchel-grid">${bagPad(stored.map(tile('v')))}</div></div>
+ <div class="vault-hint">${picked?`<span><b>${esc(picked[1].name)}</b></span><button onclick="vaultShift()">${picked[0]==='v'?'Withdraw':'Deposit'}</button>`:'<span>Double tap the item to deposit or withdraw</span>'}<button onclick="vaultOrder=vaultOrder==='slot'?'power':'slot';cityVault()">Warehouse Sort</button></div>
+ <div class="satchel-tabs">${['Common','Materials','ALL'].map(t=>`<button aria-pressed="${t===vaultTab}" onclick="vaultTab='${t}';cityVault()">${denPlain}${t}</button>`).join('')}</div>
+ <div class="satchel-scroll"><div class="satchel-grid">${bagPad(mine.map(tile('b')))}</div></div>
+ <div class="satchel-foot"><span>Capacity: ${r.bagUsed(S)}/${r.bagCapacity}</span><button onclick="cityBagOrder=cityBagOrder==='slot'?'power':'slot';cityVault()">Sort</button></div>
+ ${satchelNav('Warehouse')}</section>`;
+}
+// ---- Devour: spare equipment feeds the Glimmer Maw ------------------------------------------------------------------
+function devourToggle(uid){devourPicks=devourPicks.includes(uid)?devourPicks.filter(x=>x!==uid):[...devourPicks,uid];cityDevour()}
+function devourAll(){const all=WonderGear.devourable(S).map(e=>e.uid);devourPicks=devourPicks.length===all.length?[]:all;cityDevour()}
+function devourFeed(){
+ const r=WonderGear,result=r.devourGear(S,devourPicks);
+ if(!result.ok){toast(result.error);return}
+ devourPicks=[];save();cityDevour();document.querySelector('.maw-pic')?.classList.add('chomp');
+ toast('+'+fmt(result.gained)+' essence'+(result.levels?' · Glimmer Maw is now Lv. '+r.devourState(S).level:''));
+}
+function devourInfo(){const r=WonderGear;popup('<h2>Devour</h2><p>The Glimmer Maw eats spare equipment from the bag. Every piece gives essence: more for a higher tier, rarity, stars and enhancement.</p><p>Each Maw level gives Reina +'+r.devourStep.attack+' ATK, +'+r.devourStep.health+' HP and +'+r.devourStep.defense+' DEF for good. Stars and gems on a devoured piece come back as star shards and sky gems.</p><p>Equipped pieces, the basic set and pieces in the warehouse are never eaten.</p>')}
+function cityDevour(){
+ const r=WonderGear,st=r.devourState(S),bonus=r.devourBonus(S),spare=r.devourable(S);
+ devourPicks=devourPicks.filter(id=>spare.some(e=>e.uid===id));
+ const gain=spare.filter(e=>devourPicks.includes(e.uid)).reduce((n,e)=>n+r.devourWorth(e),0),after=r.devourState({devour:st.total+gain}).level;
+ const stat=(icon,label,n,step)=>`<span>${uiIcon(icon)}${label} <b>+${fmt(n)}</b>${after>st.level?`<em>+${fmt(step*(after-st.level))}</em>`:''}</span>`;
+ $('#main').innerHTML=`<section class="satchel maw-room"><div class="satchel-top"><strong>Devour</strong>${satchelWallet()}</div>
+ <div class="maw-stage"><button class="maw-help" aria-label="How Devour works" onclick="devourInfo()">${denPlain}?</button><img class="maw-pic" src="${artPath('comp-bag-maw')}" alt="Glimmer Maw"><div class="maw-info"><h2>Glimmer Maw <b>Lv. ${st.level}${after>st.level?' → '+after:''}</b></h2><div class="maw-bar"><i style="width:${st.need?Math.min(100,st.into/st.need*100):100}%"></i>${gain&&st.need?`<u style="width:${Math.min(100,(st.into+gain)/st.need*100)}%"></u>`:''}<span>${st.need?fmt(st.into)+(gain?' + '+fmt(gain):'')+' / '+fmt(st.need):'Highest level'}</span></div><div class="maw-stats">${stat('attack','ATK',bonus.attack,r.devourStep.attack)}${stat('health','HP',bonus.health,r.devourStep.health)}${stat('defense','DEF',bonus.defense,r.devourStep.defense)}</div></div></div>
+ <div class="satchel-scroll">${spare.length?`<div class="satchel-grid">${bagPad(spare.map(e=>equipmentCell(e,{act:'devourToggle('+e.uid+')',pressed:devourPicks.includes(e.uid)})),12)}</div>`:'<p class="maw-none">No spare equipment in the bag. Dungeon guardians and chests drop more.</p>'}</div>
+ <div class="satchel-foot"><span>Chosen: ${devourPicks.length} · +${fmt(gain)} essence</span><button onclick="devourAll()" ${spare.length?'':'disabled'}>${devourPicks.length&&devourPicks.length===spare.length?'Clear':'Select all'}</button><button onclick="devourFeed()" ${devourPicks.length?'':'disabled'}>Devour</button></div>
+ ${satchelNav('Devour')}</section>`;
 }
 
-function satchelNav(){return ` <div class="satchel-nav"><button data-back aria-label="Back to city" onclick="go('home')">‹</button>${[['hud-bag','Bag',"go('cityBag')"],['hud-forge','Gear Crafting',"go('cityCraft')"],['hud-shop','Warehouse',"go('warehouse')"],['hud-summon','Devour',"cityBagPick('Devour')"]].map(([icon,n,action])=>`<button onclick="${action}">${artImage(icon,'')}${n}</button>`).join('')}</div>`;}
+function satchelNav(here=''){return ` <div class="satchel-nav"><button data-back aria-label="Back to city" onclick="go('home')">‹</button>${[['hud-bag','Bag',"go('cityBag')"],['hud-forge','Gear Crafting',"go('cityCraft')"],['hud-shop','Warehouse',"go('cityVault')"],['comp-bag-maw','Devour',"go('cityDevour')"]].map(([icon,n,action])=>`<button ${n===here?'aria-current="page"':''} onclick="${action}">${artImage(icon,'')}${n}</button>`).join('')}</div>`;}
 let craftBand=1,craftTier=null,craftGroup='Equipment',craftTarget=null,craftInputs=[];
 function craftFilter(band,tier,group){
  craftBand=band;craftTier=tier;craftGroup=group;craftTarget=null;craftInputs=[];cityCraft();
@@ -318,7 +427,7 @@ function cityCraft(){
  const ready=e&&craftTier<=r.unlockedTier(S)&&craftInputs.length===r.starGearCount&&S.gold>=price.gold&&eq.materials.shard>=price.shard;
  const tile=(entry,action,active=false)=>{const t=r.catalog[entry.template];return `<button class="loom-item" aria-label="${t.name}, ${entry.stars} stars" aria-pressed="${active}" style="--edge:${t.color}" onclick="${action}">${gearArt(t)}<b>T${t.tier}</b><small>★${entry.stars}</small></button>`};
  const groups=['Equipment','Necklace & Amulet','Rings'];
- $('#main').innerHTML=`<section class="satchel loom"><div class="satchel-top"><strong>Gear Crafting</strong>${[['gold',S.gold],['wishes',S.tickets],['crystals',S.scales]].map(([i,n])=>`<span>${uiIcon(i)}${fmt(n)}</span>`).join('')}</div><div class="loom-body"><aside>${[1,2,3,4,5].map(n=>`<button aria-pressed="${craftBand===n}" onclick="craftFilter(${n},null,craftGroup)">${n}-Star Gear</button>${craftBand===n?tiers.map(t=>`<button class="loom-tier" aria-pressed="${t===craftTier}" onclick="craftFilter(craftBand,${t},craftGroup)">T${t} Gear</button>`).join(''):''}`).join('')}</aside><div class="loom-work">${e?`<div class="loom-orbit"><div>${gearArt(r.catalog[e.template])}</div></div><h2>${r.catalog[e.template].name}</h2><strong>${e.stars} → ${craftBand} ★ · T${craftTier}</strong><p>${craftTier>r.unlockedTier(S)?'Requires Lv. '+r.requiredLevel(craftTier):'Success rate: 100% with all materials'}</p><div class="loom-inputs">${Array.from({length:r.starGearCount},(_,i)=>{const d=donors.find(x=>x.uid===craftInputs[i]);return d?tile(d,'craftAdd('+d.uid+')',true):'<span>+</span>'}).join('')}</div><p>${craftInputs.length} / ${r.starGearCount} spare items · ${priceText(price)}</p><div class="loom-options">${donors.map(x=>tile(x,'craftAdd('+x.uid+')',craftInputs.includes(x.uid))).join('')}</div><div class="loom-buttons"><button onclick="craftBatch([${choices.map(x=>x.uid).join(',')}])">Batch</button><button onclick="craftAdd()" ${donors.length?'':'disabled'}>Add</button><button onclick="craftCommit('${equipmentStamp(e)}')" ${ready?'':'disabled'}>Synthesize</button></div><div class="loom-options">${choices.map(x=>tile(x,'craftSelect('+x.uid+')',x===e)).join('')}</div>`:'<p>No matching equipment in your bag.</p>'}</div></div><div class="satchel-tabs">${groups.map(g=>`<button aria-pressed="${g===craftGroup}" onclick="craftFilter(craftBand,null,'${g}')">${g}</button>`).join('')}</div>${satchelNav()}</section>`;
+ $('#main').innerHTML=`<section class="satchel loom"><div class="satchel-top"><strong>Gear Crafting</strong>${[['gold',S.gold],['wishes',S.tickets],['crystals',S.scales]].map(([i,n])=>`<span>${uiIcon(i)}${fmt(n)}</span>`).join('')}</div><div class="loom-body"><aside>${[1,2,3,4,5].map(n=>`<button aria-pressed="${craftBand===n}" onclick="craftFilter(${n},null,craftGroup)">${n}-Star Gear</button>${craftBand===n?tiers.map(t=>`<button class="loom-tier" aria-pressed="${t===craftTier}" onclick="craftFilter(craftBand,${t},craftGroup)">T${t} Gear</button>`).join(''):''}`).join('')}</aside><div class="loom-work">${e?`<div class="loom-orbit"><div>${gearArt(r.catalog[e.template])}</div></div><h2>${r.catalog[e.template].name}</h2><strong>${e.stars} → ${craftBand} ★ · T${craftTier}</strong><p>${craftTier>r.unlockedTier(S)?'Requires Lv. '+r.requiredLevel(craftTier):'Success rate: 100% with all materials'}</p><div class="loom-inputs">${Array.from({length:r.starGearCount},(_,i)=>{const d=donors.find(x=>x.uid===craftInputs[i]);return d?tile(d,'craftAdd('+d.uid+')',true):'<span>+</span>'}).join('')}</div><p>${craftInputs.length} / ${r.starGearCount} spare items · ${priceText(price)}</p><div class="loom-options">${donors.map(x=>tile(x,'craftAdd('+x.uid+')',craftInputs.includes(x.uid))).join('')}</div><div class="loom-buttons"><button onclick="craftBatch([${choices.map(x=>x.uid).join(',')}])">Batch</button><button onclick="craftAdd()" ${donors.length?'':'disabled'}>Add</button><button onclick="craftCommit('${equipmentStamp(e)}')" ${ready?'':'disabled'}>Synthesize</button></div><div class="loom-options">${choices.map(x=>tile(x,'craftSelect('+x.uid+')',x===e)).join('')}</div>`:'<p>No matching equipment in your bag.</p>'}</div></div><div class="satchel-tabs">${groups.map(g=>`<button aria-pressed="${g===craftGroup}" onclick="craftFilter(craftBand,null,'${g}')">${g}</button>`).join('')}</div>${satchelNav('Gear Crafting')}</section>`;
 }
 
 let petPage='Formation',petFocus=null,emblemFilter='All',petBack='',petBackNext='';
