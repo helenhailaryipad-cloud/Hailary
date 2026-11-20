@@ -533,6 +533,7 @@ vm.runInContext(`{
  talentGo(0);if(petPage!=='Talent'||!$('#main').innerHTML.includes('den-hexes'))throw Error('Pet Talent page');
  const keepRandom=Math.random;Math.random=()=>0;talentLearn();Math.random=keepRandom;if(r.talentIds(S,0).join()!=='fang'||talentCell!==0)throw Error('Learn button inscribes a talent');
  petTab('TalentShop');if(!$('#main').innerHTML.includes('den-wares'))throw Error('Talent Shop page');
+ talentWare('haste');if(!$('#modalBody').innerHTML.includes('Quick Wing')||!$('#modalBody').innerHTML.includes('Item Description'))throw Error('Tapping a ware shows its item card first');
  talentBuy('book');if(r.talentState(S).books!==1)throw Error('Shop sells Prophecy Books');
  // Last Stand in a fight
  S.petTalents={seals:0,books:0,slots:[{open:6,cells:['stand',null,null,null,null,null,...Array(9).fill(null)],locks:[],target:''},...r.talentState(S).slots.slice(1)]};

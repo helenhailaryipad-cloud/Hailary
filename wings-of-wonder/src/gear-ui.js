@@ -403,7 +403,17 @@ function talentBuy(id){
  if(id==='book'){if(!r.buyTalentBook(S)){toast('Not enough talent seals.');return}}
  else if(!r.buyTalentScroll(S,talentSlotPick,id)){toast(v.cells.includes(id)?'Slot '+(talentSlotPick+1)+' already has this talent.':st.seals<r.talentScroll?'Not enough talent seals.':'No empty cell in Slot '+(talentSlotPick+1)+'. Open one or forget a talent.');return}
  else talentLog.unshift('Slot '+(talentSlotPick+1)+': '+talentOf(id).name+' inscribed from a scroll');
- save();cityPet();
+ save();if($('#modal').open)$('#modal').close();cityPet();toast(id==='book'?'Prophecy Book bought':talentOf(id).name+' inscribed in Slot '+(talentSlotPick+1));
+}
+// Tapping a ware shows what it is first (a small item card); buying is the button inside.
+function talentWare(id){
+ const r=WonderGear,st=r.talentState(S),v=st.slots[talentSlotPick],book=id==='book',t=book?null:talentOf(id);if(!book&&!t)return;
+ const price=book?r.talentBook:r.talentScroll,has=!book&&v.cells.includes(id),empty=v.cells.some((x,n)=>n<v.open&&!x);
+ const why=has?'Slot '+(talentSlotPick+1)+' already has this talent.':!book&&!empty?'No empty cell in Slot '+(talentSlotPick+1)+'. Open one or forget a talent.':st.seals<price?'Not enough talent seals.':'';
+ popup('<div class="den-item"><div class="den-item-head">'+(book?denIcon('misc',1,4,1):talentIcon(id))+'<div><b>'+(book?'Prophecy Book':t.name)+'</b><small>Type: <u>'+(book?'Pet talent book':(t.kind==='atk'?'Attack':'Guard')+' talent scroll')+'</u></small><small>'+(book?'You have: '+st.books:'For: Slot '+(talentSlotPick+1))+'</small></div></div>'
+  +'<h3>◆ Item Description</h3><p>'+(book?'Tick Prophecy before Learn: one book shows which talent would be inscribed, and you choose to keep it or let it go.':t.text+' The scroll inscribes it into the first empty cell of the slot.')+'</p>'
+  +(why?'<p class="den-why">'+why+'</p>':'')
+  +'<div class="den-actions"><button class="den-gold" onclick="talentBuy(\''+id+'\')" '+(why?'disabled':'')+'>'+denPlain+'Buy · '+denIcon('misc',0,4,1)+price+'</button></div></div>');
 }
 function talentExchange(){
  const r=WonderGear,count=rarity=>r.familiars.filter(p=>p.rarity===rarity).reduce((n,p)=>n+r.petSpares(S,p.id),0);
@@ -575,7 +585,7 @@ function cityPet(){
     +slots;
   }else{
    const empty=v.cells.some((id,n)=>n<v.open&&!id);
-   const ware=(id,icon,name,price,note,off)=>'<button class="den-ware" onclick="talentBuy(\''+id+'\')" '+(off?'disabled':'')+'>'+denPlain+'<b>'+name+'</b>'+icon+'<small>'+note+'</small><em>'+misc(0)+price+'</em></button>';
+   const ware=(id,icon,name,price,note,off)=>'<button class="den-ware'+(off?' den-off':'')+'" onclick="talentWare(\''+id+'\')">'+denPlain+'<b>'+name+'</b>'+icon+'<small>'+note+'</small><em>'+misc(0)+price+'</em></button>';
    body='<div class="den-shophead">'+artImage('pairs-sprout','Sprout the shopkeeper')+'<div><h2>Talent Shop</h2><p>A scroll inscribes the talent you choose into the first empty cell of the slot below.</p><button class="den-plain" onclick="talentExchange()">'+denPlain+'✦ Fragment exchange</button></div></div>'
     +slots
     +'<div class="den-wares">'+ware('book',misc(1),'Prophecy Book',rules.talentBook,'Shows a Learn result first',st.seals<rules.talentBook)

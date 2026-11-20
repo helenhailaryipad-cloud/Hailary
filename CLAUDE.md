@@ -286,6 +286,11 @@ of d0-d3 say what the paintings show (Grove Dragonling, Ember Drake, Moon Dragon
   `modal()` removes the class again. Use `popup` for new information and choice windows; buttons in them need
   `denPlain` too. The user plays in the chat's side pane (about 590 x 690 px), so check pop-ups at that size.
 
+- Item cards (user sent five photos of shop tooltips; "names can be different"): tapping a ware in the Talent Shop
+  opens `talentWare(id)`, a small card (red head with icon, name, type, "For: Slot N"; "Item Description"; reason when
+  it cannot be bought; Buy with the price). Buying happens only from that card (`talentBuy`). Wares that cannot be
+  bought are dimmed (`.den-off`) but still open their card. Reuse the `.den-item` card for other shops.
+
 ## Back buttons (2026-11-20)
 User circled a tiny "‹" in a corner: "check all back buttons everywhere, draw them clearer, not so small, with a special
 icon in the style of our game". One painted icon, `ui-back.webp` (gold-rimmed blue disc, ivory arrow; image model;

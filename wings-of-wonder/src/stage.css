@@ -6988,7 +6988,7 @@ body[data-screen=games] #stage .portal-illustration{background:#244a3c}
 .den-shophead h2{margin:0!important;font-size:6cqw!important;color:#fff3d6;text-shadow:0 2px 0 #7a2a12,0 0 8px #7a2a12}.den-shophead p{margin:.3em 0 .6em!important;font-weight:400}
 .den-wares{flex:1;min-height:0;overflow:auto;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.6cqw;align-content:start;grid-auto-rows:max-content;padding:.4cqw;scrollbar-width:none}
 #main .den .den-ware{display:grid;justify-items:center;gap:.35em;padding:.7em .2em 0;border:0;border-radius:.5em;background:linear-gradient(#fffaf0,#f0dfc2);color:#b01e3a!important;text-shadow:none!important;height:auto!important;max-height:none!important;overflow:hidden;box-shadow:0 2px 5px #0006;font-size:1em}
-#main .den .den-ware:disabled{opacity:.62}
+#main .den .den-ware.den-off{opacity:.62}
 .den-ware>.den-ico{width:42%}.den-ware b{font-size:1.02em}.den-ware small{color:#7a5a3a;font-weight:400}
 .den-ware em{display:flex;align-items:center;justify-content:center;gap:.3em;width:100%;padding:.35em 0;background:linear-gradient(#ffe89a,#e9b548);color:#5a3a12;font-size:1.08em}
 /* talent lists inside a modal */
@@ -7047,3 +7047,17 @@ html body #stage button[data-back][data-back]:active{transform:scale(.9)}
 #stage>.return-to-menu{right:auto;left:max(6px,env(safe-area-inset-left))}
 /* A screen with its own Back icon does not also need the Menu pill (it used to cover the screen's title). */
 body:has(#main button[data-back]) #stage>.return-to-menu{display:none}
+
+/* Item card: what a shop ware is, before buying */
+#stage #modal.den-pop:has(.den-item){width:min(360px,calc(100vw - 48px));padding:0;overflow:hidden;background:#1d2f66;border:1px solid #9fb6ff}
+#stage #modal.den-pop:has(.den-item) #modalBody{text-align:left}
+.den-item-head{display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;align-items:center;padding:12px 46px 12px 14px;background:linear-gradient(135deg,#ff7a8a,#e2485f)}
+.den-item-head .den-ico{width:64px;filter:drop-shadow(0 2px 2px #0006)}
+.den-item-head b{display:block;font-size:19px;color:#fff}.den-item-head small{display:block;font-size:13px;color:#ffe9ec}.den-item-head u{text-decoration:none;color:#c9ff9e}
+#stage #modal.den-pop .den-item h3{margin:12px 14px 4px;font:700 15px Arial,sans-serif;color:#ffe9a0}
+#stage #modal.den-pop .den-item p{margin:0 14px 8px;font-size:14px;line-height:1.4;font-weight:400}
+#stage #modal.den-pop .den-item .den-why{color:#ffb0b8;font-weight:700}
+.den-item .den-actions{display:flex;justify-content:center;padding:4px 0 14px}
+#stage #modal.den-pop .den-gold{display:inline-flex;align-items:center;gap:.3em;padding:8px 26px;border:0;background:linear-gradient(#ffe89a,#f0b548 60%,#d9942e);color:#5a3a12;font:700 16px Arial,sans-serif;clip-path:polygon(7% 0,93% 0,100% 50%,93% 100%,7% 100%,0 50%)}
+#stage #modal.den-pop .den-gold:disabled{filter:grayscale(.7) brightness(.8);opacity:.75}
+#stage #modal.den-pop .den-gold .den-ico{display:inline-block;width:1.4em}
