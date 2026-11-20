@@ -353,7 +353,67 @@ function recommendPets(){
 }
 // Pet rooms (rebuilt after the user's reference photos): painted pets everywhere, cards with a rarity ribbon and stars.
 let petMode='Feeding';
-const petModes=['Feeding','Stars','Badge'];
+const petModes=['Feeding','Gear','Talent'];
+// Pet gear and talents (they belong to the Primary Pet slot of the pet on stage).
+let gearPick=0,talentSlotPick=0,talentCell=-1,talentTab='Common',talentProphecy=false,talentPending=null,talentLog=[];
+// The three icon atlases are handed to CSS once, as variables, so that modals can use them too.
+function petArtVars(){const root=document.documentElement;if(!root?.style?.setProperty||root.style.getPropertyValue('--pet-tal'))return;
+ for(const [key,id] of [['tal','comp-pet-talents'],['gear','comp-pet-gear'],['misc','comp-pet-misc']])root.style.setProperty('--pet-'+key,'url("'+artPath(id)+'")')}
+const denIcon=(sheet,n,cols,rows)=>'<i class="den-ico" style="background-image:var(--pet-'+sheet+');background-size:'+cols*100+'% '+rows*100+'%;background-position:'+(n%cols)/(cols-1)*100+'% '+(rows>1?Math.floor(n/cols)/(rows-1)*100:0)+'%"></i>';
+const talentIcon=id=>denIcon('tal',WonderGear.petTalents.findIndex(t=>t.id===id),4,4);
+const talentOf=id=>WonderGear.petTalents.find(t=>t.id===id);
+function petGearUp(times){
+ const slot=WonderGear.petTeam(S).indexOf(petFocus);let done=0;
+ while(done<times&&WonderGear.upgradePetGear(S,slot,gearPick))done++;
+ if(!done){const cost=WonderGear.petGearCost(WonderGear.petGearLevels(S,slot)[gearPick]);toast(!cost?'This piece is at its highest level.':S.gold<cost.gold?'Not enough gold.':'Not enough shards for the next tier.');return}
+ save();cityPet();
+}
+function petGearSetInfo(){
+ const r=WonderGear;modal('<h2>Gear set</h2><p>Each Primary Pet slot holds eight pieces. Ten levels make one tier (T1 to T10); the first level of a new tier also costs shards.</p><p>The set bonus follows the <b>lowest</b> tier among the eight pieces: the pet in that slot deals <b>+'+r.petGearSetStep+'%</b> bolt damage per tier.</p><p>Horn Caps, Fang Guard, Claw Gauntlet and Spirit Orb add pet ATK (+'+r.petGearStep.atk+' a level). Collar and Chest Plate add Reina HP (+'+r.petGearStep.hp+'). Wing Brace and Tail Ring add Reina DEF (+'+r.petGearStep.def+').</p><p>Gear stays in the slot when you replace the pet.</p>');
+}
+function talentGo(slot){talentSlotPick=slot;talentCell=-1;talentTab='Common';talentPending=null;petTab('Talent')}
+function talentPickSlot(slot){if(WonderGear.petTeam(S)[slot]){talentSlotPick=slot;talentCell=-1;talentPending=null;cityPet()}}
+function talentOpen(){if(WonderGear.openTalentCell(S,talentSlotPick)){save();cityPet()}else toast('Not enough talent seals.')}
+function talentNote(roll){const t=talentOf(roll.id);return 'Slot '+(talentSlotPick+1)+': '+t.name+(roll.replaces?' replaced '+talentOf(roll.replaces).name:' inscribed')}
+function talentLearn(){
+ if(talentPending)return;const r=WonderGear,st=r.talentState(S),cost=r.learnCost(S,talentSlotPick);
+ const roll=r.learnTalent(S,talentSlotPick,Math.random,talentProphecy);
+ if(!roll){toast(st.seals<cost?'Not enough talent seals.':talentProphecy&&st.books<1?'No Prophecy Books. Buy one in the Shop.':'Nothing can change: unlock a talent or open a cell.');return}
+ save();
+ if(roll.held)talentPending={slot:talentSlotPick,roll};else{talentLog.unshift(talentNote(roll));talentCell=roll.cell;talentTab='Common';toast(talentOf(roll.id).name+' inscribed')}
+ cityPet();
+}
+function talentKeep(yes){
+ const p=talentPending;if(!p)return;talentPending=null;
+ if(yes&&WonderGear.keepTalent(S,p.slot,p.roll)){save();talentLog.unshift(talentNote(p.roll));talentCell=p.roll.cell}else talentLog.unshift('Slot '+(p.slot+1)+': '+talentOf(p.roll.id).name+' foreseen and let go');
+ cityPet();
+}
+function talentLock(){if(WonderGear.lockTalent(S,talentSlotPick,talentCell)){save();cityPet()}}
+function talentForget(){if(WonderGear.forgetTalent(S,talentSlotPick,talentCell)){save();talentCell=-1;cityPet()}}
+function talentRow(t,extra=''){return '<div class="den-trow">'+talentIcon(t.id)+'<div><b>'+t.name+'</b><small>'+(t.kind==='atk'?'Attack':'Guard')+' · passive</small><p>'+t.text+'</p></div>'+extra+'</div>'}
+function talentGuide(){const r=WonderGear;modal('<h2>Pet talents</h2><p>Learn inscribes a random talent this slot does not have: into an empty cell, or over a random unlocked one. A locked talent is safe, but every lock makes Learn 50% dearer. Talents work while a pet stands in the slot.</p><div class="den-tlist">'+r.petTalents.map(t=>talentRow(t)).join('')+'<div class="den-trow">'+denIcon('misc',2,4,1)+'<div><b>'+r.talentSupreme.name+'</b><small>Supreme</small><p>'+r.talentSupreme.text+'</p></div></div></div>')}
+function talentLogShow(){modal('<h2>Learning log</h2>'+(talentLog.length?'<div class="den-tlist">'+talentLog.slice(0,20).map(x=>'<p>'+esc(x)+'</p>').join('')+'</div>':'<p>Nothing learned yet in this visit.</p>'))}
+function talentTargetPick(){
+ const r=WonderGear,v=r.talentState(S).slots[talentSlotPick];
+ modal('<h2>Learn target</h2><p>The chosen talent is four times as likely to come up for Slot '+(talentSlotPick+1)+'.</p><div class="den-tlist">'+r.petTalents.filter(t=>!v.cells.includes(t.id)).map(t=>talentRow(t,'<button onclick="talentSetTarget(\''+t.id+'\')">'+(v.target===t.id?'Chosen':'Choose')+'</button>')).join('')+'</div>'+(v.target?'<button onclick="talentSetTarget(\'\')">No target</button>':''));
+}
+function talentSetTarget(id){if(WonderGear.setTalentTarget(S,talentSlotPick,id)){save();$('#modal').close();cityPet()}}
+function talentBuy(id){
+ const r=WonderGear,st=r.talentState(S),v=st.slots[talentSlotPick];
+ if(id==='book'){if(!r.buyTalentBook(S)){toast('Not enough talent seals.');return}}
+ else if(!r.buyTalentScroll(S,talentSlotPick,id)){toast(v.cells.includes(id)?'Slot '+(talentSlotPick+1)+' already has this talent.':st.seals<r.talentScroll?'Not enough talent seals.':'No empty cell in Slot '+(talentSlotPick+1)+'. Open one or forget a talent.');return}
+ else talentLog.unshift('Slot '+(talentSlotPick+1)+': '+talentOf(id).name+' inscribed from a scroll');
+ save();cityPet();
+}
+function talentExchange(){
+ const r=WonderGear,count=rarity=>r.familiars.filter(p=>p.rarity===rarity).reduce((n,p)=>n+r.petSpares(S,p.id),0);
+ modal('<h2>Fragment exchange</h2><p>Turn spare pet copies into talent seals.</p><div class="den-tlist">'+Object.entries(r.sealRates).map(([rarity,rate])=>{const n=count(rarity);return '<div class="den-trow">'+denIcon('misc',0,4,1)+'<div><b>'+rarity+' copies ×'+n+'</b><small>'+rate+' seals each</small></div><button '+(n?'':'disabled')+' onclick="talentTrade(\''+rarity+'\')">+'+fmt(n*rate)+'</button></div>'}).join('')
+  +'<div class="den-trow">'+denIcon('misc',0,4,1)+'<div><b>'+fmt(r.sealGold.gold)+' gold</b><small>You have '+fmt(S.gold)+'</small></div><button '+(S.gold<r.sealGold.gold?'disabled':'')+' onclick="talentTrade(\'gold\')">+'+r.sealGold.seals+'</button></div></div><p>Seals also come from dungeon guardians (+30) and Jungle Trek chests (+10 each).</p>');
+}
+function talentTrade(kind){
+ const got=kind==='gold'?(WonderGear.buySeals(S)?WonderGear.sealGold.seals:0):WonderGear.exchangeSpares(S,kind);
+ if(!got)return;save();cityPet();talentExchange();toast('+'+fmt(got)+' talent seals');
+}
 const petRarity={Common:['Common','c'],Rare:['Rare','r'],Epic:['Epic','e'],'Super Rare':['S.Rare','s'],Legendary:['Legend','l']};
 // An empty svg keeps decorateArt() from adding a stock icon to a text button.
 const denPlain='<svg class="den-x" width="0" height="0" aria-hidden="true"></svg>';
@@ -423,6 +483,7 @@ function forgePetBadge(){
  eq.materials.shard-=price;S.equipment=eq;(S.petBadges??={})[petFocus]=rank+1;save();cityPet();
 }
 function cityPet(){
+ petArtVars();
  const rules=WonderGear,team=rules.petTeam(S),pets=ITEMS.filter(p=>p.type==='dragon');
  if(!petFocus||petPage==='Formation'&&!team.slice(0,3).includes(petFocus))petFocus=S.dragon;
  if(petPage==='Badge'&&emblemFilter!=='All'&&item(petFocus).rarity!==emblemFilter)petFocus=pets.find(p=>p.rarity===emblemFilter)?.id||S.dragon;
@@ -447,14 +508,26 @@ function cityPet(){
  if(petPage==='Formation'){
   const flank=team.slice(0,3).filter(id=>id&&id!==p.id).map(id=>item(id));
   top=power(teamAtk)+'<button class="den-rec" onclick="recommendPets()">'+denPlain+'<i>✦</i>Recommended<br>Lineup</button>';
+   if(petMode!=='Gear')petMode='Feeding';
+   const slot=team.indexOf(p.id),modes='<div class="den-modes">'+[['Feeding',"petMode='Feeding';cityPet()"],['Gear',"petMode='Gear';cityPet()"],['Talent','talentGo('+slot+')']].map(([x,act])=>'<button aria-pressed="'+(x===petMode)+'" onclick="'+act+'">'+denPlain+'Pet '+x+'</button>').join('')+'</div>';
+   if(petMode==='Gear'){
+    const levels=rules.petGearLevels(S,slot),bonus=rules.petGearBonus(S,slot);if(!(gearPick>=0&&gearPick<levels.length))gearPick=0;
+    const piece=rules.petGearPieces[gearPick],lvl=levels[gearPick],cost=rules.petGearCost(lvl),step=rules.petGearStep[piece.stat],label={atk:'Pet ATK',hp:'Reina HP',def:'Reina DEF'}[piece.stat];
+    const tile=n=>'<button class="den-gear'+(levels[n]?'':' den-gear-none')+'" aria-pressed="'+(n===gearPick)+'" aria-label="'+rules.petGearPieces[n].name+', level '+levels[n]+'" onclick="gearPick='+n+';cityPet()">'+denPlain+denIcon('gear',n,4,2)+'<em>'+(levels[n]?'T'+rules.petGearTier(levels[n]):'')+'</em><b>'+(levels[n]?'+'+levels[n]:'Forge')+'</b></button>';
+    body='<div class="den-stage den-gearstage"><div class="den-gearcol">'+[0,1,2,3].map(tile).join('')+'</div><span class="den-glow"></span>'+art(p,'den-main')+'<div class="den-gearcol den-right">'+[4,5,6,7].map(tile).join('')+'</div><h2 class="den-name"><em class="den-'+key+'">'+tag+'</em>'+esc(p.name)+' · Slot '+(slot+1)+'</h2></div>'
+     +'<section class="den-panel den-gearinfo"><h3>'+piece.name+' · '+(lvl?'T'+rules.petGearTier(lvl)+' +'+lvl:'not forged yet')+'</h3><p>'+label+' <b>+'+fmt(lvl*step)+'</b>'+(cost?' ▲ <b>+'+fmt((lvl+1)*step)+'</b>':' · highest level')+'</p><p>Set: lowest tier <b>T'+bonus.tier+'</b> · this pet\'s bolts <b>+'+bonus.dmg+'%</b> <u onclick="petGearSetInfo()">How sets work</u></p></section>'
+     +'<div class="den-cost">'+(cost?uiIcon('gold')+'<b class="'+(S.gold<cost.gold?'low':'')+'">'+fmt(S.gold)+'</b> / '+fmt(cost.gold)+' gold'+(cost.shard?' · '+gem+'<b class="'+(shards<cost.shard?'low':'')+'">'+shards+'</b> / '+cost.shard+' shards':''):'Highest level reached')+'</div>'
+     +'<div class="den-actions"><button class="den-gold" onclick="petGearUp(1)" '+(cost?'':'disabled')+'>'+denPlain+(lvl?'Upgrade':'Forge')+'</button><button class="den-gold" onclick="petGearUp(10)" '+(cost?'':'disabled')+'>'+denPlain+'×10</button></div>'
+     +modes+lineup;
+   }else
   body='<div class="den-stage">'+flank.map((q,i)=>art(q,'den-flank den-flank-'+i)).join('')+'<span class="den-glow"></span>'+art(p,'den-main')+'<h2 class="den-name"><em class="den-'+key+'">'+tag+'</em>'+esc(p.name)+'</h2></div>'
    +'<div class="den-skills"><div><span class="den-orb">'+art(p,'')+'<u>'+rank+'</u></span><small>Deploy</small><b class="den-tag o">Team ATK +'+fmt(atk+rank*5)+'</b><b class="den-tag v">Badge Lv.'+rank+' · +'+rank*5+'</b></div>'
    +'<div><span class="den-orb den-aura den-'+key+'">✦</span><small>Aura</small><b class="den-tag o">'+kind+'</b><b class="den-tag v">Stars '+stars+'/6 · +'+stars*30+'</b></div></div>'
    +'<div class="den-level"><span>Lv. '+lv+'</span></div>'
    +'<div class="den-exp"><small>LEVEL</small><span><i style="width:'+lv/rules.petCap*100+'%"></i><b>'+lv+' / '+rules.petCap+'</b></span></div>'
    +'<div class="den-stats"><span>ATK : <b>'+fmt(atk)+'</b>'+(lv<rules.petCap?up(12):'')+'</span><span>BADGE : <b>+'+rank*5+'</b>'+(rank<20?up(5):'')+'</span><span>STARS : <b>+'+stars*30+'</b>'+(stars<6?up(30):'')+'</span><span>TEAM : <b>'+fmt(teamAtk)+'</b></span></div>'
-   +buy(offers[petMode])
-   +'<div class="den-modes">'+petModes.map(x=>'<button aria-pressed="'+(x===petMode)+'" onclick="petMode=\''+x+'\';cityPet()">'+denPlain+'Pet '+x+'</button>').join('')+'</div>'
+   +buy(offers.Feeding)
+   +modes
    +lineup;
  }else if(petPage==='Assist'){
   top=power(teamAtk);
@@ -473,6 +546,41 @@ function cityPet(){
    +'<section class="den-panel"><h3>Pet ATK <b>'+fmt(atk)+'</b>'+(stars<6?' ▲ <b>'+fmt(atk+30)+'</b>':'')+' <span>Star bonus <b>+'+stars*30+'</b>'+(stars<6?' ▲ <b>+'+(stars+1)*30+'</b>':'')+'</span></h3><div class="den-track">'+[1,2,3,4,5,6].map(n=>'<span class="'+(n<=stars?'on':'')+'"><b>'+(n<=stars?'✦':'+'+n*30)+'</b><small>★'+n+'</small></span>').join('')+'</div><p>Total star bonus: <b>+'+stars*30+' ATK</b>'+(rules.petSpares(S,p.id)?' · spare copies <b>×'+rules.petSpares(S,p.id)+'</b>':'')+'</p></section>'
    +'<div class="den-starup"><span class="den-orb">'+art(p,'')+'</span>'+(owned?buy(offers.Stars):buy({have:S.gold,cost:p.cost,unit:'gold',label:'Unlock',act:'petUnlock()',icon:uiIcon('gold')}))+'</div>'
    +strip(pets,'Gallery');
+ }else if(petPage==='Talent'||petPage==='TalentShop'){
+  const st=rules.talentState(S);if(!team[talentSlotPick])talentSlotPick=0;
+  const v=st.slots[talentSlotPick],filled=v.cells.filter(Boolean).length,misc=n=>denIcon('misc',n,4,1);
+  top='<div class="den-chips"><span>'+misc(0)+fmt(st.seals)+'</span><span>'+misc(1)+st.books+'</span><span>'+uiIcon('gold')+fmt(S.gold)+'</span></div>'+power(teamAtk);
+  const slots='<div class="den-slots">'+[0,1,2].map(n=>'<button aria-pressed="'+(n===talentSlotPick)+'" '+(team[n]?'':'disabled')+' onclick="talentPickSlot('+n+')">'+(team[n]?'<img src="'+petPicture(item(team[n]))+'" alt="">':denPlain+'<i>+</i>')+'<b>Slot '+(n+1)+'</b></button>').join('')+'</div>';
+  if(petPage==='Talent'){
+   const cost=rules.learnCost(S,talentSlotPick),openCost=rules.openCellCost(v.open),can=rules.rollTalent(S,talentSlotPick,()=>0)!==null;
+   if(!v.cells[talentCell])talentCell=-1;
+   const cell=n=>{const id=v.cells[n];
+    if(n>=v.open)return '<button class="den-hex den-shut" '+(n===v.open?'onclick="talentOpen()" aria-label="Open this cell for '+openCost+' seals"':'disabled aria-label="Closed cell"')+'>'+denPlain+'<i>🔒</i>'+(n===v.open?'<small class="'+(st.seals<openCost?'low':'')+'">'+openCost+'</small>':'')+'</button>';
+    if(!id)return '<button class="den-hex den-free" disabled aria-label="Empty cell">'+denPlain+'</button>';
+    return '<button class="den-hex" aria-pressed="'+(n===talentCell)+'" aria-label="'+talentOf(id).name+(v.locks.includes(n)?', locked':'')+'" onclick="talentCell='+n+';talentTab=\'Common\';cityPet()">'+denPlain+talentIcon(id)+(v.locks.includes(n)?'<u>🔒</u>':'')+'</button>'};
+   const round=(icon,label,act)=>'<button onclick="'+act+'">'+denPlain+'<i>'+icon+'</i>'+label+'</button>';
+   let panel;
+   if(talentPending){const r=talentPending.roll,t=talentOf(r.id);
+    panel='<small class="den-kind">Prophecy · not inscribed yet</small><div class="den-trow">'+talentIcon(t.id)+'<div><b>'+t.name+'</b><small>'+(t.kind==='atk'?'Attack':'Guard')+' · passive</small><p>'+t.text+'</p></div></div><p>'+(r.replaces?'It would replace <b>'+talentOf(r.replaces).name+'</b>.':'It would fill an empty cell.')+'</p><div class="den-actions"><button class="den-gold" onclick="talentKeep(true)">'+denPlain+'Keep</button><button class="den-plain" onclick="talentKeep(false)">'+denPlain+'Let go</button></div>';
+   }else if(talentTab==='Supreme'){
+    panel='<div class="den-trow">'+misc(2)+'<div><b>'+rules.talentSupreme.name+'</b><small>Supreme · '+(filled>=rules.talentSupremeAt?'awake':'asleep')+'</small><p>'+rules.talentSupreme.text+'</p></div></div><div class="den-exp"><small>TALENTS</small><span><i style="width:'+Math.min(100,filled/rules.talentSupremeAt*100)+'%"></i><b>'+filled+' / '+rules.talentSupremeAt+'</b></span></div>';
+   }else if(talentCell>=0){const t=talentOf(v.cells[talentCell]),locked=v.locks.includes(talentCell);
+    panel=talentRow(t)+(locked?'<p class="den-hint">Locked: Learn will not overwrite it. Each lock makes Learn 50% dearer.</p>':'')+'<div class="den-actions"><button class="den-plain" onclick="talentLock()">'+denPlain+(locked?'🔓 Unlock':'🔒 Lock')+'</button><button class="den-plain" onclick="talentForget()">'+denPlain+'Forget</button></div>';
+   }else panel='<p class="den-hint">'+(filled?'Tap a talent to read it, lock it or forget it.':'No talent yet. Tap Learn to inscribe a random one.')+'</p>'+(v.target?'<p class="den-hint">Learn target: <b>'+talentOf(v.target).name+'</b></p>':'');
+   body='<div class="den-hexes">'+Array.from({length:rules.talentCells},(_,n)=>cell(n)).join('')+'</div>'
+    +'<div class="den-rounds"><span>'+round('✎','Log','talentLogShow()')+round('❖','Guide','talentGuide()')+'</span><span>'+round('◎','Learn Target','talentTargetPick()')+round('⌂','Shop',"petTab('TalentShop')")+'</span></div>'
+    +'<div class="den-modes den-two">'+['Common','Supreme'].map(x=>'<button aria-pressed="'+(x===talentTab&&!talentPending)+'" onclick="talentTab=\''+x+'\';cityPet()">'+denPlain+x+(x==='Common'?' Talents':' Talent')+'</button>').join('')+'</div>'
+    +'<section class="den-panel den-grow den-tpanel">'+panel+'</section>'
+    +'<div class="den-learn"><span class="den-cost">'+misc(0)+'<b class="'+(st.seals<cost?'low':'')+'">'+fmt(st.seals)+'</b> / '+cost+'</span><button class="den-gold" onclick="talentLearn()" '+(talentPending||!can||st.seals<cost||talentProphecy&&st.books<1?'disabled':'')+'>'+denPlain+'Learn</button><button class="den-check" aria-pressed="'+talentProphecy+'" onclick="talentProphecy=!talentProphecy;cityPet()">'+denPlain+'<i></i>Prophecy<small>'+misc(1)+'×'+st.books+'</small></button></div>'
+    +slots;
+  }else{
+   const empty=v.cells.some((id,n)=>n<v.open&&!id);
+   const ware=(id,icon,name,price,note,off)=>'<button class="den-ware" onclick="talentBuy(\''+id+'\')" '+(off?'disabled':'')+'>'+denPlain+'<b>'+name+'</b>'+icon+'<small>'+note+'</small><em>'+misc(0)+price+'</em></button>';
+   body='<div class="den-shophead">'+artImage('pairs-sprout','Sprout the shopkeeper')+'<div><h2>Talent Shop</h2><p>A scroll inscribes the talent you choose into the first empty cell of the slot below.</p><button class="den-plain" onclick="talentExchange()">'+denPlain+'✦ Fragment exchange</button></div></div>'
+    +slots
+    +'<div class="den-wares">'+ware('book',misc(1),'Prophecy Book',rules.talentBook,'Shows a Learn result first',st.seals<rules.talentBook)
+    +rules.petTalents.map(t=>{const has=v.cells.includes(t.id);return ware(t.id,talentIcon(t.id),t.name,rules.talentScroll,has?'In Slot '+(talentSlotPick+1)+' already':empty?(t.kind==='atk'?'Attack':'Guard'):'No empty cell',has||!empty||st.seals<rules.talentScroll)}).join('')+'</div>';
+  }
  }else if(petPage==='Summon'){
   // Pet Summon lives in the room now: wishes in, a random familiar out; one she has already becomes a spare copy.
   const odds=[['Common','c',45],['Rare','r',35],['Epic','e',16],['Super Rare','s',4]],have=WonderGear.familiars.filter(q=>S.owned.includes(q.id)).length;
@@ -502,8 +610,8 @@ function cityPet(){
    +strip(pets.filter(q=>emblemFilter==='All'||q.rarity===emblemFilter),'Badge')
    +'<div class="den-filters">'+['All',...new Set(pets.map(q=>q.rarity))].map(f=>'<button aria-pressed="'+(emblemFilter===f)+'" onclick="emblemFilter=\''+f+'\';cityPet()">'+denPlain+f+'</button>').join('')+'</div>';
  }
- const side=petPage==='Synthesize'||petPage==='Summon';   // side rooms of the Gallery
- $('#main').innerHTML='<section class="spirit-room den" data-page="'+petPage+'"><div class="den-top"><strong class="den-ribbon">'+petPage+'</strong>'+top+'</div><div class="den-body">'+body+'</div><div class="spirit-nav"><button aria-label="'+(side?'Back to Gallery':petBack==='wonders'?'Back to Wonders':'Back to city')+'" onclick="'+(side?'petTab(\'Gallery\')':'petLeave()')+'">‹</button>'+petPages.map((page,i)=>'<button aria-pressed="'+(page===petPage||side&&page==='Gallery')+'" onclick="petTab(\''+page+'\')">'+artImage(['hud-pet','hud-bag','hud-companion','hud-forge'][i],'')+page+'</button>').join('')+'</div></section>';
+ const side=petPage==='Synthesize'||petPage==='Summon',inner=petPage==='Talent'||petPage==='TalentShop';   // side rooms of the Gallery and of Formation
+ $('#main').innerHTML='<section class="spirit-room den" data-page="'+petPage+'"><div class="den-top"><strong class="den-ribbon">'+(petPage==='TalentShop'?'Talent Shop':petPage)+'</strong>'+top+'</div><div class="den-body">'+body+'</div><div class="spirit-nav"><button aria-label="'+(petPage==='TalentShop'?'Back to Talents':inner?'Back to Formation':side?'Back to Gallery':petBack==='wonders'?'Back to Wonders':'Back to city')+'" onclick="'+(petPage==='TalentShop'?'petTab(\'Talent\')':inner?'petTab(\'Formation\')':side?'petTab(\'Gallery\')':'petLeave()')+'">‹</button>'+petPages.map((page,i)=>'<button aria-pressed="'+(page===petPage||side&&page==='Gallery'||inner&&page==='Formation')+'" onclick="petTab(\''+page+'\')">'+artImage(['hud-pet','hud-bag','hud-companion','hud-forge'][i],'')+page+'</button>').join('')+'</div></section>';
 }
 
 let companionKey='elf',companionMode='Upgrade',companionPick={};
