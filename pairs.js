@@ -127,7 +127,7 @@ function showPairs() {
     <p class="pairs-runs">Rewarded runs today: <b>${left} / ${Pairs.dailyRuns}</b> · Best time <b>${best}</b></p>
     <button class="primary pairs-go" onclick="openPairsBoard()">Go challenge</button>
     <button class="pairs-rank" onclick="pairsRanking()"><img src="${artPath('hud-rank')}" alt=""><span>Rankings</span></button>
-    <button class="pairs-exit" onclick="go('games')" aria-label="Leave Harvest Pairs">‹</button>
+    <button class="pairs-exit" data-back onclick="go('games')" aria-label="Leave Harvest Pairs">‹</button>
   </section>`;
   preloadPairsArt();
 }
@@ -142,7 +142,7 @@ function openPairsBoard() {
     <div class="pairs-banner"><img class="pairs-cover" src="${artPath('pairs-cover')}" alt=""><img class="pairs-host" src="${reinaLookPath(false)}" alt="Reina"><h1>Harvest Pairs</h1></div>
     <div class="pairs-bar"><span>Stage <b id="pairsStage">1</b> / ${Pairs.stages.length}</span><span>Time <b id="pairsTime">0:00</b><i id="pairsPenalty" hidden>+${Pairs.hintPenalty}s</i></span></div>
     <div class="pairs-field"><div class="pairs-board" id="pairsBoard"></div><div class="pairs-panel" id="pairsPanel" hidden></div></div>
-    <div class="pairs-foot"><button class="pairs-exit" onclick="go('pairs')" aria-label="Back to the Harvest Pairs lobby">‹</button>
+    <div class="pairs-foot"><button class="pairs-exit" data-back onclick="go('pairs')" aria-label="Back to the Harvest Pairs lobby">‹</button>
     <button class="pairs-hint" id="pairsHint" aria-label="Hint from Sprout, adds ${Pairs.hintPenalty} seconds"><img src="${artPath('pairs-sprout')}" alt="" draggable="false"></button></div>
   </section>`;
   startPairs();
