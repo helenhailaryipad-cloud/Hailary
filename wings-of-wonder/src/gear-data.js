@@ -357,6 +357,7 @@ function validPets(s){
   if(ranks!==undefined&&(!ranks||typeof ranks!=='object'||Array.isArray(ranks)||!Object.entries(ranks).every(([id,n])=>Object.hasOwn(petStarts,id)&&s.owned?.includes(id)&&Number.isInteger(n)&&n>=0&&n<=max)))return false;
  }
  if(!validTalents(s.petTalents)||!validPetGear(s.petGear))return false;
+ if(!validBag(s))return false;
  if(s.emberShards!==undefined&&(!Number.isSafeInteger(s.emberShards)||s.emberShards<0))return false;
  if(s.petSpares!==undefined&&(!s.petSpares||typeof s.petSpares!=='object'||Array.isArray(s.petSpares)||!Object.entries(s.petSpares).every(([id,n])=>Object.hasOwn(familiarById,id)&&Number.isInteger(n)&&n>0&&n<=9999)))return false;
  if(s.emberStars!==undefined&&(!Number.isInteger(s.emberStars)||s.emberStars<0||s.emberStars>6||!s.owned?.includes('d1')))return false;
@@ -381,6 +382,7 @@ function stats(save){const b=bonuses(save);
  // Pet talents that strengthen Reina, and the gear of every slot that has a pet in it.
  for(const [key,n] of Object.entries(talentBonus(save)))b[key]=(b[key]||0)+n;
  petTeam(save).slice(0,3).forEach((id,slot)=>{if(!id)return;const gear=petGearBonus(save,slot);b.health=(b.health||0)+gear.hp;b.defense=(b.defense||0)+gear.def});
+ for(const [key,n] of Object.entries(devourBonus(save)))b[key]=(b[key]||0)+n;
  const cards=globalThis.MoonwaterFish.totals(save.fishCards);
  const lv=globalThis.WonderProgress.level(save.xp),d=petTeamAttack(save),w=[40,120,180,240][Number(save.wings[1])];const attack=Math.round((85+lv*7+d+(b.attack||0))*(1+(b.attackPercent||0)/100))+(cards.attack||0)+bowBonus,defense=Math.round((52+lv*4+w+(b.defense||0))*(1+(b.defensePercent||0)/100))+(cards.defense||0),health=Math.round((900+lv*75+(b.health||0))*(1+(b.healthPercent||0)/100))+(cards.health||0),crit=round(Math.min(75,8+(b.crit||0))),speed=100+(b.speed||0),penetration=round(b.penetration||0),damageBonus=round(b.damageBonus||0),damageReduction=round(Math.min(50,b.damageReduction||0)),block=round(Math.min(40,b.block||0)),expBonus=round(b.expBonus||0);const accuracy=round(100+(b.accuracy||0)),dodge=round(Math.min(30,b.dodge||0)),critDamage=round(165+(b.critDamage||0)),critResistance=round(Math.min(30,b.critResistance||0)),shieldHealth=Math.round(b.shieldHealth||0)+(cards.shieldHealth||0),elementalAttack=Math.round(b.elementalAttack||0)+(cards.elementalAttack||0),elementalDefense=Math.round(b.elementalDefense||0)+(cards.elementalDefense||0),armor=round(100-10000/(100+defense*.35)),attackInterval=round(100/speed),healing=Math.round(health*.25);
 const advanced={accuracy,dodge,critDamage,critResistance,shieldHealth,elementalAttack,elementalDefense,armor,attackInterval,healing};
@@ -451,5 +453,96 @@ function rollBossTier(save,random){
 }
 function bossLoot(save,id,random=Math.random){const table=bossLootTables[id];if(!table)return null;const eq=state(save);save.equipment=eq;const materials=Object.fromEntries(materialDefs.map(m=>[m.id,table[m.id]||0]));for(const m of materialDefs)eq.materials[m.id]+=materials[m.id];const tier=rollBossTier(save,random),slot=table.slots[Math.min(table.slots.length-1,Math.max(0,Math.floor(random()*table.slots.length)))],drop=addDrop(save,tier,slot);if(drop.converted){eq.materials.stone+=15;materials.stone+=20;}else{drop.enhance=table.enhance;drop.stars=table.stars;}return {...materials,entry:drop.converted?null:drop,converted:!!drop.converted};}
 function grant(save,type,won,score=0){const eq=state(save);save.equipment=eq;let stones=type==='dungeon'?(won?12:3):type==='defense'?(won?8:2):type==='spar'?(won?2:0):Math.min(7,Math.floor(score/180));eq.materials.stone+=stones;let shard=won&&(type==='dungeon'||type==='defense')?3:0;eq.materials.shard+=shard;if(won&&type==='dungeon'){eq.materials.essence+=2;eq.materials.gem+=1}return {stone:stones,shard,gem:won&&type==='dungeon'?1:0,essence:won&&type==='dungeon'?2:0}}
-return Object.freeze({riposteShare,riposteEvery,talentCells,talentFree,talentLearn,talentBook,talentScroll,talentTopScroll,talentPrice,talentSupremeAt,talentSupreme,petTalents,talentState,talentIds,supremeReady,addSeals,openCellCost,openTalentCell,learnCost,rollTalent,keepTalent,learnTalent,lockTalent,forgetTalent,setTalentTarget,buyTalentScroll,buyTalentBook,sealRates,sealGold,buySeals,exchangeSpares,talentBonus,guardTalents,petGearPieces,petGearMax,petGearStep,petGearSetStep,petGearLevels,petGearTier,petGearCost,petGearBonus,upgradePetGear,petBolt,petBoltPace,petHit,petPace,assistPages,assistSlots,synthChain,synthNeed,petSpares,addPetSpare,synthesizePet,fashionTraits,companionTypes,companionSkins,companionSkin,ownsCompanionSkin,useCompanionSkin,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,starGearCount,starDonors,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
+// ---- Bag ---------------------------------------------------------------------------------------------------------
+// Things Reina carries besides equipment. Stacks live in the optional save field `bag` {id:n}; what is put away in
+// the warehouse lives in `vault` {key:n} with keys "i:<item>" and "m:<material>". All numbers are placeholders.
+const bagCapacity=150,bagStackMax=99999,bagStarter={exp1:3,gold1:2,chest1:1,stam:1,petegg:1};
+const bagRarity={b:['Common','#58b7ff'],p:['Rare','#b784ff'],o:['Epic','#ffa94a'],r:['Legendary','#ff5d6c']};
+const bagItems=[
+ {id:'exp1',name:'Dew of Wisdom',kind:'Experience',rarity:'b',text:'A drop of morning wisdom. Gives Reina 150 XP.',give:{xp:150}},
+ {id:'exp2',name:'Star of Wisdom',kind:'Experience',rarity:'p',text:'A fallen star of knowledge. Gives Reina 1,500 XP.',give:{xp:1500}},
+ {id:'gold1',name:'Coin Pouch',kind:'Treasure',rarity:'b',text:'A small pouch of coins. Gives 500 gold.',give:{gold:500}},
+ {id:'gold2',name:'Coin Coffer',kind:'Treasure',rarity:'o',text:'A coffer filled to the brim. Gives 5,000 gold.',give:{gold:5000}},
+ {id:'chest1',name:'Oak Chest',kind:'Chest',rarity:'b',text:'Gold, enhancement crystals and one small surprise.',give:{gold:300,stone:10},pick:['exp1','gold1','stam']},
+ {id:'chest2',name:'Moon Chest',kind:'Chest',rarity:'p',text:'Gold, crystals, star shards, one piece of equipment and a surprise.',give:{gold:800,stone:20,shard:5,gear:0},pick:['exp1','wish','sealbag']},
+ {id:'chest3',name:'Winged Chest',kind:'Chest',rarity:'r',text:'A rich haul: gold, gems, forge essence, fine equipment, a Star of Wisdom and a rare surprise.',give:{gold:2000,gem:3,essence:5,gear:1,item:{exp2:1}},pick:['petegg','wish','gembox']},
+ {id:'gearbox',name:"Armourer's Crate",kind:'Chest',rarity:'o',text:'One piece of equipment of the tier Reina can wear.',give:{gear:0}},
+ {id:'stam',name:'Vigor Tonic',kind:'Tonic',rarity:'b',text:'Restores 1 boss stamina spent today.',give:{stamina:1}},
+ {id:'wish',name:'Wish Ticket',kind:'Ticket',rarity:'p',text:'Worth 50 wishes: one pet summon.',give:{tickets:50}},
+ {id:'petegg',name:'Pet Egg',kind:'Pet',rarity:'o',pet:true,text:'Hatches into one random pet. A pet she already has becomes a spare copy.',give:{pet:1}},
+ {id:'sealbag',name:'Seal Satchel',kind:'Pet',rarity:'p',pet:true,text:'Holds 50 talent seals for the Pet Talent room.',give:{seals:50}},
+ {id:'shardbag',name:'Star Shard Pouch',kind:'Bundle',rarity:'p',text:'Holds 10 star shards.',give:{shard:10}},
+ {id:'stonebag',name:'Crystal Bundle',kind:'Bundle',rarity:'b',text:'Holds 20 enhancement crystals.',give:{stone:20}},
+ {id:'gembox',name:'Jewel Box',kind:'Bundle',rarity:'o',text:'Holds 3 sky gems.',give:{gem:3}},
+ {id:'essence',name:'Essence Vial',kind:'Bundle',rarity:'p',text:'Holds 5 forge essence.',give:{essence:5}}
+];
+const bagItemById=Object.fromEntries(bagItems.map(i=>[i.id,i]));
+const bagOf=s=>s.bag||{...bagStarter},vaultOf=s=>s.vault||{};
+function bagCount(s,id){const n=bagOf(s)[id];return Number.isInteger(n)&&n>0?n:0}
+function bagAdd(s,id,n=1){if(!Object.hasOwn(bagItemById,id)||!(n>0))return 0;const bag=bagOf(s);bag[id]=Math.min(bagStackMax,(bag[id]||0)+Math.round(n));s.bag=bag;return bag[id]}
+function bagStacks(s){const bag=bagOf(s);return bagItems.filter(i=>bag[i.id]>0).map(i=>({id:i.id,n:bag[i.id],item:i}))}
+// Places taken in the bag: every stack and every piece of equipment that is not in the warehouse.
+function bagUsed(s){return bagStacks(s).length+state(s).items.filter(e=>!e.stored).length+materialDefs.filter(m=>state(s).materials[m.id]>0).length}
+function vaultCount(s,key){const n=vaultOf(s)[key];return Number.isInteger(n)&&n>0?n:0}
+function vaultKeyOk(key){return typeof key==='string'&&(key.startsWith('i:')?Object.hasOwn(bagItemById,key.slice(2)):key.startsWith('m:')&&materialDefs.some(m=>m.id===key.slice(2)))}
+// Moves a whole stack between the bag and the warehouse.
+function vaultMove(s,key,store){
+ if(!vaultKeyOk(key))return false;
+ const id=key.slice(2),vault={...vaultOf(s)},item=key[0]==='i',eq=state(s),bag=bagOf(s);
+ const here=item?bag[id]||0:eq.materials[id]||0,there=vault[key]||0,n=store?here:there;
+ if(!n)return false;
+ if(store)vault[key]=there+n;else delete vault[key];
+ if(item){if(store)delete bag[id];else bag[id]=Math.min(bagStackMax,here+n);s.bag=bag}
+ else{eq.materials[id]=store?0:here+n;s.equipment=eq}
+ s.vault=vault;return true;
+}
+function eggPet(s,rng){
+ const roll=rng(),tier=roll<.04?'Super Rare':roll<.2?'Epic':roll<.55?'Rare':'Common',pool=familiars.filter(p=>p.rarity===tier),p=pool[Math.min(pool.length-1,Math.floor(rng()*pool.length))];
+ const had=s.owned.includes(p.id);if(had)addPetSpare(s,p.id);else s.owned.push(p.id);
+ return {kind:'pet',id:p.id,spare:had};
+}
+// Opens or drinks `count` of one stack. Returns what Reina gained, as a list the UI can show.
+function useBagItem(s,id,count=1,rng=Math.random){
+ const item=bagItemById[id],have=bagCount(s,id);count=Math.min(have,Math.max(1,Math.floor(count)));
+ if(!item||!have)return {ok:false,error:'Nothing to use.'};
+ const eq=state(s),sum={},note=(key,n)=>{if(n)sum[key]=(sum[key]||0)+n},gains=[];let used=0;
+ for(;used<count;used++){
+  const g=item.give||{};
+  if(g.stamina){const a=globalThis.WonderAdventure,day=a.dailyDungeon(s);if(!day.spent)break;a.state(s).dungeonDay={...day,spent:day.spent-1};note('stamina',1)}
+  if(g.xp)note('xp',globalThis.WonderProgress.award(s,g.xp));
+  if(g.gold){s.gold+=g.gold;note('gold',g.gold)}
+  if(g.tickets){s.tickets+=g.tickets;note('tickets',g.tickets)}
+  if(g.seals){addSeals(s,g.seals);note('seals',g.seals)}
+  for(const m of materialDefs)if(g[m.id]){eq.materials[m.id]+=g[m.id];s.equipment=eq;note('m:'+m.id,g[m.id])}
+  if(g.gear!==undefined){const drop=addDrop(s,Math.min(maxTier,unlockedTier(s)+g.gear));if(drop.converted)note('m:stone',5);else gains.push({kind:'gear',uid:drop.uid,template:drop.template})}
+  if(g.pet)gains.push(eggPet(s,rng));
+  for(const [other,n] of Object.entries(g.item||{})){bagAdd(s,other,n);note('i:'+other,n)}
+  if(item.pick){const other=item.pick[Math.min(item.pick.length-1,Math.floor(rng()*item.pick.length))];bagAdd(s,other,1);note('i:'+other,1)}
+ }
+ if(!used)return {ok:false,error:item.give?.stamina?'Stamina is already full.':'Nothing to use.'};
+ const bag=bagOf(s);if(bag[id]>used)bag[id]-=used;else delete bag[id];s.bag=bag;
+ for(const [key,n] of Object.entries(sum))gains.unshift(key.startsWith('m:')?{kind:'material',id:key.slice(2),n}:key.startsWith('i:')?{kind:'item',id:key.slice(2),n}:{kind:key,n});
+ return {ok:true,used,gains};
+}
+// ---- Devour: spare equipment feeds the Glimmer Maw; its level strengthens Reina ----------------------------------
+const devourStep={attack:6,health:60,defense:5},devourMax=200;
+function devourNeed(level){return 40+level*20}
+function devourWorth(entry){const t=catalog[entry.template];return 10*t.tier+15*t.grade+8*entry.stars+2*entry.enhance}
+function devourState(s){let into=Number.isSafeInteger(s.devour)?s.devour:0,level=0;const total=into;while(level<devourMax&&into>=devourNeed(level)){into-=devourNeed(level);level++}return {level,into,need:level>=devourMax?0:devourNeed(level),total}}
+function devourBonus(s){const level=devourState(s).level;return {attack:level*devourStep.attack,health:level*devourStep.health,defense:level*devourStep.defense}}
+function devourable(s){const eq=state(s);return eq.items.filter(e=>!e.stored&&!e.starter&&!equipped(eq,e.uid))}
+// Feeds spare pieces to the Maw. Stars and gems on them come back as shards and gems, as with salvage.
+function devourGear(s,uids){
+ const eq=state(s),ok=new Set(devourable(s).map(e=>e.uid)),ids=[...new Set(uids)];
+ if(!ids.length||!ids.every(id=>ok.has(id)))return {ok:false,error:'Only spare equipment from the bag can be devoured.'};
+ const before=devourState(s);let gained=0;
+ for(const e of eq.items.filter(e=>ids.includes(e.uid))){gained+=devourWorth(e);eq.materials.shard+=e.stars;eq.materials.gem+=e.gems}
+ eq.items=eq.items.filter(e=>!ids.includes(e.uid));s.equipment=eq;s.devour=before.total+gained;
+ return {ok:true,gained,levels:devourState(s).level-before.level};
+}
+function validBag(s){
+ const counts=(o,ok)=>o===undefined||!!o&&typeof o==='object'&&!Array.isArray(o)&&Object.entries(o).every(([k,n])=>ok(k)&&Number.isInteger(n)&&n>0&&n<=1e9);
+ return counts(s.bag,k=>Object.hasOwn(bagItemById,k))&&counts(s.vault,vaultKeyOk)&&(s.devour===undefined||Number.isSafeInteger(s.devour)&&s.devour>=0&&s.devour<=1e12);
+}
+return Object.freeze({bagCapacity,bagStarter,bagRarity,bagItems,bagItemById,bagCount,bagAdd,bagStacks,bagUsed,vaultCount,vaultMove,useBagItem,devourStep,devourMax,devourNeed,devourWorth,devourState,devourBonus,devourable,devourGear,validBag,riposteShare,riposteEvery,talentCells,talentFree,talentLearn,talentBook,talentScroll,talentTopScroll,talentPrice,talentSupremeAt,talentSupreme,petTalents,talentState,talentIds,supremeReady,addSeals,openCellCost,openTalentCell,learnCost,rollTalent,keepTalent,learnTalent,lockTalent,forgetTalent,setTalentTarget,buyTalentScroll,buyTalentBook,sealRates,sealGold,buySeals,exchangeSpares,talentBonus,guardTalents,petGearPieces,petGearMax,petGearStep,petGearSetStep,petGearLevels,petGearTier,petGearCost,petGearBonus,upgradePetGear,petBolt,petBoltPace,petHit,petPace,assistPages,assistSlots,synthChain,synthNeed,petSpares,addPetSpare,synthesizePet,fashionTraits,companionTypes,companionSkins,companionSkin,ownsCompanionSkin,useCompanionSkin,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,starGearCount,starDonors,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
 })();

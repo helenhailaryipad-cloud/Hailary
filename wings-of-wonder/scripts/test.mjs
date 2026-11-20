@@ -567,3 +567,60 @@ vm.runInContext(`{
  if((html.match(/class="city-pet /g)||[]).length!==3||!html.includes('familiar-12')||!html.includes('familiar-37'))throw Error('All three deployed pets stand beside Reina');
 }`,context);
 console.log('PASS: home screen shows exactly the three Primary Pets, each in the spot of its slot.');
+
+vm.runInContext(`
+{const r=WonderGear;S=defaults();
+ // A fresh bag holds the starter kit; nothing is written until something changes.
+ if(S.bag!==undefined||r.bagCount(S,'exp1')!==r.bagStarter.exp1||!r.bagStacks(S).some(x=>x.id==='petegg'))throw Error('Starter kit');
+ const xp=S.xp,gold=S.gold;let use=r.useBagItem(S,'exp1',2);
+ if(!use.ok||use.used!==2||S.xp!==xp+300||r.bagCount(S,'exp1')!==r.bagStarter.exp1-2||!valid(S))throw Error('Dew of Wisdom');
+ use=r.useBagItem(S,'gold1',99);if(use.used!==r.bagStarter.gold1||S.gold!==gold+500*r.bagStarter.gold1||r.bagCount(S,'gold1')||Object.hasOwn(S.bag,'gold1'))throw Error('Use is capped by the stack');
+ if(r.useBagItem(S,'gold1').ok||r.useBagItem(S,'nope').ok||r.bagAdd(S,'nope',1))throw Error('Unknown or empty stack');
+ // A chest gives its fixed part and one surprise; the Moon Chest adds a piece of equipment.
+ const stone=r.state(S).materials.stone;use=r.useBagItem(S,'chest1',1,()=>0);
+ if(S.gold!==gold+1000+300||r.state(S).materials.stone!==stone+10||r.bagCount(S,'exp1')!==r.bagStarter.exp1-1||!use.gains.some(g=>g.kind==='item'&&g.id==='exp1'))throw Error('Oak Chest');
+ r.bagAdd(S,'chest2',1);const pieces=r.state(S).items.length;use=r.useBagItem(S,'chest2',1,()=>.99);
+ if(r.state(S).items.length!==pieces+1||!use.gains.some(g=>g.kind==='gear')||r.bagCount(S,'sealbag')!==1)throw Error('Moon Chest');
+ const seals=r.talentState(S).seals;r.useBagItem(S,'sealbag');if(r.talentState(S).seals!==seals+50)throw Error('Seal Satchel');
+ // The egg hatches a pet; one she already has becomes a spare copy.
+ const first=r.familiars.find(p=>p.rarity==='Common').id;use=r.useBagItem(S,'petegg',1,()=>.9);
+ const hatched=use.gains.find(g=>g.kind==='pet');if(!hatched||hatched.spare||!S.owned.includes(hatched.id))throw Error('Pet Egg');
+ r.bagAdd(S,'petegg',1);use=r.useBagItem(S,'petegg',1,()=>.9);if(!use.gains[0].spare||r.petSpares(S,hatched.id)!==1)throw Error('Second egg must give a copy');
+ // The tonic only works when stamina was spent today.
+ if(r.useBagItem(S,'stam').ok||r.bagCount(S,'stam')!==1)throw Error('Tonic at full stamina');
+ WonderAdventure.spendStamina(S);if(!r.useBagItem(S,'stam').ok||WonderAdventure.dailyDungeon(S).spent!==0)throw Error('Vigor Tonic');
+ // Warehouse: whole stacks and materials move there and back; stored things cannot be used.
+ r.bagAdd(S,'wish',3);const crystals=r.state(S).materials.stone;
+ if(!r.vaultMove(S,'i:wish',true)||r.bagCount(S,'wish')||r.vaultCount(S,'i:wish')!==3||r.useBagItem(S,'wish').ok)throw Error('Deposit');
+ if(!r.vaultMove(S,'m:stone',true)||r.state(S).materials.stone!==0||r.vaultCount(S,'m:stone')!==crystals||r.vaultMove(S,'m:stone',true)||r.vaultMove(S,'x:stone',true))throw Error('Material deposit');
+ S=JSON.parse(JSON.stringify(S));if(!valid(S))throw Error('Bag save');
+ r.bagAdd(S,'wish',1);r.vaultMove(S,'i:wish',false);r.vaultMove(S,'m:stone',false);
+ if(r.bagCount(S,'wish')!==4||r.vaultCount(S,'i:wish')||r.state(S).materials.stone!==crystals||Object.keys(S.vault).length)throw Error('Withdraw');
+ for(const bad of [{bag:{nope:1}},{bag:{exp1:0}},{vault:{'i:nope':1}},{vault:{'m:stone':-1}},{devour:-1},{devour:1.5}])if(valid({...S,...bad}))throw Error('Invalid bag accepted '+JSON.stringify(bad));
+ // Devour: only spare pieces from the bag; the Maw's level adds to Reina's stats.
+ const eq=r.state(S),worn=eq.equipped.bow,spare=r.devourable(S),before=stats();
+ if(spare.some(e=>r.equipped(eq,e.uid)||e.stored)||r.devourGear(S,[worn]).ok||r.devourGear(S,[]).ok)throw Error('Devour must protect worn gear');
+ const worth=spare.reduce((n,e)=>n+r.devourWorth(e),0),fed=r.devourGear(S,spare.map(e=>e.uid));
+ if(!fed.ok||fed.gained!==worth||S.devour!==worth||r.devourable(S).length)throw Error('Devour');
+ const st=r.devourState(S);let need=0;for(let l=0;l<st.level;l++)need+=r.devourNeed(l);
+ if(st.level<1||st.into!==worth-need||fed.levels!==st.level)throw Error('Maw level');
+ const after=stats();if(after.attack<=before.attack||after.health<=before.health||after.defense<=before.defense)throw Error('Maw bonus');
+ if(r.devourBonus(S).attack!==st.level*r.devourStep.attack||!valid(JSON.parse(JSON.stringify(S))))throw Error('Devour save');
+ // Screens: bag tabs, item card, use, warehouse taps, Devour room.
+ r.bagAdd(S,'chest1',2);r.addPetSpare(S,first,2);r.addDrop(S,1);
+ for(const tab of ['Common','Materials','Pet','ALL']){cityBagFilter=tab;openScreen('cityBag');if(!document.querySelector('#main').innerHTML.includes('Capacity: '))throw Error('Bag tab '+tab)}
+ cityBagFilter='Pet';cityBag();if(!document.querySelector('#main').innerHTML.includes('2/'+r.synthNeed))throw Error('Pet copies in the bag');
+ cityBagFilter='Common';cityBag();const html=document.querySelector('#main').innerHTML;
+ if(!html.includes("bagOpen('i:chest1')")||html.includes("bagOpen('p:"))throw Error('Common tab');
+ bagOpen('i:chest1');if(!document.querySelector('#modalBody').innerHTML.includes('Oak Chest')||!document.querySelector('#modalBody').innerHTML.includes("bagUse('chest1',2)"))throw Error('Item card');
+ bagUse('chest1',1);if(r.bagCount(S,'chest1')!==1||!document.querySelector('#modalBody').innerHTML.includes('You received'))throw Error('Use from the card');
+ openScreen('cityVault');const piece=r.devourable(S)[0].uid;
+ vaultTap('b','g:'+piece);if(r.state(S).items.find(e=>e.uid===piece).stored||!document.querySelector('#main').innerHTML.includes('Deposit'))throw Error('First tap only chooses');
+ vaultTap('b','g:'+piece);if(!r.state(S).items.find(e=>e.uid===piece).stored)throw Error('Second tap deposits');
+ vaultTap('v','g:'+piece);vaultTap('v','g:'+piece);if(r.state(S).items.find(e=>e.uid===piece).stored)throw Error('Withdraw by taps');
+ vaultTap('b','i:chest1');vaultShift();if(r.vaultCount(S,'i:chest1')!==1)throw Error('Deposit button');
+ openScreen('cityDevour');devourToggle(piece);if(!document.querySelector('#main').innerHTML.includes('Chosen: 1'))throw Error('Devour pick');
+ devourFeed();if(r.state(S).items.some(e=>e.uid===piece)||!document.querySelector('#main').innerHTML.includes('Glimmer Maw'))throw Error('Devour room');
+}
+`,context);
+console.log('PASS: bag items and chests, warehouse stacks, Devour levels, and the Bag / Warehouse / Devour screens.');

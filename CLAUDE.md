@@ -317,6 +317,32 @@ icon in the style of our game". One painted icon, `ui-back.webp` (gold-rimmed bl
   that have their own `data-back` button (`body:has(...)`), where it used to cover the title.
 Checked on 36 screens at 590 x 690. Never use a bare "‹" or "←" for going back again.
 
+## Bag, Warehouse, Devour (2026-11-20)
+User sent 12 reference photos ("the bag and its contents"). Home -> Bag (`cityBag()` in `gear-ui.js`) kept its layout and
+got contents; the bottom bar (`satchelNav(here)`) now leads to four real screens: Bag, Gear Crafting (`cityCraft`,
+unchanged), Warehouse (`cityVault`), Devour (`cityDevour`). Rules in `gear-data.js`, all numbers are placeholders.
+- Items: `bagItems` (16 stackable things: two XP items, two coin items, Oak / Moon / Winged Chest, Armourer's Crate,
+  Vigor Tonic, Wish Ticket, Pet Egg, Seal Satchel, four material bundles). Optional save field `S.bag {id:n}`; a save
+  without it holds `bagStarter`. `useBagItem(s,id,count,rng)` returns `{ok,used,gains}`; chests have a fixed part
+  (`give`) and one random surprise (`pick`). Sources so far: every dungeon win gives an Oak Chest (Moon Chest on a
+  first clear), beating the Jungle Trek dragon gives a Moon Chest.
+- Tabs: Common = items + spare equipment (worn pieces are only on the rails now), Materials = equipment materials,
+  talent seals, prophecy books, Pet = Pet Egg, Seal Satchel, spare pet copies with n/6, Ember shards, ALL. Tapping a
+  tile opens the item card (`bagOpen(key)`, the `.den-item` pop-up) with Use / Use N; the result is a "You received"
+  pop-up (`bagUse`, `bagGain`). Tile keys: `i:<item>`, `m:<material>`, `g:<uid>`, `p:<pet>`, `t:seals|books|ember`.
+  Capacity (`bagUsed` / `bagCapacity` 150) is only shown, nothing is refused yet.
+- Warehouse: stored things on top, the bag below (Common / Materials / ALL). First tap chooses (name + Deposit /
+  Withdraw button), second tap on the same tile moves it (`vaultTap(side,key)`, `vaultShift`). Equipment uses the old
+  `stored` flag; stacks and materials move whole into optional `S.vault {"i:<id>"|"m:<id>": n}` (`vaultMove`); stored
+  materials do not count for costs. The old Gear -> Warehouse page (`gearWorkspace`) still exists.
+- Devour: the Glimmer Maw eats spare equipment (`devourable`, `devourGear`): essence by tier, grade, stars, enhance
+  (`devourWorth`), levels by `devourNeed`, each level +6 ATK, +60 HP, +5 DEF (`devourStep`, added in `stats()`);
+  optional `S.devour` (total essence). Stars and gems on eaten pieces come back as shards and gems.
+- Art: `art-source/bag/items.webp` (4 x 4 sheet in the order of `bagItems`) and `maw.webp`, built by
+  `scripts/build-bag-icons.py` into `comp-bag-items` and `comp-bag-maw`. Tiles need `denPlain` (stock icons).
+- Not done from the reference: bottom-row extra slots, the star bands of Gear Crafting (ours is 1-5 Star Gear),
+  capacity limits, Convert in bulk. Hosted bundle headroom is about 0.22 MB: add AVIF copies before more art.
+
 ## In-chat playable preview (user requirement)
 The user wants to play the game inside the chat, and wants SHORT replies in Russian, no fluff.
 - Artifact: https://claude.ai/artifact/L9owNJPMaZjAsTmU3tDGs6 (private). After game changes, rebuild and republish:
