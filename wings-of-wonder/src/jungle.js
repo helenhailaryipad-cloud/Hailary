@@ -9,7 +9,7 @@ const Trek = {
   subs:[{at:13,name:'Thornback',art:'guardian-t15',hp:1100,kind:'charger'},{at:29,name:'Stormwing',art:'guardian-t19',hp:2000,kind:'storm'}],
   subChest:120,bossChest:150,bossWishes:20,   // every chest holds gold; the dragon's three also hold wishes
   finaleLength:3.8,                            // the dragon's explosion and its chests, after which the run ends
-  create:()=>({kind:'jungle',running:true,ended:false,paused:false,x:0,target:0,hp:3,score:0,time:0,shot:0,row:0,wave:0,hazardAt:7,hurt:0,boost:0,shield:0,rocket:0,rocketShot:0,laser:0,chain:0,chainShot:0,frost:0,lean:0,pets:[0,0],arrows:1,power:0,dropCount:0,foes:[],bolts:[],drops:[],sparks:[],hazards:[],arcs:[],blasts:[],texts:[],pops:[],shake:0,hitFlash:0,kills:0,kick:0,finale:0,subsMet:0,loot:{gold:0,wishes:0,chests:0},booms:[],chests:[],debris:[]}),
+  create:()=>({kind:'jungle',running:true,ended:false,paused:false,x:0,target:0,hp:3,score:0,time:0,shot:0,row:0,wave:0,hazardAt:7,hurt:0,boost:0,shield:0,rocket:0,rocketShot:0,laser:0,chain:0,chainShot:0,frost:0,lean:0,pets:[0,0,0],arrows:1,power:0,dropCount:0,foes:[],bolts:[],drops:[],sparks:[],hazards:[],arcs:[],blasts:[],texts:[],pops:[],shake:0,hitFlash:0,kills:0,kick:0,finale:0,subsMet:0,loot:{gold:0,wishes:0,chests:0},booms:[],chests:[],debris:[]}),
   // Simulated rivals for the live ranking: final scores fixed for one UTC day, earned evenly over the run.
   rivals(names,now){const day=new Date(now===undefined?Date.now():now).toISOString().slice(0,10);
     return names.map(name=>{let h=2166136261;for(const ch of name+day)h=Math.imul(h^ch.charCodeAt(0),16777619)>>>0;return {name,final:2800+(h%55)*50}})},
@@ -79,7 +79,7 @@ const Trek = {
     if(!g.running||g.paused||g.ended)return;
     dt=this.clamp(dt,0,.05);
     // Finale: the clock stops, nothing can hurt her, the barrels left on the field pop one after another.
-    if(g.finale>0){const before=g.finale;g.finale+=dt;g.hurt-=dt;g.shake-=dt;g.hitFlash-=dt;g.shieldBreak-=dt;g.kick=Math.max(0,g.kick-dt*8);g.x+=(g.target-g.x)*Math.min(1,dt*14);g.lean+=(this.clamp((g.target-g.x)*2.4,-1,1)-g.lean)*Math.min(1,dt*10);g.pets[0]+=(g.x-g.pets[0])*Math.min(1,dt*6.5);g.pets[1]+=(g.x-g.pets[1])*Math.min(1,dt*4.5);
+    if(g.finale>0){const before=g.finale;g.finale+=dt;g.hurt-=dt;g.shake-=dt;g.hitFlash-=dt;g.shieldBreak-=dt;g.kick=Math.max(0,g.kick-dt*8);g.x+=(g.target-g.x)*Math.min(1,dt*14);g.lean+=(this.clamp((g.target-g.x)*2.4,-1,1)-g.lean)*Math.min(1,dt*10);g.pets[0]+=(g.x-g.pets[0])*Math.min(1,dt*6.5);g.pets[1]+=(g.x-g.pets[1])*Math.min(1,dt*4.5);g.pets[2]+=(g.x-g.pets[2])*Math.min(1,dt*3.4);
       if(Math.floor(g.finale/.09)!==Math.floor(before/.09)){const f=g.foes.find(f=>!f.dead);if(f){f.dead=true;this.pop(g,f.x,f.z,'#ffd584',true);this.burst(g,f.x,f.z,'#ffd584')}}
       g.foes=g.foes.filter(f=>!f.dead);this.effects(g,dt);
       if(g.finale>=this.finaleLength){g.ended=true;g.running=false}
@@ -87,7 +87,7 @@ const Trek = {
     g.time=Math.min(this.length,g.time+dt);g.kick=Math.max(0,g.kick-dt*8);g.hurt-=dt;g.boost-=dt;g.shield-=dt;g.rocket-=dt;g.laser-=dt;g.chain-=dt;g.frost-=dt;g.shot-=dt;g.rocketShot-=dt;g.chainShot-=dt;g.row-=dt;g.hazardAt-=dt;g.shieldBreak-=dt;g.shake-=dt;g.hitFlash-=dt;
     g.x+=(g.target-g.x)*Math.min(1,dt*14);
     // Only for the picture: she leans into a turn and the two pets trail after her.
-    g.lean+=(this.clamp((g.target-g.x)*2.4,-1,1)-g.lean)*Math.min(1,dt*10);g.pets[0]+=(g.x-g.pets[0])*Math.min(1,dt*6.5);g.pets[1]+=(g.x-g.pets[1])*Math.min(1,dt*4.5);
+    g.lean+=(this.clamp((g.target-g.x)*2.4,-1,1)-g.lean)*Math.min(1,dt*10);g.pets[0]+=(g.x-g.pets[0])*Math.min(1,dt*6.5);g.pets[1]+=(g.x-g.pets[1])*Math.min(1,dt*4.5);g.pets[2]+=(g.x-g.pets[2])*Math.min(1,dt*3.4);
     // A new row every 2.2 s (faster later): most lanes hold a barrel; some are storm or bomb barrels. Barrels grow sturdier.
     const sub=g.foes.find(f=>f.sub&&!f.dead);
     if(g.row<=0&&g.time<this.lastRow){g.wave++;const tier=Math.floor(g.time/12.6);
@@ -167,7 +167,7 @@ function trekMip(image,want){
   for(let n=levels.length;n<=i;n++){const src=levels[n-1],w=Math.max(1,Math.round((src.naturalWidth||src.width)/2)),h=Math.max(1,Math.round((src.naturalHeight||src.height)/2)),copy=document.createElement('canvas');copy.width=w;copy.height=h;const x=copy.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(src,0,0,w,h);levels.push(copy)}
   return levels[i]}
 // The pets that run with her are her own deployed pets (the first two Primary Pets), as in the dungeons.
-function trekCrew(){return typeof WonderGear==='undefined'||typeof S==='undefined'||typeof petArtId!=='function'?['d0','d1']:WonderGear.petTeam(S).slice(0,3).filter(Boolean).slice(0,2).map(petArtId)}
+function trekCrew(){return typeof WonderGear==='undefined'||typeof S==='undefined'||typeof petArtId!=='function'?['d0','d1']:WonderGear.petTeam(S).slice(0,3).filter(Boolean).map(petArtId)}
 function showJungle(){
   $('#main').innerHTML=`<section class="jungle-screen"><div class="jungle-field"><canvas id="trekField" width="480" height="800" tabindex="0" aria-label="Jungle Trek. Drag left and right or use arrow keys. Automatic shooting. Escape pauses."></canvas><div id="trekHud" class="trek-top"><div><small>CURRENT SCORE</small><strong id="trekScore">0</strong><small id="trekBest">BEST ${fmt(S.jungleBest||0)}</small><span class="trek-rank" id="trekRank"></span></div><div class="trek-clock"><small>JUNGLE TREK</small><strong id="trekTime">01:03</strong></div><div><span id="trekLives" aria-label="3 lives">♥ ♥ ♥</span><button id="trekPause" onclick="pauseJungle()" aria-label="Pause run">Ⅱ</button></div></div><div class="trek-buffs" id="trekBuffs"></div><div class="trek-controls"><button onclick="go('games')" aria-label="Exit Jungle Trek">‹</button><span>DRAG TO MOVE · AUTO FIRE</span></div><div class="jungle-overlay" id="trekPanel"><small>WINGS OF WONDER</small><h2>Jungle Trek</h2><p>Break the barrels and grab the bonuses: more arrows, power, rockets, sun beam, chain lightning, frost, wings, shields.<br>Two sub-bosses block the trail: Thornback rushes down your lane, Stormwing strikes three lanes at once.<br>Beat the dragon before the clock runs out. Every boss leaves a chest of gold.</p><p class="trek-instruction">Drag left or right · 3 lives · about a minute</p><button class="primary" onclick="startJungle()">Start adventure</button><button onclick="go('games')">Back to Mini Games</button></div></div></section>`;
   const g=Trek.create();g.running=false;g.foes=[{x:-1.24,z:.3,hp:120,max:120,kind:0},{x:-.62,z:.22,hp:60,max:60,kind:2},{x:0,z:.5,hp:60,max:60,kind:1},{x:.62,z:.39,hp:90,max:90,kind:3},{x:1.24,z:.22,hp:100,max:100,kind:4}];
@@ -337,7 +337,7 @@ function drawJungle(c,g){
     if(ch.open){c.globalCompositeOperation='lighter';glow(p.x,p.y-h*.7,w*1.05,[[0,'#fff3b088'],[.5,'#ffcf5a44'],[1,'#ffb34700']]);for(let i=0;i<7;i++){const q=(rnd(i+ch.tx*9+40)+T*.9)%1;c.globalAlpha=fade*(1-q);star(p.x+(rnd(i+50)-.5)*w*.9,p.y-h*.6-q*70*p.s,(3+rnd(i+60)*4)*p.s,'#ffe27a')}c.globalAlpha=fade;c.globalCompositeOperation='source-over'}
     c.translate(p.x,p.y-up);if(k<1)c.rotate(Math.sin(k*9)*.25*(1-k));picture(art,-w/2,-h,w,h);c.restore()}
   // The two pets hop along a little behind her.
-  const pets=g.pets||[g.x,g.x];trekCrew().map((id,i)=>[id,i?84:-84]).forEach(([id,dx],i)=>{const at=P(pets[i],.88).x+dx,hop=Math.abs(Math.sin(T*7.5+i*1.9))*7;ellipse(at,floor+1,27-hop,6.5-hop*.3,'#0c2a1f55');sprite(id,at,floor+2-hop,70,76)});
+  const pets=g.pets||[g.x,g.x,g.x];trekCrew().map((id,i)=>[id,[-84,84,-150][i],i]).reverse().forEach(([id,dx,i])=>{const at=P(pets[i]??g.x,.88).x+dx,hop=Math.abs(Math.sin(T*7.5+i*1.9))*7;ellipse(at,floor+1,27-hop,6.5-hop*.3,'#0c2a1f55');sprite(id,at,floor+2-hop,70,76)});
   // Wings bonus: no pasted wings any more; a soft aura and rising motes, and her own wings beat faster.
   if(g.boost>0){const a=Math.min(1,g.boost);c.save();c.globalCompositeOperation='lighter';c.globalAlpha=a;glow(hero.x,floor-96,150,[[0,'#b9a4ff40'],[1,'#6a4dff00']]);
     for(let i=0;i<8;i++){const q=(i/8+T*1.5)%1,x=hero.x+Math.sin(i*4.7)*60,y=floor-24-q*170;c.globalAlpha=a*(1-q)*.7;star(x,y,7*(1-q*.4),'#e6dcff')}c.restore()}

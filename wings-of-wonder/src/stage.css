@@ -6998,3 +6998,6 @@ body[data-screen=games] #stage .portal-illustration{background:#244a3c}
 .den-learn .den-cost{white-space:nowrap}
 .den-ware b,.den-ware small,.den-ware em{text-shadow:none}
 #main .den .den-ware b{color:#b01e3a;text-shadow:none}#main .den .den-ware small{color:#7a5a3a}#main .den .den-ware em{color:#5a3a12;font-style:normal}
+/* Home: the three Primary Pets stand around Reina: slot 1 at her left, slot 2 at her right, slot 3 in front of her
+   on the stone circle (the sides are taken by menu icons). */
+.city-hud .city-pet-2{left:51%;bottom:27.5%;width:17%;height:11.5%;z-index:2}

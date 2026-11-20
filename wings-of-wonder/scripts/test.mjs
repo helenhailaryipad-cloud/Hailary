@@ -541,3 +541,14 @@ vm.runInContext(`{
  game.hp=low;petSupport(game,.01);if(game.hp!==low)throw Error('Last Stand waits 60 seconds');stopGame();
 }`,context);
 console.log('PASS: pet talents (learn, lock, prophecy, target, scrolls, exchange), pet gear (tiers, set), bolt maths, pages, Last Stand.');
+// Home shows exactly the pets placed in the three Primary Pet slots, each in the spot of its slot.
+vm.runInContext(`{
+ stopGame();S=defaults();openScreen('home');let html=$('#main').innerHTML;
+ if((html.match(/class="city-pet /g)||[]).length!==1||!html.includes('city-pet-0'))throw Error('A new hero has one pet beside her');
+ S.owned.push('d12','d37');S.petPartners=[null,'d37'];openScreen('home');html=$('#main').innerHTML;
+ if((html.match(/class="city-pet /g)||[]).length!==2||!html.includes('city-pet-2')||html.includes('city-pet-1'))throw Error('An empty slot stays empty on the home screen');
+ S.petPartners=['d12','d37'];openScreen('home');html=$('#main').innerHTML;
+ if((html.match(/class="city-pet /g)||[]).length!==3||!html.includes('familiar-12')||!html.includes('familiar-37'))throw Error('All three deployed pets stand beside Reina');
+ if(trekCrew().join()!=='d0,familiar-12,familiar-37')throw Error('Jungle Trek takes the same three pets');
+}`,context);
+console.log('PASS: home screen and Jungle Trek show exactly the three Primary Pets.');

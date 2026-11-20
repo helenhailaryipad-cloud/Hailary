@@ -274,6 +274,11 @@ of d0-d3 say what the paintings show (Grove Dragonling, Ember Drake, Moon Dragon
     variables set once by `petArtVars()` (`denIcon`). Buttons that hold only an `<i>` icon need `denPlain`.
   - Balance is NOT play-tested; hosted bundle headroom about 0.77 MB.
 
+- Three pets beside Reina (user: "3 pets are always on screen next to the hero, but first they must be placed in the
+  chosen window"): the home screen shows exactly the pets of the three Primary Pet slots (`home()` in `app.js`,
+  `.city-pet-<slot>`: slot 1 left, slot 2 right, slot 3 in front on the stone circle); an empty slot shows nothing, no
+  stand-in pet any more. Jungle Trek runs with all three (`trekCrew`, `g.pets[3]`); dungeons already did.
+
 ## In-chat playable preview (user requirement)
 The user wants to play the game inside the chat, and wants SHORT replies in Russian, no fluff.
 - Artifact: https://claude.ai/artifact/L9owNJPMaZjAsTmU3tDGs6 (private). After game changes, rebuild and republish:
