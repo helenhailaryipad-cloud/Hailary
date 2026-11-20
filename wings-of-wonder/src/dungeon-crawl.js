@@ -9,8 +9,9 @@ const PET_SPOTS=[[-66,12],[-120,-24],[-140,40]],PET_HIT=.35,PET_PACE=2.4;
 function petArtId(id){return Number(id.slice(1))>3?'familiar-'+id.slice(1):id}
 function crawlPets(g){
  const a=g.crawl;if(a.pets)return a.pets;
- const ids=typeof WonderGear==='undefined'||typeof S==='undefined'?[]:WonderGear.petTeam(S).slice(0,3).filter(Boolean);
- a.pets=ids.map((id,i)=>({id,i,x:a.hero.x+PET_SPOTS[i][0],y:a.hero.y+PET_SPOTS[i][1],cd:1.2+i*.8,kick:0}));a.petShots=[];
+ // `slot` is the pet's Primary Pet slot (its talents and gear live there); `i` is its place in the line behind Reina.
+ const team=typeof WonderGear==='undefined'||typeof S==='undefined'?[]:WonderGear.petTeam(S).slice(0,3).map((id,slot)=>({id,slot})).filter(x=>x.id);
+ a.pets=team.map(({id,slot},i)=>({id,slot,i,x:a.hero.x+PET_SPOTS[i][0],y:a.hero.y+PET_SPOTS[i][1],cd:1.2+i*.8,kick:0,count:0,fired:false}));a.petShots=[];
  return a.pets;
 }
 function movePets(g,dt){
@@ -21,14 +22,25 @@ function movePets(g,dt){
  }
  for(const shot of a.petShots)shot.life-=dt;a.petShots=a.petShots.filter(shot=>shot.life>0);
 }
+// Talents that keep Reina alive: Mending Breath (2% every 15 s of a fight) and Last Stand (15% when below 30%, 60 s).
+function talentGuard(g,dt){
+ const t=g.talents??=WonderGear.guardTalents(S),a=g.crawl;
+ if(t.mend&&a.engaged&&!a.exitReady&&g.enemy.hp>0){g.mendCD=(g.mendCD??15)-dt;
+  if(g.mendCD<=0){g.mendCD=15;if(g.hp<g.maxhp){const heal=Math.round(g.maxhp*.02*t.mend);g.hp=Math.min(g.maxhp,g.hp+heal);battleLog('Mending Breath restores '+heal+' health.')}}}
+ g.standCD=Math.max(0,(g.standCD||0)-dt);
+ if(t.stand&&g.hp>0&&g.hp<g.maxhp*.3&&g.standCD<=0){g.standCD=60;const heal=Math.round(g.maxhp*.15*t.stand);g.hp=Math.min(g.maxhp,g.hp+heal);
+  g.particles.push({text:'LAST STAND +'+heal,x:a.hero.x-60,y:a.hero.y-130,color:'#b6ff9e',life:1.4});battleLog('Last Stand restores '+heal+' health.')}
+}
 function petSupport(g,dt){
- const a=g.crawl;if(!a||g.ended||a.exitReady||!a.engaged||g.enemy.hp<=0||g.transition>0)return false;
+ const a=g.crawl;if(!a||g.ended)return false;
+ if(typeof WonderGear!=='undefined'&&typeof S!=='undefined')talentGuard(g,dt);
+ if(a.exitReady||!a.engaged||g.enemy.hp<=0||g.transition>0)return false;
  const pets=crawlPets(g);
  if(pets.length&&!a.petsHailed){a.petsHailed=true;battleLog(pets.map(p=>item(p.id).name).join(', ')+(pets.length>1?' fight':' fights')+' beside REINA.');}
  for(const p of pets){
-  p.cd-=dt;if(p.cd>0)continue;p.cd=PET_PACE;p.kick=.28;
+  p.cd-=dt;if(p.cd>0)continue;p.cd=WonderGear.petBoltPace(S,p.slot);p.kick=.28;p.count++;
   a.petShots.push({x:p.x+16,y:p.y-34,tx:a.enemy.x,ty:a.enemy.y-(g.enemy.boss?110:70),life:.36,max:.36,color:item(p.id).color});
-  battleDamage(Math.round(WonderGear.petAttack(S,p.id)*PET_HIT));
+  battleDamage(WonderGear.petBolt(S,p.slot,p.id,{first:!p.fired,enemyRatio:g.enemy.hp/g.enemy.maxhp,boss:!!g.enemy.boss,count:p.count}));p.fired=true;
   if(g.ended||a.exitReady||g.transition>0)return true;
  }
  return false;
@@ -39,7 +51,7 @@ function drawCrawlPet(c,g,p){
  drawArtSprite(c,petArtId(p.id),p.x+lunge,p.y+7-hop,76,76);c.restore();
 }
 function setupCrawl(g){g.crawl={hero:{x:118,y:330,tx:285,ty:310},enemy:{x:520,y:300},engaged:false,exitReady:false,shots:[],danger:null,roomTime:0};}
-function crawlRoom(g){const a=g.crawl;a.hero={x:118,y:330,tx:285,ty:310};a.enemy={x:520,y:g.stage===2?BOSS_LANE.top:300};a.engaged=false;a.exitReady=false;a.shots=[];a.danger=null;a.roomTime=0;g.transition=0;if(a.pets){for(const p of a.pets){p.x=a.hero.x+PET_SPOTS[p.i][0];p.y=a.hero.y+PET_SPOTS[p.i][1];p.cd=1.2+p.i*.8;p.kick=0}a.petShots=[]}}
+function crawlRoom(g){const a=g.crawl;a.hero={x:118,y:330,tx:285,ty:310};a.enemy={x:520,y:g.stage===2?BOSS_LANE.top:300};a.engaged=false;a.exitReady=false;a.shots=[];a.danger=null;a.roomTime=0;g.transition=0;if(a.pets){for(const p of a.pets){p.x=a.hero.x+PET_SPOTS[p.i][0];p.y=a.hero.y+PET_SPOTS[p.i][1];p.cd=1.2+p.i*.8;p.kick=0;p.fired=false}a.petShots=[]}}
 function moveRanger(x,y){const g=game;if(!g?.crawl||g.ended||gamePaused||!Number.isFinite(x)||!Number.isFinite(y))return;g.crawl.hero.tx=Math.max(84,Math.min(640,x));g.crawl.hero.ty=Math.max(235,Math.min(406,y));}
 function beginCrawlDodge(g){
  const {hero,enemy,danger}=g.crawl;

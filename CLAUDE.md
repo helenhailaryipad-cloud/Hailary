@@ -246,6 +246,29 @@ of d0-d3 say what the paintings show (Grove Dragonling, Ember Drake, Moon Dragon
   `scripts/build-familiars.py` (takes about 5 minutes; run it in the background). Cache tag `?v=sharp3` in
   `gear-data.js` (the chat builder patches that exact string). Hosted bundle headroom about 1.13 MB.
 
+- Pet Gear and Pet Talent (user sent 15 reference photos, no text; original names, icons and numbers, similar
+  mechanics). Formation sub-tabs are now Pet Feeding / Pet Gear / Pet Talent (`petModes`; Star-up stays in Gallery,
+  the badge forge in the Badge tab). Both systems belong to the Primary Pet SLOT (0-2), stay when the pet is replaced,
+  and count only while a pet stands in the slot. Rules in `gear-data.js`, optional save fields, validated:
+  - Gear (`S.petGear` = 3 x 8 levels, 0-100): eight pieces (`petGearPieces`), ten levels per tier (T1-T10), gold per
+    level and shards for the first level of a new tier (`petGearCost`); Horn/Fang/Claw/Orb add pet ATK (+4), Collar/
+    Plate Reina HP (+30), Brace/Ring Reina DEF (+6); set bonus = lowest tier x 4% bolt damage (`petGearBonus`). UI:
+    `petMode==='Gear'`, tiles left and right of the pet, Upgrade and x10 (`petGearUp`). No bag, synthesis or reset.
+  - Talents (`S.petTalents` = {seals, books, slots:[{open, cells[15], locks, target}]}; starts at 300 seals): sixteen
+    talents (`petTalents`, eight attack that shape that pet's bolts, eight guard that strengthen Reina), fifteen cells a
+    slot (six open, more for seals). Learn (60 seals, +50% per lock) inscribes a random missing talent into an empty
+    cell or over a random unlocked one; Prophecy (one book) shows the result first (Keep / Let go, `talentPending`);
+    Learn Target makes one talent four times likelier; Supreme talent Dragon's Roar awakes at twelve talents (every
+    fifth bolt x3). Talent Shop (`petPage==='TalentShop'`): Prophecy Book 50, any talent scroll 400 (needs an empty
+    cell), Fragment exchange (spare copies or 1,000 gold -> seals). Seals also come from dungeon guardians (+30) and
+    Jungle Trek chests (+10 each). Pages: `petPage==='Talent'` (`talentGo(slot)`), back arrow to Formation.
+  - Fights: `petBolt(s,slot,id,ctx,rng)` and `petBoltPace` replace the fixed 35% / 2.4 s in `petSupport`;
+    `talentGuard` runs Mending Breath and Last Stand. Stat talents and gear HP/DEF are added in `stats()`.
+  - Icons: three atlases `comp-pet-talents` (4x4, order of `petTalents`), `comp-pet-gear` (4x2), `comp-pet-misc`
+    (seal, book, supreme, scroll) from `art-source/pets/`, built by `scripts/build-pet-talents.py`; shown through CSS
+    variables set once by `petArtVars()` (`denIcon`). Buttons that hold only an `<i>` icon need `denPlain`.
+  - Balance is NOT play-tested; hosted bundle headroom about 0.77 MB.
+
 ## In-chat playable preview (user requirement)
 The user wants to play the game inside the chat, and wants SHORT replies in Russian, no fluff.
 - Artifact: https://claude.ai/artifact/L9owNJPMaZjAsTmU3tDGs6 (private). After game changes, rebuild and republish:

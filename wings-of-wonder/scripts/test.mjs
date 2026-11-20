@@ -491,3 +491,53 @@ vm.runInContext(`{
  if(!dragonSVG(item('d1'),5).includes('<svg'))throw Error('Evolution preview keeps its star forms');
 }`,context);
 console.log('PASS: Wonders > Pets opens the Pets room and returns; Summon inside the room; painted pets replace the flat drawings.');
+// Pet talents and pet gear: rules, validation, effect on Reina and on pet bolts, and the three new pages.
+vm.runInContext(`{
+ const r=WonderGear;stopGame();S=defaults();
+ const t0=r.talentState(S);if(t0.seals!==300||t0.books!==0||t0.slots.length!==3||t0.slots[0].open!==6||S.petTalents!==undefined)throw Error('Talents start with 300 seals and six open cells, without touching the save');
+ if(r.petTalents.length!==16||new Set(r.petTalents.map(t=>t.id)).size!==16)throw Error('Sixteen talents');
+ const base=stats().attack;
+ let roll=r.learnTalent(S,0,()=>0);if(!roll||roll.id!=='fang'||roll.cell!==0||r.talentState(S).seals!==240||!valid(S))throw Error('Learn inscribes a random talent into the first empty cell for 60 seals');
+ r.lockTalent(S,0,0);if(r.learnCost(S,0)!==90)throw Error('Each lock makes Learn 50% dearer');
+ for(let i=0;i<5;i++)r.addSeals(S,90),r.learnTalent(S,0,()=>0);
+ let v=r.talentState(S).slots[0];if(v.cells.slice(0,6).join()!=='fang,surge,haste,star,pounce,bite')throw Error('Cells fill in order');
+ r.addSeals(S,90);roll=r.learnTalent(S,0,()=>0);v=r.talentState(S).slots[0];
+ if(roll.cell!==1||roll.replaces!=='surge'||v.cells[0]!=='fang'||v.cells[1]!=='giant')throw Error('A full slot overwrites an unlocked talent, never a locked one');
+ r.setTalentTarget(S,0,'bond');r.addSeals(S,500);r.buyTalentBook(S);const held=r.learnTalent(S,0,()=>.3,true);v=r.talentState(S);
+ if(!held.held||held.id!=='bond'||v.books!==0||v.slots[0].cells.includes('bond'))throw Error('Prophecy shows the result first; the target is likelier');
+ if(!r.keepTalent(S,0,held)||!r.talentState(S).slots[0].cells.includes('bond')||stats().attack<=base)throw Error('Keeping it inscribes it; Bonded Might raises Reina ATK');
+ const seals=r.talentState(S).seals;if(r.buyTalentScroll(S,0,'mend'))throw Error('A scroll needs an empty cell');
+ if(!r.openTalentCell(S,0)||r.talentState(S).seals!==seals-50||!r.buyTalentScroll(S,0,'mend')||r.talentState(S).slots[0].cells[6]!=='mend')throw Error('Open a cell for seals, then inscribe a scroll');
+ if(r.guardTalents(S).mend!==1||r.guardTalents(S).stand!==0)throw Error('Healing talents are counted');
+ if(!r.forgetTalent(S,0,6)||r.guardTalents(S).mend!==0||!valid(S))throw Error('Forget frees a cell');
+ const fam=r.familiars.find(p=>p.rarity==='Common').id;r.addPetSpare(S,fam,3);const before=r.talentState(S).seals;
+ if(r.exchangeSpares(S,'Common')!==60||r.talentState(S).seals!==before+60||r.petSpares(S,fam)!==0)throw Error('Spare copies become seals');
+ S.gold=1000;if(!r.buySeals(S)||S.gold!==0||r.buySeals(S))throw Error('Gold buys seals');
+ for(const bad of [{seals:-1,books:0,slots:r.talentState(S).slots},{seals:1,books:0,slots:[]},{seals:1,books:0,slots:[{open:6,cells:Array(15).fill(null).map((x,i)=>i===9?'fang':null),locks:[],target:''},...r.talentState(S).slots.slice(1)]}]){const keep=S.petTalents;S.petTalents=bad;if(valid(S))throw Error('Invalid talents accepted');S.petTalents=keep}
+ // bolts: talents multiply, in order; gear adds pet ATK and a set bonus
+ S=defaults();const plain=r.petBolt(S,0,'d0',{count:1},()=>.5);if(plain!==Math.round(r.petAttack(S,'d0')*.35))throw Error('A plain bolt is 35% of pet ATK');
+ S.petTalents={seals:0,books:0,slots:[{open:6,cells:['fang','pounce','giant',null,null,null,...Array(9).fill(null)],locks:[],target:''},...r.talentState(S).slots.slice(1)]};
+ if(r.petBolt(S,0,'d0',{first:true,boss:true,count:1},()=>.5)!==Math.round(r.petAttack(S,'d0')*.35*1.25*3*1.3)||r.petBolt(S,1,'d0',{first:true,boss:true,count:1},()=>.5)!==plain)throw Error('Talents of a slot shape only that slot');
+ if(r.petBoltPace(S,0)!==2.4)throw Error('Pace without Quick Wing');
+ S.gold=200;const hp=stats().health,team=r.petTeamAttack(S);
+ if(!r.upgradePetGear(S,0,0)||S.gold!==0||r.petGearLevels(S,0)[0]!==1||r.petTeamAttack(S)!==team+4||r.upgradePetGear(S,0,0)||!valid(S))throw Error('Forging a horn piece costs gold and adds pet ATK');
+ S.gold=1e7;for(let i=0;i<10;i++)r.upgradePetGear(S,0,3);if(r.petGearLevels(S,0)[3]!==10||stats().health!==hp+300)throw Error('Collar adds Reina HP');
+ const shards=r.state(S).materials.shard;S.equipment=r.state(S);S.equipment.materials.shard=0;if(r.upgradePetGear(S,0,3))throw Error('A new tier needs shards');
+ S.equipment.materials.shard=6;if(!r.upgradePetGear(S,0,3)||r.state(S).materials.shard!==0||r.petGearTier(11)!==2)throw Error('Tier-up spends shards');
+ for(let p=0;p<8;p++)while(r.petGearLevels(S,0)[p]<1)r.upgradePetGear(S,0,p);
+ if(r.petGearBonus(S,0).tier!==1||r.petGearBonus(S,0).dmg!==4)throw Error('Set bonus follows the lowest tier');
+ S.petGear=[[1,2],[],[]];if(valid(S))throw Error('Invalid pet gear accepted');S.petGear=undefined;
+ // pages render and act
+ S=defaults();S.gold=5000;openScreen('cityPet');petMode='Gear';cityPet();if(!$('#main').innerHTML.includes('den-gearstage'))throw Error('Pet Gear page');
+ petGearUp(1);if(r.petGearLevels(S,0)[0]!==1)throw Error('Upgrade button forges the chosen piece');
+ talentGo(0);if(petPage!=='Talent'||!$('#main').innerHTML.includes('den-hexes'))throw Error('Pet Talent page');
+ const keepRandom=Math.random;Math.random=()=>0;talentLearn();Math.random=keepRandom;if(r.talentIds(S,0).join()!=='fang'||talentCell!==0)throw Error('Learn button inscribes a talent');
+ petTab('TalentShop');if(!$('#main').innerHTML.includes('den-wares'))throw Error('Talent Shop page');
+ talentBuy('book');if(r.talentState(S).books!==1)throw Error('Shop sells Prophecy Books');
+ // Last Stand in a fight
+ S.petTalents={seals:0,books:0,slots:[{open:6,cells:['stand',null,null,null,null,null,...Array(9).fill(null)],locks:[],target:''},...r.talentState(S).slots.slice(1)]};
+ startBattle('dungeon','mistwood');game.crawl.engaged=true;game.hp=Math.round(game.maxhp*.2);const low=game.hp;petSupport(game,.01);
+ if(game.hp!==low+Math.round(game.maxhp*.15))throw Error('Last Stand restores 15% below 30% health');
+ game.hp=low;petSupport(game,.01);if(game.hp!==low)throw Error('Last Stand waits 60 seconds');stopGame();
+}`,context);
+console.log('PASS: pet talents (learn, lock, prophecy, target, scrolls, exchange), pet gear (tiers, set), bolt maths, pages, Last Stand.');
