@@ -7,6 +7,11 @@ Read `docs/WINGS-OF-WONDER-HANDOVER.md` before any game work.
 - Preserve save compatibility (`wow-save-v1`, version 1), item instance IDs, existing art and project identity.
 - `mcp/gpt_image_mcp.py` is an image-generation MCP server (default model gpt-image-2.6-sunburst); the OpenAI key is injected by the session proxy, never committed.
 
+## Current priority (user, 2026-11-20)
+Build the SKELETON of the game first: screens, systems and flows that exist and work. Prices, bonuses and all stat
+numbers will be tuned together later, so do not spend time balancing now and do not report balance caveats at length;
+pick sensible placeholder numbers, keep them in named constants, and move on.
+
 ## Layout
 - `wings-of-wonder/` — the game (imported from backup v301 with full Git history, commit 1468d48). Run commands from there: `npm ci`, `node scripts/test.mjs`, `node scripts/test-jungle.mjs`, `node scripts/preview.mjs --port 4173`.
 - `docs/backup-v301/` — original handover, file inventory, function index, captured test output.
