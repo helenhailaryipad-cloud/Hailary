@@ -1411,6 +1411,15 @@ function cloudRoundCheck(){
  if(!WonderGear.cloudNewRound(S,owners))return false;
  delete S.cloudWarHits;S.cloudPatrol={hits:{},last:Date.now()};save();return true;
 }
+// A city of her own faction that has not paid its ownership reward this round shows a chest above it.
+const cloudChestReady=i=>cloudCount===4&&cloudOwner(i)===cloudMine&&!WonderGear.cloudState(S).got.includes(i);
+function cloudOwnClaim(i){
+ const place=cloudTerritories()[i];if(!place||!cloudChestReady(i))return;
+ const items=WonderGear.cloudOwnTake(S,i,place.rank);if(!items)return;
+ save();if($('#modal').open)$('#modal').close();
+ const board=document.querySelector('.cloud-four-board');if(board)board.outerHTML=cloudFourBoard(cloudTerritories());
+ popup('<h2>Ownership Reward</h2><p>'+place.name+' belongs to '+cloudFactions[cloudMine][0]+'. The reward of this round went to the bag.</p><div class="bag-gains">'+cloudItems(items)+'</div><p>Every city she holds pays again in the next round.</p>');
+}
 const cloudClaimable=()=>{const v=WonderGear.cloudState(S);return WonderGear.cloudPointRewards.some((r,n)=>v.carnage>=r.at&&!v.claimed.includes(n))};
 const cloudLoot={Boss:{id:'chest2',n:1},Elite:{id:'chest1',n:1},Guard:null};
 function cloudItems(items){bagArtVars();return Object.entries(items).map(([id,n])=>'<span class="bag-gain" style="--rarity:'+bagHue(WonderGear.bagItemById[id].rarity)+'">'+bagIcon(id)+'<b>×'+n+'</b><small>'+WonderGear.bagItemById[id].name+'</small></span>').join('')}
@@ -1666,7 +1675,7 @@ function cloudPortalPreview(place,index){
   <div class="portal-defenders" data-terrain="${place.rank}">${defenders}</div>
   <div class="city-points"><b>Current points:</b>${rows.map(([f,i,n],k)=>`<span style="color:${f[3]}">${k+1}. ${f[0]}: ${n}</span>`).join('')}<small>80 points open the city</small></div>
   <div class="city-kill"><h3>Killing Rewards${pick>=0?' · '+cloudBossName(pick):''}</h3><p>Territory Points: <b>${cloudEnemyScore[role]}</b> · Carnage Points: <b>${cloudEnemyScore[role]}</b></p><p>Personal point pool <b>${rewards.personal}</b>, shared by damage</p><div class="bag-gains">${loot?cloudItems({[loot.id]:loot.n}):''}${dailyTokens(['hud-prisms','hud-gems'])}</div></div>
-  <div class="den-actions"><button class="den-gold city-go" onclick="cloudGo(${index})" ${mine&&pick>=0?'':'disabled'}>${denPlain}Go</button></div></section>`;
+  <div class="den-actions">${cloudChestReady(index)?`<button class="den-gold city-own" onclick="cloudOwnClaim(${index})">${denPlain}Ownership Reward</button>`:''}<button class="den-gold city-go" onclick="cloudGo(${index})" ${mine&&pick>=0?'':'disabled'}>${denPlain}Go</button></div></section>`;
 }
 function cloudTerritory(index){
  if(cloudCount===4&&cloudRoundCheck())cityCloudWar();
@@ -1729,9 +1738,10 @@ function cloudFourBoard(nodes){
   const sector=Math.floor(i/6),owner=cloudOwner(i),target=patrols[sector];
   const alive=cloudAlive(i),badge=(owner>=0?cloudFactions[owner][0]+' · ':'')+'Boss: '+alive+(target?.index===i?' · under attack':'');
   const spriteSize=city?size:Math.round(size*.9);
-  return `<g transform="translate(${p.x*6} ${p.y*8})" role="button" tabindex="0" aria-label="${p.owner}: ${p.name}, ${p.rank}" onclick="cloudTerritory(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();cloudTerritory(${i})}" style="cursor:pointer"><rect x="${-width/2}" y="${-size*.65}" width="${width}" height="${size+24}" fill="transparent"/><image href="assets/generated/${asset}.webp" x="${-spriteSize/2}" y="${size*.3-spriteSize}" width="${spriteSize}" height="${spriteSize}"/><rect x="${-ribbonWidth/2}" y="${size*.3}" width="${ribbonWidth}" height="14" rx="4" fill="#415874" fill-opacity=".65"/><text y="${size*.3+10.4}" fill="#fffdf4" font-size="${fontSize}" font-weight="600">${label}</text><text y="${size*.3+24}" fill="${owner>=0?cloudFactions[owner][3]:'#fff8dd'}" stroke="#203044" stroke-width="2.6" paint-order="stroke" font-size="8.6" font-weight="700">${badge}</text></g>`;
+  const chest=cloudChestReady(i)?`<g class="cloud-own-chest" role="button" aria-label="Ownership reward of ${p.name}" onclick="event.stopPropagation();cloudOwnClaim(${i})" transform="translate(${p.x*6} ${p.y*8-size*.78})"><circle r="15" fill="#ffe27a" opacity=".35"><animate attributeName="r" values="12;17;12" dur="1.4s" repeatCount="indefinite"/></circle><g><animateTransform attributeName="transform" type="translate" values="0 0;0 -4;0 0" dur="1.4s" repeatCount="indefinite"/><image href="${artPath('comp-bag-items')}" x="${p.rank==='Capital'?-51:-17}" y="-51" width="136" height="136" clip-path="url(#cloudChestClip)"/></g></g>`:'';
+  return `<g transform="translate(${p.x*6} ${p.y*8})" role="button" tabindex="0" aria-label="${p.owner}: ${p.name}, ${p.rank}" onclick="cloudTerritory(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();cloudTerritory(${i})}" style="cursor:pointer"><rect x="${-width/2}" y="${-size*.65}" width="${width}" height="${size+24}" fill="transparent"/><image href="assets/generated/${asset}.webp" x="${-spriteSize/2}" y="${size*.3-spriteSize}" width="${spriteSize}" height="${spriteSize}"/><rect x="${-ribbonWidth/2}" y="${size*.3}" width="${ribbonWidth}" height="14" rx="4" fill="#415874" fill-opacity=".65"/><text y="${size*.3+10.4}" fill="#fffdf4" font-size="${fontSize}" font-weight="600">${label}</text><text y="${size*.3+24}" fill="${owner>=0?cloudFactions[owner][3]:'#fff8dd'}" stroke="#203044" stroke-width="2.6" paint-order="stroke" font-size="8.6" font-weight="700">${badge}</text></g>`+chest;
  }).join('');
- return `<svg class="cloud-four-board" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid meet" role="group" aria-label="Four faction territories" text-anchor="middle" font-family="system-ui"><defs><filter id="cloudRoadGlow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3"/></filter></defs><image href="assets/generated/cloud-war-heavens.webp" width="600" height="800" preserveAspectRatio="xMidYMid slice" pointer-events="none"/><rect width="600" height="800" fill="#416c9a" opacity=".14" pointer-events="none"/>${roads.join('')}${ships}${markers}</svg>`;
+ return `<svg class="cloud-four-board" viewBox="0 0 600 800" preserveAspectRatio="xMidYMid meet" role="group" aria-label="Four faction territories" text-anchor="middle" font-family="system-ui"><defs><filter id="cloudRoadGlow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3"/></filter><clipPath id="cloudChestClip"><rect x="-17" y="-17" width="34" height="34"/></clipPath></defs><image href="assets/generated/cloud-war-heavens.webp" width="600" height="800" preserveAspectRatio="xMidYMid slice" pointer-events="none"/><rect width="600" height="800" fill="#416c9a" opacity=".14" pointer-events="none"/>${roads.join('')}${ships}${markers}</svg>`;
 }
 function cloudLinkedMap(nodes){
  const links=[[0,1],[0,2],[1,3],[1,4],[2,3],[2,5]];

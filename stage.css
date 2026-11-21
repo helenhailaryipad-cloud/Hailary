@@ -7483,3 +7483,5 @@ body:is([data-screen=citySummon],[data-screen=cityContest]) #stage>#main{inset:0
 @keyframes cloud-ride{0%{left:-40%;transform:translateY(0)}25%{transform:translateY(-3%)}50%{transform:translateY(0)}75%{transform:translateY(-3%)}100%{left:100%;transform:translateY(0)}}
 .cloud-path strong{position:absolute;top:14%;left:50%;transform:translateX(-50%);padding:.2em .8em;border-radius:1em;background:#302239dc;font:900 clamp(16px,4.4cqw,24px)/1.2 Arial,sans-serif;color:#ffb35a;text-shadow:0 2px 3px #000;white-space:nowrap}
 .cloud-path small{position:absolute;top:28%;left:50%;transform:translateX(-50%);font:700 13px/1.2 Arial,sans-serif!important;color:#fff;text-shadow:0 1px 3px #000;white-space:nowrap}
+.cloud-own-chest{cursor:pointer}
+#stage #modal .cloud-city .city-own{padding:8px 18px;font-size:15px;background:linear-gradient(#b8ff9a,#4fc24c);color:#0f3a12}
