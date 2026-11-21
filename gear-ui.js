@@ -258,14 +258,17 @@ const bagIcon=id=>{const n=WonderGear.bagItems.findIndex(i=>i.id===id);return '<
 const bagHue=k=>WonderGear.bagRarity[k][1];
 const bagNum=n=>n>=1e4?new Intl.NumberFormat('en',{notation:'compact',maximumFractionDigits:1}).format(n):String(n);
 const bagNotes={stone:'Used to enhance equipment. Earn crystals in dungeons and mini-games.',shard:'Used to add stars to equipment and pets. Earn shards from dungeon and Castle Defense victories.',gem:'Socket into equipment for attack, piercing, health or defense. Earn gems by clearing dungeons.',synthesis:'Needed to craft the next equipment tier. Earn up to two per day from the Forge keeper, or buy one in Gear Crafting.',essence:'Crafts the next equipment tier while keeping all upgrades. Earn essence from dungeon bosses.'};
+// Equipment has three tabs of its own, by slot: Equipment (bow and armour), Necklace (necklace, amulet), Rings.
+const bagGearTabs=['Equipment','Necklace','Rings'],bagTabs=['Common',...bagGearTabs,'Materials','Pet','ALL'],vaultTabs=['Common',...bagGearTabs,'Materials','ALL'];
+const bagGearGroup=t=>['necklace','amulet'].includes(t.slot)?'Necklace':t.slot.startsWith('spirit')?'Rings':'Equipment';
 // What one tab holds, as tiles. where: 'bag' or 'vault'; petTab: the view has its own Pet tab.
 function bagThings(tab,where='bag',petTab=true,order='slot'){
  const r=WonderGear,eq=r.state(S),vault=where==='vault',out=[],all=tab==='ALL';
  const stack=(key,icon,n,hue,name,rank=0)=>out.push({key,n,hue,name,rank,html:icon+'<b>'+bagNum(n)+'</b>'});
  const items=want=>{for(const i of r.bagItems){const n=vault?r.vaultCount(S,'i:'+i.id):r.bagCount(S,i.id);if(n&&want(i))stack('i:'+i.id,bagIcon(i.id),n,bagHue(i.rarity),i.name,'bpor'.indexOf(i.rarity))}};
- if(tab==='Common'||all){
-  items(i=>all||!petTab||!i.pet);
-  const gear=eq.items.filter(e=>vault?e.stored:!e.stored&&!r.equipped(eq,e.uid)).sort((a,b)=>order==='power'?r.detail(b).power-r.detail(a).power:r.slots.findIndex(s=>s.id===r.catalog[a.template].slot)-r.slots.findIndex(s=>s.id===r.catalog[b.template].slot)||a.uid-b.uid);
+ if(tab==='Common'||all)items(i=>all||!petTab||!i.pet);
+ if(bagGearTabs.includes(tab)||all){
+  const gear=eq.items.filter(e=>(all||bagGearGroup(r.catalog[e.template])===tab)&&(vault?e.stored:!e.stored&&!r.equipped(eq,e.uid))).sort((a,b)=>order==='power'?r.detail(b).power-r.detail(a).power:r.slots.findIndex(s=>s.id===r.catalog[a.template].slot)-r.slots.findIndex(s=>s.id===r.catalog[b.template].slot)||a.uid-b.uid);
   for(const e of gear)out.push({key:'g:'+e.uid,gear:e,name:r.catalog[e.template].name,rank:r.catalog[e.template].grade});
  }
  if(tab==='Materials'||all){
@@ -325,7 +328,7 @@ function cityBag(){
  $('#main').innerHTML=`<section class="satchel"><div class="satchel-top"><strong>Bag</strong>${satchelWallet()}</div><h1>Lv. ${level()} &nbsp;${esc(S.name)}</h1>
  <div class="satchel-stage"><div class="satchel-rail">${rails(0)}</div><div class="satchel-model"><div class="satchel-wings">${artImage(S.wings,'')}</div><img src="${reinaLookPath(false)}" alt="Reina"></div><div class="satchel-rail">${rails(5)}</div></div>
  <div class="satchel-actions"><button aria-label="Equipped wings" onclick="chooseSectionPage('wings')">${artImage(S.wings,'')}</button>${[['gem','Gem'],['star','Star'],['equipment','Enhance']].map(([i,n])=>`<button onclick="cityBagPick('${n}')">${uiIcon(i)}${n}</button>`).join('')}<button aria-label="Equipped pet" onclick="selectedPetId=S.dragon;chooseSectionPage('collection')">${dragonSVG(pet)}</button></div>
- <div class="satchel-tabs">${['Common','Materials','Pet','ALL'].map(t=>`<button aria-pressed="${t===cityBagFilter}" onclick="cityBagFilter='${t}';cityBag()">${denPlain}${t}</button>`).join('')}</div>
+ <div class="satchel-tabs many">${bagTabs.map(t=>`<button aria-pressed="${t===cityBagFilter}" onclick="cityBagFilter='${t}';cityBag()">${denPlain}${t}</button>`).join('')}</div>
  <div class="satchel-scroll"><div class="satchel-grid">${bagPad(things.map(t=>t.gear?equipmentCell(t.gear):bagTile(t,"bagOpen('"+t.key+"')")))}</div></div>
  <div class="satchel-foot"><span>Capacity: ${petTab?things.length+'/'+bagPetCapacity:r.bagUsed(S)+'/'+r.bagCapacity}</span><button onclick="cityBagPick('Convert')">Convert</button><button onclick="go('cityDevour')">Devour</button><button onclick="cityBagOrder=cityBagOrder==='slot'?'power':'slot';cityBag();toast(cityBagOrder==='power'?'Sorted by rarity':'Sorted by kind')">Sort</button></div>
  ${satchelNav('Bag')}</section>`;
@@ -351,7 +354,7 @@ function cityVault(){
  $('#main').innerHTML=`<section class="satchel vault"><div class="satchel-top"><strong>Warehouse</strong>${satchelWallet()}</div>
  <div class="satchel-scroll"><div class="satchel-grid">${bagPad(stored.map(tile('v')))}</div></div>
  <div class="vault-hint">${picked?`<span><b>${esc(picked[1].name)}</b></span><button onclick="vaultShift()">${picked[0]==='v'?'Withdraw':'Deposit'}</button>`:'<span>Double tap the item to deposit or withdraw</span>'}<button onclick="vaultOrder=vaultOrder==='slot'?'power':'slot';cityVault()">Warehouse Sort</button></div>
- <div class="satchel-tabs">${['Common','Materials','ALL'].map(t=>`<button aria-pressed="${t===vaultTab}" onclick="vaultTab='${t}';cityVault()">${denPlain}${t}</button>`).join('')}</div>
+ <div class="satchel-tabs many">${vaultTabs.map(t=>`<button aria-pressed="${t===vaultTab}" onclick="vaultTab='${t}';cityVault()">${denPlain}${t}</button>`).join('')}</div>
  <div class="satchel-scroll"><div class="satchel-grid">${bagPad(mine.map(tile('b')))}</div></div>
  <div class="satchel-foot"><span>Capacity: ${r.bagUsed(S)}/${r.bagCapacity}</span><button onclick="cityBagOrder=cityBagOrder==='slot'?'power':'slot';cityVault()">Sort</button></div>
  ${satchelNav('Warehouse')}</section>`;

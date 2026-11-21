@@ -7122,3 +7122,6 @@ body:is([data-screen=cityVault],[data-screen=cityDevour]) #stage>#main{inset:0!i
 #stage #modal .bag-gain :is(img,.gear-illustration){width:52px;height:52px}
 .bag-gain{align-content:start}
 .bag-gain b{font:700 14px/1 Arial,sans-serif;color:#fff}.bag-gain small{font:400 11px/1.15 Arial,sans-serif!important;color:#dfe8ff;text-align:center}
+/* Seven tabs in the bag (Common, Equipment, Necklace, Rings, Materials, Pet, ALL): equal shares, smaller letters */
+#stage #main .satchel-tabs.many{gap:.6%}
+#stage #main .satchel-tabs.many button{flex:1 1 0;width:auto;min-width:0;font:700 2.35cqw/1 Arial,sans-serif;letter-spacing:-.01em;white-space:nowrap;overflow:hidden}
