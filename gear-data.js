@@ -382,6 +382,7 @@ function validPets(s){
  if(!validSummon(s.summon))return false;
  if(!validContest(s.contest))return false;
  if(!validCloud(s.cloud))return false;
+ if(!validSocial(s.social))return false;
  if(s.emberShards!==undefined&&(!Number.isSafeInteger(s.emberShards)||s.emberShards<0))return false;
  if(s.petSpares!==undefined&&(!s.petSpares||typeof s.petSpares!=='object'||Array.isArray(s.petSpares)||!Object.entries(s.petSpares).every(([id,n])=>Object.hasOwn(familiarById,id)&&Number.isInteger(n)&&n>0&&n<=9999)))return false;
  if(s.emberStars!==undefined&&(!Number.isInteger(s.emberStars)||s.emberStars<0||s.emberStars>6||!s.owned?.includes('d1')))return false;
@@ -826,5 +827,94 @@ function validCloud(v){
   &&int(v.carnage)&&v.carnage<=cloudRules.carnageCap&&int(v.tokens)&&Array.isArray(v.claimed)&&new Set(v.claimed).size===v.claimed.length&&v.claimed.every(n=>Number.isInteger(n)&&n>=0&&n<cloudPointRewards.length)
   &&(v.got===undefined||Array.isArray(v.got)&&new Set(v.got).size===v.got.length&&v.got.every(n=>Number.isInteger(n)&&n>=0&&n<cloudRules.territories))&&!!v.held&&typeof v.held==='object'&&!Array.isArray(v.held)&&Object.entries(v.held).every(([i,f])=>/^\d+$/.test(i)&&Number(i)<cloudRules.territories&&Number.isInteger(f)&&f>=0&&f<cloudRules.factions);
 }
-return Object.freeze({cloudOwnReward,cloudOwnTake,cloudRules,cloudPointRewards,cloudShop,cloudRound,cloudRoundEnds,cloudState,cloudNewRound,cloudGain,cloudClaim,buyCloud,validCloud,warFactions,warTotems,warRules,warQuests,warRanks,contestShop,contestState,warNew,warHeld,warHero,warOrder,warTally,warStep,warStanding,warRankPrize,warQuestsDue,warStart,warSettle,buyContest,validContest,summonWells,summonPity,summonLevelMax,summonDupGold,markKinds,markPrice,markLimit,markNeed,galaQuests,galaMilestones,galaEnds,summonState,summonLevel,summonPay,summonDraw,markOffer,buyMarkPet,galaClaim,galaReward,validSummon,bossRare,gearRanks,gearRank,gearCraftFrom,gearNoDevour,bossDropRanks,craftRecipe,craftInputs,craftChance,craftGear,gearGroups,gearGroup,bagCapacity,bagStarter,bagRarity,bagItems,bagItemById,bagCount,bagAdd,bagStacks,bagUsed,vaultCount,vaultMove,useBagItem,devourStep,devourMax,devourNeed,devourWorth,devourState,devourBonus,devourable,devourGear,validBag,riposteShare,riposteEvery,talentCells,talentFree,talentLearn,talentBook,talentScroll,talentTopScroll,talentPrice,talentSupremeAt,talentSupreme,petTalents,talentState,talentIds,supremeReady,addSeals,openCellCost,openTalentCell,learnCost,rollTalent,keepTalent,learnTalent,lockTalent,forgetTalent,setTalentTarget,buyTalentScroll,buyTalentBook,sealRates,sealGold,buySeals,exchangeSpares,talentBonus,guardTalents,petGearPieces,petGearMax,petGearStep,petGearSetStep,petGearLevels,petGearTier,petGearCost,petGearBonus,upgradePetGear,petBolt,petBoltPace,petHit,petPace,assistPages,assistSlots,synthChain,synthNeed,petSpares,addPetSpare,synthesizePet,fashionTraits,companionTypes,companionSkins,companionSkin,ownsCompanionSkin,useCompanionSkin,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
+// ---- Social: chat, friends, flowers, mail and thank-you notes ------------------------------------------------------
+// There are no other players: everyone here is an AI adventurer and is labelled so. Optional save field `social`
+// {day, sent[], got, hearts{id:n}, friends[], requests[], blocked[], recent[], mail[], nextId, chat[]}. Placeholders.
+const socialFolk=[
+ {id:'nyra',name:'Nyra',face:'nyra',lv:4},{id:'kael',name:'Kael',face:'kael',lv:9},{id:'pip',name:'Pip',face:'pip',lv:-3},
+ {id:'vesper',name:'Vesper',face:'vesper',lv:6},{id:'briar',name:'Briar',face:'briar',lv:1},{id:'orin',name:'Orin',face:'orin',lv:12},
+ {id:'wren',name:'Wren',face:'guest',lv:-1},{id:'juno',name:'Juno',face:'guest',lv:3},{id:'lumi',name:'Lumi',face:'guest',lv:7},{id:'thane',name:'Thane',face:'guest',lv:-5}
+];
+const socialRules={friendsMax:20,giftsPerDay:10,flowerHeart:10,heartPoints:100,hearts:5,receiveGold:20,mailMax:30,chatKeep:30,chatEvery:25e3};
+const socialById=Object.fromEntries(socialFolk.map(f=>[f.id,f]));
+const chatChannels=['World','Guild','Cross-server','Private'];
+const chatLines=['Anyone up for the Moonfall guardian?','Just hatched a Pet Egg, it was an Epic!','Cloud War round starts soon, Galewing gather at Larkspire!',
+ 'Tip: Blue and Purple gear is great food for the Glimmer Maw.','Who has a spare Star Shard Pouch to trade?','The Jungle Trek dragon finally fell, three chests!',
+ 'Good luck on your summons today!','Five Orange pieces make a 2-Star Red, do not devour them.','Harvest Pairs under a minute, new record!',
+ 'Totem War tip: hold two totems and your points grow.','Thanks for the flowers, friend!','Mind the Golden Boss, it hits hard.',
+ 'Is the Summon Festival worth it? Star Orbs are nice.','Fishing at dawn gives the rarest catches, I think.','Let us clear the EXP trial together.'];
+const chatReplies=['Hello! Nice to meet you.','Good luck out there!','Haha, same here.','See you in the dungeon!','Sounds good to me.','Thank you, friend!','On my way!'];
+const thankLines=['With your help I cleared the EXP trial and got great rewards. Thank you!','Your arrows saved me at the Moonfall gate. Thanks!',
+ 'We took a city in Cloud War thanks to you!','Thank you for the flowers, here is a little something back.'];
+const hashOf=str=>{let h=7;for(const c of String(str))h=(h*31+c.charCodeAt(0))%2147483647;return h};
+function socialState(s,now=Date.now()){
+ const v=s.social||{},day=utcDay(now),today=v.day===day;
+ return {day,sent:today?[...(v.sent||[])]:[],got:today?v.got||0:0,hearts:{...v.hearts},friends:v.friends?[...v.friends]:['nyra','kael','pip','vesper'],
+  requests:v.requests?[...v.requests]:['briar','wren'],blocked:[...(v.blocked||[])],recent:[...(v.recent||[])],mail:(v.mail||[]).map(m=>({...m,items:{...m.items}})),
+  nextId:v.nextId||1,chat:(v.chat||[]).map(c=>({...c})),stamp:v.day||''};
+}
+function heartsOf(s,id){const pts=socialState(s).hearts[id]||0;return Math.min(socialRules.hearts,pts/socialRules.heartPoints)}
+function mailSend(v,m,now){v.mail.unshift({id:v.nextId++,kind:m.kind||'mail',title:m.title,text:m.text,from:m.from,items:m.items||{},t:now,read:false,claimed:!Object.keys(m.items||{}).length});
+ while(v.mail.length>socialRules.mailMax){const old=[...v.mail].reverse().findIndex(x=>x.claimed);v.mail.splice(old>=0?v.mail.length-1-old:v.mail.length-1,1)}}
+// New UTC day: the daily courier letter and one or two thank-you notes from friends. Returns how many arrived.
+function socialTick(s,now=Date.now(),rng=Math.random){
+ const v=socialState(s,now);if(v.stamp===v.day){return 0}
+ const first=!s.social;
+ if(first)mailSend(v,{title:'Welcome to Sky Garden',from:'Kiki',text:'Letters, rewards and anything that did not fit in your bag arrive here. Claim them whenever you like.',items:{chest1:1}},now);
+ mailSend(v,{title:'Daily Courier',from:'Kiki',text:'Here is today\'s little parcel from the courier guild.',items:{exp1:1,gold1:1}},now);
+ const notes=1+(rng()<.5?1:0);
+ for(let i=0;i<notes&&v.friends.length;i++){const f=v.friends[Math.floor(rng()*v.friends.length)];mailSend(v,{kind:'note',title:'Thank-you Note',from:socialById[f].name,text:thankLines[Math.floor(rng()*thankLines.length)],items:{stonebag:1}},now)}
+ v.stamp=v.day;s.social=socialPack(v);return 1+notes+(first?1:0);
+}
+function socialPack(v){const out={day:v.day,sent:v.sent,got:v.got,hearts:v.hearts,friends:v.friends,requests:v.requests,blocked:v.blocked,recent:v.recent,mail:v.mail,nextId:v.nextId,chat:v.chat};return out}
+// Flowers: up to ten sent and ten received a day. Gift All does both for every friend.
+function sendFlower(s,id,now=Date.now()){
+ const v=socialState(s,now);if(!v.friends.includes(id)||v.sent.includes(id)||v.sent.length>=socialRules.giftsPerDay)return false;
+ v.sent.push(id);v.hearts[id]=Math.min(socialRules.hearts*socialRules.heartPoints,(v.hearts[id]||0)+socialRules.flowerHeart);s.social=socialPack({...v,day:v.day});return true;
+}
+function giftAll(s,now=Date.now()){
+ let sent=0;for(const id of socialState(s,now).friends)if(sendFlower(s,id,now))sent++;
+ const v=socialState(s,now),got=Math.max(0,Math.min(socialRules.giftsPerDay,v.friends.length)-v.got);
+ v.got+=got;s.gold+=got*socialRules.receiveGold;for(const id of v.friends.slice(0,got))v.hearts[id]=Math.min(socialRules.hearts*socialRules.heartPoints,(v.hearts[id]||0)+socialRules.flowerHeart);
+ s.social=socialPack(v);return {sent,got,gold:got*socialRules.receiveGold};
+}
+function friendAnswer(s,id,yes){const v=socialState(s);if(!v.requests.includes(id))return false;v.requests=v.requests.filter(x=>x!==id);if(yes&&v.friends.length<socialRules.friendsMax&&!v.friends.includes(id))v.friends.push(id);s.social=socialPack(v);return true}
+function friendAdd(s,id){const v=socialState(s);if(!socialById[id]||v.friends.includes(id)||v.blocked.includes(id)||v.friends.length>=socialRules.friendsMax)return false;v.friends.push(id);v.requests=v.requests.filter(x=>x!==id);s.social=socialPack(v);return true}
+function friendBlock(s,id,on=true){const v=socialState(s);if(!socialById[id])return false;v.blocked=v.blocked.filter(x=>x!==id);v.friends=v.friends.filter(x=>x!==id||!on);if(on)v.blocked.push(id);s.social=socialPack(v);return true}
+function mailClaim(s,ids){
+ const v=socialState(s),got={};let n=0;
+ for(const m of v.mail)if(ids.includes(m.id)&&!m.claimed){m.claimed=true;m.read=true;n++;for(const [id,k] of Object.entries(m.items)){bagAdd(s,id,k);got[id]=(got[id]||0)+k}}
+ s.social=socialPack(v);return {n,got};
+}
+function mailDelete(s,ids){const v=socialState(s),before=v.mail.length;v.mail=v.mail.filter(m=>!(ids.includes(m.id)&&m.claimed));s.social=socialPack(v);return before-v.mail.length}
+function mailRead(s,id){const v=socialState(s),m=v.mail.find(m=>m.id===id);if(!m)return null;m.read=true;s.social=socialPack(v);return m}
+// The chat feed: AI lines come every 25 s, picked from the clock, so they are the same after a reload; her own lines
+// and the answers to them are kept (`chat`, last 30).
+function chatFeed(s,channel,now=Date.now(),count=24){
+ const v=socialState(s,now),out=[];
+ if(channel!=='Private'){
+  const slot=Math.floor(now/socialRules.chatEvery),pool=socialFolk.filter(f=>!v.blocked.includes(f.id));
+  for(let k=slot-count+1;k<=slot;k++){const h=Math.imul(hashOf(channel+k),2654435761)>>>0,g=Math.imul(h^(h>>>15),2246822519)>>>0;if(channel==='Guild'&&h%3)continue;const f=pool[g%pool.length];out.push({ch:channel,from:f.id,text:chatLines[(h>>>7)%chatLines.length],t:k*socialRules.chatEvery})}
+ }
+ for(const c of v.chat)if(channel==='Private'?c.ch.startsWith('p:'):c.ch===channel)out.push(c);
+ return out.sort((a,b)=>a.t-b.t).slice(-count);
+}
+function chatSay(s,channel,text,now=Date.now(),rng=Math.random){
+ const clean=String(text).replace(/[<>]/g,'').trim().slice(0,80);if(!clean)return null;
+ const v=socialState(s,now),me={ch:channel,from:'me',text:clean,t:now};v.chat.push(me);
+ const to=channel.startsWith('p:')?channel.slice(2):null,pool=socialFolk.filter(f=>!v.blocked.includes(f.id)),who=to||pool[Math.min(pool.length-1,Math.floor(rng()*pool.length))].id;
+ const reply={ch:channel,from:who,text:chatReplies[Math.floor(rng()*chatReplies.length)],t:now+1500};v.chat.push(reply);
+ if(to&&!v.recent.includes(to))v.recent.unshift(to);v.recent=v.recent.slice(0,10);
+ v.chat=v.chat.slice(-socialRules.chatKeep);s.social=socialPack(v);return {me,reply};
+}
+function validSocial(v){
+ if(v===undefined)return true;
+ const ids=a=>Array.isArray(a)&&new Set(a).size===a.length&&a.every(x=>Object.hasOwn(socialById,x)),int=n=>Number.isSafeInteger(n)&&n>=0;
+ return !!v&&typeof v==='object'&&!Array.isArray(v)&&typeof v.day==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v.day)&&ids(v.sent)&&v.sent.length<=socialRules.giftsPerDay&&int(v.got)&&v.got<=socialRules.giftsPerDay
+  &&!!v.hearts&&typeof v.hearts==='object'&&Object.entries(v.hearts).every(([k,n])=>Object.hasOwn(socialById,k)&&int(n)&&n<=socialRules.hearts*socialRules.heartPoints)
+  &&ids(v.friends)&&v.friends.length<=socialRules.friendsMax&&ids(v.requests)&&ids(v.blocked)&&ids(v.recent)&&int(v.nextId)
+  &&Array.isArray(v.mail)&&v.mail.length<=socialRules.mailMax&&v.mail.every(m=>m&&int(m.id)&&m.id<v.nextId&&['mail','note'].includes(m.kind)&&[m.title,m.text,m.from].every(x=>typeof x==='string'&&x.length<=300)&&Number.isFinite(m.t)&&typeof m.read==='boolean'&&typeof m.claimed==='boolean'&&!!m.items&&Object.entries(m.items).every(([k,n])=>Object.hasOwn(bagItemById,k)&&int(n)&&n<=99))
+  &&Array.isArray(v.chat)&&v.chat.length<=socialRules.chatKeep&&v.chat.every(c=>c&&typeof c.ch==='string'&&c.ch.length<=20&&(c.from==='me'||Object.hasOwn(socialById,c.from))&&typeof c.text==='string'&&c.text.length<=80&&Number.isFinite(c.t));
+}
+return Object.freeze({socialFolk,socialRules,socialById,chatChannels,socialState,heartsOf,socialTick,sendFlower,giftAll,friendAnswer,friendAdd,friendBlock,mailClaim,mailDelete,mailRead,chatFeed,chatSay,validSocial,cloudOwnReward,cloudOwnTake,cloudRules,cloudPointRewards,cloudShop,cloudRound,cloudRoundEnds,cloudState,cloudNewRound,cloudGain,cloudClaim,buyCloud,validCloud,warFactions,warTotems,warRules,warQuests,warRanks,contestShop,contestState,warNew,warHeld,warHero,warOrder,warTally,warStep,warStanding,warRankPrize,warQuestsDue,warStart,warSettle,buyContest,validContest,summonWells,summonPity,summonLevelMax,summonDupGold,markKinds,markPrice,markLimit,markNeed,galaQuests,galaMilestones,galaEnds,summonState,summonLevel,summonPay,summonDraw,markOffer,buyMarkPet,galaClaim,galaReward,validSummon,bossRare,gearRanks,gearRank,gearCraftFrom,gearNoDevour,bossDropRanks,craftRecipe,craftInputs,craftChance,craftGear,gearGroups,gearGroup,bagCapacity,bagStarter,bagRarity,bagItems,bagItemById,bagCount,bagAdd,bagStacks,bagUsed,vaultCount,vaultMove,useBagItem,devourStep,devourMax,devourNeed,devourWorth,devourState,devourBonus,devourable,devourGear,validBag,riposteShare,riposteEvery,talentCells,talentFree,talentLearn,talentBook,talentScroll,talentTopScroll,talentPrice,talentSupremeAt,talentSupreme,petTalents,talentState,talentIds,supremeReady,addSeals,openCellCost,openTalentCell,learnCost,rollTalent,keepTalent,learnTalent,lockTalent,forgetTalent,setTalentTarget,buyTalentScroll,buyTalentBook,sealRates,sealGold,buySeals,exchangeSpares,talentBonus,guardTalents,petGearPieces,petGearMax,petGearStep,petGearSetStep,petGearLevels,petGearTier,petGearCost,petGearBonus,upgradePetGear,petBolt,petBoltPace,petHit,petPace,assistPages,assistSlots,synthChain,synthNeed,petSpares,addPetSpare,synthesizePet,fashionTraits,companionTypes,companionSkins,companionSkin,ownsCompanionSkin,useCompanionSkin,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
 })();
