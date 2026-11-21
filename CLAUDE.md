@@ -326,10 +326,10 @@ unchanged), Warehouse (`cityVault`), Devour (`cityDevour`). Rules in `gear-data.
   without it holds `bagStarter`. `useBagItem(s,id,count,rng)` returns `{ok,used,gains}`; chests have a fixed part
   (`give`) and one random surprise (`pick`). Sources so far: every dungeon win gives an Oak Chest (Moon Chest on a
   first clear), beating the Jungle Trek dragon gives a Moon Chest.
-- Tabs (`bagTabs`; user 2026-11-21: "split equipment, necklace and rings tabs"): Common = items only, Equipment
-  (bow and armour pieces), Necklace (necklace, amulet), Rings (both spirit rings) = spare equipment by slot
-  (`bagGearGroup`; worn pieces are only on the rails), Materials = equipment materials, talent seals, prophecy books,
-  Pet = Pet Egg, Seal Satchel, spare pet copies with n/6, Ember shards, ALL. The Warehouse has the same without Pet. Tapping a
+- Tabs (`bagTabs`, four as in the reference): Common = items + spare equipment (worn pieces are only on the rails),
+  Materials = equipment materials, talent seals, prophecy books, Pet = Pet Egg, Seal Satchel, spare pet copies with
+  n/6, Ember shards, ALL. The Warehouse has Common / Materials / ALL. Do NOT add equipment tabs to the bag: the user
+  rejected that reading (see Gear Crafting below). Tapping a
   tile opens the item card (`bagOpen(key)`, the `.den-item` pop-up) with Use / Use N; the result is a "You received"
   pop-up (`bagUse`, `bagGain`). Tile keys: `i:<item>`, `m:<material>`, `g:<uid>`, `p:<pet>`, `t:seals|books|ember`.
   Capacity (`bagUsed` / `bagCapacity` 150) is only shown, nothing is refused yet.
@@ -342,6 +342,11 @@ unchanged), Warehouse (`cityVault`), Devour (`cityDevour`). Rules in `gear-data.
   optional `S.devour` (total essence). Stars and gems on eaten pieces come back as shards and gems.
 - Art: `art-source/bag/items.webp` (4 x 4 sheet in the order of `bagItems`) and `maw.webp`, built by
   `scripts/build-bag-icons.py` into `comp-bag-items` and `comp-bag-maw`. Tiles need `denPlain` (stock icons).
+- Gear Crafting families (user 2026-11-21: "split equipment, necklace and rings tabs", then the reference photo of the
+  bottom tabs): the tabs existed, but a piece took ANY spare piece of its tier, so necklaces and rings were eaten on
+  the Equipment tab. Rule now: `gearGroups` = Equipment / Necklace & Amulet / Rings, `gearGroup(template)`, and
+  `starDonors` only offers spare pieces of the target's own family and tier (also in the old Forge page). The tabs are
+  a clear bar above the bottom bar (`.loom-kinds`).
 - Not done from the reference: bottom-row extra slots, the star bands of Gear Crafting (ours is 1-5 Star Gear),
   capacity limits, Convert in bulk. Hosted bundle headroom is about 0.22 MB: add AVIF copies before more art.
 

@@ -610,16 +610,20 @@ vm.runInContext(`
  r.bagAdd(S,'chest1',2);r.addPetSpare(S,first,2);r.addDrop(S,1);
  for(const tab of bagTabs){cityBagFilter=tab;openScreen('cityBag');if(!document.querySelector('#main').innerHTML.includes('Capacity: '))throw Error('Bag tab '+tab)}
  cityBagFilter='Pet';cityBag();if(!document.querySelector('#main').innerHTML.includes('2/'+r.synthNeed))throw Error('Pet copies in the bag');
- // Equipment sits in three tabs of its own, by slot; Common holds items only.
- r.addDrop(S,1,'bow');r.addDrop(S,1,'necklace');r.addDrop(S,1,'spiritluck');
- const groups={Equipment:0,Necklace:0,Rings:0};for(const e of r.devourable(S))groups[bagGearGroup(r.catalog[e.template])]++;
- for(const tab of bagGearTabs){const got=bagThings(tab);if(!groups[tab]||got.length!==groups[tab]||got.some(t=>!t.gear||bagGearGroup(r.catalog[t.gear.template])!==tab))throw Error('Gear tab '+tab)}
- if(bagThings('Common').some(t=>t.gear)||bagThings('ALL').filter(t=>t.gear).length!==groups.Equipment+groups.Necklace+groups.Rings)throw Error('Gear must leave Common and stay in ALL');
+ if(bagTabs.join()!=='Common,Materials,Pet,ALL'||!bagThings('Common').some(t=>t.gear))throw Error('The bag has four tabs; spare equipment is in Common');
+ // Gear Crafting keeps Equipment, Necklace & Amulet and Rings apart: a piece only takes spare pieces of its own family.
+ {const T=defaults();T.gold=1e6;T.equipment=r.state(T);T.equipment.materials.shard=99;
+  const add=slot=>r.addDrop(T,1,slot).uid,bow=add('bow'),armour=[add('crown'),add('armor'),add('boots'),add('bow')],neck=[add('necklace'),add('amulet'),add('necklace'),add('amulet')],rings=[add('spiritluck'),add('spiritguard'),add('spiritluck'),add('spiritguard')];
+  const item=r.state(T).items.find(e=>e.uid===bow),names=r.starDonors(r.state(T),item).map(e=>r.gearGroup(e.template));
+  if(r.gearGroups.length!==3||!names.length||names.some(n=>n!=='Equipment'))throw Error('Equipment donors must be equipment');
+  if(r.perform(T,bow,'star',neck).ok||r.perform(T,bow,'star',[...armour.slice(0,3),rings[0]]).ok)throw Error('Necklaces and rings must not feed equipment');
+  if(!r.perform(T,bow,'star',armour).ok||!r.perform(T,neck[0],'star',[neck[1],neck[2],neck[3],add('amulet')]).ok||!r.perform(T,rings[0],'star',[rings[1],rings[2],rings[3],add('spiritguard')]).ok)throw Error('Each family crafts within itself');
+  const keep=S;S=T;for(const g of r.gearGroups){craftFilter(1,null,g);const html=document.querySelector('#main').innerHTML;if(!html.includes('loom-kinds'))throw Error('Crafting tabs')}S=keep}
  cityBagFilter='Common';cityBag();const html=document.querySelector('#main').innerHTML;
  if(!html.includes("bagOpen('i:chest1')")||html.includes("bagOpen('p:"))throw Error('Common tab');
  bagOpen('i:chest1');if(!document.querySelector('#modalBody').innerHTML.includes('Oak Chest')||!document.querySelector('#modalBody').innerHTML.includes("bagUse('chest1',2)"))throw Error('Item card');
  bagUse('chest1',1);if(r.bagCount(S,'chest1')!==1||!document.querySelector('#modalBody').innerHTML.includes('You received'))throw Error('Use from the card');
- vaultTab='ALL';openScreen('cityVault');const piece=r.devourable(S)[0].uid;
+ openScreen('cityVault');const piece=r.devourable(S)[0].uid;
  vaultTap('b','g:'+piece);if(r.state(S).items.find(e=>e.uid===piece).stored||!document.querySelector('#main').innerHTML.includes('Deposit'))throw Error('First tap only chooses');
  vaultTap('b','g:'+piece);if(!r.state(S).items.find(e=>e.uid===piece).stored)throw Error('Second tap deposits');
  vaultTap('v','g:'+piece);vaultTap('v','g:'+piece);if(r.state(S).items.find(e=>e.uid===piece).stored)throw Error('Withdraw by taps');
