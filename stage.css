@@ -7413,3 +7413,39 @@ body:is([data-screen=citySummon],[data-screen=cityContest]) #stage>#main{inset:0
 .cloud-floating-loot .bag-gain .bag-ico{width:44px}
 .cloud-open{margin-left:auto}.cloud-open b{color:#7dff8a!important}
 .cloud-foreign{margin:4px 10px;padding:5px 8px;border-radius:8px;background:#ffffff1a;color:#ffe7b0;font-size:13px}
+/* Cloud War hall under the fight: info, Boss List / DMG Rankings, Auto next */
+.cloud-share{display:block;margin-top:-4px;font:700 12px/1.2 Arial,sans-serif;color:#d9b3ff}
+.cloud-hall-buttons{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+#stage .cloud-encounter .cloud-auto[aria-pressed=true]{background:#5fbf6a;color:#10301a}
+.cloud-hall{width:min(100%,90dvh);display:grid;gap:4px;text-align:left}
+.hall-info{display:grid;gap:2px;padding:6px 10px;border-radius:10px;background:#0d1a2cd9;font:700 13px/1.3 Arial,sans-serif;color:#fff}
+.hall-info b{color:#7dff8a}.hall-info i{font-style:normal;color:#ff9aa2;margin-left:6px}.hall-info i.ok{color:#7dff8a}
+.hall-tabs{display:flex;gap:4px}
+#stage .cloud-encounter .hall-tabs button{flex:1;min-height:30px;padding:4px;border-radius:8px;font:700 13px/1 Arial,sans-serif;background:#23324d;color:#cfe0ff;border:1px solid #6f8bb8}
+#stage .cloud-encounter .hall-tabs button[aria-pressed=true]{background:linear-gradient(#ffe89a,#f0b548);color:#5a3a12}
+.hall-list{display:grid;gap:2px;max-height:210px;overflow:auto;padding:4px;border-radius:10px;background:#0d1a2cd9}
+#stage .cloud-encounter .hall-row{display:grid;grid-template-columns:minmax(0,1.6fr) 1fr .9fr;align-items:center;gap:6px;min-height:0;padding:4px 8px;border-radius:6px;background:transparent;border:1px solid transparent;box-shadow:none;text-align:left;font:700 13px/1.2 Arial,sans-serif;color:#fff}
+#stage .cloud-encounter .hall-row::before,#stage .cloud-encounter .hall-row::after{display:none}
+.hall-row b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hall-row.role-boss b{color:#ffcf5a}.hall-row.role-elite b{color:#d99cff}.hall-row.role-guard b{color:#8fd0ff}
+.hall-row em{font-style:normal;color:#ff7a7a}.hall-row em.up{color:#7dff8a}
+.hall-row span{font-size:12px;text-align:right}
+#stage .cloud-encounter .hall-row.now{border-color:#ffe27a;background:#ffe27a22}
+/* the fight with its hall fits one screen */
+#stage .cloud-encounter:has(.cloud-hall){align-content:start;gap:5px;padding:52px 3% 10px}
+#stage .cloud-encounter:has(.cloud-hall) h2{font-size:clamp(17px,4.2cqw,24px)}
+#stage .cloud-encounter:has(.cloud-hall) label{font-size:14px}
+#stage .cloud-encounter:has(.cloud-hall) progress{height:10px;margin:2px 0 4px}
+#stage .cloud-encounter:has(.cloud-hall) .cloud-battlefield{width:min(100%,calc(34dvh*640/420))}
+#stage .cloud-encounter:has(.cloud-hall) [data-status]{font-size:15px}
+.cloud-hall-buttons{flex-wrap:nowrap}
+#stage .cloud-encounter .cloud-hall-buttons button{min-height:34px;padding:4px 12px;font-size:14px;white-space:nowrap}
+#stage .cloud-encounter .cloud-hall-buttons button :is(img,svg,.gpt-icon){width:18px;height:18px}
+.cloud-hall .den-x{display:none}
+.hall-list{max-height:min(210px,24dvh)}
+#stage #main .cloud-encounter .hall-row{display:grid;grid-template-columns:minmax(0,1.6fr) 1fr .9fr;height:auto;min-height:24px;margin:0;padding:3px 8px;border:1px solid transparent!important;outline:0!important;box-shadow:none!important;background:transparent!important;border-radius:6px;font:700 13px/1.25 Arial,sans-serif;text-decoration:none;transform:none}
+#stage #main .cloud-encounter .hall-row.now{border-color:#ffe27a!important;background:#ffe27a22!important}
+#stage #main .cloud-encounter .hall-row:nth-child(even){background:#ffffff0d!important}
+#stage #main .cloud-encounter .hall-row::before,#stage #main .cloud-encounter .hall-row::after{content:none!important;display:none!important}
+#stage #main .cloud-encounter .hall-row small{font:400 10px/1 Arial,sans-serif!important;opacity:.7}
+#stage #main .cloud-encounter div.hall-row{display:grid}

@@ -1506,6 +1506,23 @@ function cloudArenaFloor(ctx){
  }
  ctx.restore();
 }
+let cloudMapOffset=[0,0],cloudAutoNext=true,cloudHallTab='Boss';
+// The hall of a city: who is left, who is back by the round's end, which faction beat whom; tap a row to fight it.
+function cloudBossName(slot){const art=cloudPortalSlots[slot][3],same=cloudPortalSlots.slice(0,slot).filter(x=>x[3]===art).length;return (WonderGear.tierGuardians.find(g=>g.id==='guardian-t'+art)?.name||'Defender')+(same?' II':'')}
+const cloudNextTarget=index=>cloudPortalSlots.findIndex(([role],slot)=>cloudDamage(index,slot)<cloudEnemyHealth[role]);
+function cloudHallPick(index,slot){if(cloudPlayerDuel===index*10+slot)return;if(cloudDamage(index,slot)>=cloudEnemyHealth[cloudPortalSlots[slot][0]]){toast('Defeated · returns in '+cloudClock());return}cloudPlayerDuel=null;cloudStrike(index,slot)}
+function cloudHallTabs(tab,index,slot){cloudHallTab=tab;const hall=document.querySelector('.cloud-hall');if(hall)hall.outerHTML=cloudHall(index,slot)}
+function cloudHall(index,current){
+ const sector=Math.floor(index/6),pts=cloudFactionScores(index)[cloudMine]||0,owner=cloudOwner(index),holy=cloudOwner(sector*6),v=WonderGear.cloudState(S);
+ const mine=S.cloudWarHits?.[index]||[],bots=S.cloudPatrol?.hits?.[index]||[];
+ const rows=cloudPortalSlots.map(([role],slot)=>{const lim=cloudEnemyHealth[role],down=cloudDamage(index,slot)>=lim,by=down?((mine[slot]||0)>=lim?cloudMine:sector):-1,now=slot===current;
+  return `<button class="hall-row role-${role.toLowerCase()} ${now?'now':''}" onclick="cloudHallPick(${index},${slot})">${denPlain}<b>${cloudBossName(slot)}</b><em class="${down?'':'up'}">${now?'Fighting':down?cloudClock():'Refreshed'}</em><span style="color:${by>=0?cloudFactions[by][3]:'#9fb0d8'}">${by>=0?cloudFactions[by][0]:'None'}</span></button>`}).join('');
+ const killers=[[esc(S.name),cloudMine,mine.filter((n,slot)=>n>=cloudEnemyHealth[cloudPortalSlots[slot][0]]).length],...(sector===cloudMine?cloudSquads[cloudMine].map((n,i)=>[n+' <small>AI</small>',cloudMine,bots.filter((h,slot)=>h>0&&slot%2===i).length]):[])].sort((a,b)=>b[2]-a[2]);
+ const dmg=killers.map(([n,f,k],i)=>`<div class="hall-row"><b>${i+1}. ${n}</b><em class="up">${k} defeated</em><span style="color:${cloudFactions[f][3]}">${cloudFactions[f][0]}</span></div>`).join('');
+ return `<div class="cloud-hall"><div class="hall-info"><span>Carnage Points <b>${v.carnage}/${WonderGear.cloudRules.carnageCap}</b></span><span>Current Territory Point: <b>${pts}</b> <i class="${owner===cloudMine?'ok':''}">${owner===cloudMine?'Occupied':'Not occupied'}</i></span><span>Current Holy Land Owner: <b style="color:${holy>=0?cloudFactions[holy][3]:'#fff'}">${holy>=0?cloudFactions[holy][0]:'None'}</b></span></div>
+  <div class="hall-tabs"><button aria-pressed="${cloudHallTab==='Boss'}" onclick="cloudHallTabs('Boss',${index},${current})">${denPlain}Boss List</button><button aria-pressed="${cloudHallTab==='Dmg'}" onclick="cloudHallTabs('Dmg',${index},${current})">${denPlain}DMG Rankings</button></div>
+  <div class="hall-list">${cloudHallTab==='Boss'?rows:dmg}</div></div>`;
+}
 function cloudStrike(index,slot){
  const defender=cloudPortalSlots[slot],place=cloudTerritories()[index];
  if(screen!=='cloudWar'||cloudCount!==4||!defender||!place||Math.floor(index/6)!==cloudMine)return;
@@ -1514,7 +1531,8 @@ function cloudStrike(index,slot){
  if(previous>=limit)return;
  cloudPlayerDuel=index*10+slot;
  const field=$('.cloud-field.map-4');
- const mapOffset=[field.scrollLeft,field.scrollTop];
+ if(field)cloudMapOffset=[field.scrollLeft,field.scrollTop];
+ const mapOffset=cloudMapOffset;
  $('#modal').close();
  const body=$('#main');
  const max=role==='Boss'?3000:role==='Elite'?2100:1500;
@@ -1522,7 +1540,7 @@ function cloudStrike(index,slot){
  const orbDamage=role==='Boss'?2:1;
  let heroHP=100,nextOrb=2,orbStart=null,lastHit=-2;
  const shots=[],actor={clock:0,heroShotAt:-1,spriteIdle:true};
- body.innerHTML=`<section class="cloud-encounter" style="${cloudArenaStyle(slot)}"><h2>${place.name} · ${role==='Boss'?'Golden Boss':role}</h2><label>${role} HP <b data-enemy-hp></b><progress max="${max}" value="${hp}"></progress></label><div class="cloud-battlefield"><canvas width="640" height="420" aria-label="Reina fighting the ${role}"></canvas></div><p data-status>Reina · 100% HP · Auto-fighting</p><button class="primary" data-burst>Celestial Arrow</button> <button data-exit>Leave battle</button></section>`;
+ body.innerHTML=`<section class="cloud-encounter" style="${cloudArenaStyle(slot)}"><h2>${place.name} · ${cloudBossName(slot)}</h2><label>${role==='Boss'?'Golden Boss':role} HP <b data-enemy-hp></b><progress max="${max}" value="${hp}"></progress><small class="cloud-share">1. ${cloudFactions[cloudMine][0]}: 100%</small></label><div class="cloud-battlefield"><canvas width="640" height="420" aria-label="Reina fighting the ${role}"></canvas></div><p data-status>Reina · 100% HP · Auto-fighting</p><div class="cloud-hall-buttons"><button class="primary" data-burst>Celestial Arrow</button><button class="cloud-auto" aria-pressed="${cloudAutoNext}" onclick="cloudAutoNext=!cloudAutoNext;this.setAttribute('aria-pressed',cloudAutoNext)">${denPlain}Auto next</button><button data-exit>Leave battle</button></div>${cloudHall(index,slot)}</section>`;
  const canvas=body.querySelector('canvas'),ctx=canvas.getContext('2d'),burst=body.querySelector('[data-burst]');
  const bar=body.querySelector('progress'),number=body.querySelector('[data-enemy-hp]');
  function shoot(damage){
@@ -1589,7 +1607,9 @@ function cloudStrike(index,slot){
   canvas.onclick=null;
   body.querySelector('[data-status]').textContent='Victory';
   bagArtVars();canvas.parentElement.insertAdjacentHTML('beforeend',`<div class="cloud-floating-loot" role="status">${loot?'<div class="bag-gains">'+cloudItems({[loot.id]:loot.n})+'</div>':''}<strong>+${cloudEnemyScore[role]} territory points · ${gain?'+'+gain+' Carnage Points':'daily Carnage cap reached'}</strong></div>`);
-  setTimeout(returnToTerritory,3200);
+  const hall=body.querySelector('.cloud-hall');if(hall)hall.outerHTML=cloudHall(index,-1);
+  const next=cloudNextTarget(index);
+  setTimeout(()=>{if(!canvas.isConnected||screen!=='cloudWar')return;if(cloudAutoNext&&next>=0){cloudPlayerDuel=null;cloudStrike(index,next)}else returnToTerritory()},3200);
  }
  requestAnimationFrame(frame);
 }
