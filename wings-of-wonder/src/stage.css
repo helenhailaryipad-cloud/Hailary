@@ -7477,3 +7477,9 @@ body:is([data-screen=citySummon],[data-screen=cityContest]) #stage>#main{inset:0
 #stage #modal .cloud-city .portal-strike small{font-size:8px;padding:1px 3px}
 #stage #modal .cloud-city .portal-defenders[data-terrain]{width:min(100%,46dvh,380px)}
 #stage #modal .cloud-city .portal-defenders[data-terrain]{width:min(100%,42dvh,380px)}
+/* Pathfinding between two defenders: Reina rides across the hall */
+.cloud-path{position:absolute;inset:0;z-index:2;display:grid;place-items:end center;padding-bottom:6%;border-radius:12px;background:linear-gradient(#0d1a2c00 50%,#0d1a2c66);pointer-events:none}
+.cloud-path img{position:absolute;bottom:4%;left:-40%;width:42%;object-fit:contain;filter:drop-shadow(0 6px 6px #0008);animation:cloud-ride 1.9s ease-in-out forwards}
+@keyframes cloud-ride{0%{left:-40%;transform:translateY(0)}25%{transform:translateY(-3%)}50%{transform:translateY(0)}75%{transform:translateY(-3%)}100%{left:100%;transform:translateY(0)}}
+.cloud-path strong{position:absolute;top:14%;left:50%;transform:translateX(-50%);padding:.2em .8em;border-radius:1em;background:#302239dc;font:900 clamp(16px,4.4cqw,24px)/1.2 Arial,sans-serif;color:#ffb35a;text-shadow:0 2px 3px #000;white-space:nowrap}
+.cloud-path small{position:absolute;top:28%;left:50%;transform:translateX(-50%);font:700 13px/1.2 Arial,sans-serif!important;color:#fff;text-shadow:0 1px 3px #000;white-space:nowrap}

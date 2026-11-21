@@ -458,6 +458,9 @@ territory windows with ten defenders and the fight; defenders never came back an
   to fight that defender (`cloudHallPick`). "Auto next" (`cloudAutoNext`, on by default) moves to the next standing
   defender after a victory (`cloudNextTarget`) instead of returning to the map. Rows need full overrides of the global
   `#main button` rules (see the end of `stage.css`).
+- Pathfinding (user photo of the hero driving between bosses): with Auto next, 2.4 s after a victory the canvas is
+  cleared and Reina rides across on her chosen mount (`reinaLookPath(true)`, `.cloud-path`, `cloudRideMs` 1.9 s) under
+  "Pathfinding to <next defender>", then the next fight starts.
 - City window (user: "I tap the icon and choose the boss on the mini-map", photo of the Palace City window):
   `cloudPortalPreview` for the four-faction map shows Ownership, the mini-map of ten defenders (HP bar under each,
   defeated ones grey with the return clock), Current points of the factions (80 open the city), Killing Rewards of
