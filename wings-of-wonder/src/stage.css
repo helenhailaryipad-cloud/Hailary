@@ -7759,7 +7759,7 @@ body[data-screen=home] #stage #main .city-chat .city-social::before,body[data-sc
 .gld-dropbox p{margin:.6cqh 0 0;text-align:center;font:italic 400 2.6cqw/1.2 Arial,sans-serif;color:#cfe0ff}
 .gld-beastbtns{display:flex;justify-content:center;gap:2.5cqw;flex-wrap:wrap}
 .gld-when{display:flex;justify-content:space-between;align-items:center;margin:0;font:400 2.6cqw/1.2 Arial,sans-serif;color:#cfe0ff}
-/* Checked boxes show a tick (user, 2026-11-21) */
-#stage #main .soc-check{position:relative;padding:0}
-#stage #main .soc-check[aria-pressed=true]::after{content:"";display:block!important;position:absolute;left:30%;top:8%;width:28%;height:55%;border:solid #fff;border-width:0 .55cqw .55cqw 0;transform:rotate(45deg);background:none;filter:drop-shadow(0 1px 0 #17401f)}
-#stage #main .chat-sheet .soc-check{min-height:0;max-height:6cqw;align-self:center;aspect-ratio:1}
+/* Checkboxes: painted gold-rimmed box, green with an ivory tick when checked (user, 2026-11-21) */
+#stage #main .soc-check,#stage #main .chat-sheet .soc-check{position:relative;padding:0;min-height:0;aspect-ratio:1;width:7.5cqw;height:7.5cqw;max-height:none;border:0!important;border-radius:0;box-shadow:none!important;background:url(assets/generated/ui-check-off.webp) center/contain no-repeat!important;align-self:center;flex:none}
+#stage #main .soc-check[aria-pressed=true],#stage #main .chat-sheet .soc-check[aria-pressed=true]{background-image:url(assets/generated/ui-check-on.webp)!important}
+#stage #main .soc-check::before,#stage #main .soc-check::after{display:none!important}
