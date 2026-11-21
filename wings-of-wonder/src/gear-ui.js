@@ -1401,6 +1401,7 @@ function cloudOwner(index){
 }
 // ---- Rounds, Carnage Points and the Cloud War windows (rules: WonderGear.cloud*) ------------------------------------
 const cloudMine=0;   // Reina fights for Galewing
+const cloudOpen=f=>[0,1,2,3,4,5].filter(j=>cloudOwner(f*6+j)===f).length;
 const cloudAlive=index=>cloudPortalSlots.filter(([role],slot)=>cloudDamage(index,slot)<cloudEnemyHealth[role]).length;
 const cloudClock=()=>{const n=Math.max(0,Math.ceil((WonderGear.cloudRoundEnds(Date.now())-Date.now())/1000));return String(Math.floor(n/3600)).padStart(2,'0')+':'+String(Math.floor(n%3600/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0')};
 const cloudTokenIcon=()=>artImage('hud-cloud','Cloud Tokens','cloud-token');
@@ -1507,7 +1508,7 @@ function cloudArenaFloor(ctx){
 }
 function cloudStrike(index,slot){
  const defender=cloudPortalSlots[slot],place=cloudTerritories()[index];
- if(screen!=='cloudWar'||cloudCount!==4||!defender||!place)return;
+ if(screen!=='cloudWar'||cloudCount!==4||!defender||!place||Math.floor(index/6)!==cloudMine)return;
  const [role,,,art]=defender,limit=cloudEnemyHealth[role];
  const previous=cloudDamage(index,slot);
  if(previous>=limit)return;
@@ -1598,10 +1599,11 @@ function cloudPortalPreview(place,index){
  // Each outer courtyard holds one elite and two guards around its central paving.
  const pads=[[50,32],[26,32],[74,32],[50,58],[14,24],[12,36],[86,24],[88,36],[42,69],[58,69]];
  const defenders=cloudPortalSlots.map(([role,x,y,art],slot)=>cloudCount===4?
+  cloudCount===4&&Math.floor(index/6)!==cloudMine?`<div class="portal-defender" data-role="${role}" style="left:${pads[slot][0]}%;top:${pads[slot][1]}%"><small>${role==='Boss'?'Golden Boss':role}</small>${artImage('guardian-t'+art,role)}</div>`:
   `<button class="portal-defender portal-strike" aria-label="Fight ${role} in ${place.name}, target ${slot+1}" style="left:${pads[slot][0]}%;top:${pads[slot][1]}%" data-role="${role}" onclick="cloudStrike(${index},${slot})" ${cloudDamage(index,slot)>=cloudEnemyHealth[role]?'disabled':''}><small>${role==='Boss'?'Golden Boss':role}</small>${artImage('guardian-t'+art,role)}<progress max="${cloudEnemyHealth[role]}" value="${cloudEnemyHealth[role]-cloudDamage(index,slot)}"></progress></button>`:
   `<div class="portal-defender" data-role="${role}" style="left:${x}%;top:${y}%"><small>${role==='Boss'?'Golden Boss':role}</small>${artImage('guardian-t'+art,role)}</div>`
  ).join('');
- return `<section class="cloud-portal-preview"><h2>${place.name}</h2><p>${place.owner} · ${place.rank==='Capital'?'Holy City':place.rank}</p>${cloudCount===4?'<div data-patrol-zone="'+index+'">'+cloudCapturePanel(index)+'</div>':''}<div class="portal-defenders" ${cloudCount===4?'data-terrain="'+place.rank+'"':''}><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="${paths}"/></svg>${defenders}</div><h3>Defender rewards</h3><div class="cloud-tier-rewards">${['Boss','Elite','Guard'].map(r=>`<span><b>${r==='Boss'?'Golden Boss':r}</b> ${cloudEnemyScore[r]} Carnage Points${cloudLoot[r]?' · '+WonderGear.bagItemById[cloudLoot[r].id].name:''}</span>`).join('')}</div><p>Carnage Points today <b>${WonderGear.cloudState(S).carnage} / ${WonderGear.cloudRules.carnageCap}</b> · defenders return in <b>${cloudClock()}</b></p><p>Boss personal point pool <b>${rewards.personal}</b></p><small>Personal points are shared by damage dealt.</small><div>${dailyTokens(['hud-prisms','hud-gems',rewards.armor])}</div></section>`;
+ return `<section class="cloud-portal-preview"><h2>${place.name}</h2><p>${place.owner} · ${place.rank==='Capital'?'Holy City':place.rank}</p>${cloudCount===4&&Math.floor(index/6)!==cloudMine?'<p class="cloud-foreign">A city of '+place.owner+'. '+cloudFactions[cloudMine][0]+' opens only its own six cities; this one is left to its faction.</p>':''}${cloudCount===4?'<div data-patrol-zone="'+index+'">'+cloudCapturePanel(index)+'</div>':''}<div class="portal-defenders" ${cloudCount===4?'data-terrain="'+place.rank+'"':''}><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="${paths}"/></svg>${defenders}</div><h3>Defender rewards</h3><div class="cloud-tier-rewards">${['Boss','Elite','Guard'].map(r=>`<span><b>${r==='Boss'?'Golden Boss':r}</b> ${cloudEnemyScore[r]} Carnage Points${cloudLoot[r]?' · '+WonderGear.bagItemById[cloudLoot[r].id].name:''}</span>`).join('')}</div><p>Carnage Points today <b>${WonderGear.cloudState(S).carnage} / ${WonderGear.cloudRules.carnageCap}</b> · defenders return in <b>${cloudClock()}</b></p><p>Boss personal point pool <b>${rewards.personal}</b></p><small>Personal points are shared by damage dealt.</small><div>${dailyTokens(['hud-prisms','hud-gems',rewards.armor])}</div></section>`;
 }
 function cloudTerritory(index){
  if(cloudCount===4&&cloudRoundCheck())cityCloudWar();
@@ -1614,19 +1616,22 @@ function cloudBrief(page){
  const names=['3-Faction War','2-Faction War','4-Faction War','Twin Sanctum','Four Sanctums'];
  const descriptions=['Three capitals command the sky roads.','Two factions compete for the sky island.','Four factions defend their own capitals.','Four factions contest two holy cities.','Four factions contest four holy cities.'];
  const days=[null,10,14,50,90];
- const body='<h2>'+names[page]+'</h2><p>'+descriptions[page]+'</p>'+(days[page]?'<p>Opens on server day '+days[page]+'</p>':'')+(page===2?'<p>Neighboring islands, fortresses and Holy Cities are connected by roads, including across faction borders. Each faction has two fortresses and three islands. Follow roads to attack territories of the same or higher tier.</p><p>Daily Carnage Point allowance: 1200. Weekly shop allowance: 80 additional points.</p>':page===1?'<p>Each capital connects to two fortresses guarding three islands.</p>':page<3?'<p>Each faction holds three outposts, two strongholds and one capital.</p>':'')+'<div class="cloud-brief-tabs">'+names.map((n,i)=>'<button aria-pressed="'+(i===page)+'" onclick="cloudBrief('+i+')">'+n+'</button>').join('')+'</div>';
+ const body='<h2>'+names[page]+'</h2><p>'+descriptions[page]+'</p>'+(days[page]?'<p>Opens on server day '+days[page]+'</p>':'')+(page===2?'<p>Each faction has six cities: its Holy City, two fortresses and three islands. A city opens for the faction when it scores 80 points there by defeating defenders. When both cities at the ends of a road are open, the road lights up; open all six and the whole network shines.</p><p>Dashed roads lead into other factions\' lands. Those cities could be opened, but they belong to other factions and are left alone.</p><p>Daily Carnage Point allowance: 1200. Weekly shop allowance: 80 additional points.</p>':page===1?'<p>Each capital connects to two fortresses guarding three islands.</p>':page<3?'<p>Each faction holds three outposts, two strongholds and one capital.</p>':'')+'<div class="cloud-brief-tabs">'+names.map((n,i)=>'<button aria-pressed="'+(i===page)+'" onclick="cloudBrief('+i+')">'+n+'</button>').join('')+'</div>';
  if($('#modal').open)$('#modalBody').innerHTML=body;else modal(body);
 }
 function cloudFourBoard(nodes){
- const route=(a,b,color)=>{
+ // A road inside one faction's sector lights up once BOTH of its cities are open (80 points each) for that faction;
+ // until then it is a faint line. Roads into another faction's sector are dashed: those cities are not ours to open.
+ const route=(a,b)=>{
   const start=nodes[a],end=nodes[b];
   const x=start.x*6,y=start.y*8,dx=(end.x-start.x)*6,dy=(end.y-start.y)*8;
   const bend=.055;
   const path=`M ${x} ${y} Q ${x+dx/2-dy*bend} ${y+dy/2+dx*bend} ${x+dx} ${y+dy}`;
-  const owners=[cloudOwner(a),cloudOwner(b)];
-  const captured=owners.find(owner=>owner>=0),lit=captured!==undefined;
-  const glow=captured===0?'#54ffe0':cloudFactions[captured]?.[3];
-  return `<g fill="none" stroke-linecap="round" pointer-events="none">${lit?`<path d="${path}" stroke="${glow}" stroke-width="12" opacity=".65" filter="url(#cloudRoadGlow)"/>`:''}<path d="${path}" stroke="${lit?glow:color}" opacity="${lit?1:.65}" stroke-width="${lit?5:2.5}"/>${lit?`<path d="${path}" stroke="#e4fff5" stroke-width="1.7"/>`:''}</g>`;
+  const sa=Math.floor(a/6),sb=Math.floor(b/6);
+  if(sa!==sb)return `<path d="${path}" fill="none" stroke="#fff3cf" stroke-width="2.4" stroke-dasharray="3 7" stroke-linecap="round" opacity=".8" pointer-events="none"/>`;
+  const open=cloudOwner(a)===sa&&cloudOwner(b)===sa,glow=sa===cloudMine?'#ffd86b':cloudFactions[sa][3];
+  return open?`<g fill="none" stroke-linecap="round" pointer-events="none"><path d="${path}" stroke="${glow}" stroke-width="13" opacity=".6" filter="url(#cloudRoadGlow)"/><path d="${path}" stroke="${glow}" stroke-width="5.5"/><path d="${path}" stroke="#fffbe8" stroke-width="1.8"/></g>`
+   :`<path d="${path}" fill="none" stroke="${nodes[a].color}" stroke-width="2.2" opacity=".55" stroke-linecap="round" pointer-events="none"/>`;
  };
  const roads=[];
  // Repeat the drawn north-west quarter clockwise. Slots are city, corner fort,
@@ -1635,9 +1640,9 @@ function cloudFourBoard(nodes){
  for(const [quarter,base] of clockwise.entries()){
   const next=clockwise[(quarter+1)%4];
   const local=[[0,1],[0,2],[1,2],[1,5],[2,5],[2,4],[3,4],[3,5]];
-  for(const [a,b] of local)roads.push(route(base+a,base+b,nodes[base].color));
+  for(const [a,b] of local)roads.push(route(base+a,base+b));
   const across=[[0,0],[0,2],[1,2],[1,4],[3,4]];
-  for(const [a,b] of across)roads.push(route(base+a,next+b,'#ffe7aa'));
+  for(const [a,b] of across)roads.push(route(base+a,next+b));
  }
  const ships=cloudFactions.map((faction,sector)=>{
   const first=sector*6+3, island=nodes[first];
@@ -1690,7 +1695,7 @@ function cityCloudWar(){
  const markers=nodes.map((p,i)=>`<button class="cloud-place" data-rank="${p.rank}" aria-label="${p.owner}: ${p.name}, ${p.rank}" title="${p.name} · ${p.rank}" style="left:${p.x}%;top:${p.y}%;--banner:${p.color}" onclick="cloudTerritory(${i})"><span class="map-token" aria-hidden="true">${symbols[p.rank]}</span></button>`).join('');
  if(cloudCount===4)cloudRoundCheck();
  const cv=WonderGear.cloudState(S);
- $('#main').innerHTML='<section class="cloud-war"><div class="cloud-heading"><strong>Cloud War</strong>'+(cloudCount===4?'<span class="cloud-round">This round ends in <b data-round>'+cloudClock()+'</b></span><span class="cloud-level">Level <b>'+level()+'</b></span>':'<small>Battle starts at 19:30</small>')+'</div><div class="cloud-field map-'+cloudCount+'"><div class="cloud-map-plane">'+(cloudCount===4?cloudFourBoard(nodes):cloudCount===2?cloudLinkedMap(nodes):markers)+'</div></div>'+(cloudCount===4?'<div class="cloud-carnage">'+artImage('hud-rush','')+'<span>Carnage Points<b data-carnage>'+cv.carnage+' / '+WonderGear.cloudRules.carnageCap+'</b></span></div>':'')+'<div class="cloud-actions"><button data-back aria-label="Back to city" onclick="go(\'home\')">‹</button>'+(cloudCount===4?[['hud-shop','Cloud Shop','cloudShopShow()'],['hud-clan','Faction Status','cloudStatusShow()'],['hud-chest','Point Rewards','cloudPointsShow()'],['hud-rank','Rankings','cloudRankShow()']].map(([icon,name,act])=>'<button class="cloud-tool" onclick="'+act+'">'+artImage(icon,'')+name+(name==='Point Rewards'?'<i class="cloud-dot"'+(cloudClaimable()?'':' hidden')+'></i>':'')+'</button>').join(''):'')+'<button class="cloud-tool" onclick="cloudBrief('+[3,2,4].indexOf(cloudCount)+')">'+artImage('hud-quest','')+'Guide</button></div></section>';
+ $('#main').innerHTML='<section class="cloud-war"><div class="cloud-heading"><strong>Cloud War</strong>'+(cloudCount===4?'<span class="cloud-round">This round ends in <b data-round>'+cloudClock()+'</b></span><span class="cloud-level">Level <b>'+level()+'</b></span>':'<small>Battle starts at 19:30</small>')+'</div><div class="cloud-field map-'+cloudCount+'"><div class="cloud-map-plane">'+(cloudCount===4?cloudFourBoard(nodes):cloudCount===2?cloudLinkedMap(nodes):markers)+'</div></div>'+(cloudCount===4?'<div class="cloud-carnage">'+artImage('hud-rush','')+'<span>Carnage Points<b data-carnage>'+cv.carnage+' / '+WonderGear.cloudRules.carnageCap+'</b></span><span class="cloud-open">'+cloudFactions[cloudMine][0]+' cities open <b>'+cloudOpen(cloudMine)+' / 6</b></span></div>':'')+'<div class="cloud-actions"><button data-back aria-label="Back to city" onclick="go(\'home\')">‹</button>'+(cloudCount===4?[['hud-shop','Cloud Shop','cloudShopShow()'],['hud-clan','Faction Status','cloudStatusShow()'],['hud-chest','Point Rewards','cloudPointsShow()'],['hud-rank','Rankings','cloudRankShow()']].map(([icon,name,act])=>'<button class="cloud-tool" onclick="'+act+'">'+artImage(icon,'')+name+(name==='Point Rewards'?'<i class="cloud-dot"'+(cloudClaimable()?'':' hidden')+'></i>':'')+'</button>').join(''):'')+'<button class="cloud-tool" onclick="cloudBrief('+[3,2,4].indexOf(cloudCount)+')">'+artImage('hud-quest','')+'Guide</button></div></section>';
  if(cloudCount===4){
   cloudPlayerDuel=null;
   startCloudPatrol();

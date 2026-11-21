@@ -778,6 +778,13 @@ vm.runInContext(`
  S.cloudWarHits={6:[0,0,0,0,9,9,9,9,9,9]};if(cloudAlive(6)!==4)throw Error('Bosses left');
  S.cloudWarHits={6:[9,9,9,9,9,0,0,0,0,0]};if(cloudOwner(6)!==0)throw Error('80 points take a territory');
  S.cloud.round='2026-01-01T00';cloudRoundCheck();if(S.cloudWarHits||S.cloud.held[6]!==0||cloudOwner(6)!==0||cloudAlive(6)!==10)throw Error('Round refresh');
+ // Roads: dashed into other factions' lands, lit only between two open cities of one faction; foreign cities are not attacked.
+ S.cloud.held={};S.cloudWarHits={};let board=cloudFourBoard(cloudTerritories());
+ if(!board.includes('stroke-dasharray="3 7"')||board.includes('stroke="#ffd86b" stroke-width="5.5"'))throw Error('Roads before opening');
+ for(const i of [0,1])S.cloudWarHits[i]=[9,9,9,9,9,0,0,0,0,0];board=cloudFourBoard(cloudTerritories());
+ if(!board.includes('stroke="#ffd86b" stroke-width="5.5"')||cloudOpen(0)!==2)throw Error('A road between two open cities lights up');
+ cloudTerritory(7);if(!$('#modalBody').innerHTML.includes('cloud-foreign')||$('#modalBody').innerHTML.includes('cloudStrike(7'))throw Error('Foreign city is look-only');
+ cloudTerritory(3);if(!$('#modalBody').innerHTML.includes('cloudStrike(3'))throw Error('Own city can be attacked');
  cloudPointsShow();if(!$('#modalBody').innerHTML.includes('Point Rewards'))throw Error('Point Rewards window');
  r.cloudGain(S,160);cloudPointsShow();if(!$('#modalBody').innerHTML.includes('cloudTake(0)'))throw Error('Claim button');cloudTake(0);if(!r.cloudState(S).claimed.includes(0))throw Error('Claim');
  cloudShopShow();if(!$('#modalBody').innerHTML.includes("cloudBuy('wish')"))throw Error('Shop window');

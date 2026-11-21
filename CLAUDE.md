@@ -445,6 +445,12 @@ territory windows with ten defenders and the fight; defenders never came back an
   bar Cloud Shop / Faction Status / Point Rewards (red dot when claimable) / Rankings (AI rivals, simulated) / Guide;
   all windows are pop-ups (`cloudShopShow`, `cloudStatusShow`, `cloudPointsShow`, `cloudRankShow`). Icons reuse
   existing `hud-*` art (no new pictures).
+- Roads (user explained the photo: "one of four factions; when the 6 cities are opened with at least 80 points each
+  the lines join; a dashed line marks cities that could be opened but belong to other factions, so they are left
+  alone"): in `cloudFourBoard` a road inside a sector is lit (gold for Galewing, faction colour for the others) only
+  when both of its cities are open for that sector's faction; roads into another sector are dashed. Reina opens only
+  Galewing's six cities (`cloudOpen`, counter "Galewing cities open n/6"); other factions' cities open as look-only
+  windows (`.cloud-foreign`), `cloudStrike` refuses them. The Guide text says the same.
 - Not done: the hall view with a live boss list and damage rankings, Cloud Hunt, buying extra Carnage, Bizarre Lands.
 
 ## In-chat playable preview (user requirement)
