@@ -7126,3 +7126,49 @@ body:is([data-screen=cityVault],[data-screen=cityDevour]) #stage>#main{inset:0!i
 #stage #main .loom .loom-kinds{gap:0;align-items:stretch;background:#1d3550;border-top:2px solid #6f93ad}
 #stage #main .loom .loom-kinds button{flex:1 1 0;width:auto;height:100%;border:0;border-right:1px solid #ffffff22;border-radius:0;background:transparent;color:#a9c6d8;font:700 3.1cqw/1.1 Arial,sans-serif}
 #stage #main .loom .loom-kinds button[aria-pressed=true]{background:linear-gradient(#3f86b8,#2a5f8a);color:#fff;box-shadow:inset 0 3px 0 #9fe3ff}
+
+/* Quality ladder (gearRanks, 2026-11-21): the frame and the plate of a piece follow --rarity; the finest shimmer. */
+#stage #main .satchel .equipment-cell,.loom-face,.boss-drop-row .equipment-cell,#stage #modal.den-pop .loom-pick .equipment-cell{background:linear-gradient(160deg,color-mix(in srgb,var(--rarity) 60%,#1c2244),color-mix(in srgb,var(--rarity) 24%,#1c2244))}
+#stage #main .satchel .equipment-cell.q-relic5,.loom-face.q-relic5{background:linear-gradient(160deg,#ff8fc4,#b3246f);border-color:#ffe08a}
+#stage #main .satchel .equipment-cell:is(.q-rainbow,.q-god),.loom-face:is(.q-rainbow,.q-god),#stage #modal .equipment-cell:is(.q-rainbow,.q-god){background:linear-gradient(135deg,#ff8ad1,#9b8cff 34%,#6fd8ff 66%,#9dffb4);border-color:#fff}
+#stage #main .satchel .equipment-cell.q-god,.loom-face.q-god{border-color:#ffe27a;box-shadow:0 0 8px #ffe27a}
+/* Gear Crafting work area */
+.loom .loom-work{position:relative;padding:1cqh 1cqw 2cqh}
+#stage #main .satchel.loom .maw-help{top:1%;right:1%}
+.loom-face{position:relative;display:grid;place-items:center;aspect-ratio:1;width:100%;border:3px solid var(--rarity);border-radius:7%;box-sizing:border-box;overflow:hidden}
+.loom-face img{width:88%;height:88%;object-fit:contain}
+.loom-face b{position:absolute;top:0;right:0;padding:0 .25em;background:#101832c9;border-radius:0 0 0 .4em;font:700 2.3cqw/1.3 Arial,sans-serif;color:#fff}
+.loom-face small{position:absolute;left:2%;top:2%;width:1em;font:700 2.1cqw/.95 Arial,sans-serif!important;color:#ffe45c;text-shadow:0 1px 1px #000;word-break:break-all;text-align:center}
+.loom .loom-orbit{width:min(60%,19cqh)}
+.loom .loom-orbit .loom-face{width:54%}
+.loom .loom-orbit .loom-face b{font-size:2.8cqw}.loom .loom-orbit .loom-face small{font-size:2.6cqw!important}
+.loom .loom-work h2{margin:.5em 0 .2em;font-size:3.9cqw}
+.loom-rate{display:block;font:700 3.5cqw/1.3 Arial,sans-serif;color:#fff}.loom-rate.low{color:#ff8089}
+.loom-row{display:flex;justify-content:center;gap:1.4cqw;margin:1.6cqh 0 0}
+#stage #main .loom .loom-row>*{width:15.5%;flex:none}
+#stage #main .loom .loom-plus{aspect-ratio:1;border:2px dashed #7fa6c4;border-radius:7%;background:#1d3550b3;color:#cfe6f5;font:700 5cqw/1 Arial,sans-serif}
+#stage #main .satchel .bag-tile b.low,.loom-slot em.low{color:#ff8089}
+.loom .loom-work p{margin:.9cqh 0 0;font:600 2.7cqw/1.35 Arial,sans-serif}
+.loom .loom-buttons{margin:1.6cqh 0}
+#stage #main .loom-buttons button{flex:1 1 0;width:auto;max-width:34%;font:700 3cqw/1 Arial,sans-serif;border-radius:2em;padding:.75em .2em}
+.loom-slots{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:1.4cqw 1.6cqw}
+#stage #main .loom .loom-slot{display:grid;gap:.3cqh;padding:0 0 .2cqh;border-radius:7%}
+#stage #main .loom .loom-slot[aria-pressed=true]{outline:3px solid #ffe27a;outline-offset:1px;background:#ffe27a2e}
+.loom-slot em{font:700 2.9cqw/1 Arial,sans-serif;font-style:normal;color:#8dff9a}
+#stage #main .loom-body aside button{font:700 2.75cqw/1.15 Arial,sans-serif;padding:.7em .2em}
+#stage #modal.den-pop .loom-pick{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:8px 0}
+#stage #modal.den-pop .loom-pick .equipment-cell{position:relative;width:100%;height:auto;min-height:0;aspect-ratio:1;padding:0;border:3px solid var(--rarity);border-radius:7%;display:grid;place-items:center;overflow:hidden}
+#stage #modal.den-pop .loom-pick .gear-illustration{width:86%;height:86%;object-fit:contain}
+#stage #modal.den-pop .loom-pick :is(.gear-tier,.gear-stars,.gear-enhance,.gear-gems){font-size:10px}
+#stage #modal.den-pop .loom-ladder p{margin:0;text-align:left;font-size:13px}
+/* Guardian drops in the victory window */
+.boss-drop-row{display:flex;justify-content:center;gap:10px;margin:6px 0 10px}
+#stage #modal .boss-drop-row .equipment-cell{position:relative;width:76px;height:76px;min-height:0;padding:0;border:3px solid var(--rarity);border-radius:8px;display:grid;place-items:center;overflow:hidden}
+#stage #modal .boss-drop-row .gear-illustration{width:86%;height:86%;object-fit:contain}
+/* Auto devour switch */
+#stage #main .satchel .maw-auto{display:flex;align-items:center;gap:.5em;justify-self:start;font:700 2.9cqw/1 Arial,sans-serif;color:#fff2cf}
+.maw-auto i{width:1.25em;height:1.25em;border:2px solid #cfe0ff;border-radius:.25em;background:#101832b3;box-sizing:border-box}
+.maw-auto[aria-pressed=true] i{background:#6fe07f;border-color:#eaffea;box-shadow:inset 0 0 0 2px #17401f}
+#stage #main .loom .loom-row>*{width:17.5%}
+.loom .loom-row .gear-tier{display:none}
+#stage #main .satchel .maw-auto::before{display:none}

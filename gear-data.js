@@ -37,8 +37,27 @@ const labels={attack:'ATK',defense:'DEF',health:'HP',crit:'Crit Rate',accuracy:'
 const percentKeys=new Set(['crit','attackPercent','healthPercent','defensePercent','damageBonus','damageReduction','block','expBonus','accuracy','dodge','critDamage','critResistance','armor']);
 const materialDefs=[{id:'stone',name:'Enhancement Crystal',icon:9,color:'#69dfff'},{id:'shard',name:'Star Shard',icon:10,color:'#d9a1ff'},{id:'gem',name:'Sky Gem',icon:9,color:'#8df5d1'},{id:'essence',name:'Forge Essence',icon:11,color:'#ffc470'},{id:'synthesis',name:'Synthesis Stone',icon:10,color:'#ff9bba'}];
 const round=n=>Math.round(n*100)/100;
+// ---- Quality ladder ----------------------------------------------------------------------------------------------
+// Dungeon guardians drop Blue, Purple and Orange pieces. Orange (2 stars) is the first quality that is crafted on:
+// five Orange pieces of one tier and family make a 2-Star Red, and so on up the ladder (`need` pieces of the quality
+// below, plus `mats`). Blue and Purple are food for the Glimmer Maw. `bonus` is the share of base stats a quality adds.
+// A piece stores its place as the optional field `rank`; pieces from before the ladder are read from their stars.
+const gearRanks=[
+ {id:'blue',name:'Blue',stars:0,color:'#58b7ff',bonus:0},
+ {id:'purple',name:'Purple',stars:1,color:'#b784ff',bonus:.12},
+ {id:'orange',name:'Orange',stars:2,color:'#ffa94a',bonus:.24},
+ {id:'red2',name:'2-Star Red',stars:2,color:'#ff5d6c',bonus:.3,need:5,flex:true},
+ {id:'red3',name:'3-Star Red',stars:3,color:'#ff5d6c',bonus:.36,need:5},
+ {id:'gold4',name:'4-Star Dark Gold',stars:4,color:'#e0a02c',bonus:.48,need:2,mats:{essence:20}},
+ {id:'pink5',name:'5-Star Pink',stars:5,color:'#ff7ac8',bonus:.6,need:1,mats:{gem:10}},
+ {id:'relic5',name:'5-Star Relic',stars:5,color:'#ff4fa0',bonus:.72,need:3,mats:{gem:12,essence:20}},
+ {id:'rainbow',name:'Rainbow',stars:5,color:'#8fe8ff',bonus:.84,need:1,mats:{gem:15,synthesis:3}},
+ {id:'god',name:'Divine Rainbow',stars:5,color:'#ffe27a',bonus:.96,need:1,mats:{gem:25,synthesis:5}}
+];
+const legacyRanks=[0,1,2,4,5,6],gearCraftFrom=3,gearNoDevour=7,bossDropRanks=[2,1,0];
+function gearRank(entry){return Number.isInteger(entry.rank)?entry.rank:legacyRanks[entry.stars]??0}
 function fresh(save){const eq={version:1,nextId:15,items:[],equipped:{},materials:{stone:60,shard:12,gem:4,essence:8,synthesis:0}};for(let i=0;i<slots.length;i++){const slot=slots[i],legacy={bow:'bow',crown:'crown',armor:'armor',boots:'boots',spiritluck:'ring',amulet:'charm'}[slot.id];const entry={uid:i+1,template:slot.id+'-t1',enhance:legacy?(save.upgrades?.[legacy]||0):0,stars:0,gems:0};eq.items.push(entry);eq.equipped[slot.id]=entry.uid}for(const [j,id]of ['bow-t3','boots-t3','spiritguard-t3','spiritluck-t1'].entries())eq.items.push({uid:11+j,template:id,enhance:0,stars:0,gems:0});return eq}
-function valid(eq){if(eq===undefined)return true;return !!eq&&eq.version===1&&Number.isSafeInteger(eq.nextId)&&eq.nextId>0&&eq.nextId<1e9&&Array.isArray(eq.items)&&eq.items.length<=80+slots.length&&new Set(eq.items.map(i=>i?.uid)).size===eq.items.length&&eq.items.every(i=>i&&(i.stored===undefined||typeof i.stored==='boolean')&&Number.isSafeInteger(i.uid)&&i.uid>0&&i.uid<eq.nextId&&typeof i.template==='string'&&Object.hasOwn(catalog,i.template)&&Number.isInteger(i.enhance)&&i.enhance>=0&&i.enhance<=20&&Number.isInteger(i.stars)&&i.stars>=0&&i.stars<=5&&Number.isInteger(i.gems)&&i.gems>=0&&i.gems<=3)&&!!eq.equipped&&Object.keys(eq.equipped).length===10&&slots.every(slot=>eq.equipped[slot.id]===null||eq.items.some(i=>!i.stored&&i.uid===eq.equipped[slot.id]&&catalog[i.template].slot===slot.id))&&!!eq.materials&&materialDefs.every(m=>(m.id==='synthesis'&&eq.materials.synthesis===undefined)||Number.isSafeInteger(eq.materials[m.id])&&eq.materials[m.id]>=0&&eq.materials[m.id]<=1e9)}
+function valid(eq){if(eq===undefined)return true;return !!eq&&eq.version===1&&Number.isSafeInteger(eq.nextId)&&eq.nextId>0&&eq.nextId<1e9&&Array.isArray(eq.items)&&eq.items.length<=80+slots.length&&new Set(eq.items.map(i=>i?.uid)).size===eq.items.length&&eq.items.every(i=>i&&(i.stored===undefined||typeof i.stored==='boolean')&&Number.isSafeInteger(i.uid)&&i.uid>0&&i.uid<eq.nextId&&typeof i.template==='string'&&Object.hasOwn(catalog,i.template)&&Number.isInteger(i.enhance)&&i.enhance>=0&&i.enhance<=20&&Number.isInteger(i.stars)&&i.stars>=0&&i.stars<=5&&Number.isInteger(i.gems)&&i.gems>=0&&i.gems<=3&&(i.rank===undefined||Number.isInteger(i.rank)&&i.rank>=0&&i.rank<gearRanks.length&&gearRanks[i.rank].stars===i.stars))&&!!eq.equipped&&Object.keys(eq.equipped).length===10&&slots.every(slot=>eq.equipped[slot.id]===null||eq.items.some(i=>!i.stored&&i.uid===eq.equipped[slot.id]&&catalog[i.template].slot===slot.id))&&!!eq.materials&&materialDefs.every(m=>(m.id==='synthesis'&&eq.materials.synthesis===undefined)||Number.isSafeInteger(eq.materials[m.id])&&eq.materials[m.id]>=0&&eq.materials[m.id]<=1e9)}
 function equipBasicSlot(eq,slot){
  const template=slot.id+'-t1';
  const current=eq.items.find(i=>i.uid===eq.equipped[slot.id]);
@@ -69,7 +88,7 @@ function state(save){const eq=save.equipment||fresh(save);eq.materials.synthesis
 const stonePrice=1000;
 function buyStone(save){if(save.gold<stonePrice)return false;const eq=state(save);save.equipment=eq;save.gold-=stonePrice;eq.materials.synthesis++;return true}
 function attributePower(t){return (t.accuracy||0)*12+(t.dodge||0)*18+(t.critDamage||0)*8+(t.critResistance||0)*15+(t.shieldHealth||0)/3+(t.elementalAttack||0)*3+(t.elementalDefense||0)*3}
-function detail(entry){const t=catalog[entry.template],base={},enhancement={},star={},gem={},perfect={};for(const [key,n]of Object.entries(t.base)){base[key]=round(n*t.factor);star[key]=round(base[key]*entry.stars*.12)}for(const [key,n]of Object.entries(t.enhanceBonus))enhancement[key]=round(n*entry.enhance);if(entry.gems){const key=t.offense?'attack':'health';gem[key]=entry.gems*(t.offense?18:75);gem[t.offense?'penetration':'defense']=entry.gems*(t.offense?4:9)}if(t.grade){if(t.offense){perfect.attackPercent=round(t.grade*1.5);perfect.damageBonus=t.grade}else{perfect.healthPercent=round(t.grade*1.2);perfect.defensePercent=round(t.grade*1.5);perfect.damageReduction=round(t.grade*.6)}}if(t.slot==='spiritguard')perfect.expBonus=entry.stars*3;if(t.slot==='crown'&&t.grade>=2)perfect.block=t.grade*1.5;const total={};for(const section of [base,enhancement,star,gem,perfect])for(const [key,n]of Object.entries(section))total[key]=round((total[key]||0)+n);return {template:t,base,enhancement,star,gem,perfect,total,power:Math.round((total.attack||0)*5+(total.defense||0)*4+(total.health||0)/3+(total.crit||0)*10+(total.speed||0)+(total.penetration||0)*3+(total.attackPercent||0)*20+(total.healthPercent||0)*10+(total.defensePercent||0)*15+(total.damageBonus||0)*20+(total.damageReduction||0)*25+(total.block||0)*15+attributePower(total))}}
+function detail(entry){const t=catalog[entry.template],base={},enhancement={},star={},gem={},perfect={};for(const [key,n]of Object.entries(t.base)){base[key]=round(n*t.factor);star[key]=round(base[key]*gearRanks[gearRank(entry)].bonus)}for(const [key,n]of Object.entries(t.enhanceBonus))enhancement[key]=round(n*entry.enhance);if(entry.gems){const key=t.offense?'attack':'health';gem[key]=entry.gems*(t.offense?18:75);gem[t.offense?'penetration':'defense']=entry.gems*(t.offense?4:9)}if(t.grade){if(t.offense){perfect.attackPercent=round(t.grade*1.5);perfect.damageBonus=t.grade}else{perfect.healthPercent=round(t.grade*1.2);perfect.defensePercent=round(t.grade*1.5);perfect.damageReduction=round(t.grade*.6)}}if(t.slot==='spiritguard')perfect.expBonus=entry.stars*3;if(t.slot==='crown'&&t.grade>=2)perfect.block=t.grade*1.5;const total={};for(const section of [base,enhancement,star,gem,perfect])for(const [key,n]of Object.entries(section))total[key]=round((total[key]||0)+n);return {template:t,base,enhancement,star,gem,perfect,total,power:Math.round((total.attack||0)*5+(total.defense||0)*4+(total.health||0)/3+(total.crit||0)*10+(total.speed||0)+(total.penetration||0)*3+(total.attackPercent||0)*20+(total.healthPercent||0)*10+(total.defensePercent||0)*15+(total.damageBonus||0)*20+(total.damageReduction||0)*25+(total.block||0)*15+attributePower(total))}}
 const companionTypes={
  elf:{name:'Elf',title:'Dreamveil',art:'familiar-46',icon:'hud-pet',growth:{attack:6,health:60,penetration:0.2,defense:2}},
  mount:{name:'Mount',title:'Silver Tabby',art:'reina-silver-tabby',icon:'silver-tabby-icon',growth:{attack:3,health:120,penetration:0.1,defense:5}},
@@ -387,26 +406,38 @@ function stats(save){const b=bonuses(save);
  const lv=globalThis.WonderProgress.level(save.xp),d=petTeamAttack(save),w=[40,120,180,240][Number(save.wings[1])];const attack=Math.round((85+lv*7+d+(b.attack||0))*(1+(b.attackPercent||0)/100))+(cards.attack||0)+bowBonus,defense=Math.round((52+lv*4+w+(b.defense||0))*(1+(b.defensePercent||0)/100))+(cards.defense||0),health=Math.round((900+lv*75+(b.health||0))*(1+(b.healthPercent||0)/100))+(cards.health||0),crit=round(Math.min(75,8+(b.crit||0))),speed=100+(b.speed||0),penetration=round(b.penetration||0),damageBonus=round(b.damageBonus||0),damageReduction=round(Math.min(50,b.damageReduction||0)),block=round(Math.min(40,b.block||0)),expBonus=round(b.expBonus||0);const accuracy=round(100+(b.accuracy||0)),dodge=round(Math.min(30,b.dodge||0)),critDamage=round(165+(b.critDamage||0)),critResistance=round(Math.min(30,b.critResistance||0)),shieldHealth=Math.round(b.shieldHealth||0)+(cards.shieldHealth||0),elementalAttack=Math.round(b.elementalAttack||0)+(cards.elementalAttack||0),elementalDefense=Math.round(b.elementalDefense||0)+(cards.elementalDefense||0),armor=round(100-10000/(100+defense*.35)),attackInterval=round(100/speed),healing=Math.round(health*.25);
 const advanced={accuracy,dodge,critDamage,critResistance,shieldHealth,elementalAttack,elementalDefense,armor,attackInterval,healing};
 return {attack,defense,health,crit,speed,penetration,damageBonus,damageReduction,block,expBonus,...advanced,level:lv,power:Math.floor(attack*5+defense*4+health/3+crit*10+speed+penetration*3+damageBonus*20+damageReduction*25+block*15+attributePower({...advanced,accuracy:accuracy-100,critDamage:critDamage-165}))}}
-function cost(entry,action){const t=catalog[entry.template];if(action==='enhance')return entry.enhance>=20?null:{gold:150+entry.enhance*100,stone:2+Math.floor(entry.enhance/4)};if(action==='star')return entry.stars>=5?null:{gold:200*(entry.stars+1),shard:3*(entry.stars+1)};if(action==='gem')return entry.gems>=3?null:{gold:150*(entry.gems+1),gem:1};if(action==='craft')return t.tier>=maxTier?null:{gold:500*(t.grade+1),essence:3*(t.grade+1),stone:5*(t.grade+1),synthesis:t.tier};return null}
+function cost(entry,action){const t=catalog[entry.template];if(action==='enhance')return entry.enhance>=20?null:{gold:150+entry.enhance*100,stone:2+Math.floor(entry.enhance/4)};if(action==='gem')return entry.gems>=3?null:{gold:150*(entry.gems+1),gem:1};if(action==='craft')return t.tier>=maxTier?null:{gold:500*(t.grade+1),essence:3*(t.grade+1),stone:5*(t.grade+1),synthesis:t.tier};return null}
 function equipped(eq,uid){return Object.values(eq.equipped).includes(uid)}
-const starGearCount=4;
-// Crafting keeps three families apart: a piece only takes spare pieces of its own family and tier.
+// Crafting keeps three families apart: a piece is only made from spare pieces of its own family and tier.
 const gearGroups=['Equipment','Necklace & Amulet','Rings'];
 function gearGroup(template){const slot=catalog[template]?.slot||'';return ['necklace','amulet'].includes(slot)?gearGroups[1]:slot.startsWith('spirit')?gearGroups[2]:gearGroups[0]}
-function starDonors(eq,item){
- return eq.items.filter(e=>e.uid!==item.uid&&!e.starter&&!e.stored&&!equipped(eq,e.uid)&&catalog[e.template].tier===catalog[item.template].tier&&gearGroup(e.template)===gearGroup(item.template));
+function craftRecipe(rank){const r=gearRanks[rank];return r?.need?{need:r.need,flex:!!r.flex,mats:r.mats||{}}:null}
+// Spare pieces that can go into a craft of quality `rank` at `tier` in the family `group`: any slot of that family.
+function craftInputs(save,group,tier,rank){const eq=state(save);return eq.items.filter(e=>!e.starter&&!e.stored&&!equipped(eq,e.uid)&&catalog[e.template].tier===tier&&gearGroup(e.template)===group&&gearRank(e)===rank-1)}
+// "The more gear added, the higher the success rate": a flexible recipe works with fewer pieces at a lower chance.
+function craftChance(rank,count){const r=craftRecipe(rank);if(!r||count<1)return 0;return r.flex?Math.min(1,count/r.need):count>=r.need?1:0}
+// Makes one piece for `slotId` at `tier` and quality `rank` out of the pieces `uids`. The pieces and materials are
+// spent even when the craft fails. The new piece keeps the highest enhancement and gems among the pieces put in.
+function craftGear(save,slotId,tier,rank,uids,rng=Math.random){
+ const recipe=craftRecipe(rank),template=slotId+'-t'+tier;
+ if(!recipe||!Object.hasOwn(catalog,template))return {ok:false,error:'Unknown recipe.'};
+ const eq=state(save),pool=new Set(craftInputs(save,gearGroup(template),tier,rank).map(e=>e.uid)),ids=Array.isArray(uids)?[...new Set(uids)]:[];
+ if(!ids.length||ids.length!==uids.length||ids.length>recipe.need||ids.some(id=>!pool.has(id)))return {ok:false,error:'Put in spare '+gearRanks[rank-1].name+' pieces of this tier and kind.'};
+ if(!recipe.flex&&ids.length<recipe.need)return {ok:false,error:'At least '+recipe.need+' pieces.'};
+ if(materialDefs.some(m=>(recipe.mats[m.id]||0)>eq.materials[m.id]))return {ok:false,error:'Not enough materials.'};
+ const used=eq.items.filter(e=>ids.includes(e.uid)),chance=craftChance(rank,ids.length),success=chance>=1||rng()<chance;
+ eq.items=eq.items.filter(e=>!ids.includes(e.uid));for(const m of materialDefs)eq.materials[m.id]-=recipe.mats[m.id]||0;save.equipment=eq;
+ if(!success)return {ok:true,success:false,chance};
+ const entry={uid:eq.nextId++,template,enhance:Math.max(...used.map(e=>e.enhance)),stars:gearRanks[rank].stars,gems:Math.max(...used.map(e=>e.gems)),rank};
+ eq.items.push(entry);return {ok:true,success:true,chance,entry};
 }
-function perform(save,uid,action,donors=[]){const eq=state(save);const i=eq.items.find(e=>e.uid===uid);if(!i)return {ok:false,error:'Item not found.'};if(i.stored)return {ok:false,error:'Withdraw this item first.'};if(action==='equip'||action==='craft'||action==='star'){
+function perform(save,uid,action,donors=[]){const eq=state(save);const i=eq.items.find(e=>e.uid===uid);if(!i)return {ok:false,error:'Item not found.'};if(i.stored)return {ok:false,error:'Withdraw this item first.'};if(action==='star')return {ok:false,error:'Stars are made in Gear Crafting.'};if(action==='equip'||action==='craft'){
  if(action==='craft'&&i.starter)return {ok:false,error:'Use a spare item for tier synthesis.'};
  const target=catalog[i.template].tier+(action==='craft'?1:0);
  if(target<=maxTier&&target>unlockedTier(save))return {ok:false,error:'T'+target+' unlocks at hero level '+requiredLevel(target)+'.'};
-}if(action==='equip'){const t=catalog[i.template];if(eq.equipped[t.slot]===uid)return {ok:false,error:'Already equipped.'};save.equipment=eq;eq.equipped[t.slot]=uid;return {ok:true,entry:i}}const price=cost(i,action);if(!price)return {ok:false,error:'This upgrade is already complete.'};if((price.gold||0)>save.gold||materialDefs.some(m=>(price[m.id]||0)>eq.materials[m.id]))return {ok:false,error:'Not enough gold or materials.'};if(action==='star'){
- const eligible=new Set(starDonors(eq,i).map(e=>e.uid));
- if(!Array.isArray(donors)||donors.length!==starGearCount||new Set(donors).size!==starGearCount||donors.some(id=>!eligible.has(id)))return {ok:false,error:'Select four spare items of the same tier and kind.'};
- eq.items=eq.items.filter(e=>!donors.includes(e.uid));
-}save.equipment=eq;save.gold-=price.gold||0;for(const m of materialDefs)eq.materials[m.id]-=price[m.id]||0;if(action==='enhance')i.enhance++;else if(action==='star')i.stars++;else if(action==='gem')i.gems++;else if(action==='craft'){const t=catalog[i.template];i.template=t.slot+'-t'+(t.tier+1)}return {ok:true,entry:i}}
+}if(action==='equip'){const t=catalog[i.template];if(eq.equipped[t.slot]===uid)return {ok:false,error:'Already equipped.'};save.equipment=eq;eq.equipped[t.slot]=uid;return {ok:true,entry:i}}const price=cost(i,action);if(!price)return {ok:false,error:'This upgrade is already complete.'};if((price.gold||0)>save.gold||materialDefs.some(m=>(price[m.id]||0)>eq.materials[m.id]))return {ok:false,error:'Not enough gold or materials.'};save.equipment=eq;save.gold-=price.gold||0;for(const m of materialDefs)eq.materials[m.id]-=price[m.id]||0;if(action==='enhance')i.enhance++;else if(action==='gem')i.gems++;else if(action==='craft'){const t=catalog[i.template];i.template=t.slot+'-t'+(t.tier+1)}return {ok:true,entry:i}}
 function salvage(save,uid){const eq=state(save),i=eq.items.find(e=>e.uid===uid);if(i?.starter)return {ok:false,error:'Keep your basic equipment set.'};if(i?.stored)return {ok:false,error:'Withdraw this item first.'};if(!i||equipped(eq,uid))return {ok:false,error:'Equipped items cannot be salvaged.'};const t=catalog[i.template];save.equipment=eq;eq.items=eq.items.filter(e=>e.uid!==uid);eq.materials.stone+=3+t.grade*3+i.enhance;eq.materials.shard+=i.stars;eq.materials.gem+=i.gems;save.gold+=50*(t.grade+1);return {ok:true}}
-function addDrop(save,tier=1,slotId=null){const eq=state(save);if(eq.items.length>=80){save.equipment=eq;eq.materials.stone+=5;return {converted:true}}const allowed=tiers.filter(t=>t.tier<=tier),t=allowed[allowed.length-1],slot=slots.find(s=>s.id===slotId)||slots[Math.floor(Math.random()*slots.length)],entry={uid:eq.nextId++,template:slot.id+'-t'+t.tier,enhance:0,stars:0,gems:0};save.equipment=eq;eq.items.push(entry);return entry}
+function addDrop(save,tier=1,slotId=null,rank=0){const eq=state(save);if(eq.items.length>=80){save.equipment=eq;eq.materials.stone+=5;return {converted:true}}const allowed=tiers.filter(t=>t.tier<=tier),t=allowed[allowed.length-1],slot=slots.find(s=>s.id===slotId)||slots[Math.floor(Math.random()*slots.length)],entry={uid:eq.nextId++,template:slot.id+'-t'+t.tier,enhance:0,stars:gearRanks[rank].stars,gems:0};if(rank)entry.rank=rank;save.equipment=eq;eq.items.push(entry);return entry}
 const bossLootTables={
 mistwood:{slots:['bow','boots','bracers'],enhance:1,stars:1,stone:12,shard:3,gem:1,essence:2},
 moonfall:{slots:['crown','necklace','spiritguard'],enhance:1,stars:1,stone:16,shard:4,gem:1,essence:3},
@@ -454,7 +485,22 @@ function rollBossTier(save,random){
  if(roll<.8)return top;
  return 2+Math.min(top-2,Math.floor(random()*(top-1)));
 }
-function bossLoot(save,id,random=Math.random){const table=bossLootTables[id];if(!table)return null;const eq=state(save);save.equipment=eq;const materials=Object.fromEntries(materialDefs.map(m=>[m.id,table[m.id]||0]));for(const m of materialDefs)eq.materials[m.id]+=materials[m.id];const tier=rollBossTier(save,random),slot=table.slots[Math.min(table.slots.length-1,Math.max(0,Math.floor(random()*table.slots.length)))],drop=addDrop(save,tier,slot);if(drop.converted){eq.materials.stone+=15;materials.stone+=20;}else{drop.enhance=table.enhance;drop.stars=table.stars;}return {...materials,entry:drop.converted?null:drop,converted:!!drop.converted};}
+// A guardian drops three pieces of one tier: Orange, Purple and Blue (`bossDropRanks`). With Auto devour on, the Blue
+// and Purple ones go straight to the Maw. `entry` is the best piece that stayed in the bag.
+function bossLoot(save,id,random=Math.random){
+ const table=bossLootTables[id];if(!table)return null;
+ const eq=state(save);save.equipment=eq;const materials=Object.fromEntries(materialDefs.map(m=>[m.id,table[m.id]||0]));
+ for(const m of materialDefs)eq.materials[m.id]+=materials[m.id];
+ const tier=rollBossTier(save,random),entries=[];let converted=false;
+ for(const rank of bossDropRanks){
+  const slot=table.slots[Math.min(table.slots.length-1,Math.max(0,Math.floor(random()*table.slots.length)))],drop=addDrop(save,tier,slot,rank);
+  if(drop.converted){converted=true;materials.stone+=5}else entries.push(drop);
+ }
+ if(converted){eq.materials.stone+=15;materials.stone+=15}
+ let devoured=0;
+ if(save.autoDevour){const food=entries.filter(e=>gearRank(e)<2);if(food.length){devoured=devourGear(save,food.map(e=>e.uid)).gained||0;for(const e of food)entries.splice(entries.indexOf(e),1)}}
+ return {...materials,entry:entries[0]||null,entries,converted,devoured};
+}
 function grant(save,type,won,score=0){const eq=state(save);save.equipment=eq;let stones=type==='dungeon'?(won?12:3):type==='defense'?(won?8:2):type==='spar'?(won?2:0):Math.min(7,Math.floor(score/180));eq.materials.stone+=stones;let shard=won&&(type==='dungeon'||type==='defense')?3:0;eq.materials.shard+=shard;if(won&&type==='dungeon'){eq.materials.essence+=2;eq.materials.gem+=1}return {stone:stones,shard,gem:won&&type==='dungeon'?1:0,essence:won&&type==='dungeon'?2:0}}
 // ---- Bag ---------------------------------------------------------------------------------------------------------
 // Things Reina carries besides equipment. Stacks live in the optional save field `bag` {id:n}; what is put away in
@@ -530,10 +576,11 @@ function useBagItem(s,id,count=1,rng=Math.random){
 // ---- Devour: spare equipment feeds the Glimmer Maw; its level strengthens Reina ----------------------------------
 const devourStep={attack:6,health:60,defense:5},devourMax=200;
 function devourNeed(level){return 40+level*20}
-function devourWorth(entry){const t=catalog[entry.template];return 10*t.tier+15*t.grade+8*entry.stars+2*entry.enhance}
+function devourWorth(entry){const t=catalog[entry.template];return 10*t.tier+15*t.grade+8*gearRank(entry)+2*entry.enhance}
 function devourState(s){let into=Number.isSafeInteger(s.devour)?s.devour:0,level=0;const total=into;while(level<devourMax&&into>=devourNeed(level)){into-=devourNeed(level);level++}return {level,into,need:level>=devourMax?0:devourNeed(level),total}}
 function devourBonus(s){const level=devourState(s).level;return {attack:level*devourStep.attack,health:level*devourStep.health,defense:level*devourStep.defense}}
-function devourable(s){const eq=state(s);return eq.items.filter(e=>!e.stored&&!e.starter&&!equipped(eq,e.uid))}
+// Relic and finer pieces are never food.
+function devourable(s){const eq=state(s);return eq.items.filter(e=>!e.stored&&!e.starter&&!equipped(eq,e.uid)&&gearRank(e)<gearNoDevour)}
 // Feeds spare pieces to the Maw. Stars and gems on them come back as shards and gems, as with salvage.
 function devourGear(s,uids){
  const eq=state(s),ok=new Set(devourable(s).map(e=>e.uid)),ids=[...new Set(uids)];
@@ -545,7 +592,7 @@ function devourGear(s,uids){
 }
 function validBag(s){
  const counts=(o,ok)=>o===undefined||!!o&&typeof o==='object'&&!Array.isArray(o)&&Object.entries(o).every(([k,n])=>ok(k)&&Number.isInteger(n)&&n>0&&n<=1e9);
- return counts(s.bag,k=>Object.hasOwn(bagItemById,k))&&counts(s.vault,vaultKeyOk)&&(s.devour===undefined||Number.isSafeInteger(s.devour)&&s.devour>=0&&s.devour<=1e12);
+ return counts(s.bag,k=>Object.hasOwn(bagItemById,k))&&counts(s.vault,vaultKeyOk)&&(s.devour===undefined||Number.isSafeInteger(s.devour)&&s.devour>=0&&s.devour<=1e12)&&(s.autoDevour===undefined||typeof s.autoDevour==='boolean');
 }
-return Object.freeze({gearGroups,gearGroup,bagCapacity,bagStarter,bagRarity,bagItems,bagItemById,bagCount,bagAdd,bagStacks,bagUsed,vaultCount,vaultMove,useBagItem,devourStep,devourMax,devourNeed,devourWorth,devourState,devourBonus,devourable,devourGear,validBag,riposteShare,riposteEvery,talentCells,talentFree,talentLearn,talentBook,talentScroll,talentTopScroll,talentPrice,talentSupremeAt,talentSupreme,petTalents,talentState,talentIds,supremeReady,addSeals,openCellCost,openTalentCell,learnCost,rollTalent,keepTalent,learnTalent,lockTalent,forgetTalent,setTalentTarget,buyTalentScroll,buyTalentBook,sealRates,sealGold,buySeals,exchangeSpares,talentBonus,guardTalents,petGearPieces,petGearMax,petGearStep,petGearSetStep,petGearLevels,petGearTier,petGearCost,petGearBonus,upgradePetGear,petBolt,petBoltPace,petHit,petPace,assistPages,assistSlots,synthChain,synthNeed,petSpares,addPetSpare,synthesizePet,fashionTraits,companionTypes,companionSkins,companionSkin,ownsCompanionSkin,useCompanionSkin,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,starGearCount,starDonors,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
+return Object.freeze({gearRanks,gearRank,gearCraftFrom,gearNoDevour,bossDropRanks,craftRecipe,craftInputs,craftChance,craftGear,gearGroups,gearGroup,bagCapacity,bagStarter,bagRarity,bagItems,bagItemById,bagCount,bagAdd,bagStacks,bagUsed,vaultCount,vaultMove,useBagItem,devourStep,devourMax,devourNeed,devourWorth,devourState,devourBonus,devourable,devourGear,validBag,riposteShare,riposteEvery,talentCells,talentFree,talentLearn,talentBook,talentScroll,talentTopScroll,talentPrice,talentSupremeAt,talentSupreme,petTalents,talentState,talentIds,supremeReady,addSeals,openCellCost,openTalentCell,learnCost,rollTalent,keepTalent,learnTalent,lockTalent,forgetTalent,setTalentTarget,buyTalentScroll,buyTalentBook,sealRates,sealGold,buySeals,exchangeSpares,talentBonus,guardTalents,petGearPieces,petGearMax,petGearStep,petGearSetStep,petGearLevels,petGearTier,petGearCost,petGearBonus,upgradePetGear,petBolt,petBoltPace,petHit,petPace,assistPages,assistSlots,synthChain,synthNeed,petSpares,addPetSpare,synthesizePet,fashionTraits,companionTypes,companionSkins,companionSkin,ownsCompanionSkin,useCompanionSkin,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
 })();
