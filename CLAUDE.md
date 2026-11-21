@@ -342,11 +342,27 @@ unchanged), Warehouse (`cityVault`), Devour (`cityDevour`). Rules in `gear-data.
   optional `S.devour` (total essence). Stars and gems on eaten pieces come back as shards and gems.
 - Art: `art-source/bag/items.webp` (4 x 4 sheet in the order of `bagItems`) and `maw.webp`, built by
   `scripts/build-bag-icons.py` into `comp-bag-items` and `comp-bag-maw`. Tiles need `denPlain` (stock icons).
-- Gear Crafting families (user 2026-11-21: "split equipment, necklace and rings tabs", then the reference photo of the
-  bottom tabs): the tabs existed, but a piece took ANY spare piece of its tier, so necklaces and rings were eaten on
-  the Equipment tab. Rule now: `gearGroups` = Equipment / Necklace & Amulet / Rings, `gearGroup(template)`, and
-  `starDonors` only offers spare pieces of the target's own family and tier (also in the old Forge page). The tabs are
-  a clear bar above the bottom bar (`.loom-kinds`).
+- Quality ladder and Gear Crafting (user 2026-11-21, ten photos of the reference: "they are gathered not from 1
+  star but from 2 stars, and those are orange; a red 2-star is crafted from orange ones; they drop in the dungeon
+  together with purple and blue ones, which can then be devoured"). Rules in `gear-data.js`:
+  - `gearRanks`: Blue (0★), Purple (1★), Orange (2★), 2-Star Red, 3-Star Red, 4-Star Dark Gold, 5-Star Pink, 5-Star
+    Relic, Rainbow, Divine Rainbow. A piece keeps its place in the optional field `rank` (validated against `stars`);
+    pieces from before the ladder are read from their stars (`gearRank`, `legacyRanks`) and keep the same stat bonus
+    (`bonus`, used in `detail()`). Tile frame and plate colour = quality (`--rarity`, class `q-<id>`), not tier.
+  - Guardians drop three pieces of one tier (`bossDropRanks` = Orange, Purple, Blue; `bossLoot` returns `entries`).
+  - `craftGear(save,slot,tier,rank,uids,rng)`: `need` spare pieces of the quality below, same tier and family
+    (`gearGroups` = Equipment / Necklace & Amulet / Rings, any slot inside the family; `craftInputs`), plus `mats`
+    for Dark Gold and finer (existing materials: essence, gems, synthesis stones). It makes a NEW piece of the chosen
+    slot that keeps the highest enhancement and gems of the inputs. 2-Star Red is `flex`: fewer than five pieces work
+    at 20% each (`craftChance`); a failed try loses them. The old "add a star to this piece" action is gone
+    (`perform(...,'star')` refuses; the item dialog and the old Forge page point to Gear Crafting).
+  - Screen `cityCraft`: quality list with tiers on the left, result tile, success rate / "At least N pieces",
+    material tiles, input places (tap + to pick, tap a piece to remove), Batch (2-Star Red only) / Add / Synthesize,
+    then one tile per slot of the family with the number of usable pieces; family tabs at the bottom; `?` = ladder.
+  - Devour: the quick button picks only Blue and Purple; Relic and finer cannot be devoured (`gearNoDevour`);
+    Auto devour (optional `S.autoDevour`) feeds Blue and Purple drops to the Maw as they drop.
+  - Not done from the photos: Tier-up and alternative input tabs (Red 3-Star / Dark Gold gear / Pink Gear), locked
+    extra places, the Devour pop-up with a tier filter and the Maw's Upgrade button, Male Gear.
 - Equipment art is ONE design per slot in eight tier colourways (user 2026-11-21, with photos of the reference where
   T4, T7, T16 sets share their shapes: "make all sets alike, differing a little and by colour"). All ten slots were
   repainted by the image model, one 4 x 2 sheet per slot (`art-source/gear/<slot>.webp`: ivory-green, silver-emerald,

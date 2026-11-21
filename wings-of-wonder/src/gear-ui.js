@@ -6,10 +6,10 @@ function equipmentIcon(index,extra=''){return `<span class="equipment-art ${extr
 function gearArt(template){
   return `<img class="gear-illustration" alt="" src="assets/generated/gear-${template.slot}-t${eqRules().artTier(template.tier)}.webp?v=4">`;
 }
-function equipmentCell(entry,{compact=false,equipped=false,warehouse=false,forge=false,act=null,pressed=null}={}){const r=eqRules(),t=r.catalog[entry.template];
+function equipmentCell(entry,{compact=false,equipped=false,warehouse=false,forge=false,act=null,pressed=null}={}){const r=eqRules(),t=r.catalog[entry.template],q=r.gearRanks[r.gearRank(entry)];
  const action=act?act:forge?`selectForgePiece(${entry.uid})`:warehouse?`transferGear(${entry.uid},${!entry.stored})`:`openEquipment(${entry.uid})`;
  const purpose=warehouse?(entry.stored?'Withdraw ':'Deposit '):'';
- return `<button data-tier="${t.tier}" data-stars="${entry.stars}" class="equipment-cell rarity-${t.grade} slot-${t.slot} ${equipped?'is-worn':''} ${compact?'compact-cell':''}" style="--rarity:${t.color}" aria-label="${purpose}${t.name}, Tier ${t.tier}, ${entry.stars} stars, enhance ${entry.enhance}${equipped?', equipped':''}" ${pressed===null?'':'aria-pressed="'+pressed+'"'} onclick="${action}"><span class="gear-tier">T${t.tier}</span><span class="gear-stars">${uiIcon('star','badge-icon')}${entry.stars}</span>${gearArt(t)}${entry.enhance>0?`<span class="gear-enhance">+${entry.enhance}</span>`:''}${equipped?`<span class="worn-dot">${uiIcon('check','badge-icon')}</span>`:''}${entry.gems?`<span class="gear-gems ${equipped?'worn-gems':''}">${uiIcon('gem','badge-icon')}${entry.gems}</span>`:''}</button>`}
+ return `<button data-tier="${t.tier}" data-stars="${entry.stars}" class="equipment-cell rarity-${t.grade} q-${q.id} slot-${t.slot} ${equipped?'is-worn':''} ${compact?'compact-cell':''}" style="--rarity:${q.color}" aria-label="${purpose}${t.name}, Tier ${t.tier}, ${entry.stars} stars, ${q.name}, enhance ${entry.enhance}${equipped?', equipped':''}" ${pressed===null?'':'aria-pressed="'+pressed+'"'} onclick="${action}"><span class="gear-tier">T${t.tier}</span>${entry.stars?`<span class="gear-stars">${uiIcon('star','badge-icon')}${entry.stars}</span>`:''}${gearArt(t)}${entry.enhance>0?`<span class="gear-enhance">+${entry.enhance}</span>`:''}${equipped?`<span class="worn-dot">${uiIcon('check','badge-icon')}</span>`:''}${entry.gems?`<span class="gear-gems ${equipped?'worn-gems':''}">${uiIcon('gem','badge-icon')}${entry.gems}</span>`:''}</button>`}
 function loadoutCell(eq,slot,compact=false){
  const entry=eq.items.find(i=>i.uid===eq.equipped[slot.id]);
  if(entry)return equipmentCell(entry,{equipped:true,compact});
@@ -31,8 +31,8 @@ function openEquipment(uid, view='summary', page=0){
  const rules=eqRules(), eq=rules.state(S), item=eq.items.find(entry=>entry.uid===uid);
  if(!item)return;
  const detail=rules.detail(item), template=detail.template, worn=rules.equipped(eq,uid);
- const allowed=template.tier<=rules.unlockedTier(S), stamp=equipmentStamp(item);
- const groups={total:'Total stats',base:'Base stats',enhancement:'Enhancement',star:'Star bonuses',perfect:'Perfect bonuses',gem:'Socketed gems'};
+ const allowed=template.tier<=rules.unlockedTier(S), stamp=equipmentStamp(item), quality=rules.gearRanks[rules.gearRank(item)];
+ const groups={total:'Total stats',base:'Base stats',enhancement:'Enhancement',star:'Quality bonus',perfect:'Perfect bonuses',gem:'Socketed gems'};
  for(const group of Object.keys(groups)){
   if(!Object.values(detail[group]).some(Number))delete groups[group];
  }
@@ -44,15 +44,15 @@ function openEquipment(uid, view='summary', page=0){
   const primary=Object.keys(detail.base).filter(key=>detail.base[key]).slice(0,2);
   content=primary.map(key=>statLines({[key]:detail.total[key]})).join('');
  }else if(view==='upgrades'){
-  const options=[['enhance','Enhance'],['star','Add star'],['gem','Socket gem'],['craft','Craft next tier']];
+  const options=[['enhance','Enhance'],['star','Gear Crafting'],['gem','Socket gem'],['craft','Craft next tier']];
   pages=options.length;
   page=Math.max(0,Math.min(page,pages-1));
   const [action,label]=options[page],price=rules.cost(item,action);
   const locked=action==='craft'&&template.tier+1>rules.unlockedTier(S);
   const available=price&&!locked&&S.gold>=(price.gold||0)&&rules.materialDefs.every(m=>eq.materials[m.id]>=(price[m.id]||0));
-  const canSelectDonors=action==='star'&&price;
-  content=`<strong>${label}</strong><p>${locked?'Requires Lv. '+rules.requiredLevel(template.tier+1):priceText(price)}</p>
-   <button ${!available&&!canSelectDonors?'disabled':''} onclick="equipmentAction(${uid},'${action}','${stamp}')">${label}</button>`;
+  content=action==='star'?`<strong>Quality · ${quality.name}</strong><p>Finer pieces are made in Gear Crafting out of spare pieces of the quality below.</p>
+   <button onclick="equipmentAction(${uid},'star','${stamp}')">Gear Crafting</button>`:`<strong>${label}</strong><p>${locked?'Requires Lv. '+rules.requiredLevel(template.tier+1):priceText(price)}</p>
+   <button ${!available?'disabled':''} onclick="equipmentAction(${uid},'${action}','${stamp}')">${label}</button>`;
  }else{
   const entries=view==='compare'?equipmentCompare(eq,item):
    Object.entries(detail[view]).filter(([,value])=>value!==0).map(([key,value])=>statLines({[key]:value}));
@@ -65,10 +65,10 @@ function openEquipment(uid, view='summary', page=0){
   <button aria-label="Previous" ${page===0?'disabled':''} onclick="openEquipment(${uid},'${view}',${page-1})">‹</button>
   <span>${page+1} / ${pages}</span>
   <button aria-label="Next" ${page===pages-1?'disabled':''} onclick="openEquipment(${uid},'${view}',${page+1})">›</button></div>`:'';
- const heading=`<div class="gear-detail-header" data-tier="${template.tier}" data-stars="${item.stars}" style="--rarity:${template.color}">
+ const heading=`<div class="gear-detail-header" data-tier="${template.tier}" data-stars="${item.stars}" style="--rarity:${quality.color}">
   <div class="detail-item-icon slot-${template.slot}">${gearArt(template)}<span>T${template.tier}</span></div>
   <div class="gear-heading"><h2>${template.name}${item.enhance?' +'+item.enhance:''}</h2>
-  <p>${worn?'Equipped · ':''}${template.rarity} · ${item.stars}/5 stars</p>
+  <p>${worn?'Equipped · ':''}${quality.name} · T${template.tier}</p>
   <p class="item-power">Power <strong>${fmt(detail.power)}</strong></p></div></div>`;
  const actions=worn?'':`<div class="sheet-actions"><button ${allowed?'':'disabled'} onclick="equipmentAction(${uid},'equip','${stamp}')">${allowed?'Equip item':'Requires Lv. '+rules.requiredLevel(template.tier)}</button>
  <button onclick="confirmSalvage(${uid})">Salvage</button></div>`;
@@ -113,7 +113,7 @@ gearDialog.addEventListener('cancel',event=>{
  }
 });
 function refreshEquipmentSurface(){if(screen==='cityBag')cityBag();else if(screen==='cityVault')cityVault();else if(screen==='cityDevour')cityDevour();else if(['inventory','forge','warehouse'].includes(screen))gearWorkspace();else if(screen==='bag')bag();else if(screen==='home')home();wallet()}
-function equipmentAction(uid,action,expected){if(gearActionLock)return;if(action==='star'){$('#modal').close();openStarForge(uid);return}const eq=eqRules().state(S),entry=eq.items.find(i=>i.uid===uid);if(!entry||equipmentStamp(entry)!==expected){toast('This item changed. Open it again.');return}gearActionLock=true;try{const result=eqRules().perform(S,uid,action);if(!result.ok){toast(result.error);return}save();refreshEquipmentSurface();$('#modal').close();openEquipment(uid);toast(action==='equip'?'Item equipped':action==='craft'?'Next tier crafted. All upgrades kept.':'Equipment improved')}finally{setTimeout(()=>gearActionLock=false,220)}}
+function equipmentAction(uid,action,expected){if(gearActionLock)return;if(action==='star'){$('#modal').close();go('cityCraft');return}const eq=eqRules().state(S),entry=eq.items.find(i=>i.uid===uid);if(!entry||equipmentStamp(entry)!==expected){toast('This item changed. Open it again.');return}gearActionLock=true;try{const result=eqRules().perform(S,uid,action);if(!result.ok){toast(result.error);return}save();refreshEquipmentSurface();$('#modal').close();openEquipment(uid);toast(action==='equip'?'Item equipped':action==='craft'?'Next tier crafted. All upgrades kept.':'Equipment improved')}finally{setTimeout(()=>gearActionLock=false,220)}}
 function autoEquipBest(){const r=eqRules(),eq=r.state(S),changed=new Set();for(let pass=0;pass<3;pass++){let improved=false;for(const slot of r.slots){let bestUid=eq.equipped[slot.id],bestPower=r.stats({...S,equipment:eq}).power;for(const candidate of eq.items.filter(i=>!i.stored&&r.catalog[i.template].tier<=r.unlockedTier(S)&&r.catalog[i.template].slot===slot.id)){const power=r.stats({...S,equipment:{...eq,equipped:{...eq.equipped,[slot.id]:candidate.uid}}}).power;if(power>bestPower){bestPower=power;bestUid=candidate.uid}}if(bestUid!==eq.equipped[slot.id]){eq.equipped[slot.id]=bestUid;changed.add(slot.id);improved=true}}if(!improved)break}if(changed.size){S.equipment=eq;save();bag();toast(changed.size+' equipment slots improved')}else {const locked=eq.items.filter(i=>!i.stored&&r.catalog[i.template].tier>r.unlockedTier(S)).map(i=>r.catalog[i.template].tier);toast(locked.length?'Best available gear equipped. T'+Math.min(...locked)+' requires Lv. '+r.requiredLevel(Math.min(...locked))+'.':'Your strongest items are already equipped')}}
 function confirmSalvage(uid){const r=eqRules(),eq=r.state(S),entry=eq.items.find(i=>i.uid===uid);if(!entry||r.equipped(eq,uid))return;const t=r.catalog[entry.template];modal(`<p class="eyebrow">SALVAGE SPARE EQUIPMENT</p><h2>${t.name}</h2><p>This spare item will become ${3+t.grade*3+entry.enhance} enhancement crystals and ${50*(t.grade+1)} gold. Socketed gems and ${entry.stars} star shards are recovered.</p><p class="rules">This item will be removed. Equipped items are protected.</p><button onclick="openEquipment(${uid})">Keep item</button> <button class="primary" onclick="salvageEquipment(${uid})">Salvage this item</button>`)}
 function salvageEquipment(uid){if(gearActionLock)return;gearActionLock=true;try{const result=eqRules().salvage(S,uid);if(!result.ok){toast(result.error);return}save();$('#modal').close();refreshEquipmentSurface();toast('Spare equipment salvaged')}finally{setTimeout(()=>gearActionLock=false,220)}}
@@ -154,35 +154,19 @@ function explainHeroStat(key){if(!Object.hasOwn(HERO_STAT_HELP,key))return;$('#h
 function openHeroStats(){const st=stats();modal(`<div class="hero-stats-dialog"><p class="eyebrow">YOUR COMPLETE ATTRIBUTES</p><h2>${esc(S.name)} · Level ${level()}</h2><div class="hero-stats-power">${statIcon('power')}<span>Combat Power</span><b>${fmt(st.power)}</b></div><div id="heroAttributes">${heroAttributesMarkup('basic',st)}</div><p class="rules">Your equipped gear, enhancements, stars and gems contribute to these totals.</p></div>`)}
 
 function equipmentRewardHtml(reward){if(!reward)return '';return eqRules().materialDefs.filter(m=>reward[m.id]>0).map(m=>`<span class="reward">${equipmentIcon(m.icon)}${reward[m.id]} ${m.name.toLowerCase()}${reward[m.id]>1?'s':''}</span>`).join('')}
-function bossLootPreview(id){const r=eqRules(),t=r.bossLootTables[id];if(!t)return '';return `<div class="boss-loot-preview"><strong>Guaranteed boss loot</strong><p>1 equipment item · ${r.bossGearLabel(S)} · T${r.bossGearTier(S)} wearable at Lv. ${Math.max(1,r.requiredLevel(r.bossGearTier(S)))} · ${t.stars}${uiIcon('star','inline-art')} · +${t.enhance}</p><small>${t.slots.map(id=>r.slots.find(s=>s.id===id).name).join(' · ')}</small><small>${t.stone} crystals · ${t.shard} star shards · ${t.gem} ${t.gem===1?'gem':'gems'} · ${t.essence} forge essence</small></div>`;}
-function bossDropMarkup(reward){if(!reward.entry)return '';const r=eqRules(),eq=r.state(S),e=reward.entry,t=r.catalog[e.template],power=stats().power,next=r.stats({...S,equipment:{...eq,equipped:{...eq.equipped,[t.slot]:e.uid}}}).power,diff=next-power;return `<section class="boss-drop-card" style="--loot-color:${t.color}"><p class="eyebrow">BOSS EQUIPMENT FOUND</p><div class="boss-drop-heading"><span class="boss-drop-icon">${gearArt(t)}</span><div><h3>${t.name}</h3><strong>T${t.tier} · ${e.stars}${uiIcon('star','inline-art')} · +${e.enhance}</strong><p class="loot-power">${diff>0?'+'+fmt(diff)+' hero power if equipped':diff<0?'Your equipped item is stronger. Salvage this for materials.':'Same hero power. Compare its attributes.'}</p></div></div><div class="row"><button class="primary" onclick="openEquipment(${e.uid})">Compare / Equip / Enhance</button><button onclick="$('#modal').close();openScreen('bag')">Open Equipment</button></div><small>Crystals enhance · Shards add stars · Gems add attributes · Essence crafts higher tiers</small></section>`;}
+function bossLootPreview(id){const r=eqRules(),t=r.bossLootTables[id];if(!t)return '';const drops=r.bossDropRanks.map(n=>r.gearRanks[n]);return `<div class="boss-loot-preview"><strong>Guaranteed boss loot</strong><p>${drops.length} equipment pieces · ${r.bossGearLabel(S)} · T${r.bossGearTier(S)} wearable at Lv. ${Math.max(1,r.requiredLevel(r.bossGearTier(S)))}</p><p>${drops.map(q=>`<b style="color:${q.color}">${q.name}${q.stars?' '+q.stars+'★':''}</b>`).join(' · ')}</p><small>${t.slots.map(id=>r.slots.find(s=>s.id===id).name).join(' · ')}</small><small>Five Orange pieces make a 2-Star Red in Gear Crafting · Blue and Purple feed the Glimmer Maw</small><small>${t.stone} crystals · ${t.shard} star shards · ${t.gem} ${t.gem===1?'gem':'gems'} · ${t.essence} forge essence</small></div>`;}
+function bossDropMarkup(reward){
+ const fed=reward.devoured?`<p>The Glimmer Maw ate the Blue and Purple pieces: +${fmt(reward.devoured)} essence.</p>`:'';
+ if(!reward.entry)return fed;
+ const r=eqRules(),eq=r.state(S),e=reward.entry,t=r.catalog[e.template],q=r.gearRanks[r.gearRank(e)],power=stats().power,next=r.stats({...S,equipment:{...eq,equipped:{...eq.equipped,[t.slot]:e.uid}}}).power,diff=next-power;
+ return `<section class="boss-drop-card" style="--loot-color:${q.color}"><p class="eyebrow">BOSS EQUIPMENT FOUND</p><div class="boss-drop-row">${(reward.entries||[e]).map(x=>equipmentCell(x,{compact:true})).join('')}</div><div class="boss-drop-heading"><div><h3>${t.name}</h3><strong>${q.name} · T${t.tier}</strong><p class="loot-power">${diff>0?'+'+fmt(diff)+' hero power if equipped':diff<0?'Your equipped item is stronger.':'Same hero power. Compare its attributes.'}</p></div></div>${fed}<div class="row"><button class="primary" onclick="openEquipment(${e.uid})">Compare / Equip / Enhance</button><button onclick="$('#modal').close();openScreen('cityCraft')">Gear Crafting</button></div><small>Five Orange pieces make a 2-Star Red · Blue and Purple feed the Glimmer Maw</small></section>`;
+}
 function characterSheet(){
  const st=stats();
  $('#main').innerHTML=`<section class="character-folio"><div class="folio-portrait"><img src="${reinaLookPath(false)}" alt="REINA"><h1>${esc(S.name)}</h1><strong>Level ${level()} · ${fmt(st.power)} Power</strong></div><div id="heroAttributes">${heroAttributesMarkup('basic',st)}</div></section>`;
 }
-let forgeUid=null,forgeMode='star',forgeDonors=[];
-function openStarForge(uid){forgeUid=uid;forgeMode='star';forgeDonors=[];openScreen('forge')}
-function setForgeMode(mode){forgeMode=mode;forgeDonors=[];gearWorkspace()}
-function toggleForgeDonor(uid){
- if(forgeDonors.includes(uid))forgeDonors=forgeDonors.filter(id=>id!==uid);
- else if(forgeDonors.length<eqRules().starGearCount)forgeDonors.push(uid);
- gearWorkspace();
-}
-function forgeStar(uid,stamp){
- const r=eqRules(),e=r.state(S).items.find(i=>i.uid===uid);
- if(!e||equipmentStamp(e)!==stamp)return;
- const result=r.perform(S,uid,'star',forgeDonors);
- if(!result.ok){toast(result.error);return}
- forgeDonors=[];save();wallet();gearWorkspace();toast('Star added · T'+r.catalog[e.template].tier);
-}
-function starRecipe(e,eq){
- const r=eqRules(),t=r.catalog[e.template],price=r.cost(e,'star'),eligible=r.starDonors(eq,e);
- const title='<h2>'+t.name+' · T'+t.tier+'</h2>';
- if(!price)return '<section class="forge-recipe">'+title+'<p>Maximum stars · 5 / 5</p></section>';
- forgeDonors=forgeDonors.filter(id=>eligible.some(d=>d.uid===id));
- const unlocked=t.tier<=r.unlockedTier(S),ready=unlocked&&forgeDonors.length===r.starGearCount&&S.gold>=price.gold&&eq.materials.shard>=price.shard;
- return `<section class="forge-recipe">${title}<p>${e.stars} → ${e.stars+1} stars · T${t.tier}</p><h3>Select gear to consume · ${forgeDonors.length} / ${r.starGearCount}</h3><p>${eligible.length} spare T${t.tier} items in bag · Gold ${fmt(S.gold)} / ${price.gold} · Star shards ${eq.materials.shard} / ${price.shard}</p><div class="forge-resources">${eligible.map(d=>`<button class="forge-piece" aria-label="${r.catalog[d.template].name}, ${d.stars} stars, +${d.enhance}" aria-pressed="${forgeDonors.includes(d.uid)}" onclick="toggleForgeDonor(${d.uid})" style="--rarity:${t.color}">${gearArt(r.catalog[d.template])}<b>${forgeDonors.includes(d.uid)?'✓ ':''}${d.stars}★</b></button>`).join('')}</div><button class="primary" ${ready?'':'disabled'} onclick="forgeStar(${e.uid},'${equipmentStamp(e)}')">${unlocked?'Consume 4 items · Add star':'Requires Lv. '+r.requiredLevel(t.tier)}</button></section><h3>Select equipment to upgrade</h3>`;
-}
+let forgeUid=null,forgeMode='tier',forgeDonors=[];
+function setForgeMode(mode){forgeMode='tier';forgeDonors=[];gearWorkspace()}
 function selectForgePiece(uid){forgeUid=uid;forgeDonors=[];gearWorkspace()}
 function buyForgeStone(){if(!eqRules().buyStone(S))return;save();wallet();gearWorkspace();toast('Synthesis stone +1')}
 function synthesizePiece(uid,stamp){
@@ -195,7 +179,6 @@ function synthesizePiece(uid,stamp){
 function forgeRecipe(pieces,eq){
  const r=eqRules(),e=pieces.find(i=>i.uid===forgeUid)||pieces[0];
  if(!e)return '';
- if(forgeMode==='star')return starRecipe(e,eq);
  const source=r.catalog[e.template],price=r.cost(e,'craft'),next=r.catalog[source.slot+'-t'+(source.tier+1)];
  const icon=t=>`<span class="forge-piece" style="--rarity:${t.color}">${gearArt(t)}<b>T${t.tier}</b></span>`;
  const store=`<p>Forge keeper: up to 2 stones daily · Wishes: 10% · Boss wheel: 1 stone on the stone segment.</p><button ${S.gold<r.stonePrice?'disabled':''} onclick="buyForgeStone()">Buy 1 stone · ${fmt(r.stonePrice)} gold</button>`;
@@ -215,7 +198,7 @@ function gearWorkspace(){
   const stored=eq.items.filter(e=>e.stored),spares=pieces.filter(e=>!r.equipped(eq,e.uid));
   content=`<section class="warehouse-pane"><h2>Stored gear · ${stored.length}</h2><div class="work-grid">${stored.map(storage).join('')||'<p>Your vault is empty.</p>'}</div></section><section class="warehouse-pane"><h2>Bag · ${spares.length}</h2><div class="work-grid">${spares.map(storage).join('')||'<p>No spare gear to deposit.</p>'}</div></section>`;
  }else{
-  content=(screen==='forge'?`<div class="tabs">${[['star','Add star'],['tier','Raise tier']].map(([id,label])=>`<button class="${forgeMode===id?'active':''}" onclick="setForgeMode('${id}')">${label}</button>`).join('')}</div>`+forgeRecipe(pieces,eq):'')+'<div class="work-grid">'+pieces.map(card).join('')+'</div>';
+  content=(screen==='forge'?`<div class="tabs">${[['tier','Raise tier']].map(([id,label])=>`<button class="${forgeMode===id?'active':''}" onclick="setForgeMode('${id}')">${label}</button>`).join('')}</div>`+forgeRecipe(pieces,eq):'')+'<div class="work-grid">'+pieces.map(card).join('')+'</div>';
   if(screen==='inventory')content+='<h2>Materials</h2><div class="work-grid">'+r.materialDefs.map(m=>`<button class="storage-slot material-cell" aria-label="${m.name}, ${fmt(eq.materials[m.id])}" onclick="materialInfo('${m.id}')">${equipmentIcon(m.icon)}<strong>${m.name}</strong><small>${fmt(eq.materials[m.id])}</small></button>`).join('')+'</div>';
  }
  $('#main').innerHTML=`<div class="topline"><h1>${titles[screen]}</h1></div><section class="gear-workspace">${content}</section>`;
@@ -359,76 +342,108 @@ function cityVault(){
 }
 // ---- Devour: spare equipment feeds the Glimmer Maw ------------------------------------------------------------------
 function devourToggle(uid){devourPicks=devourPicks.includes(uid)?devourPicks.filter(x=>x!==uid):[...devourPicks,uid];cityDevour()}
-function devourAll(){const all=WonderGear.devourable(S).map(e=>e.uid);devourPicks=devourPicks.length===all.length?[]:all;cityDevour()}
+// The quick button only picks Blue and Purple pieces: Orange and finer are crafting stock.
+const devourFood=()=>WonderGear.devourable(S).filter(e=>WonderGear.gearRank(e)<2).map(e=>e.uid);
+function devourAll(){const food=devourFood();devourPicks=food.length===devourPicks.length&&food.every(id=>devourPicks.includes(id))?[]:food;cityDevour()}
+function devourAuto(){if(S.autoDevour)delete S.autoDevour;else S.autoDevour=true;save();cityDevour();toast(S.autoDevour?'Blue and Purple drops will go straight to the Maw.':'Auto devour is off.')}
 function devourFeed(){
  const r=WonderGear,result=r.devourGear(S,devourPicks);
  if(!result.ok){toast(result.error);return}
  devourPicks=[];save();cityDevour();document.querySelector('.maw-pic')?.classList.add('chomp');
  toast('+'+fmt(result.gained)+' essence'+(result.levels?' · Glimmer Maw is now Lv. '+r.devourState(S).level:''));
 }
-function devourInfo(){const r=WonderGear;popup('<h2>Devour</h2><p>The Glimmer Maw eats spare equipment from the bag. Every piece gives essence: more for a higher tier, rarity, stars and enhancement.</p><p>Each Maw level gives Reina +'+r.devourStep.attack+' ATK, +'+r.devourStep.health+' HP and +'+r.devourStep.defense+' DEF for good. Stars and gems on a devoured piece come back as star shards and sky gems.</p><p>Equipped pieces, the basic set and pieces in the warehouse are never eaten.</p>')}
+function devourInfo(){const r=WonderGear;popup('<h2>Devour</h2><p>The Glimmer Maw eats spare equipment from the bag. Every piece gives essence: more for a higher tier, rarity, stars and enhancement.</p><p>Each Maw level gives Reina +'+r.devourStep.attack+' ATK, +'+r.devourStep.health+' HP and +'+r.devourStep.defense+' DEF for good. Stars and gems on a devoured piece come back as star shards and sky gems.</p><p>Blue and Purple pieces are its usual food: the quick button picks only those, and with Auto devour on they are eaten as soon as a guardian drops them. Orange and finer pieces are crafting stock; Relic and above cannot be devoured.</p><p>Equipped pieces, the basic set and pieces in the warehouse are never eaten.</p>')}
 function cityDevour(){
- const r=WonderGear,st=r.devourState(S),bonus=r.devourBonus(S),spare=r.devourable(S);
+ const r=WonderGear,st=r.devourState(S),bonus=r.devourBonus(S),spare=r.devourable(S),food=devourFood();
  devourPicks=devourPicks.filter(id=>spare.some(e=>e.uid===id));
  const gain=spare.filter(e=>devourPicks.includes(e.uid)).reduce((n,e)=>n+r.devourWorth(e),0),after=r.devourState({devour:st.total+gain}).level;
  const stat=(icon,label,n,step)=>`<span>${uiIcon(icon)}${label} <b>+${fmt(n)}</b>${after>st.level?`<em>+${fmt(step*(after-st.level))}</em>`:''}</span>`;
  $('#main').innerHTML=`<section class="satchel maw-room"><div class="satchel-top"><strong>Devour</strong>${satchelWallet()}</div>
- <div class="maw-stage"><button class="maw-help" aria-label="How Devour works" onclick="devourInfo()">${denPlain}?</button><img class="maw-pic" src="${artPath('comp-bag-maw')}" alt="Glimmer Maw"><div class="maw-info"><h2>Glimmer Maw <b>Lv. ${st.level}${after>st.level?' → '+after:''}</b></h2><div class="maw-bar"><i style="width:${st.need?Math.min(100,st.into/st.need*100):100}%"></i>${gain&&st.need?`<u style="width:${Math.min(100,(st.into+gain)/st.need*100)}%"></u>`:''}<span>${st.need?fmt(st.into)+(gain?' + '+fmt(gain):'')+' / '+fmt(st.need):'Highest level'}</span></div><div class="maw-stats">${stat('attack','ATK',bonus.attack,r.devourStep.attack)}${stat('health','HP',bonus.health,r.devourStep.health)}${stat('defense','DEF',bonus.defense,r.devourStep.defense)}</div></div></div>
+ <div class="maw-stage"><button class="maw-help" aria-label="How Devour works" onclick="devourInfo()">${denPlain}?</button><img class="maw-pic" src="${artPath('comp-bag-maw')}" alt="Glimmer Maw"><div class="maw-info"><h2>Glimmer Maw <b>Lv. ${st.level}${after>st.level?' → '+after:''}</b></h2><div class="maw-bar"><i style="width:${st.need?Math.min(100,st.into/st.need*100):100}%"></i>${gain&&st.need?`<u style="width:${Math.min(100,(st.into+gain)/st.need*100)}%"></u>`:''}<span>${st.need?fmt(st.into)+(gain?' + '+fmt(gain):'')+' / '+fmt(st.need):'Highest level'}</span></div><div class="maw-stats">${stat('attack','ATK',bonus.attack,r.devourStep.attack)}${stat('health','HP',bonus.health,r.devourStep.health)}${stat('defense','DEF',bonus.defense,r.devourStep.defense)}</div><button class="maw-auto" aria-pressed="${!!S.autoDevour}" onclick="devourAuto()">${denPlain}<i></i>Auto devour</button></div></div>
  <div class="satchel-scroll">${spare.length?`<div class="satchel-grid">${bagPad(spare.map(e=>equipmentCell(e,{act:'devourToggle('+e.uid+')',pressed:devourPicks.includes(e.uid)})),12)}</div>`:'<p class="maw-none">No spare equipment in the bag. Dungeon guardians and chests drop more.</p>'}</div>
- <div class="satchel-foot"><span>Chosen: ${devourPicks.length} · +${fmt(gain)} essence</span><button onclick="devourAll()" ${spare.length?'':'disabled'}>${devourPicks.length&&devourPicks.length===spare.length?'Clear':'Select all'}</button><button onclick="devourFeed()" ${devourPicks.length?'':'disabled'}>Devour</button></div>
+ <div class="satchel-foot"><span>Chosen: ${devourPicks.length} · +${fmt(gain)} essence</span><button onclick="devourAll()" ${food.length?'':'disabled'}>${food.length&&food.length===devourPicks.length&&food.every(id=>devourPicks.includes(id))?'Clear':'Blue & Purple'}</button><button onclick="devourFeed()" ${devourPicks.length?'':'disabled'}>Devour</button></div>
  ${satchelNav('Devour')}</section>`;
 }
 
 function satchelNav(here=''){return ` <div class="satchel-nav"><button data-back aria-label="Back to city" onclick="go('home')">‹</button>${[['hud-bag','Bag',"go('cityBag')"],['hud-forge','Gear Crafting',"go('cityCraft')"],['hud-shop','Warehouse',"go('cityVault')"],['comp-bag-maw','Devour',"go('cityDevour')"]].map(([icon,n,action])=>`<button ${n===here?'aria-current="page"':''} onclick="${action}">${artImage(icon,'')}${n}</button>`).join('')}</div>`;}
-let craftBand=1,craftTier=null,craftGroup='Equipment',craftTarget=null,craftInputs=[];
-function craftFilter(band,tier,group){
- craftBand=band;craftTier=tier;craftGroup=group;craftTarget=null;craftInputs=[];cityCraft();
-}
-function craftSelect(uid){craftTarget=uid;craftInputs=[];cityCraft()}
+// ---- Gear Crafting: pieces of one quality make one piece of the next (WonderGear.gearRanks) --------------------------
+let craftRank=3,craftTier=null,craftGroup='Equipment',craftSlot=null,craftInputs=[];
+function craftFilter(rank,tier,group){craftRank=rank;craftTier=tier;craftGroup=group;craftInputs=[];cityCraft()}
+function craftSelect(slot){craftSlot=slot;cityCraft()}
+const craftPool=()=>WonderGear.craftInputs(S,craftGroup,craftTier,craftRank);
+const craftPlain=(a,b)=>a.enhance-b.enhance||a.gems-b.gems||a.uid-b.uid;
+const craftSource=()=>craftRank===WonderGear.gearCraftFrom?'Orange pieces drop from dungeon guardians.':'Make them one step higher in the list on the left.';
+// No uid: fill the empty places with the plainest spare pieces. A uid toggles that piece.
 function craftAdd(uid){
- const r=eqRules(),eq=r.state(S),e=eq.items.find(x=>x.uid===craftTarget);
- if(!e)return;
- const allowed=r.starDonors(eq,e).map(x=>x.uid);
- if(uid===undefined)craftInputs=allowed.slice(0,r.starGearCount);
+ const r=WonderGear,pool=craftPool(),need=r.craftRecipe(craftRank).need;
+ if(uid===undefined){craftInputs=[...craftInputs,...pool.filter(e=>!craftInputs.includes(e.uid)).sort(craftPlain).map(e=>e.uid)].slice(0,need);if(!craftInputs.length)toast('No spare '+r.gearRanks[craftRank-1].name+' pieces of T'+craftTier+'. '+craftSource())}
  else if(craftInputs.includes(uid))craftInputs=craftInputs.filter(x=>x!==uid);
- else if(allowed.includes(uid)&&craftInputs.length<r.starGearCount)craftInputs.push(uid);
+ else if(pool.some(e=>e.uid===uid)&&craftInputs.length<need)craftInputs.push(uid);
+ if($('#modal').open)$('#modal').close();
  cityCraft();
 }
-function craftCommit(stamp){
- const r=eqRules(),e=r.state(S).items.find(x=>x.uid===craftTarget);
- if(!e||equipmentStamp(e)!==stamp)return;
- const result=r.perform(S,e.uid,'star',craftInputs);
- if(!result.ok){toast(result.error);return}
- save();craftInputs=[];cityCraft();toast('Star added');
+function craftPick(){
+ const r=WonderGear,rest=craftPool().filter(e=>!craftInputs.includes(e.uid)).sort(craftPlain);
+ popup('<h2>Choose a piece</h2><p>'+r.gearRanks[craftRank-1].name+' · T'+craftTier+' · '+craftGroup+'</p>'+(rest.length?'<div class="loom-pick">'+rest.map(e=>equipmentCell(e,{act:'craftAdd('+e.uid+')'})).join('')+'</div>':'<p>No more spare pieces of this kind. '+craftSource()+'</p>'));
 }
-function craftBatch(targetIds){
- const r=eqRules(),trial=JSON.parse(JSON.stringify(S));
- let count=0;
- for(const uid of targetIds){
-  const eq=r.state(trial),item=eq.items.find(x=>x.uid===uid);
-  if(!item||item.stars!==craftBand-1)continue;
-  const donors=r.starDonors(eq,item).sort((a,b)=>a.stars-b.stars||a.enhance-b.enhance||a.gems-b.gems).slice(0,r.starGearCount);
-  if(!r.perform(trial,uid,'star',donors.map(x=>x.uid)).ok)continue;
-  count++;
+function craftShow(entries){
+ const r=WonderGear,e=entries[0],t=r.catalog[e.template];
+ popup('<h2>Crafted</h2><div class="loom-pick">'+entries.slice(0,12).map(x=>equipmentCell(x,{act:"$('#modal').close();openEquipment("+x.uid+")"})).join('')+'</div><p>'+(entries.length>1?entries.length+' × ':'')+r.gearRanks[r.gearRank(e)].name+' · '+t.name+'</p><p>Tap the piece to compare or equip it.</p>');
+}
+function craftCommit(){
+ const r=WonderGear,result=r.craftGear(S,craftSlot,craftTier,craftRank,craftInputs);
+ if(!result.ok){toast(result.error);return}
+ craftInputs=[];save();cityCraft();
+ if(result.success)craftShow([result.entry]);else toast('The synthesis failed: the pieces are lost.');
+}
+// Batch: every full recipe the spare pieces allow, for the chosen slot.
+function craftBatch(){
+ const r=WonderGear,need=r.craftRecipe(craftRank).need,count=Math.floor(craftPool().length/need),t=r.catalog[craftSlot+'-t'+craftTier];
+ if(!count){toast('Not enough spare pieces for one full recipe.');return}
+ popup('<h2>Batch</h2><p>Make <b>'+count+' × '+r.gearRanks[craftRank].name+' '+t.name+'</b> from '+count*need+' '+r.gearRanks[craftRank-1].name+' pieces of T'+craftTier+'?</p><div class="den-actions"><button class="den-gold" onclick="craftBatchRun()">'+denPlain+'Synthesize all</button></div>');
+}
+function craftBatchRun(){
+ const r=WonderGear,need=r.craftRecipe(craftRank).need,made=[];
+ for(let guard=0;guard<60;guard++){
+  const pool=craftPool().sort(craftPlain);if(pool.length<need)break;
+  const result=r.craftGear(S,craftSlot,craftTier,craftRank,pool.slice(0,need).map(e=>e.uid));
+  if(!result.ok||!result.success)break;made.push(result.entry);
  }
- if(!count){toast('Not enough spare gear or materials.');return}
- if(!confirm('Upgrade '+count+' items using '+count*r.starGearCount+' spare items, '+(S.gold-trial.gold)+' gold and '+(r.state(S).materials.shard-trial.equipment.materials.shard)+' shards?'))return;
- S.gold=trial.gold;S.equipment=trial.equipment;save();craftInputs=[];cityCraft();
+ if(!made.length)return;
+ craftInputs=[];save();if($('#modal').open)$('#modal').close();cityCraft();craftShow(made);
+}
+function craftInfo(){
+ const r=WonderGear,line=(q,n)=>{const c=r.craftRecipe(n);return '<p><b style="color:'+q.color+'">'+q.name+'</b> · '+(c?c.need+' × '+r.gearRanks[n-1].name+Object.entries(c.mats).map(([id,x])=>' + '+x+' '+r.materialDefs.find(m=>m.id===id).name).join(''):'dungeon guardians')+'</p>'};
+ popup('<h2>Gear Crafting</h2><p>Dungeon guardians drop Blue, Purple and Orange pieces. Orange is where crafting starts; Blue and Purple feed the Glimmer Maw.</p><p>A recipe takes spare pieces of one tier and one family (any slot) and gives the piece you chose. It keeps the highest enhancement and gems of the pieces put in.</p><div class="den-tlist loom-ladder">'+r.gearRanks.map(line).join('')+'</div><p>A 2-Star Red can be tried with fewer than five pieces at a lower success rate; a failed try loses the pieces.</p>');
 }
 function cityCraft(){
- const r=eqRules(),eq=r.state(S),pieces=eq.items.filter(e=>!e.stored);
- const family=pieces.filter(e=>r.gearGroup(e.template)===craftGroup&&e.stars===craftBand-1);
- const tiers=[...new Set(family.map(e=>r.catalog[e.template].tier))].sort((a,b)=>b-a);
- if(!tiers.includes(craftTier))craftTier=tiers.find(t=>t<=r.unlockedTier(S))??tiers[0]??null;
- const choices=family.filter(e=>r.catalog[e.template].tier===craftTier),e=choices.find(x=>x.uid===craftTarget)||choices[0];
- craftTarget=e?.uid??null;
- const donors=e?r.starDonors(eq,e):[],price=e?r.cost(e,'star'):null;
- craftInputs=craftInputs.filter(id=>donors.some(x=>x.uid===id));
- const ready=e&&craftTier<=r.unlockedTier(S)&&craftInputs.length===r.starGearCount&&S.gold>=price.gold&&eq.materials.shard>=price.shard;
- const tile=(entry,action,active=false)=>{const t=r.catalog[entry.template];return `<button class="loom-item" aria-label="${t.name}, ${entry.stars} stars" aria-pressed="${active}" style="--edge:${t.color}" onclick="${action}">${gearArt(t)}<b>T${t.tier}</b><small>★${entry.stars}</small></button>`};
- $('#main').innerHTML=`<section class="satchel loom"><div class="satchel-top"><strong>Gear Crafting</strong>${[['gold',S.gold],['wishes',S.tickets],['crystals',S.scales]].map(([i,n])=>`<span>${uiIcon(i)}${fmt(n)}</span>`).join('')}</div><div class="loom-body"><aside>${[1,2,3,4,5].map(n=>`<button aria-pressed="${craftBand===n}" onclick="craftFilter(${n},null,craftGroup)">${n}-Star Gear</button>${craftBand===n?tiers.map(t=>`<button class="loom-tier" aria-pressed="${t===craftTier}" onclick="craftFilter(craftBand,${t},craftGroup)">T${t} Gear</button>`).join(''):''}`).join('')}</aside><div class="loom-work">${e?`<div class="loom-orbit"><div>${gearArt(r.catalog[e.template])}</div></div><h2>${r.catalog[e.template].name}</h2><strong>${e.stars} → ${craftBand} ★ · T${craftTier}</strong><p>${craftTier>r.unlockedTier(S)?'Requires Lv. '+r.requiredLevel(craftTier):'Success rate: 100% with all materials'}</p><div class="loom-inputs">${Array.from({length:r.starGearCount},(_,i)=>{const d=donors.find(x=>x.uid===craftInputs[i]);return d?tile(d,'craftAdd('+d.uid+')',true):'<span>+</span>'}).join('')}</div><p>${craftInputs.length} / ${r.starGearCount} spare items · ${priceText(price)}</p><div class="loom-options">${donors.map(x=>tile(x,'craftAdd('+x.uid+')',craftInputs.includes(x.uid))).join('')}</div><div class="loom-buttons"><button onclick="craftBatch([${choices.map(x=>x.uid).join(',')}])">Batch</button><button onclick="craftAdd()" ${donors.length?'':'disabled'}>Add</button><button onclick="craftCommit('${equipmentStamp(e)}')" ${ready?'':'disabled'}>Synthesize</button></div><div class="loom-options">${choices.map(x=>tile(x,'craftSelect('+x.uid+')',x===e)).join('')}</div>`:'<p>No matching equipment in your bag.</p>'}</div></div><div class="satchel-tabs loom-kinds">${r.gearGroups.map(g=>`<button aria-pressed="${g===craftGroup}" onclick="craftFilter(craftBand,null,'${g}')">${denPlain}${g}</button>`).join('')}</div>${satchelNav('Gear Crafting')}</section>`;
+ const r=eqRules(),eq=r.state(S);
+ if(!r.craftRecipe(craftRank))craftRank=r.gearCraftFrom;
+ const rank=r.gearRanks[craftRank],prev=r.gearRanks[craftRank-1],recipe=r.craftRecipe(craftRank);
+ const slots=r.slots.filter(s=>r.gearGroup(s.id+'-t1')===craftGroup);
+ if(!slots.some(s=>s.id===craftSlot))craftSlot=slots[0].id;
+ const open=Math.min(r.maxTier,r.unlockedTier(S)),mine=eq.items.filter(e=>!e.stored&&!e.starter&&r.gearGroup(e.template)===craftGroup&&[craftRank-1,craftRank].includes(r.gearRank(e)));
+ const tiers=[...new Set([open,...mine.map(e=>r.catalog[e.template].tier)])].sort((a,b)=>b-a);
+ if(!tiers.includes(craftTier))craftTier=[...new Set(mine.filter(e=>r.gearRank(e)===craftRank-1).map(e=>r.catalog[e.template].tier))].sort((a,b)=>b-a)[0]??open;
+ const pool=craftPool();craftInputs=craftInputs.filter(id=>pool.some(e=>e.uid===id));
+ const target=r.catalog[craftSlot+'-t'+craftTier],count=craftInputs.length,chance=r.craftChance(craftRank,count),least=recipe.flex?1:recipe.need;
+ const mats=Object.entries(recipe.mats),ready=chance>0&&mats.every(([id,n])=>eq.materials[id]>=n);
+ const pips=q=>q.stars?'<small>'+'★'.repeat(q.stars)+'</small>':'';
+ const face=(t,q)=>`<span class="loom-face q-${q.id}" style="--rarity:${q.color}">${gearArt(t)}<b>T${t.tier}</b>${pips(q)}</span>`;
+ const places=Array.from({length:recipe.need},(_,i)=>{const e=pool.find(x=>x.uid===craftInputs[i]);return e?equipmentCell(e,{act:'craftAdd('+e.uid+')',pressed:true}):`<button class="loom-plus" aria-label="Add a piece" onclick="craftPick()">${denPlain}+</button>`}).join('');
+ const stuff=mats.map(([id,n])=>{const m=r.materialDefs.find(m=>m.id===id),have=eq.materials[id];return `<button class="satchel-stack bag-tile" style="--rarity:${m.color}" aria-label="${m.name}, ${have} of ${n}" onclick="materialInfo('${id}')">${denPlain}${equipmentIcon(m.icon)}<b class="${have<n?'low':''}">${bagNum(have)}/${n}</b></button>`}).join('');
+ $('#main').innerHTML=`<section class="satchel loom"><div class="satchel-top"><strong>Gear Crafting</strong>${satchelWallet()}</div>
+ <div class="loom-body"><aside>${r.gearRanks.map((q,n)=>r.craftRecipe(n)?`<button aria-pressed="${craftRank===n}" onclick="craftFilter(${n},null,craftGroup)">${denPlain}${q.name}</button>${craftRank===n?tiers.map(t=>`<button class="loom-tier" aria-pressed="${t===craftTier}" onclick="craftFilter(craftRank,${t},craftGroup)">${denPlain}T${t} Gear</button>`).join(''):''}`:'').join('')}</aside>
+ <div class="loom-work"><button class="maw-help" aria-label="How crafting works" onclick="craftInfo()">${denPlain}?</button>
+ <div class="loom-orbit">${face(target,rank)}</div><h2>${rank.name} · ${target.name}</h2>
+ ${chance>0?`<b class="loom-rate">Success rate: ${Math.round(chance*100)}%</b>`:`<b class="loom-rate low">At least ${least} ${least===1?'piece':'pieces'}</b>`}
+ ${stuff?`<div class="loom-row">${stuff}</div>`:''}
+ <div class="loom-row">${places}</div>
+ <p>${count} / ${recipe.need} ${prev.name} · T${craftTier} · any ${craftGroup==='Equipment'?'equipment':craftGroup.toLowerCase()} slot${recipe.flex?'<br>The more gear added, the higher the success rate.':''}${pool.length?'':'<br>'+craftSource()}</p>
+ <div class="loom-buttons">${craftRank===r.gearCraftFrom?`<button onclick="craftBatch()" ${pool.length>=recipe.need?'':'disabled'}>${denPlain}Batch</button>`:''}<button onclick="craftAdd()" ${pool.length&&count<recipe.need?'':'disabled'}>${denPlain}Add</button><button onclick="craftCommit()" ${ready?'':'disabled'}>${denPlain}Synthesize</button></div>
+ <div class="loom-slots">${slots.map(s=>`<button class="loom-slot" aria-label="${r.catalog[s.id+'-t'+craftTier].name}" aria-pressed="${s.id===craftSlot}" onclick="craftSelect('${s.id}')">${denPlain}${face(r.catalog[s.id+'-t'+craftTier],rank)}<em class="${pool.length>=least?'':'low'}">${pool.length}</em></button>`).join('')}</div>
+ </div></div><div class="satchel-tabs loom-kinds">${r.gearGroups.map(g=>`<button aria-pressed="${g===craftGroup}" onclick="craftFilter(craftRank,null,'${g}')">${denPlain}${g}</button>`).join('')}</div>${satchelNav('Gear Crafting')}</section>`;
 }
-
 let petPage='Formation',petFocus=null,emblemFilter='All',petBack='',petBackNext='';
 // Leaving the room: back to Wonders when it was opened from the Pets tab there, otherwise to the city.
 function petLeave(){if(petBack==='wonders'){petBack='';filter='wings';go('collection')}else go('home')}

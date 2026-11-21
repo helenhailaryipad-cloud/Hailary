@@ -136,14 +136,33 @@ const beforePhysicalDodge=game.hp;game.crawl.danger={x:100,y:300,r:74};game.craw
 stopGame();
 `,context);
 vm.runInContext(`
-for(const id of DUNGEONS.map(d=>d.id)){const sample=defaults(),r=globalThis.WonderGear,eq=r.state(sample);sample.equipment=eq;const before=JSON.parse(JSON.stringify(eq)),t=r.bossLootTables[id],reward=r.bossLoot(sample,id,()=>.99);if(!reward.entry||eq.items.length!==before.items.length+1||r.catalog[reward.entry.template].tier!==r.bossGearTier(sample)||reward.entry.stars!==t.stars||reward.entry.enhance!==t.enhance)throw Error('Boss item quality');if(!t.slots.includes(r.catalog[reward.entry.template].slot)||JSON.stringify(eq.equipped)!==JSON.stringify(before.equipped))throw Error('Boss pool or automatic replacement');for(const m of r.materialDefs)if(eq.materials[m.id]!==before.materials[m.id]+(t[m.id]||0))throw Error('Boss materials doubled');if(!valid(sample))throw Error('Boss gear not saveable');for(const [lvl,tier] of [[44,1],[45,2],[49,2],[50,3],[95,3],[100,4],[1500,31]]){const hero=defaults();hero.xp=(lvl-1)*WonderProgress.xpPerLevel;const prize=r.bossLoot(hero,id,()=>.7);if(r.catalog[prize.entry.template].tier!==tier)throw Error('Boss reward level band '+id+' at '+lvl);}}
+for(const id of DUNGEONS.map(d=>d.id)){const sample=defaults(),r=globalThis.WonderGear,eq=r.state(sample);sample.equipment=eq;const before=JSON.parse(JSON.stringify(eq)),t=r.bossLootTables[id],reward=r.bossLoot(sample,id,()=>.99);if(!reward.entry||eq.items.length!==before.items.length+3||reward.entries.map(e=>r.gearRank(e)).join()!==r.bossDropRanks.join()||reward.entries.map(e=>e.stars).join()!=='2,1,0'||reward.entries.some(e=>r.catalog[e.template].tier!==r.bossGearTier(sample)||e.enhance!==0))throw Error('Boss item quality');if(reward.entries.some(e=>!t.slots.includes(r.catalog[e.template].slot))||JSON.stringify(eq.equipped)!==JSON.stringify(before.equipped))throw Error('Boss pool or automatic replacement');for(const m of r.materialDefs)if(eq.materials[m.id]!==before.materials[m.id]+(t[m.id]||0))throw Error('Boss materials doubled');if(!valid(sample))throw Error('Boss gear not saveable');for(const [lvl,tier] of [[44,1],[45,2],[49,2],[50,3],[95,3],[100,4],[1500,31]]){const hero=defaults();hero.xp=(lvl-1)*WonderProgress.xpPerLevel;const prize=r.bossLoot(hero,id,()=>.7);if(r.catalog[prize.entry.template].tier!==tier)throw Error('Boss reward level band '+id+' at '+lvl);}}
 {const hero=defaults(),r=WonderGear;hero.xp=1499*WonderProgress.xpPerLevel;const rolls=[.95,1/30,0];const reward=r.bossLoot(hero,'mistwood',()=>rolls.shift());if(r.catalog[reward.entry.template].tier!==3)throw Error('T3 must remain available at level cap');
- hero.xp=49*WonderProgress.xpPerLevel;hero.gold=99999;const target=r.addDrop(hero,2,'bow'),donors=Array.from({length:4},()=>r.addDrop(hero,2,'boots').uid);const before=JSON.stringify(hero);
- if(r.perform(hero,target.uid,'star',[...donors.slice(1),target.uid]).ok||JSON.stringify(hero)!==before)throw Error('Invalid star sacrifice spent resources');
- if(!r.perform(hero,target.uid,'star',donors).ok||target.template!=='bow-t2'||target.stars!==1||hero.equipment.items.some(i=>donors.includes(i.uid)))throw Error('Same-tier star crafting failed');}
+ // Quality ladder: five Orange pieces of one tier and family make a 2-Star Red of the chosen slot.
+ hero.xp=49*WonderProgress.xpPerLevel;const orange=Array.from({length:5},(_,i)=>r.addDrop(hero,2,['boots','crown','armor','bow','bracers'][i],2));orange[2].enhance=6;orange[4].gems=2;
+ const ids=orange.map(e=>e.uid),ring=r.addDrop(hero,2,'spiritluck',2).uid,purple=r.addDrop(hero,2,'bow',1).uid,low=r.addDrop(hero,1,'bow',2).uid,before=JSON.stringify(hero);
+ for(const bad of [[...ids.slice(1),ring],[...ids.slice(1),purple],[...ids.slice(1),low],[...ids.slice(1),ids[1]],[...ids,ids[0]],[],[hero.equipment.equipped.bow]])if(r.craftGear(hero,'bow',2,3,bad).ok||JSON.stringify(hero)!==before)throw Error('Invalid craft spent pieces '+bad);
+ if(r.craftGear(hero,'bow',2,2,ids).ok||r.craftGear(hero,'nope',2,3,ids).ok||r.craftChance(3,5)!==1||r.craftChance(3,2)!==.4||r.craftChance(4,4)!==0||r.perform(hero,ids[0],'star').ok)throw Error('Recipe rules');
+ const made=r.craftGear(hero,'bow',2,3,ids);
+ if(!made.ok||!made.success||made.entry.template!=='bow-t2'||made.entry.rank!==3||made.entry.stars!==2||made.entry.enhance!==6||made.entry.gems!==2||hero.equipment.items.some(i=>ids.includes(i.uid))||!valid(JSON.parse(JSON.stringify(hero))))throw Error('2-Star Red crafting failed');
+ if(r.detail(made.entry).star.attack!==Math.round(r.detail(made.entry).base.attack*r.gearRanks[3].bonus*100)/100)throw Error('Quality bonus');
+ // Fewer pieces lower the chance; a failed try loses them.
+ const few=[r.addDrop(hero,2,'boots',2).uid,r.addDrop(hero,2,'boots',2).uid],count=hero.equipment.items.length,fail=r.craftGear(hero,'boots',2,3,few,()=>.5);
+ if(!fail.ok||fail.success||fail.chance!==.4||hero.equipment.items.length!==count-2)throw Error('Failed craft');
+ const lucky=[r.addDrop(hero,2,'boots',2).uid],win=r.craftGear(hero,'boots',2,3,lucky,()=>.1);if(!win.success||win.entry.template!=='boots-t2')throw Error('Lucky craft');
+ // Higher steps need exact counts and materials; pieces from before the ladder keep their stars and their bonus.
+ const reds=Array.from({length:5},()=>{const e=r.addDrop(hero,2,'armor',2);e.rank=3;return e.uid});
+ if(r.craftGear(hero,'armor',2,4,reds.slice(0,4)).ok)throw Error('3-Star Red needs five');const red3=r.craftGear(hero,'armor',2,4,reds).entry;if(red3.stars!==3||red3.rank!==4)throw Error('3-Star Red');
+ const pair=[red3.uid,(()=>{const e=r.addDrop(hero,2,'crown',2);e.rank=4;e.stars=3;return e.uid})()];hero.equipment.materials.essence=19;
+ if(r.craftGear(hero,'crown',2,5,pair).ok)throw Error('Dark Gold needs essence');hero.equipment.materials.essence=20;const gold4=r.craftGear(hero,'crown',2,5,pair).entry;if(gold4.stars!==4||hero.equipment.materials.essence!==0)throw Error('Dark Gold');
+ const old={uid:900,template:'bow-t1',enhance:0,stars:3,gems:0};if(r.gearRank(old)!==4||r.gearRank({stars:0})!==0||r.detail(old).star.attack!==Math.round(r.detail(old).base.attack*.36*100)/100)throw Error('Old stars must read as the same quality bonus');
+ for(const bad of [{rank:3,stars:3},{rank:10,stars:5},{rank:-1,stars:0},{rank:1.5,stars:1}]){const eq=JSON.parse(JSON.stringify(hero.equipment));Object.assign(eq.items[0],bad);if(r.valid(eq))throw Error('Bad rank accepted')}
+ // Auto devour: the Maw eats Blue and Purple drops at once, Orange stays; Relic and finer are never food.
+ const auto=defaults();auto.autoDevour=true;const fed=r.bossLoot(auto,'mistwood',()=>.5);if(fed.entries.length!==1||r.gearRank(fed.entry)!==2||!(fed.devoured>0)||auto.devour!==fed.devoured||!valid(auto)||valid({...auto,autoDevour:1}))throw Error('Auto devour');
+ const relic=r.addDrop(auto,1,'bow',7);if(r.devourable(auto).some(e=>e.uid===relic.uid)||r.devourGear(auto,[relic.uid]).ok)throw Error('Relic must not be devoured');}
 {const s=defaults(),a=WonderAdventure;for(let i=0;i<5;i++)if(!a.spendStamina(s,0))throw Error('Missing daily entry');if(a.spendStamina(s,0)||!a.spendStamina(s,86400000))throw Error('Stamina reset');for(let tier=1;tier<=WonderGear.maxTier;tier++){if(DUNGEONS.filter(d=>d.tier===tier).length!==5)throw Error('Boss count');}if(visibleDungeons().length>7)throw Error('Future bosses exposed');}
-const fullSample=defaults(),rules=globalThis.WonderGear,fullEq=rules.fresh(fullSample);fullSample.equipment=fullEq;while(fullEq.items.length<80)fullEq.items.push({uid:fullEq.nextId++,template:'bow-t1',enhance:0,stars:0,gems:0});const oldCrystal=fullEq.materials.stone,oldCount=fullEq.items.length,converted=rules.bossLoot(fullSample,'sunspire',()=>.99);if(!converted.converted||converted.entry||fullEq.items.length!==oldCount||fullEq.materials.stone!==oldCrystal+55+20||converted.stone!==75||!valid(fullSample))throw Error('Full bag boss conversion');
-stopGame();S=defaults();launchBattle('dungeon','mistwood');game.stage=2;game.cleared=2;battleEnemy();const countBeforeBoss=rules.state(S).items.length;game.enemy.hp=1;battleDamage(99999);if(S.equipment.items.length!==countBeforeBoss+1)throw Error('Boss equipment missing');const paidBoss=JSON.stringify(S);endBattle(true);if(JSON.stringify(S)!==paidBoss)throw Error('Boss loot duplicate claim');
+const fullSample=defaults(),rules=globalThis.WonderGear,fullEq=rules.fresh(fullSample);fullSample.equipment=fullEq;while(fullEq.items.length<80)fullEq.items.push({uid:fullEq.nextId++,template:'bow-t1',enhance:0,stars:0,gems:0});const oldCrystal=fullEq.materials.stone,oldCount=fullEq.items.length,converted=rules.bossLoot(fullSample,'sunspire',()=>.99);if(!converted.converted||converted.entry||fullEq.items.length!==oldCount||fullEq.materials.stone!==oldCrystal+55+30||converted.stone!==85||!valid(fullSample))throw Error('Full bag boss conversion');
+stopGame();S=defaults();launchBattle('dungeon','mistwood');game.stage=2;game.cleared=2;battleEnemy();const countBeforeBoss=rules.state(S).items.length;game.enemy.hp=1;battleDamage(99999);if(S.equipment.items.length!==countBeforeBoss+3)throw Error('Boss equipment missing');const paidBoss=JSON.stringify(S);endBattle(true);if(JSON.stringify(S)!==paidBoss)throw Error('Boss loot duplicate claim');
 `,context);
 vm.runInContext(`
 {
@@ -611,16 +630,20 @@ vm.runInContext(`
  for(const tab of bagTabs){cityBagFilter=tab;openScreen('cityBag');if(!document.querySelector('#main').innerHTML.includes('Capacity: '))throw Error('Bag tab '+tab)}
  cityBagFilter='Pet';cityBag();if(!document.querySelector('#main').innerHTML.includes('2/'+r.synthNeed))throw Error('Pet copies in the bag');
  if(bagTabs.join()!=='Common,Materials,Pet,ALL'||!bagThings('Common').some(t=>t.gear))throw Error('The bag has four tabs; spare equipment is in Common');
- // Gear Crafting keeps Equipment, Necklace & Amulet and Rings apart: a piece only takes spare pieces of its own family.
- {const T=defaults();T.gold=1e6;T.equipment=r.state(T);T.equipment.materials.shard=99;
-  const add=slot=>r.addDrop(T,1,slot).uid,bow=add('bow'),armour=[add('crown'),add('armor'),add('boots'),add('bow')],neck=[add('necklace'),add('amulet'),add('necklace'),add('amulet')],rings=[add('spiritluck'),add('spiritguard'),add('spiritluck'),add('spiritguard')];
-  const item=r.state(T).items.find(e=>e.uid===bow),names=r.starDonors(r.state(T),item).map(e=>r.gearGroup(e.template));
-  if(r.gearGroups.length!==3||!names.length||names.some(n=>n!=='Equipment'))throw Error('Equipment donors must be equipment');
-  if(r.perform(T,bow,'star',neck).ok||r.perform(T,bow,'star',[...armour.slice(0,3),rings[0]]).ok)throw Error('Necklaces and rings must not feed equipment');
-  if(!r.perform(T,bow,'star',armour).ok||!r.perform(T,neck[0],'star',[neck[1],neck[2],neck[3],add('amulet')]).ok||!r.perform(T,rings[0],'star',[rings[1],rings[2],rings[3],add('spiritguard')]).ok)throw Error('Each family crafts within itself');
-  const keep=S;S=T;for(const g of r.gearGroups){craftFilter(1,null,g);const html=document.querySelector('#main').innerHTML;if(!html.includes('loom-kinds'))throw Error('Crafting tabs')}S=keep}
- cityBagFilter='Common';cityBag();const html=document.querySelector('#main').innerHTML;
- if(!html.includes("bagOpen('i:chest1')")||html.includes("bagOpen('p:"))throw Error('Common tab');
+ // Gear Crafting keeps Equipment, Necklace & Amulet and Rings apart, and its screen crafts by taps.
+ {const T=defaults();T.equipment=r.state(T);const add=(slot,rank=2)=>r.addDrop(T,1,slot,rank).uid;
+  const armour=[add('crown'),add('armor'),add('boots'),add('bow'),add('bracers')],neck=[add('necklace'),add('amulet'),add('necklace'),add('amulet'),add('amulet')],rings=[add('spiritluck'),add('spiritguard')];
+  if(r.gearGroups.length!==3||r.craftInputs(T,'Equipment',1,3).map(e=>e.uid).join()!==armour.join()||r.craftInputs(T,'Rings',1,3).length!==2||r.craftInputs(T,'Equipment',1,4).length)throw Error('Craft pool by family');
+  if(r.craftGear(T,'bow',1,3,[...armour.slice(0,4),neck[0]]).ok||r.craftGear(T,'necklace',1,3,armour).ok)throw Error('Families must not mix');
+  const keep=S;S=T;craftRank=3;
+  for(const g of r.gearGroups){craftFilter(3,null,g);const html=document.querySelector('#main').innerHTML;if(!html.includes('loom-kinds')||!html.includes('2-Star Red')||!html.includes('At least 1 piece'))throw Error('Crafting screen '+g)}
+  craftFilter(3,null,'Equipment');craftSelect('boots');craftAdd();if(craftInputs.length!==5||!document.querySelector('#main').innerHTML.includes('Success rate: 100%'))throw Error('Add fills the recipe');
+  craftAdd(craftInputs[0]);if(craftInputs.length!==4||!document.querySelector('#main').innerHTML.includes('Success rate: 80%'))throw Error('Tap removes a piece');
+  craftAdd();craftCommit();const boots=r.state(S).items.find(e=>e.template==='boots-t1'&&e.rank===3);if(!boots||r.craftInputs(S,'Equipment',1,3).length||!document.querySelector('#modalBody').innerHTML.includes('Crafted'))throw Error('Synthesize');
+  craftFilter(3,null,'Necklace & Amulet');craftBatchRun();if(!r.state(S).items.some(e=>e.template==='necklace-t1'&&e.rank===3)||r.craftInputs(S,'Necklace & Amulet',1,3).length)throw Error('Batch');
+  craftFilter(5,null,'Equipment');if(!document.querySelector('#main').innerHTML.includes('4-Star Dark Gold')||!document.querySelector('#main').innerHTML.includes('At least 2 pieces'))throw Error('Dark Gold page');
+  openEquipment(boots.uid);if(!document.querySelector('#modalBody').innerHTML.includes('2-Star Red · T1'))throw Error('Item card shows quality');
+  S=keep}
  bagOpen('i:chest1');if(!document.querySelector('#modalBody').innerHTML.includes('Oak Chest')||!document.querySelector('#modalBody').innerHTML.includes("bagUse('chest1',2)"))throw Error('Item card');
  bagUse('chest1',1);if(r.bagCount(S,'chest1')!==1||!document.querySelector('#modalBody').innerHTML.includes('You received'))throw Error('Use from the card');
  openScreen('cityVault');const piece=r.devourable(S)[0].uid;
