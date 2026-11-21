@@ -429,6 +429,24 @@ War = lobby, Fight, Shop). Rules in `gear-data.js` (placeholders, `warRules`), o
   atlases (headroom about 0.42 MB after this pass).
 - Not done: Star Duel, Storm Brawl, Shadow Hunt, betting, the contest privilege, timed opening hours.
 
+## Cloud War second pass (2026-11-21)
+User sent two photos of the reference's cloud war (territory map with owners and "Boss: N", round timer, Killing
+Points 390/1200, Cloud Shop / Faction Battle Status / Point Rewards / Rankings / Description; the territory hall
+with a boss list). Our Cloud War (`cityCloudWar`, `cloudCount` 4, Reina = Galewing `cloudMine`) already had the map,
+territory windows with ten defenders and the fight; defenders never came back and the "chests" were only counted.
+- Rounds: one UTC hour (`cloudRules.roundMs`). `cloudRoundCheck()` (on opening the map, a territory, and every second
+  of the patrol timer) starts a new round: `S.cloudWarHits` and the bots' `S.cloudPatrol` are cleared, so all
+  defenders return, and territories taken in the old round are kept in `S.cloud.held` (`cloudNewRound`). `cloudOwner`
+  = this round's taker (80 points) or the held owner.
+- Carnage Points: a defeated defender gives 10 / 20 / 30 (`cloudEnemyScore`) up to 1200 a UTC day (`cloudGain`) and
+  as many Cloud Tokens; a Golden Boss also gives a Moon Chest, an Elite an Oak Chest (`cloudLoot`), straight into the
+  bag. Optional save field `S.cloud {round, held, day, carnage, claimed, tokens}` (`validCloud`).
+- Map: round clock and Level at the top, every territory says owner and "Boss: N" (`cloudAlive`), Carnage bar, tool
+  bar Cloud Shop / Faction Status / Point Rewards (red dot when claimable) / Rankings (AI rivals, simulated) / Guide;
+  all windows are pop-ups (`cloudShopShow`, `cloudStatusShow`, `cloudPointsShow`, `cloudRankShow`). Icons reuse
+  existing `hud-*` art (no new pictures).
+- Not done: the hall view with a live boss list and damage rankings, Cloud Hunt, buying extra Carnage, Bizarre Lands.
+
 ## In-chat playable preview (user requirement)
 The user wants to play the game inside the chat, and wants SHORT replies in Russian, no fluff.
 - Artifact: https://claude.ai/artifact/L9owNJPMaZjAsTmU3tDGs6 (private). After game changes, rebuild and republish:

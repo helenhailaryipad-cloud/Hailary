@@ -754,3 +754,36 @@ vm.runInContext(`
 }
 `,context);
 console.log('PASS: Sky Contest Totem War: tally formula, full fight, orders, totem capture, quests, ranking, daily fights, shop and screens.');
+
+vm.runInContext(`
+{const r=WonderGear,T0=Date.UTC(2026,10,21,21,10),hour=36e5,day=864e5;
+ S=defaults();if(S.cloud!==undefined||!valid(S)||r.cloudRound(T0)!=='2026-11-21T21'||r.cloudRoundEnds(T0)!==Date.UTC(2026,10,21,22))throw Error('Round clock');
+ // Carnage Points are capped per UTC day and pay the same number of Cloud Tokens.
+ if(r.cloudGain(S,390,T0)!==390||r.cloudGain(S,1000,T0)!==810||r.cloudGain(S,30,T0)!==0||r.cloudState(S,T0).carnage!==1200||r.cloudState(S,T0).tokens!==1200)throw Error('Carnage cap');
+ if(r.cloudState(S,T0+day).carnage!==0||r.cloudState(S,T0+day).tokens!==1200)throw Error('Daily reset keeps tokens');
+ // Point Rewards: each step once a day, into the bag.
+ const oak=r.bagCount(S,'chest1');if(!r.cloudClaim(S,0,T0)||r.cloudClaim(S,0,T0)||r.bagCount(S,'chest1')!==oak+1||r.cloudClaim(S,9,T0))throw Error('Point reward');
+ const T=defaults();r.cloudGain(T,200,T0);if(r.cloudClaim(T,2,T0)||!r.cloudClaim(T,0,T0))throw Error('Reward before its points');
+ // Cloud Shop takes tokens.
+ const tokens=r.cloudState(S).tokens;if(!r.buyCloud(S,'chest3')||r.cloudState(S).tokens!==tokens-900||r.bagCount(S,'chest3')!==1||r.buyCloud(S,'nope'))throw Error('Cloud Shop');
+ S.cloud.tokens=10;if(r.buyCloud(S,'wish'))throw Error('Shop without tokens');
+ // A new round keeps territories taken in the old one.
+ const C=defaults();if(!r.cloudNewRound(C,{},T0)||r.cloudNewRound(C,{},T0+60000))throw Error('First round');
+ if(!r.cloudNewRound(C,{3:2,7:0,99:1},T0+hour)||C.cloud.held[3]!==2||C.cloud.held[7]!==0||Object.keys(C.cloud.held).length!==3)throw Error('Held territories');
+ if(!valid(JSON.parse(JSON.stringify(S))))throw Error('Cloud save');
+ for(const bad of [{carnage:1201},{tokens:-1},{round:'x'},{claimed:[0,0]},{claimed:[7]},{held:{30:1}},{held:{3:4}}])if(valid({...S,cloud:{...S.cloud,...bad}}))throw Error('Invalid cloud accepted '+JSON.stringify(bad));
+ // The map: round clock, Carnage Points, owners and bosses left on every territory, the tool bar and its windows.
+ S=defaults();cloudCount=4;openScreen('cloudWar');let html=$('#main').innerHTML;
+ if(!html.includes('This round ends in')||!html.includes('Carnage Points')||!html.includes('Boss: 10')||!html.includes('cloudShopShow()')||!html.includes('cloudPointsShow()'))throw Error('Cloud War map');
+ S.cloudWarHits={6:[0,0,0,0,9,9,9,9,9,9]};if(cloudAlive(6)!==4)throw Error('Bosses left');
+ S.cloudWarHits={6:[9,9,9,9,9,0,0,0,0,0]};if(cloudOwner(6)!==0)throw Error('80 points take a territory');
+ S.cloud.round='2026-01-01T00';cloudRoundCheck();if(S.cloudWarHits||S.cloud.held[6]!==0||cloudOwner(6)!==0||cloudAlive(6)!==10)throw Error('Round refresh');
+ cloudPointsShow();if(!$('#modalBody').innerHTML.includes('Point Rewards'))throw Error('Point Rewards window');
+ r.cloudGain(S,160);cloudPointsShow();if(!$('#modalBody').innerHTML.includes('cloudTake(0)'))throw Error('Claim button');cloudTake(0);if(!r.cloudState(S).claimed.includes(0))throw Error('Claim');
+ cloudShopShow();if(!$('#modalBody').innerHTML.includes("cloudBuy('wish')"))throw Error('Shop window');
+ cloudStatusShow();if(!$('#modalBody').innerHTML.includes('Galewing (you)'))throw Error('Status window');
+ cloudRankShow();if(!$('#modalBody').innerHTML.includes('AI'))throw Error('Rankings window');
+ cloudTerritory(6);if(!$('#modalBody').innerHTML.includes('Carnage Points today')||!$('#modalBody').innerHTML.includes('Moon Chest'))throw Error('Territory window');
+}
+`,context);
+console.log('PASS: Cloud War: rounds keep held territories, Carnage cap, Point Rewards, Cloud Shop, map labels and windows.');
