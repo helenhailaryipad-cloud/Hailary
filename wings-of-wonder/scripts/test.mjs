@@ -660,3 +660,55 @@ vm.runInContext(`
 }
 `,context);
 console.log('PASS: bag items and chests, warehouse stacks, Devour levels, and the Bag / Warehouse / Devour screens.');
+
+vm.runInContext(`
+{const r=WonderGear,T0=Date.UTC(2026,10,18,12),day=864e5;   // a Wednesday
+ S=defaults();if(S.summon!==undefined||!valid(S)||r.summonLevel(S).level!==1||r.summonState(S,T0).gala.basic!==0)throw Error('Fresh summon record');
+ // Basic: a Wish Ticket first, then wishes; every draw counts for the Festival; Rare and finer leave a mark.
+ if(r.summonDraw(S,'basic',3).ok||r.summonDraw(S,'nope',1).ok||JSON.stringify(r.summonPay(S,'basic',1))!=='{"tickets":50}')throw Error('Draw sizes and payment');
+ r.bagAdd(S,'wish',1);let wishes=S.tickets,draw=r.summonDraw(S,'basic',1,()=>.5,T0);
+ if(!draw.ok||draw.pay.item!=='wish'||r.bagCount(S,'wish')||S.tickets!==wishes||draw.results[0].rarity!=='Rare'||S.summon.marks.r!==1||S.summon.gala.basic!==1)throw Error('Ticket draw');
+ draw=r.summonDraw(S,'basic',10,()=>.99,T0);if(S.tickets!==wishes-500||draw.results.some(x=>x.rarity!=='Super Rare')||S.summon.marks.s!==10||S.summon.gala.basic!==11||draw.results.filter(x=>x.spare).length!==9||!valid(JSON.parse(JSON.stringify(S))))throw Error('Ten draws for wishes');
+ S.tickets=0;if(r.summonDraw(S,'basic',1,Math.random,T0).ok)throw Error('Unaffordable basic draw');
+ // Advanced: Star Orbs or prisms; guarantees and the Summon Level.
+ if(r.summonPay(S,'advanced',1)||r.summonDraw(S,'advanced',1,Math.random,T0).ok)throw Error('Advanced needs orbs or prisms');
+ S.scales=30*45;const got=[];for(let i=0;i<45;i++)got.push(r.summonDraw(S,'advanced',1,()=>0,T0).results[0].rarity);
+ if(S.scales!==0||got.slice(0,9).some(x=>x!=='Rare')||got[9]!=='Epic'||got[19]!=='Epic'||got[39]!=='Super Rare'||got.filter(x=>x==='Super Rare').length!==1||got[40]!=='Rare')throw Error('Guarantees '+got.join());
+ if(S.summon.adv!==45||r.summonLevel(S).level!==5||r.summonLevel(S).into!==5||S.summon.gala.basic!==11)throw Error('Summon Level');
+ // The Festival: quests for today's Basic summons pay Star Orbs and tokens; orbs pay for Advanced draws.
+ if(!r.galaClaim(S,0,T0)||r.galaClaim(S,0,T0)||r.galaClaim(S,1,T0)||S.summon.orbs!==1||S.summon.gala.tokens!==5)throw Error('Festival quest');
+ const adv=S.summon.adv;if(!r.summonDraw(S,'advanced',1,()=>0,T0).ok||S.summon.orbs!==0||S.summon.adv!==adv+1)throw Error('Orb draw');
+ if(r.galaReward(S,0,Math.random,T0))throw Error('Milestone before its tokens');
+ S.summon.gala.tokens=80;const eggs=r.bagCount(S,'petegg'),prize=r.galaReward(S,0,Math.random,T0),pet=r.galaReward(S,2,()=>0,T0);
+ if(prize.id!=='petegg'||r.bagCount(S,'petegg')!==eggs+1||r.galaReward(S,0,Math.random,T0)||pet.rarity!=='Epic'||!S.owned.includes(pet.id)||r.galaReward(S,4,Math.random,T0))throw Error('Milestones');
+ let next=r.summonState(S,T0+day);if(next.gala.basic!==0||next.gala.claimed.length||next.gala.tokens!==80||next.gala.got.length!==2)throw Error('Quests reset daily, tokens stay');
+ next=r.summonState(S,Date.UTC(2026,11,1,1));if(next.gala.tokens!==0||next.gala.got.length||next.adv!==adv+1||next.marks.s!==11)throw Error('A new month starts a new Festival');
+ if(r.galaEnds(T0)!==Date.UTC(2026,11,1))throw Error('Festival end');
+ // Mark Shop: marks of the pet's rarity, a weekly limit, and the Summon Level opens finer pets.
+ const rare=r.familiars.find(p=>p.rarity==='Rare'&&!S.owned.includes(p.id)),royal=r.familiars.find(p=>p.rarity==='Super Rare'),common=r.familiars.find(p=>p.rarity==='Common');
+ if(r.markOffer(S,common.id,T0)||r.buyMarkPet(S,common.id,T0).ok||r.markOffer(S,royal.id,T0).why!=='Summon Lv. 10'||r.buyMarkPet(S,royal.id,T0).ok)throw Error('Shop rules');
+ S.summon.marks.r=19;if(r.buyMarkPet(S,rare.id,T0).ok)throw Error('Not enough marks');
+ S.summon.marks.r=100;for(let i=0;i<r.markLimit;i++)if(!r.buyMarkPet(S,rare.id,T0).ok)throw Error('Buying a pet');
+ if(!S.owned.includes(rare.id)||r.petSpares(S,rare.id)!==r.markLimit-1||S.summon.marks.r!==100-r.markLimit*r.markPrice||r.buyMarkPet(S,rare.id,T0).ok||r.markOffer(S,rare.id,T0).why!=='Sold out this week')throw Error('Weekly limit');
+ if(r.markOffer(S,rare.id,T0+5*day).left!==r.markLimit||r.markOffer(S,rare.id,T0+4*day).left!==0)throw Error('Restock on Monday');
+ S.summon.adv=95;if(r.markOffer(S,royal.id,T0).why!=='Not enough marks')throw Error('Royal marks short');S.summon.marks.s=20;if(r.markOffer(S,royal.id,T0).why||!r.buyMarkPet(S,royal.id,T0).ok)throw Error('Summon Level opens Super Rare');
+ if(!valid(JSON.parse(JSON.stringify(S))))throw Error('Summon save');
+ for(const bad of [{adv:-1},{orbs:1.5},{pityE:99},{marks:{r:1,e:1}},{marks:{r:1,e:1,s:-1}},{shop:{week:'x',bought:{}}},{shop:{week:'2026-11-16',bought:{nope:1}}},{shop:{week:'2026-11-16',bought:{[rare.id]:9}}},{gala:{...S.summon.gala,claimed:[0,0]}},{gala:{...S.summon.gala,got:[9]}},{gala:{...S.summon.gala,season:'2026-10'}}])
+  if(valid({...S,summon:{...S.summon,...bad}}))throw Error('Invalid summon accepted '+JSON.stringify(bad));
+ // The room: Home > Summon opens it; four pages; the Pets room's own Summon page uses the same rule.
+ if(!cityGroups.flat().some(x=>x[1]==='Summon'&&x[2]==='citySummon'))throw Error('Home Summon icon');
+ S=defaults();S.tickets=600;summonPage='Basic';openScreen('citySummon');let html=$('#main').innerHTML;
+ if(!html.includes('Basic Summon')||!html.includes("summonDo('basic',10)")||!html.includes('well-skip'))throw Error('Basic page');
+ summonDo('basic',10);if(S.tickets!==100||!S.summon||r.summonState(S).gala.basic!==10||!$('#modalBody').innerHTML.includes('Basic Summon')||!$('#modalBody').innerHTML.includes('sum-reveal'))throw Error('Draw from the room');
+ summonSkipToggle();summonDo('basic',1);if($('#modalBody').innerHTML.includes('sum-reveal')||S.tickets!==50)throw Error('Skip');
+ summonGo('Gala');html=$('#main').innerHTML;if(!html.includes('galaTake(0)')||!html.includes('Perform Basic Summon 80 times')||!html.includes('mile'))throw Error('Festival page');
+ galaTake(0);if(r.summonState(S).orbs!==1||!$('#main').innerHTML.includes('Claimed'))throw Error('Claim on the page');
+ summonGo('Advanced');html=$('#main').innerHTML;if(!html.includes('Summon Level')||!html.includes('Guaranteed')||html.includes("summonDo('advanced',1)\\" disabled"))throw Error('Advanced page');
+ summonDo('advanced',1);if(r.summonState(S).orbs!==0||S.summon.adv!==1)throw Error('Advanced draw from the room');
+ summonGo('Shop');markFilter='Epic';citySummon();html=$('#main').innerHTML;if(!html.includes('Spirit Mark Shop')||(html.match(/shop-card/g)||[]).length!==10||!html.includes('Summon Lv. 5'))throw Error('Mark Shop page');
+ const one=r.familiars.find(p=>p.rarity==='Rare');markFilter='All';S.summon.marks.r=40;markAsk(one.id);if(!$('#modalBody').innerHTML.includes("markBuy('"+one.id+"')"))throw Error('Shop card');
+ markBuy(one.id);if(r.summonState(S).marks.r!==20||!S.owned.includes(one.id))throw Error('Buy from the shop');
+ summonLeave();if(summonPage!=='Advanced'||screen!=='citySummon')throw Error('Shop returns to Advanced');summonLeave();if(screen!=='home')throw Error('Back to the city');
+}
+`,context);
+console.log('PASS: Summon room: Basic and Advanced wells, guarantees, Summon Level, Spirit Marks and the Mark Shop, Summon Festival quests and milestones.');

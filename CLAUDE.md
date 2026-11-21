@@ -377,7 +377,33 @@ unchanged), Warehouse (`cityVault`), Devour (`cityDevour`). Rules in `gear-data.
   fashion" are kept in `art-source/fashion/helms.webp` (not in the game yet). Gear art cache tag is `?v=4` (the chat
   builder patches that exact string).
 - Not done from the reference: bottom-row extra slots, the star bands of Gear Crafting (ours is 1-5 Star Gear),
-  capacity limits, Convert in bulk. Hosted bundle headroom is about 0.22 MB: add AVIF copies before more art.
+  capacity limits, Convert in bulk. Hosted bundle headroom is about 0.14 MB after the Summon room: add AVIF
+  copies of older art (or lower their quality) before adding more pictures.
+
+## Summon room (2026-11-21)
+User sent nine reference photos (no text): a Summon icon on the home screen, Basic Summon, Advanced Summon, a shop
+for summon by-products, and an event that pays advanced tickets for basic summons. Home -> Summon now opens
+`citySummon` (`gear-ui.js`, root `.satchel.well`, page in `summonPage`: Basic / Advanced / Shop / Gala); the old
+Wishing Tree is still under Wonders -> Wishes. Rules in `gear-data.js` (placeholders), optional save field
+`S.summon {adv, pityE, pityS, orbs, marks{r,e,s}, shop{week,bought}, gala{season,day,basic,claimed,tokens,got}}`,
+read through `summonState(s,now)` which applies the resets.
+- Basic (`summonWells.basic`): a Wish Ticket from the bag or 50 wishes; Common 45 / Rare 35 / Epic 16 / Super Rare 4.
+  Advanced: a Star Orb or 30 prisms (`S.scales`); Rare 50 / Epic 38 / Super Rare 12, an Epic or finer every 10 draws
+  and a Super Rare every 40 (`summonPity`); ten advanced draws raise the Summon Level (1-20, `summonLevel`).
+  `summonDraw(s,kind,count,rng,now)`; a repeat pet is a spare copy + 100 gold. The Pets room's own Summon page
+  (`summonPets`) uses the same rule. `summonShow` is the result window (cards turn up one by one unless Skip is on).
+- Spirit Marks: every Rare / Epic / Super Rare pet from either well leaves one mark of its rarity (Rare, Epic, Royal
+  Mark). Mark Shop (`markOffer`, `buyMarkPet`): any pet of those rarities for 20 marks, three of each a week (restock
+  Monday 00:00 UTC), Rare from Summon Lv. 1, Epic from 5, Super Rare from 10. Filters All / Super Rare / Epic / Rare.
+- Summon Festival: eight quests for Basic summons made today (10 ... 80) pay Star Orbs and tokens (`galaQuests`,
+  `galaClaim`; reset 00:00 UTC); tokens open five milestones (`galaMilestones`: Pet Egg, Seal Satchels, an Epic pet,
+  Winged Chest, a Super Rare pet; `galaReward`). The Festival season is the UTC calendar month (`galaEnds`).
+- Art (image model): `art-source/summon/{oracle,glade,stall,icons}.webp`, built by `scripts/build-summon-art.py` into
+  `comp-summon-*` (+ AVIF copies). Pets on the pages are the game's own paintings. Icons: `sumIcon(n)` (Star Orb,
+  three marks, token, level card).
+- Fixed on the way: `.satchel-top span` also styled the icon inside each wallet chip, so the wallet icons of the Bag,
+  Warehouse, Devour and Gear Crafting were dark blobs (`.satchel-top>span` now).
+- Not done from the photos: element badges on pets, "need N more stars" conditions, the per-pet banner rotation.
 
 ## In-chat playable preview (user requirement)
 The user wants to play the game inside the chat, and wants SHORT replies in Russian, no fluff.
