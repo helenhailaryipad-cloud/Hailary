@@ -699,11 +699,19 @@ function chatRefresh(){
  const feed=document.querySelector('.chat-feed');if(feed)feed.scrollTop=feed.scrollHeight;
 }
 function chatStop(){if(chatTimer){clearInterval(chatTimer);chatTimer=0}}
-function chatTick(){chatStop();chatTimer=setInterval(()=>{if(!document.querySelector('.chat-sheet')){chatStop();return}if(document.activeElement?.id==='chatText')return;chatRefresh()},8000)}
+// The timer only swaps the messages when they changed, and keeps the reading position: nothing moves or blinks.
+function chatFeedOnly(){
+ const feed=document.querySelector('.chat-sheet .chat-feed');if(!feed){chatStop();return}
+ const html=WonderGear.chatFeed(S,chatTarget()).map(chatLine).join('');if(!html||feed.dataset.sig===String(html.length)+html.slice(-80))return;
+ const atEnd=feed.scrollHeight-feed.scrollTop-feed.clientHeight<24;feed.innerHTML=html;feed.dataset.sig=String(html.length)+html.slice(-80);if(atEnd)feed.scrollTop=feed.scrollHeight;
+}
+function chatTick(){chatStop();chatTimer=setInterval(()=>{if(!document.querySelector('.chat-sheet')){chatStop();return}chatFeedOnly()},8000)}
 function chatSheetOpen(){
  if(WonderGear.socialTick(S))save();socialArtVars();
  const host=document.querySelector('.city-hud')||document.querySelector('#main');if(!host)return;
- document.querySelector('.chat-sheet')?.remove();host.insertAdjacentHTML('beforeend',chatSheet(false));chatRefresh();chatTick();
+ document.querySelector('.chat-sheet')?.remove();host.insertAdjacentHTML('beforeend',chatSheet(false));
+ const el=document.querySelector('.chat-sheet');el?.classList.add('opening');setTimeout(()=>el?.classList.remove('opening'),300);
+ const feed=document.querySelector('.chat-feed');if(feed)feed.scrollTop=feed.scrollHeight;chatTick();
 }
 function chatSheetClose(){document.querySelector('.chat-sheet.over')?.remove();chatStop();chatEmoji=false}
 function chatInsert(text){const box=document.getElementById('chatText');if(!box)return;box.value=(box.value+text).slice(0,80);box.focus?.()}
