@@ -458,6 +458,10 @@ territory windows with ten defenders and the fight; defenders never came back an
   to fight that defender (`cloudHallPick`). "Auto next" (`cloudAutoNext`, on by default) moves to the next standing
   defender after a victory (`cloudNextTarget`) instead of returning to the map. Rows need full overrides of the global
   `#main button` rules (see the end of `stage.css`).
+- Pathfinding: the player chooses whom to go to (user: "after choosing the boss on the left she rides to him on her
+  mount; I choose myself where to go"). A tap on a Boss List row (`cloudHallPick`) stops the current fight
+  (`canvas.dataset.stop`, the frame loop and the victory timer check it) and runs `cloudRide(index,slot)`; Auto next
+  uses the same ride.
 - Pathfinding (user photo of the hero driving between bosses): with Auto next, 2.4 s after a victory the canvas is
   cleared and Reina rides across on her chosen mount (`reinaLookPath(true)`, `.cloud-path`, `cloudRideMs` 1.9 s) under
   "Pathfinding to <next defender>", then the next fight starts.
