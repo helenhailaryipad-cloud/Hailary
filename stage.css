@@ -7017,7 +7017,9 @@ body[data-screen=games] #stage .portal-illustration{background:#244a3c}
 #stage #modal.den-pop .den-trow .den-ico{width:44px}
 #stage #modal.den-pop .den-trow b{font-size:15px}#stage #modal.den-pop .den-trow small{font-size:12px}#stage #modal.den-pop .den-trow p{font-size:13px}
 #stage #modal.den-pop button{font-size:14px;min-height:36px;padding:6px 14px}
-#stage #modal.den-pop>.dialog-dismiss{min-height:32px}
+#stage #modal.den-pop>.dialog-dismiss{display:grid;place-items:center;width:44px;min-width:44px;height:44px;min-height:44px;padding:0;margin:0;border:0;background:transparent;box-shadow:none}
+#stage #modal.den-pop>.dialog-dismiss::before,#stage #modal.den-pop>.dialog-dismiss::after{display:none}
+#stage #modal.den-pop>.dialog-dismiss .gpt-icon{width:35px;height:35px;margin:0}
 #stage #modal.den-pop .den-picker{max-height:none}
 #stage #modal.den-pop .den-burst{width:min(52vw,220px)}
 #stage #modal.den-pop #modalBody{outline:0}
