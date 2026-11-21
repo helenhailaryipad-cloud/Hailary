@@ -837,7 +837,14 @@ const socialFolk=[
 ];
 const socialRules={friendsMax:20,giftsPerDay:10,flowerHeart:10,heartPoints:100,hearts:5,receiveGold:20,mailMax:30,chatKeep:30,chatEvery:25e3};
 const socialById=Object.fromEntries(socialFolk.map(f=>[f.id,f]));
-const chatChannels=['World','Guild','Cross-server','Private'];
+// Channels of the chat sheet (reference: System, Squad, Globe, X-server, Guild, Faction). Squad = her first three
+// friends; 'Squad' is the team line, 'p:<id>' a talk with one member. Old saves used World / Cross-server.
+const chatChannels=['System','Squad','Globe','X-server','Guild','Faction'],chatOld={World:'Globe','Cross-server':'X-server'};
+const factionLines=['Galewing, gather at Larkspire for the next round!','Two Holy City defenders left, push now!','Embercrest is weak at Ashvault, let us take it.',
+ 'Who holds Kitewatch? The chest is up.','Ride with me to the Golden Boss.','Remember: 80 points open a city.','Our roads are almost lit, one more island!'];
+const guildLines=['Guild boss in ten minutes, do not forget.','Thanks for the donation!','Who needs a Star Shard Pouch?','Welcome to our new member!'];
+const quizBook=[{q:'Which colour is the Holy City of Galewing?',a:'gold'},{q:'How many cities does one faction hold?',a:'six'},{q:'What does a Pet Egg hatch into?',a:'a pet'},
+ {q:'Which quality comes after Orange?',a:'red'},{q:'How many pieces make a 2-Star Red?',a:'five'},{q:'What eats Blue and Purple gear?',a:'the maw'}];
 const chatLines=['Anyone up for the Moonfall guardian?','Just hatched a Pet Egg, it was an Epic!','Cloud War round starts soon, Galewing gather at Larkspire!',
  'Tip: Blue and Purple gear is great food for the Glimmer Maw.','Who has a spare Star Shard Pouch to trade?','The Jungle Trek dragon finally fell, three chests!',
  'Good luck on your summons today!','Five Orange pieces make a 2-Star Red, do not devour them.','Harvest Pairs under a minute, new record!',
@@ -851,7 +858,7 @@ function socialState(s,now=Date.now()){
  const v=s.social||{},day=utcDay(now),today=v.day===day;
  return {day,sent:today?[...(v.sent||[])]:[],got:today?v.got||0:0,hearts:{...v.hearts},friends:v.friends?[...v.friends]:['nyra','kael','pip','vesper'],
   requests:v.requests?[...v.requests]:['briar','wren'],blocked:[...(v.blocked||[])],recent:[...(v.recent||[])],mail:(v.mail||[]).map(m=>({...m,items:{...m.items}})),
-  nextId:v.nextId||1,chat:(v.chat||[]).map(c=>({...c})),stamp:v.day||''};
+  nextId:v.nextId||1,chat:(v.chat||[]).map(c=>({...c,ch:chatOld[c.ch]||c.ch})),sys:(v.sys||[]).map(n=>({...n})),xblock:!!v.xblock,stamp:v.day||''};
 }
 function heartsOf(s,id){const pts=socialState(s).hearts[id]||0;return Math.min(socialRules.hearts,pts/socialRules.heartPoints)}
 function mailSend(v,m,now){v.mail.unshift({id:v.nextId++,kind:m.kind||'mail',title:m.title,text:m.text,from:m.from,items:m.items||{},t:now,read:false,claimed:!Object.keys(m.items||{}).length});
@@ -866,7 +873,11 @@ function socialTick(s,now=Date.now(),rng=Math.random){
  for(let i=0;i<notes&&v.friends.length;i++){const f=v.friends[Math.floor(rng()*v.friends.length)];mailSend(v,{kind:'note',title:'Thank-you Note',from:socialById[f].name,text:thankLines[Math.floor(rng()*thankLines.length)],items:{stonebag:1}},now)}
  v.stamp=v.day;s.social=socialPack(v);return 1+notes+(first?1:0);
 }
-function socialPack(v){const out={day:v.day,sent:v.sent,got:v.got,hearts:v.hearts,friends:v.friends,requests:v.requests,blocked:v.blocked,recent:v.recent,mail:v.mail,nextId:v.nextId,chat:v.chat};return out}
+function socialPack(v){const out={day:v.day,sent:v.sent,got:v.got,hearts:v.hearts,friends:v.friends,requests:v.requests,blocked:v.blocked,recent:v.recent,mail:v.mail,nextId:v.nextId,chat:v.chat};if(v.sys.length)out.sys=v.sys;if(v.xblock)out.xblock=true;return out}
+// A line in the System channel about something that happened to her (a victory, a summon, a craft...).
+function socialNote(s,text,now=Date.now()){const v=socialState(s,now);v.sys.push({text:String(text).replace(/[<>]/g,'').slice(0,120),t:now});v.sys=v.sys.slice(-20);s.social=socialPack(v)}
+function chatBlockX(s,on){const v=socialState(s);v.xblock=!!on;s.social=socialPack(v);return v.xblock}
+const squadOf=s=>{const v=socialState(s);return v.friends.filter(id=>!v.blocked.includes(id)).slice(0,3)};
 // Flowers: up to ten sent and ten received a day. Gift All does both for every friend.
 function sendFlower(s,id,now=Date.now()){
  const v=socialState(s,now);if(!v.friends.includes(id)||v.sent.includes(id)||v.sent.length>=socialRules.giftsPerDay)return false;
@@ -890,19 +901,45 @@ function mailDelete(s,ids){const v=socialState(s),before=v.mail.length;v.mail=v.
 function mailRead(s,id){const v=socialState(s),m=v.mail.find(m=>m.id===id);if(!m)return null;m.read=true;s.social=socialPack(v);return m}
 // The chat feed: AI lines come every 25 s, picked from the clock, so they are the same after a reload; her own lines
 // and the answers to them are kept (`chat`, last 30).
+// The feed of one channel. AI lines come every 25 s, picked from the clock (same after a reload); her own lines and
+// the answers are kept (`chat`, last 30). Lines: {ch,from,text,t,kind} with kind chat / roll / quiz / sys, and for
+// X-server a server number and a faction (`srv`, `fac`).
 function chatFeed(s,channel,now=Date.now(),count=24){
- const v=socialState(s,now),out=[];
- if(channel!=='Private'){
-  const slot=Math.floor(now/socialRules.chatEvery),pool=socialFolk.filter(f=>!v.blocked.includes(f.id));
-  for(let k=slot-count+1;k<=slot;k++){const h=Math.imul(hashOf(channel+k),2654435761)>>>0,g=Math.imul(h^(h>>>15),2246822519)>>>0;if(channel==='Guild'&&h%3)continue;const f=pool[g%pool.length];out.push({ch:channel,from:f.id,text:chatLines[(h>>>7)%chatLines.length],t:k*socialRules.chatEvery})}
+ channel=chatOld[channel]||channel;
+ const v=socialState(s,now),out=[],slot=Math.floor(now/socialRules.chatEvery),pool=socialFolk.filter(f=>!v.blocked.includes(f.id));
+ const mix=k=>{const h=Math.imul(hashOf(channel+k),2654435761)>>>0;return [h,Math.imul(h^(h>>>15),2246822519)>>>0]};
+ if(channel==='System'){
+  out.push({ch:'System',from:'sys',kind:'sys',text:'Welcome to Sky Garden! Everyone in this chat is an AI adventurer.',t:0});
+  for(const n of v.sys)out.push({ch:'System',from:'sys',kind:'sys',text:n.text,t:n.t});
+ }else if(channel==='X-server'&&v.xblock){return []}
+ else if(!channel.startsWith('p:')){
+  const squad=squadOf(s);
+  for(let k=slot-count+1;k<=slot;k++){
+   const [h,g]=mix(k),t=k*socialRules.chatEvery;
+   if(channel==='Squad'){if(!squad.length||h%2)continue;out.push({ch:channel,kind:'chat',from:squad[g%squad.length],text:chatLines[(h>>>7)%chatLines.length],t});continue}
+   const f=pool[g%pool.length];
+   if(channel==='Guild'){
+    if(h%3===0)out.push({ch:channel,kind:'chat',from:f.id,text:guildLines[(h>>>7)%guildLines.length],t});
+    else{const roll=1+(h>>>5)%99,top=h%3===1;out.push({ch:channel,kind:'roll',from:f.id,roll,text:top?'rolled highest this round! Bonus: T'+(1+(g>>>4)%8)+'·'+slots[(g>>>9)%slots.length].name+' ('+gearRanks[2+(g>>>13)%3].name+')':'rolled '+roll+' this round',t})}
+   }else if(channel==='X-server'){
+    const q=quizBook[Math.floor(k/24)%quizBook.length];
+    if(k%24===0)out.push({ch:channel,kind:'quiz',from:'sys',text:q.q,t});
+    else if(k%24<4)out.push({ch:channel,kind:'chat',from:f.id,srv:10+g%90,fac:g%4,text:(h%4?q.a:quizBook[(h>>>3)%quizBook.length].a),t});
+    else if(k%24===4)out.push({ch:channel,kind:'quiz',from:'sys',text:'The riddle has come to an end. The answer was: '+q.a+'. Thanks for playing, adventurers!',t});
+    else out.push({ch:channel,kind:'chat',from:f.id,srv:10+g%90,fac:g%4,text:chatLines[(h>>>7)%chatLines.length],t});
+   }else if(channel==='Faction')out.push({ch:channel,kind:'chat',from:f.id,text:factionLines[(h>>>7)%factionLines.length],t});
+   else out.push({ch:channel,kind:'chat',from:f.id,text:chatLines[(h>>>7)%chatLines.length],t});
+  }
  }
- for(const c of v.chat)if(channel==='Private'?c.ch.startsWith('p:'):c.ch===channel)out.push(c);
+ for(const c of v.chat)if(c.ch===channel)out.push({kind:'chat',...c});
  return out.sort((a,b)=>a.t-b.t).slice(-count);
 }
 function chatSay(s,channel,text,now=Date.now(),rng=Math.random){
- const clean=String(text).replace(/[<>]/g,'').trim().slice(0,80);if(!clean)return null;
+ channel=chatOld[channel]||channel;
+ const clean=String(text).replace(/[<>]/g,'').trim().slice(0,80);if(!clean||channel==='System')return null;
  const v=socialState(s,now),me={ch:channel,from:'me',text:clean,t:now};v.chat.push(me);
- const to=channel.startsWith('p:')?channel.slice(2):null,pool=socialFolk.filter(f=>!v.blocked.includes(f.id)),who=to||pool[Math.min(pool.length-1,Math.floor(rng()*pool.length))].id;
+ const to=channel.startsWith('p:')?channel.slice(2):null,squad=squadOf(s),pool=channel==='Squad'&&squad.length?squad.map(id=>socialById[id]):socialFolk.filter(f=>!v.blocked.includes(f.id));
+ const who=to||pool[Math.min(pool.length-1,Math.floor(rng()*pool.length))].id;
  const reply={ch:channel,from:who,text:chatReplies[Math.floor(rng()*chatReplies.length)],t:now+1500};v.chat.push(reply);
  if(to&&!v.recent.includes(to))v.recent.unshift(to);v.recent=v.recent.slice(0,10);
  v.chat=v.chat.slice(-socialRules.chatKeep);s.social=socialPack(v);return {me,reply};
@@ -914,7 +951,7 @@ function validSocial(v){
   &&!!v.hearts&&typeof v.hearts==='object'&&Object.entries(v.hearts).every(([k,n])=>Object.hasOwn(socialById,k)&&int(n)&&n<=socialRules.hearts*socialRules.heartPoints)
   &&ids(v.friends)&&v.friends.length<=socialRules.friendsMax&&ids(v.requests)&&ids(v.blocked)&&ids(v.recent)&&int(v.nextId)
   &&Array.isArray(v.mail)&&v.mail.length<=socialRules.mailMax&&v.mail.every(m=>m&&int(m.id)&&m.id<v.nextId&&['mail','note'].includes(m.kind)&&[m.title,m.text,m.from].every(x=>typeof x==='string'&&x.length<=300)&&Number.isFinite(m.t)&&typeof m.read==='boolean'&&typeof m.claimed==='boolean'&&!!m.items&&Object.entries(m.items).every(([k,n])=>Object.hasOwn(bagItemById,k)&&int(n)&&n<=99))
-  &&Array.isArray(v.chat)&&v.chat.length<=socialRules.chatKeep&&v.chat.every(c=>c&&typeof c.ch==='string'&&c.ch.length<=20&&(c.from==='me'||Object.hasOwn(socialById,c.from))&&typeof c.text==='string'&&c.text.length<=80&&Number.isFinite(c.t));
+  &&(v.xblock===undefined||v.xblock===true)&&(v.sys===undefined||Array.isArray(v.sys)&&v.sys.length<=20&&v.sys.every(n=>n&&typeof n.text==='string'&&n.text.length<=120&&Number.isFinite(n.t)))&&Array.isArray(v.chat)&&v.chat.length<=socialRules.chatKeep&&v.chat.every(c=>c&&typeof c.ch==='string'&&c.ch.length<=20&&(c.from==='me'||Object.hasOwn(socialById,c.from))&&typeof c.text==='string'&&c.text.length<=80&&Number.isFinite(c.t));
 }
-return Object.freeze({socialFolk,socialRules,socialById,chatChannels,socialState,heartsOf,socialTick,sendFlower,giftAll,friendAnswer,friendAdd,friendBlock,mailClaim,mailDelete,mailRead,chatFeed,chatSay,validSocial,cloudOwnReward,cloudOwnTake,cloudRules,cloudPointRewards,cloudShop,cloudRound,cloudRoundEnds,cloudState,cloudNewRound,cloudGain,cloudClaim,buyCloud,validCloud,warFactions,warTotems,warRules,warQuests,warRanks,contestShop,contestState,warNew,warHeld,warHero,warOrder,warTally,warStep,warStanding,warRankPrize,warQuestsDue,warStart,warSettle,buyContest,validContest,summonWells,summonPity,summonLevelMax,summonDupGold,markKinds,markPrice,markLimit,markNeed,galaQuests,galaMilestones,galaEnds,summonState,summonLevel,summonPay,summonDraw,markOffer,buyMarkPet,galaClaim,galaReward,validSummon,bossRare,gearRanks,gearRank,gearCraftFrom,gearNoDevour,bossDropRanks,craftRecipe,craftInputs,craftChance,craftGear,gearGroups,gearGroup,bagCapacity,bagStarter,bagRarity,bagItems,bagItemById,bagCount,bagAdd,bagStacks,bagUsed,vaultCount,vaultMove,useBagItem,devourStep,devourMax,devourNeed,devourWorth,devourState,devourBonus,devourable,devourGear,validBag,riposteShare,riposteEvery,talentCells,talentFree,talentLearn,talentBook,talentScroll,talentTopScroll,talentPrice,talentSupremeAt,talentSupreme,petTalents,talentState,talentIds,supremeReady,addSeals,openCellCost,openTalentCell,learnCost,rollTalent,keepTalent,learnTalent,lockTalent,forgetTalent,setTalentTarget,buyTalentScroll,buyTalentBook,sealRates,sealGold,buySeals,exchangeSpares,talentBonus,guardTalents,petGearPieces,petGearMax,petGearStep,petGearSetStep,petGearLevels,petGearTier,petGearCost,petGearBonus,upgradePetGear,petBolt,petBoltPace,petHit,petPace,assistPages,assistSlots,synthChain,synthNeed,petSpares,addPetSpare,synthesizePet,fashionTraits,companionTypes,companionSkins,companionSkin,ownsCompanionSkin,useCompanionSkin,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
+return Object.freeze({socialNote,chatBlockX,squadOf,socialFolk,socialRules,socialById,chatChannels,socialState,heartsOf,socialTick,sendFlower,giftAll,friendAnswer,friendAdd,friendBlock,mailClaim,mailDelete,mailRead,chatFeed,chatSay,validSocial,cloudOwnReward,cloudOwnTake,cloudRules,cloudPointRewards,cloudShop,cloudRound,cloudRoundEnds,cloudState,cloudNewRound,cloudGain,cloudClaim,buyCloud,validCloud,warFactions,warTotems,warRules,warQuests,warRanks,contestShop,contestState,warNew,warHeld,warHero,warOrder,warTally,warStep,warStanding,warRankPrize,warQuestsDue,warStart,warSettle,buyContest,validContest,summonWells,summonPity,summonLevelMax,summonDupGold,markKinds,markPrice,markLimit,markNeed,galaQuests,galaMilestones,galaEnds,summonState,summonLevel,summonPay,summonDraw,markOffer,buyMarkPet,galaClaim,galaReward,validSummon,bossRare,gearRanks,gearRank,gearCraftFrom,gearNoDevour,bossDropRanks,craftRecipe,craftInputs,craftChance,craftGear,gearGroups,gearGroup,bagCapacity,bagStarter,bagRarity,bagItems,bagItemById,bagCount,bagAdd,bagStacks,bagUsed,vaultCount,vaultMove,useBagItem,devourStep,devourMax,devourNeed,devourWorth,devourState,devourBonus,devourable,devourGear,validBag,riposteShare,riposteEvery,talentCells,talentFree,talentLearn,talentBook,talentScroll,talentTopScroll,talentPrice,talentSupremeAt,talentSupreme,petTalents,talentState,talentIds,supremeReady,addSeals,openCellCost,openTalentCell,learnCost,rollTalent,keepTalent,learnTalent,lockTalent,forgetTalent,setTalentTarget,buyTalentScroll,buyTalentBook,sealRates,sealGold,buySeals,exchangeSpares,talentBonus,guardTalents,petGearPieces,petGearMax,petGearStep,petGearSetStep,petGearLevels,petGearTier,petGearCost,petGearBonus,upgradePetGear,petBolt,petBoltPace,petHit,petPace,assistPages,assistSlots,synthChain,synthNeed,petSpares,addPetSpare,synthesizePet,fashionTraits,companionTypes,companionSkins,companionSkin,ownsCompanionSkin,useCompanionSkin,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
 })();

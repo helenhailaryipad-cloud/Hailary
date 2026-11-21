@@ -403,6 +403,7 @@ function craftShow(entries){
 function craftCommit(){
  const r=WonderGear,result=r.craftGear(S,craftSlot,craftTier,craftRank,craftInputs);
  if(!result.ok){toast(result.error);return}
+ if(result.success)r.socialNote(S,'Crafted '+r.gearRanks[craftRank].name+' '+r.catalog[result.entry.template].name+'.');
  craftInputs=[];save();cityCraft();
  if(result.success)craftShow([result.entry]);else toast('The synthesis failed: the pieces are lost.');
 }
@@ -471,6 +472,7 @@ function summonShow(title,results,note=''){
 function summonDo(kind,count){
  const r=WonderGear,before=r.summonState(S).marks,result=r.summonDraw(S,kind,count);
  if(!result.ok){toast(kind==='basic'?'Not enough wishes or Wish Tickets.':'Not enough prisms or Star Orbs.');return}
+ const best=result.results.find(x=>x.rarity==='Super Rare');if(best)r.socialNote(S,'Summoned a Super Rare pet: '+r.familiars.find(p=>p.id===best.id).name+'!');
  save();citySummon();
  const after=r.summonState(S).marks,gained=r.markKinds.map(([,key,name])=>after[key]>before[key]?'+'+(after[key]-before[key])+' '+name:'').filter(Boolean);
  summonShow(r.summonWells[kind].name,result.results,gained.length?'Spirit Marks: '+gained.join(' · '):'');
@@ -654,7 +656,7 @@ function cityContest(){
 
 // ---- Social room: Chat, Friends, Mail, Thank-you Note (rules: WonderGear.social*, chat*, mail*) ---------------------
 // Everyone here is an AI adventurer; names carry an "AI" tag. Screen `citySocial`, page in `socialPage`.
-let socialPage='Chat',chatChannel='World',chatWith=null,friendTab='Friends',mailPick=null,mailChecked=[],socialTimer=0;
+let socialPage='Chat',chatChannel='Globe',chatWith=null,chatTimer=0,chatEmoji=false,friendTab='Friends',mailPick=null,mailChecked=[],socialTimer=0;
 function socialArtVars(){const root=document.documentElement;if(!root?.style?.setProperty||root.style.getPropertyValue('--soc-icons'))return;root.style.setProperty('--soc-icons','url("'+artPath('comp-social-icons')+'")')}
 // 0 flowers, 1 heart, 2 empty heart, 3 letter, 4 open letter, 5 thank-you scroll, 6 chat bubble, 7 gift
 const socIcon=n=>'<i class="soc-ico" style="background-position:'+(n%4)/3*100+'% '+Math.floor(n/4)*100+'%"></i>';
@@ -666,17 +668,54 @@ const socialDue=()=>{const v=WonderGear.socialState(S);return {mail:v.mail.filte
 function socialOpen(page){if(WonderGear.socialTick(S))save();socialPage=page;if(screen==='citySocial')citySocial();else go('citySocial')}
 function socialStop(){if(socialTimer){clearInterval(socialTimer);socialTimer=0}}
 function hearts(id){const h=WonderGear.heartsOf(S,id);return Array.from({length:WonderGear.socialRules.hearts},(_,i)=>h>=i+1?socIcon(1):h>i?'<span class="soc-half">'+socIcon(2)+socIcon(1)+'</span>':socIcon(2)).join('')}
+// ---- The chat sheet: slides up over the home screen (or fills the room's Chat page). Channels on the left. ----------
+const chatEmojis=['😀','😂','😍','👍','🎉','🌸','⚔️','🐉','💖','😢','🙏','✨'];
+const chatShortcuts=['Hello everyone!','Thank you!','Good luck!','Who wants to team up?','Let us take the next city!','See you later!'];
 function chatLine(c){
- const me=c.from==='me',time=new Date(c.t).toISOString().slice(11,16);
- return `<div class="chat-line ${me?'me':''}">${me?'':folkFace(c.from)}<div><b>${me?esc(S.name):esc(folk(c.from).name)+' <small>AI</small>'}<em>${time}</em></b><p>${esc(c.text)}</p></div></div>`;
+ if(c.kind==='sys'||c.kind==='quiz')return `<div class="chat-note ${c.kind}">${esc(c.text)}</div>`;
+ if(c.kind==='roll')return `<div class="chat-note roll"><b>${esc(folk(c.from).name)}</b> ${esc(c.text).replace(/(Bonus: )(.*)$/,'$1<u>$2</u>').replace(/rolled (\d+)/,'rolled <i>$1</i>')}</div>`;
+ const me=c.from==='me',time=new Date(c.t).toISOString().slice(11,16),f=me?null:folk(c.from);
+ const tag=c.srv?`<span class="srv">[S-${c.srv}]</span> `:'',fac=c.fac!==undefined?` <span class="fac" style="color:${cloudFactions[c.fac][3]}">[${cloudFactions[c.fac][0]}]</span>`:'';
+ return `<div class="chat-line ${me?'me':''}">${me?'':`<button class="chat-face" aria-label="Mention ${esc(f.name)}" onclick="chatMention('${f.name}')">${denPlain}${folkFace(c.from)}</button>`}<div><b>${me?esc(S.name):tag+esc(f.name)+' <small>AI</small>'+fac}<em>${time}</em></b><p>${esc(c.text)}</p></div></div>`;
 }
+const chatTarget=()=>chatChannel==='Squad'&&chatWith?'p:'+chatWith:chatChannel;
+function chatSheet(room){
+ const r=WonderGear,v=r.socialState(S),ch=chatTarget(),squad=r.squadOf(S),members=chatWith&&!squad.includes(chatWith)?[...squad,chatWith]:squad;
+ const feed=r.chatFeed(S,ch).map(chatLine).join(''),sys=chatChannel==='System';
+ const top=chatChannel==='X-server'?`<label class="chat-block"><button class="soc-check" aria-pressed="${v.xblock}" onclick="WonderGear.chatBlockX(S,${!v.xblock});save();chatRefresh()">${denPlain}</button>Block all messages in cross-server channel</label>`
+  :chatChannel==='Squad'?`<div class="chat-squad"><button aria-pressed="${!chatWith}" onclick="chatWith=null;chatRefresh()">${denPlain}${socIcon(7)}<b>Team</b></button>${members.map(id=>`<button aria-pressed="${id===chatWith}" onclick="chatWith='${id}';chatRefresh()">${denPlain}${folkFace(id)}<b>${folk(id).name}</b><small>Lv${folkLevel(id)}</small></button>`).join('')}</div>`:'';
+ return `<div class="chat-sheet ${room?'in-room':'over'}">${room?'':`<button class="chat-fold" aria-label="Close chat" onclick="chatSheetClose()">${denPlain}⌄</button>`}
+  <div class="chat-side">${r.chatChannels.map(c=>`<button aria-pressed="${c===chatChannel}" onclick="chatChannel='${c}';chatWith=null;chatEmoji=false;chatRefresh()">${denPlain}${c}</button>`).join('')}
+   <span></span><button class="chat-tool" onclick="chatQuick('📍 I am at Sky Garden · Lv. '+level())">${denPlain}${uiIcon('travel')}Coordinate</button><button class="chat-tool" onclick="chatShortcutsShow()">${denPlain}${socIcon(6)}Shortcut</button><button class="chat-tool" onclick="chatSheetClose();go('cityBag')">${denPlain}${uiIcon('equipment')}Bag</button></div>
+  <div class="chat-main">${top}<div class="chat-feed">${feed||`<p class="soc-empty">${v.xblock&&chatChannel==='X-server'?'Cross-server messages are blocked.':'No messages yet. Say hello!'}</p>`}</div>
+   ${chatEmoji?`<div class="chat-emoji">${chatEmojis.map(e=>`<button onclick="chatInsert('${e}')">${denPlain}${e}</button>`).join('')}</div>`:''}
+   <div class="chat-input"><input id="chatText" maxlength="80" ${sys?'disabled':''} placeholder="${sys?'System messages only':'Press the avatar or input @ to notify…'}" onkeydown="if(event.key==='Enter')chatSend()"><button class="chat-smile" aria-label="Emoji" onclick="chatEmoji=!chatEmoji;chatRefresh()" ${sys?'disabled':''}>${denPlain}☺</button><button class="den-gold" onclick="chatSend()" ${sys?'disabled':''}>${denPlain}Send</button></div></div></div>`;
+}
+function chatRefresh(){
+ const el=document.querySelector('.chat-sheet');if(!el){chatStop();return}
+ const box=document.getElementById('chatText'),keep=box?.value||'';
+ el.outerHTML=chatSheet(el.classList.contains('in-room'));
+ const nb=document.getElementById('chatText');if(nb)nb.value=keep;
+ const feed=document.querySelector('.chat-feed');if(feed)feed.scrollTop=feed.scrollHeight;
+}
+function chatStop(){if(chatTimer){clearInterval(chatTimer);chatTimer=0}}
+function chatTick(){chatStop();chatTimer=setInterval(()=>{if(!document.querySelector('.chat-sheet')){chatStop();return}if(document.activeElement?.id==='chatText')return;chatRefresh()},8000)}
+function chatSheetOpen(){
+ if(WonderGear.socialTick(S))save();socialArtVars();
+ const host=document.querySelector('.city-hud')||document.querySelector('#main');if(!host)return;
+ document.querySelector('.chat-sheet')?.remove();host.insertAdjacentHTML('beforeend',chatSheet(false));chatRefresh();chatTick();
+}
+function chatSheetClose(){document.querySelector('.chat-sheet.over')?.remove();chatStop();chatEmoji=false}
+function chatInsert(text){const box=document.getElementById('chatText');if(!box)return;box.value=(box.value+text).slice(0,80);box.focus?.()}
+function chatMention(name){chatInsert('@'+name+' ')}
 function chatSend(){
  const box=document.getElementById('chatText'),text=box?.value||'';
- const ch=chatChannel==='Private'?(chatWith?'p:'+chatWith:null):chatChannel;if(!ch){toast('Choose a friend first.');return}
- if(!WonderGear.chatSay(S,ch,text)){toast('Write something first.');return}
- save();citySocial();const feed=document.querySelector('.chat-feed');if(feed)feed.scrollTop=feed.scrollHeight;
+ if(!WonderGear.chatSay(S,chatTarget(),text)){toast(chatChannel==='System'?'Nobody can write in System.':'Write something first.');return}
+ if(box)box.value='';chatEmoji=false;save();chatRefresh();
 }
-function friendChat(id){chatChannel='Private';chatWith=id;socialOpen('Chat')}
+function chatQuick(text){if(WonderGear.chatSay(S,chatTarget(),text)){save();if($('#modal').open)$('#modal').close();chatRefresh()}else toast('Nobody can write in System.')}
+function chatShortcutsShow(){popup('<h2>Shortcut</h2><div class="soc-list">'+chatShortcuts.map(t=>`<button class="soc-row" onclick="chatQuick('${t.replace(/'/g,"\\'")}')">${denPlain}${socIcon(6)}<b>${t}</b></button>`).join('')+'</div>')}
+function friendChat(id){chatChannel='Squad';chatWith=id;socialOpen('Chat')}
 function friendFlower(id){if(WonderGear.sendFlower(S,id)){save();citySocial();toast('Flowers sent to '+folk(id).name)}else toast('Already sent today, or no flowers left.')}
 function friendGiftAll(){const r=WonderGear.giftAll(S);save();citySocial();toast(r.sent||r.got?'Sent '+r.sent+' · received '+r.got+' (+'+r.gold+' gold)':'Everything is sent and received for today.')}
 function friendPickFlower(){const v=WonderGear.socialState(S);popup('<h2>Send Flowers</h2><p>Flowers raise intimacy (hearts). '+(WonderGear.socialRules.giftsPerDay-v.sent.length)+' left today.</p><div class="soc-list">'+v.friends.map(id=>`<button class="soc-row" ${v.sent.includes(id)?'disabled':''} onclick="friendFlower('${id}');$('#modal').close()">${denPlain}${folkFace(id)}<b>${folk(id).name} <small>AI</small></b><span>${v.sent.includes(id)?'Sent':socIcon(0)}</span></button>`).join('')+'</div>')}
@@ -697,18 +736,12 @@ function mailTake(kind){
 function mailDrop(){const n=WonderGear.mailDelete(S,mailChecked);mailChecked=[];if(!n){toast('Claim the items first; only claimed letters can be deleted.');return}save();mailPick=null;citySocial();toast(n+' deleted')}
 function citySocial(){
  const r=WonderGear;if(r.socialTick(S))save();const v=r.socialState(S),due=socialDue();socialArtVars();bagArtVars();
- socialStop();if(!['Chat','Friends','Mail','Notes'].includes(socialPage))socialPage='Chat';
+ socialStop();chatStop();if(!['Chat','Friends','Mail','Notes'].includes(socialPage))socialPage='Chat';
  const dot=n=>n?'<i class="soc-dot">'+n+'</i>':'';
- const nav=`<div class="satchel-nav well-nav soc-nav"><button data-back aria-label="Back to city" onclick="socialStop();go('home')">‹</button>${[['Chat',6,'Chat',0],['Friends',7,'Friends',due.requests],['Mail',3,'Mail',due.mail],['Notes',5,'Thank-you Note',due.notes]].map(([p,i,label,n])=>`<button ${p===socialPage?'aria-current="page"':''} onclick="socialOpen('${p}')">${denPlain}${socIcon(i)}${label}${dot(n)}</button>`).join('')}</div>`;
+ const nav=`<div class="satchel-nav well-nav soc-nav"><button data-back aria-label="Back to city" onclick="socialStop();chatStop();go('home')">‹</button>${[['Chat',6,'Chat',0],['Friends',7,'Friends',due.requests],['Mail',3,'Mail',due.mail],['Notes',5,'Thank-you Note',due.notes]].map(([p,i,label,n])=>`<button ${p===socialPage?'aria-current="page"':''} onclick="socialOpen('${p}')">${denPlain}${socIcon(i)}${label}${dot(n)}</button>`).join('')}</div>`;
  let body='';
  if(socialPage==='Chat'){
-  const priv=chatChannel==='Private',ch=priv?(chatWith?'p:'+chatWith:null):chatChannel;
-  const feed=priv&&!chatWith?'':r.chatFeed(S,priv?'Private':chatChannel).filter(c=>!priv||c.ch===ch).map(chatLine).join('');
-  const people=[...new Set([...v.recent,...v.friends])].filter(id=>!v.blocked.includes(id));
-  body=`<div class="satchel-top"><strong>Chat</strong></div><div class="soc-tabs">${r.chatChannels.map(c=>`<button aria-pressed="${c===chatChannel}" onclick="chatChannel='${c}';citySocial()">${denPlain}${c}</button>`).join('')}</div>
-  <div class="soc-people">${priv?people.map(id=>`<button aria-pressed="${id===chatWith}" onclick="chatWith='${id}';citySocial()">${denPlain}${folkFace(id)}<small>${folk(id).name}</small></button>`).join(''):''}</div>
-  <div class="chat-feed">${feed||`<p class="soc-empty">${priv&&!chatWith?'Choose a friend above to chat in private.':'No messages yet. Say hello!'}</p>`}</div>
-  <div class="chat-input"><input id="chatText" maxlength="80" placeholder="${priv&&!chatWith?'Choose a friend first':'Say something nice…'}" onkeydown="if(event.key==='Enter')chatSend()"><button class="den-gold" onclick="chatSend()">${denPlain}Send</button></div><p class="soc-note">Everyone here is an AI adventurer.</p>`;
+  body=`<div class="satchel-top"><strong>Chat</strong></div>${chatSheet(true)}`;
  }else if(socialPage==='Friends'){
   const list=friendTab==='Blacklist'?v.blocked:friendTab==='Recent Contacts'?v.recent.filter(id=>!v.blocked.includes(id)):v.friends;
   const card=id=>{const st=folkStatus(id),black=friendTab==='Blacklist';return `<div class="soc-card">${folkFace(id)}<div><b>${folk(id).name} <small>AI</small> <em class="${st.on?'on':''}">${st.text}</em></b><span>Lv. ${folkLevel(id)}</span><span class="soc-hearts">${hearts(id)}</span></div>${black?`<button class="den-gold" onclick="friendBan('${id}',false)">${denPlain}Remove</button>`:`<button class="soc-round" aria-label="Send flowers" onclick="friendFlower('${id}')" ${v.sent.includes(id)?'disabled':''}>${denPlain}${socIcon(0)}</button><button class="soc-round" aria-label="Chat" onclick="friendChat('${id}')">${denPlain}${socIcon(6)}</button><button class="soc-round soc-more" aria-label="More" onclick="friendManage('${id}')">${denPlain}⋯</button>`}</div>`};
@@ -726,14 +759,13 @@ function citySocial(){
   <div class="soc-mailbar"><button class="soc-check" aria-pressed="${list.length&&list.every(x=>mailChecked.includes(x.id))}" onclick="mailAll('${kind}')">${denPlain}</button><span>Select All <b>${list.length}/${r.socialRules.mailMax}</b></span><button onclick="mailDrop()">${denPlain}Delete</button><button class="den-gold" onclick="mailTake('${kind}')">${denPlain}Claim</button></div>`;
  }
  $('#main').innerHTML=`<section class="satchel soc soc-p-${socialPage.toLowerCase()}">${body}${nav}</section>`;
- if(socialPage==='Chat'){const feed=document.querySelector('.chat-feed');if(feed)feed.scrollTop=feed.scrollHeight;
-  socialTimer=setInterval(()=>{if(screen!=='citySocial'||socialPage!=='Chat'){socialStop();return}const box=document.getElementById('chatText');if(box&&document.activeElement===box)return;const keep=box?.value||'';citySocial();const nb=document.getElementById('chatText');if(nb)nb.value=keep},8000)}
+ if(socialPage==='Chat'){const feed=document.querySelector('.chat-feed');if(feed)feed.scrollTop=feed.scrollHeight;chatTick()}
 }
 // The strip on the home screen: the latest two World lines; tap it for the chat, the bubble for friends and mail.
 function homeChat(){
  if(WonderGear.socialTick(S))save();socialArtVars();const due=socialDue(),n=due.mail+due.notes+due.requests;
- const lines=WonderGear.chatFeed(S,'World',Date.now(),2).map(c=>`<div><small>World</small> ${c.from==='me'?esc(S.name):esc(folk(c.from).name)}: ${esc(c.text)}</div>`).join('');
- return `<div class="city-chat" role="button" tabindex="0" onclick="chatChannel='World';socialOpen('Chat')">${lines}<button class="city-social" aria-label="Friends and mail" onclick="event.stopPropagation();socialOpen(${due.mail?"'Mail'":due.notes?"'Notes'":"'Friends'"})">${denPlain}${socIcon(6)}${n?'<i class="soc-dot">'+n+'</i>':''}</button></div>`;
+ const lines=WonderGear.chatFeed(S,'Globe',Date.now(),2).map(c=>`<div><small>Globe</small> ${c.from==='me'?esc(S.name):esc(folk(c.from).name)}: ${esc(c.text)}</div>`).join('');
+ return `<div class="city-chat" role="button" tabindex="0" onclick="chatSheetOpen()">${lines}<button class="city-social" aria-label="Friends and mail" onclick="event.stopPropagation();socialOpen(${due.mail?"'Mail'":due.notes?"'Notes'":"'Friends'"})">${denPlain}${socIcon(6)}${n?'<i class="soc-dot">'+n+'</i>':''}</button></div>`;
 }
 
 let petPage='Formation',petFocus=null,emblemFilter='All',petBack='',petBackNext='';
@@ -1499,7 +1531,7 @@ function cloudRoundCheck(){
 const cloudChestReady=i=>cloudCount===4&&cloudOwner(i)===cloudMine&&!WonderGear.cloudState(S).got.includes(i);
 function cloudOwnClaim(i){
  const place=cloudTerritories()[i];if(!place||!cloudChestReady(i))return;
- const items=WonderGear.cloudOwnTake(S,i,place.rank);if(!items)return;
+ const items=WonderGear.cloudOwnTake(S,i,place.rank);if(!items)return;WonderGear.socialNote(S,'Ownership reward of '+place.name+' collected.');
  save();if($('#modal').open)$('#modal').close();
  const board=document.querySelector('.cloud-four-board');if(board)board.outerHTML=cloudFourBoard(cloudTerritories());
  popup('<h2>Ownership Reward</h2><p>'+place.name+' belongs to '+cloudFactions[cloudMine][0]+'. The reward of this round went to the bag.</p><div class="bag-gains">'+cloudItems(items)+'</div><p>Every city she holds pays again in the next round.</p>');
