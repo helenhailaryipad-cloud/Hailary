@@ -7449,3 +7449,31 @@ body:is([data-screen=citySummon],[data-screen=cityContest]) #stage>#main{inset:0
 #stage #main .cloud-encounter .hall-row::before,#stage #main .cloud-encounter .hall-row::after{content:none!important;display:none!important}
 #stage #main .cloud-encounter .hall-row small{font:400 10px/1 Arial,sans-serif!important;opacity:.7}
 #stage #main .cloud-encounter div.hall-row{display:grid}
+/* City window: choose a defender on the mini-map, then Go */
+#stage #modal .cloud-city .portal-defenders[data-terrain]{width:min(100%,52dvh);margin:6px auto}
+#stage #modal .cloud-city .portal-defender{padding:0;min-height:0;background:transparent;border:0;box-shadow:none;cursor:pointer}
+#stage #modal .cloud-city .portal-defender::before,#stage #modal .cloud-city .portal-defender::after{display:none}
+#stage #modal .cloud-city .portal-defender.picked img{border-color:#fff;box-shadow:0 0 0 3px #ffe27a,0 0 14px #ffe27a}
+#stage #modal .cloud-city .portal-defender.down img{filter:grayscale(1) brightness(.6)}
+.portal-hp{display:block;width:90%;height:5px;margin-top:2px;border-radius:3px;background:#401018;overflow:hidden}
+.portal-hp u{display:block;height:100%;background:#ff4a55}
+.portal-clock{margin-top:1px;padding:0 3px;border-radius:3px;background:#2a0d12d9;font:700 9px/1.3 Arial,sans-serif;font-style:normal;color:#ff8a8a}
+.cloud-city .city-owner b{font-size:1.1em}
+.city-points{display:flex;flex-wrap:wrap;justify-content:center;align-items:baseline;gap:4px 12px;margin:2px 8px;font:700 13px/1.3 Arial,sans-serif}
+.city-points small{width:100%;font-size:11px!important;opacity:.75}
+.city-kill{margin:4px 8px;padding:6px 8px;border-radius:10px;background:#0d1a2c99}
+#modal .cloud-city .city-kill h3{margin:0 0 2px;font-size:14px;color:#ffe9a0}
+#modal .cloud-city .city-kill p{margin:1px 0;font-size:12px}
+.city-kill .bag-gains{display:flex;justify-content:center;align-items:center;gap:6px;margin:4px 0 0}
+#stage #modal .city-kill .bag-gain{width:62px;padding:3px 2px}
+#stage #modal .city-kill .bag-gain .bag-ico{width:34px;height:34px}
+#stage #modal .city-kill .daily-token img{width:34px;height:34px}
+#stage #modal .cloud-city .city-go{min-width:150px;padding:8px 40px;font-size:18px}
+#stage #modal .cloud-city .den-x{display:none}
+#stage #modal .cloud-city .portal-defenders[data-terrain]{width:min(100%,40dvh,330px)}
+#stage #modal[open]:has(.cloud-city) .dialog-menu-exit{display:none}
+#modal .cloud-city h2{margin:0 30px}
+#modal .cloud-city .city-owner{margin:0 0 2px}
+#stage #modal .cloud-city .portal-strike small{font-size:8px;padding:1px 3px}
+#stage #modal .cloud-city .portal-defenders[data-terrain]{width:min(100%,46dvh,380px)}
+#stage #modal .cloud-city .portal-defenders[data-terrain]{width:min(100%,42dvh,380px)}
