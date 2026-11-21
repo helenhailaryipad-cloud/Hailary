@@ -1511,7 +1511,21 @@ const cloudRideMs=1900;
 // The hall of a city: who is left, who is back by the round's end, which faction beat whom; tap a row to fight it.
 function cloudBossName(slot){const art=cloudPortalSlots[slot][3],same=cloudPortalSlots.slice(0,slot).filter(x=>x[3]===art).length;return (WonderGear.tierGuardians.find(g=>g.id==='guardian-t'+art)?.name||'Defender')+(same?' II':'')}
 const cloudNextTarget=index=>cloudPortalSlots.findIndex(([role],slot)=>cloudDamage(index,slot)<cloudEnemyHealth[role]);
-function cloudHallPick(index,slot){if(cloudPlayerDuel===index*10+slot)return;if(cloudDamage(index,slot)>=cloudEnemyHealth[cloudPortalSlots[slot][0]]){toast('Defeated · returns in '+cloudClock());return}cloudPlayerDuel=null;cloudStrike(index,slot)}
+function cloudHallPick(index,slot){if(cloudPlayerDuel===index*10+slot&&!document.querySelector('.cloud-path'))return;if(cloudDamage(index,slot)>=cloudEnemyHealth[cloudPortalSlots[slot][0]]){toast('Defeated · returns in '+cloudClock());return}cloudRide(index,slot)}
+// Pathfinding: the current fight stops, Reina rides across the hall on her mount to the chosen defender, then fights it.
+// Used both for a defender she picks in the Boss List and for Auto next after a victory.
+function cloudRide(index,slot){
+ const canvas=document.querySelector('.cloud-encounter canvas');
+ if(!canvas||screen!=='cloudWar'){cloudPlayerDuel=null;cloudStrike(index,slot);return}
+ const token=String(Date.now()+Math.random());canvas.dataset.stop=token;
+ canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
+ const field=canvas.parentElement;field.querySelectorAll('.cloud-floating-loot,.cloud-path').forEach(n=>n.remove());
+ field.insertAdjacentHTML('beforeend',`<div class="cloud-path" role="status"><img src="${reinaLookPath(true)}" alt="Reina riding"><strong>⚔ Pathfinding</strong><small>to ${cloudBossName(slot)}</small></div>`);
+ const body=canvas.closest('.cloud-encounter'),status=body.querySelector('[data-status]');if(status)status.textContent='Pathfinding · '+cloudBossName(slot);
+ body.querySelectorAll('.hall-row').forEach((row,i)=>row.classList.toggle('now',i===slot&&cloudHallTab==='Boss'));
+ const burst=body.querySelector('[data-burst]');if(burst)burst.disabled=true;
+ setTimeout(()=>{if(!canvas.isConnected||screen!=='cloudWar'||canvas.dataset.stop!==token)return;cloudPlayerDuel=null;cloudStrike(index,slot)},cloudRideMs);
+}
 function cloudHallTabs(tab,index,slot){cloudHallTab=tab;const hall=document.querySelector('.cloud-hall');if(hall)hall.outerHTML=cloudHall(index,slot)}
 function cloudHall(index,current){
  const sector=Math.floor(index/6),pts=cloudFactionScores(index)[cloudMine]||0,owner=cloudOwner(index),holy=cloudOwner(sector*6),v=WonderGear.cloudState(S);
@@ -1564,7 +1578,7 @@ function cloudStrike(index,slot){
  }
  body.querySelector('[data-exit]').onclick=returnToTerritory;
  function frame(now){
-  if(!canvas.isConnected||screen!=='cloudWar')return;
+  if(!canvas.isConnected||screen!=='cloudWar'||canvas.dataset.stop)return;
   elapsed+=Math.min(.1,(now-last)/1000);last=now;actor.clock=elapsed;
   if(elapsed>=nextShot){shoot(100);nextShot=elapsed+.65;}
   ctx.clearRect(0,0,640,420);
@@ -1612,14 +1626,8 @@ function cloudStrike(index,slot){
   const next=cloudNextTarget(index);
   // Auto next: after the loot she rides to the next standing defender ("Pathfinding"), then that fight starts.
   setTimeout(()=>{
-   if(!canvas.isConnected||screen!=='cloudWar')return;
-   if(!(cloudAutoNext&&next>=0)){returnToTerritory();return}
-   canvas.parentElement.querySelector('.cloud-floating-loot')?.remove();
-   ctx.clearRect(0,0,canvas.width,canvas.height);
-   canvas.parentElement.insertAdjacentHTML('beforeend',`<div class="cloud-path" role="status"><img src="${reinaLookPath(true)}" alt="Reina riding"><strong>⚔ Pathfinding</strong><small>to ${cloudBossName(next)}</small></div>`);
-   body.querySelector('[data-status]').textContent='Pathfinding · '+cloudBossName(next);
-   const row=body.querySelectorAll('.hall-row')[next];if(row)row.classList.add('now');
-   setTimeout(()=>{if(!canvas.isConnected||screen!=='cloudWar'||!cloudAutoNext){returnToTerritory();return}cloudPlayerDuel=null;cloudStrike(index,next)},cloudRideMs);
+   if(!canvas.isConnected||screen!=='cloudWar'||canvas.dataset.stop)return;
+   if(cloudAutoNext&&next>=0)cloudRide(index,next);else returnToTerritory();
   },2400);
  }
  requestAnimationFrame(frame);
