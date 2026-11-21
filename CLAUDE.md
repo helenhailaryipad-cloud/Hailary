@@ -347,6 +347,10 @@ unchanged), Warehouse (`cityVault`), Devour (`cityDevour`). Rules in `gear-data.
   the Equipment tab. Rule now: `gearGroups` = Equipment / Necklace & Amulet / Rings, `gearGroup(template)`, and
   `starDonors` only offers spare pieces of the target's own family and tier (also in the old Forge page). The tabs are
   a clear bar above the bottom bar (`.loom-kinds`).
+- Helmets (user 2026-11-21: "instead of the ring there should be a helmet"): the head slot showed tiaras that read as
+  rings. Its eight art tiers are now helmets (`art-source/gear/helms.webp`, `scripts/build-gear-helms.py` writes
+  `gear-crown-t1..8.webp` and the AVIF copies); the slot is named Helmet, items "<tier> Helm"; the slot id stays
+  `crown` (saves). Gear art cache tag is `?v=3` (the chat builder patches that exact string).
 - Not done from the reference: bottom-row extra slots, the star bands of Gear Crafting (ours is 1-5 Star Gear),
   capacity limits, Convert in bulk. Hosted bundle headroom is about 0.22 MB: add AVIF copies before more art.
 
