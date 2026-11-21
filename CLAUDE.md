@@ -451,7 +451,14 @@ territory windows with ten defenders and the fight; defenders never came back an
   when both of its cities are open for that sector's faction; roads into another sector are dashed. Reina opens only
   Galewing's six cities (`cloudOpen`, counter "Galewing cities open n/6"); other factions' cities open as look-only
   windows (`.cloud-foreign`), `cloudStrike` refuses them. The Guide text says the same.
-- Not done: the hall view with a live boss list and damage rankings, Cloud Hunt, buying extra Carnage, Bizarre Lands.
+- The fight (user photo "this is how the fight goes": auto-fight in the city hall with a boss list beside it): under
+  the canvas `cloudHall(index,current)` shows Carnage Points, the city's territory points and Occupied / Not occupied,
+  the Holy Land owner, and two tabs: Boss List (all ten defenders by name, `cloudBossName`; Refreshed / return clock /
+  Fighting; which faction beat it) and DMG Rankings (defenders beaten by Reina and her faction's AI squad). Tap a row
+  to fight that defender (`cloudHallPick`). "Auto next" (`cloudAutoNext`, on by default) moves to the next standing
+  defender after a victory (`cloudNextTarget`) instead of returning to the map. Rows need full overrides of the global
+  `#main button` rules (see the end of `stage.css`).
+- Not done: Cloud Hunt, buying extra Carnage, Bizarre Lands, other players' damage shares on the boss bar.
 
 ## In-chat playable preview (user requirement)
 The user wants to play the game inside the chat, and wants SHORT replies in Russian, no fluff.

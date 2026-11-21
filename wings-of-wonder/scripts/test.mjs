@@ -785,6 +785,11 @@ vm.runInContext(`
  if(!board.includes('stroke="#ffd86b" stroke-width="5.5"')||cloudOpen(0)!==2)throw Error('A road between two open cities lights up');
  cloudTerritory(7);if(!$('#modalBody').innerHTML.includes('cloud-foreign')||$('#modalBody').innerHTML.includes('cloudStrike(7'))throw Error('Foreign city is look-only');
  cloudTerritory(3);if(!$('#modalBody').innerHTML.includes('cloudStrike(3'))throw Error('Own city can be attacked');
+ // The hall under a fight: every defender with its state (Refreshed / return clock / Fighting) and who beat it.
+ S.cloudWarHits={0:[0,0,0,0,9,0,0,0,0,0]};S.cloudPatrol={hits:{0:[0,0,0,0,0,9,0,0,0,0]},last:0};
+ let hall=cloudHall(0,6);if((hall.match(/hall-row/g)||[]).length!==10||!hall.includes('Fighting')||(hall.match(/>Refreshed</g)||[]).length!==7||!hall.includes('Boss List'))throw Error('Hall list');
+ if(cloudNextTarget(0)!==0||cloudBossName(8)===cloudBossName(5))throw Error('Next target and names');
+ cloudHallTab='Dmg';hall=cloudHall(0,6);if(!hall.includes('1 defeated'))throw Error('DMG Rankings');cloudHallTab='Boss';
  cloudPointsShow();if(!$('#modalBody').innerHTML.includes('Point Rewards'))throw Error('Point Rewards window');
  r.cloudGain(S,160);cloudPointsShow();if(!$('#modalBody').innerHTML.includes('cloudTake(0)'))throw Error('Claim button');cloudTake(0);if(!r.cloudState(S).claimed.includes(0))throw Error('Claim');
  cloudShopShow();if(!$('#modalBody').innerHTML.includes("cloudBuy('wish')"))throw Error('Shop window');
