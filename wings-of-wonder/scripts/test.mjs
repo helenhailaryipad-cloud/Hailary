@@ -828,18 +828,28 @@ vm.runInContext(`
  if(!r.friendAnswer(S,'briar',true)||!r.socialState(S).friends.includes('briar')||!r.friendAnswer(S,'wren',false)||r.socialState(S).friends.includes('wren')||r.friendAnswer(S,'wren',true))throw Error('Requests');
  if(!r.friendAdd(S,'orin')||r.friendAdd(S,'orin')||!r.friendBlock(S,'pip',true)||r.socialState(S).friends.includes('pip')||!r.socialState(S).blocked.includes('pip')||r.friendAdd(S,'pip'))throw Error('Add and blacklist');
  // Chat: the feed is the same for the same moment; her lines are cleaned, kept and answered.
- const a=r.chatFeed(S,'World',T0),b=r.chatFeed(S,'World',T0);if(a.length!==24||JSON.stringify(a)!==JSON.stringify(b)||a.some(c=>c.from==='pip'))throw Error('Chat feed');
+ const a=r.chatFeed(S,'Globe',T0),b=r.chatFeed(S,'Globe',T0);if(a.length!==24||JSON.stringify(a)!==JSON.stringify(b)||a.some(c=>c.from==='pip'))throw Error('Chat feed');
  if(new Set(a.map(c=>c.text)).size<6)throw Error('Feed lines vary');
- const said=r.chatSay(S,'World','  hi <b>there</b> ',T0,rng);if(said.me.text!=='hi bthere/b'||said.reply.from==='me'||!r.chatFeed(S,'World',T0+2000).some(c=>c.from==='me')||r.chatSay(S,'World','   '))throw Error('Say');
- r.chatSay(S,'p:kael','hello',T0,rng);if(!r.socialState(S).recent.includes('kael')||!r.chatFeed(S,'Private',T0+2000).some(c=>c.ch==='p:kael'&&c.from==='kael'))throw Error('Private chat');
- for(let i=0;i<40;i++)r.chatSay(S,'World','line '+i,T0,rng);if(r.socialState(S).chat.length!==r.socialRules.chatKeep||!valid(JSON.parse(JSON.stringify(S))))throw Error('Chat cap');
- for(const bad of [{day:'x'},{friends:['nope']},{sent:['nyra','nyra']},{mail:[{id:1}]},{chat:[{ch:'World',from:'x',text:'a',t:1}]},{hearts:{nyra:999}}])if(valid({...S,social:{...S.social,...bad}}))throw Error('Invalid social accepted '+JSON.stringify(bad));
+ const said=r.chatSay(S,'Globe','  hi <b>there</b> ',T0,rng);if(said.me.text!=='hi bthere/b'||said.reply.from==='me'||!r.chatFeed(S,'Globe',T0+2000).some(c=>c.from==='me')||r.chatSay(S,'Globe','   ')||r.chatSay(S,'System','hi'))throw Error('Say');
+ // Six channels: Guild rolls, an X-server riddle with answers (and a block switch), Squad of three friends, System notes.
+ if(r.chatChannels.join()!=='System,Squad,Globe,X-server,Guild,Faction'||!r.chatFeed(S,'Guild',T0).some(c=>c.kind==='roll'&&/rolled/.test(c.text)))throw Error('Guild rolls');
+ const xs=r.chatFeed(S,'X-server',T0+day,240);if(!xs.some(c=>c.kind==='quiz')||!xs.some(c=>c.srv>=10&&c.fac>=0))throw Error('X-server');
+ r.chatBlockX(S,true);if(r.chatFeed(S,'X-server',T0).length||!valid(S))throw Error('Block X-server');r.chatBlockX(S,false);
+ if(r.squadOf(S).length!==3||r.chatFeed(S,'Squad',T0+day,240).some(c=>!r.squadOf(S).includes(c.from)))throw Error('Squad');
+ r.socialNote(S,'Victory <b>x</b>',T0);if(!r.chatFeed(S,'System',T0).some(c=>c.text==='Victory bx/b'))throw Error('System note');
+ S.social.chat.push({ch:'World',from:'me',text:'old',t:T0-5});if(!r.chatFeed(S,'Globe',T0).some(c=>c.text==='old'))throw Error('Old World lines show in Globe');S.social.chat.pop();
+ r.chatSay(S,'p:kael','hello',T0,rng);if(!r.socialState(S).recent.includes('kael')||!r.chatFeed(S,'p:kael',T0+2000).some(c=>c.from==='kael'))throw Error('Private chat');
+ for(let i=0;i<40;i++)r.chatSay(S,'Globe','line '+i,T0,rng);if(r.socialState(S).chat.length!==r.socialRules.chatKeep||!valid(JSON.parse(JSON.stringify(S))))throw Error('Chat cap');
+ for(const bad of [{day:'x'},{friends:['nope']},{sent:['nyra','nyra']},{mail:[{id:1}]},{chat:[{ch:'Globe',from:'x',text:'a',t:1}]},{xblock:1},{sys:[{text:1,t:1}]},{hearts:{nyra:999}}])if(valid({...S,social:{...S.social,...bad}}))throw Error('Invalid social accepted '+JSON.stringify(bad));
  // Screens: the home strip opens the chat; the four pages render; Gift All and Claim from the pages.
- S=defaults();openScreen('home');if(!$('#main').innerHTML.includes('city-chat')||!$('#main').innerHTML.includes("socialOpen('Chat')"))throw Error('Home chat strip');
+ S=defaults();openScreen('home');if(!$('#main').innerHTML.includes('city-chat')||!$('#main').innerHTML.includes('chatSheetOpen()'))throw Error('Home chat strip');
+ chatChannel='Guild';let sheet=chatSheet(false);if(!sheet.includes('chat-sheet over')||!sheet.includes('Coordinate')||!sheet.includes('Shortcut')||!sheet.includes('rolled'))throw Error('Chat sheet');
+ chatChannel='Squad';chatWith='nyra';if(chatTarget()!=='p:nyra'||!chatSheet(true).includes('chat-squad'))throw Error('Squad member talk');chatWith=null;
+ chatChannel='System';if(!chatSheet(true).includes('System messages only'))throw Error('System is read-only');
  for(const page of ['Chat','Friends','Mail','Notes']){socialOpen(page);if(screen!=='citySocial'||!$('#main').innerHTML.includes('soc-p-'+page.toLowerCase()))throw Error('Social page '+page)}
  socialOpen('Friends');friendGiftAll();if(r.socialState(S).sent.length!==4)throw Error('Gift All from the page');
  socialOpen('Mail');const before=r.bagCount(S,'chest1');mailChecked=[];mailAll('mail');mailTake('mail');if(r.bagCount(S,'chest1')!==before+1||r.socialState(S).mail.some(m=>m.kind==='mail'&&!m.claimed))throw Error('Claim all mail');
- chatChannel='World';socialOpen('Chat');if(!$('#main').innerHTML.includes('chat-line'))throw Error('Chat page feed');socialStop();
+ chatChannel='Globe';socialOpen('Chat');if(!$('#main').innerHTML.includes('chat-line')||!$('#main').innerHTML.includes('chat-sheet in-room'))throw Error('Chat page feed');socialStop();chatStop();
 }
 `,context);
 console.log('PASS: Social: daily mail and thank-you notes, claim and delete, flowers and hearts, requests and blacklist, chat feed and replies, screens.');

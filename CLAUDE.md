@@ -499,7 +499,18 @@ There are no other players: every person is an AI adventurer and is labelled "AI
     from friends (`socialTick`), each with bag items; Claim (checked or all), Delete (only claimed), 30 letters max.
 - Art (image model): `art-source/social/{banner,icons}.webp` -> `comp-social-banner`, `comp-social-icons` (flowers,
   hearts, letters, note, chat bubble, gift) by `scripts/build-social-art.py`.
-- Not done: guild chat of a real guild, voice/emoji, the reference's Management page, sending mail to friends.
+- Chat sheet (second pass, four photos of the reference's chat): tapping the home strip slides a sheet up over the
+  home screen (`chatSheetOpen`, `.chat-sheet.over`, ⌄ closes; the room's Chat page shows the same sheet `.in-room`).
+  Channels in a column on the left: System (read-only; `socialNote(s,text)` adds her events: dungeon victories,
+  Super Rare summons, crafts, Cloud War ownership rewards; optional `S.social.sys`, last 20), Squad (Team line plus
+  one card per squad member = her first three friends, `squadOf`; a card opens a talk `p:<id>`), Globe, X-server (AI
+  with `[S-nn]` server tags and faction tags, a riddle every ten minutes with AI answers and an end line, "Block all
+  messages in cross-server channel" = optional `S.social.xblock`), Guild (AI loot rolls "rolled N" / "rolled highest
+  this round! Bonus: T3·Boots (Orange)" and guild lines), Faction (Cloud War talk). Below the channels: Coordinate
+  (posts where she is), Shortcut (quick phrases), Bag. Input "Press the avatar or input @ to notify…"; tapping an
+  avatar inserts @Name; ☺ opens twelve emoji. Old saved channel names World / Cross-server read as Globe / X-server
+  (`chatOld`). `chatRefresh` redraws only the sheet every 8 s unless she is typing (`chatTimer`).
+- Not done: a real guild, voice messages, the reference's Management page, sending mail to friends.
 
 ## In-chat playable preview (user requirement)
 The user wants to play the game inside the chat, and wants SHORT replies in Russian, no fluff.

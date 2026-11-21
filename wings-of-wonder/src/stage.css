@@ -7574,3 +7574,54 @@ body[data-screen=home] #stage #main .city-chat .city-social::before,body[data-sc
 #stage #main .soc-people button small{font:700 2.3cqw/1 Arial,sans-serif!important;color:#fff!important}
 .soc-people{align-items:start}
 #stage #main .soc-people button{height:auto}
+
+/* Chat sheet (2026-11-21, after the reference): channels in a column on the left, feed and input on the right.
+   On the home screen it slides up over the lower part (.over); in the Social room it fills the Chat page (.in-room). */
+.chat-sheet{display:grid;grid-template-columns:24% minmax(0,1fr);background:#262a42f2;color:#fff;border:2px solid #4a4f72;border-radius:1em 1em 0 0;overflow:hidden}
+.chat-sheet.over{position:absolute;left:3%;right:3%;bottom:0;height:62%;z-index:40;box-shadow:0 -6px 24px #000a;animation:chat-up .25s ease-out}
+@keyframes chat-up{from{transform:translateY(100%)}to{transform:none}}
+.chat-sheet.in-room{min-height:0;margin:0 2%;grid-row:span 4;border-radius:1em}
+.satchel.soc-p-chat{grid-template-rows:auto minmax(0,1fr) 8%}
+#stage #main .chat-sheet button::before,#stage #main .chat-sheet button::after{display:none}
+.chat-sheet .den-x{display:none}
+#stage #main .chat-sheet .chat-fold{position:absolute;left:50%;top:0;transform:translate(-50%,-2%);z-index:2;width:16%;height:auto;padding:0 0 .2em;border-radius:0 0 .8em .8em;background:#1a1d33;border:1px solid #4a4f72;border-top:0;color:#ffcf5a;font:700 4.5cqw/1 Arial,sans-serif}
+.chat-side{display:flex;flex-direction:column;gap:.4cqh;padding:3.5cqh 0 1cqh;background:#1a1d33;overflow:auto}
+#stage #main .chat-side>button:not(.chat-tool){padding:1.1cqh 0;border-radius:0 .6em .6em 0;margin-right:6%;background:transparent;border:0;color:#cfd6ff;font:700 3.2cqw/1 Arial,sans-serif}
+#stage #main .chat-side>button[aria-pressed=true]{background:linear-gradient(90deg,#3b8fd0,#2a6fb0);color:#fff}
+.chat-side>span{flex:1}
+#stage #main .chat-side .chat-tool{display:grid;justify-items:center;gap:.2em;padding:.4cqh 0;background:transparent;border:0;color:#fff;font:700 2.3cqw/1 Arial,sans-serif}
+.chat-tool :is(.gpt-icon,.soc-ico){width:8cqw;height:8cqw}
+.chat-main{display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;min-height:0;padding:3cqh 2cqw 1cqh}
+.chat-sheet .chat-feed{margin:0;border-radius:.6em;background:#2f3452;align-content:start}
+.chat-note{padding:.4em .6em;border-radius:.4em;font:400 3cqw/1.35 Arial,sans-serif;color:#e9ecff}
+.chat-note.sys{background:#3a3f63;color:#ffe9a0}
+.chat-note.quiz{background:#3a5a3f;color:#b8ffb0;font-weight:700}
+.chat-note.roll b{color:#7dff8a}.chat-note.roll i{font-style:normal;color:#ffcf5a;font-weight:700}.chat-note.roll u{text-decoration:none;color:#ffa94a;font-weight:700}
+.chat-line .srv{color:#9fc8ff}.chat-line .fac{font-weight:700}
+#stage #main .chat-sheet .chat-face{padding:0;background:transparent;border:0;border-radius:50%;flex:none}
+.chat-sheet .chat-line .portrait-badge{width:9cqw;height:9cqw;border-radius:50%;filter:none}
+.chat-block{display:flex;align-items:center;gap:2cqw;margin-bottom:1cqh;font:700 2.8cqw/1.2 Arial,sans-serif;color:#fff}
+.chat-squad{display:flex;gap:1.5cqw;margin-bottom:1cqh;overflow-x:auto}
+#stage #main .chat-squad button{display:grid;justify-items:center;gap:.2em;flex:none;width:15cqw;padding:.5cqh 0;border-radius:.5em;background:#33395c;border:2px solid #4a4f72;color:#ffe9a0;font:700 2.3cqw/1 Arial,sans-serif}
+#stage #main .chat-squad button[aria-pressed=true]{border-color:#ffcf5a;background:#3f466e}
+.chat-squad .portrait-badge{width:9cqw;height:9cqw;border-radius:50%;filter:none}.chat-squad .soc-ico{width:9cqw}
+.chat-squad small{font:400 2cqw/1 Arial,sans-serif!important;color:#cfd6ff!important}
+.chat-emoji{display:flex;flex-wrap:wrap;gap:1cqw;padding:.6cqh 0}
+#stage #main .chat-emoji button{width:9cqw;height:9cqw;padding:0;border-radius:.4em;background:#3a3f63;border:0;font:400 5cqw/1 Arial,sans-serif}
+.chat-sheet .chat-input{padding:1cqh 0 0;gap:1.5cqw}
+.chat-sheet .chat-input input{background:#1a1d33;color:#fff;border-color:#4a4f72;font-size:2.9cqw}
+.chat-sheet .chat-input input::placeholder{color:#9aa0c8}
+#stage #main .chat-sheet .chat-smile{width:9cqw;padding:0;border-radius:50%;background:#3a3f63;border:0;color:#fff;font:400 5cqw/1 Arial,sans-serif}
+#stage #main .chat-sheet .chat-input .den-gold{padding:.5em 1.2em;font-size:3cqw}
+#stage #main .chat-sheet button:disabled{opacity:.5}
+.chat-main{display:flex;flex-direction:column;gap:0}
+.chat-sheet .chat-feed{flex:1 1 0;min-height:0}
+.chat-sheet .chat-input{flex:none;align-items:center}
+.chat-sheet .chat-input input{height:9cqw;box-sizing:border-box;padding:0 .8em}
+#stage #main .chat-sheet .chat-smile{height:9cqw}
+#stage #main .chat-sheet .chat-input .den-gold{height:9cqw;padding:0 1.2em}
+#stage #main .chat-sheet .chat-line p{color:#3a2a1a}
+#stage #main .chat-sheet .chat-line.me p{color:#1b2a40}
+.chat-sheet .chat-block,.chat-sheet .chat-squad,.chat-sheet .chat-emoji{flex:none}
+#stage #main .chat-sheet .soc-check{flex:none;width:6cqw;height:6cqw;padding:0;border-radius:.2em;border:2px solid #cfe0ff;background:#0d1a2c}
+#stage #main .chat-sheet .soc-check[aria-pressed=true]{background:#5fbf6a;border-color:#eaffea;box-shadow:inset 0 0 0 2px #17401f}
