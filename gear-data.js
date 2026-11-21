@@ -379,6 +379,7 @@ function validPets(s){
  }
  if(!validTalents(s.petTalents)||!validPetGear(s.petGear))return false;
  if(!validBag(s))return false;
+ if(!validSummon(s.summon))return false;
  if(s.emberShards!==undefined&&(!Number.isSafeInteger(s.emberShards)||s.emberShards<0))return false;
  if(s.petSpares!==undefined&&(!s.petSpares||typeof s.petSpares!=='object'||Array.isArray(s.petSpares)||!Object.entries(s.petSpares).every(([id,n])=>Object.hasOwn(familiarById,id)&&Number.isInteger(n)&&n>0&&n<=9999)))return false;
  if(s.emberStars!==undefined&&(!Number.isInteger(s.emberStars)||s.emberStars<0||s.emberStars>6||!s.owned?.includes('d1')))return false;
@@ -602,5 +603,89 @@ function validBag(s){
  const counts=(o,ok)=>o===undefined||!!o&&typeof o==='object'&&!Array.isArray(o)&&Object.entries(o).every(([k,n])=>ok(k)&&Number.isInteger(n)&&n>0&&n<=1e9);
  return counts(s.bag,k=>Object.hasOwn(bagItemById,k))&&counts(s.vault,vaultKeyOk)&&(s.devour===undefined||Number.isSafeInteger(s.devour)&&s.devour>=0&&s.devour<=1e12)&&(s.autoDevour===undefined||typeof s.autoDevour==='boolean');
 }
-return Object.freeze({bossRare,gearRanks,gearRank,gearCraftFrom,gearNoDevour,bossDropRanks,craftRecipe,craftInputs,craftChance,craftGear,gearGroups,gearGroup,bagCapacity,bagStarter,bagRarity,bagItems,bagItemById,bagCount,bagAdd,bagStacks,bagUsed,vaultCount,vaultMove,useBagItem,devourStep,devourMax,devourNeed,devourWorth,devourState,devourBonus,devourable,devourGear,validBag,riposteShare,riposteEvery,talentCells,talentFree,talentLearn,talentBook,talentScroll,talentTopScroll,talentPrice,talentSupremeAt,talentSupreme,petTalents,talentState,talentIds,supremeReady,addSeals,openCellCost,openTalentCell,learnCost,rollTalent,keepTalent,learnTalent,lockTalent,forgetTalent,setTalentTarget,buyTalentScroll,buyTalentBook,sealRates,sealGold,buySeals,exchangeSpares,talentBonus,guardTalents,petGearPieces,petGearMax,petGearStep,petGearSetStep,petGearLevels,petGearTier,petGearCost,petGearBonus,upgradePetGear,petBolt,petBoltPace,petHit,petPace,assistPages,assistSlots,synthChain,synthNeed,petSpares,addPetSpare,synthesizePet,fashionTraits,companionTypes,companionSkins,companionSkin,ownsCompanionSkin,useCompanionSkin,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
+// ---- Summon --------------------------------------------------------------------------------------------------------
+// Two wells. Basic: a Wish Ticket from the bag or wishes. Advanced: a Star Orb or prisms (save.scales); it has a
+// Summon Level and two guarantees. Rare and finer pets also leave Spirit Marks, the money of the Mark Shop. The
+// Festival pays Star Orbs and tokens for Basic summons made today; tokens open the month's milestones.
+// Optional save field `summon`; every number here is a placeholder.
+const summonWells={
+ basic:{name:'Basic Summon',unit:50,odds:[['Common',.45],['Rare',.35],['Epic',.16],['Super Rare',.04]]},
+ advanced:{name:'Advanced Summon',unit:30,odds:[['Rare',.5],['Epic',.38],['Super Rare',.12]]}
+};
+const summonPity={epic:10,top:40},summonLevelStep=10,summonLevelMax=20,summonDupGold=100;
+const markKinds=[['Rare','r','Rare Mark'],['Epic','e','Epic Mark'],['Super Rare','s','Royal Mark']],markKey=Object.fromEntries(markKinds.map(([rarity,key])=>[rarity,key]));
+const markPrice=20,markLimit=3,markNeed={Rare:1,Epic:5,'Super Rare':10};
+const galaQuests=[10,20,30,40,50,60,70,80].map((need,i)=>({need,orbs:[1,1,2,2,2,2,2,3][i],tokens:i<6?5:10}));
+const galaMilestones=[{at:20,item:'petegg',n:1},{at:45,item:'sealbag',n:2},{at:80,pet:'Epic'},{at:120,item:'chest3',n:1},{at:180,pet:'Super Rare'}];
+const utcDay=now=>new Date(now).toISOString().slice(0,10);
+function utcWeek(now){const d=new Date(now);d.setUTCDate(d.getUTCDate()-(d.getUTCDay()+6)%7);return utcDay(d)}   // Monday
+function galaEnds(now){const d=new Date(now);return Date.UTC(d.getUTCFullYear(),d.getUTCMonth()+1,1)}
+// The record as of `now`: the shop restocks on Monday, quests reset at 00:00 UTC, the Festival season is a month.
+function summonState(s,now=Date.now()){
+ const v=s.summon||{},day=utcDay(now),week=utcWeek(now),season=day.slice(0,7),g=v.gala||{},fresh=g.season===season,today=fresh&&g.day===day;
+ return {adv:v.adv||0,pityE:v.pityE||0,pityS:v.pityS||0,orbs:v.orbs||0,marks:{r:0,e:0,s:0,...v.marks},
+  shop:v.shop?.week===week?{week,bought:{...v.shop.bought}}:{week,bought:{}},
+  gala:{season,day,basic:today?g.basic:0,claimed:today?[...g.claimed]:[],tokens:fresh?g.tokens:0,got:fresh?[...g.got]:[]}};
+}
+function summonLevel(s){const adv=s.summon?.adv||0,level=Math.min(summonLevelMax,1+Math.floor(adv/summonLevelStep));return {level,into:level>=summonLevelMax?summonLevelStep:adv%summonLevelStep,need:summonLevelStep,max:level>=summonLevelMax}}
+// What a draw would be paid with: tickets or orbs first, then the currency. null when she cannot afford it.
+function summonPay(s,kind,count){
+ const well=summonWells[kind];if(!well||![1,10].includes(count))return null;
+ if(kind==='basic')return bagCount(s,'wish')>=count?{item:'wish',n:count}:s.tickets>=count*well.unit?{tickets:count*well.unit}:null;
+ return (s.summon?.orbs||0)>=count?{orbs:count}:s.scales>=count*well.unit?{scales:count*well.unit}:null;
+}
+function summonPet(s,rarity,rng){
+ const pool=familiars.filter(p=>p.rarity===rarity),p=pool[Math.min(pool.length-1,Math.floor(rng()*pool.length))],spare=s.owned.includes(p.id);
+ if(spare){addPetSpare(s,p.id);s.gold+=summonDupGold}else s.owned.push(p.id);
+ return {id:p.id,rarity,spare};
+}
+function summonDraw(s,kind,count=1,rng=Math.random,now=Date.now()){
+ const pay=summonPay(s,kind,count);if(!pay)return {ok:false,error:summonWells[kind]?'Not enough to summon.':'Unknown summon.'};
+ const v=summonState(s,now),well=summonWells[kind],results=[];
+ if(pay.item){const bag=bagOf(s);if(bag[pay.item]>pay.n)bag[pay.item]-=pay.n;else delete bag[pay.item];s.bag=bag}
+ if(pay.tickets)s.tickets-=pay.tickets;if(pay.scales)s.scales-=pay.scales;if(pay.orbs)v.orbs-=pay.orbs;
+ for(let i=0;i<count;i++){
+  let roll=rng(),rarity=well.odds[well.odds.length-1][0];
+  for(const [name,chance] of well.odds){if(roll<chance){rarity=name;break}roll-=chance}
+  if(kind==='advanced'){
+   v.adv++;v.pityE++;v.pityS++;
+   if(v.pityS>=summonPity.top)rarity='Super Rare';else if(v.pityE>=summonPity.epic&&rarity==='Rare')rarity='Epic';
+   if(rarity==='Super Rare')v.pityS=0;if(rarity!=='Rare')v.pityE=0;
+  }else v.gala.basic++;
+  if(markKey[rarity])v.marks[markKey[rarity]]++;
+  results.push(summonPet(s,rarity,rng));
+ }
+ s.summon=v;return {ok:true,results,pay};
+}
+// Mark Shop: a chosen pet for Spirit Marks of its rarity, a few of each a week, opened by the Summon Level.
+function markOffer(s,id,now=Date.now()){
+ const p=familiarById[id],key=markKey[p?.rarity];if(!key)return null;
+ const v=summonState(s,now),left=markLimit-(v.shop.bought[id]||0),level=summonLevel(s).level,need=markNeed[p.rarity];
+ return {key,price:markPrice,left,need,have:v.marks[key],why:level<need?'Summon Lv. '+need:left<1?'Sold out this week':v.marks[key]<markPrice?'Not enough marks':''};
+}
+function buyMarkPet(s,id,now=Date.now()){
+ const offer=markOffer(s,id,now);if(!offer||offer.why)return {ok:false,error:offer?.why||'Not sold here.'};
+ const v=summonState(s,now);v.marks[offer.key]-=offer.price;v.shop.bought[id]=(v.shop.bought[id]||0)+1;
+ const spare=s.owned.includes(id);if(spare)addPetSpare(s,id);else s.owned.push(id);
+ s.summon=v;return {ok:true,spare};
+}
+function galaClaim(s,n,now=Date.now()){
+ const q=galaQuests[n],v=summonState(s,now);if(!q||v.gala.claimed.includes(n)||v.gala.basic<q.need)return false;
+ v.gala.claimed.push(n);v.orbs+=q.orbs;v.gala.tokens+=q.tokens;s.summon=v;return true;
+}
+function galaReward(s,n,rng=Math.random,now=Date.now()){
+ const m=galaMilestones[n],v=summonState(s,now);if(!m||v.gala.got.includes(n)||v.gala.tokens<m.at)return null;
+ v.gala.got.push(n);s.summon=v;
+ if(m.item){bagAdd(s,m.item,m.n);return {kind:'item',id:m.item,n:m.n}}
+ return {kind:'pet',...summonPet(s,m.pet,rng)};
+}
+function validSummon(v){
+ if(v===undefined)return true;
+ const int=n=>Number.isSafeInteger(n)&&n>=0&&n<=1e9,list=(a,max)=>Array.isArray(a)&&new Set(a).size===a.length&&a.every(n=>Number.isInteger(n)&&n>=0&&n<max),date=x=>typeof x==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(x);
+ return !!v&&typeof v==='object'&&!Array.isArray(v)&&[v.adv,v.pityE,v.pityS,v.orbs].every(int)&&v.pityE<=summonPity.epic&&v.pityS<=summonPity.top
+  &&!!v.marks&&Object.keys(v.marks).length===3&&markKinds.every(([,key])=>int(v.marks[key]))
+  &&!!v.shop&&date(v.shop.week)&&!!v.shop.bought&&typeof v.shop.bought==='object'&&!Array.isArray(v.shop.bought)&&Object.entries(v.shop.bought).every(([id,n])=>Object.hasOwn(familiarById,id)&&Number.isInteger(n)&&n>0&&n<=markLimit)
+  &&!!v.gala&&date(v.gala.day)&&v.gala.season===v.gala.day.slice(0,7)&&int(v.gala.basic)&&int(v.gala.tokens)&&list(v.gala.claimed,galaQuests.length)&&list(v.gala.got,galaMilestones.length);
+}
+return Object.freeze({summonWells,summonPity,summonLevelMax,summonDupGold,markKinds,markPrice,markLimit,markNeed,galaQuests,galaMilestones,galaEnds,summonState,summonLevel,summonPay,summonDraw,markOffer,buyMarkPet,galaClaim,galaReward,validSummon,bossRare,gearRanks,gearRank,gearCraftFrom,gearNoDevour,bossDropRanks,craftRecipe,craftInputs,craftChance,craftGear,gearGroups,gearGroup,bagCapacity,bagStarter,bagRarity,bagItems,bagItemById,bagCount,bagAdd,bagStacks,bagUsed,vaultCount,vaultMove,useBagItem,devourStep,devourMax,devourNeed,devourWorth,devourState,devourBonus,devourable,devourGear,validBag,riposteShare,riposteEvery,talentCells,talentFree,talentLearn,talentBook,talentScroll,talentTopScroll,talentPrice,talentSupremeAt,talentSupreme,petTalents,talentState,talentIds,supremeReady,addSeals,openCellCost,openTalentCell,learnCost,rollTalent,keepTalent,learnTalent,lockTalent,forgetTalent,setTalentTarget,buyTalentScroll,buyTalentBook,sealRates,sealGold,buySeals,exchangeSpares,talentBonus,guardTalents,petGearPieces,petGearMax,petGearStep,petGearSetStep,petGearLevels,petGearTier,petGearCost,petGearBonus,upgradePetGear,petBolt,petBoltPace,petHit,petPace,assistPages,assistSlots,synthChain,synthNeed,petSpares,addPetSpare,synthesizePet,fashionTraits,companionTypes,companionSkins,companionSkin,ownsCompanionSkin,useCompanionSkin,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
 })();

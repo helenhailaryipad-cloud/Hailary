@@ -454,6 +454,103 @@ function cityCraft(){
  <div class="loom-slots">${slots.map(s=>`<button class="loom-slot" aria-label="${r.catalog[s.id+'-t'+craftTier].name}" aria-pressed="${s.id===craftSlot}" onclick="craftSelect('${s.id}')">${denPlain}${face(r.catalog[s.id+'-t'+craftTier],rank)}<em class="${pool.length>=least?'':'low'}">${pool.length}</em></button>`).join('')}</div>
  </div></div><div class="satchel-tabs loom-kinds">${r.gearGroups.map(g=>`<button aria-pressed="${g===craftGroup}" onclick="craftFilter(craftRank,null,'${g}')">${denPlain}${g}</button>`).join('')}</div>${satchelNav('Gear Crafting')}</section>`;
 }
+// ---- Summon room: Basic and Advanced wells, the Mark Shop and the Summon Festival (rules: WonderGear.summon*) --------
+let summonPage='Basic',summonSkip=false,markFilter='All';
+function summonArtVars(){const root=document.documentElement;if(!root?.style?.setProperty||root.style.getPropertyValue('--sum-icons'))return;root.style.setProperty('--sum-icons','url("'+artPath('comp-summon-icons')+'")')}
+// 0 Star Orb, 1 Rare Mark, 2 Epic Mark, 3 Royal Mark, 4 Festival token, 5 level card
+const sumIcon=n=>'<i class="sum-ico" style="background-position:'+(n%3)/2*100+'% '+Math.floor(n/3)*100+'%"></i>';
+const markIcon=key=>sumIcon(1+'res'.indexOf(key));
+const sumChip=(icon,n,label)=>'<span title="'+label+'">'+icon+bagNum(n)+'</span>';
+function summonGo(page){summonPage=page;if(screen==='citySummon')citySummon();else go('citySummon')}
+function summonLeave(){if(summonPage==='Shop')summonGo('Advanced');else go('home')}
+// The result window. Cards turn up one after another unless Skip is ticked.
+function summonShow(title,results,note=''){
+ const cards=results.map((x,i)=>'<span class="sum-card" style="animation-delay:'+(i*.13).toFixed(2)+'s">'+petCard(x.id,'',x.spare?'+1 copy':'New!')+'</span>').join('');
+ popup('<div class="den-congrats'+(summonSkip?'':' sum-reveal')+'" onclick="$(\'#modal\').close()"><h2>'+title+'</h2><div class="den-picker den-summoned">'+cards+'</div>'+(note?'<p>'+note+'</p>':'')+'<small>Tap anywhere to close</small></div>');
+}
+function summonDo(kind,count){
+ const r=WonderGear,before=r.summonState(S).marks,result=r.summonDraw(S,kind,count);
+ if(!result.ok){toast(kind==='basic'?'Not enough wishes or Wish Tickets.':'Not enough prisms or Star Orbs.');return}
+ save();citySummon();
+ const after=r.summonState(S).marks,gained=r.markKinds.map(([,key,name])=>after[key]>before[key]?'+'+(after[key]-before[key])+' '+name:'').filter(Boolean);
+ summonShow(r.summonWells[kind].name,result.results,gained.length?'Spirit Marks: '+gained.join(' · '):'');
+}
+function summonSkipToggle(){summonSkip=!summonSkip;citySummon()}
+function summonOdds(kind){
+ const r=WonderGear,well=r.summonWells[kind];
+ popup('<h2>'+well.name+'</h2><div class="den-odds sum-odds">'+well.odds.map(([name,chance])=>'<span class="den-'+petRarity[name][1]+'"><b>'+Math.round(chance*100)+'%</b><small>'+name+'</small></span>').join('')+'</div>'
+  +(kind==='basic'?'<p>One draw costs a Wish Ticket from the bag or '+well.unit+' wishes. Every Basic summon counts for the Summon Festival.</p>':'<p>One draw costs a Star Orb or '+well.unit+' prisms. Every '+r.summonPity.epic+' draws give an Epic or finer pet, every '+r.summonPity.top+' a Super Rare one. Each '+10+' draws raise the Summon Level, which opens finer pets in the Mark Shop.</p>')
+  +'<p>A pet she already has becomes a spare copy and '+r.summonDupGold+' gold. Rare and finer pets leave a Spirit Mark of their rarity.</p>');
+}
+function markAsk(id){
+ const r=WonderGear,p=r.familiars.find(p=>p.id===id),offer=r.markOffer(S,id);if(!offer)return;
+ const owned=S.owned.includes(id);
+ popup('<div class="den-item"><div class="den-item-head bag-head" style="--rarity:'+p.color+'"><img src="'+petPicture(p)+'" alt=""><div><b>'+esc(p.name)+'</b><small>Type: <u>'+p.rarity+' pet</u></small><small>This week: '+offer.left+' / '+r.markLimit+'</small></div></div><h3>◆ Item Description</h3><p>'+(owned?'Reina already has this pet: buying gives a spare copy for Synthesize.':'A new pet for the collection.')+' Needs Summon Lv. '+offer.need+'.</p>'
+  +(offer.why?'<p class="den-why">'+offer.why+'</p>':'')+'<div class="den-actions"><button class="den-gold" onclick="markBuy(\''+id+'\')" '+(offer.why?'disabled':'')+'>'+denPlain+'Buy · '+markIcon(offer.key)+offer.price+'</button></div></div>');
+}
+function markBuy(id){
+ const result=WonderGear.buyMarkPet(S,id);
+ if(!result.ok){toast(result.error);return}
+ save();$('#modal').close();citySummon();summonShow('Mark Shop',[{id,spare:result.spare}]);
+}
+function galaTake(n){if(WonderGear.galaClaim(S,n)){save();citySummon()}}
+function galaOpen(n){
+ const r=WonderGear,got=r.galaReward(S,n);if(!got)return;
+ save();citySummon();
+ if(got.kind==='pet')summonShow('Festival reward',[got]);else{bagArtVars();popup('<h2>Festival reward</h2><div class="bag-gains">'+bagGain(got)+'</div>')}
+}
+function citySummon(){
+ const r=WonderGear,v=r.summonState(S),lv=r.summonLevel(S);summonArtVars();bagArtVars();
+ if(!['Basic','Advanced','Shop','Gala'].includes(summonPage))summonPage='Basic';
+ const tab=summonPage==='Gala'?'Gala':'Summon';
+ const nav=`<div class="satchel-nav well-nav"><button data-back aria-label="Back" onclick="summonLeave()">‹</button><button ${tab==='Summon'?'aria-current="page"':''} onclick="summonGo('Basic')">${denPlain}${sumIcon(0)}Summon</button><button ${tab==='Gala'?'aria-current="page"':''} onclick="summonGo('Gala')">${denPlain}${sumIcon(4)}Summon Festival</button></div>`;
+ const wishes=sumChip(uiIcon('wishes'),S.tickets,'Wishes'),prisms=sumChip(uiIcon('crystals'),S.scales,'Prisms');
+ const top=(title,chips)=>`<div class="satchel-top"><strong>${title}</strong>${chips}</div>`;
+ const sr=r.familiars.filter(p=>p.rarity==='Super Rare').sort((a,b)=>b.power-a.power);
+ if(summonPage==='Basic'||summonPage==='Advanced'){
+  const basic=summonPage==='Basic',kind=basic?'basic':'advanced',well=r.summonWells[kind];
+  const draw=n=>{const pay=r.summonPay(S,kind,n);return `<button class="well-draw-${n}" onclick="summonDo('${kind}',${n})" ${pay?'':'disabled'}>${denPlain}<b>Draw ×${n}</b><small>${fmt(n*well.unit)}${basic?uiIcon('wishes'):uiIcon('crystals')} or ${n}${basic?bagIcon('wish'):sumIcon(0)}</small></button>`};
+  const crowd=basic?[sr[0],...['Epic','Rare','Common','Epic','Rare'].map((rarity,i)=>r.familiars.filter(p=>p.rarity===rarity)[i*2])]:sr.slice(0,3);
+  const stage=basic
+   ?`<h2 class="well-title">Basic Summon</h2><p class="well-ribbon">Randomly obtain a <b>Common – Super Rare</b> pet</p><div class="well-crowd">${crowd.map((p,i)=>`<img class="crowd-${i}" src="${petPicture(p)}" alt="${esc(p.name)}">`).join('')}</div>`
+   :`<h2 class="well-title">Advanced Summon</h2><button class="well-shop" onclick="summonGo('Shop')">${denPlain}${markIcon('s')}Mark Shop</button><div class="well-orbs">${crowd.map((p,i)=>`<span class="orb-${i}"><img src="${petPicture(p)}" alt="${esc(p.name)}"></span>`).join('')}</div>
+    <div class="well-level"><span>Summon Level: <b>${lv.level}</b></span><i><u style="width:${lv.into/lv.need*100}%"></u><em>${lv.max?'max':lv.into+' / '+lv.need}</em></i><span class="well-card">${sumIcon(5)}<b>${lv.level}</b></span>
+     <p>Guaranteed <b class="hot">Super Rare</b> after ${r.summonPity.top-v.pityS}</p><p>Guaranteed <b class="warm">Epic or higher</b> after ${r.summonPity.epic-v.pityE}</p></div>`;
+  $('#main').innerHTML=`<section class="satchel well well-${kind}" style="background-image:url('${artPath(basic?'comp-summon-glade':'comp-summon-oracle')}')">
+  ${top('Summon',(basic?sumChip(bagIcon('wish'),r.bagCount(S,'wish'),'Wish Tickets'):sumChip(sumIcon(0),v.orbs,'Star Orbs'))+wishes+prisms)}
+  <div class="well-stage"><button class="maw-help" aria-label="Chances" onclick="summonOdds('${kind}')">${denPlain}?</button>${stage}</div>
+  <div class="well-draw">${draw(1)}${draw(10)}<button class="well-skip" aria-pressed="${summonSkip}" onclick="summonSkipToggle()">${denPlain}<i></i>Skip</button></div>
+  <div class="well-banners"><button class="ban-adv" aria-pressed="${!basic}" onclick="summonGo('Advanced')">${denPlain}Advanced<br>Summoning</button><button class="ban-basic" aria-pressed="${basic}" onclick="summonGo('Basic')">${denPlain}Basic<br>Summoning</button></div>
+  ${nav}</section>`;
+  return;
+ }
+ if(summonPage==='Shop'){
+  const kinds=r.markKinds.filter(([rarity])=>markFilter==='All'||markFilter===rarity).reverse();
+  const cards=kinds.flatMap(([rarity,key])=>r.familiars.filter(p=>p.rarity===rarity).map(p=>{const o=r.markOffer(S,p.id);
+   return `<button class="shop-card den-${petRarity[rarity][1]} ${o.why?'shut':''}" aria-label="${esc(p.name)}" onclick="markAsk('${p.id}')">${denPlain}<small>Limited: ${o.left}/${r.markLimit}</small><img src="${petPicture(p)}" alt=""><b>${esc(p.name)}</b><em>${o.why&&o.why!=='Not enough marks'?o.why:S.owned.includes(p.id)?'gives a copy':'new pet'}</em><span>${markIcon(key)}${o.price}</span></button>`}));
+  $('#main').innerHTML=`<section class="satchel well well-mart">
+  ${top('Mark Shop',[...r.markKinds].reverse().map(([,key,name])=>sumChip(markIcon(key),v.marks[key],name)).join(''))}
+  <div class="mart-banner" style="background-image:url('${artPath('comp-summon-stall')}')"><h2>Spirit Mark Shop</h2><p>Summoning Rare and finer pets leaves Spirit Marks</p><em>Restock every Monday at 00:00 UTC</em></div>
+  <div class="satchel-scroll"><p class="mart-note">Summon Level <b>${lv.level}</b> · Rare from Lv. ${r.markNeed.Rare}, Epic from Lv. ${r.markNeed.Epic}, Super Rare from Lv. ${r.markNeed['Super Rare']}</p><div class="mart-grid">${cards.join('')}</div></div>
+  <div class="mart-filters">${['All','Super Rare','Epic','Rare'].map(f=>`<button aria-pressed="${f===markFilter}" onclick="markFilter='${f}';citySummon()">${denPlain}${f}</button>`).join('')}</div>
+  ${nav}</section>`;
+  return;
+ }
+ const left=Math.max(0,r.galaEnds(Date.now())-Date.now()),days=Math.floor(left/864e5),hours=Math.floor(left%864e5/36e5),mins=Math.floor(left%36e5/6e4),g=v.gala;
+ const gift=m=>m.item?bagIcon(m.item):'<img src="'+petPicture(m.pet==='Super Rare'?sr[0]:r.familiars.filter(p=>p.rarity===m.pet)[0])+'" alt="">';
+ const miles=r.galaMilestones.map((m,n)=>{const got=g.got.includes(n),ready=!got&&g.tokens>=m.at;
+  return `<button class="mile ${got?'got':ready?'ready':''}" aria-label="Reward at ${m.at} tokens" onclick="${ready?'galaOpen('+n+')':"toast('"+(got?'Already taken.':'Needs '+m.at+' Festival tokens.')+"')"}">${denPlain}<span>${gift(m)}${m.pet?'<small>'+m.pet+'</small>':m.n>1?'<small>×'+m.n+'</small>':''}</span><b>${m.at}</b></button>`}).join('');
+ const order=r.galaQuests.map((q,n)=>({q,n,state:g.claimed.includes(n)?2:g.basic>=q.need?0:1})).sort((a,b)=>a.state-b.state||a.n-b.n);
+ const rows=order.map(({q,n,state})=>`<div class="gala-row ${state===2?'done':''}"><h3>Perform Basic Summon ${q.need} times (<b class="${g.basic>=q.need?'ok':'low'}">${Math.min(g.basic,q.need)}</b>/${q.need})</h3><div><span class="gala-prize">${sumIcon(0)}<b>${q.orbs}</b></span><span class="gala-prize">${sumIcon(4)}<b>${q.tokens}</b></span>${state===0?`<button class="gala-claim" onclick="galaTake(${n})">${denPlain}Claim</button>`:state===1?`<button class="gala-go" onclick="summonGo('Basic')">${denPlain}Summon</button>`:'<em>Claimed</em>'}</div></div>`).join('');
+ $('#main').innerHTML=`<section class="satchel well well-gala" style="background-image:url('${artPath('comp-summon-glade')}')">
+ ${top('Summon Festival',sumChip(sumIcon(4),g.tokens,'Festival tokens')+sumChip(sumIcon(0),v.orbs,'Star Orbs'))}
+ <div class="gala-head"><em>${days} d ${String(hours).padStart(2,'0')}:${String(mins).padStart(2,'0')}</em><h2>Claim Star Orbs</h2><p>for the Advanced Summon: a <b>Super Rare</b> pet is guaranteed!</p><div class="well-crowd">${sr.slice(0,4).map((p,i)=>`<img class="gala-${i}" src="${petPicture(p)}" alt="${esc(p.name)}">`).join('')}</div></div>
+ <div class="gala-track"><span class="gala-tokens">${sumIcon(4)}<b>${g.tokens}</b></span>${miles}</div>
+ <div class="satchel-scroll gala-list">${rows}</div>
+ <p class="gala-foot">Quests reset at 00:00 UTC · tokens and rewards reset when the Festival ends</p>
+ ${nav}</section>`;
+}
+
 let petPage='Formation',petFocus=null,emblemFilter='All',petBack='',petBackNext='';
 // Leaving the room: back to Wonders when it was opened from the Pets tab there, otherwise to the city.
 function petLeave(){if(petBack==='wonders'){petBack='';filter='wings';go('collection')}else go('home')}
