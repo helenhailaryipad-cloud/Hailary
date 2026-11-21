@@ -474,7 +474,7 @@ territory windows with ten defenders and the fight; defenders never came back an
 - Ownership reward (user: "when a city is taken, the reward shows as a small chest above the city"): every city held
   by Galewing (`cloudOwner(i)===cloudMine`) pays once a round (`cloudOwnReward` by rank: Holy City Moon Chest + Wish
   Ticket, Fortress Oak Chest + Star Shard Pouch, Island Oak Chest; `cloudOwnTake`, `S.cloud.got` cleared by
-  `cloudNewRound`). Until taken, a bobbing chest (cut from `comp-bag-items` with the SVG clip `#cloudChestClip`)
+  `cloudNewRound`). Until taken, a SMALL (20 px, user: "it is small and shows the city is taken") bobbing chest (cut from `comp-bag-items` with the SVG clip `#cloudChestClip`)
   floats above the city on the map; tapping it (`cloudOwnClaim`) or the city window's "Ownership Reward" button pays
   into the bag. Nested `<svg viewBox>` did not clip there, use the clip path.
 - Not done: Cloud Hunt, buying extra Carnage, Bizarre Lands, other players' damage shares on the boss bar.
