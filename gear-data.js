@@ -381,6 +381,7 @@ function validPets(s){
  if(!validBag(s))return false;
  if(!validSummon(s.summon))return false;
  if(!validContest(s.contest))return false;
+ if(!validCloud(s.cloud))return false;
  if(s.emberShards!==undefined&&(!Number.isSafeInteger(s.emberShards)||s.emberShards<0))return false;
  if(s.petSpares!==undefined&&(!s.petSpares||typeof s.petSpares!=='object'||Array.isArray(s.petSpares)||!Object.entries(s.petSpares).every(([id,n])=>Object.hasOwn(familiarById,id)&&Number.isInteger(n)&&n>0&&n<=9999)))return false;
  if(s.emberStars!==undefined&&(!Number.isInteger(s.emberStars)||s.emberStars<0||s.emberStars>6||!s.owned?.includes('d1')))return false;
@@ -781,5 +782,40 @@ function buyContest(s,id){
  v.medals-=ware.price;s.contest=v;bagAdd(s,id,1);return true;
 }
 function validContest(v){const int=n=>Number.isSafeInteger(n)&&n>=0&&n<=1e9;return v===undefined||!!v&&typeof v==='object'&&!Array.isArray(v)&&[v.medals,v.runs,v.best,v.wins].every(int)&&v.runs<=warRules.daily&&typeof v.day==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v.day)}
-return Object.freeze({warFactions,warTotems,warRules,warQuests,warRanks,contestShop,contestState,warNew,warHeld,warHero,warOrder,warTally,warStep,warStanding,warRankPrize,warQuestsDue,warStart,warSettle,buyContest,validContest,summonWells,summonPity,summonLevelMax,summonDupGold,markKinds,markPrice,markLimit,markNeed,galaQuests,galaMilestones,galaEnds,summonState,summonLevel,summonPay,summonDraw,markOffer,buyMarkPet,galaClaim,galaReward,validSummon,bossRare,gearRanks,gearRank,gearCraftFrom,gearNoDevour,bossDropRanks,craftRecipe,craftInputs,craftChance,craftGear,gearGroups,gearGroup,bagCapacity,bagStarter,bagRarity,bagItems,bagItemById,bagCount,bagAdd,bagStacks,bagUsed,vaultCount,vaultMove,useBagItem,devourStep,devourMax,devourNeed,devourWorth,devourState,devourBonus,devourable,devourGear,validBag,riposteShare,riposteEvery,talentCells,talentFree,talentLearn,talentBook,talentScroll,talentTopScroll,talentPrice,talentSupremeAt,talentSupreme,petTalents,talentState,talentIds,supremeReady,addSeals,openCellCost,openTalentCell,learnCost,rollTalent,keepTalent,learnTalent,lockTalent,forgetTalent,setTalentTarget,buyTalentScroll,buyTalentBook,sealRates,sealGold,buySeals,exchangeSpares,talentBonus,guardTalents,petGearPieces,petGearMax,petGearStep,petGearSetStep,petGearLevels,petGearTier,petGearCost,petGearBonus,upgradePetGear,petBolt,petBoltPace,petHit,petPace,assistPages,assistSlots,synthChain,synthNeed,petSpares,addPetSpare,synthesizePet,fashionTraits,companionTypes,companionSkins,companionSkin,ownsCompanionSkin,useCompanionSkin,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
+// ---- Cloud War: rounds, Carnage Points, Point Rewards, Cloud Shop --------------------------------------------------
+// A round lasts one UTC hour; when it ends the defenders of every territory return, and each territory keeps the
+// faction that took it (`held`). Defeating a defender earns Carnage Points (up to `carnageCap` a UTC day) and as many
+// Cloud Tokens. Optional save field `cloud {round, held, day, carnage, claimed, tokens}`; numbers are placeholders.
+const cloudRules={roundMs:36e5,carnageCap:1200,territories:24,factions:4};
+const cloudPointRewards=[{at:150,items:{chest1:1}},{at:300,items:{wish:1}},{at:600,items:{chest2:1}},{at:900,items:{gembox:1}},{at:1200,items:{chest3:1}}];
+const cloudShop=[{id:'stonebag',price:60},{id:'wish',price:80},{id:'exp2',price:120},{id:'shardbag',price:150},{id:'gearbox',price:260},{id:'chest2',price:300},{id:'petegg',price:400},{id:'chest3',price:900}];
+const cloudRound=now=>new Date(now).toISOString().slice(0,13);
+const cloudRoundEnds=now=>(Math.floor(now/cloudRules.roundMs)+1)*cloudRules.roundMs;
+function cloudState(s,now=Date.now()){
+ const v=s.cloud||{},day=utcDay(now),today=v.day===day;
+ return {round:v.round||cloudRound(now),held:{...v.held},day,carnage:today?v.carnage:0,claimed:today?[...v.claimed]:[],tokens:v.tokens||0};
+}
+// True when a new round began since the save was last touched; `owners` are the territories taken in the old round.
+function cloudNewRound(s,owners={},now=Date.now()){
+ const v=cloudState(s,now),round=cloudRound(now);if(s.cloud?.round===round)return false;
+ for(const [i,f] of Object.entries(owners))if(Number.isInteger(f)&&f>=0&&f<cloudRules.factions)v.held[i]=f;
+ v.round=round;s.cloud=v;return true;
+}
+function cloudGain(s,points,now=Date.now()){
+ const v=cloudState(s,now),gain=Math.max(0,Math.min(Math.round(points),cloudRules.carnageCap-v.carnage));
+ v.carnage+=gain;v.tokens+=gain;s.cloud=v;return gain;
+}
+function cloudClaim(s,n,now=Date.now()){
+ const r=cloudPointRewards[n],v=cloudState(s,now);if(!r||v.claimed.includes(n)||v.carnage<r.at)return null;
+ v.claimed.push(n);s.cloud=v;for(const [id,k] of Object.entries(r.items))bagAdd(s,id,k);return r.items;
+}
+function buyCloud(s,id){const w=cloudShop.find(w=>w.id===id),v=cloudState(s);if(!w||v.tokens<w.price)return false;v.tokens-=w.price;s.cloud=v;bagAdd(s,id,1);return true}
+function validCloud(v){
+ if(v===undefined)return true;
+ const int=n=>Number.isSafeInteger(n)&&n>=0&&n<=1e9;
+ return !!v&&typeof v==='object'&&!Array.isArray(v)&&typeof v.round==='string'&&/^\d{4}-\d{2}-\d{2}T\d{2}$/.test(v.round)&&typeof v.day==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v.day)
+  &&int(v.carnage)&&v.carnage<=cloudRules.carnageCap&&int(v.tokens)&&Array.isArray(v.claimed)&&new Set(v.claimed).size===v.claimed.length&&v.claimed.every(n=>Number.isInteger(n)&&n>=0&&n<cloudPointRewards.length)
+  &&!!v.held&&typeof v.held==='object'&&!Array.isArray(v.held)&&Object.entries(v.held).every(([i,f])=>/^\d+$/.test(i)&&Number(i)<cloudRules.territories&&Number.isInteger(f)&&f>=0&&f<cloudRules.factions);
+}
+return Object.freeze({cloudRules,cloudPointRewards,cloudShop,cloudRound,cloudRoundEnds,cloudState,cloudNewRound,cloudGain,cloudClaim,buyCloud,validCloud,warFactions,warTotems,warRules,warQuests,warRanks,contestShop,contestState,warNew,warHeld,warHero,warOrder,warTally,warStep,warStanding,warRankPrize,warQuestsDue,warStart,warSettle,buyContest,validContest,summonWells,summonPity,summonLevelMax,summonDupGold,markKinds,markPrice,markLimit,markNeed,galaQuests,galaMilestones,galaEnds,summonState,summonLevel,summonPay,summonDraw,markOffer,buyMarkPet,galaClaim,galaReward,validSummon,bossRare,gearRanks,gearRank,gearCraftFrom,gearNoDevour,bossDropRanks,craftRecipe,craftInputs,craftChance,craftGear,gearGroups,gearGroup,bagCapacity,bagStarter,bagRarity,bagItems,bagItemById,bagCount,bagAdd,bagStacks,bagUsed,vaultCount,vaultMove,useBagItem,devourStep,devourMax,devourNeed,devourWorth,devourState,devourBonus,devourable,devourGear,validBag,riposteShare,riposteEvery,talentCells,talentFree,talentLearn,talentBook,talentScroll,talentTopScroll,talentPrice,talentSupremeAt,talentSupreme,petTalents,talentState,talentIds,supremeReady,addSeals,openCellCost,openTalentCell,learnCost,rollTalent,keepTalent,learnTalent,lockTalent,forgetTalent,setTalentTarget,buyTalentScroll,buyTalentBook,sealRates,sealGold,buySeals,exchangeSpares,talentBonus,guardTalents,petGearPieces,petGearMax,petGearStep,petGearSetStep,petGearLevels,petGearTier,petGearCost,petGearBonus,upgradePetGear,petBolt,petBoltPace,petHit,petPace,assistPages,assistSlots,synthChain,synthNeed,petSpares,addPetSpare,synthesizePet,fashionTraits,companionTypes,companionSkins,companionSkin,ownsCompanionSkin,useCompanionSkin,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
 })();

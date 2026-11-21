@@ -7370,3 +7370,44 @@ body:is([data-screen=citySummon],[data-screen=cityContest]) #stage>#main{inset:0
 #stage #main .gp-room .sky-list{grid-auto-rows:minmax(17cqh,1fr)}
 #stage #modal.den-pop .war-result .bag-gains{display:flex;justify-content:center;flex-wrap:wrap;gap:8px}
 #stage #modal.den-pop .war-result .bag-gain{width:76px;height:84px;box-sizing:border-box}
+
+/* Cloud War second pass (2026-11-21): round clock, Carnage Points, tool bar, pop-ups */
+.cloud-war{grid-template-rows:auto minmax(0,1fr) auto auto!important}
+.cloud-war .cloud-heading{flex-wrap:wrap;gap:.2em 1em}
+.cloud-round{font:700 3cqw/1.2 Arial,sans-serif;color:#fff}.cloud-round b{color:#7dff8a}
+.cloud-level{margin-left:auto;font:700 3cqw/1.2 Arial,sans-serif;color:#fff}.cloud-level b{color:#7dff8a}
+.cloud-carnage{display:flex;align-items:center;gap:.6em;padding:.5em 4%;background:#1c2a40;border-top:1px solid #ffffff22}
+.cloud-carnage img{width:7cqw;height:7cqw;object-fit:contain}
+.cloud-carnage span{display:flex;align-items:baseline;gap:.6em;font:700 3.2cqw/1 Arial,sans-serif;color:#fff}.cloud-carnage b{color:#ffe27a;font-size:1.15em}
+#stage #main .cloud-war .cloud-actions{gap:1%;padding:1% 2%}
+#stage #main .cloud-war .cloud-tool{position:relative;display:grid;justify-items:center;gap:.15em;flex:1 1 0;min-width:0;padding:.3em 0;background:transparent;border:0;box-shadow:none;font:700 2.5cqw/1.05 Arial,sans-serif;color:#fff1c7;white-space:normal}
+#stage #main .cloud-war .cloud-tool::before,#stage #main .cloud-war .cloud-tool::after{display:none}
+.cloud-tool img{width:9cqw;height:9cqw;object-fit:contain}
+.cloud-dot{position:absolute;top:2%;right:22%;width:1.1em;height:1.1em;border-radius:50%;background:#ff4a55;border:2px solid #fff;box-shadow:0 0 6px #ff4a55}
+.cloud-dot[hidden]{display:none}
+.cloud-token{width:1.4em!important;height:1.4em!important;object-fit:contain;vertical-align:middle}
+.cloud-steps{display:grid;gap:6px;margin:8px 0}
+.cloud-steps>div{display:grid;grid-template-columns:48px minmax(0,1fr) auto;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;background:#ffffff14}
+.cloud-steps>div>b{font:700 17px/1 Arial,sans-serif;color:#ffe27a}
+.cloud-steps .bag-gains{display:flex;gap:6px;margin:0}
+#stage #modal.den-pop .cloud-steps .bag-gain{width:64px;padding:3px 2px}
+#stage #modal.den-pop .cloud-steps .bag-gain .bag-ico{width:34px;height:34px}
+.cloud-steps em{font:700 12px/1 Arial,sans-serif;font-style:normal;color:#cfe0ff}
+.cloud-steps .got{opacity:.6}.cloud-steps .ready{outline:2px solid #ffe27a}
+#stage #modal.den-pop .cloud-steps .den-gold{min-height:32px;padding:4px 14px;font-size:14px}
+.cloud-wallet{display:flex;align-items:center;justify-content:center;gap:6px}
+.cloud-wares{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:8px 0}
+#stage #modal.den-pop .cloud-wares button{display:grid;justify-items:center;gap:2px;min-height:0;padding:6px 2px;border-radius:10px;border:2px solid var(--rarity);background:linear-gradient(160deg,color-mix(in srgb,var(--rarity) 45%,#1c2244),#1c2244);color:#fff}
+#stage #modal.den-pop .cloud-wares .bag-ico{width:44px}
+.cloud-wares b{font:700 11px/1.15 Arial,sans-serif}.cloud-wares span{display:flex;align-items:center;gap:2px;font:700 13px/1 Arial,sans-serif;color:#ffe27a}
+.cloud-wares .shut{filter:saturate(.4) brightness(.8)}
+.cloud-table{display:grid;gap:3px;margin:8px 0;text-align:left}
+.cloud-table>div{display:grid;grid-template-columns:minmax(0,1.4fr) 1fr 1fr;align-items:center;gap:8px;padding:5px 10px;border-radius:8px;background:#ffffff12;font:700 14px/1.2 Arial,sans-serif}
+.cloud-table>div:first-child{background:transparent;font-size:12px;color:#cfe0ff}
+.cloud-table.rank>div{grid-template-columns:28px minmax(0,1fr) auto}
+.cloud-table>div.me{background:#ffe27a33;outline:1px solid #ffe27a}
+.cloud-table small{font:400 10px/1 Arial,sans-serif!important;opacity:.7}
+.cloud-floating-loot .bag-gains{display:flex;justify-content:center;margin:0 0 6px}
+.cloud-floating-loot>strong{display:inline-block;font:700 clamp(12px,3.2cqw,17px)/1.3 Arial,sans-serif;white-space:nowrap}
+.cloud-floating-loot .bag-gain{width:76px;padding:4px 2px}
+.cloud-floating-loot .bag-gain .bag-ico{width:44px}
