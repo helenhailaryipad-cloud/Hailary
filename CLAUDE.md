@@ -326,8 +326,10 @@ unchanged), Warehouse (`cityVault`), Devour (`cityDevour`). Rules in `gear-data.
   without it holds `bagStarter`. `useBagItem(s,id,count,rng)` returns `{ok,used,gains}`; chests have a fixed part
   (`give`) and one random surprise (`pick`). Sources so far: every dungeon win gives an Oak Chest (Moon Chest on a
   first clear), beating the Jungle Trek dragon gives a Moon Chest.
-- Tabs: Common = items + spare equipment (worn pieces are only on the rails now), Materials = equipment materials,
-  talent seals, prophecy books, Pet = Pet Egg, Seal Satchel, spare pet copies with n/6, Ember shards, ALL. Tapping a
+- Tabs (`bagTabs`; user 2026-11-21: "split equipment, necklace and rings tabs"): Common = items only, Equipment
+  (bow and armour pieces), Necklace (necklace, amulet), Rings (both spirit rings) = spare equipment by slot
+  (`bagGearGroup`; worn pieces are only on the rails), Materials = equipment materials, talent seals, prophecy books,
+  Pet = Pet Egg, Seal Satchel, spare pet copies with n/6, Ember shards, ALL. The Warehouse has the same without Pet. Tapping a
   tile opens the item card (`bagOpen(key)`, the `.den-item` pop-up) with Use / Use N; the result is a "You received"
   pop-up (`bagUse`, `bagGain`). Tile keys: `i:<item>`, `m:<material>`, `g:<uid>`, `p:<pet>`, `t:seals|books|ember`.
   Capacity (`bagUsed` / `bagCapacity` 150) is only shown, nothing is refused yet.

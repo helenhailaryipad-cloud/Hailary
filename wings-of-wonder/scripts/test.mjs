@@ -608,13 +608,18 @@ vm.runInContext(`
  if(r.devourBonus(S).attack!==st.level*r.devourStep.attack||!valid(JSON.parse(JSON.stringify(S))))throw Error('Devour save');
  // Screens: bag tabs, item card, use, warehouse taps, Devour room.
  r.bagAdd(S,'chest1',2);r.addPetSpare(S,first,2);r.addDrop(S,1);
- for(const tab of ['Common','Materials','Pet','ALL']){cityBagFilter=tab;openScreen('cityBag');if(!document.querySelector('#main').innerHTML.includes('Capacity: '))throw Error('Bag tab '+tab)}
+ for(const tab of bagTabs){cityBagFilter=tab;openScreen('cityBag');if(!document.querySelector('#main').innerHTML.includes('Capacity: '))throw Error('Bag tab '+tab)}
  cityBagFilter='Pet';cityBag();if(!document.querySelector('#main').innerHTML.includes('2/'+r.synthNeed))throw Error('Pet copies in the bag');
+ // Equipment sits in three tabs of its own, by slot; Common holds items only.
+ r.addDrop(S,1,'bow');r.addDrop(S,1,'necklace');r.addDrop(S,1,'spiritluck');
+ const groups={Equipment:0,Necklace:0,Rings:0};for(const e of r.devourable(S))groups[bagGearGroup(r.catalog[e.template])]++;
+ for(const tab of bagGearTabs){const got=bagThings(tab);if(!groups[tab]||got.length!==groups[tab]||got.some(t=>!t.gear||bagGearGroup(r.catalog[t.gear.template])!==tab))throw Error('Gear tab '+tab)}
+ if(bagThings('Common').some(t=>t.gear)||bagThings('ALL').filter(t=>t.gear).length!==groups.Equipment+groups.Necklace+groups.Rings)throw Error('Gear must leave Common and stay in ALL');
  cityBagFilter='Common';cityBag();const html=document.querySelector('#main').innerHTML;
  if(!html.includes("bagOpen('i:chest1')")||html.includes("bagOpen('p:"))throw Error('Common tab');
  bagOpen('i:chest1');if(!document.querySelector('#modalBody').innerHTML.includes('Oak Chest')||!document.querySelector('#modalBody').innerHTML.includes("bagUse('chest1',2)"))throw Error('Item card');
  bagUse('chest1',1);if(r.bagCount(S,'chest1')!==1||!document.querySelector('#modalBody').innerHTML.includes('You received'))throw Error('Use from the card');
- openScreen('cityVault');const piece=r.devourable(S)[0].uid;
+ vaultTab='ALL';openScreen('cityVault');const piece=r.devourable(S)[0].uid;
  vaultTap('b','g:'+piece);if(r.state(S).items.find(e=>e.uid===piece).stored||!document.querySelector('#main').innerHTML.includes('Deposit'))throw Error('First tap only chooses');
  vaultTap('b','g:'+piece);if(!r.state(S).items.find(e=>e.uid===piece).stored)throw Error('Second tap deposits');
  vaultTap('v','g:'+piece);vaultTap('v','g:'+piece);if(r.state(S).items.find(e=>e.uid===piece).stored)throw Error('Withdraw by taps');
