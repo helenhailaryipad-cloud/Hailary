@@ -712,3 +712,45 @@ vm.runInContext(`
 }
 `,context);
 console.log('PASS: Summon room: Basic and Advanced wells, guarantees, Summon Level, Spirit Marks and the Mark Shop, Summon Festival quests and milestones.');
+
+vm.runInContext(`
+{const r=WonderGear,w=r.warRules,T0=Date.UTC(2026,10,21,12),day=864e5;
+ let seed=11;const rng=()=>(seed=(seed*16807)%2147483647)/2147483647;
+ // A fresh fight: three factions of five, each holding its own totem; Reina leads the chosen faction.
+ let g=r.warNew(1,rng);if(g.fighters.length!==15||g.fighters.filter(f=>f.hero).length!==1||r.warHero(g).faction!==1||g.totems.map(t=>t.owner).join()!=='0,1,2'||r.warHeld(g,1)!==1)throw Error('New fight');
+ // Points come every 30 s: kills, assists and totem hits, plus 20% for each totem the faction holds.
+ const h=r.warHero(g);h.pending={kills:3,assists:2,hits:10};g.totems[0].owner=1;r.warTally(g);
+ if(h.points!==Math.round((3*w.kill+2*w.assist+10*w.hit)*(1+2*w.flag))||g.lastTally.held!==2||g.scores[1]!==h.points||h.pending.kills)throw Error('Tally formula');
+ // A full fight: tallies at 30, 60 ... 180 s; every point of a faction is the sum of its fighters.
+ g=r.warNew(0,rng);let tallies=0;while(!g.over){const before=g.nextTally;r.warStep(g,rng);if(g.nextTally!==before)tallies++}
+ if(g.time!==w.length||tallies!==w.length/w.tally||[0,1,2].some(f=>g.scores[f]!==g.fighters.filter(x=>x.faction===f).reduce((n,x)=>n+x.points,0)))throw Error('Full fight');
+ if(!g.fighters.some(f=>f.kills)||!g.fighters.some(f=>f.hits)||g.totems.some(t=>!(t.hp>0&&t.hp<=w.totemHp)))throw Error('Fighting happened');
+ // Orders: Reina goes where she is sent; a totem falls to the faction that damaged it most.
+ g=r.warNew(0,rng);if(!r.warOrder(g,2)||r.warOrder(g,5))throw Error('Order');const me=r.warHero(g);let near=99;
+ for(let i=0;i<40;i++){r.warStep(g,rng);if(!me.dead)near=Math.min(near,Math.hypot(me.x-r.warTotems[2].x,me.y-r.warTotems[2].y))}
+ if(near>w.reach||me.target!==2)throw Error('Reina must go to her totem');
+ g=r.warNew(0,rng);for(const f of g.fighters)if(f.faction!==1){f.x=r.warTotems[2].x;f.y=r.warTotems[2].y;f.target=2;f.order=2}
+ for(const f of g.fighters)if(f.faction===2||f.faction===1&&f.id%2){f.dead=99}
+ for(let i=0;i<60&&g.totems[2].owner===2;i++)r.warStep(g,()=>.5);if(g.totems[2].owner!==0)throw Error('Totem capture');
+ // Quests pay once into the bag; the ranking pays medals and items; two rewarded fights a day.
+ S=defaults();if(!r.warStart(S,T0)||!r.warStart(S,T0)||r.warStart(S,T0)||r.contestState(S,T0).runs!==2||r.contestState(S,T0+day).runs!==0)throw Error('Daily fights');
+ g=r.warNew(0,rng);r.warHero(g).points=160;const wishes=r.bagCount(S,'wish'),q=r.warQuestsDue(S,g,true);
+ if(q.length!==2||r.contestState(S).medals!==15||r.warQuestsDue(S,g,true).length)throw Error('Quests');
+ r.warHero(g).points=400;r.warQuestsDue(S,g,false);if(r.contestState(S).medals!==15||r.bagCount(S,'wish')!==wishes)throw Error('Practice pays nothing');
+ if(r.warSettle(S,g,true))throw Error('Settle before the end');
+ g.over=true;for(const f of g.fighters)if(!f.hero)f.points=10;const res=r.warSettle(S,g,true);
+ if(res.rank!==1||res.prize!==r.warRanks[0]||r.contestState(S).medals!==50||r.contestState(S).wins!==1||r.contestState(S).best!==400||r.bagCount(S,'chest2')!==1||r.warSettle(S,g,true))throw Error('Ranking reward');
+ if(r.warRankPrize(15)!==r.warRanks[4]||r.warRankPrize(5).medals!==25)throw Error('Rank bands');
+ if(r.buyContest(S,'chest3')||!r.buyContest(S,'wish')||r.contestState(S).medals!==35||!valid(JSON.parse(JSON.stringify(S))))throw Error('Contest Shop');
+ for(const bad of [{medals:-1},{runs:3},{day:'x'},{best:1.5}])if(valid({...S,contest:{...S.contest,...bad}}))throw Error('Invalid contest accepted '+JSON.stringify(bad));
+ // Screens: Gameplay > Sky Contest > Totem War lobby, fight, result, shop, and back.
+ S=defaults();openScreen('cityGameplay');playSection=4;cityGameplay();if(!$('#main').innerHTML.includes('Totem War')||!$('#main').innerHTML.includes('gp-banner'))throw Error('Sky Contest list');
+ contestGo('War');let html=$('#main').innerHTML;if(!html.includes('Reward Preview')||!html.includes('warPick(2)')||!html.includes('contestEnter()'))throw Error('Lobby');
+ warPick(2);contestEnter();if(contestPage!=='Fight'||warGame.faction!==2||!warPaid||!$('#main').innerHTML.includes('tw-totem'))throw Error('Enter');
+ warSend(0);if(r.warHero(warGame).order!==0)throw Error('Send Reina');warSend(-1);if(r.warHero(warGame).order!==null)throw Error('Auto');
+ for(let i=0;i<400&&!warGame.over;i++)warTick();if(!warGame.settled||!$('#modalBody').innerHTML.includes('points')||r.contestState(S).runs!==1)throw Error('Fight ends and settles');
+ contestGo('Shop');if(!$('#main').innerHTML.includes('Contest Shop'))throw Error('Shop page');contestAsk('wish');if(!$('#modalBody').innerHTML.includes("contestBuy('wish')"))throw Error('Shop card');
+ contestLeave();if(contestPage!=='War')throw Error('Shop returns to the lobby');contestLeave();if(screen!=='cityGameplay'||playSection!==4)throw Error('Lobby returns to Sky Contest');
+}
+`,context);
+console.log('PASS: Sky Contest Totem War: tally formula, full fight, orders, totem capture, quests, ranking, daily fights, shop and screens.');

@@ -551,6 +551,107 @@ function citySummon(){
  ${nav}</section>`;
 }
 
+// ---- Sky Contest: Totem War (rules: WonderGear.war*). Gameplay > Sky Contest lists the modes; this room has the
+// lobby, the fight and the Contest Shop. ------------------------------------------------------------------------------
+let contestPage='War',warFaction=0,warGame=null,warPaid=false,warTimer=0,warFast=false;
+const contestModes=[['Star Duel','One against one, by rank','#4f8fe0','guardian-t9',false],['Totem War','Three factions, three totems','#3f9a62','guardian-t12',true],['Storm Brawl','Everyone for themselves','#d0553a','guardian-t20',false],['Shadow Hunt','Hunt the season boss','#7a55d0','guardian-t27',false]];
+function warArtVars(){const root=document.documentElement;if(!root?.style?.setProperty||root.style.getPropertyValue('--war-icons'))return;root.style.setProperty('--war-icons','url("'+artPath('comp-war-icons')+'")')}
+// 0-2 totems (Ember, Tide, Gale), 3 medal, 4-6 emblems, 7 crown
+const warIcon=n=>'<i class="war-ico" style="background-position:'+(n%4)/3*100+'% '+Math.floor(n/4)*100+'%"></i>';
+function contestGo(page){contestPage=page;if(page!=='Fight')warStop();if(screen==='cityContest')cityContest();else go('cityContest')}
+function contestLeave(){warStop();if(contestPage==='War'){go('cityGameplay');playSection=4;cityGameplay()}else contestGo('War')}
+function contestList(){
+ return '<div class="sky-list">'+contestModes.map(([name,note,color,art,open])=>`<button class="sky-mode ${open?'':'soon'}" style="--tone:${color}" onclick="${open?"contestGo('War')":"toast('"+name+" is not open yet.')"}">${denPlain}<b>${name}</b><small>${note}</small><em>${open?'Open every day · '+WonderGear.contestState(S).runs+' / '+WonderGear.warRules.daily+' rewarded fights today':'Coming later'}</em>${bossArtMarkup(art)}</button>`).join('')+'</div>';
+}
+function warRulesShow(){const w=WonderGear.warRules;popup('<h2>Totem War</h2><p>1. Three factions of '+w.team+' fight for '+w.length/60+' minutes. Reina leads the faction you choose; the other fighters are AI adventurers.</p><p>2. Every '+w.tally+' seconds your deeds turn into points: a defeated enemy '+w.kill+', an assist '+w.assist+', a hit on an enemy totem '+w.hit+'.</p><p>3. Each totem your faction holds at that moment adds '+Math.round(w.flag*100)+'% to those points. A totem falls to the faction that damaged it most.</p><p>4. Tap a totem to send Reina there; Auto lets her choose. She fights by herself.</p><p>5. Points open quest rewards during the fight, and the final ranking gives contest medals. Rewards are paid for '+w.daily+' fights a day; later fights are practice.</p>')}
+function warPrizes(items){return Object.entries(items).map(([id,n])=>'<span class="bag-gain" style="--rarity:'+bagHue(WonderGear.bagItemById[id].rarity)+'">'+bagIcon(id)+'<b>×'+n+'</b></span>').join('')}
+function warRankShow(){
+ const r=WonderGear;bagArtVars();let from=1;
+ popup('<h2>Ranking Reward</h2><div class="war-ranks">'+r.warRanks.map(row=>{const label=row.to===from?String(from):from+'–'+row.to;from=row.to+1;return '<div><b>'+label+'</b><span class="bag-gain" style="--rarity:#ffd86b">'+warIcon(3)+'<b>×'+row.medals+'</b></span>'+warPrizes(row.items)+'</div>'}).join('')+'</div><p>Paid when the fight ends. The first place also counts as a victory on your record.</p>');
+}
+function warPick(n){warFaction=n;cityContest()}
+function warStop(){if(warTimer){clearInterval(warTimer);warTimer=0}}
+function contestEnter(){
+ const r=WonderGear;warStop();warPaid=r.warStart(S);if(warPaid)save();
+ warGame=r.warNew(warFaction);contestPage='Fight';cityContest();
+ warTimer=setInterval(warTick,warFast?250:500);
+}
+function warSpeed(){warFast=!warFast;if(warTimer){clearInterval(warTimer);warTimer=setInterval(warTick,warFast?250:500)}warPaint()}
+function warSend(n){const g=warGame;if(!g||g.over)return;if(n<0)WonderGear.warHero(g).order=null;else WonderGear.warOrder(g,n);warPaint()}
+// One step of the fight, then the picture. The timer calls it; tests call it directly.
+function warTick(){
+ const r=WonderGear,g=warGame;
+ if(!g||screen!=='cityContest'||contestPage!=='Fight'){warStop();return}
+ if(typeof document!=='undefined'&&document.hidden)return;
+ const before=g.nextTally;r.warStep(g);
+ if(g.nextTally!==before&&g.lastTally)g.note={text:'+'+g.lastTally.gain+' points',until:g.time+3};
+ const due=r.warQuestsDue(S,g,warPaid);
+ if(due.length){if(warPaid)save();toast('Quest: '+due[due.length-1].at+' points'+(warPaid?' · reward sent to the bag':' (practice)'))}
+ if(g.over){warStop();warFinish()}else warPaint();
+}
+function warFinish(){
+ const r=WonderGear,g=warGame,result=r.warSettle(S,g,warPaid);if(!result)return;
+ save();warPaint();bagArtVars();
+ const st=r.warStanding(g),rows=st.list.map((f,i)=>'<div class="'+(f.hero?'me':'')+'"><b>'+(i+1)+'</b>'+warIcon(4+f.faction)+'<span>'+esc(f.name)+(f.hero?'':' <small>AI</small>')+'</span><em>'+f.points+'</em></div>').join('');
+ const best=g.scores.indexOf(Math.max(...g.scores));
+ popup('<div class="war-result"><h2>'+(result.rank===1?'First place!':'Rank '+result.rank+' of '+st.list.length)+'</h2><p>'+result.points+' points · '+r.warFactions[best].name+' leads with '+g.scores[best]+'</p>'
+  +(result.prize?'<div class="bag-gains"><span class="bag-gain" style="--rarity:#ffd86b">'+warIcon(3)+'<b>×'+result.prize.medals+'</b><small>Contest medals</small></span>'+warPrizes(result.prize.items)+'</div>':'<p>Practice fight: no rewards.</p>')
+  +'<div class="war-board">'+rows+'</div><div class="den-actions"><button class="den-gold" onclick="$(\'#modal\').close();contestGo(\'War\')">'+denPlain+'Continue</button></div></div>');
+}
+function warClock(n){n=Math.max(0,Math.ceil(n));return Math.floor(n/60)+':'+String(n%60).padStart(2,'0')}
+// Moves what is already on the field; the markup itself is written once by cityContest().
+function warPaint(){
+ const r=WonderGear,g=warGame;if(!g||typeof document.querySelectorAll!=='function')return;
+ const q=sel=>document.querySelector(sel),hero=r.warHero(g),w=r.warRules;
+ document.querySelectorAll('.tw-f').forEach((el,i)=>{const f=g.fighters[i];el.style.left=f.x+'%';el.style.top=f.y+'%';el.classList.toggle('down',f.dead>0);el.style.setProperty('--hp',Math.round(f.hp/f.maxhp*100)+'%')});
+ document.querySelectorAll('.tw-totem').forEach((el,i)=>{const t=g.totems[i];el.style.setProperty('--tone',r.warFactions[t.owner].color);el.style.setProperty('--hp',Math.round(t.hp/w.totemHp*100)+'%');el.dataset.owner=t.owner;el.classList.toggle('aim',hero.order===i);el.querySelector('.war-ico').style.backgroundPosition=t.owner/3*100+'% 0%'});
+ document.querySelectorAll('.tw-score b').forEach((el,i)=>el.textContent=g.scores[i]);
+ const set=(sel,text)=>{const el=q(sel);if(el)el.textContent=text};
+ set('.tw-time',warClock(w.length-g.time));set('.tw-next','Tally in '+Math.max(0,Math.ceil(g.nextTally-g.time))+' s');
+ set('.tw-mine b',hero.points);const p=hero.pending;set('.tw-pending','This round: '+p.kills+' kills · '+p.assists+' assists · '+p.hits+' totem hits · totems ×'+(1+w.flag*r.warHeld(g,g.faction)).toFixed(1));
+ const next=r.warQuests.find((x,n)=>!g.claimed.includes(n));set('.tw-quest',next?'Reach '+next.at+' points: '+Math.min(hero.points,next.at)+' / '+next.at:'All quests done');
+ const bar=q('.tw-bar u');if(bar)bar.style.width=(next?Math.min(100,hero.points/next.at*100):100)+'%';
+ set('.tw-log',g.note&&g.time<g.note.until?g.note.text:g.log[0]||'The fight begins');
+ const auto=q('.tw-auto');if(auto)auto.setAttribute('aria-pressed',hero.order===null);
+ const fast=q('.tw-fast');if(fast)fast.setAttribute('aria-pressed',warFast);
+}
+function contestBuy(id){
+ const r=WonderGear;if(!r.buyContest(S,id)){toast('Not enough contest medals.');return}
+ save();$('#modal').close();cityContest();toast(r.bagItemById[id].name+' sent to the bag');
+}
+function contestAsk(id){
+ const r=WonderGear,i=r.bagItemById[id],ware=r.contestShop.find(w=>w.id===id),v=r.contestState(S);
+ popup('<div class="den-item"><div class="den-item-head bag-head" style="--rarity:'+bagHue(i.rarity)+'">'+bagIcon(id)+'<div><b>'+i.name+'</b><small>Type: <u>'+i.kind+'</u></small><small>In the bag: '+r.bagCount(S,id)+'</small></div></div><h3>◆ Item Description</h3><p>'+i.text+'</p>'+(v.medals<ware.price?'<p class="den-why">Not enough contest medals.</p>':'')+'<div class="den-actions"><button class="den-gold" onclick="contestBuy(\''+id+'\')" '+(v.medals<ware.price?'disabled':'')+'>'+denPlain+'Buy · '+warIcon(3)+ware.price+'</button></div></div>');
+}
+function cityContest(){
+ const r=WonderGear,v=r.contestState(S),w=r.warRules;warArtVars();bagArtVars();
+ if(!['War','Shop','Fight'].includes(contestPage)||contestPage==='Fight'&&!warGame)contestPage='War';
+ const medals=sumChip(warIcon(3),v.medals,'Contest medals');
+ if(contestPage==='Fight'){
+  const g=warGame;
+  $('#main').innerHTML=`<section class="satchel tw tw-fight"><div class="tw-top">${r.warFactions.map((f,i)=>`<span class="tw-score ${i===g.faction?'mine':''}" style="--tone:${f.color}">${warIcon(4+i)}<b>0</b></span>`).join('')}<span class="tw-clock"><b class="tw-time"></b><small class="tw-next"></small></span></div>
+  <div class="tw-field" style="background-image:url('${artPath('comp-war-field')}')">${g.totems.map((t,i)=>`<button class="tw-totem" aria-label="${r.warFactions[i].name} totem" style="left:${t.x}%;top:${t.y}%" onpointerdown="warSend(${i})">${denPlain}<b class="tw-ring"></b>${warIcon(t.owner)}<i class="tw-hp"></i></button>`).join('')}${g.fighters.map(f=>`<span class="tw-f ${f.hero?'tw-me':''}" style="left:${f.x}%;top:${f.y}%;--tone:${r.warFactions[f.faction].color}">${portrait(['reina','nyra','kael','pip','vesper','briar','orin'][f.face])}<i class="tw-hp"></i>${f.hero?'<b>Reina</b>':''}</span>`).join('')}</div>
+  <div class="tw-panel"><div class="tw-mine">${warIcon(4+g.faction)}<b>0</b><small>${warPaid?'your points':'practice'}</small><button class="tw-auto" aria-pressed="true" onpointerdown="warSend(-1)">${denPlain}Auto</button><button class="tw-fast" aria-pressed="${warFast}" onclick="warSpeed()">${denPlain}×2</button></div>
+  <p class="tw-quest"></p><i class="tw-bar"><u></u></i><p class="tw-pending"></p><p class="tw-log"></p><small>Tap a totem to send Reina there</small></div>
+  <div class="satchel-nav well-nav"><button data-back aria-label="Leave the fight" onclick="contestLeave()">‹</button></div></section>`;
+  warPaint();return;
+ }
+ if(contestPage==='Shop'){
+  $('#main').innerHTML=`<section class="satchel well well-mart"><div class="satchel-top"><strong>Contest Shop</strong>${medals}</div>
+  <div class="mart-banner" style="background-image:url('${artPath('comp-summon-stall')}')"><h2>Contest Shop</h2><p>Contest medals come from Totem War quests and rankings</p></div>
+  <div class="satchel-scroll"><div class="mart-grid">${r.contestShop.map(ware=>{const i=r.bagItemById[ware.id];return `<button class="shop-card ${v.medals<ware.price?'shut':''}" style="--edge:${bagHue(i.rarity)};--bg:${bagHue(i.rarity)}" aria-label="${i.name}" onclick="contestAsk('${ware.id}')">${denPlain}<small>Unlimited</small>${bagIcon(ware.id)}<b>${i.name}</b><em>${i.kind}</em><span>${warIcon(3)}${ware.price}</span></button>`}).join('')}</div></div>
+  <div class="satchel-nav well-nav"><button data-back aria-label="Back" onclick="contestLeave()">‹</button></div></section>`;
+  return;
+ }
+ $('#main').innerHTML=`<section class="satchel tw tw-lobby" style="background-image:url('${artPath('comp-war-key')}')"><div class="satchel-top"><strong>Totem War</strong>${medals}${sumChip(uiIcon('gold'),S.gold,'Gold')}</div>
+ <div class="tw-stage"><p class="tw-when">Open every day · rewarded fights today: <b>${v.runs} / ${w.daily}</b></p><button class="maw-help" aria-label="Rules" onclick="warRulesShow()">${denPlain}?</button>
+  <button class="tw-side" onclick="warRankShow()">${denPlain}${warIcon(7)}Ranking<br>Rewards</button><p class="tw-best">Best: <b>${v.best}</b> points · first places: <b>${v.wins}</b></p></div>
+ <div class="tw-preview"><h3>Reward Preview</h3><div>${warIcon(3)}${bagIcon('chest2')}${bagIcon('wish')}${bagIcon('exp1')}</div></div>
+ <div class="tw-sides">${r.warFactions.map((f,i)=>`<button aria-pressed="${i===warFaction}" style="--tone:${f.color}" onclick="warPick(${i})">${denPlain}${warIcon(4+i)}${f.name}</button>`).join('')}</div>
+ <div class="tw-enter"><button class="tw-shop" onclick="contestGo('Shop')">${denPlain}${warIcon(3)}Contest<br>Shop</button><button class="den-gold" onclick="contestEnter()">${denPlain}Enter${v.runs>=w.daily?'<small>practice</small>':''}</button></div>
+ <div class="satchel-nav well-nav"><button data-back aria-label="Back" onclick="contestLeave()">‹</button></div></section>`;
+}
+
 let petPage='Formation',petFocus=null,emblemFilter='All',petBack='',petBackNext='';
 // Leaving the room: back to Wonders when it was opened from the Pets tab there, otherwise to the city.
 function petLeave(){if(petBack==='wonders'){petBack='';filter='wings';go('collection')}else go('home')}
@@ -1083,7 +1184,7 @@ function cityDaily(){
  $('#main').innerHTML='<section class="companion-room spirit-room daily-room daily-page-'+page+'"><div class="satchel-top"><strong>Daily</strong>'+[['gold',S.gold],['wishes',S.tickets],['crystals',S.scales]].map(([id,n])=>'<span>'+uiIcon(id)+fmt(n)+'</span>').join('')+'</div><header class="daily-banner">'+banner+'</header><div class="daily-list">'+list+'</div>'+(foot?'<div class="daily-foot">'+foot+'</div>':'')+'<nav class="spirit-nav"><button data-back aria-label="Back to city" onclick="go(\'home\')">‹</button>'+dailyPages.map((name,i)=>'<button aria-pressed="'+(i===page)+'" onclick="dailyOpen('+i+')">'+artImage(['hud-daily','hud-event','hud-reward','hud-bag','hud-combat'][i],'')+name+'</button>').join('')+'</nav></section>';
 }
 
-const playSections=['Material','Challenge','Team Dungeon','Arena','Peak Contest'];
+const playSections=['Material','Challenge','Team Dungeon','Arena','Sky Contest'];
 const playMaterials=['Mount Dungeon','Wings','Soulforge','Elf Dungeon'];
 const mountTiers=[['Hard',300],['Elite',330],['Nightmare',360],['Hell',380]];
 let playSection=0,playMaterial=0,playTier=3;
@@ -1096,8 +1197,8 @@ function cityGameplay(){
  const mountPanel=`<div class="gp-tiers">${tiers}</div><div class="gp-rewards"><b>Recommended Level: ${mountTiers[playTier][1]}</b><small>Clear with 3 stars to unlock 2× Sweep.</small><div>${dailyTokens(['hud-pet','hud-gift','hud-prisms','hud-pass'])}</div></div><div class="gp-actions"><button onclick="go('cityDaily');dailyOpen(4)">Auto Sweep</button><button disabled>Dungeon Raid<br><small>Free</small></button><button disabled>Double Sweep<br><small>500 crystals</small></button></div>`;
  const destinations=[null,['Mini Games','games'],['EXP Forest','expLobby'],null,null];
  const dest=destinations[playSection];
- const scene=mount?mountPanel:`<div class="gp-empty">${artImage(['hud-pet','hud-combat','hud-gear','hud-combat','hud-rank'][playSection],'')}${dest?`<button class="spirit-gold" onclick="go('${dest[1]}')">${dest[0]}</button>`:''}</div>`;
- $('#main').innerHTML=`<section class="companion-room spirit-room gp-room"><div class="satchel-top"><strong>${name}</strong>${[['gold',S.gold],['wishes',S.tickets],['crystals',S.scales]].map(([id,n])=>'<span>'+uiIcon(id)+fmt(n)+'</span>').join('')}</div><header class="gp-banner"><h2>${title}</h2>${mount?'<small>Mount development materials</small>':''}</header><div class="gp-content">${scene}</div><div class="companion-modes">${playSection===0?nav(playMaterials,playMaterial,'playMaterial'):''}</div><nav class="spirit-nav"><button data-back aria-label="Back to city" onclick="go('home')">‹</button>${nav(playSections,playSection,'playSection')}</nav></section>`;
+ const scene=mount?mountPanel:playSection===4?contestList():`<div class="gp-empty">${artImage(['hud-pet','hud-combat','hud-gear','hud-combat','hud-rank'][playSection],'')}${dest?`<button class="spirit-gold" onclick="go('${dest[1]}')">${dest[0]}</button>`:''}</div>`;
+ $('#main').innerHTML=`<section class="companion-room spirit-room gp-room"><div class="satchel-top"><strong>${name}</strong>${[['gold',S.gold],['wishes',S.tickets],['crystals',S.scales]].map(([id,n])=>'<span>'+uiIcon(id)+fmt(n)+'</span>').join('')}</div><div class="gp-banner"><h2>${title}</h2>${mount?'<small>Mount development materials</small>':''}</div><div class="gp-content">${scene}</div><div class="companion-modes">${playSection===0?nav(playMaterials,playMaterial,'playMaterial'):''}</div><nav class="spirit-nav"><button data-back aria-label="Back to city" onclick="go('home')">‹</button>${nav(playSections,playSection,'playSection')}</nav></section>`;
 }
 
 const bountyPages=['AdvQuest','Adventure Shop','Pet Pass'];

@@ -380,6 +380,7 @@ function validPets(s){
  if(!validTalents(s.petTalents)||!validPetGear(s.petGear))return false;
  if(!validBag(s))return false;
  if(!validSummon(s.summon))return false;
+ if(!validContest(s.contest))return false;
  if(s.emberShards!==undefined&&(!Number.isSafeInteger(s.emberShards)||s.emberShards<0))return false;
  if(s.petSpares!==undefined&&(!s.petSpares||typeof s.petSpares!=='object'||Array.isArray(s.petSpares)||!Object.entries(s.petSpares).every(([id,n])=>Object.hasOwn(familiarById,id)&&Number.isInteger(n)&&n>0&&n<=9999)))return false;
  if(s.emberStars!==undefined&&(!Number.isInteger(s.emberStars)||s.emberStars<0||s.emberStars>6||!s.owned?.includes('d1')))return false;
@@ -687,5 +688,98 @@ function validSummon(v){
   &&!!v.shop&&date(v.shop.week)&&!!v.shop.bought&&typeof v.shop.bought==='object'&&!Array.isArray(v.shop.bought)&&Object.entries(v.shop.bought).every(([id,n])=>Object.hasOwn(familiarById,id)&&Number.isInteger(n)&&n>0&&n<=markLimit)
   &&!!v.gala&&date(v.gala.day)&&v.gala.season===v.gala.day.slice(0,7)&&int(v.gala.basic)&&int(v.gala.tokens)&&list(v.gala.claimed,galaQuests.length)&&list(v.gala.got,galaMilestones.length);
 }
-return Object.freeze({summonWells,summonPity,summonLevelMax,summonDupGold,markKinds,markPrice,markLimit,markNeed,galaQuests,galaMilestones,galaEnds,summonState,summonLevel,summonPay,summonDraw,markOffer,buyMarkPet,galaClaim,galaReward,validSummon,bossRare,gearRanks,gearRank,gearCraftFrom,gearNoDevour,bossDropRanks,craftRecipe,craftInputs,craftChance,craftGear,gearGroups,gearGroup,bagCapacity,bagStarter,bagRarity,bagItems,bagItemById,bagCount,bagAdd,bagStacks,bagUsed,vaultCount,vaultMove,useBagItem,devourStep,devourMax,devourNeed,devourWorth,devourState,devourBonus,devourable,devourGear,validBag,riposteShare,riposteEvery,talentCells,talentFree,talentLearn,talentBook,talentScroll,talentTopScroll,talentPrice,talentSupremeAt,talentSupreme,petTalents,talentState,talentIds,supremeReady,addSeals,openCellCost,openTalentCell,learnCost,rollTalent,keepTalent,learnTalent,lockTalent,forgetTalent,setTalentTarget,buyTalentScroll,buyTalentBook,sealRates,sealGold,buySeals,exchangeSpares,talentBonus,guardTalents,petGearPieces,petGearMax,petGearStep,petGearSetStep,petGearLevels,petGearTier,petGearCost,petGearBonus,upgradePetGear,petBolt,petBoltPace,petHit,petPace,assistPages,assistSlots,synthChain,synthNeed,petSpares,addPetSpare,synthesizePet,fashionTraits,companionTypes,companionSkins,companionSkin,ownsCompanionSkin,useCompanionSkin,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
+// ---- Sky Contest: Totem War ----------------------------------------------------------------------------------------
+// Three factions of five fight over three totems for three minutes. Reina leads one faction; everyone else is an AI
+// adventurer scaled to her. Every 30 seconds each fighter's kills, assists and totem hits turn into points, raised
+// by 20% for every totem the faction holds at that moment. Points open quests during the fight and decide the final
+// ranking. Rewards are paid for two fights a UTC day (later fights are practice). Optional save field `contest`
+// {medals, day, runs, best, wins}. Every number is a placeholder.
+const warFactions=[{id:'ember',name:'Ember',color:'#ff7a4a'},{id:'tide',name:'Tide',color:'#5aa8ff'},{id:'gale',name:'Gale',color:'#63d98a'}];
+const warTotems=[{x:18,y:26},{x:82,y:26},{x:50,y:70}],warHomes=[{x:8,y:10},{x:92,y:10},{x:50,y:92}];   // percent of the field picture
+const warRules={length:180,tally:30,step:.5,team:5,kill:10,assist:5,hit:2,flag:.2,totemHp:600,respawn:6,speed:11,reach:9,daily:2,hero:1.25};
+const warNames=['Nyra','Kael','Pip','Vesper','Briar','Orin','Lumi','Thane','Sable','Wren','Juno','Corin','Maeve','Dax'];
+const warQuests=[{at:60,medals:5,item:'exp1',n:1},{at:150,medals:10,item:'gold1',n:1},{at:300,medals:20,item:'wish',n:1}];
+const warRanks=[{to:1,medals:35,items:{chest2:1,wish:2}},{to:3,medals:30,items:{chest1:2,wish:1}},{to:6,medals:25,items:{chest1:1,wish:1}},{to:10,medals:20,items:{chest1:1}},{to:15,medals:15,items:{exp1:1}}];
+const contestShop=[{id:'wish',price:15},{id:'exp2',price:20},{id:'sealbag',price:40},{id:'gembox',price:50},{id:'chest2',price:60},{id:'petegg',price:80},{id:'gearbox',price:90},{id:'chest3',price:200}];
+function contestState(s,now=Date.now()){const v=s.contest||{},day=utcDay(now);return {medals:v.medals||0,day,runs:v.day===day?v.runs:0,best:v.best||0,wins:v.wins||0}}
+function warNew(faction=0,rng=Math.random){
+ const g={time:0,nextTally:warRules.tally,over:false,faction,scores:[0,0,0],log:[],claimed:[],lastTally:null,
+  totems:warTotems.map((t,i)=>({...t,owner:i,hp:warRules.totemHp,dmg:[0,0,0]})),fighters:[]};
+ let name=0;
+ for(let f=0;f<3;f++)for(let n=0;n<warRules.team;n++){
+  const hero=f===faction&&n===0,power=hero?warRules.hero:.8+rng()*.35,home=warHomes[f];
+  g.fighters.push({id:g.fighters.length,faction:f,hero,name:hero?'Reina':warNames[name++],face:hero?0:1+(name-1)%6,power,maxhp:Math.round(900*power),hp:Math.round(900*power),atk:Math.round(60*power),
+   x:home.x+(n-2)*3,y:home.y,target:f,order:null,dead:0,kills:0,assists:0,hits:0,pending:{kills:0,assists:0,hits:0},points:0,hurtBy:[]});
+ }
+ return g;
+}
+const warHeld=(g,f)=>g.totems.filter(t=>t.owner===f).length;
+const warHero=g=>g.fighters.find(f=>f.hero);
+function warOrder(g,totem){if(Number.isInteger(totem)&&totem>=0&&totem<3&&!g.over){warHero(g).order=totem;return true}return false}
+// Where an AI fighter goes: mostly to an enemy totem (the weakest one), sometimes home to defend.
+function warThink(g,f,rng){
+ const foes=g.totems.map((t,i)=>i).filter(i=>g.totems[i].owner!==f.faction),mine=g.totems.map((t,i)=>i).filter(i=>g.totems[i].owner===f.faction);
+ if(!foes.length)return mine[Math.floor(rng()*mine.length)];
+ if(mine.length&&rng()<.3)return mine[Math.floor(rng()*mine.length)];
+ return rng()<.6?foes.slice().sort((a,b)=>g.totems[a].hp-g.totems[b].hp)[0]:foes[Math.floor(rng()*foes.length)];
+}
+function warTally(g){
+ const rows=[];
+ for(const f of g.fighters){
+  const p=f.pending,base=p.kills*warRules.kill+p.assists*warRules.assist+p.hits*warRules.hit,held=warHeld(g,f.faction),gain=Math.round(base*(1+warRules.flag*held));
+  f.points+=gain;g.scores[f.faction]+=gain;if(f.hero)g.lastTally={...p,base,held,gain};
+  f.pending={kills:0,assists:0,hits:0};rows.push(gain);
+ }
+ return rows;
+}
+// One step of the fight (warRules.step seconds).
+function warStep(g,rng=Math.random){
+ if(g.over)return g;
+ const dt=warRules.step;g.time=Math.round((g.time+dt)*10)/10;
+ for(const f of g.fighters){
+  if(f.dead>0){f.dead-=dt;if(f.dead<=0){f.dead=0;f.hp=f.maxhp;f.hurtBy=[];const home=warHomes[f.faction];f.x=home.x;f.y=home.y;f.target=f.hero&&f.order!==null?f.order:warThink(g,f,rng)}continue}
+  if(f.hero&&f.order!==null)f.target=f.order;else if(rng()<.04)f.target=warThink(g,f,rng);
+  const t=g.totems[f.target],dx=t.x-f.x,dy=t.y-f.y,far=Math.hypot(dx,dy),spot=warRules.reach*.55;
+  if(far>spot){const move=Math.min(far-spot,warRules.speed*dt);f.x+=dx/far*move;f.y+=dy/far*move}
+ }
+ for(const f of g.fighters){
+  if(f.dead>0)continue;
+  const t=g.totems[f.target];if(Math.hypot(t.x-f.x,t.y-f.y)>warRules.reach)continue;
+  const foes=g.fighters.filter(o=>o.faction!==f.faction&&!o.dead&&Math.hypot(o.x-f.x,o.y-f.y)<=warRules.reach*1.6);
+  if(foes.length){
+   const o=foes.sort((a,b)=>a.hp-b.hp)[0],hit=Math.round(f.atk*dt*(.8+rng()*.4));o.hp-=hit;if(!o.hurtBy.includes(f.id))o.hurtBy.push(f.id);
+   if(o.hp<=0){o.hp=0;o.dead=warRules.respawn;f.kills++;f.pending.kills++;
+    for(const id of o.hurtBy)if(id!==f.id){const a=g.fighters[id];a.assists++;a.pending.assists++}
+    g.log.unshift(f.name+' defeated '+o.name);g.log.length=Math.min(g.log.length,6)}
+  }else if(t.owner!==f.faction){
+   const hit=Math.round(f.atk*dt);t.hp-=hit;t.dmg[f.faction]+=hit;f.hits++;f.pending.hits++;
+   if(t.hp<=0){const taker=t.dmg.indexOf(Math.max(...t.dmg));g.log.unshift(warFactions[taker].name+' took the '+warFactions[g.totems.indexOf(t)].name+' totem');g.log.length=Math.min(g.log.length,6);t.owner=taker;t.hp=warRules.totemHp;t.dmg=[0,0,0]}
+  }else if(t.hp<warRules.totemHp)t.hp=Math.min(warRules.totemHp,t.hp+Math.round(f.atk*dt*.25));
+ }
+ if(g.time>=g.nextTally){warTally(g);g.nextTally+=warRules.tally}
+ if(g.time>=warRules.length)g.over=true;
+ return g;
+}
+function warStanding(g){const list=g.fighters.slice().sort((a,b)=>b.points-a.points||a.id-b.id);return {list,rank:list.findIndex(f=>f.hero)+1}}
+const warRankPrize=rank=>warRanks.find(r=>rank<=r.to)||warRanks[warRanks.length-1];
+// Quest rewards go to the bag as soon as her points reach them (only in a rewarded fight).
+function warQuestsDue(s,g,paid){
+ const hero=warHero(g),out=[];
+ warQuests.forEach((q,n)=>{if(hero.points>=q.at&&!g.claimed.includes(n)){g.claimed.push(n);if(paid){const v=contestState(s);v.medals+=q.medals;s.contest=v;bagAdd(s,q.item,q.n)}out.push(q)}});
+ return out;
+}
+function warStart(s,now=Date.now()){const v=contestState(s,now),paid=v.runs<warRules.daily;if(paid){v.runs++;s.contest=v}return paid}
+function warSettle(s,g,paid,now=Date.now()){
+ if(!g.over||g.settled)return null;g.settled=true;
+ const {rank}=warStanding(g),hero=warHero(g),prize=warRankPrize(rank),v=contestState(s,now),won=g.scores[g.faction]===Math.max(...g.scores);
+ v.best=Math.max(v.best,hero.points);
+ if(paid){v.medals+=prize.medals;if(rank===1)v.wins++;for(const [id,n] of Object.entries(prize.items))bagAdd(s,id,n)}
+ s.contest=v;return {rank,points:hero.points,prize:paid?prize:null,won};
+}
+function buyContest(s,id){
+ const ware=contestShop.find(w=>w.id===id),v=contestState(s);if(!ware||v.medals<ware.price)return false;
+ v.medals-=ware.price;s.contest=v;bagAdd(s,id,1);return true;
+}
+function validContest(v){const int=n=>Number.isSafeInteger(n)&&n>=0&&n<=1e9;return v===undefined||!!v&&typeof v==='object'&&!Array.isArray(v)&&[v.medals,v.runs,v.best,v.wins].every(int)&&v.runs<=warRules.daily&&typeof v.day==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v.day)}
+return Object.freeze({warFactions,warTotems,warRules,warQuests,warRanks,contestShop,contestState,warNew,warHeld,warHero,warOrder,warTally,warStep,warStanding,warRankPrize,warQuestsDue,warStart,warSettle,buyContest,validContest,summonWells,summonPity,summonLevelMax,summonDupGold,markKinds,markPrice,markLimit,markNeed,galaQuests,galaMilestones,galaEnds,summonState,summonLevel,summonPay,summonDraw,markOffer,buyMarkPet,galaClaim,galaReward,validSummon,bossRare,gearRanks,gearRank,gearCraftFrom,gearNoDevour,bossDropRanks,craftRecipe,craftInputs,craftChance,craftGear,gearGroups,gearGroup,bagCapacity,bagStarter,bagRarity,bagItems,bagItemById,bagCount,bagAdd,bagStacks,bagUsed,vaultCount,vaultMove,useBagItem,devourStep,devourMax,devourNeed,devourWorth,devourState,devourBonus,devourable,devourGear,validBag,riposteShare,riposteEvery,talentCells,talentFree,talentLearn,talentBook,talentScroll,talentTopScroll,talentPrice,talentSupremeAt,talentSupreme,petTalents,talentState,talentIds,supremeReady,addSeals,openCellCost,openTalentCell,learnCost,rollTalent,keepTalent,learnTalent,lockTalent,forgetTalent,setTalentTarget,buyTalentScroll,buyTalentBook,sealRates,sealGold,buySeals,exchangeSpares,talentBonus,guardTalents,petGearPieces,petGearMax,petGearStep,petGearSetStep,petGearLevels,petGearTier,petGearCost,petGearBonus,upgradePetGear,petBolt,petBoltPace,petHit,petPace,assistPages,assistSlots,synthChain,synthNeed,petSpares,addPetSpare,synthesizePet,fashionTraits,companionTypes,companionSkins,companionSkin,ownsCompanionSkin,useCompanionSkin,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
 })();

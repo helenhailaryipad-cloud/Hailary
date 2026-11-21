@@ -7072,7 +7072,7 @@ body:has(#main button[data-back]) #stage>.return-to-menu{display:none}
 #main .den .den-trow p{font-size:.95em}
 #main .den .den-topware b{color:#8a4a00}
 /* Pets room: a small note at the top instead of a big banner over the buttons */
-body:is([data-screen=cityPet],[data-screen=cityBag],[data-screen=cityVault],[data-screen=cityDevour],[data-screen=cityCraft],[data-screen=citySummon]) #stage .toast{top:5.2%!important;bottom:auto!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:auto!important;max-width:72%!important;min-height:0!important;padding:7px 16px!important;border-radius:99px!important;font:700 14px/1.25 Arial,sans-serif!important;text-align:center}
+body:is([data-screen=cityPet],[data-screen=cityBag],[data-screen=cityVault],[data-screen=cityDevour],[data-screen=cityCraft],[data-screen=citySummon],[data-screen=cityContest]) #stage .toast{top:5.2%!important;bottom:auto!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:auto!important;max-width:72%!important;min-height:0!important;padding:7px 16px!important;border-radius:99px!important;font:700 14px/1.25 Arial,sans-serif!important;text-align:center}
 #main .den .den-check small{font-size:.8em!important}
 
 /* Bag contents, warehouse and Devour (2026-11-20). Tiles share .satchel-stack; --rarity colours frame and plate. */
@@ -7183,9 +7183,9 @@ body:is([data-screen=cityVault],[data-screen=cityDevour]) #stage>#main{inset:0!i
 .boss-rare{color:#ffe08a;font-weight:700}
 
 /* Summon room (citySummon, 2026-11-21): Basic and Advanced wells, Mark Shop, Summon Festival. Root .satchel.well */
-body[data-screen=citySummon] #stage{width:min(100%,55dvh);margin-inline:auto}
-body[data-screen=citySummon] #stage>:is(header,nav,footer){display:none!important}
-body[data-screen=citySummon] #stage>#main{inset:0!important;width:100%;height:100%;padding:0!important;display:block;overflow:auto}
+body:is([data-screen=citySummon],[data-screen=cityContest]) #stage{width:min(100%,55dvh);margin-inline:auto}
+body:is([data-screen=citySummon],[data-screen=cityContest]) #stage>:is(header,nav,footer){display:none!important}
+body:is([data-screen=citySummon],[data-screen=cityContest]) #stage>#main{inset:0!important;width:100%;height:100%;padding:0!important;display:block;overflow:auto}
 .satchel.well{grid-template-rows:5.6% minmax(0,1fr) auto auto 8%;background-size:cover;background-position:50% 0;background-color:#27407a}
 .sum-ico{display:inline-block;width:1.5em;aspect-ratio:1;background:var(--sum-icons) no-repeat;background-size:300% 200%;font-style:normal;flex:none;vertical-align:middle}
 .well .satchel-top span :is(.sum-ico,.bag-ico,.gpt-icon){width:1.45em;height:1.45em;aspect-ratio:auto}
@@ -7295,3 +7295,78 @@ body[data-screen=citySummon] #stage>#main{inset:0!important;width:100%;height:10
 #stage #main .satchel.well :is(.mile,.shop-card,.well-shop,.well-skip)::before{display:none}
 #stage #main .satchel .shop-card b{color:#5a3a12}
 #stage #modal.den-pop .den-congrats p{margin:0;font:700 13px/1.35 Arial,sans-serif;color:#ffe9a0}
+
+/* Sky Contest: mode list in Gameplay, Totem War lobby and fight (cityContest, 2026-11-21) */
+.war-ico{display:inline-block;width:1.5em;aspect-ratio:1;background:var(--war-icons) no-repeat;background-size:400% 200%;font-style:normal;flex:none;vertical-align:middle}
+.satchel-top>span .war-ico{width:1.45em}
+.sky-list{display:grid;gap:1.2cqh;flex:1;grid-auto-rows:minmax(0,1fr)}
+#stage #main .gp-room .sky-mode{position:relative;display:grid;align-content:center;justify-items:start;gap:.3em;padding:0 44% 0 5%;min-height:0;text-align:left;border:2px solid #ffffff55;border-radius:.6em;overflow:hidden;background:linear-gradient(100deg,var(--tone),color-mix(in srgb,var(--tone) 55%,#fff) 70%,color-mix(in srgb,var(--tone) 35%,#fff));color:#fff}
+.sky-mode b{font:900 5cqw/1 Georgia,serif;font-style:italic;color:#fff6c9;text-shadow:0 2px 0 #0006,0 0 8px #0006}
+.sky-mode small{font:700 2.8cqw/1.1 Arial,sans-serif!important;color:#fff!important;text-shadow:0 1px 2px #0008}
+.sky-mode em{font:700 2.5cqw/1.1 Arial,sans-serif;font-style:normal;color:#d8ffcf;text-shadow:0 1px 2px #000a}
+.sky-mode img{position:absolute;right:-2%;top:-12%;height:130%;width:46%;object-fit:contain;object-position:50% 0;filter:drop-shadow(0 2px 4px #0008)}
+#stage #main .gp-room .sky-mode::before{display:none}
+.sky-mode.soon{filter:saturate(.55)}.sky-mode.soon em{color:#ffe7b0}
+.satchel.tw{grid-template-rows:5.6% minmax(0,1fr) auto auto auto 8%;background-size:cover;background-position:50% 0;background-color:#232a66}
+.tw-stage{position:relative;min-height:0}
+.tw-when{margin:1cqh 0 0;text-align:center;font:700 2.9cqw/1.2 Arial,sans-serif;color:#fff;text-shadow:0 1px 3px #000,0 0 6px #000}.tw-when b{color:#8dff9a}
+#stage #main .satchel.tw .maw-help{top:auto;bottom:3%;left:3%;right:auto}
+#stage #main .satchel .tw-side{position:absolute;right:2%;bottom:3%;display:grid;justify-items:center;font:700 2.6cqw/1.05 Arial,sans-serif;color:#fff;text-shadow:0 1px 2px #000,0 0 4px #000}
+.tw-side .war-ico{width:9cqw;filter:drop-shadow(0 2px 3px #0008)}
+.tw-best{position:absolute;left:14%;right:22%;bottom:3%;margin:0;text-align:center;font:700 2.7cqw/1.2 Arial,sans-serif;color:#fff;text-shadow:0 1px 3px #000,0 0 6px #000}.tw-best b{color:#ffe27a}
+.tw-preview{margin:0 4%;padding:.6cqh 0 1cqh;border:1px solid #6f93d8;border-radius:.4em;background:#141a3ad9;text-align:center}
+.tw-preview h3{margin:0 0 .6cqh;font:700 3.2cqw/1.2 Arial,sans-serif;color:#fff}
+.tw-preview div{display:flex;justify-content:center;gap:2.5cqw}
+.tw-preview :is(.war-ico,.bag-ico){width:11cqw;aspect-ratio:1;padding:.6cqw;border:2px solid #b784ff;border-radius:.4em;background-color:#2a2f6a;background-origin:content-box;box-sizing:border-box}
+.tw-sides{display:flex;justify-content:center;gap:3cqw;padding:1.2cqh 4% 0}
+#stage #main .tw-sides button{flex:1 1 0;display:flex;align-items:center;justify-content:center;gap:.4em;padding:.4em 0;border-radius:2em;border:2px solid transparent;background:#141a3ad9;font:700 3.2cqw/1 Arial,sans-serif;color:#fff}
+#stage #main .tw-sides button[aria-pressed=true]{border-color:var(--tone);box-shadow:0 0 10px var(--tone);background:color-mix(in srgb,var(--tone) 35%,#141a3a)}
+.tw-sides .war-ico{width:2em}
+.tw-enter{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:6cqw;padding:1.2cqh 8% 1.4cqh}
+#stage #main .satchel .tw-shop{display:grid;justify-items:center;font:700 2.6cqw/1.05 Arial,sans-serif;color:#fff;text-shadow:0 1px 2px #000}
+.tw-shop .war-ico{width:8.5cqw}
+#stage #main .tw-enter .den-gold{justify-self:center;display:grid;padding:.55em 3em;border:0;background:linear-gradient(#ffe89a,#f0b548 60%,#d9942e);color:#5a3a12;font:700 4.6cqw/1 Arial,sans-serif;clip-path:polygon(7% 0,93% 0,100% 50%,93% 100%,7% 100%,0 50%)}
+.tw-enter .den-gold small{font:700 .55em/1.2 Arial,sans-serif!important;color:#7a4a12!important}
+/* the fight */
+.satchel.tw-fight{grid-template-rows:auto minmax(0,1fr) auto 8%;padding:0;background:#1b2550}
+.tw-top{display:flex;align-items:center;gap:2cqw;padding:.8cqh 2cqw;background:#141a3a}
+.tw-score{display:flex;align-items:center;gap:.3em;padding:.15em .7em .15em .2em;border-radius:2em;background:color-mix(in srgb,var(--tone) 30%,#141a3a);border:2px solid transparent;font:700 3.6cqw/1 Arial,sans-serif;color:#fff}
+.tw-score.mine{border-color:var(--tone)}.tw-score .war-ico{width:1.7em}
+.tw-clock{margin-left:auto;display:grid;justify-items:end}.tw-clock b{font:900 4.4cqw/1 Arial,sans-serif;color:#fff}.tw-clock small{font:700 2.4cqw/1.1 Arial,sans-serif!important;color:#8dff9a!important}
+.tw-field{position:relative;min-height:0;background-size:100% 100%;overflow:hidden}
+#stage #main .satchel .tw-totem{position:absolute;width:19%;aspect-ratio:1;transform:translate(-50%,-78%);display:grid;place-items:center;border-radius:50%;z-index:2}
+.tw-totem .war-ico{width:100%;filter:drop-shadow(0 0 5px var(--tone)) drop-shadow(0 3px 3px #0008)}
+.tw-hp{position:absolute;left:14%;right:14%;bottom:-6%;height:7%;min-height:4px;border-radius:1em;background:#101832d9;overflow:hidden}
+.tw-hp::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--hp,100%);background:var(--tone,#6fe07f)}
+.tw-ring{display:none;position:absolute;left:4%;right:4%;bottom:-14%;height:30%;border:3px solid #fff;border-radius:50%;box-shadow:0 0 8px #fff,inset 0 0 6px #fff;animation:tw-pulse 1s ease-in-out infinite}
+.tw-totem.aim .tw-ring{display:block}
+@keyframes tw-pulse{50%{opacity:.45}}
+#stage #main .satchel .tw-totem::before,#stage #main .satchel .tw-totem::after{display:none}
+.tw-f{position:absolute;width:8.5%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;border:2px solid var(--tone);background:#141a3a;box-shadow:0 2px 4px #0008;transition:left .5s linear,top .5s linear,opacity .3s;z-index:3}
+.tw-f .portrait-badge{position:absolute;inset:0;width:100%;height:100%;border-radius:50%;filter:none}
+.tw-f.tw-me{width:11.5%;border-width:3px;border-color:#fff;box-shadow:0 0 0 2px var(--tone),0 0 10px var(--tone);z-index:5}
+.tw-f b{position:absolute;left:50%;top:-58%;transform:translateX(-50%);padding:.1em .5em;border-radius:1em;background:#141a3ad9;font:700 2.4cqw/1.1 Arial,sans-serif;color:#fff;white-space:nowrap}
+.tw-f .tw-hp{left:0;right:0;bottom:-22%;height:14%}
+.tw-f.down{opacity:.18}
+.tw-panel{display:grid;gap:.5cqh;padding:1cqh 3cqw;background:#141a3a;color:#fff;text-align:center}
+.tw-mine{display:flex;align-items:center;gap:.5em;font:700 3cqw/1 Arial,sans-serif}.tw-mine .war-ico{width:2.2em}
+.tw-mine b{font:900 5.2cqw/1 Arial,sans-serif;color:#ffe27a}.tw-mine small{font:700 2.6cqw/1 Arial,sans-serif!important;color:#cfe0ff!important;margin-right:auto}
+#stage #main .tw-mine button{padding:.5em 1em;border-radius:2em;border:2px solid #8fa6d8;background:#232a66;font:700 3cqw/1 Arial,sans-serif;color:#fff}
+#stage #main .tw-mine button[aria-pressed=true]{background:#6fe07f;border-color:#eaffea;color:#17401f}
+.tw-panel p{margin:0;font:700 2.7cqw/1.2 Arial,sans-serif}.tw-quest{color:#ffe7b0}.tw-pending{color:#cfe0ff;font-weight:400!important}.tw-log{color:#8dff9a;min-height:1.2em}
+.tw-bar{position:relative;display:block;height:1.2cqh;border-radius:1em;background:#0c1228;overflow:hidden}.tw-bar u{position:absolute;inset:0 auto 0 0;background:linear-gradient(#ffe89a,#f0b548)}
+.tw-panel>small{font:400 2.4cqw/1.1 Arial,sans-serif!important;color:#9fb0d8!important}
+/* pop-ups of the contest */
+.war-ranks{display:grid;gap:6px;margin:8px 0}
+.war-ranks>div{display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:10px;background:#ffffff14}
+.war-ranks>div>b{width:54px;font:700 16px/1 Arial,sans-serif;color:#ffe27a}
+#stage #modal.den-pop :is(.war-ranks,.war-result) .bag-gain{width:58px;padding:4px 2px}
+#stage #modal.den-pop :is(.war-ranks,.war-result) .bag-gain :is(.war-ico,.bag-ico){width:36px;height:36px;aspect-ratio:auto}
+.war-board{display:grid;gap:3px;max-height:150px;overflow:auto;margin:6px 0 10px;text-align:left}
+.war-board>div{display:grid;grid-template-columns:24px 22px minmax(0,1fr) auto;align-items:center;gap:6px;padding:2px 8px;border-radius:6px;background:#ffffff12;font:700 13px/1.2 Arial,sans-serif}
+.war-board>div.me{background:#ffe27a33;outline:1px solid #ffe27a}.war-board .war-ico{width:22px}.war-board small{font:400 10px/1 Arial,sans-serif!important;opacity:.7}.war-board em{font-style:normal;color:#ffe27a}
+.den-item-head .war-ico{width:1.4em}
+.tw-f{pointer-events:none}
+#stage #main .gp-room .sky-list{grid-auto-rows:minmax(17cqh,1fr)}
+#stage #modal.den-pop .war-result .bag-gains{display:flex;justify-content:center;flex-wrap:wrap;gap:8px}
+#stage #modal.den-pop .war-result .bag-gain{width:76px;height:84px;box-sizing:border-box}

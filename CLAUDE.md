@@ -405,6 +405,30 @@ read through `summonState(s,now)` which applies the resets.
   Warehouse, Devour and Gear Crafting were dark blobs (`.satchel-top>span` now).
 - Not done from the photos: element badges on pets, "need N more stars" conditions, the per-pet banner rotation.
 
+## Sky Contest: Totem War (2026-11-21)
+User sent the reference's battlefield rules, then nine photos (Gameplay hub, Peak Contest list, Elements lobby with
+Reward Preview / Ranking Rewards / Contest Shop / rules) and said "go" to: own entry, auto-fight with totem orders,
+3-minute fights, two rewarded fights a day. Gameplay's fifth tab is now "Sky Contest" (`contestList()`: Star Duel,
+Totem War, Storm Brawl, Shadow Hunt; only Totem War is open). Screen `cityContest` (`gear-ui.js`, `contestPage`:
+War = lobby, Fight, Shop). Rules in `gear-data.js` (placeholders, `warRules`), optional save field
+`S.contest {medals, day, runs, best, wins}`.
+- Fight (`warNew`, `warStep` every 0.5 s, `warTally`): three factions (`warFactions` Ember / Tide / Gale) of five;
+  Reina leads the chosen one (power x1.25), the rest are AI. Every 30 s a fighter's points = kills x10 + assists x5 +
+  totem hits x2, times (1 + 0.2 x totems the faction holds). A totem (600 HP) falls to the faction that damaged it
+  most; holders slowly mend their own. Defeated fighters return home after 6 s. Tap a totem to send Reina there
+  (`warOrder`/`warSend`), Auto lets her choose, x2 speeds the clock. `warTick` drives the screen; `warPaint` only moves
+  what `cityContest()` drew (fighters are `.tw-f`, Reina `.tw-me`; never use the class `hero`, a global rule makes it
+  485 px tall; fighters have `pointer-events:none` so taps reach the totems).
+- Rewards: quests at 60 / 150 / 300 points pay medals and an item into the bag at once (`warQuestsDue`); the final
+  ranking of all 15 pays medals and items (`warRanks`, `warSettle`); only the first two fights of a UTC day pay
+  (`warStart`), later ones are practice. Contest Shop (`contestShop`, `buyContest`): bag items for contest medals.
+- Art (image model): `art-source/contest/{key,field,sheet}.webp` -> `comp-war-key`, `comp-war-field` (the three
+  daises are at `warTotems`), `comp-war-icons` (totems, medal, emblems, crown) by `scripts/build-contest-art.py`.
+- Fixed on the way: the Gameplay banner was a `<header>` (hidden/out of flow inside `#main`), so every Gameplay page
+  was squeezed into its top 18%; it is a `div` now. `scripts/build-hosting-avif.py` added AVIF copies of five big
+  atlases (headroom about 0.42 MB after this pass).
+- Not done: Star Duel, Storm Brawl, Shadow Hunt, betting, the contest privilege, timed opening hours.
+
 ## In-chat playable preview (user requirement)
 The user wants to play the game inside the chat, and wants SHORT replies in Russian, no fluff.
 - Artifact: https://claude.ai/artifact/L9owNJPMaZjAsTmU3tDGs6 (private). After game changes, rebuild and republish:
