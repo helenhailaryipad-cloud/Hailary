@@ -7578,7 +7578,8 @@ body[data-screen=home] #stage #main .city-chat .city-social::before,body[data-sc
 /* Chat sheet (2026-11-21, after the reference): channels in a column on the left, feed and input on the right.
    On the home screen it slides up over the lower part (.over); in the Social room it fills the Chat page (.in-room). */
 .chat-sheet{display:grid;grid-template-columns:24% minmax(0,1fr);background:#262a42f2;color:#fff;border:2px solid #4a4f72;border-radius:1em 1em 0 0;overflow:hidden}
-.chat-sheet.over{position:absolute;left:3%;right:3%;bottom:0;height:62%;z-index:40;box-shadow:0 -6px 24px #000a;animation:chat-up .25s ease-out}
+.chat-sheet.over{position:absolute;left:3%;right:3%;bottom:0;height:62%;z-index:40;box-shadow:0 -6px 24px #000a}
+.chat-sheet.over.opening{animation:chat-up .25s ease-out}
 @keyframes chat-up{from{transform:translateY(100%)}to{transform:none}}
 .chat-sheet.in-room{min-height:0;margin:0 2%;grid-row:span 4;border-radius:1em}
 .satchel.soc-p-chat{grid-template-rows:auto minmax(0,1fr) 8%}
@@ -7677,3 +7678,4 @@ body[data-screen=home] #stage #main .city-chat .city-social::before,body[data-sc
 #stage #modal.den-pop .gld-crests button{width:60px;height:60px;min-height:0;padding:4px;border-radius:12px;background:#ffffff14;border:2px solid transparent}
 #stage #modal.den-pop .gld-crests button[aria-pressed=true]{border-color:#ffe27a;background:#ffe27a33}
 #stage #modal.den-pop .gld-crests .gld-ico{width:100%}
+.chat-sheet .chat-feed{overflow-anchor:none;scroll-behavior:auto}

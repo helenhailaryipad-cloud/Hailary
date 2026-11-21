@@ -509,7 +509,9 @@ There are no other players: every person is an AI adventurer and is labelled "AI
   this round! Bonus: T3·Boots (Orange)" and guild lines), Faction (Cloud War talk). Below the channels: Coordinate
   (posts where she is), Shortcut (quick phrases), Bag. Input "Press the avatar or input @ to notify…"; tapping an
   avatar inserts @Name; ☺ opens twelve emoji. Old saved channel names World / Cross-server read as Globe / X-server
-  (`chatOld`). `chatRefresh` redraws only the sheet every 8 s unless she is typing (`chatTimer`).
+  (`chatOld`). No jerking (user: "the chat window must not twitch"): the 8 s timer only swaps the messages when they
+  changed (`chatFeedOnly`) and keeps the reading position unless she is at the bottom; the slide-up animation plays
+  only when the sheet opens (`.opening`); `chatRefresh` (full redraw) is only for her own actions.
 - Not done: a real guild, voice messages, the reference's Management page, sending mail to friends.
 
 ## Guild (2026-11-21)
