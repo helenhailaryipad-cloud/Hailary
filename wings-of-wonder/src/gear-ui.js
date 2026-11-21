@@ -155,8 +155,18 @@ function openHeroStats(){const st=stats();modal(`<div class="hero-stats-dialog">
 
 function equipmentRewardHtml(reward){if(!reward)return '';return eqRules().materialDefs.filter(m=>reward[m.id]>0).map(m=>`<span class="reward">${equipmentIcon(m.icon)}${reward[m.id]} ${m.name.toLowerCase()}${reward[m.id]>1?'s':''}</span>`).join('')}
 function bossLootPreview(id){const r=eqRules(),t=r.bossLootTables[id];if(!t)return '';const drops=r.bossDropRanks.map(n=>r.gearRanks[n]);return `<div class="boss-loot-preview"><strong>Guaranteed boss loot</strong><p>${drops.length} equipment pieces · ${r.bossGearLabel(S)} · T${r.bossGearTier(S)} wearable at Lv. ${Math.max(1,r.requiredLevel(r.bossGearTier(S)))}</p><p>${drops.map(q=>`<b style="color:${q.color}">${q.name}${q.stars?' '+q.stars+'★':''}</b>`).join(' · ')}</p><small>${t.slots.map(id=>r.slots.find(s=>s.id===id).name).join(' · ')}</small><small>Five Orange pieces make a 2-Star Red in Gear Crafting · Blue and Purple feed the Glimmer Maw</small><small>${t.stone} crystals · ${t.shard} star shards · ${t.gem} ${t.gem===1?'gem':'gems'} · ${t.essence} forge essence</small></div>`;}
+// What a guardian can drop, with the real chances of the rare things.
+function dungeonLoot(){
+ const r=eqRules(),tier=r.bossGearTier(S);bagArtVars();
+ const row=(icon,hue,name,note)=>'<div class="loot-row" style="--rarity:'+hue+'"><span>'+icon+'</span><b>'+name+'</b><em>'+note+'</em></div>';
+ const piece=(n,note)=>{const q=r.gearRanks[n];return row(gearArt(r.catalog['bow-t'+tier]),q.color,q.name+' piece'+(q.stars?' · '+'★'.repeat(q.stars):''),note)};
+ popup('<h2>Guardian drops</h2><p>Every victory gives three pieces of equipment'+(tier>2?' (T2–T'+tier+')':' (T'+tier+')')+' and a chest. Rare drops are rolled each time.</p><div class="loot-list">'
+  +r.bossDropRanks.map(n=>piece(n,'always')).join('')+row(bagIcon('chest1'),r.bagRarity.b[1],'Oak Chest','always')
+  +r.bossRare.map(x=>x.kind==='gear'?piece(x.rank,Math.round(x.chance*100)+'%'):row(bagIcon(x.id),r.bagRarity[r.bagItemById[x.id].rarity][1],r.bagItemById[x.id].name,Math.round(x.chance*100)+'%')).join('')+'</div>');
+}
 function bossDropMarkup(reward){
- const fed=reward.devoured?`<p>The Glimmer Maw ate the Blue and Purple pieces: +${fmt(reward.devoured)} essence.</p>`:'';
+ const rare=(reward.rare||[]).map(x=>x.kind==='gear'?eqRules().gearRanks[x.rank].name+' piece':eqRules().bagItemById[x.id].name);
+ const fed=(rare.length?`<p class="boss-rare">Rare drop: ${rare.join(', ')}!</p>`:'')+(reward.devoured?`<p>The Glimmer Maw ate the Blue and Purple pieces: +${fmt(reward.devoured)} essence.</p>`:'');
  if(!reward.entry)return fed;
  const r=eqRules(),eq=r.state(S),e=reward.entry,t=r.catalog[e.template],q=r.gearRanks[r.gearRank(e)],power=stats().power,next=r.stats({...S,equipment:{...eq,equipped:{...eq.equipped,[t.slot]:e.uid}}}).power,diff=next-power;
  return `<section class="boss-drop-card" style="--loot-color:${q.color}"><p class="eyebrow">BOSS EQUIPMENT FOUND</p><div class="boss-drop-row">${(reward.entries||[e]).map(x=>equipmentCell(x,{compact:true})).join('')}</div><div class="boss-drop-heading"><div><h3>${t.name}</h3><strong>${q.name} · T${t.tier}</strong><p class="loot-power">${diff>0?'+'+fmt(diff)+' hero power if equipped':diff<0?'Your equipped item is stronger.':'Same hero power. Compare its attributes.'}</p></div></div>${fed}<div class="row"><button class="primary" onclick="openEquipment(${e.uid})">Compare / Equip / Enhance</button><button onclick="$('#modal').close();openScreen('cityCraft')">Gear Crafting</button></div><small>Five Orange pieces make a 2-Star Red · Blue and Purple feed the Glimmer Maw</small></section>`;
