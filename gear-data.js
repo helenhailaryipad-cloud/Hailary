@@ -2,7 +2,7 @@
 globalThis.WonderGear=(()=>{
 const slots=[
 {id:'bow',name:'Weapon',item:'Bow',icon:0,base:{attack:28,penetration:8,accuracy:2},enhance:{attack:24,penetration:2,accuracy:.3},offense:true},
-{id:'crown',name:'Headwear',item:'Crown',icon:1,base:{health:100,defense:5,critResistance:1},enhance:{health:130,defense:2,critResistance:.4}},
+{id:'crown',name:'Helmet',item:'Helm',icon:1,base:{health:100,defense:5,critResistance:1},enhance:{health:130,defense:2,critResistance:.4}},
 {id:'armor',name:'Armor',item:'Raiment',icon:2,base:{health:120,defense:15,elementalDefense:8},enhance:{defense:18,health:20,elementalDefense:3}},
 {id:'leggings',name:'Legguards',item:'Legguards',icon:3,base:{health:95,defense:12,elementalDefense:6},enhance:{health:35,defense:6,elementalDefense:2}},
 {id:'boots',name:'Boots',item:'Boots',icon:4,base:{health:55,defense:5,speed:2,dodge:2},enhance:{speed:3,health:15,dodge:.35}},
