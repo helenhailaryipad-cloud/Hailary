@@ -808,3 +808,38 @@ vm.runInContext(`
 }
 `,context);
 console.log('PASS: Cloud War: rounds keep held territories, Carnage cap, Point Rewards, Cloud Shop, map labels and windows.');
+
+vm.runInContext(`
+{const r=WonderGear,T0=Date.UTC(2026,10,21,12),day=864e5;let seed=3;const rng=()=>(seed=(seed*16807)%2147483647)/2147483647;
+ S=defaults();if(S.social!==undefined||!valid(S))throw Error('Fresh social');
+ // A new UTC day brings the courier letter and thank-you notes; the first day also a welcome letter.
+ if(r.socialTick(S,T0,rng)<3||r.socialTick(S,T0+3600e3,rng)!==0||!valid(S))throw Error('Daily mail');
+ let v=r.socialState(S,T0);if(!v.mail.some(m=>m.kind==='note')||!v.mail.some(m=>m.title==='Welcome to Sky Garden')||v.friends.length!==4||v.requests.length!==2)throw Error('Starting mail and friends');
+ const n=v.mail.length;r.socialTick(S,T0+day,rng);if(r.socialState(S,T0+day).mail.length<=n)throw Error('Next day mail');
+ // Mail: claim puts items in the bag; only claimed letters can be deleted; the box keeps at most 30.
+ const letter=r.socialState(S).mail.find(m=>m.title==='Daily Courier'),exp=r.bagCount(S,'exp1');
+ if(r.mailDelete(S,[letter.id]))throw Error('Unclaimed letter deleted');
+ const got=r.mailClaim(S,[letter.id]);if(got.n!==1||r.bagCount(S,'exp1')!==exp+1||r.mailClaim(S,[letter.id]).n||r.mailDelete(S,[letter.id])!==1)throw Error('Claim and delete');
+ for(let d=2;d<40;d++)r.socialTick(S,T0+d*day,rng);if(r.socialState(S).mail.length>r.socialRules.mailMax||!valid(S))throw Error('Mail cap');
+ // Flowers: ten a day, once per friend; Gift All sends and receives; hearts grow with intimacy.
+ const gold=S.gold,res=r.giftAll(S,T0+50*day);if(res.sent!==4||res.got!==4||S.gold!==gold+80||r.sendFlower(S,'nyra',T0+50*day)||r.heartsOf(S,'nyra')!==.2)throw Error('Gift All');
+ if(!r.sendFlower(S,'nyra',T0+51*day)||r.heartsOf(S,'nyra')!==.3)throw Error('A new day, new flowers');
+ // Friends: requests, add, blacklist.
+ if(!r.friendAnswer(S,'briar',true)||!r.socialState(S).friends.includes('briar')||!r.friendAnswer(S,'wren',false)||r.socialState(S).friends.includes('wren')||r.friendAnswer(S,'wren',true))throw Error('Requests');
+ if(!r.friendAdd(S,'orin')||r.friendAdd(S,'orin')||!r.friendBlock(S,'pip',true)||r.socialState(S).friends.includes('pip')||!r.socialState(S).blocked.includes('pip')||r.friendAdd(S,'pip'))throw Error('Add and blacklist');
+ // Chat: the feed is the same for the same moment; her lines are cleaned, kept and answered.
+ const a=r.chatFeed(S,'World',T0),b=r.chatFeed(S,'World',T0);if(a.length!==24||JSON.stringify(a)!==JSON.stringify(b)||a.some(c=>c.from==='pip'))throw Error('Chat feed');
+ if(new Set(a.map(c=>c.text)).size<6)throw Error('Feed lines vary');
+ const said=r.chatSay(S,'World','  hi <b>there</b> ',T0,rng);if(said.me.text!=='hi bthere/b'||said.reply.from==='me'||!r.chatFeed(S,'World',T0+2000).some(c=>c.from==='me')||r.chatSay(S,'World','   '))throw Error('Say');
+ r.chatSay(S,'p:kael','hello',T0,rng);if(!r.socialState(S).recent.includes('kael')||!r.chatFeed(S,'Private',T0+2000).some(c=>c.ch==='p:kael'&&c.from==='kael'))throw Error('Private chat');
+ for(let i=0;i<40;i++)r.chatSay(S,'World','line '+i,T0,rng);if(r.socialState(S).chat.length!==r.socialRules.chatKeep||!valid(JSON.parse(JSON.stringify(S))))throw Error('Chat cap');
+ for(const bad of [{day:'x'},{friends:['nope']},{sent:['nyra','nyra']},{mail:[{id:1}]},{chat:[{ch:'World',from:'x',text:'a',t:1}]},{hearts:{nyra:999}}])if(valid({...S,social:{...S.social,...bad}}))throw Error('Invalid social accepted '+JSON.stringify(bad));
+ // Screens: the home strip opens the chat; the four pages render; Gift All and Claim from the pages.
+ S=defaults();openScreen('home');if(!$('#main').innerHTML.includes('city-chat')||!$('#main').innerHTML.includes("socialOpen('Chat')"))throw Error('Home chat strip');
+ for(const page of ['Chat','Friends','Mail','Notes']){socialOpen(page);if(screen!=='citySocial'||!$('#main').innerHTML.includes('soc-p-'+page.toLowerCase()))throw Error('Social page '+page)}
+ socialOpen('Friends');friendGiftAll();if(r.socialState(S).sent.length!==4)throw Error('Gift All from the page');
+ socialOpen('Mail');const before=r.bagCount(S,'chest1');mailChecked=[];mailAll('mail');mailTake('mail');if(r.bagCount(S,'chest1')!==before+1||r.socialState(S).mail.some(m=>m.kind==='mail'&&!m.claimed))throw Error('Claim all mail');
+ chatChannel='World';socialOpen('Chat');if(!$('#main').innerHTML.includes('chat-line'))throw Error('Chat page feed');socialStop();
+}
+`,context);
+console.log('PASS: Social: daily mail and thank-you notes, claim and delete, flowers and hearts, requests and blacklist, chat feed and replies, screens.');

@@ -479,6 +479,28 @@ territory windows with ten defenders and the fight; defenders never came back an
   into the bag. Nested `<svg viewBox>` did not clip there, use the clip path.
 - Not done: Cloud Hunt, buying extra Carnage, Bizarre Lands, other players' damage shares on the boss bar.
 
+## Social room: chat, friends, mail (2026-11-21)
+User: "let's launch the chat", with photos of the reference's chat strip, Friends (Giftable / Receivable, hearts,
+Management / Send Flowers / Apply / Add / Gift All, Recent Contacts / Friends / Blacklist), Mail and Thank-you Note.
+There are no other players: every person is an AI adventurer and is labelled "AI" everywhere.
+- Home: the old dead strip (`.city-chat`, "Globe Welcome to Sky Garden") is now `homeChat()`: the latest two World
+  lines; tapping it opens the chat, its bubble opens Friends / Mail / Notes with a red count of unclaimed letters and
+  friend requests. The Journal moved to More only.
+- Screen `citySocial` (`gear-ui.js`, `socialPage` Chat / Friends / Mail / Notes, bottom bar). Rules in `gear-data.js`,
+  optional save field `S.social` (`validSocial`), read through `socialState(s,now)` (daily reset of flowers).
+  - Chat: channels World / Guild / Cross-server / Private (`chatChannels`). AI lines arrive every 25 s, picked from the
+    clock (`chatFeed`, same after a reload); her own lines are kept (last 30) and an AI answers each (`chatSay`; `<>`
+    stripped, 80 chars). Private: pick a friend; recent partners go to Recent Contacts. The page refreshes every 8 s
+    unless she is typing (`socialTimer`, stopped on leaving).
+  - Friends: ten AI adventurers (`socialFolk`, portraits via `portrait()`), start with four friends and two requests.
+    Flowers: ten sent and ten received a UTC day (`sendFlower`, `giftAll`: +10 intimacy each, received ones +20
+    gold); hearts = intimacy / 100, up to five, half hearts shown. Apply (accept/decline), Add, Blacklist (via ⋯).
+  - Mail and Thank-you Note: a welcome letter, a Daily Courier letter every UTC day and one or two thank-you notes
+    from friends (`socialTick`), each with bag items; Claim (checked or all), Delete (only claimed), 30 letters max.
+- Art (image model): `art-source/social/{banner,icons}.webp` -> `comp-social-banner`, `comp-social-icons` (flowers,
+  hearts, letters, note, chat bubble, gift) by `scripts/build-social-art.py`.
+- Not done: guild chat of a real guild, voice/emoji, the reference's Management page, sending mail to friends.
+
 ## In-chat playable preview (user requirement)
 The user wants to play the game inside the chat, and wants SHORT replies in Russian, no fluff.
 - Artifact: https://claude.ai/artifact/L9owNJPMaZjAsTmU3tDGs6 (private). After game changes, rebuild and republish:
