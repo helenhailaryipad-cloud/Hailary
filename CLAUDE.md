@@ -458,6 +458,12 @@ territory windows with ten defenders and the fight; defenders never came back an
   to fight that defender (`cloudHallPick`). "Auto next" (`cloudAutoNext`, on by default) moves to the next standing
   defender after a victory (`cloudNextTarget`) instead of returning to the map. Rows need full overrides of the global
   `#main button` rules (see the end of `stage.css`).
+- City window (user: "I tap the icon and choose the boss on the mini-map", photo of the Palace City window):
+  `cloudPortalPreview` for the four-faction map shows Ownership, the mini-map of ten defenders (HP bar under each,
+  defeated ones grey with the return clock), Current points of the factions (80 open the city), Killing Rewards of
+  the chosen defender (territory and Carnage points, its chest) and Go. Tapping a defender only chooses it
+  (`cloudChoose`, state `cloudPick`; the first standing one is chosen by default); Go starts the fight (`cloudGo`).
+  Other factions' cities show the same with Go disabled. Mini-map width is tuned so Go fits at 590 x 690.
 - Not done: Cloud Hunt, buying extra Carnage, Bizarre Lands, other players' damage shares on the boss bar.
 
 ## In-chat playable preview (user requirement)

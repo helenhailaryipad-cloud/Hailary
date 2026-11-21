@@ -1613,22 +1613,46 @@ function cloudStrike(index,slot){
  }
  requestAnimationFrame(frame);
 }
+// The city window: a mini-map of its ten defenders. Tap one to choose it (a defeated one shows when it returns),
+// then Go fights the chosen defender. Other factions' cities only show their state.
+let cloudPick=null;
+function cloudChoose(index,slot){
+ const role=cloudPortalSlots[slot][0];
+ if(cloudDamage(index,slot)>=cloudEnemyHealth[role]){toast(cloudBossName(slot)+' is defeated · returns in '+cloudClock());return}
+ cloudPick={index,slot};cloudTerritory(index);
+}
+function cloudGo(index){
+ const slot=cloudPick?.index===index?cloudPick.slot:cloudNextTarget(index);
+ if(slot<0){toast('Every defender here is defeated. They return in '+cloudClock()+'.');return}
+ cloudPick=null;cloudStrike(index,slot);
+}
 function cloudPortalPreview(place,index){
  const rewards=cloudPortalRewards[place.rank];
  const paths='M50 31 L24 14 L9 31 L24 48 Z M50 31 L76 14 L91 31 L76 48 Z M50 31 V55 M50 55 H34 V69 L50 87 L66 69 V55 Z';
  // Each outer courtyard holds one elite and two guards around its central paving.
  const pads=[[50,32],[26,32],[74,32],[50,58],[14,24],[12,36],[86,24],[88,36],[42,69],[58,69]];
- const defenders=cloudPortalSlots.map(([role,x,y,art],slot)=>cloudCount===4?
-  cloudCount===4&&Math.floor(index/6)!==cloudMine?`<div class="portal-defender" data-role="${role}" style="left:${pads[slot][0]}%;top:${pads[slot][1]}%"><small>${role==='Boss'?'Golden Boss':role}</small>${artImage('guardian-t'+art,role)}</div>`:
-  `<button class="portal-defender portal-strike" aria-label="Fight ${role} in ${place.name}, target ${slot+1}" style="left:${pads[slot][0]}%;top:${pads[slot][1]}%" data-role="${role}" onclick="cloudStrike(${index},${slot})" ${cloudDamage(index,slot)>=cloudEnemyHealth[role]?'disabled':''}><small>${role==='Boss'?'Golden Boss':role}</small>${artImage('guardian-t'+art,role)}<progress max="${cloudEnemyHealth[role]}" value="${cloudEnemyHealth[role]-cloudDamage(index,slot)}"></progress></button>`:
-  `<div class="portal-defender" data-role="${role}" style="left:${x}%;top:${y}%"><small>${role==='Boss'?'Golden Boss':role}</small>${artImage('guardian-t'+art,role)}</div>`
- ).join('');
- return `<section class="cloud-portal-preview"><h2>${place.name}</h2><p>${place.owner} · ${place.rank==='Capital'?'Holy City':place.rank}</p>${cloudCount===4&&Math.floor(index/6)!==cloudMine?'<p class="cloud-foreign">A city of '+place.owner+'. '+cloudFactions[cloudMine][0]+' opens only its own six cities; this one is left to its faction.</p>':''}${cloudCount===4?'<div data-patrol-zone="'+index+'">'+cloudCapturePanel(index)+'</div>':''}<div class="portal-defenders" ${cloudCount===4?'data-terrain="'+place.rank+'"':''}><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="${paths}"/></svg>${defenders}</div><h3>Defender rewards</h3><div class="cloud-tier-rewards">${['Boss','Elite','Guard'].map(r=>`<span><b>${r==='Boss'?'Golden Boss':r}</b> ${cloudEnemyScore[r]} Carnage Points${cloudLoot[r]?' · '+WonderGear.bagItemById[cloudLoot[r].id].name:''}</span>`).join('')}</div><p>Carnage Points today <b>${WonderGear.cloudState(S).carnage} / ${WonderGear.cloudRules.carnageCap}</b> · defenders return in <b>${cloudClock()}</b></p><p>Boss personal point pool <b>${rewards.personal}</b></p><small>Personal points are shared by damage dealt.</small><div>${dailyTokens(['hud-prisms','hud-gems',rewards.armor])}</div></section>`;
+ if(cloudCount!==4){
+  const defenders=cloudPortalSlots.map(([role,x,y,art])=>`<div class="portal-defender" data-role="${role}" style="left:${x}%;top:${y}%"><small>${role==='Boss'?'Golden Boss':role}</small>${artImage('guardian-t'+art,role)}</div>`).join('');
+  return `<section class="cloud-portal-preview"><h2>${place.name}</h2><p>${place.owner} · ${place.rank==='Capital'?'Holy City':place.rank}</p><div class="portal-defenders"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="${paths}"/></svg>${defenders}</div><p>Boss personal point pool <b>${rewards.personal}</b></p><div>${dailyTokens(['hud-prisms','hud-gems',rewards.armor])}</div></section>`;
+ }
+ const sector=Math.floor(index/6),mine=sector===cloudMine,owner=cloudOwner(index),scores=cloudFactionScores(index);
+ if(cloudPick?.index!==index||cloudDamage(index,cloudPick.slot)>=cloudEnemyHealth[cloudPortalSlots[cloudPick.slot][0]])cloudPick=mine&&cloudNextTarget(index)>=0?{index,slot:cloudNextTarget(index)}:null;
+ const pick=cloudPick?.slot??-1;
+ const defenders=cloudPortalSlots.map(([role,,,art],slot)=>{const lim=cloudEnemyHealth[role],left=lim-cloudDamage(index,slot),down=left<=0;
+  return `<button class="portal-defender portal-strike ${slot===pick?'picked':''} ${down?'down':''}" aria-label="${cloudBossName(slot)}, ${role}${down?', defeated':''}" style="left:${pads[slot][0]}%;top:${pads[slot][1]}%" data-role="${role}" onclick="cloudChoose(${index},${slot})">${denPlain}<small>${role==='Boss'?'Boss':role}</small>${artImage('guardian-t'+art,role)}${down?`<em class="portal-clock">${cloudClock()}</em>`:`<i class="portal-hp"><u style="width:${left/lim*100}%"></u></i>`}</button>`}).join('');
+ const rows=cloudFactions.map((f,i)=>[f,i,scores[i]||0]).filter(([,i,n])=>n>0||i===sector||i===cloudMine).sort((a,b)=>b[2]-a[2]);
+ const role=pick>=0?cloudPortalSlots[pick][0]:'Boss',loot=cloudLoot[role];
+ return `<section class="cloud-portal-preview cloud-city"><h2>${place.name}</h2><p class="city-owner">Ownership: <b style="color:${owner>=0?cloudFactions[owner][3]:'#fff'}">${owner>=0?cloudFactions[owner][0]:'None'}</b> · ${place.rank==='Capital'?'Holy City':place.rank}</p>
+  ${mine?'':'<p class="cloud-foreign">A city of '+place.owner+'. '+cloudFactions[cloudMine][0]+' opens only its own six cities; this one is left to its faction.</p>'}
+  <div class="portal-defenders" data-terrain="${place.rank}">${defenders}</div>
+  <div class="city-points"><b>Current points:</b>${rows.map(([f,i,n],k)=>`<span style="color:${f[3]}">${k+1}. ${f[0]}: ${n}</span>`).join('')}<small>80 points open the city</small></div>
+  <div class="city-kill"><h3>Killing Rewards${pick>=0?' · '+cloudBossName(pick):''}</h3><p>Territory Points: <b>${cloudEnemyScore[role]}</b> · Carnage Points: <b>${cloudEnemyScore[role]}</b></p><p>Personal point pool <b>${rewards.personal}</b>, shared by damage</p><div class="bag-gains">${loot?cloudItems({[loot.id]:loot.n}):''}${dailyTokens(['hud-prisms','hud-gems'])}</div></div>
+  <div class="den-actions"><button class="den-gold city-go" onclick="cloudGo(${index})" ${mine&&pick>=0?'':'disabled'}>${denPlain}Go</button></div></section>`;
 }
 function cloudTerritory(index){
  if(cloudCount===4&&cloudRoundCheck())cityCloudWar();
  const place=cloudTerritories()[index];
- if(cloudCount!==3)return modal(cloudPortalPreview(place,index));
+ if(cloudCount!==3){modal(cloudPortalPreview(place,index));return}
  const portraits=cloudDefenders[({Island:"Outpost",Fortress:"Stronghold"})[place.rank]||place.rank].map((role,i)=>'<span>'+artImage('guardian-t'+(7+i),'')+'<small>'+role+'</small></span>').join('');
  modal('<h2>'+place.name+'</h2><p>'+place.rank+' · '+place.owner+'</p><div class="cloud-guards">'+portraits+'</div><h3>Killing Rewards</h3><p>Territory points · 30</p>'+dailyTokens(['hud-prisms','hud-gems','gear-armor-t6']));
 }

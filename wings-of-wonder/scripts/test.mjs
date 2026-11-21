@@ -783,8 +783,10 @@ vm.runInContext(`
  if(!board.includes('stroke-dasharray="3 7"')||board.includes('stroke="#ffd86b" stroke-width="5.5"'))throw Error('Roads before opening');
  for(const i of [0,1])S.cloudWarHits[i]=[9,9,9,9,9,0,0,0,0,0];board=cloudFourBoard(cloudTerritories());
  if(!board.includes('stroke="#ffd86b" stroke-width="5.5"')||cloudOpen(0)!==2)throw Error('A road between two open cities lights up');
- cloudTerritory(7);if(!$('#modalBody').innerHTML.includes('cloud-foreign')||$('#modalBody').innerHTML.includes('cloudStrike(7'))throw Error('Foreign city is look-only');
- cloudTerritory(3);if(!$('#modalBody').innerHTML.includes('cloudStrike(3'))throw Error('Own city can be attacked');
+ cloudTerritory(7);if(!$('#modalBody').innerHTML.includes('cloud-foreign')||!$('#modalBody').innerHTML.includes('cloudGo(7)" disabled'))throw Error('Foreign city is look-only');
+ cloudTerritory(3);if(!$('#modalBody').innerHTML.includes('cloudGo(3)')||$('#modalBody').innerHTML.includes('cloudGo(3)" disabled')||cloudPick.slot!==cloudNextTarget(3))throw Error('Own city: first standing defender is chosen');
+ cloudChoose(3,7);if(cloudPick.slot!==7||!$('#modalBody').innerHTML.includes('Killing Rewards · '+cloudBossName(7))||!$('#modalBody').innerHTML.includes('Current points:'))throw Error('Choose on the mini-map');
+ S.cloudWarHits[3]=[0,0,0,0,0,0,0,9,0,0];cloudChoose(3,7);cloudTerritory(3);if(cloudPick.slot===7)throw Error('A defeated defender cannot be chosen');
  // The hall under a fight: every defender with its state (Refreshed / return clock / Fighting) and who beat it.
  S.cloudWarHits={0:[0,0,0,0,9,0,0,0,0,0]};S.cloudPatrol={hits:{0:[0,0,0,0,0,9,0,0,0,0]},last:0};
  let hall=cloudHall(0,6);if((hall.match(/hall-row/g)||[]).length!==10||!hall.includes('Fighting')||(hall.match(/>Refreshed</g)||[]).length!==7||!hall.includes('Boss List'))throw Error('Hall list');
@@ -795,7 +797,7 @@ vm.runInContext(`
  cloudShopShow();if(!$('#modalBody').innerHTML.includes("cloudBuy('wish')"))throw Error('Shop window');
  cloudStatusShow();if(!$('#modalBody').innerHTML.includes('Galewing (you)'))throw Error('Status window');
  cloudRankShow();if(!$('#modalBody').innerHTML.includes('AI'))throw Error('Rankings window');
- cloudTerritory(6);if(!$('#modalBody').innerHTML.includes('Carnage Points today')||!$('#modalBody').innerHTML.includes('Moon Chest'))throw Error('Territory window');
+ cloudTerritory(6);if(!$('#modalBody').innerHTML.includes('Killing Rewards')||!$('#modalBody').innerHTML.includes('Moon Chest'))throw Error('Territory window');
 }
 `,context);
 console.log('PASS: Cloud War: rounds keep held territories, Carnage cap, Point Rewards, Cloud Shop, map labels and windows.');
