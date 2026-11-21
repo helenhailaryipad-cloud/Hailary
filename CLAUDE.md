@@ -512,6 +512,27 @@ There are no other players: every person is an AI adventurer and is labelled "AI
   (`chatOld`). `chatRefresh` redraws only the sheet every 8 s unless she is typing (`chatTimer`).
 - Not done: a real guild, voice messages, the reference's Management page, sending mail to friends.
 
+## Guild (2026-11-21)
+User: "now let's make the guild" (no photos). Home -> Guild (the left promo icon, formerly ClanClash, and the drawer's
+Guild) opens `cityGuild` (`gear-ui.js`, `guildPage` Hall / Members / Boss / Shop / Blessings). Rules in `gear-data.js`
+(placeholders, `guildRules`), optional save field `S.guild` (`validGuild`), read through `guildState(s,now)` (daily
+counters reset 00:00 UTC, shop limits on Monday). Every member besides Reina is an AI adventurer, labelled AI.
+- No guild: join one of three AI guilds (`guildList`, `guildJoin`, she is Member) or Found a Guild for 2000 gold with
+  a name and one of four crests (`guildCreate`; she is Leader, her first three friends join). Leave any time.
+- Hall: crest, name, level bar (`guildLevel`, 1000 x level EXP per level, max 10), Daily Check-in, Donate Gold (3 a
+  day), Donate Prisms (1 a day) -> guild EXP, contribution, guild coins; Guild Boss shortcut.
+- Members: her and the AI members with role, level, online status and contribution today.
+- Boss: one a day, HP 60000 x guild level; AI members' damage grows through the day (`guildAiDamage`); she has three
+  attacks (`guildHit`, damage from her power); when the total reaches the HP the reward is claimable once: 100 guild
+  coins and a chest by her rank (`guildBossRank`, `guildBossClaim`). Boss art reuses `guardian-t21`.
+- Shop: bag items for guild coins, weekly limits, some need a guild level (`guildShop`, `guildBuy`).
+- Blessings: contribution raises ATK / HP / DEF levels for Reina (cap = 2 x guild level; `guildSkillUp`,
+  `guildBonus`, added in `stats()`).
+- System chat notes on joining / founding. Art (image model): `art-source/guild/{hall,icons}.webp` ->
+  `comp-guild-hall`, `comp-guild-icons` by `scripts/build-guild-art.py`; crests are the one crest icon hue-rotated.
+- Hosted bundle headroom is only about 0.1 MB now: compress older art before adding pictures.
+- Not done: guild wars, guild quests, applications from other players, roles management.
+
 ## In-chat playable preview (user requirement)
 The user wants to play the game inside the chat, and wants SHORT replies in Russian, no fluff.
 - Artifact: https://claude.ai/artifact/L9owNJPMaZjAsTmU3tDGs6 (private). After game changes, rebuild and republish:

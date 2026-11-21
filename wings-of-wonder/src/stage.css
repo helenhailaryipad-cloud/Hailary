@@ -7072,7 +7072,7 @@ body:has(#main button[data-back]) #stage>.return-to-menu{display:none}
 #main .den .den-trow p{font-size:.95em}
 #main .den .den-topware b{color:#8a4a00}
 /* Pets room: a small note at the top instead of a big banner over the buttons */
-body:is([data-screen=cityPet],[data-screen=cityBag],[data-screen=cityVault],[data-screen=cityDevour],[data-screen=cityCraft],[data-screen=citySummon],[data-screen=cityContest],[data-screen=citySocial]) #stage .toast{top:5.2%!important;bottom:auto!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:auto!important;max-width:72%!important;min-height:0!important;padding:7px 16px!important;border-radius:99px!important;font:700 14px/1.25 Arial,sans-serif!important;text-align:center}
+body:is([data-screen=cityPet],[data-screen=cityBag],[data-screen=cityVault],[data-screen=cityDevour],[data-screen=cityCraft],[data-screen=citySummon],[data-screen=cityContest],[data-screen=citySocial],[data-screen=cityGuild]) #stage .toast{top:5.2%!important;bottom:auto!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:auto!important;max-width:72%!important;min-height:0!important;padding:7px 16px!important;border-radius:99px!important;font:700 14px/1.25 Arial,sans-serif!important;text-align:center}
 #main .den .den-check small{font-size:.8em!important}
 
 /* Bag contents, warehouse and Devour (2026-11-20). Tiles share .satchel-stack; --rarity colours frame and plate. */
@@ -7183,9 +7183,9 @@ body:is([data-screen=cityVault],[data-screen=cityDevour]) #stage>#main{inset:0!i
 .boss-rare{color:#ffe08a;font-weight:700}
 
 /* Summon room (citySummon, 2026-11-21): Basic and Advanced wells, Mark Shop, Summon Festival. Root .satchel.well */
-body:is([data-screen=citySummon],[data-screen=cityContest],[data-screen=citySocial]) #stage{width:min(100%,55dvh);margin-inline:auto}
-body:is([data-screen=citySummon],[data-screen=cityContest],[data-screen=citySocial]) #stage>:is(header,nav,footer){display:none!important}
-body:is([data-screen=citySummon],[data-screen=cityContest],[data-screen=citySocial]) #stage>#main{inset:0!important;width:100%;height:100%;padding:0!important;display:block;overflow:auto}
+body:is([data-screen=citySummon],[data-screen=cityContest],[data-screen=citySocial],[data-screen=cityGuild]) #stage{width:min(100%,55dvh);margin-inline:auto}
+body:is([data-screen=citySummon],[data-screen=cityContest],[data-screen=citySocial],[data-screen=cityGuild]) #stage>:is(header,nav,footer){display:none!important}
+body:is([data-screen=citySummon],[data-screen=cityContest],[data-screen=citySocial],[data-screen=cityGuild]) #stage>#main{inset:0!important;width:100%;height:100%;padding:0!important;display:block;overflow:auto}
 .satchel.well{grid-template-rows:5.6% minmax(0,1fr) auto auto 8%;background-size:cover;background-position:50% 0;background-color:#27407a}
 .sum-ico{display:inline-block;width:1.5em;aspect-ratio:1;background:var(--sum-icons) no-repeat;background-size:300% 200%;font-style:normal;flex:none;vertical-align:middle}
 .well .satchel-top span :is(.sum-ico,.bag-ico,.gpt-icon){width:1.45em;height:1.45em;aspect-ratio:auto}
@@ -7625,3 +7625,55 @@ body[data-screen=home] #stage #main .city-chat .city-social::before,body[data-sc
 .chat-sheet .chat-block,.chat-sheet .chat-squad,.chat-sheet .chat-emoji{flex:none}
 #stage #main .chat-sheet .soc-check{flex:none;width:6cqw;height:6cqw;padding:0;border-radius:.2em;border:2px solid #cfe0ff;background:#0d1a2c}
 #stage #main .chat-sheet .soc-check[aria-pressed=true]{background:#5fbf6a;border-color:#eaffea;box-shadow:inset 0 0 0 2px #17401f}
+
+/* Guild room (cityGuild, 2026-11-21) */
+.gld-ico{display:inline-block;width:1.5em;aspect-ratio:1;background:var(--gld-icons) no-repeat;background-size:400% 200%;font-style:normal;flex:none;vertical-align:middle}
+.satchel.gld{grid-template-rows:5.6% auto minmax(0,1fr) auto 8%;background-size:cover;background-position:50% 30%;background-color:#2a3a5a}
+.satchel.gld-p-join,.satchel.gld-p-members,.satchel.gld-p-boss,.satchel.gld-p-shop,.satchel.gld-p-blessings{grid-template-rows:5.6% minmax(0,1fr) auto 8%}
+#stage #main .satchel.gld button::before,#stage #main .satchel.gld button::after{display:none}
+.gld .den-x{display:none}
+.gld .satchel-top>span .gld-ico{width:1.45em}
+.gld-head{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:3cqw;margin:1cqh 3%;padding:1.2cqh 3cqw;border-radius:.8em;background:#16233ee6;color:#fff}
+.gld-head .gld-crest{width:16cqw}
+.gld-head h2{margin:0;font:900 5.4cqw/1.1 Georgia,serif;font-style:italic;color:#ffe9a0}
+.gld-head small{display:block;margin:.3cqh 0 .8cqh;font:700 2.8cqw/1.2 Arial,sans-serif!important;color:#cfe0ff!important}
+.gld-bar{position:relative;display:block;height:3cqh;border-radius:2em;background:#0c1228;border:1px solid #8fa6d8;overflow:hidden}
+.gld-bar u{position:absolute;inset:0 auto 0 0;background:linear-gradient(#a6f08a,#3fb64a)}
+.gld-bar.boss u{background:linear-gradient(#ff8a8a,#d03a3a)}
+.gld-bar em{position:absolute;inset:0;display:grid;place-items:center;font:700 2.5cqw/1 Arial,sans-serif;font-style:normal;color:#fff;text-shadow:0 1px 1px #000}
+.gld-card{min-height:0;overflow:auto;margin:1cqh 3%;padding:1.4cqh 3cqw;border-radius:.8em;background:#16233ee6;color:#fff;display:grid;align-content:start;gap:1.2cqh}
+.gld-card h2{margin:0;font:900 5cqw/1.1 Georgia,serif;font-style:italic;color:#ffe9a0}.gld-card h2 small{font:700 3cqw/1 Arial,sans-serif;color:#cfe0ff}
+.gld-card>p{margin:0;font:400 2.9cqw/1.35 Arial,sans-serif;color:#dfe8ff}
+.gld-act,.gld-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:2.5cqw;padding:1cqh 2.5cqw;border-radius:.6em;background:#ffffff14}
+.gld-act .gld-ico{width:12cqw}.gld-row .gld-ico{width:12cqw}
+.gld-act b,.gld-row b{display:block;font:700 3.3cqw/1.2 Arial,sans-serif;color:#fff}
+.gld-act small,.gld-row small{font:400 2.6cqw/1.25 Arial,sans-serif!important;color:#cfe0ff!important}
+.gld-row b small{font-size:2cqw!important;opacity:.75}
+.gld-row .portrait-badge{width:11cqw;height:11cqw;border-radius:50%;filter:none}
+.gld-row.me{background:#ffe27a2e;outline:1px solid #ffe27a}
+.gld-row em{font:700 3.4cqw/1 Arial,sans-serif;font-style:normal;color:#ffe27a}
+.gld-cols{display:flex;justify-content:space-between;font-size:2.6cqw!important;color:#9fb0d8!important}
+#stage #main .gld .den-gold{padding:.55em 1.3em;border-radius:2em;border:0;background:linear-gradient(#ffe89a,#f0b548);color:#5a3a12;font:700 3.1cqw/1 Arial,sans-serif;white-space:nowrap}
+#stage #main .gld .den-gold:disabled{filter:grayscale(.8);opacity:.6}
+#stage #main .gld .gld-found{display:flex;align-items:center;justify-content:center;gap:.5em;justify-self:center;padding:.5em 2em;font-size:3.6cqw}
+.gld-found .gld-ico{width:2em}
+.gld-foot{display:flex;align-items:center;justify-content:space-between;margin:0 3%;font:400 2.5cqw/1.2 Arial,sans-serif;color:#fff;text-shadow:0 1px 2px #000}
+#stage #main .gld .gld-leave{padding:.4em 1em;border-radius:2em;background:#5a1d24cc;border:1px solid #ff8a8a;color:#fff;font:700 2.6cqw/1 Arial,sans-serif}
+.gld-nav .gld-ico{width:7cqw}
+#stage #main .gld-nav button:not([data-back]){width:16%;font-size:2.4cqw!important}
+.gld-bossroom{justify-items:stretch}
+.gld-boss-art{position:relative;justify-self:center;width:62%;aspect-ratio:1}
+.gld-boss-art img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 6px 8px #000a)}
+.gld-boss-art.hit img{animation:gld-shake .5s}
+@keyframes gld-shake{20%{transform:translateX(-4%) rotate(-3deg)}40%{transform:translateX(4%) rotate(3deg)}60%{transform:translateX(-2%)}80%{transform:translateX(2%)}}
+.gld-dmg{position:absolute;left:50%;top:20%;transform:translateX(-50%);font:900 7cqw/1 Arial,sans-serif;color:#ffd84a;text-shadow:0 2px 0 #7a2a00,0 0 8px #000;animation:gld-rise 1.2s ease-out forwards;pointer-events:none}
+@keyframes gld-rise{to{transform:translate(-50%,-80%);opacity:0}}
+.gld-board{display:grid;gap:.4cqh}
+.gld-board>div{display:grid;grid-template-columns:7cqw minmax(0,1fr) auto;gap:2cqw;padding:.6cqh 2cqw;border-radius:.4em;background:#ffffff12;font:700 2.9cqw/1.2 Arial,sans-serif}
+.gld-board>div.me{background:#ffe27a2e;outline:1px solid #ffe27a}.gld-board b{color:#ffe27a}.gld-board em{font-style:normal;color:#ff9a9a}.gld-board small{font-size:2cqw;opacity:.7}
+.gld .mart-grid .shop-card .bag-ico{width:62%}
+#stage #modal.den-pop .gld-name{width:100%;box-sizing:border-box;margin:6px 0;padding:8px 10px;border-radius:10px;border:2px solid #8fb3d8;font:400 15px/1.2 Arial,sans-serif}
+.gld-crests{display:flex;justify-content:center;gap:10px;margin:6px 0 10px}
+#stage #modal.den-pop .gld-crests button{width:60px;height:60px;min-height:0;padding:4px;border-radius:12px;background:#ffffff14;border:2px solid transparent}
+#stage #modal.den-pop .gld-crests button[aria-pressed=true]{border-color:#ffe27a;background:#ffe27a33}
+#stage #modal.den-pop .gld-crests .gld-ico{width:100%}

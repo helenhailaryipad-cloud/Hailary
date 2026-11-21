@@ -853,3 +853,42 @@ vm.runInContext(`
 }
 `,context);
 console.log('PASS: Social: daily mail and thank-you notes, claim and delete, flowers and hearts, requests and blacklist, chat feed and replies, screens.');
+
+vm.runInContext(`
+{const r=WonderGear,R=r.guildRules,T0=Date.UTC(2026,10,21,12),day=864e5;
+ S=defaults();if(S.guild!==undefined||r.guildState(S)||!valid(S))throw Error('No guild at first');
+ // Join an AI guild, or found one for gold; one guild at a time.
+ if(!r.guildJoin(S,'star')||r.guildJoin(S,'moon')||S.guild.role!==2||r.guildLevel(S.guild.exp).lv!==4||!valid(S))throw Error('Join');
+ r.guildLeave(S);S.gold=100;if(r.guildCreate(S,'Leaf Wings',1))throw Error('Found without gold');S.gold=5000;
+ if(r.guildCreate(S,'<x>',0)||r.guildCreate(S,'Leaf Wings',9)||!r.guildCreate(S,'Leaf Wings',1)||S.gold!==3000||S.guild.role!==0||S.guild.members.length!==3)throw Error('Found');
+ if(r.guildLevel(0).lv!==1||r.guildLevel(1000).lv!==2||r.guildLevel(3000).lv!==3||r.guildLevel(1e9).lv!==R.maxLevel)throw Error('Guild level');
+ // Check-in once a day; donations with daily limits.
+ if(!r.guildSign(S,T0)||r.guildSign(S,T0)||r.guildState(S,T0).exp!==R.signExp||r.guildState(S,T0).coins!==R.signCoins)throw Error('Check-in');
+ if(!r.guildSign(S,T0+day))throw Error('Next day check-in');
+ S.gold=10000;for(let i=0;i<R.goldTimes;i++)if(!r.guildDonate(S,'gold',T0+day))throw Error('Gold donation');
+ if(r.guildDonate(S,'gold',T0+day)||S.gold!==10000-R.goldTimes*R.goldDonate)throw Error('Gold limit');
+ S.scales=0;if(r.guildDonate(S,'gems',T0+day))throw Error('Prisms without prisms');S.scales=100;if(!r.guildDonate(S,'gems',T0+day)||r.guildDonate(S,'gems',T0+day)||r.guildDonate(S,'nope',T0+day))throw Error('Prism donation');
+ // Boss: three hits a day; AI members chip in through the day; the reward pays once and only after it falls.
+ const late=T0+day+10*36e5;let b=r.guildBoss(S,late);if(b.dead||b.hits)throw Error('Fresh boss');
+ for(let i=0;i<R.bossHits;i++)if(!(r.guildHit(S,()=>.5,late)>0))throw Error('Hit');
+ if(r.guildHit(S,()=>.5,late)!==null||r.guildBoss(S,late).hits!==R.bossHits||r.guildBossClaim(S,late))throw Error('Hit limit and early claim');
+ const end=T0+day+11*36e5;S.guild.dmg=r.guildBossHp(S);b=r.guildBoss(S,end);
+ const coins=r.guildState(S,end).coins,prize=r.guildBossClaim(S,end);if(!b.dead||!prize||r.guildState(S,end).coins!==coins+R.bossCoins||r.guildBossClaim(S,end)||prize.rank!==1||r.bagCount(S,'chest2')<1)throw Error('Boss reward');
+ // Shop: coins, weekly limit, guild level gate.
+ S.guild.coins=5000;if(!r.guildBuy(S,'wish',end)||r.guildBuy(S,'chest3',end))throw Error('Shop level gate');
+ for(let i=1;i<3;i++)r.guildBuy(S,'wish',end);if(r.guildBuy(S,'wish',end)||!r.guildBuy(S,'wish',end+7*day))throw Error('Weekly limit');
+ // Blessings: contribution, capped by guild level, add to Reina's stats.
+ const before=stats().attack;S.guild.contrib=100000;S.guild.exp=0;
+ if(!r.guildSkillUp(S,'atk')||!r.guildSkillUp(S,'atk')||r.guildSkillUp(S,'atk')||r.guildSkillUp(S,'nope'))throw Error('Blessing cap');
+ if(stats().attack<=before||r.guildBonus(S).attack!==2*R.skillStep.atk||!valid(JSON.parse(JSON.stringify(S))))throw Error('Blessing bonus');
+ for(const bad of [{id:'x'},{name:'<b>'},{role:5},{gold:9},{hits:4},{members:['nope']},{bought:{chest3:9}},{skills:{atk:99,hp:0,def:0}}])if(valid({...S,guild:{...S.guild,...bad}}))throw Error('Invalid guild accepted '+JSON.stringify(bad));
+ // Screens: join list, Found window, the five pages and leaving.
+ S=defaults();openScreen('cityGuild');if(!$('#main').innerHTML.includes("guildJoinPick('dawn')")||!$('#main').innerHTML.includes('guildFound()'))throw Error('Join page');
+ guildJoinPick('dawn');for(const p of ['Hall','Members','Boss','Shop','Blessings']){guildGo(p);if(!$('#main').innerHTML.includes('gld-p-'+p.toLowerCase()))throw Error('Guild page '+p)}
+ guildGo('Hall');guildSignNow();if(!r.guildState(S).signed)throw Error('Check in from the hall');
+ guildGo('Boss');guildStrike();if(r.guildState(S).hits!==1)throw Error('Attack from the boss page');
+ if(!cityGroups.flat().some(x=>x[1]==='Guild'&&x[2]==='cityGuild'))throw Error('Home Guild icon');
+ WonderGear.guildLeave(S);cityGuild();if(!$('#main').innerHTML.includes('Join a Guild'))throw Error('Leave');
+}
+`,context);
+console.log('PASS: Guild: join and found, levels, check-in, donations, daily boss with AI members, shop limits, blessings, screens.');
