@@ -7172,3 +7172,12 @@ body:is([data-screen=cityVault],[data-screen=cityDevour]) #stage>#main{inset:0!i
 #stage #main .loom .loom-row>*{width:17.5%}
 .loom .loom-row .gear-tier{display:none}
 #stage #main .satchel .maw-auto::before{display:none}
+/* Guardian drop list (dungeon lobby -> Rare drops) */
+#stage #main .lobby-rewards .lobby-rare{position:static;width:100%;min-width:0;min-height:0;margin:.3rem 0 0;padding:.3rem .1rem;border:1px solid #ffd98a;border-radius:.5rem;background:linear-gradient(#7a4fd0,#4b2c94);color:#fff;font:700 clamp(.62rem,2.3cqw,.8rem)/1.1 Arial,sans-serif}
+#stage #main .lobby-rewards .lobby-rare::before,#stage #main .lobby-rewards .lobby-rare::after{display:none}
+.loot-list{display:grid;gap:6px;margin:8px 0 4px}
+.loot-row{display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:10px;padding:4px 10px 4px 4px;border-radius:10px;background:#ffffff14;text-align:left}
+.loot-row span{display:grid;place-items:center;width:44px;height:44px;border:2px solid var(--rarity);border-radius:8px;background:linear-gradient(160deg,color-mix(in srgb,var(--rarity) 60%,#1c2244),color-mix(in srgb,var(--rarity) 24%,#1c2244));overflow:hidden}
+#stage #modal .loot-row span :is(img,.bag-ico){width:38px;height:38px;object-fit:contain;aspect-ratio:auto}
+.loot-row b{font:700 14px/1.2 Arial,sans-serif;color:#fff}.loot-row em{font:700 13px/1 Arial,sans-serif;font-style:normal;color:#ffe08a}
+.boss-rare{color:#ffe08a;font-weight:700}
