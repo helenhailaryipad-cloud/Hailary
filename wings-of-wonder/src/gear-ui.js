@@ -777,77 +777,132 @@ function homeChat(){
 }
 
 // ---- Guild room (rules: WonderGear.guild*). Without a guild: a list of AI guilds to join and Found a Guild. --------
-let guildPage='Hall',guildCrestPick=0;
+let guildPage='Info',guildTab='Info',guildCrestPick=0,guildPick='attack';
 function guildArtVars(){const root=document.documentElement;if(!root?.style?.setProperty||root.style.getPropertyValue('--gld-icons'))return;root.style.setProperty('--gld-icons','url("'+artPath('comp-guild-icons')+'")')}
 // 0 crest, 1 check-in, 2 gold, 3 prisms, 4 boss, 5 guild coin, 6 blessings, 7 shop
 const gldIcon=n=>'<i class="gld-ico" style="background-position:'+(n%4)/3*100+'% '+Math.floor(n/4)*100+'%"></i>';
 const gldCrest=c=>'<i class="gld-ico gld-crest" style="background-position:0% 0%;filter:hue-rotate('+[0,110,210,300][c]+'deg)"></i>';
 const guildBossArt='guardian-t21';
-function guildGo(page){guildPage=page;if(screen==='cityGuild')cityGuild();else go('cityGuild')}
-function guildJoinPick(id){if(WonderGear.guildJoin(S,id)){WonderGear.socialNote(S,'Joined the guild '+S.guild.name+'.');save();guildPage='Hall';cityGuild();toast('Welcome to '+S.guild.name+'!')}}
+const gldPower=n=>n>=1e6?(n/1e6).toFixed(1).replace(/\.0$/,'')+'M':n>=1e4?Math.round(n/1e3)+'K':fmt(n);
+function guildGo(page,tab){guildPage=page;if(tab)guildTab=tab;if(screen==='cityGuild')cityGuild();else go('cityGuild')}
+function guildJoinPick(id){if(WonderGear.guildJoin(S,id)){WonderGear.socialNote(S,'Joined the guild '+S.guild.name+'.');save();guildPage='Info';guildTab='Info';cityGuild();toast('Welcome to '+S.guild.name+'!')}}
 function guildFound(){
  popup(`<h2>Found a Guild</h2><p>Costs ${fmt(WonderGear.guildRules.createGold)} gold. Your first three friends join you.</p><input id="guildName" maxlength="16" placeholder="Guild name (3–16 letters)" class="gld-name"><div class="gld-crests">${[0,1,2,3].map(c=>`<button aria-pressed="${c===guildCrestPick}" onclick="guildCrestPick=${c};this.parentNode.querySelectorAll('button').forEach((b,i)=>b.setAttribute('aria-pressed',i===${c}))">${denPlain}${gldCrest(c)}</button>`).join('')}</div><div class="den-actions"><button class="den-gold" onclick="guildFoundNow()">${denPlain}Found · ${fmt(WonderGear.guildRules.createGold)} gold</button></div>`);
 }
 function guildFoundNow(){
  const name=document.getElementById('guildName')?.value||'';
  if(!WonderGear.guildCreate(S,name,guildCrestPick)){toast(S.gold<WonderGear.guildRules.createGold?'Not enough gold.':'Name: 3–16 letters or numbers.');return}
- WonderGear.socialNote(S,'Founded the guild '+S.guild.name+'.');save();$('#modal').close();guildPage='Hall';cityGuild();toast('Guild founded!');
+ WonderGear.socialNote(S,'Founded the guild '+S.guild.name+'.');save();$('#modal').close();guildPage='Info';guildTab='Info';cityGuild();toast('Guild founded!');
 }
-function guildLeaveAsk(){popup(`<h2>Leave ${esc(S.guild.name)}?</h2><p>Guild coins, contribution and blessings stay with the guild.</p><div class="den-actions"><button class="den-gold" onclick="WonderGear.guildLeave(S);save();$('#modal').close();cityGuild()">${denPlain}Leave</button></div>`)}
-function guildSignNow(){if(WonderGear.guildSign(S)){save();cityGuild();toast('Checked in: +'+WonderGear.guildRules.signExp+' guild EXP')}else toast('Already checked in today.')}
+function guildLeaveAsk(){popup(`<h2>Leave ${esc(S.guild.name)}?</h2><p>Guild coins, contribution and Academy levels stay with the guild.</p><div class="den-actions"><button class="den-gold" onclick="WonderGear.guildLeave(S);save();$('#modal').close();cityGuild()">${denPlain}Leave</button></div>`)}
+function guildSignNow(){if(WonderGear.guildSign(S)){save();cityGuild();toast('Signed in: +'+WonderGear.guildRules.signFund+' guild fund')}else toast('Already signed in today.')}
 function guildGive(kind){if(WonderGear.guildDonate(S,kind)){save();cityGuild();toast('Thank you for the donation!')}else toast(kind==='gold'?'No gold donations left today, or not enough gold.':'Already donated prisms today, or not enough prisms.')}
+function guildUpPop(){
+ const r=WonderGear,g=r.guildState(S),R=r.guildRules,max=g.lv>=R.maxLevel,cost=r.guildUpFund(g.lv),can=g.role<=1;
+ popup(`<h2>Guild Level ${g.lv}${max?'':' → '+(g.lv+1)}</h2>${max?'<p>The guild has reached the highest level.</p>':`<p>Members: ${r.guildCap(g.lv)} → <b>${r.guildCap(g.lv+1)}</b><br>Academy cap: Lv. ${r.guildAcademyCap(g.lv)} → <b>${r.guildAcademyCap(g.lv+1)}</b></p><p>Guild fund: <b>${fmt(g.fund)} / ${fmt(cost)}</b></p>
+ ${can?`<div class="den-actions"><button class="den-gold" ${g.fund>=cost?'':'disabled'} onclick="guildUpNow()">${denPlain}Upgrade</button></div>`:'<p>Only the leader or an elder can upgrade. The AI leader upgrades as soon as the fund is full.</p>'}`}`);
+}
+function guildUpNow(){if(WonderGear.guildUpgrade(S)){save();$('#modal').close();cityGuild();toast('Guild level '+S.guild.lv+'!')}}
+function guildEditPop(kind){
+ const g=WonderGear.guildState(S),R=WonderGear.guildRules,max=kind==='note'?R.noteMax:R.speakerMax;
+ popup(`<h2>${kind==='note'?'Guild Announcement':'Edit Speaker'}</h2><p>${kind==='note'?'Every member sees it on the Info page.':'The line members see when someone signs in.'}</p><textarea id="guildText" maxlength="${max}" class="gld-name" rows="3">${esc(g[kind])}</textarea><div class="den-actions"><button class="den-gold" onclick="guildEditNow('${kind}')">${denPlain}Save</button></div>`);
+}
+function guildEditNow(kind){const t=document.getElementById('guildText')?.value||'';if((kind==='note'?WonderGear.guildNote:WonderGear.guildSpeaker)(S,t)){save();$('#modal').close();cityGuild()}else toast('Write a few words first.')}
+function guildBoxNow(i){const items=WonderGear.guildBoxClaim(S,i);if(!items){const b=WonderGear.guildActivity(S).boxes[i];toast(b.claimed?'Already opened today.':'Needs '+b.at+' sign-in activity.');return}save();cityGuild();bagArtVars();popup('<h2>Sign-in Chest</h2><div class="bag-gains">'+cloudItems(items)+'</div>')}
+function guildEnvOpen(id){
+ const r=WonderGear,e=r.guildEnvelopes(S).find(x=>x.id===id);if(!e)return;
+ if(!e.claimed&&!e.own){const got=r.guildEnvClaim(S,id);if(got){save();cityGuild();e.takers.push({id:'me',amount:got.amount});e.claimed=true;e.best=[...e.takers].sort((a,b)=>b.amount-a.amount)[0].id}}
+ const unit=e.kind==='gold'?uiIcon('gold'):e.kind==='wishes'?'✦':gldIcon(3),who=t=>t.id==='me'?esc(S.name):folk(t.id).name+' <small>AI</small>';
+ const sender=e.from==='me'?esc(S.name):folk(e.from).name+' <small>AI</small>';
+ popup(`<div class="gld-env-pop"><div class="gld-env big"><i></i></div><h2>${sender}</h2><p>“${esc(e.note)}”</p>${e.claimed&&!e.own?`<p class="gld-env-got">You received <b>${unit} ${e.takers.find(t=>t.id==='me').amount}</b> ${e.kind}</p>`:''}
+ <h3>Check Others' Luck · ${e.takers.length}/${e.shares}</h3><div class="gld-board">${e.takers.map(t=>`<div class="${t.id==='me'?'me':''}"><b>${t.id===e.best?'★':''}</b><span>${who(t)}</span><em>${unit} ${t.amount}</em></div>`).join('')}</div></div>`);
+}
+function guildEnvRecords(){
+ const r=WonderGear,list=r.guildEnvelopes(S),mine=list.filter(e=>e.claimed&&!e.own),sent=list.filter(e=>e.own);
+ popup(`<h2>Surprise Bag Records</h2><div class="gld-board">${mine.map(e=>`<div><b>⬇</b><span>From ${folk(e.from).name} <small>AI</small></span><em>${e.takers.find(t=>t.id==='me').amount} ${e.kind}</em></div>`).join('')}${sent.map(e=>`<div class="me"><b>⬆</b><span>You sent a Surprise Bag</span><em>${e.total} prisms</em></div>`).join('')||''}${mine.length+sent.length?'':'<p>No bags opened or sent today.</p>'}</div>`);
+}
+function guildEnvSendAsk(){const R=WonderGear.guildRules,g=WonderGear.guildState(S);popup(`<h2>Send Surprise Bag</h2><p>${R.envCost} prisms shared out among ${R.envShares} guild members. You gain +${R.envGain} contribution and the guild fund +${R.envCost}.</p><p>Sent today: ${g.envSent}/${R.envSendMax}</p><div class="den-actions"><button class="den-gold" ${g.envSent<R.envSendMax&&S.scales>=R.envCost?'':'disabled'} onclick="guildEnvSendNow()">${denPlain}Send · ${R.envCost} prisms</button></div>`)}
+function guildEnvSendNow(){if(WonderGear.guildEnvSend(S)){save();$('#modal').close();cityGuild();toast('Surprise Bag sent!')}else toast('Not enough prisms, or three bags sent today.')}
 function guildStrike(){
- const dmg=WonderGear.guildHit(S);if(dmg===null){toast('No attacks left today, or the boss is down.');return}
+ const dmg=WonderGear.guildHit(S);if(dmg===null){toast(WonderGear.guildState(S).reserved?'No challenges left today, or the beast is down.':'Book the beast first.');return}
  save();cityGuild();const stage=document.querySelector('.gld-boss-art');if(stage?.insertAdjacentHTML){stage.classList.add('hit');stage.insertAdjacentHTML('beforeend',`<b class="gld-dmg">-${fmt(dmg)}</b>`)}
 }
-function guildClaimBoss(){const r=WonderGear.guildBossClaim(S);if(!r)return;save();cityGuild();bagArtVars();popup('<h2>Boss Defeated</h2><p>Your rank today: <b>'+r.rank+'</b></p><div class="bag-gains"><span class="bag-gain" style="--rarity:#ffcf5a">'+gldIcon(5)+'<b>+'+r.coins+'</b><small>Guild coins</small></span>'+cloudItems(r.items)+'</div>')}
+function guildReserveNow(){if(WonderGear.guildReserve(S)){save();cityGuild();toast('The Guild Beast is booked for today!')}else toast('Only the leader books the beast, for '+WonderGear.guildRules.reserveFund+' guild fund.')}
+function guildClaimBoss(){
+ const r=WonderGear.guildBossClaim(S);if(!r)return;save();cityGuild();bagArtVars();const q=WonderGear.gearRanks[r.quality];
+ popup('<h2>Guild Beast Defeated</h2><p>Your damage rank today: <b>'+r.rank+'</b></p><div class="bag-gains"><span class="bag-gain" style="--rarity:#ffcf5a">'+gldIcon(5)+'<b>+'+r.coins+'</b><small>Guild coins</small></span>'+cloudItems(r.items)+'</div>'+(r.gear?'<p>Divine Beast Drop: <b style="color:'+q.color+'">'+q.name+' '+WonderGear.catalog[r.gear.template].name+'</b> (T'+WonderGear.catalog[r.gear.template].tier+') is in the bag.</p>':'<p>The bag is full: the piece became enhancement stones.</p>'));
+}
+function guildBeastRules(){const R=WonderGear.guildRules;popup(`<h2>Guild Beast</h2><p>One beast a day, of the tier you have reached. In your own guild the leader books it for ${R.reserveFund} guild fund; AI guilds book it every day.</p><p>Every member has ${R.bossHits} challenges. The beast falls when the guild's total damage reaches its HP (${fmt(R.bossHp)} × guild level). Then everyone who hit it claims a reward by damage rank.</p><p>The beast's HP and rewards reset at 00:00 UTC.</p>`)}
+function guildBeastPreview(){
+ const r=WonderGear,t=r.guildBeastTier(S);bagArtVars();
+ popup(`<h2>Reward Preview</h2><div class="gld-board gld-prev">${r.guildBossRank.map((x,i)=>{const q=r.gearRanks[x.rank],from=i?r.guildBossRank[i-1].to+1:1;return `<div><b>${from===x.to?'#'+x.to:x.to>50?'#'+from+'+':'#'+from+'–'+x.to}</b><span><i style="color:${q.color}">T${t} ${q.name} gear</i> · ${Object.entries(x.items).map(([id,n])=>r.bagItemById[id].name+' ×'+n).join(', ')} · ${r.guildRules.bossCoins} coins</span></div>`}).join('')}</div>`);
+}
 function guildBuyNow(id){if(WonderGear.guildBuy(S,id)){save();cityGuild();toast(WonderGear.bagItemById[id].name+' sent to the bag')}else toast('Not enough guild coins, sold out, or the guild level is too low.')}
-function guildSkill(key){if(WonderGear.guildSkillUp(S,key)){save();cityGuild()}else toast('Not enough contribution, or the guild level caps this blessing.')}
+function guildLearnNow(){if(WonderGear.guildLearn(S,guildPick)){save();cityGuild()}else toast('Not enough contribution, or the guild level caps this stat.')}
+function guildAcademyValue(a,n){const v=Math.round(n*a.step*100)/100;return '+'+fmt(v)+(WonderGear.percentKeys.has(a.key)?'%':'')}
 function cityGuild(){
  const r=WonderGear,g=r.guildState(S),R=r.guildRules;guildArtVars();bagArtVars();
  const wallet=g?sumChip(gldIcon(5),g.coins,'Guild coins')+sumChip(gldIcon(1),g.contrib,'Contribution'):sumChip(uiIcon('gold'),S.gold,'Gold');
  if(!g){
-  const rows=r.guildList.map(t=>{const lv=r.guildLevel(t.exp).lv;return `<div class="gld-row">${gldCrest(t.crest)}<div><b>${t.name}</b><small>Lv. ${lv} · ${t.members.length+1}/20 members · AI guild</small></div><button class="den-gold" onclick="guildJoinPick('${t.id}')">${denPlain}Join</button></div>`}).join('');
+  const rows=r.guildList.map(t=>{const lv=r.guildLevel(t.exp).lv;return `<div class="gld-row">${gldCrest(t.crest)}<div><b>${t.name}</b><small>Lv. ${lv} · ${t.members.length+1}/${r.guildCap(lv)} members · AI guild</small></div><button class="den-gold" onclick="guildJoinPick('${t.id}')">${denPlain}Join</button></div>`}).join('');
   $('#main').innerHTML=`<section class="satchel gld gld-p-join" style="background-image:url('${artPath('comp-guild-hall')}')"><div class="satchel-top"><strong>Guild</strong>${wallet}</div>
-  <div class="gld-card"><h2>Join a Guild</h2><p>Guild members check in, donate, fight the daily guild boss together and share blessings. Everyone else here is an AI adventurer.</p>${rows}<button class="den-gold gld-found" onclick="guildFound()">${denPlain}${gldCrest(guildCrestPick)}Found a Guild</button></div>
+  <div class="gld-card"><h2>Join a Guild</h2><p>Guild members sign in, donate, study at the Academy and fight the Guild Beast together. Everyone else here is an AI adventurer.</p>${rows}<button class="den-gold gld-found" onclick="guildFound()">${denPlain}${gldCrest(guildCrestPick)}Found a Guild</button></div>
   <div class="satchel-nav well-nav gld-nav"><button data-back aria-label="Back to city" onclick="go('home')">‹</button></div></section>`;
   return;
  }
- const lv=r.guildLevel(g.exp),role=r.guildRoles[g.role];
- if(!['Hall','Members','Boss','Shop','Blessings'].includes(guildPage))guildPage='Hall';
- let body='';
- if(guildPage==='Hall'){
-  const act=(icon,title,note,btn,on,click)=>`<div class="gld-act">${gldIcon(icon)}<div><b>${title}</b><small>${note}</small></div><button class="den-gold" ${on?'':'disabled'} onclick="${click}">${denPlain}${btn}</button></div>`;
-  const boss=r.guildBoss(S);
-  body=`<div class="gld-head">${gldCrest(g.crest)}<div><h2>${esc(g.name)}</h2><small>Lv. ${lv.lv} · ${g.members.length+1}/20 members · you: ${role}</small><i class="gld-bar"><u style="width:${lv.need?lv.into/lv.need*100:100}%"></u><em>${lv.need?fmt(lv.into)+' / '+fmt(lv.need)+' EXP':'Max level'}</em></i></div></div>
-  <div class="gld-card">${act(1,'Daily Check-in','+'+R.signExp+' guild EXP · +'+R.signContrib+' contribution · +'+R.signCoins+' coins','Check in',!g.signed,'guildSignNow()')}
-  ${act(2,'Donate Gold',fmt(R.goldDonate)+' gold → +'+R.goldExp+' EXP · +'+R.goldGain+' contribution & coins · '+(R.goldTimes-g.gold)+'/'+R.goldTimes+' left','Donate',g.gold<R.goldTimes&&S.gold>=R.goldDonate,"guildGive('gold')")}
-  ${act(3,'Donate Prisms',R.gemDonate+' prisms → +'+R.gemExp+' EXP · +'+R.gemGain+' contribution & coins · '+(R.gemTimes-g.gems)+'/'+R.gemTimes+' left','Donate',g.gems<R.gemTimes&&S.scales>=R.gemDonate,"guildGive('gems')")}
-  ${act(4,'Guild Boss',boss.dead?'Defeated today':'HP '+Math.round(boss.left/boss.hp*100)+'% · attacks '+(R.bossHits-boss.hits)+'/'+R.bossHits,'Go',true,"guildGo('Boss')")}</div>
-  <p class="gld-foot"><button class="gld-leave" onclick="guildLeaveAsk()">${denPlain}Leave guild</button>Guild chat: Home → chat → Guild</p>`;
- }else if(guildPage==='Members'){
-  const today=id=>[...(g.id+id+g.day)].reduce((h,c)=>(h*31+c.charCodeAt(0))%997,7)%120;
-  const rows=[{id:'me',role:g.role},...g.members.map((id,i)=>({id,role:g.role===0?(i===0?1:2):(i===0?0:i===1?1:2)}))].map(m=>m.id==='me'
-   ?`<div class="gld-row me">${portrait('reina')}<div><b>${esc(S.name)}</b><small>Lv. ${level()} · ${r.guildRoles[m.role]} · Online</small></div><em>${g.contrib}</em></div>`
-   :`<div class="gld-row">${folkFace(m.id)}<div><b>${folk(m.id).name} <small>AI</small></b><small>Lv. ${folkLevel(m.id)} · ${r.guildRoles[m.role]} · ${folkStatus(m.id).text}</small></div><em>${today(m.id)}</em></div>`).join('');
-  body=`<div class="gld-card"><h2>Members <small>${g.members.length+1}/20</small></h2><p class="gld-cols"><span>Member</span><span>Contribution today</span></p>${rows}</div>`;
- }else if(guildPage==='Boss'){
-  const b=r.guildBoss(S),name=m=>m.id==='me'?esc(S.name):folk(m.id).name+' <small>AI</small>';
-  body=`<div class="gld-card gld-bossroom"><h2>Guild Boss · Lv. ${lv.lv}</h2><div class="gld-boss-art">${artImage(guildBossArt,'Guild boss')}</div>
-  <i class="gld-bar boss"><u style="width:${b.left/b.hp*100}%"></u><em>${b.dead?'Defeated':fmt(b.left)+' / '+fmt(b.hp)}</em></i>
-  <div class="den-actions">${b.dead?`<button class="den-gold" ${b.done||!g.dmg?'disabled':''} onclick="guildClaimBoss()">${denPlain}${b.done?'Reward claimed':g.dmg?'Claim reward':'You did not attack'}</button>`:`<button class="den-gold" ${b.hits>=R.bossHits?'disabled':''} onclick="guildStrike()">${denPlain}Attack · ${R.bossHits-b.hits}/${R.bossHits}</button>`}</div>
-  <p>Every member attacks during the day; the boss falls when the guild's total damage reaches its HP. Your rank decides the chest.</p>
+ if(!['Info','Academy','Beast','Shop'].includes(guildPage))guildPage='Info';
+ if(!['Info','Member','Ranking','Envelope'].includes(guildTab))guildTab='Info';
+ const leader=g.role===0?esc(S.name):folk(g.members[0]).name+' <small>AI</small>',cap=r.guildCap(g.lv);
+ let body='',tabs='';
+ if(guildPage==='Info'){
+  tabs=`<div class="gld-tabs">${[['Info','Info'],['Member','Member'],['Ranking','Ranking'],['Envelope','Red Envelope']].map(([k,n])=>`<button ${k===guildTab?'aria-current="page"':''} onclick="guildGo('Info','${k}')">${denPlain}${n}${k==='Envelope'&&r.guildEnvelopes(S).some(e=>!e.claimed&&!e.own)?'<i class="gld-dot"></i>':''}</button>`).join('')}</div>`;
+  if(guildTab==='Info'){
+   const act=r.guildActivity(S),up=g.lv<R.maxLevel?r.guildUpFund(g.lv):0;
+   const box=(b,i)=>`<button class="gld-box ${b.claimed?'open':b.ready?'ready':''}" onclick="guildBoxNow(${i})">${denPlain}${bagIcon(i?'chest2':'chest1')}<small>${b.claimed?'✓':b.at}</small></button>`;
+   const card=(name,val,icon)=>`<div class="gi-card">${icon}<small>${name}</small><b>${val}</b></div>`;
+   body=`<div class="gi-body"><div class="gi-stage"><div class="gi-banner">${gldCrest(g.crest)}<b>${esc(g.name)}</b></div>
+    <div class="gi-sign"><button class="gi-signbtn ${g.signed?'done':''}" onclick="guildSignNow()">${denPlain}${gldIcon(1)}<b>${g.signed?'Signed':'Sign-in'}</b></button><i class="gld-bar"><u style="width:${Math.min(100,act.points/r.guildSignBoxes[1].at*100)}%"></u><em>${act.points}</em></i>${act.boxes.map(box).join('')}</div></div>
+    <div class="gi-panel"><div class="gi-lead"><span>${warIcon(7)}<b>${leader}</b></span><button class="gi-up" onclick="guildUpPop()">${denPlain}Guild Level: <b>${g.lv}</b>${g.lv<R.maxLevel?'<i>↑</i>':''}</button></div>
+    <div class="gi-note"><h3>Guild Announcement${g.role<=1?`<button class="gi-edit" onclick="guildEditPop('note')">${denPlain}✎</button>`:''}</h3><p>${esc(g.note)}</p></div>
+    <div class="gi-cards">${card('Guild Fund',fmt(g.fund),gldIcon(2))}${card('Guild Members',(g.members.length+1)+'/'+cap,gldIcon(1))}${card('Guild Power',gldPower(r.guildPower(S)),gldIcon(4))}${card('Upgrade Funds',up?gldPower(g.fund)+'/'+gldPower(up):'Max',gldIcon(0))}</div>
+    <div class="gi-speak"><span>📣</span><p>${esc(g.speaker)}</p>${g.role<=1?`<button onclick="guildEditPop('speaker')">${denPlain}Edit Speaker</button>`:''}</div>
+    <div class="gi-give"><button onclick="guildGive('gold')" ${g.gold<R.goldTimes&&S.gold>=R.goldDonate?'':'disabled'}>${denPlain}${gldIcon(2)}Donate ${fmt(R.goldDonate)} gold <small>${R.goldTimes-g.gold}/${R.goldTimes}</small></button><button onclick="guildGive('gems')" ${g.gems<R.gemTimes&&S.scales>=R.gemDonate?'':'disabled'}>${denPlain}${gldIcon(3)}Donate ${R.gemDonate} prisms <small>${R.gemTimes-g.gems}/${R.gemTimes}</small></button></div>
+    <p class="gld-foot"><button class="gld-leave" onclick="guildLeaveAsk()">${denPlain}Leave guild</button>Guild chat: Home → chat → Guild</p></div></div>`;
+  }else if(guildTab==='Member'){
+   const today=id=>[...(g.id+id+g.day)].reduce((h,c)=>(h*31+c.charCodeAt(0))%997,7)%120;
+   const rows=[{id:'me',role:g.role},...g.members.map((id,i)=>({id,role:g.role===0?(i===0?1:2):(i===0?0:i===1?1:2)}))].map(m=>m.id==='me'
+    ?`<div class="gld-row me">${portrait('reina')}<div><b>${esc(S.name)}</b><small>Lv. ${level()} · ${r.guildRoles[m.role]} · Power ${gldPower(stats().power)} · Online</small></div><em>${g.contrib}</em></div>`
+    :`<div class="gld-row">${folkFace(m.id)}<div><b>${folk(m.id).name} <small>AI</small></b><small>Lv. ${folkLevel(m.id)} · ${r.guildRoles[m.role]} · Power ${gldPower(r.guildFolkPower(m.id,g.lv))} · ${folkStatus(m.id).text}</small></div><em>${today(m.id)}</em></div>`).join('');
+   body=`<div class="gld-card"><h2>Members <small>${g.members.length+1}/${cap}</small></h2><p class="gld-cols"><span>Member</span><span>Contribution today</span></p>${rows}</div>`;
+  }else if(guildTab==='Ranking'){
+   body=`<div class="gld-card"><h2>Guild Ranking <small>by Guild Power</small></h2>${r.guildRanking(S).map(x=>`<div class="gld-row gld-rank ${x.mine?'me':''}"><b class="gld-no">${x.rank}</b>${gldCrest(x.crest)}<div><b>${esc(x.name)}${x.mine?'':' <small>AI</small>'}</b><small>Lv. ${x.lv} · ${x.members} members</small></div><em>${gldPower(x.power)}</em></div>`).join('')}</div>`;
+  }else{
+   const envs=r.guildEnvelopes(S);
+   body=`<div class="gld-card gld-envs"><h2>Red Envelope<button class="gi-rec" onclick="guildEnvRecords()">${denPlain}Surprise Bag Records</button></h2><div class="gld-env-grid">${envs.map(e=>{const from=e.from==='me'?esc(S.name):folk(e.from).name;
+    return `<button class="gld-envc ${e.claimed?'claimed':''}" onclick="guildEnvOpen('${e.id}')">${denPlain}<div class="gld-env"><i></i></div><b>${from}${e.from==='me'?'':' <small>AI</small>'}</b><small>“${esc(e.note)}”</small><em>${e.own?'Sent by you':e.claimed?'Claimed · Check Others\' Luck':'Open · '+e.left+' left'}</em></button>`}).join('')}</div>
+    <button class="den-gold gld-found" onclick="guildEnvSendAsk()">${denPlain}${gldIcon(3)}Send Surprise Bag</button></div>`;
+  }
+ }else if(guildPage==='Academy'){
+  const acCap=r.guildAcademyCap(g.lv),a=r.guildAcademy.find(x=>x.key===guildPick)||r.guildAcademy[0],lv=g.academy[a.key]||0,cost=r.guildAcademyCost(lv),top=lv>=acCap;
+  body=`<div class="gld-card gld-acad"><h2>Guild Academy <small>Cap Lv. ${acCap} at guild Lv. ${g.lv}</small></h2><div class="gld-acgrid">${r.guildAcademy.map(x=>`<button class="${x.key===a.key?'on':''}" onclick="guildPick='${x.key}';cityGuild()">${denPlain}${statIcon(x.key,'gld-stat')}<b>${x.name}</b><small>Lv.${g.academy[x.key]||0}</small></button>`).join('')}</div></div>
+  <div class="gld-acdetail">${statIcon(a.key,'gld-stat')}<div><b>${a.name} Lv.${lv}</b><small>Basic ${a.name} ${guildAcademyValue(a,lv)}</small><small>${top?'Raise the guild level to study further':'Next Level: '+guildAcademyValue(a,lv+1)}</small></div><div class="gld-accost"><span>${gldIcon(1)}<b class="${g.contrib>=cost?'':'low'}">${gldPower(g.contrib)}</b>/${gldPower(cost)}</span><button class="den-gold" ${!top&&g.contrib>=cost?'':'disabled'} onclick="guildLearnNow()">${denPlain}Upgrade</button></div></div>`;
+ }else if(guildPage==='Beast'){
+  const b=r.guildBoss(S),name=m=>m.id==='me'?esc(S.name):folk(m.id).name+' <small>AI</small>',red=r.gearRanks[3];
+  const drop=['bow','armor','crown','necklace','boots'].map(slot=>`<span class="gld-drop" style="--rarity:${red.color}">${gearArt({slot,tier:b.tier})}<small>T${b.tier}</small></span>`).join('');
+  const reserve=b.reserved?`<button class="den-gold" disabled>${denPlain}Booked ✓</button>`:`<button class="den-gold" ${g.role===0&&g.fund>=R.reserveFund?'':'disabled'} onclick="guildReserveNow()">${denPlain}Reservation Open · ${R.reserveFund} fund</button>`;
+  body=`<div class="gld-card gld-bossroom"><h2>T${b.tier} Guild Beast<button class="gi-rec" onclick="guildBeastRules()">${denPlain}?</button></h2><div class="gld-boss-art">${artImage(guildBossArt,'Guild Beast')}</div>
+  <i class="gld-bar boss"><u style="width:${b.left/b.hp*100}%"></u><em>${!b.reserved?'Not booked yet':b.dead?'Defeated':fmt(b.left)+' / '+fmt(b.hp)}</em></i>
+  <div class="gld-dropbox"><h3>Divine Beast Drop</h3><div>${drop}</div><p>The higher the damage dealt, the better the reward</p></div>
+  <div class="den-actions gld-beastbtns">${reserve}${b.dead?`<button class="den-gold" ${b.done||!g.dmg?'disabled':''} onclick="guildClaimBoss()">${denPlain}${b.done?'Reward claimed':g.dmg?'Claim reward':'You did not attack'}</button>`:`<button class="den-gold" ${!b.reserved||b.hits>=R.bossHits?'disabled':''} onclick="guildStrike()">${denPlain}Conduct challenge · ${R.bossHits-b.hits}/${R.bossHits}</button>`}</div>
+  <p class="gld-when">Open all day · resets 00:00 UTC <button class="gi-rec" onclick="guildBeastPreview()">${denPlain}Reward Preview</button></p>
   <div class="gld-board">${b.board.map((m,i)=>`<div class="${m.id==='me'?'me':''}"><b>${i+1}</b><span>${name(m)}</span><em>${fmt(m.dmg)}</em></div>`).join('')}</div></div>`;
- }else if(guildPage==='Shop'){
-  body=`<div class="gld-card"><h2>Guild Shop</h2><p>Limits reset every Monday. Higher guild levels open finer wares.</p><div class="mart-grid">${r.guildShop.map(w=>{const i=r.bagItemById[w.id],left=w.limit-(g.bought[w.id]||0),shut=lv.lv<w.lv||left<1||g.coins<w.price;
-   return `<button class="shop-card ${shut?'shut':''}" style="--edge:${bagHue(i.rarity)}" onclick="guildBuyNow('${w.id}')">${denPlain}<small>Limit ${left}/${w.limit}</small>${bagIcon(w.id)}<b>${i.name}</b><em>${lv.lv<w.lv?'Guild Lv. '+w.lv:i.kind}</em><span>${gldIcon(5)}${w.price}</span></button>`}).join('')}</div></div>`;
  }else{
-  const cap=lv.lv*R.skillPerLevel,names={atk:['Blessing of Arrows','ATK',R.skillStep.atk],hp:['Blessing of Leaves','HP',R.skillStep.hp],def:['Blessing of Bark','DEF',R.skillStep.def]};
-  body=`<div class="gld-card"><h2>Blessings</h2><p>Spend contribution to strengthen Reina. Guild Lv. ${lv.lv} allows level ${cap}.</p>${Object.entries(names).map(([k,[n,stat,step]])=>{const l=g.skills[k],cost=r.guildSkillCost(l);
-   return `<div class="gld-act">${gldIcon(6)}<div><b>${n} · Lv. ${l}/${cap}</b><small>${stat} +${fmt(l*step)} → +${fmt((l+1)*step)} · ${l>=cap?'raise the guild level':cost+' contribution'}</small></div><button class="den-gold" ${l<cap&&g.contrib>=cost?'':'disabled'} onclick="guildSkill('${k}')">${denPlain}Upgrade</button></div>`}).join('')}</div>`;
+  body=`<div class="gld-card"><h2>Guild Shop</h2><p>Limits reset every Monday. Higher guild levels open finer wares.</p><div class="mart-grid">${r.guildShop.map(w=>{const i=r.bagItemById[w.id],left=w.limit-(g.bought[w.id]||0),shut=g.lv<w.lv||left<1||g.coins<w.price;
+   return `<button class="shop-card ${shut?'shut':''}" style="--edge:${bagHue(i.rarity)}" onclick="guildBuyNow('${w.id}')">${denPlain}<small>Limit ${left}/${w.limit}</small>${bagIcon(w.id)}<b>${i.name}</b><em>${g.lv<w.lv?'Guild Lv. '+w.lv:i.kind}</em><span>${gldIcon(5)}${w.price}</span></button>`}).join('')}</div></div>`;
  }
- const nav=`<div class="satchel-nav well-nav gld-nav"><button data-back aria-label="Back to city" onclick="go('home')">‹</button>${[['Hall',0],['Members',1],['Boss',4],['Shop',7],['Blessings',6]].map(([p,i])=>`<button ${p===guildPage?'aria-current="page"':''} onclick="guildGo('${p}')">${denPlain}${gldIcon(i)}${p}</button>`).join('')}</div>`;
- $('#main').innerHTML=`<section class="satchel gld gld-p-${guildPage.toLowerCase()}" style="background-image:url('${artPath('comp-guild-hall')}')"><div class="satchel-top"><strong>Guild</strong>${wallet}</div>${body}${nav}</section>`;
+ warArtVars();
+ const nav=`<div class="satchel-nav well-nav gld-nav"><button data-back aria-label="Back to city" onclick="go('home')">‹</button>${[['Info','Info',0],['Academy','Academy',6],['Beast','Guild Beast',4],['Shop','Shop',7]].map(([p,n,i])=>`<button ${p===guildPage?'aria-current="page"':''} onclick="guildGo('${p}')">${denPlain}${gldIcon(i)}${n}</button>`).join('')}</div>`;
+ $('#main').innerHTML=`<section class="satchel gld gld-p-${guildPage.toLowerCase()} ${tabs?'gld-tabbed':''} gld-t-${guildTab.toLowerCase()}" style="background-image:url('${artPath('comp-guild-hall')}')"><div class="satchel-top"><strong>Guild</strong>${wallet}</div>${body}${tabs}${nav}</section>`;
 }
 
 let petPage='Formation',petFocus=null,emblemFilter='All',petBack='',petBackNext='';

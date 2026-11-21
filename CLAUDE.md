@@ -532,8 +532,30 @@ counters reset 00:00 UTC, shop limits on Monday). Every member besides Reina is 
   `guildBonus`, added in `stats()`).
 - System chat notes on joining / founding. Art (image model): `art-source/guild/{hall,icons}.webp` ->
   `comp-guild-hall`, `comp-guild-icons` by `scripts/build-guild-art.py`; crests are the one crest icon hue-rotated.
+- Second pass (user sent five photos of the reference's guild; Warehouse, Hire and Guild Auction are extras, skipped):
+  bottom bar Info / Academy / Guild Beast / Shop (`guildPage`), the Info page has sub-tabs Info / Member / Ranking /
+  Red Envelope (`guildTab`). The Hall and Blessings pages are gone.
+  - Level and fund: the guild has a stored `lv` and `fund` (sign-in, donations and Surprise Bags feed the fund);
+    Guild Level ↑ (`guildUpPop`, `guildUpgrade`) spends `guildUpFund(lv)`, leader or elder only; in an AI guild the
+    AI leader upgrades as soon as the fund allows (`guildGain`). Member cap `guildCap(lv)`. Guild Power = her power +
+    simulated AI powers (`guildFolkPower`); Ranking against AI guilds (`guildRanking`, `guildRivals`).
+  - Info: name banner over the hall art, leader with crown, Guild Announcement and Speaker line (editable by leader /
+    elder, `guildNote`, `guildSpeaker`), four cards (fund, members, power, upgrade funds), donations, and a Sign-in
+    button with two chests opened by the day's sign-in activity (her + AI members, `guildActivity`, `guildBoxClaim`).
+  - Red Envelope: AI members send Surprise Bags daily (five shares, one kept for her: gold or wishes), Check Others'
+    Luck, records, Send Surprise Bag for prisms (`guildEnvelopes`, `guildEnvClaim`, `guildEnvSend`). The envelope is
+    drawn in CSS (`.gld-env`).
+  - Academy: twelve stats (`guildAcademy`: ATK, HP, ARP, DEF, Dodge, Accuracy, ATK%, HP Bonus, DMG Bonus, DEF Bonus,
+    ELEM. ATK, ELEM. DEF) for contribution, cap `guildAcademyCap(lv)` (`guildLearn`, `guildBonus` in `stats()`).
+  - Guild Beast: tier = Reina's tier (`guildBeastTier`), Divine Beast Drop row, her own guild must book it first
+    (Reservation, `guildReserve`, from the fund; AI guilds are always booked), three challenges a day, the claim adds
+    a piece of the beast's tier by damage rank (2-Star Red / Orange / Purple, `guildBossRank`) plus chests and coins;
+    Reward Preview and rules pop-ups.
+  - Save: optional `lv, fund, note, speaker, academy, box, reserved, envGot, envSent`; first-pass saves (`exp`,
+    `skills`) still load: `guildState()` derives the level from `exp` and turns the old ATK/HP/DEF blessings into
+    Academy levels. No new pictures (headroom).
 - Hosted bundle headroom is only about 0.1 MB now: compress older art before adding pictures.
-- Not done: guild wars, guild quests, applications from other players, roles management.
+- Not done: guild wars, guild quests, applications from other players, roles management, Warehouse, Hire, Auction.
 
 ## In-chat playable preview (user requirement)
 The user wants to play the game inside the chat, and wants SHORT replies in Russian, no fluff.

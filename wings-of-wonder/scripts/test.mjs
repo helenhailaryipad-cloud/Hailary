@@ -858,37 +858,69 @@ vm.runInContext(`
 {const r=WonderGear,R=r.guildRules,T0=Date.UTC(2026,10,21,12),day=864e5;
  S=defaults();if(S.guild!==undefined||r.guildState(S)||!valid(S))throw Error('No guild at first');
  // Join an AI guild, or found one for gold; one guild at a time.
- if(!r.guildJoin(S,'star')||r.guildJoin(S,'moon')||S.guild.role!==2||r.guildLevel(S.guild.exp).lv!==4||!valid(S))throw Error('Join');
+ if(!r.guildJoin(S,'star')||r.guildJoin(S,'moon')||S.guild.role!==2||S.guild.lv!==4||r.guildState(S).lv!==4||!valid(S))throw Error('Join');
  r.guildLeave(S);S.gold=100;if(r.guildCreate(S,'Leaf Wings',1))throw Error('Found without gold');S.gold=5000;
- if(r.guildCreate(S,'<x>',0)||r.guildCreate(S,'Leaf Wings',9)||!r.guildCreate(S,'Leaf Wings',1)||S.gold!==3000||S.guild.role!==0||S.guild.members.length!==3)throw Error('Found');
- if(r.guildLevel(0).lv!==1||r.guildLevel(1000).lv!==2||r.guildLevel(3000).lv!==3||r.guildLevel(1e9).lv!==R.maxLevel)throw Error('Guild level');
- // Check-in once a day; donations with daily limits.
- if(!r.guildSign(S,T0)||r.guildSign(S,T0)||r.guildState(S,T0).exp!==R.signExp||r.guildState(S,T0).coins!==R.signCoins)throw Error('Check-in');
- if(!r.guildSign(S,T0+day))throw Error('Next day check-in');
+ if(r.guildCreate(S,'<x>',0)||r.guildCreate(S,'Leaf Wings',9)||!r.guildCreate(S,'Leaf Wings',1)||S.gold!==3000||S.guild.role!==0||S.guild.members.length!==3||S.guild.lv!==1)throw Error('Found');
+ if(r.guildLevel(0).lv!==1||r.guildLevel(1000).lv!==2||r.guildLevel(3000).lv!==3||r.guildLevel(1e9).lv!==R.maxLevel||r.guildCap(5)!==R.memberBase+5*R.memberStep)throw Error('Guild level');
+ // A save from the first pass (exp + skills) still loads: level from exp, old blessings become Academy levels.
+ {const old={...S,guild:{id:'dawn',name:'Dawnfeather',crest:0,role:2,exp:4200,contrib:5,coins:5,skills:{atk:2,hp:1,def:0},members:['nyra','kael'],day:'',signed:false,gold:0,gems:0,hits:0,dmg:0,bossDone:false,week:'',bought:{}}};
+  const st=r.guildState(old);if(!valid(old)||st.lv!==3||st.academy.attack!==2||st.academy.health!==1||r.guildBonus(old).attack!==2*r.guildAcademy[0].step||st.note!==undefined&&!st.note)throw Error('Old guild save');}
+ // Sign-in once a day; donations with daily limits feed the guild fund.
+ if(!r.guildSign(S,T0)||r.guildSign(S,T0)||r.guildState(S,T0).fund!==R.signFund||r.guildState(S,T0).coins!==R.signCoins)throw Error('Sign-in');
+ if(!r.guildSign(S,T0+day))throw Error('Next day sign-in');
  S.gold=10000;for(let i=0;i<R.goldTimes;i++)if(!r.guildDonate(S,'gold',T0+day))throw Error('Gold donation');
  if(r.guildDonate(S,'gold',T0+day)||S.gold!==10000-R.goldTimes*R.goldDonate)throw Error('Gold limit');
  S.scales=0;if(r.guildDonate(S,'gems',T0+day))throw Error('Prisms without prisms');S.scales=100;if(!r.guildDonate(S,'gems',T0+day)||r.guildDonate(S,'gems',T0+day)||r.guildDonate(S,'nope',T0+day))throw Error('Prism donation');
- // Boss: three hits a day; AI members chip in through the day; the reward pays once and only after it falls.
- const late=T0+day+10*36e5;let b=r.guildBoss(S,late);if(b.dead||b.hits)throw Error('Fresh boss');
+ // Level up from the fund (leader); announcement and speaker (leader or elder only).
+ const fund=S.guild.fund;if(fund<r.guildUpFund(1)||!r.guildUpgrade(S,T0+day)||S.guild.lv!==2||S.guild.fund!==fund-r.guildUpFund(1))throw Error('Upgrade');
+ if(r.guildUpgrade(S,T0+day))throw Error('Upgrade without fund');
+ if(!r.guildNote(S,'Hello <b>all</b>',T0+day)||S.guild.note!=='Hello ball/b'||r.guildNote(S,'   ',T0+day)||!r.guildSpeaker(S,'Welcome back!',T0+day)||!valid(S))throw Error('Announcement');
+ // Sign-in activity chests: her sign-in plus AI members who have signed by now.
+ const act=r.guildActivity(S,T0+day+11.9*36e5);if(act.points!==R.signActivity+3*R.aiActivity||!act.boxes[1].ready)throw Error('Activity');
+ if(!r.guildBoxClaim(S,0,T0+day+11*36e5)||r.guildBoxClaim(S,0,T0+day+11*36e5)||r.bagCount(S,'chest1')<1)throw Error('Sign-in chest');
+ // Ranking by guild power holds her guild once.
+ const rank=r.guildRanking(S,T0+day);if(rank.filter(x=>x.mine).length!==1||rank.some((x,i)=>i&&x.power>rank[i-1].power)||rank.length!==r.guildList.length+r.guildRivals.length+1)throw Error('Ranking');
+ // Guild Beast: her own guild books it from the fund; three hits; claim after it falls gives beast-tier gear by rank.
+ const late=T0+day+10*36e5;S.guild.fund=0;if(r.guildHit(S,()=>.5,late)!==null||r.guildReserve(S,late))throw Error('Beast not booked');
+ S.guild.fund=1000;if(!r.guildReserve(S,late)||r.guildReserve(S,late)||S.guild.fund!==1000-R.reserveFund)throw Error('Booking');
+ let b=r.guildBoss(S,late);if(b.dead||b.hits||!b.reserved)throw Error('Fresh beast');
  for(let i=0;i<R.bossHits;i++)if(!(r.guildHit(S,()=>.5,late)>0))throw Error('Hit');
- if(r.guildHit(S,()=>.5,late)!==null||r.guildBoss(S,late).hits!==R.bossHits||r.guildBossClaim(S,late))throw Error('Hit limit and early claim');
+ if(r.guildHit(S,()=>.5,late)!==null||r.guildBoss(S,late).hits!==R.bossHits||r.guildBossClaim(S,()=>.1,late))throw Error('Hit limit and early claim');
  const end=T0+day+11*36e5;S.guild.dmg=r.guildBossHp(S);b=r.guildBoss(S,end);
- const coins=r.guildState(S,end).coins,prize=r.guildBossClaim(S,end);if(!b.dead||!prize||r.guildState(S,end).coins!==coins+R.bossCoins||r.guildBossClaim(S,end)||prize.rank!==1||r.bagCount(S,'chest2')<1)throw Error('Boss reward');
+ const coins=r.guildState(S,end).coins,prize=r.guildBossClaim(S,()=>.1,end);
+ if(!b.dead||!prize||r.guildState(S,end).coins!==coins+R.bossCoins||r.guildBossClaim(S,()=>.1,end)||prize.rank!==1||r.bagCount(S,'chest2')<1)throw Error('Beast reward');
+ if(!prize.gear||prize.gear.rank!==3||r.catalog[prize.gear.template].tier!==r.guildBeastTier(S)||!valid(S))throw Error('Divine Beast Drop');
+ if(!r.guildState(S,end+day).reserved===false||r.guildState(S,end+day).hits)throw Error('Next day beast');
+ // Red envelopes in an AI guild: claim a share once; send her own bag for prisms.
+ const keep=S;S=defaults();r.guildJoin(S,'dawn');const envs=r.guildEnvelopes(S,T0);if(envs.length<2||envs.some(e=>e.own||e.claimed))throw Error('Envelopes');
+ const e=envs[0],g0=S.gold,w0=S.wishes||0,got=r.guildEnvClaim(S,e.id,T0);if(!got||got.amount!==e.mineShare||(e.kind==='gold'?S.gold-g0:S.wishes-w0)!==got.amount||r.guildEnvClaim(S,e.id,T0))throw Error('Claim envelope');
+ if(!r.guildEnvelopes(S,T0)[0].claimed||r.guildEnvelopes(S,T0)[0].takers.length!==R.envShares)throw Error('Envelope luck');
+ S.scales=1000;for(let i=0;i<R.envSendMax;i++)if(!r.guildEnvSend(S,T0))throw Error('Send bag');
+ if(r.guildEnvSend(S,T0)||r.guildEnvelopes(S,T0).filter(x=>x.own).length!==R.envSendMax||S.scales!==1000-R.envSendMax*R.envCost||!valid(S))throw Error('Send limit');
+ if(r.guildEnvelopes(S,T0+day).some(x=>x.own||x.claimed))throw Error('Envelopes reset');
+ // AI guilds book the beast and upgrade themselves; a member cannot edit or upgrade.
+ if(!r.guildState(S,T0).reserved||r.guildUpgrade(S,T0)||r.guildNote(S,'x y z'))throw Error('Member rights');
+ const lv0=S.guild.lv;S.guild.fund=r.guildUpFund(lv0);S.gold=5000;r.guildDonate(S,'gold',T0);if(S.guild.lv!==lv0+1)throw Error('AI leader upgrade');
+ S=keep;
  // Shop: coins, weekly limit, guild level gate.
  S.guild.coins=5000;if(!r.guildBuy(S,'wish',end)||r.guildBuy(S,'chest3',end))throw Error('Shop level gate');
  for(let i=1;i<3;i++)r.guildBuy(S,'wish',end);if(r.guildBuy(S,'wish',end)||!r.guildBuy(S,'wish',end+7*day))throw Error('Weekly limit');
- // Blessings: contribution, capped by guild level, add to Reina's stats.
- const before=stats().attack;S.guild.contrib=100000;S.guild.exp=0;
- if(!r.guildSkillUp(S,'atk')||!r.guildSkillUp(S,'atk')||r.guildSkillUp(S,'atk')||r.guildSkillUp(S,'nope'))throw Error('Blessing cap');
- if(stats().attack<=before||r.guildBonus(S).attack!==2*R.skillStep.atk||!valid(JSON.parse(JSON.stringify(S))))throw Error('Blessing bonus');
- for(const bad of [{id:'x'},{name:'<b>'},{role:5},{gold:9},{hits:4},{members:['nope']},{bought:{chest3:9}},{skills:{atk:99,hp:0,def:0}}])if(valid({...S,guild:{...S.guild,...bad}}))throw Error('Invalid guild accepted '+JSON.stringify(bad));
- // Screens: join list, Found window, the five pages and leaving.
+ // Academy: twelve stats, contribution, capped by the guild level.
+ const before=stats().attack;S.guild.contrib=1e6;S.guild.lv=1;
+ for(let i=0;i<R.academyPerLevel;i++)if(!r.guildLearn(S,'attack'))throw Error('Academy learn');
+ if(r.guildLearn(S,'attack')||r.guildLearn(S,'nope')||!r.guildLearn(S,'dodge')||r.guildAcademy.length!==12)throw Error('Academy cap');
+ if(stats().attack<=before||r.guildBonus(S).attack!==R.academyPerLevel*r.guildAcademy[0].step||r.guildBonus(S).dodge!==.2||!valid(JSON.parse(JSON.stringify(S))))throw Error('Academy bonus');
+ for(const bad of [{id:'x'},{name:'<b>'},{role:5},{gold:9},{hits:4},{members:['nope']},{bought:{chest3:9}},{academy:{attack:999}},{academy:{nope:1}},{lv:99},{note:'<script>'},{box:9},{envSent:9},{skills:{atk:99}}])if(valid({...S,guild:{...S.guild,...bad}}))throw Error('Invalid guild accepted '+JSON.stringify(bad));
+ // Screens: join list, Found window, the four pages, the Info tabs and leaving.
  S=defaults();openScreen('cityGuild');if(!$('#main').innerHTML.includes("guildJoinPick('dawn')")||!$('#main').innerHTML.includes('guildFound()'))throw Error('Join page');
- guildJoinPick('dawn');for(const p of ['Hall','Members','Boss','Shop','Blessings']){guildGo(p);if(!$('#main').innerHTML.includes('gld-p-'+p.toLowerCase()))throw Error('Guild page '+p)}
- guildGo('Hall');guildSignNow();if(!r.guildState(S).signed)throw Error('Check in from the hall');
- guildGo('Boss');guildStrike();if(r.guildState(S).hits!==1)throw Error('Attack from the boss page');
+ guildJoinPick('dawn');for(const p of ['Info','Academy','Beast','Shop']){guildGo(p);if(!$('#main').innerHTML.includes('gld-p-'+p.toLowerCase()))throw Error('Guild page '+p)}
+ for(const t of ['Info','Member','Ranking','Envelope']){guildGo('Info',t);if(!$('#main').innerHTML.includes('gld-t-'+t.toLowerCase()))throw Error('Guild tab '+t)}
+ guildGo('Info','Info');guildSignNow();if(!r.guildState(S).signed||!$('#main').innerHTML.includes('Guild Announcement'))throw Error('Sign in from Info');
+ guildGo('Beast');guildStrike();if(r.guildState(S).hits!==1||!$('#main').innerHTML.includes('Divine Beast Drop'))throw Error('Challenge from the beast page');
+ guildGo('Academy');guildPick='health';S.guild.contrib=1000;guildLearnNow();if(r.guildState(S).academy.health!==1)throw Error('Academy upgrade');
+ guildGo('Info','Envelope');guildEnvOpen(r.guildEnvelopes(S)[0].id);if(!r.guildEnvelopes(S)[0].claimed)throw Error('Open envelope');
  if(!cityGroups.flat().some(x=>x[1]==='Guild'&&x[2]==='cityGuild'))throw Error('Home Guild icon');
  WonderGear.guildLeave(S);cityGuild();if(!$('#main').innerHTML.includes('Join a Guild'))throw Error('Leave');
 }
 `,context);
-console.log('PASS: Guild: join and found, levels, check-in, donations, daily boss with AI members, shop limits, blessings, screens.');
+console.log('PASS: Guild: join and found, old saves, fund and levels, sign-in chests, ranking, red envelopes, Guild Beast booking and gear, shop, academy, screens.');

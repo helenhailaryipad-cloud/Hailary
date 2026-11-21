@@ -957,85 +957,171 @@ function validSocial(v){
 }
 // ---- Guild ---------------------------------------------------------------------------------------------------------
 // One guild at a time: join one of the AI guilds or found her own. Every member besides Reina is an AI adventurer.
-// Optional save field `guild` {id, name, crest, role, exp, contrib, coins, skills{atk,hp,def}, day, signed, gold,
-// gems, hits, dmg, bossDone, week, bought{}}. Daily counters reset at 00:00 UTC, the shop on Monday. Placeholders.
-const guildRules={createGold:2000,levelExp:1000,maxLevel:10,signExp:50,signContrib:20,signCoins:20,goldDonate:1000,goldTimes:3,goldExp:100,goldGain:50,
- gemDonate:50,gemTimes:1,gemExp:300,gemGain:150,bossHits:3,bossHp:60000,bossCoins:100,skillStep:{atk:10,hp:100,def:8},skillCost:100,skillPerLevel:2};
+// Optional save field `guild` {id, name, crest, role, lv, fund, contrib, coins, academy{stat:lv}, note, speaker, members,
+// day, signed, gold, gems, hits, dmg, bossDone, box, reserved, envGot{}, envSent, week, bought{}}. Saves from the first
+// pass hold `exp` and `skills{atk,hp,def}` instead of `lv` and `academy`; guildState() reads both. Daily counters reset
+// at 00:00 UTC, the shop on Monday. All numbers are placeholders.
+const guildRules={createGold:2000,maxLevel:10,memberBase:20,memberStep:10,levelExp:1000,
+ signFund:200,signContrib:20,signCoins:20,signActivity:200,aiActivity:100,
+ goldDonate:1000,goldTimes:3,goldFund:1000,goldGain:50,gemDonate:50,gemTimes:1,gemFund:1500,gemGain:150,
+ bossHits:3,bossHp:60000,bossCoins:100,reserveFund:300,academyCost:100,academyPerLevel:5,noteMax:120,speakerMax:60,
+ envCost:100,envShares:5,envSendMax:3,envGain:50};
+const guildUpFund=lv=>2000*lv*lv;
+const guildSignBoxes=[{at:300,items:{chest1:1}},{at:500,items:{chest2:1,wish:1}}];
+const guildAcademy=[{key:'attack',name:'ATK',step:40},{key:'health',name:'HP',step:400},{key:'penetration',name:'ARP',step:12},{key:'defense',name:'DEF',step:30},
+ {key:'dodge',name:'Dodge',step:.2},{key:'accuracy',name:'Accuracy',step:.2},{key:'attackPercent',name:'ATK%',step:.5},{key:'healthPercent',name:'HP Bonus',step:.5},
+ {key:'damageBonus',name:'DMG Bonus',step:.3},{key:'defensePercent',name:'DEF Bonus',step:.5},{key:'elementalAttack',name:'ELEM. ATK',step:20},{key:'elementalDefense',name:'ELEM. DEF',step:20}];
+const guildAcademyKeys=new Set(guildAcademy.map(a=>a.key)),guildOldSkills={atk:'attack',hp:'health',def:'defense'};
 const guildList=[{id:'dawn',name:'Dawnfeather',crest:0,exp:4200,members:['nyra','kael','wren','juno','lumi']},{id:'moon',name:'Moonbloom',crest:1,exp:2300,members:['vesper','briar','thane']},
  {id:'star',name:'Starwhisper',crest:2,exp:6900,members:['orin','pip','lumi','wren','juno','thane']}];
+// Other AI guilds that only appear in the ranking.
+const guildRivals=[{id:'thorn',name:'Thornveil',crest:3,lv:6},{id:'silver',name:'Silverbough',crest:1,lv:5},{id:'lark',name:'Lark Haven',crest:0,lv:3},{id:'ember',name:'Emberglade',crest:2,lv:7},{id:'mist',name:'Mistral Crown',crest:3,lv:4}];
 const guildCrests=4,guildRoles=['Leader','Elder','Member'];
+const guildNoteText='Welcome! Check in every day, donate and fight the Guild Beast together.',guildSpeakerText='The brave adventurer has logged in and signed in!';
 const guildShop=[{id:'stonebag',price:40,lv:1,limit:5},{id:'wish',price:60,lv:1,limit:3},{id:'exp2',price:90,lv:2,limit:3},{id:'shardbag',price:120,lv:3,limit:3},
  {id:'chest2',price:200,lv:4,limit:2},{id:'gembox',price:260,lv:5,limit:2},{id:'petegg',price:400,lv:6,limit:1},{id:'chest3',price:800,lv:8,limit:1}];
-const guildBossRank=[{to:1,items:{chest2:1,wish:1}},{to:3,items:{chest1:2}},{to:99,items:{chest1:1}}];
+// Guild Beast rewards by damage rank: a piece of the beast's tier in this quality, plus chests and guild coins.
+const guildBossRank=[{to:1,rank:3,items:{chest2:1,wish:1}},{to:3,rank:2,items:{chest1:2}},{to:99,rank:1,items:{chest1:1}}];
+const guildEnvNotes=['Good luck, everyone!','Thanks for the help against the beast!','A little something for the brave.','Happy hunting, friends!','For our newest members!','May the wind carry you!'];
 function guildLevel(exp){let lv=1,left=exp;while(lv<guildRules.maxLevel&&left>=guildRules.levelExp*lv){left-=guildRules.levelExp*lv;lv++}return {lv,into:left,need:lv>=guildRules.maxLevel?0:guildRules.levelExp*lv}}
+const guildCap=lv=>guildRules.memberBase+guildRules.memberStep*lv;
+const guildClean=(text,max)=>String(text).replace(/[<>]/g,'').replace(/\s+/g,' ').trim().slice(0,max);
 function guildState(s,now=Date.now()){
  const g=s.guild;if(!g)return null;
- const day=utcDay(now),today=g.day===day,week=utcWeek(now);
- return {...g,skills:{atk:0,hp:0,def:0,...g.skills},day,signed:today&&g.signed,gold:today?g.gold:0,gems:today?g.gems:0,hits:today?g.hits:0,dmg:today?g.dmg:0,bossDone:today&&g.bossDone,
-  week,bought:g.week===week?{...g.bought}:{},members:[...g.members]};
+ const day=utcDay(now),today=g.day===day,week=utcWeek(now),academy={};
+ for(const [k,n] of Object.entries(g.skills||{}))if(guildOldSkills[k])academy[guildOldSkills[k]]=n;
+ Object.assign(academy,g.academy);
+ const out={...g,lv:g.lv??guildLevel(g.exp||0).lv,fund:g.fund??0,note:g.note??guildNoteText,speaker:g.speaker??guildSpeakerText,academy,day,signed:today&&g.signed,
+  gold:today?g.gold:0,gems:today?g.gems:0,hits:today?g.hits:0,dmg:today?g.dmg:0,bossDone:today&&g.bossDone,box:today?g.box||0:0,reserved:g.role!==0||today&&!!g.reserved,
+  envGot:today?{...g.envGot}:{},envSent:today?g.envSent||0:0,week,bought:g.week===week?{...g.bought}:{},members:[...g.members]};
+ delete out.skills;delete out.exp;return out;
 }
-const guildPack=g=>{const out={...g};delete out.members;out.members=[...g.members];return out};
+const guildPack=g=>{const out={...g};out.members=[...g.members];if(g.role!==0)delete out.reserved;return out};
+const guildFresh=(t,role,members)=>({id:t.id,name:t.name,crest:t.crest,role,lv:t.lv,fund:t.fund||0,contrib:0,coins:0,academy:{},members,day:'',signed:false,gold:0,gems:0,hits:0,dmg:0,bossDone:false,week:'',bought:{}});
 function guildJoin(s,id){
  const t=guildList.find(x=>x.id===id);if(!t||s.guild)return false;
- s.guild={id:t.id,name:t.name,crest:t.crest,role:2,exp:t.exp,contrib:0,coins:0,skills:{atk:0,hp:0,def:0},members:[...t.members],day:'',signed:false,gold:0,gems:0,hits:0,dmg:0,bossDone:false,week:'',bought:{}};return true;
+ const lv=guildLevel(t.exp);s.guild=guildFresh({...t,lv:lv.lv,fund:lv.into*2},2,[...t.members]);return true;
 }
 function guildCreate(s,name,crest=0){
  const clean=String(name).replace(/[^A-Za-z0-9 '\-]/g,'').trim().slice(0,16);
  if(s.guild||clean.length<3||s.gold<guildRules.createGold||!Number.isInteger(crest)||crest<0||crest>=guildCrests)return false;
  s.gold-=guildRules.createGold;const friends=(s.social?.friends||['nyra','kael','pip']).slice(0,3);
- s.guild={id:'own',name:clean,crest,role:0,exp:0,contrib:0,coins:0,skills:{atk:0,hp:0,def:0},members:friends,day:'',signed:false,gold:0,gems:0,hits:0,dmg:0,bossDone:false,week:'',bought:{}};return true;
+ s.guild=guildFresh({id:'own',name:clean,crest,lv:1},0,friends);return true;
 }
-// Leaving keeps nothing but her own contribution points; guild coins and blessings stay with the guild.
+// Leaving keeps nothing: guild coins, contribution and academy levels stay with the guild.
 function guildLeave(s){if(!s.guild)return false;delete s.guild;return true}
-function guildGain(g,exp,contrib,coins){g.exp+=exp;g.contrib+=contrib;g.coins+=coins}
-function guildSign(s,now=Date.now()){const g=guildState(s,now);if(!g||g.signed)return false;g.signed=true;guildGain(g,guildRules.signExp,guildRules.signContrib,guildRules.signCoins);s.guild=guildPack(g);return true}
+// In an AI guild the AI leader raises the level as soon as the fund allows it.
+function guildGain(g,fund,contrib,coins){g.fund+=fund;g.contrib+=contrib;g.coins+=coins;
+ while(g.role===2&&g.lv<guildRules.maxLevel&&g.fund>=guildUpFund(g.lv)){g.fund-=guildUpFund(g.lv);g.lv++}}
+function guildUpgrade(s,now=Date.now()){const g=guildState(s,now);if(!g||g.role>1||g.lv>=guildRules.maxLevel||g.fund<guildUpFund(g.lv))return false;g.fund-=guildUpFund(g.lv);g.lv++;s.guild=guildPack(g);return true}
+function guildNote(s,text,now=Date.now()){const g=guildState(s,now),t=guildClean(text,guildRules.noteMax);if(!g||g.role>1||!t)return false;g.note=t;s.guild=guildPack(g);return true}
+function guildSpeaker(s,text,now=Date.now()){const g=guildState(s,now),t=guildClean(text,guildRules.speakerMax);if(!g||g.role>1||!t)return false;g.speaker=t;s.guild=guildPack(g);return true}
+function guildSign(s,now=Date.now()){const g=guildState(s,now),r=guildRules;if(!g||g.signed)return false;g.signed=true;guildGain(g,r.signFund,r.signContrib,r.signCoins);s.guild=guildPack(g);return true}
 function guildDonate(s,kind,now=Date.now()){
  const g=guildState(s,now),r=guildRules;if(!g)return false;
- if(kind==='gold'){if(g.gold>=r.goldTimes||s.gold<r.goldDonate)return false;s.gold-=r.goldDonate;g.gold++;guildGain(g,r.goldExp,r.goldGain,r.goldGain)}
- else if(kind==='gems'){if(g.gems>=r.gemTimes||s.scales<r.gemDonate)return false;s.scales-=r.gemDonate;g.gems++;guildGain(g,r.gemExp,r.gemGain,r.gemGain)}
+ if(kind==='gold'){if(g.gold>=r.goldTimes||s.gold<r.goldDonate)return false;s.gold-=r.goldDonate;g.gold++;guildGain(g,r.goldFund,r.goldGain,r.goldGain)}
+ else if(kind==='gems'){if(g.gems>=r.gemTimes||s.scales<r.gemDonate)return false;s.scales-=r.gemDonate;g.gems++;guildGain(g,r.gemFund,r.gemGain,r.gemGain)}
  else return false;
  s.guild=guildPack(g);return true;
 }
-// Guild boss: one a day. The AI members' damage grows through the day; her three hits add to it.
-function guildBossHp(s){const g=guildState(s);return g?guildRules.bossHp*guildLevel(g.exp).lv:0}
+// AI members: power, the hour they check in, today's contribution. Everything follows from their id and the day.
+const guildFolkPower=(id,lv)=>12000+hashOf('pow'+id)%26000+lv*1500;
+function guildPower(s,now=Date.now()){const g=guildState(s,now);if(!g)return 0;return stats(s).power+g.members.reduce((n,id)=>n+guildFolkPower(id,g.lv),0)}
+function guildRanking(s,now=Date.now()){
+ const g=guildState(s,now),mine=g?.id;
+ const rows=[...guildList.map(t=>({id:t.id,name:t.name,crest:t.crest,lv:guildLevel(t.exp).lv,members:t.members.length+1,power:t.members.reduce((n,id)=>n+guildFolkPower(id,guildLevel(t.exp).lv),0)+30000})),
+  ...guildRivals.map(t=>({...t,members:8+hashOf(t.id)%12,power:t.lv*42000+hashOf('gp'+t.id)%60000}))].filter(x=>x.id!==mine);
+ if(g)rows.push({id:g.id,name:g.name,crest:g.crest,lv:g.lv,members:g.members.length+1,power:guildPower(s,now),mine:true});
+ return rows.sort((a,b)=>b.power-a.power).map((x,i)=>({...x,rank:i+1}));
+}
+// Daily sign-in activity: her check-in plus the AI members who have checked in by now; two chests to open.
+function guildActivity(s,now=Date.now()){
+ const g=guildState(s,now);if(!g)return null;const hours=(now%864e5)/36e5;
+ const ai=g.members.filter(id=>hashOf('sign'+id+g.day)%12<=hours).length,points=(g.signed?guildRules.signActivity:0)+ai*guildRules.aiActivity;
+ return {points,ai,boxes:guildSignBoxes.map((b,i)=>({...b,ready:points>=b.at,claimed:!!(g.box&1<<i)}))};
+}
+function guildBoxClaim(s,i,now=Date.now()){
+ const a=guildActivity(s,now),b=a?.boxes[i];if(!b||!b.ready||b.claimed)return null;
+ const g=guildState(s,now);g.box|=1<<i;s.guild=guildPack(g);for(const [id,n] of Object.entries(b.items))bagAdd(s,id,n);return b.items;
+}
+// Red envelopes (Surprise Bags): AI members send a few every day, each split into five shares; one is kept for Reina.
+// Her own bag costs prisms and is shared out among the AI members.
+function guildEnvShares(id,total,n){const w=Array.from({length:n},(_,j)=>1+hashOf(id+'#'+j)%9),sum=w.reduce((a,b)=>a+b,0);return w.map(x=>Math.max(1,Math.round(total*x/sum)))}
+function guildEnvelopes(s,now=Date.now()){
+ const g=guildState(s,now);if(!g)return [];const r=guildRules,list=[];
+ g.members.forEach((id,i)=>{const h=hashOf('env'+id+g.day);if(i>1&&h%3)return;
+  const kind=h%4===0?'wishes':'gold',total=kind==='gold'?300+h%5*100:20+h%4*10,eid=id+'-'+g.day,shares=guildEnvShares(eid,total,r.envShares);
+  const takers=g.members.filter(x=>x!==id).slice(0,r.envShares-1).map((x,j)=>({id:x,amount:shares[j]}));
+  const got=g.envGot[eid];if(got)takers.push({id:'me',amount:got});
+  list.push({id:eid,from:id,note:guildEnvNotes[h%guildEnvNotes.length],kind,total,shares:r.envShares,mineShare:shares[r.envShares-1],takers,claimed:!!got,left:r.envShares-takers.length});
+ });
+ for(let k=0;k<g.envSent;k++){const eid='me'+k+'-'+g.day,shares=guildEnvShares(eid,r.envCost,r.envShares);
+  list.push({id:eid,from:'me',note:'From Reina, with love!',kind:'prisms',total:r.envCost,shares:r.envShares,takers:g.members.slice(0,r.envShares).map((x,j)=>({id:x,amount:shares[j]})),claimed:true,own:true,left:0})}
+ for(const e of list){const best=[...e.takers].sort((a,b)=>b.amount-a.amount)[0];e.best=best?.id}
+ return list;
+}
+function guildEnvClaim(s,id,now=Date.now()){
+ const e=guildEnvelopes(s,now).find(x=>x.id===id);if(!e||e.own||e.claimed)return null;
+ const g=guildState(s,now);g.envGot[id]=e.mineShare;s.guild=guildPack(g);
+ if(e.kind==='gold')s.gold+=e.mineShare;else s.wishes=(s.wishes||0)+e.mineShare;return {kind:e.kind,amount:e.mineShare};
+}
+function guildEnvSend(s,now=Date.now()){
+ const g=guildState(s,now),r=guildRules;if(!g||g.envSent>=r.envSendMax||(s.scales||0)<r.envCost)return false;
+ s.scales-=r.envCost;g.envSent++;guildGain(g,r.envCost,r.envGain,0);s.guild=guildPack(g);return true;
+}
+// Guild Beast: one a day, of the tier Reina has reached. In her own guild the leader books it first (from the fund);
+// AI guilds always have it booked. The AI members' damage grows through the day; her three hits add to it.
+const guildBeastTier=s=>Math.min(maxTier,unlockedTier(s));
+function guildBossHp(s){const g=guildState(s);return g?guildRules.bossHp*g.lv:0}
+function guildReserve(s,now=Date.now()){const g=guildState(s,now);if(!g||g.reserved||g.role!==0||g.fund<guildRules.reserveFund)return false;g.fund-=guildRules.reserveFund;g.reserved=true;s.guild=guildPack(g);return true}
 function guildAiDamage(s,now=Date.now()){
- const g=guildState(s,now);if(!g)return [];const hp=guildBossHp(s),hours=(now%864e5)/36e5;
+ const g=guildState(s,now);if(!g||!g.reserved)return (g?.members||[]).map(id=>({id,dmg:0}));const hp=guildBossHp(s),hours=(now%864e5)/36e5;
  return g.members.map(id=>{const h=hashOf(g.id+id+g.day);return {id,dmg:Math.round(hp*(.08+(h%10)/100)*Math.min(1,hours/20))}});
 }
 function guildBoss(s,now=Date.now()){
  const g=guildState(s,now);if(!g)return null;const ai=guildAiDamage(s,now),hp=guildBossHp(s),total=ai.reduce((n,x)=>n+x.dmg,0)+g.dmg;
  const board=[...ai,{id:'me',dmg:g.dmg}].sort((a,b)=>b.dmg-a.dmg);
- return {hp,left:Math.max(0,hp-total),dead:total>=hp,board,rank:board.findIndex(x=>x.id==='me')+1,hits:g.hits,done:g.bossDone};
+ return {hp,left:Math.max(0,hp-total),dead:total>=hp,board,rank:board.findIndex(x=>x.id==='me')+1,hits:g.hits,done:g.bossDone,reserved:g.reserved,tier:guildBeastTier(s)};
 }
 function guildHit(s,rng=Math.random,now=Date.now()){
- const g=guildState(s,now);if(!g||g.hits>=guildRules.bossHits||guildBoss(s,now).dead)return null;
+ const g=guildState(s,now);if(!g||!g.reserved||g.hits>=guildRules.bossHits||guildBoss(s,now).dead)return null;
  const dmg=Math.round(stats(s).power*(.8+rng()*.4)*1.5);g.hits++;g.dmg+=dmg;guildGain(g,0,10,10);s.guild=guildPack(g);return dmg;
 }
-function guildBossClaim(s,now=Date.now()){
+function guildBossClaim(s,rng=Math.random,now=Date.now()){
  const b=guildBoss(s,now),g=guildState(s,now);if(!b||!b.dead||g.bossDone||!g.dmg)return null;
  const prize=guildBossRank.find(x=>b.rank<=x.to);g.bossDone=true;g.coins+=guildRules.bossCoins;s.guild=guildPack(g);
- for(const [id,n] of Object.entries(prize.items))bagAdd(s,id,n);return {coins:guildRules.bossCoins,items:prize.items,rank:b.rank};
+ for(const [id,n] of Object.entries(prize.items))bagAdd(s,id,n);
+ const gear=addDrop(s,b.tier,slots[Math.floor(rng()*slots.length)].id,prize.rank);
+ return {coins:guildRules.bossCoins,items:prize.items,rank:b.rank,gear:gear.uid?gear:null,quality:prize.rank};
 }
 function guildBuy(s,id,now=Date.now()){
- const g=guildState(s,now),w=guildShop.find(x=>x.id===id);if(!g||!w||guildLevel(g.exp).lv<w.lv||(g.bought[id]||0)>=w.limit||g.coins<w.price)return false;
+ const g=guildState(s,now),w=guildShop.find(x=>x.id===id);if(!g||!w||g.lv<w.lv||(g.bought[id]||0)>=w.limit||g.coins<w.price)return false;
  g.coins-=w.price;g.bought[id]=(g.bought[id]||0)+1;s.guild=guildPack(g);bagAdd(s,id,1);return true;
 }
-// Blessings: contribution points raise ATK / HP / DEF for Reina; the cap grows with the guild level.
-function guildSkillCost(lv){return guildRules.skillCost*(lv+1)}
-function guildSkillUp(s,key){
- const g=guildState(s);if(!g||!Object.hasOwn(guildRules.skillStep,key))return false;const lv=g.skills[key],cap=guildLevel(g.exp).lv*guildRules.skillPerLevel,cost=guildSkillCost(lv);
- if(lv>=cap||g.contrib<cost)return false;g.contrib-=cost;g.skills[key]=lv+1;s.guild=guildPack(g);return true;
+// Academy: contribution points raise twelve stats for Reina; the cap grows with the guild level.
+const guildAcademyCost=lv=>guildRules.academyCost*(lv+1);
+const guildAcademyCap=lv=>lv*guildRules.academyPerLevel;
+function guildLearn(s,key,now=Date.now()){
+ const g=guildState(s,now);if(!g||!guildAcademyKeys.has(key))return false;const lv=g.academy[key]||0,cost=guildAcademyCost(lv);
+ if(lv>=guildAcademyCap(g.lv)||g.contrib<cost)return false;g.contrib-=cost;g.academy[key]=lv+1;s.guild=guildPack(g);return true;
 }
-function guildBonus(s){const g=s.guild;if(!g)return {};const k=g.skills||{},st=guildRules.skillStep;return {attack:(k.atk||0)*st.atk,health:(k.hp||0)*st.hp,defense:(k.def||0)*st.def}}
+function guildBonus(s){const g=s.guild?guildState(s):null;if(!g)return {};const out={};for(const a of guildAcademy){const n=g.academy[a.key]||0;if(n)out[a.key]=Math.round(n*a.step*100)/100}return out}
 function validGuild(g){
  if(g===undefined)return true;
- const int=n=>Number.isSafeInteger(n)&&n>=0&&n<=1e12,date=x=>x===''||typeof x==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(x);
+ const int=n=>Number.isSafeInteger(n)&&n>=0&&n<=1e12,date=x=>x===''||typeof x==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(x),opt=(x,f)=>x===undefined||f(x);
+ const levels=(o,keys,max)=>!!o&&typeof o==='object'&&!Array.isArray(o)&&Object.entries(o).every(([k,n])=>keys.has(k)&&Number.isInteger(n)&&n>=0&&n<=max);
+ const text=max=>x=>typeof x==='string'&&x.length>0&&x.length<=max&&!/[<>]/.test(x);
  return !!g&&typeof g==='object'&&!Array.isArray(g)&&(g.id==='own'||guildList.some(x=>x.id===g.id))&&typeof g.name==='string'&&g.name.length>=3&&g.name.length<=16&&/^[A-Za-z0-9 '\-]+$/.test(g.name)
-  &&Number.isInteger(g.crest)&&g.crest>=0&&g.crest<guildCrests&&[0,1,2].includes(g.role)&&[g.exp,g.contrib,g.coins,g.dmg].every(int)&&date(g.day)&&date(g.week)
+  &&Number.isInteger(g.crest)&&g.crest>=0&&g.crest<guildCrests&&[0,1,2].includes(g.role)&&[g.contrib,g.coins,g.dmg].every(int)&&opt(g.exp,int)&&opt(g.fund,int)&&date(g.day)&&date(g.week)
+  &&opt(g.lv,n=>Number.isInteger(n)&&n>=1&&n<=guildRules.maxLevel)&&(g.lv!==undefined||g.exp!==undefined)
+  &&opt(g.note,text(guildRules.noteMax))&&opt(g.speaker,text(guildRules.speakerMax))&&opt(g.box,n=>Number.isInteger(n)&&n>=0&&n<1<<guildSignBoxes.length)
+  &&opt(g.reserved,x=>typeof x==='boolean')&&opt(g.envSent,n=>Number.isInteger(n)&&n>=0&&n<=guildRules.envSendMax)
+  &&opt(g.envGot,o=>!!o&&typeof o==='object'&&!Array.isArray(o)&&Object.entries(o).length<=20&&Object.entries(o).every(([k,n])=>k.length<=40&&int(n)&&n<=1e5))
   &&typeof g.signed==='boolean'&&typeof g.bossDone==='boolean'&&Number.isInteger(g.gold)&&g.gold>=0&&g.gold<=guildRules.goldTimes&&Number.isInteger(g.gems)&&g.gems>=0&&g.gems<=guildRules.gemTimes
-  &&Number.isInteger(g.hits)&&g.hits>=0&&g.hits<=guildRules.bossHits&&!!g.skills&&['atk','hp','def'].every(k=>Number.isInteger(g.skills[k]??0)&&(g.skills[k]??0)>=0&&(g.skills[k]??0)<=guildRules.maxLevel*guildRules.skillPerLevel)
+  &&Number.isInteger(g.hits)&&g.hits>=0&&g.hits<=guildRules.bossHits
+  &&opt(g.skills,o=>levels(o,new Set(Object.keys(guildOldSkills)),guildRules.maxLevel*2))&&opt(g.academy,o=>levels(o,guildAcademyKeys,guildAcademyCap(guildRules.maxLevel)))
   &&Array.isArray(g.members)&&g.members.length<=20&&new Set(g.members).size===g.members.length&&g.members.every(id=>Object.hasOwn(socialById,id))
   &&!!g.bought&&typeof g.bought==='object'&&Object.entries(g.bought).every(([id,n])=>guildShop.some(w=>w.id===id&&Number.isInteger(n)&&n>0&&n<=w.limit));
 }
-return Object.freeze({guildRules,guildList,guildCrests,guildRoles,guildShop,guildBossRank,guildLevel,guildState,guildJoin,guildCreate,guildLeave,guildSign,guildDonate,guildBossHp,guildBoss,guildHit,guildBossClaim,guildBuy,guildSkillCost,guildSkillUp,guildBonus,validGuild,socialNote,chatBlockX,squadOf,socialFolk,socialRules,socialById,chatChannels,socialState,heartsOf,socialTick,sendFlower,giftAll,friendAnswer,friendAdd,friendBlock,mailClaim,mailDelete,mailRead,chatFeed,chatSay,validSocial,cloudOwnReward,cloudOwnTake,cloudRules,cloudPointRewards,cloudShop,cloudRound,cloudRoundEnds,cloudState,cloudNewRound,cloudGain,cloudClaim,buyCloud,validCloud,warFactions,warTotems,warRules,warQuests,warRanks,contestShop,contestState,warNew,warHeld,warHero,warOrder,warTally,warStep,warStanding,warRankPrize,warQuestsDue,warStart,warSettle,buyContest,validContest,summonWells,summonPity,summonLevelMax,summonDupGold,markKinds,markPrice,markLimit,markNeed,galaQuests,galaMilestones,galaEnds,summonState,summonLevel,summonPay,summonDraw,markOffer,buyMarkPet,galaClaim,galaReward,validSummon,bossRare,gearRanks,gearRank,gearCraftFrom,gearNoDevour,bossDropRanks,craftRecipe,craftInputs,craftChance,craftGear,gearGroups,gearGroup,bagCapacity,bagStarter,bagRarity,bagItems,bagItemById,bagCount,bagAdd,bagStacks,bagUsed,vaultCount,vaultMove,useBagItem,devourStep,devourMax,devourNeed,devourWorth,devourState,devourBonus,devourable,devourGear,validBag,riposteShare,riposteEvery,talentCells,talentFree,talentLearn,talentBook,talentScroll,talentTopScroll,talentPrice,talentSupremeAt,talentSupreme,petTalents,talentState,talentIds,supremeReady,addSeals,openCellCost,openTalentCell,learnCost,rollTalent,keepTalent,learnTalent,lockTalent,forgetTalent,setTalentTarget,buyTalentScroll,buyTalentBook,sealRates,sealGold,buySeals,exchangeSpares,talentBonus,guardTalents,petGearPieces,petGearMax,petGearStep,petGearSetStep,petGearLevels,petGearTier,petGearCost,petGearBonus,upgradePetGear,petBolt,petBoltPace,petHit,petPace,assistPages,assistSlots,synthChain,synthNeed,petSpares,addPetSpare,synthesizePet,fashionTraits,companionTypes,companionSkins,companionSkin,ownsCompanionSkin,useCompanionSkin,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
+return Object.freeze({guildRules,guildUpFund,guildSignBoxes,guildAcademy,guildList,guildRivals,guildCrests,guildRoles,guildShop,guildBossRank,guildLevel,guildCap,guildState,guildJoin,guildCreate,guildLeave,guildUpgrade,guildNote,guildSpeaker,guildSign,guildDonate,guildFolkPower,guildPower,guildRanking,guildActivity,guildBoxClaim,guildEnvelopes,guildEnvClaim,guildEnvSend,guildBeastTier,guildBossHp,guildReserve,guildBoss,guildHit,guildBossClaim,guildBuy,guildAcademyCost,guildAcademyCap,guildLearn,guildBonus,validGuild,socialNote,chatBlockX,squadOf,socialFolk,socialRules,socialById,chatChannels,socialState,heartsOf,socialTick,sendFlower,giftAll,friendAnswer,friendAdd,friendBlock,mailClaim,mailDelete,mailRead,chatFeed,chatSay,validSocial,cloudOwnReward,cloudOwnTake,cloudRules,cloudPointRewards,cloudShop,cloudRound,cloudRoundEnds,cloudState,cloudNewRound,cloudGain,cloudClaim,buyCloud,validCloud,warFactions,warTotems,warRules,warQuests,warRanks,contestShop,contestState,warNew,warHeld,warHero,warOrder,warTally,warStep,warStanding,warRankPrize,warQuestsDue,warStart,warSettle,buyContest,validContest,summonWells,summonPity,summonLevelMax,summonDupGold,markKinds,markPrice,markLimit,markNeed,galaQuests,galaMilestones,galaEnds,summonState,summonLevel,summonPay,summonDraw,markOffer,buyMarkPet,galaClaim,galaReward,validSummon,bossRare,gearRanks,gearRank,gearCraftFrom,gearNoDevour,bossDropRanks,craftRecipe,craftInputs,craftChance,craftGear,gearGroups,gearGroup,bagCapacity,bagStarter,bagRarity,bagItems,bagItemById,bagCount,bagAdd,bagStacks,bagUsed,vaultCount,vaultMove,useBagItem,devourStep,devourMax,devourNeed,devourWorth,devourState,devourBonus,devourable,devourGear,validBag,riposteShare,riposteEvery,talentCells,talentFree,talentLearn,talentBook,talentScroll,talentTopScroll,talentPrice,talentSupremeAt,talentSupreme,petTalents,talentState,talentIds,supremeReady,addSeals,openCellCost,openTalentCell,learnCost,rollTalent,keepTalent,learnTalent,lockTalent,forgetTalent,setTalentTarget,buyTalentScroll,buyTalentBook,sealRates,sealGold,buySeals,exchangeSpares,talentBonus,guardTalents,petGearPieces,petGearMax,petGearStep,petGearSetStep,petGearLevels,petGearTier,petGearCost,petGearBonus,upgradePetGear,petBolt,petBoltPace,petHit,petPace,assistPages,assistSlots,synthChain,synthNeed,petSpares,addPetSpare,synthesizePet,fashionTraits,companionTypes,companionSkins,companionSkin,ownsCompanionSkin,useCompanionSkin,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
 })();
