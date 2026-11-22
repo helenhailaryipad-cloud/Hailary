@@ -383,7 +383,7 @@ function validPets(s){
  if(!validContest(s.contest))return false;
  if(!validCloud(s.cloud))return false;
  if(!validSocial(s.social))return false;
- if(!validGuild(s.guild))return false;
+ if(!validGuild(s.guild))return false; if(!validDuel(s.duel))return false;
  if(s.emberShards!==undefined&&(!Number.isSafeInteger(s.emberShards)||s.emberShards<0))return false;
  if(s.petSpares!==undefined&&(!s.petSpares||typeof s.petSpares!=='object'||Array.isArray(s.petSpares)||!Object.entries(s.petSpares).every(([id,n])=>Object.hasOwn(familiarById,id)&&Number.isInteger(n)&&n>0&&n<=9999)))return false;
  if(s.emberStars!==undefined&&(!Number.isInteger(s.emberStars)||s.emberStars<0||s.emberStars>6||!s.owned?.includes('d1')))return false;
@@ -1131,5 +1131,136 @@ function validGuild(g){
   &&Array.isArray(g.members)&&g.members.length<=20&&new Set(g.members).size===g.members.length&&g.members.every(id=>Object.hasOwn(socialById,id))
   &&!!g.bought&&typeof g.bought==='object'&&Object.entries(g.bought).every(([id,n])=>guildShop.some(w=>w.id===id&&Number.isInteger(n)&&n>0&&n<=w.limit));
 }
-return Object.freeze({guildRules,guildUpFund,guildSignBoxes,guildAcademy,guildList,guildRivals,guildCrests,guildRoles,guildShop,guildBossRank,guildLevel,guildCap,guildState,guildJoin,guildCreate,guildLeave,guildUpgrade,guildNote,guildSpeaker,guildSign,guildDonate,guildFolkPower,guildPower,guildRanking,guildActivity,guildBoxClaim,guildEnvelopes,guildEnvClaim,guildEnvSend,guildBeastTier,guildBossHp,guildReserve,guildBoss,guildHit,guildBossClaim,guildBuy,guildAcademyCost,guildAcademyCap,guildLearn,guildBonus,validGuild,socialNote,chatBlockX,squadOf,socialFolk,socialRules,socialById,chatChannels,socialState,heartsOf,socialTick,sendFlower,giftAll,friendAnswer,friendAdd,friendBlock,mailClaim,mailDelete,mailRead,chatFeed,chatSay,chatLiveLeft,chatLiveSet,validSocial,cloudOwnReward,cloudOwnTake,cloudRules,cloudPointRewards,cloudShop,cloudRound,cloudRoundEnds,cloudState,cloudNewRound,cloudGain,cloudClaim,buyCloud,validCloud,warFactions,warTotems,warRules,warQuests,warRanks,contestShop,contestState,warNew,warHeld,warHero,warOrder,warTally,warStep,warStanding,warRankPrize,warQuestsDue,warStart,warSettle,buyContest,validContest,summonWells,summonPity,summonLevelMax,summonDupGold,markKinds,markPrice,markLimit,markNeed,galaQuests,galaMilestones,galaEnds,summonState,summonLevel,summonPay,summonDraw,markOffer,buyMarkPet,galaClaim,galaReward,validSummon,bossRare,gearRanks,gearRank,gearCraftFrom,gearNoDevour,bossDropRanks,craftRecipe,craftInputs,craftChance,craftGear,gearGroups,gearGroup,bagCapacity,bagStarter,bagRarity,bagItems,bagItemById,bagCount,bagAdd,bagStacks,bagUsed,vaultCount,vaultMove,useBagItem,devourStep,devourMax,devourNeed,devourWorth,devourState,devourBonus,devourable,devourGear,validBag,riposteShare,riposteEvery,talentCells,talentFree,talentLearn,talentBook,talentScroll,talentTopScroll,talentPrice,talentSupremeAt,talentSupreme,petTalents,talentState,talentIds,supremeReady,addSeals,openCellCost,openTalentCell,learnCost,rollTalent,keepTalent,learnTalent,lockTalent,forgetTalent,setTalentTarget,buyTalentScroll,buyTalentBook,sealRates,sealGold,buySeals,exchangeSpares,talentBonus,guardTalents,petGearPieces,petGearMax,petGearStep,petGearSetStep,petGearLevels,petGearTier,petGearCost,petGearBonus,upgradePetGear,petBolt,petBoltPace,petHit,petPace,assistPages,assistSlots,synthChain,synthNeed,petSpares,addPetSpare,synthesizePet,fashionTraits,companionTypes,companionSkins,companionSkin,ownsCompanionSkin,useCompanionSkin,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
+// ---- Sky Contest: Star Duel ----------------------------------------------------------------------------------------
+// A two-week season (UTC days from `duelRules.anchor`): Qualification on days 1-3 (15 one-on-one auto-fights against AI
+// adventurers, HP does not recover within a day; points for winning, for the foe's strength and for HP left), the top
+// 160 of the field reach the Group stage on day 4 (ten in a group, everyone fights everyone, top two go on), the Peak
+// Game on day 5 (32 players, five knock-out rounds, HP carries from match to match, bets on other matches and a
+// champion guess), then the results and rewards by mail. Everyone else is an AI adventurer. Optional save field
+// `duel` {season, n, w, pts, hp, hpDay, insp, auto, g[], p[], php, bets{round:slot}, guess, done}. Placeholders.
+const duelRules={anchor:Date.UTC(2026,10,21),period:14,qualDays:3,groupDay:3,peakDay:4,matches:15,promote:160,field:1200,groupSize:10,peakSize:32,peakRounds:5,
+ peakHours:4,inspCost:50,inspStep:6,inspMax:5,winBase:20,winPower:10,winHp:10,lossPts:5,groupWin:3,betStake:1000,betPay:2.5,guessPay:5000};
+const duelPart={exp1:1,gold1:1};
+const duelRanks=[{to:1,label:'Champion',items:{chest3:2,gembox:2,wish:5}},{to:2,label:'Runner-up',items:{chest3:1,gembox:2,wish:3}},{to:4,label:'Top 4',items:{chest2:2,gembox:1,wish:2}},
+ {to:8,label:'Top 8',items:{chest2:1,gembox:1}},{to:16,label:'Top 16',items:{chest2:1,shardbag:1}},{to:32,label:'Top 32',items:{chest1:2,shardbag:1}},{to:160,label:'Top 160',items:{chest1:1,stonebag:1}},
+ {to:1e9,label:'Participant',items:{stonebag:1}}];
+const duelNames=['Bjorn','Mira','Talon','Seren','Rook','Ilsa','Kestrel','Faye','Corin','Liora','Dax','Nim','Ysolde','Garrick','Pell','Ondine','Marco','Mawi','Sable','Quill'];
+function duelSeason(now=Date.now()){
+ const r=duelRules,d=Math.floor((now-r.anchor)/864e5),season=Math.floor(d/r.period),day=d-season*r.period,start=r.anchor+season*r.period*864e5;
+ const stage=day<r.qualDays?'qual':day===r.groupDay?'group':day===r.peakDay?'peak':'rest';
+ return {season,day,start,stage,hours:(now-start-day*864e5)/36e5};
+}
+// The AI field: final qualification points, power (relative to Reina's) and a name, all from the season and the slot.
+const duelMix=n=>{n=Math.imul(n^(n>>>16),0x45d9f3b);n=Math.imul(n^(n>>>16),0x45d9f3b);return (n^(n>>>16))>>>0};
+function duelAi(season,i){const h=hashOf('duel'+season+':'+i),u=(h%1000)/1000,m=duelMix(h+i*7919);return {i,name:duelNames[m%duelNames.length]+' S-'+(5000+Math.floor(m/97)%400),pts:Math.round(30+570*u**1.7),pow:.6+u*.6+(h%7)/100}}
+function duelField(season){const out=[];for(let i=0;i<duelRules.field;i++)out.push(duelAi(season,i));return out}
+function duelState(s,now=Date.now()){
+ const se=duelSeason(now),v=s.duel&&s.duel.season===se.season?s.duel:{},today=utcDay(now);
+ return {...se,n:v.n||0,w:v.w||0,pts:v.pts||0,hp:v.hpDay===today?v.hp??100:100,hpDay:today,insp:v.insp||0,auto:!!v.auto,g:[...(v.g||[])],p:[...(v.p||[])],php:v.php??100,
+  bets:{...v.bets},guess:v.guess,done:v.done||0};
+}
+function duelPack(s,v){const out={season:v.season,n:v.n,w:v.w,pts:v.pts,hp:v.hp,hpDay:v.hpDay,insp:v.insp,g:v.g,p:v.p,php:v.php,bets:v.bets,done:v.done};if(v.auto)out.auto=true;if(v.guess!==undefined)out.guess=v.guess;s.duel=out}
+// Qualification ranking: the AI field gathers its points over the three days.
+function duelQualRank(s,now=Date.now()){
+ const v=duelState(s,now),r=duelRules,prog=v.stage==='qual'?Math.min(1,(now-v.start)/(r.qualDays*864e5)):1,field=duelField(v.season);
+ const ai=field.map(a=>({...a,now:Math.round(a.pts*Math.min(1,prog*(.75+(hashOf('qp'+a.i)%50)/100)))})).sort((a,b)=>b.now-a.now||a.i-b.i);
+ const rank=v.n?1+ai.filter(a=>a.now>v.pts).length:0;
+ return {rank,top:ai.slice(0,30),qualified:v.n>0&&rank<=r.promote&&v.stage!=='qual',open:v.stage==='qual'};
+}
+// One duel: turn by turn until one side falls. Inspiration lowers the damage Reina takes.
+function duelSim(me,op,rng=Math.random){
+ const maxA=me.power*12,maxB=op.power*12;let a=maxA*me.hp,b=maxB*op.hp;const hits=[];
+ for(let t=0;t<40&&a>0&&b>0;t++){const mine=t%2===0,dmg=Math.round((mine?me.power:op.power)*(2.2+rng()*1.2)*(mine?1:1-(me.red||0)));if(mine)b-=dmg;else a-=dmg;hits.push({mine,dmg,a:Math.max(0,a)/maxA,b:Math.max(0,b)/maxB})}
+ const ha=Math.max(0,a)/maxA,hb=Math.max(0,b)/maxB;return {win:ha>0&&(hb<=0||ha>=hb),hp:ha,opHp:hb,hits};
+}
+const duelRed=v=>v.insp*duelRules.inspStep/100;
+function duelInspire(s,count=1,now=Date.now()){
+ const v=duelState(s,now),r=duelRules,n=Math.min(count,r.inspMax-v.insp);if(n<1||(s.scales||0)<n*r.inspCost)return 0;
+ s.scales-=n*r.inspCost;v.insp+=n;duelPack(s,v);return n;
+}
+function duelAuto(s,on,now=Date.now()){const v=duelState(s,now);v.auto=!!on;duelPack(s,v);return v.auto}
+function duelAutoBuy(s,now){const v=duelState(s,now);if(v.auto&&v.insp<duelRules.inspMax)duelInspire(s,duelRules.inspMax-v.insp,now)}
+function duelQualFight(s,rng=Math.random,now=Date.now()){
+ duelAutoBuy(s,now);const v=duelState(s,now),r=duelRules;if(v.stage!=='qual'||v.n>=r.matches)return null;
+ if(v.hp<=0)return {tired:true};
+ const power=stats(s).power,foe=duelAi(v.season,hashOf('q'+v.season+':'+v.n)%r.field),opPower=Math.max(1,Math.round(power*foe.pow));
+ const f=duelSim({power,hp:v.hp/100,red:duelRed(v)},{power:opPower,hp:1},rng);
+ const pts=f.win?r.winBase+Math.round(r.winPower*Math.min(2,opPower/power))+Math.round(r.winHp*f.hp):r.lossPts;
+ v.n++;if(f.win)v.w++;v.pts+=pts;v.hp=Math.round(f.hp*100);duelPack(s,v);for(const [id,k] of Object.entries(duelPart))bagAdd(s,id,k);
+ return {...f,pts,foe:{name:foe.name,power:opPower},items:duelPart};
+}
+// Group stage: Reina (slot 0) and nine AI adventurers ranked near her; a round-robin by the circle method.
+function duelGroup(s,now=Date.now()){
+ const v=duelState(s,now),q=duelQualRank(s,now),r=duelRules,power=stats(s).power;if(!q.qualified)return null;
+ const field=duelField(v.season).sort((a,b)=>b.pts-a.pts||a.i-b.i),near=Math.min(field.length-10,Math.max(0,q.rank-5));
+ const members=[{me:true,name:'me',power},...field.slice(near,near+r.groupSize-1).map(a=>({name:a.name,i:a.i,power:Math.round(power*a.pow)}))];
+ const rounds=[];const ring=members.map((_,i)=>i);
+ for(let k=0;k<r.groupSize-1;k++){const pairs=[];for(let j=0;j<r.groupSize/2;j++)pairs.push([ring[j],ring[r.groupSize-1-j]]);rounds.push(pairs);ring.splice(1,0,ring.pop())}
+ const shown=v.stage==='group'?v.g.length:r.groupSize-1,table=members.map(m=>({...m,pts:0,won:0,lost:0}));
+ rounds.forEach((pairs,k)=>{if(k>=shown)return;for(const [a,b] of pairs){let aw;
+  if(a===0||b===0){const res=v.g[k];aw=a===0?res===1:res!==1}else{const pa=members[a].power,pb=members[b].power;aw=(hashOf('g'+v.season+':'+k+':'+a)%1000)/1000<pa/(pa+pb)}
+  const w=aw?a:b,l=aw?b:a;table[w].pts+=r.groupWin;table[w].won++;table[l].lost++}});
+ const standing=[...table].sort((x,y)=>y.pts-x.pts||y.power-x.power);
+ const next=v.stage==='group'&&v.g.length<r.groupSize-1?rounds[v.g.length].map(p=>p.includes(0)?p[0]===0?p[1]:p[0]:null).find(x=>x!==null):null;
+ return {members,table,standing,next,done:v.stage!=='qual'&&v.stage!=='group'||v.g.length>=r.groupSize-1,top2:standing.slice(0,2).some(m=>m.me)};
+}
+function duelGroupFight(s,rng=Math.random,now=Date.now()){
+ duelAutoBuy(s,now);const v=duelState(s,now),gr=duelGroup(s,now);if(v.stage!=='group'||!gr||gr.next===null)return null;
+ const foe=gr.members[gr.next],f=duelSim({power:gr.members[0].power,hp:1,red:duelRed(v)},{power:foe.power,hp:1},rng);
+ v.g.push(f.win?1:0);duelPack(s,v);return {...f,foe:{name:foe.name,power:foe.power}};
+}
+// Peak Game: 32 players in a knock-out bracket. Reina takes slot 0 if she finished top two of her group.
+function duelPeak(s,now=Date.now()){
+ const v=duelState(s,now),r=duelRules,gr=v.day>=r.peakDay?duelGroup(s,now):null,inn=!!(gr&&gr.top2&&gr.done),power=stats(s).power;
+ const field=duelField(v.season).sort((a,b)=>b.pts-a.pts||a.i-b.i).slice(0,r.peakSize);
+ const players=field.map(a=>({name:a.name,i:a.i,power:Math.round(power*a.pow)}));if(inn)players[0]={me:true,name:'me',power};
+ const rounds=[];let alive=players.map((_,k)=>k);
+ for(let k=0;k<r.peakRounds;k++){
+  const herIn=inn&&alive.includes(0),revealed=v.day>r.peakDay||v.stage==='peak'&&(v.hours>=r.peakHours*(k+1)||herIn&&v.p.length>k),matches=[];
+  for(let j=0;j<alive.length;j+=2){const a=alive[j],b=alive[j+1],mine=inn&&(a===0||b===0),other=a===0?b:a;let win;
+   if(mine)win=v.p.length>k?(v.p[k]===1?0:other):revealed?other:null;
+   else{const pa=players[a].power,pb=players[b].power;win=(hashOf('p'+v.season+':'+k+':'+a)%1000)/1000<pa/(pa+pb)?a:b}
+   matches.push({a,b,mine,win:revealed||mine?win:null})}
+  rounds.push({k,matches,revealed});if(!revealed)break;alive=matches.map(m=>m.win);
+ }
+ const mineAll=rounds.flatMap(rd=>rd.matches.filter(m=>m.mine)),lostAt=mineAll.findIndex(m=>m.win!==null&&m.win!==0);
+ const meAlive=inn&&lostAt<0,myRound=meAlive?rounds.findIndex(rd=>rd.matches.some(m=>m.mine&&m.win===null)):-1;
+ const final=rounds.length===r.peakRounds&&rounds[r.peakRounds-1].revealed?rounds[r.peakRounds-1].matches[0].win:null;
+ return {players,rounds,inn,meAlive,myRound,lostAt,champion:final,php:v.php};
+}
+function duelPeakFight(s,rng=Math.random,now=Date.now()){
+ duelAutoBuy(s,now);const v=duelState(s,now),pk=duelPeak(s,now);if(v.stage!=='peak'||!pk.inn||pk.myRound<0||v.hours>=duelRules.peakHours*(pk.myRound+1)||v.php<=0)return null;
+ const m=pk.rounds[pk.myRound].matches.find(x=>x.a===0||x.b===0),foe=pk.players[m.a===0?m.b:m.a];
+ const f=duelSim({power:pk.players[0].power,hp:v.php/100,red:duelRed(v)},{power:foe.power,hp:1},rng);
+ v.p.push(f.win?1:0);v.php=f.win?Math.max(1,Math.round(f.hp*100)):0;duelPack(s,v);return {...f,foe:{name:foe.name,power:foe.power},round:pk.myRound};
+}
+// Bets: before a round is revealed, stake gold on one AI player of an AI match; a right guess pays stake x betPay.
+function duelBet(s,round,slot,now=Date.now()){
+ const v=duelState(s,now),pk=duelPeak(s,now),rd=pk.rounds[round],r=duelRules;if(v.stage!=='peak'||!rd||rd.revealed||Object.hasOwn(v.bets,round)||s.gold<r.betStake)return false;
+ const m=rd.matches.find(x=>x.a===slot||x.b===slot);if(!m||m.a===0&&pk.inn||m.b===0&&pk.inn)return false;
+ s.gold-=r.betStake;v.bets[round]=slot;duelPack(s,v);return true;
+}
+function duelGuess(s,slot,now=Date.now()){const v=duelState(s,now),pk=duelPeak(s,now);if(v.day>duelRules.peakDay||v.guess!==undefined||pk.rounds[0]?.revealed||!Number.isInteger(slot)||slot<0||slot>=duelRules.peakSize)return false;v.guess=slot;duelPack(s,v);return true}
+// Her place in the season (null while it is still open) and the settlement: bets, the guess, and the rewards by mail.
+function duelPlace(s,now=Date.now()){
+ const v=duelState(s,now),r=duelRules;if(!v.n)return null;const q=duelQualRank(s,now);if(v.stage==='qual')return null;if(!q.qualified)return q.rank;
+ const gr=duelGroup(s,now);if(!gr.done)return null;if(!gr.top2)return Math.min(r.promote,Math.max(33,q.rank));
+ const pk=duelPeak(s,now);if(pk.lostAt>=0)return [32,16,8,4,2][pk.lostAt];return pk.champion===0?1:null;
+}
+function duelSettle(s,now=Date.now()){
+ const v=duelState(s,now),r=duelRules,pk=duelPeak(s,now),paid={gold:0,mail:null};
+ for(const [k,slot] of Object.entries(v.bets)){const bit=1<<k,rd=pk.rounds[k];if(v.done&bit||!rd?.revealed)continue;const m=rd.matches.find(x=>x.a===slot||x.b===slot);v.done|=bit;if(m&&m.win===slot){const g=Math.round(r.betStake*r.betPay);s.gold+=g;paid.gold+=g}}
+ if(v.guess!==undefined&&!(v.done&32)&&pk.champion!==null){v.done|=32;if(pk.champion===v.guess){s.gold+=r.guessPay;paid.gold+=r.guessPay}}
+ const place=duelPlace(s,now);
+ if(place!==null&&!(v.done&64)&&(v.day>r.peakDay)){const row=duelRanks.find(x=>place<=x.to);v.done|=64;
+  const sv=socialState(s,now);mailSend(sv,{title:'Star Duel: '+row.label,from:'Arena Herald',text:'Your Star Duel season ended at place '+place+'. Here are your rewards.',items:row.items},now);s.social=socialPack(sv);paid.mail=row}
+ if(v.done!==(s.duel?.season===v.season?s.duel.done||0:0)||paid.gold)duelPack(s,v);return paid;
+}
+function validDuel(v){
+ if(v===undefined)return true;const int=(n,max)=>Number.isInteger(n)&&n>=0&&n<=max,r=duelRules;
+ return !!v&&typeof v==='object'&&!Array.isArray(v)&&Number.isInteger(v.season)&&int(v.n,r.matches)&&int(v.w,v.n)&&int(v.pts,1e5)&&int(v.hp,100)&&typeof v.hpDay==='string'&&v.hpDay.length<=10
+  &&int(v.insp,r.inspMax)&&(v.auto===undefined||v.auto===true)&&Array.isArray(v.g)&&v.g.length<r.groupSize&&v.g.every(x=>x===0||x===1)&&Array.isArray(v.p)&&v.p.length<=r.peakRounds&&v.p.every(x=>x===0||x===1)
+  &&int(v.php,100)&&!!v.bets&&typeof v.bets==='object'&&Object.entries(v.bets).every(([k,x])=>/^[0-4]$/.test(k)&&int(x,r.peakSize-1))&&(v.guess===undefined||int(v.guess,r.peakSize-1))&&int(v.done,127);
+}
+return Object.freeze({duelRules,duelPart,duelRanks,duelSeason,duelAi,duelField,duelState,duelQualRank,duelSim,duelInspire,duelAuto,duelQualFight,duelGroup,duelGroupFight,duelPeak,duelPeakFight,duelBet,duelGuess,duelPlace,duelSettle,validDuel,guildRules,guildUpFund,guildSignBoxes,guildAcademy,guildList,guildRivals,guildCrests,guildRoles,guildShop,guildBossRank,guildLevel,guildCap,guildState,guildJoin,guildCreate,guildLeave,guildUpgrade,guildNote,guildSpeaker,guildSign,guildDonate,guildFolkPower,guildPower,guildRanking,guildActivity,guildBoxClaim,guildEnvelopes,guildEnvClaim,guildEnvSend,guildBeastTier,guildBossHp,guildReserve,guildBoss,guildHit,guildBossClaim,guildBuy,guildAcademyCost,guildAcademyCap,guildLearn,guildBonus,validGuild,socialNote,chatBlockX,squadOf,socialFolk,socialRules,socialById,chatChannels,socialState,heartsOf,socialTick,sendFlower,giftAll,friendAnswer,friendAdd,friendBlock,mailClaim,mailDelete,mailRead,chatFeed,chatSay,chatLiveLeft,chatLiveSet,validSocial,cloudOwnReward,cloudOwnTake,cloudRules,cloudPointRewards,cloudShop,cloudRound,cloudRoundEnds,cloudState,cloudNewRound,cloudGain,cloudClaim,buyCloud,validCloud,warFactions,warTotems,warRules,warQuests,warRanks,contestShop,contestState,warNew,warHeld,warHero,warOrder,warTally,warStep,warStanding,warRankPrize,warQuestsDue,warStart,warSettle,buyContest,validContest,summonWells,summonPity,summonLevelMax,summonDupGold,markKinds,markPrice,markLimit,markNeed,galaQuests,galaMilestones,galaEnds,summonState,summonLevel,summonPay,summonDraw,markOffer,buyMarkPet,galaClaim,galaReward,validSummon,bossRare,gearRanks,gearRank,gearCraftFrom,gearNoDevour,bossDropRanks,craftRecipe,craftInputs,craftChance,craftGear,gearGroups,gearGroup,bagCapacity,bagStarter,bagRarity,bagItems,bagItemById,bagCount,bagAdd,bagStacks,bagUsed,vaultCount,vaultMove,useBagItem,devourStep,devourMax,devourNeed,devourWorth,devourState,devourBonus,devourable,devourGear,validBag,riposteShare,riposteEvery,talentCells,talentFree,talentLearn,talentBook,talentScroll,talentTopScroll,talentPrice,talentSupremeAt,talentSupreme,petTalents,talentState,talentIds,supremeReady,addSeals,openCellCost,openTalentCell,learnCost,rollTalent,keepTalent,learnTalent,lockTalent,forgetTalent,setTalentTarget,buyTalentScroll,buyTalentBook,sealRates,sealGold,buySeals,exchangeSpares,talentBonus,guardTalents,petGearPieces,petGearMax,petGearStep,petGearSetStep,petGearLevels,petGearTier,petGearCost,petGearBonus,upgradePetGear,petBolt,petBoltPace,petHit,petPace,assistPages,assistSlots,synthChain,synthNeed,petSpares,addPetSpare,synthesizePet,fashionTraits,companionTypes,companionSkins,companionSkin,ownsCompanionSkin,useCompanionSkin,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
 })();

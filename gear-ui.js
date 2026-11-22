@@ -556,14 +556,14 @@ function citySummon(){
 // ---- Sky Contest: Totem War (rules: WonderGear.war*). Gameplay > Sky Contest lists the modes; this room has the
 // lobby, the fight and the Contest Shop. ------------------------------------------------------------------------------
 let contestPage='War',warFaction=0,warGame=null,warPaid=false,warTimer=0,warFast=false;
-const contestModes=[['Star Duel','One against one, by rank','#4f8fe0','guardian-t9',false],['Totem War','Three factions, three totems','#3f9a62','guardian-t12',true],['Storm Brawl','Everyone for themselves','#d0553a','guardian-t20',false],['Shadow Hunt','Hunt the season boss','#7a55d0','guardian-t27',false]];
+const contestModes=[['Star Duel','One against one, by rank','#4f8fe0','guardian-t9','Duel'],['Totem War','Three factions, three totems','#3f9a62','guardian-t12',true],['Storm Brawl','Everyone for themselves','#d0553a','guardian-t20',false],['Shadow Hunt','Hunt the season boss','#7a55d0','guardian-t27',false]];
 function warArtVars(){const root=document.documentElement;if(!root?.style?.setProperty||root.style.getPropertyValue('--war-icons'))return;root.style.setProperty('--war-icons','url("'+artPath('comp-war-icons')+'")')}
 // 0-2 totems (Ember, Tide, Gale), 3 medal, 4-6 emblems, 7 crown
 const warIcon=n=>'<i class="war-ico" style="background-position:'+(n%4)/3*100+'% '+Math.floor(n/4)*100+'%"></i>';
 function contestGo(page){contestPage=page;if(page!=='Fight')warStop();if(screen==='cityContest')cityContest();else go('cityContest')}
-function contestLeave(){warStop();if(contestPage==='War'){go('cityGameplay');playSection=4;cityGameplay()}else contestGo('War')}
+function contestLeave(){warStop();if(contestPage==='War'||contestPage==='Duel'){go('cityGameplay');playSection=4;cityGameplay()}else contestGo('War')}
 function contestList(){
- return '<div class="sky-list">'+contestModes.map(([name,note,color,art,open])=>`<button class="sky-mode ${open?'':'soon'}" style="--tone:${color}" onclick="${open?"contestGo('War')":"toast('"+name+" is not open yet.')"}">${denPlain}<b>${name}</b><small>${note}</small><em>${open?'Open every day · '+WonderGear.contestState(S).runs+' / '+WonderGear.warRules.daily+' rewarded fights today':'Coming later'}</em>${bossArtMarkup(art)}</button>`).join('')+'</div>';
+ return '<div class="sky-list">'+contestModes.map(([name,note,color,art,open])=>`<button class="sky-mode ${open?'':'soon'}" style="--tone:${color}" onclick="${open?(open==='Duel'?"duelGo('Qualification')":"contestGo('War')"):"toast('"+name+" is not open yet.')"}">${denPlain}<b>${name}</b><small>${note}</small><em>${open==='Duel'?'Every two weeks · now: '+duelWindow(WonderGear.duelState(S)):open?'Open every day · '+WonderGear.contestState(S).runs+' / '+WonderGear.warRules.daily+' rewarded fights today':'Coming later'}</em>${bossArtMarkup(art)}</button>`).join('')+'</div>';
 }
 function warRulesShow(){const w=WonderGear.warRules;popup('<h2>Totem War</h2><p>1. Three factions of '+w.team+' fight for '+w.length/60+' minutes. Reina leads the faction you choose; the other fighters are AI adventurers.</p><p>2. Every '+w.tally+' seconds your deeds turn into points: a defeated enemy '+w.kill+', an assist '+w.assist+', a hit on an enemy totem '+w.hit+'.</p><p>3. Each totem your faction holds at that moment adds '+Math.round(w.flag*100)+'% to those points. A totem falls to the faction that damaged it most.</p><p>4. Tap a totem to send Reina there; Auto lets her choose. She fights by herself.</p><p>5. Points open quest rewards during the fight, and the final ranking gives contest medals. Rewards are paid for '+w.daily+' fights a day; later fights are practice.</p>')}
 function warPrizes(items){return Object.entries(items).map(([id,n])=>'<span class="bag-gain" style="--rarity:'+bagHue(WonderGear.bagItemById[id].rarity)+'">'+bagIcon(id)+'<b>×'+n+'</b></span>').join('')}
@@ -627,6 +627,7 @@ function contestAsk(id){
 }
 function cityContest(){
  const r=WonderGear,v=r.contestState(S),w=r.warRules;warArtVars();bagArtVars();
+ if(contestPage==='Duel'){duelRoom();return}
  if(!['War','Shop','Fight'].includes(contestPage)||contestPage==='Fight'&&!warGame)contestPage='War';
  const medals=sumChip(warIcon(3),v.medals,'Contest medals');
  if(contestPage==='Fight'){
@@ -919,6 +920,100 @@ function cityGuild(){
  warArtVars();
  const nav=`<div class="satchel-nav well-nav gld-nav"><button data-back aria-label="Back to city" onclick="go('home')">‹</button>${[['Info','Info',0],['Academy','Academy',6],['Beast','Guild Beast',4],['Shop','Shop',7]].map(([p,n,i])=>`<button ${p===guildPage?'aria-current="page"':''} onclick="guildGo('${p}')">${denPlain}${gldIcon(i)}${n}</button>`).join('')}</div>`;
  $('#main').innerHTML=`<section class="satchel gld gld-p-${guildPage.toLowerCase()} ${tabs?'gld-tabbed':''} gld-t-${guildTab.toLowerCase()}" style="background-image:url('${artPath('comp-guild-hall')}')"><div class="satchel-top"><strong>Guild</strong>${wallet}</div>${body}${tabs}${nav}</section>`;
+}
+
+// ---- Star Duel (rules: WonderGear.duel*). Sky Contest -> Star Duel; contestPage 'Duel', tab in duelTab. -------------
+let duelTab='Qualification',duelInfoTab='Qualification';
+const duelDate=(t)=>new Date(t).toISOString().slice(5,10);
+const duelWho=(pk,k)=>{const p=pk.players[k];return p.me?esc(S.name):esc(p.name)+' <small>AI</small>'};
+function duelGo(tab){duelTab=tab;contestPage='Duel';if(screen==='cityContest')cityContest();else go('cityContest')}
+function duelWindow(v){const R=WonderGear.duelRules,d=n=>duelDate(v.start+n*864e5);
+ return v.stage==='qual'?'Qualification: '+d(0)+' – '+d(R.qualDays-1):v.stage==='group'?'Group stage: '+d(R.groupDay)+' (all day)':v.stage==='peak'?'Peak Game: '+d(R.peakDay)+' · a round every '+R.peakHours+' h':'Next season: '+d(R.period)}
+function duelInfo(tab){
+ if(tab)duelInfoTab=tab;const r=WonderGear,R=r.duelRules,v=r.duelState(S),d=n=>duelDate(v.start+n*864e5);
+ const sched={Qualification:[['The preliminary begins',d(0)+' 00:00'],['End of preliminary',d(R.qualDays-1)+' 24:00']],Group:[['Group stage',d(R.groupDay)+' 00:00–24:00'],['Rounds',(R.groupSize-1)+' fights, any time that day']],
+  Peak:Array.from({length:R.peakRounds},(_,k)=>['Round '+(k+1),d(R.peakDay)+' until '+String(R.peakHours*(k+1)).padStart(2,'0')+':00'])}[duelInfoTab];
+ const intro={Qualification:['The qualification lasts three days (UTC).','Each adventurer can match for '+R.matches+' games and gets a reward after each battle.','After the qualification, the top '+R.promote+' are promoted to the group stage.','Beating stronger opponents and keeping more HP gives more points.','HP does not recover during a day of qualification; it is full again the next day.'],
+  Group:['The '+R.promote+' qualified adventurers are divided into groups of '+R.groupSize+' by strength.','Everyone fights everyone in the group; a victory gives '+R.groupWin+' points.','Rounds you do not fight by the end of the day count as losses.','The top two of each group enter the Peak Game.','Every group fight starts with full HP.'],
+  Peak:['32 adventurers, five knock-out rounds on one day.','Fight your round before its deadline, or it counts as a loss.','The HP left after a match carries over to the next one; nothing restores it.','Before a round is decided you may bet '+fmt(R.betStake)+' gold on a player of another match; a right bet pays ×'+R.betPay+'.','Before the first round you may guess the champion; a right guess pays '+fmt(R.guessPay)+' gold.','Ranking rewards arrive by mail when the Peak Game ends.']}[duelInfoTab];
+ popup(`<h2>Match Description</h2><div class="duel-info"><h3>${duelInfoTab==='Peak'?'Peak Game':duelInfoTab} Schedule</h3>${sched.map(([a,b])=>`<p class="duel-sched"><span>◆ ${a}</span><b>${b}</b></p>`).join('')}<h3>${duelInfoTab==='Peak'?'Peak Game':duelInfoTab} Intro</h3><ol>${intro.map(x=>`<li>${x}</li>`).join('')}</ol></div>
+ <div class="duel-infotabs">${['Qualification','Group','Peak'].map(t=>`<button ${t===duelInfoTab?'aria-current="page"':''} onclick="duelInfo('${t}')">${denPlain}${t==='Peak'?'Peak Game':t}</button>`).join('')}</div>`);
+}
+function duelInspirePop(){
+ const r=WonderGear,R=r.duelRules,v=r.duelState(S);
+ popup(`<h2>Inspiration</h2><div class="duel-insp"><p>Each inspiration gives Reina <b>${R.inspStep}%</b> DMG Reduction for this season.</p><p>Current DMG Reduction: <b>${v.insp*R.inspStep}%</b> (Cap: ${R.inspMax*R.inspStep}%)</p><p>Prism Inspiration: <b>${R.inspCost}</b> ${uiIcon('crystals')} / time</p>
+ <label class="duel-auto"><button class="soc-check" aria-pressed="${v.auto}" onclick="WonderGear.duelAuto(S,${!v.auto});save();duelInspirePop()">${denPlain}</button>Auto maximize inspirations for the season</label></div>
+ <div class="den-actions"><button class="duel-blue" ${v.insp<R.inspMax?'':'disabled'} onclick="duelInspireNow(${R.inspMax})">${denPlain}Quick Inspiration</button><button class="den-gold" ${v.insp<R.inspMax?'':'disabled'} onclick="duelInspireNow(1)">${denPlain}Inspire ${v.insp}/${R.inspMax}</button></div>`);
+}
+function duelInspireNow(n){if(WonderGear.duelInspire(S,n)){save();duelInspirePop();cityContest()}else toast('Not enough prisms, or the cap is reached.')}
+function duelRankPop(){
+ const r=WonderGear,v=r.duelState(S),q=r.duelQualRank(S),me=Math.round(stats().power);
+ const row=(no,name,pts,pow,mine)=>`<div class="duel-rk ${mine?'me':''}"><b class="duel-no n${Math.min(no,4)}">${no||'–'}</b><span>${name}</span><em>Points: <i>${pts}</i></em><small>⚔ ${gldPower(pow)}</small></div>`;
+ popup(`<h2>Qualification Rankings</h2><div class="duel-rks">${q.top.slice(0,20).map((a,i)=>row(i+1,esc(a.name)+' <small>AI</small>',a.now,Math.round(me*a.pow),false)).join('')}</div>${row(q.rank,esc(S.name),v.pts,me,true)}<p class="duel-note">Adventurers who fought and rank in the top <b>${r.duelRules.promote}</b> enter the group stage.</p>`);
+}
+function duelRewardsPop(){bagArtVars();let from=1;popup('<h2>Ranking Rewards</h2><div class="war-ranks duel-rw">'+WonderGear.duelRanks.map(x=>{const label=x.to>1e6?x.label:x.label;from=x.to+1;return '<div><b>'+label+'</b>'+warPrizes(x.items)+'</div>'}).join('')+'</div><p>Sent by mail when the Peak Game ends.</p>')}
+function duelPick(k){
+ const r=WonderGear,R=r.duelRules,pk=r.duelPeak(S),p=pk.players[k],v=r.duelState(S),rd=pk.rounds.find(x=>!x.revealed),m=rd?.matches.find(x=>x.a===k||x.b===k);
+ const canBet=v.stage==='peak'&&m&&!m.mine&&!Object.hasOwn(v.bets,rd.k),canGuess=v.day<=R.peakDay&&v.guess===undefined&&!pk.rounds[0]?.revealed;
+ popup(`<h2>${p.me?esc(S.name):esc(p.name)+' <small>AI</small>'}</h2><p>Power ⚔ ${gldPower(p.power)}</p><div class="den-actions">${canBet?`<button class="den-gold" onclick="duelBetNow(${rd.k},${k})">${denPlain}Bet ${fmt(R.betStake)} gold · round ${rd.k+1}</button>`:''}${canGuess?`<button class="duel-blue" onclick="duelGuessNow(${k})">${denPlain}Guess as champion</button>`:''}</div>${canBet||canGuess?'':'<p>No bet or guess open for this player now.</p>'}`);
+}
+function duelBetNow(round,k){if(WonderGear.duelBet(S,round,k)){save();$('#modal').close();cityContest();toast('Bet placed.')}else toast('Not enough gold, or this round is closed.')}
+function duelGuessNow(k){if(WonderGear.duelGuess(S,k)){save();$('#modal').close();cityContest();toast('Champion guess saved.')}}
+// The fight window: both fighters, HP bars and the blows one by one, then the result.
+function duelShow(f,title,after){
+ const me=esc(S.name),foe=esc(f.foe.name)+' <small>AI</small>';
+ popup(`<h2>${title}</h2><div class="duel-fight"><div class="duel-side me"><img src="${reinaLookPath(false)}" alt=""><b>${me}</b><i class="gld-bar"><u id="duelA" style="width:${(f.hits[0]?.mine===false?1:1)*100}%"></u></i></div><span class="duel-vs">VS</span><div class="duel-side"><div class="duel-foe">⚔</div><b>${foe}</b><small>⚔ ${gldPower(f.foe.power)}</small><i class="gld-bar boss"><u id="duelB" style="width:100%"></u></i></div><b class="duel-pop" id="duelPop"></b></div><p class="duel-out" id="duelOut">Fighting…</p>`);
+ let i=0;const step=()=>{const box=document.getElementById('duelOut');if(!box)return;const h=f.hits[i++];
+  if(!h){box.innerHTML=(f.win?'<b class="win">Victory!</b>':'<b class="loss">Defeat</b>')+(after||'');return}
+  const a=document.getElementById('duelA'),b=document.getElementById('duelB'),pop=document.getElementById('duelPop');if(a)a.style.width=h.a*100+'%';if(b)b.style.width=h.b*100+'%';
+  if(pop){pop.textContent='-'+fmt(h.dmg);pop.className='duel-pop '+(h.mine?'at-foe':'at-me');void pop.offsetWidth;pop.classList.add('go')}setTimeout(step,380)};
+ setTimeout(step,450);
+}
+function duelMatch(){
+ const r=WonderGear,v=r.duelState(S);let f=null,title='',after='';
+ if(duelTab==='Qualification'){f=r.duelQualFight(S);if(f?.tired){toast('No HP left today. It is full again tomorrow.');return}title='Qualification · Match '+r.duelState(S).n;if(f)after=`<br>+${f.pts} points · participation reward in the bag`}
+ else if(duelTab==='Group'){f=r.duelGroupFight(S);title='Group stage · Round '+r.duelState(S).g.length;if(f)after=f.win?'<br>+'+r.duelRules.groupWin+' points':''}
+ else if(duelTab==='Peak'){f=r.duelPeakFight(S);if(f){title='Peak Game · Round '+(f.round+1);after=f.win?'<br>HP carried to the next round: '+r.duelState(S).php+'%':'<br>Out of the Peak Game.'}}
+ if(!f){toast('No match open right now.');return}
+ save();cityContest();duelShow(f,title,after);
+}
+function duelRoom(){
+ const r=WonderGear,R=r.duelRules;warArtVars();bagArtVars();
+ const paid=r.duelSettle(S);if(paid.gold||paid.mail){save();if(paid.mail)toast('Star Duel rewards are in your Mail.');else toast('Bets paid: +'+fmt(paid.gold)+' gold')}
+ const v=r.duelState(S),q=r.duelQualRank(S),st=stats(),place=r.duelPlace(S);
+ if(!['Qualification','Group','Peak','Ultimate'].includes(duelTab))duelTab='Qualification';
+ let panel='',canMatch=false,matchNote='';
+ if(duelTab==='Qualification'){
+  canMatch=v.stage==='qual'&&v.n<R.matches&&v.hp>0;matchNote=v.stage!=='qual'?'Closed':v.n>=R.matches?'Done':v.hp<=0?'Rest':'';
+  panel=`<h3>Current Ranking: ${q.rank?'No.'+q.rank:'—'} <small>(Top ${R.promote} can be promoted)</small><button class="duel-q" onclick="duelInfo('Qualification')">${denPlain}?</button></h3>
+  <div class="duel-stats"><span>Current Ranking:</span><b>${q.rank||'—'}</b><span>Remaining attempts:</span><b>${R.matches-v.n}</b><span>Match Points:</span><b>${v.pts}</b><span>Win Rate:</span><b>${v.n?Math.round(v.w/v.n*100):0}%</b></div>
+  <i class="gld-bar duel-hp"><u style="width:${v.hp}%"></u><em>HP today ${v.hp}%</em></i>
+  <div class="duel-part"><span>Participation Rewards</span>${Object.entries(r.duelPart).map(([id,n])=>`<span class="bag-gain" style="--rarity:${bagHue(r.bagItemById[id].rarity)}">${bagIcon(id)}<b>×${n}</b></span>`).join('')}</div>`;
+ }else if(duelTab==='Group'){
+  const g=r.duelGroup(S);
+  if(!g)panel=`<h3>Group Stage<button class="duel-q" onclick="duelInfo('Group')">${denPlain}?</button></h3><p class="duel-note">${v.stage==='qual'?'Opens on '+duelDate(v.start+R.groupDay*864e5)+' for the top '+R.promote+' of the qualification.':'Only the top '+R.promote+' of the qualification play here. Your rank: '+(q.rank||'—')+'.'}</p>`;
+  else{canMatch=v.stage==='group'&&g.next!==null;matchNote=v.stage!=='group'?'Closed':g.next===null?'Done':'';
+   panel=`<h3>Your Group · Round ${Math.min(v.g.length+1,R.groupSize-1)}/${R.groupSize-1}<button class="duel-q" onclick="duelInfo('Group')">${denPlain}?</button></h3><div class="duel-table">${g.standing.map((m,i)=>`<div class="${m.me?'me':''} ${i<2?'up':''}"><b>${i+1}</b><span>${m.me?esc(S.name):esc(m.name)+' <small>AI</small>'}</span><em>${m.won}–${m.lost}</em><i>${m.pts}</i></div>`).join('')}</div>
+   <p class="duel-note">${g.next!==null?'Next: '+esc(g.members[g.next].name)+' AI':g.top2?'Top two: you enter the Peak Game!':'The group is over.'}</p>`}
+ }else if(duelTab==='Peak'){
+  const pk=r.duelPeak(S),rd=pk.rounds[pk.rounds.length-1];
+  canMatch=v.stage==='peak'&&pk.myRound>=0;matchNote=!pk.inn?'Watch':v.stage!=='peak'?'Closed':'';
+  const names=['Round of 32','Round of 16','Quarter-finals','Semi-finals','Final'];
+  panel=`<h3>${names[rd.k]}${pk.champion!==null?' · Champion: '+duelWho(pk,pk.champion):''}<button class="duel-q" onclick="duelInfo('Peak')">${denPlain}?</button></h3>
+  ${pk.inn?`<i class="gld-bar duel-hp"><u style="width:${v.php}%"></u><em>Peak HP ${v.php}%</em></i>`:''}
+  <div class="duel-rounds">${pk.rounds.map(x=>`<button ${x.k===rd.k?'aria-current="page"':''} disabled>${denPlain}${x.k+1}</button>`).join('')}<span>Bet: ${Object.keys(v.bets).length} · Guess: ${v.guess===undefined?'—':duelWho(pk,v.guess)}</span></div>
+  <div class="duel-bracket">${rd.matches.map(m=>{const side=k=>`<button class="${m.win===k?'won':m.win!==null?'lost':''} ${k===0&&pk.inn?'me':''} ${v.bets[rd.k]===k?'bet':''}" onclick="duelPick(${k})">${denPlain}${duelWho(pk,k)}</button>`;return `<div>${side(m.a)}<i>vs</i>${side(m.b)}</div>`}).join('')}</div>`;
+ }else{
+  panel=`<h3>Ultimate Showdown</h3><p class="duel-note">The champions of past Peak Games meet here once a month. Opens after your first Peak Game title.${place===1?' You are a champion this season!':''}</p>`;
+ }
+ const nav=`<div class="satchel-nav well-nav duel-nav"><button data-back aria-label="Back to Sky Contest" onclick="contestLeave()">‹</button>${[['Qualification',4],['Group',5],['Peak',6],['Ultimate',7]].map(([t,i])=>`<button ${t===duelTab?'aria-current="page"':''} onclick="duelGo('${t}')">${denPlain}${warIcon(i)}${t==='Peak'?'Peak Game':t==='Ultimate'?'Ultimate Showdown':t}</button>`).join('')}</div>`;
+ const tool=(icon,label,click)=>`<button class="duel-tool" onclick="${click}">${denPlain}${icon}<small>${label}</small></button>`;
+ $('#main').innerHTML=`<section class="satchel duel-room duel-t-${duelTab.toLowerCase()}" style="background-image:url('${artPath('comp-war-field')}')">
+  <div class="duel-time">${duelWindow(v)}</div>
+  <div class="duel-hero"><small>Lv ${level()} ${esc(S.name)}</small><img src="${reinaLookPath(false)}" alt="Reina"><b>⚔ ${fmt(Math.round(st.power))}</b></div>
+  <div class="duel-panel">${panel}</div>
+  <div class="duel-acts">${tool(warIcon(3),'Inspire '+v.insp+'/'+R.inspMax,'duelInspirePop()')}<button class="den-gold duel-match" ${canMatch?'':'disabled'} onclick="duelMatch()">${denPlain}${canMatch?'Match':matchNote||'Match'}</button>${tool(warIcon(7),'Rankings','duelRankPop()')}${tool(bagIcon('chest3'),'Rewards','duelRewardsPop()')}</div>
+  ${nav}</section>`;
 }
 
 let petPage='Formation',petFocus=null,emblemFilter='All',petBack='',petBackNext='';
