@@ -523,6 +523,17 @@ placeholders), optional save field `S.duel` (`validDuel`), read through `duelSta
 - Pop-ups: Match Description (three tabs, schedule + intro), Inspiration, Qualification Rankings, Ranking Rewards,
   player pick (bet / guess), the fight window (`duelShow`). No new art: background `comp-war-field`, icons `warIcon`.
 
+## Fashion room redesign (2026-11-22)
+User: "I don't like how the Fashion page looks" (after the reference photo of its Fashion room). `fashionShowcase()` in
+`app.js` returns a new layout when `screen==='fashion'` (`.fx-room`, CSS at the end of `stage.css`; the Skin room's
+Appearance mode keeps the old layout): full-height starry blue room without the global header / nav, top bar (Back,
+"Fashion" ribbon, gold and prisms), Reina large on the stage with CP and two round buttons (Leaflight Set, Elite Sale),
+a panel with stats and ▲ / ▼ change plus the chosen item (tile, name, bonus / price, Equip / Buy / Exclusive), five
+tabs with icons (Garment, Hairstyle, Fashion Bow, Wings, Mounts), a 4-column grid of rarity cards (`fashionCardMeta`
+reads id from the card's onclick: UR exclusives red, SSR orange, SR purple; padlock when not owned, green tick when
+worn) and a bottom bar Fashion / Supreme Set / Elite Sale. Found, not fixed: the Skin room (`citySkin`) layout is
+broken (overlapping title, blank square, cut labels) - it was like that before this pass.
+
 ## Fashion Elite Sale and Supreme Sets (2026-11-22)
 User sent twelve photos (Fashion Elite Sale with Outfit / Weapon / Chat Bubble packs, item cards with Activation
 Stats and a 5-piece set bonus, Fashion -> Supreme Set). Rules in `gear-data.js` (`supreme*`, placeholders), optional save
