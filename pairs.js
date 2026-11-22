@@ -189,7 +189,7 @@ function startPairs() {
   function countdown(n, beat = 450) {
     if (game !== g) return;
     g.locked = true; panel.hidden = false; panel.className = 'pairs-panel pairs-gate'; panel.parentElement.classList.add('gating');
-    panel.innerHTML = g.stage ? `<small>Basket ${g.stage + 1} of ${Pairs.stages.length}</small>` : `<strong class="pairs-count">${n}</strong><small>Starting soon</small>`;
+    panel.innerHTML = g.stage ? `<small>Basket ${g.stage + 1} of ${Pairs.stages.length}</small>` : `<div class="pairs-dial"><i class="pairs-dial-ring"></i><b class="pairs-dial-n" key="${n}">${n}</b></div><small>Starting soon</small>`;
     if (n > 1) setTimeout(() => countdown(n - 1, beat), beat);
     else setTimeout(() => { if (game !== g) return; panel.hidden = true; panel.parentElement.classList.remove('gating'); g.locked = false; last = performance.now(); }, beat);
   }
