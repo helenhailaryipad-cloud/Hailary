@@ -1012,6 +1012,22 @@ vm.runInContext(`
 console.log('PASS: Supreme Sets: Elite Sale purchase for prisms, limits, stars, set bonus, bubble and frame, screens.');
 
 vm.runInContext(`
+{const r=WonderGear;S=defaults();S.gold=0;S.scales=0;
+ if(r.avatarFrames.length!==16||new Set(r.avatarFrames.map(f=>f.id)).size!==16)throw Error('Sixteen own frames');
+ if(r.frameBuy(S,'rose'))throw Error('No gold, no frame');
+ S.gold=1e6;S.scales=1e5;const atk0=stats().attack,got=r.frameBuy(S,'rose');
+ if(!got||S.gold!==1e6-5000||S.supreme.frame!=='rose'||r.frameTier(S,'rose')!==0||stats().attack<=atk0||!valid(S))throw Error('Buy an SR frame: activated and worn');
+ r.frameBuy(S,'rose');if(r.frameTier(S,'rose')!==1||r.supremeBonus(S).attack!==300)throw Error('Second copy is T1 (2 x stats)');
+ r.frameBuy(S,'starmoon');if(S.supreme.frame!=='rose'||S.scales!==1e5-600)throw Error('MR for prisms, worn frame kept');
+ if(!r.supremeWear(S,'frame','starmoon')||r.supremeWear(S,'frame','pirate'))throw Error('Wear only owned frames');
+ for(let i=0;i<25;i++)r.frameBuy(S,'holly');if(r.frameTier(S,'holly')!==r.frameRules.maxTier)throw Error('Tier cap');
+ for(const bad of [{frames:{nope:1}},{frames:{rose:-1}},{frame:'pirate'}])if(valid({...S,supreme:{...S.supreme,...bad}}))throw Error('Invalid frame accepted '+JSON.stringify(bad));
+ go('fashion');changeFashionTab('Avatar');const h=$('#main').innerHTML;if(!h.includes('Star-Moon')||!h.includes('Tier-up')||!h.includes('r-mr'))throw Error('Avatar tab lists the frames '+screen+' '+h.slice(0,300));
+}
+`,context);
+console.log('PASS: Avatar frames: sixteen own frames, MR/UR/SSR/SR, buy, tiers, wear, validation, Avatar tab.');
+
+vm.runInContext(`
 {const r=WonderGear,R=r.supremeRules,T=R.saleStart+864e5,set=r.supremeSale(T).set;S=defaults();S.scales=1e5;
  r.supremeBuy(S,'weapon',T);const one=r.supremeBonus(S).attack;if(r.supremePieceStars(S,set.id,'weapon')!==0)throw Error('First copy activates');
  r.supremeBuy(S,'weapon',T);if(r.supremePieceStars(S,set.id,'weapon')!==1||r.supremeBonus(S).attack<=one)throw Error('Second copy is a star and raises the stats');

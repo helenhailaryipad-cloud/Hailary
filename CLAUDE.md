@@ -539,7 +539,15 @@ Tier-up (`supremeGet`, only while its set is on sale) and Equip / Unequip (`supr
 Painted avatar frames (user: "beautiful avatars"; chose frames): one per Supreme Set (image model, transparent ring;
 `art-source/frames/<set id>.webp` -> atlas `comp-avatar-frames` 4 x 2 by `scripts/build-avatar-frames.py`, AVIF copy).
 `frameArt(setId,face,cls)` in `gear-ui.js` draws Reina's avatar inside the painted ring; used by `supPieceArt` (sale,
-set room, Avatar tab, item card) and, for the worn frame, on the home avatar (`.pf-city`) and `#profileReadout`. Found, not fixed: the Skin room (`citySkin`) layout is
+set room, Avatar tab, item card) and, for the worn frame, on the home avatar (`.pf-city`) and `#profileReadout`. Own avatar frames (user sent two photos of the reference's Avatar tab, "examples"): sixteen themed frames painted by
+the image model (`avatarFrames` in `gear-data.js`: MR Star-Moon; UR Inferno Charm, Arcade, Fairy Garden; SSR Lantern
+Festival, Seaside, Idol Stage, Ocean Wave, Hourglass; SR Rose Balloon, Dragonling Gift, Pumpkin Night, Harvest, Pirate
+Cove, Clockwork, Winter Holly). Optional `S.supreme.frames {id: copies}`; `S.supreme.frame` may be a set id or one of
+these. First copy activates the stats for good, every further copy is a tier up to T20 (each tier adds the base stats
+once more, `frameStats`, added through `supremeBonus`); SR cost gold, the rest prisms (`frameBuy`). Avatar tab =
+`frameRoom()` (MR, UR incl. the seven set frames, SSR, SR; class `r-mr`). Atlas `comp-avatar-frames` is now 4 x 6
+(sets first, then `avatarFrames`, `FRAME_ROWS`); sources in `art-source/frames/` (haze cleaned). Hosted headroom ~80 KB.
+Found, not fixed: the Skin room (`citySkin`) layout is
 broken (overlapping title, blank square, cut labels) - it was like that before this pass.
 
 ## Fashion Elite Sale and Supreme Sets (2026-11-22)
