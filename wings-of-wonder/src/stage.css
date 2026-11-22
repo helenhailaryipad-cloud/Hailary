@@ -8112,3 +8112,5 @@ body[data-screen=games] #stage .portal-game-info .booth-title{display:block!impo
 body[data-screen=games] #stage .portal-game-info h2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 body[data-screen=games] #stage .portal-shade{border-radius:16px}
 body[data-screen=games] #stage .portal-game-info{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:0!important}body[data-screen=games] #stage .portal-game-info .booth-title{min-width:0;text-align:left}
+/* Mini games drawn by gameShell have their own "Mini Games" back button: the global Menu pill covered the title */
+body:has(#main .dungeon-back) #stage>.return-to-menu{display:none!important}

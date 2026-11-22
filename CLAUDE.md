@@ -107,6 +107,12 @@ global `#main button` rules set position, borders and `::before`.
   (`pairsEnergy`, SVG animateMotion), both tiles flare and burst into a ring and sparks (`pairsBurst`), a cleared basket
   sends a star shower and "Basket cleared!" (`pairsShower`), the finish panel pops in with turning rays and confetti
   (`.pairs-done`, `pairsConfetti`). Tiles are freed at once as before; only the visuals last longer.
+- Dragon Merge (user: "the merge flash is poor"): `mergePair` adds a burst (`g.bursts`: white-to-colour flash, two
+  shock rings, turning light rays, `drawMergeBurst`), sparks and stars with trails, shards cut from the two old eggs
+  (`drawMergeFx`), an elastic pop of the new egg (`b.pop`) with a glow, a bouncing gold "+points" / "CHAIN ×n" label and
+  a small shake (`g.shake`). The global Menu pill is hidden on gameShell games (they have "Mini Games"), it covered
+  the title.
+- Jungle Trek cover was redone cleaner on request (fewer details, Reina fully clothed in tunic and trousers).
 - Mini Games list is a compact 2-column grid (overrides at the end of `stage.css`); Jungle Trek has a new cover with
   the dragon (`cover-jungle`, source `art-source/trek/cover.webp`). Hosted bundle: AVIF copies of crownfall-vale,
   cloud-war-twin-islands and cloud-war-realms-2 were re-saved at quality 34 (headroom ~180 KB).
