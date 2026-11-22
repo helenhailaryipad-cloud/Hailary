@@ -93,6 +93,13 @@ the player's best. Original art: lobby background, Sprout mascot, 8 ingredient t
 global `#main button` rules set position, borders and `::before`.
 
 ## Crystal Cascade, Pairs effects, Mini Games grid (2026-11-22)
+- Leaving a running game (user: "Leave adventure has two buttons, Menu and a close cross, a mess, and does not work"):
+  `go()` opens `leaveAsk(id)`, one `popup` card with Keep playing / Leave (`leaveNow` ends the run, then opens the
+  screen); the in-game Finish / Retreat window (`requestFinish` in `game-polish.js`) uses the same card. `.leave-modal`
+  hides the close cross and the Menu pill.
+- Harvest Pairs third pass: new clean cover (basket on a soft garden) and lobby background (empty terrace, no painted
+  person; the live Reina portrait stands on it); the 3-2-1 dial is a centred CSS dial (`.pairs-dial`); the field has
+  soft light, a faint cell lattice and an inner frame instead of flat green.
 - Crystal Cascade (`src/cascade.js`, screen id `cascade`, Mini Games card + sub-nav tab): a falling-block puzzle with
   original magic art. Rules in `Cascade` (pure, `node scripts/test-cascade.mjs`): 10 x 20 well, seven four-crystal
   shapes with a seven-bag, kicks, ghost, soft / hard drop, lock delay, 100/300/500/800 x level for 1-4 rows with names

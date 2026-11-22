@@ -8114,3 +8114,32 @@ body[data-screen=games] #stage .portal-shade{border-radius:16px}
 body[data-screen=games] #stage .portal-game-info{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:0!important}body[data-screen=games] #stage .portal-game-info .booth-title{min-width:0;text-align:left}
 /* Mini games drawn by gameShell have their own "Mini Games" back button: the global Menu pill covered the title */
 body:has(#main .dungeon-back) #stage>.return-to-menu{display:none!important}
+/* Leave / retreat window (user: "two buttons, Menu and a close cross - a mess"): one card, two clear choices */
+#stage #modal.leave-modal>.dialog-dismiss,#stage #modal.leave-modal .dialog-menu-exit{display:none!important}
+#stage #modal.leave-modal{max-width:340px}
+.leave-pop{display:grid;justify-items:center;gap:6px;text-align:center;padding:4px 2px}
+.leave-ico .gpt-icon{width:56px;height:56px}
+#stage #modal.leave-modal .leave-pop h2{margin:2px 0 0;font:800 21px/1.2 Georgia,serif;color:#ffe9a0}
+#stage #modal.leave-modal .leave-pop p{margin:0;font:400 14px/1.4 Arial,sans-serif;color:#f3ead8}
+.leave-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-top:10px}
+#stage #modal.leave-modal .leave-actions button{display:flex;align-items:center;justify-content:center;gap:6px;min-height:46px;padding:6px 10px;border-radius:14px;font:800 15px/1 Arial,sans-serif;white-space:nowrap}
+#stage #modal.leave-modal .leave-actions .gpt-icon{width:22px;height:22px}
+#stage #modal.leave-modal .leave-stay{border:0;background:linear-gradient(#ffe89a,#f0b548);color:#5a3a12;box-shadow:0 3px 0 #a06a1a}
+#stage #modal.leave-modal .leave-go{border:2px solid #f3c86a;background:#5a2a24;color:#fff}
+/* Harvest Pairs third pass (2026-11-22): centred 3-2-1 dial, soft patterned field, cleaner art */
+.pairs-panel.pairs-gate{position:absolute;inset:0!important;top:0!important;transform:none!important;margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.8rem}
+.pairs-dial{position:relative;display:grid;place-items:center;width:clamp(7rem,24svh,10rem);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 50% 38%,#ffd37a,#f08a3a 55%,#c4541e);box-shadow:0 0 0 6px #fff6dc,0 0 0 10px #d9a64a,0 10px 24px #12301e99}
+.pairs-dial-ring{position:absolute;inset:-14px;border-radius:50%;border:3px solid #fff6dc88;animation:pairs-dial-ring .5s ease-out infinite}
+@keyframes pairs-dial-ring{0%{transform:scale(.85);opacity:1}100%{transform:scale(1.25);opacity:0}}
+.pairs-dial-n{font:900 clamp(3.4rem,12svh,5.4rem)/1 Georgia,serif;color:#fff8e6;text-shadow:0 3px 0 #8a3a10,0 0 14px #ffb04a;animation:pairs-dial-pop .45s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pairs-dial-pop{0%{transform:scale(.3);opacity:0}100%{transform:scale(1);opacity:1}}
+.pairs-gate small{margin:0}
+/* the playing field: soft light from the top, a faint lattice of cells, gentle vignette */
+.pairs-screen:not(.pairs-lobby){background:
+ radial-gradient(ellipse at 50% 0%,#bff0a055 0,transparent 55%),
+ radial-gradient(ellipse at 50% 120%,#0f3a2466 0,transparent 60%),
+ repeating-linear-gradient(0deg,#ffffff0d 0 1px,transparent 1px 34px),
+ repeating-linear-gradient(90deg,#ffffff0d 0 1px,transparent 1px 34px),
+ linear-gradient(#5aa35a,#3f8a4c 55%,#2c6f42)}
+.pairs-field::before{content:"";position:absolute;inset:3% 4% 10%;border-radius:22px;background:radial-gradient(ellipse at 50% 45%,#ffffff1f,transparent 70%);box-shadow:inset 0 0 0 1px #ffffff1a,inset 0 0 40px #0b2a1a55;pointer-events:none}
+.pairs-banner{box-shadow:0 3px 0 #6a3e1c}
