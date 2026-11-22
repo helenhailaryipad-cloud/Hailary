@@ -543,6 +543,17 @@ field `S.supreme {own{"set:piece":copies}, bubble, frame, sale{period,bought}}`.
   source `art-source/fashion/elite-hall.webp`), sunburst limit badge, a green "Activated" corner ribbon on owned
   piece tiles (`.sup-act`), the Hair Accessory card shows a head close-up (`.sup-head`), the Weapon card the bow, and
   the weapon tab shows a big bow over the dais.
+- Premium pass (user: "they are sold for real money, buy as many as you like, make them really beautiful so you
+  want to buy them, add matching wings"): no purchase limit (the `limit` fields are gone; validation still accepts old
+  `sale.bought`). Each set has its own exclusive gown and matching wings painted for it (image model; gowns are edits
+  of `base-v2.png`, mounted versions edits of `mounted/base.webp`, so they work in the wardrobe, battles and riding):
+  ember = Phoenix Empress (`phoenix`, `fashion-wing-21`), frost = Crystal Snow Queen (`snowqueen`, 22), jade = Peacock
+  Jade (`peacock`, 23), star = Starlit Galaxy (`galaxy`, 24). A sixth piece, Wings (Weapon tab), so a full set is 6/6.
+  Exclusives are never sold for gold (`PREMIUM_LOOKS`, `premiumLocked`, `premiumNote` in `app.js`). Real-money payment
+  is NOT built: packs still cost prisms (a payment provider and store accounts would be needed). Gold-jewel styling of
+  tiles, cards, ribbon and set room; unowned sets show in full colour. Hosted bundle: AVIF copies of several large maps
+  and sprites (cloud-war-*, companion-poses, reina-silver-tabby, equipment-atlas, dragon/enemy-motion) were re-saved
+  smaller to make room (headroom ~560 KB).
 - Not done: Relic tab, Apparel Records, fashion Tier-up, male sets.
 
 ## Cloud War second pass (2026-11-21)

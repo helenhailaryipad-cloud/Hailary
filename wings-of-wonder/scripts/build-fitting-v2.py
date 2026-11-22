@@ -199,7 +199,8 @@ def build_frostlace():  # Amethyst Lace, painted at 500 x 750
     return save_painted('frostlace', P, *painted_layer(P, B))
 
 PAINTED = ['emberveil', 'dawnpetal', 'nightbloom', 'sunweave', 'tidal', 'willow', 'stardust', 'pearl', 'sapphire',
-           'aurora', 'rosethorn', 'seafoam', 'ravenwing', 'sunflower', 'frostqueen', 'autumn', 'starlit', 'coral', 'jade']
+           'aurora', 'rosethorn', 'seafoam', 'ravenwing', 'sunflower', 'frostqueen', 'autumn', 'starlit', 'coral', 'jade',
+           'phoenix', 'snowqueen', 'peacock', 'galaxy']   # Supreme Set exclusives
 def build_painted(name):  # repainted on the base body at 1024 x 1536
     P = arr(Image.open(SRC/'fitting-control/painted'/(name+'.png')))
     return save_painted(name, P, *painted_layer(P, arr(body_hi)))
