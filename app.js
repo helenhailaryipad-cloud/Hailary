@@ -189,9 +189,23 @@ let clothingPreview;
 function currentDress(){
   return (S.reinaFashion?.equipped & 2) ? (S.costumes?.equipped?.reina || 'moonblossom') : '';
 }
-function fashionCard(name,icon,selected,click){
-  return `<button class="fashion-card" aria-pressed="${selected}" onclick="${click}"><img src="${icon}" alt=""><span>${name}</span></button>`;
+// Card meta read from the card's own action, so URLs (data URIs in the chat preview) do not matter:
+// rarity frame (UR exclusive, SSR premium, SR basic), owned (lock otherwise) and worn (tick).
+function fashionCardMeta(click){
+  let m;
+  if((m=click.match(/previewRegisteredDress\('([^']+)'\)/))){const id=m[1];return {r:PREMIUM_LOOKS.has(id)?'ur':['leaflight','grove','base'].includes(id)?'sr':'ssr',own:ownsRegisteredDress(id)&&!premiumLocked(id),worn:registeredLook().dress===id}}
+  if((m=click.match(/previewRegisteredHair\((\d+)\)/))){const n=+m[1];return {r:n>=12?'ssr':'sr',own:n<=1||styleOwned(styleSets.Hair,n),worn:registeredLook().hair===n}}
+  if((m=click.match(/previewRegisteredEquipment\('Weapons',(-?\d+)\)/))){const n=+m[1];return {r:n>=14?'ssr':'sr',own:styleOwned(styleSets.Weapons,n),worn:wornStyle(styleSets.Weapons)===n}}
+  if((m=click.match(/previewRegisteredEquipment\('Wings','([^']*)'\)/))){const id=m[1],n=+(id.match(/(\d+)$/)||[0,0])[1];return {r:!id?'sr':/^fashion-wing-/.test(id)?(n>=21?'ur':n>=11?'ssr':'sr'):'sr',own:!premiumLocked(id)&&wingSkinPrice(id)===0,worn:(S.reinaFashion?.wingSkin||'')===id}}
+  if((m=click.match(/mountPreview='([^']+)'/))){const id=m[1];return {r:id==='silver-tabby'?'sr':'ssr',own:ownsMount(id),worn:(currentMount()?.id||'')===id}}
+  return {r:'sr',own:true,worn:false};
 }
+function fashionCard(name,icon,selected,click){
+  if(screen!=='fashion')return `<button class="fashion-card" aria-pressed="${selected}" onclick="${click}"><img src="${icon}" alt=""><span>${name}</span></button>`;
+  const m=fashionCardMeta(click);
+  return `<button class="fashion-card fx-card r-${m.r} ${m.own?'':'locked'} ${m.worn?'worn':''}" aria-pressed="${selected}" onclick="${click}"><i class="fx-art"><img src="${icon}" alt=""></i><b class="fx-rar">${m.r.toUpperCase()}</b>${m.worn?'<i class="fx-tick">✓</i>':m.own?'':'<i class="fx-lock">🔒</i>'}<span>${name}</span></button>`;
+}
+const FX_TABS=[['Dresses','Garment','fit-icon-grove'],['Hair','Hairstyle','fit-icon-hair-12'],['Weapons','Fashion Bow','weapon-style-14'],['Wings','Wings','fashion-wing-11'],['Mounts','Mounts','mount-icon-moon-unicorn']];
 function fashionShowcase({portrait,alt,title,bonus,owned,price,equipped,action,cards,extra='',stage=''}){
   const category=fashionCategory;
   const tabs=['Dresses','Hair','Weapons','Wings','Mounts'].map(tab=>`<button aria-pressed="${tab===category}" onclick="changeFashionTab('${tab}')">${tab}</button>`).join('');
@@ -205,6 +219,20 @@ function fashionShowcase({portrait,alt,title,bonus,owned,price,equipped,action,c
     const change=stat===key?delta:0;
     return `<div><span>${label}</span><b>${fmt(current[stat])}</b><em>${change>0?'+'+change:change||''}</em></div>`;
   }).join('');
+  if(screen==='fashion'){
+    const pick=cards.match(/aria-pressed="true"[^>]*>(?:<i class="fx-art">)?<img src="([^"]+)"/),art=pick?pick[1]:'';
+    const meta=(cards.match(/class="fashion-card fx-card r-(\w+)[^"]*" aria-pressed="true"/)||[0,'sr'])[1];
+    const statRows=fields.map(([stat,label])=>{const change=stat===key?delta:0;return `<div><span>${label} <b>${fmt(current[stat])}</b></span>${change?`<em class="${change>0?'up':'down'}">${change>0?'▲ '+change:'▼ '+(-change)}</em>`:''}</div>`}).join('');
+    const btn=equipped?'Equipped':owned?'Equip':PREMIUM_LOOKS.has(String(action.match(/'([^']+)'/)?.[1]||''))?'Exclusive':'Buy';
+    return `<section class="fashion-showcase fx-room" data-category="${category}">
+    <div class="fx-top"><button data-back aria-label="Back" onclick="go('home')">‹</button><strong>Fashion</strong><span class="fx-wallet">${uiIcon('gold')}<b>${fmt(S.gold)}</b></span><span class="fx-wallet">${uiIcon('crystals')}<b>${fmt(S.scales||0)}</b></span></div>
+    <div class="fx-stage">${stage||`<div class="fashion-stage"><div class="fashion-model"><img src="${portrait}" alt="${alt}"></div></div>`}<span class="fx-cp">⚔ ${fmt(current.power)}</span>
+      <button class="fx-round l" onclick="wearLeaflightSet()">${denPlain}<i>✦</i><small>Leaflight Set</small></button><button class="fx-round r" onclick="go('eliteSale')">${denPlain}<i>✧</i><small>Elite Sale</small></button></div>
+    <div class="fx-panel"><div class="fx-stats">${statRows}</div><div class="fx-pick"><span class="fx-ptile r-${meta}">${art?`<img src="${art}" alt="">`:''}</span><b>${title}</b><small>${bonus?bonus+' · ':''}${owned?'Owned':fmt(price)+' gold'}</small><button class="fx-btn" ${equipped||(!owned&&S.gold<price)?'disabled':''} onclick="${action}">${denPlain}${btn}</button></div></div>
+    <div class="fx-tabs" role="group" aria-label="Fashion categories">${FX_TABS.map(([id,label,ic])=>`<button aria-pressed="${id===category}" onclick="changeFashionTab('${id}')"><img src="${artPath(ic)}" alt=""><span>${label}</span></button>`).join('')}</div>
+    <div class="fashion-cards fx-grid">${cards}</div>${extra}
+    <div class="fx-nav"><button aria-current="page">${denPlain}<b>👗</b><span>Fashion</span></button><button onclick="go('citySupreme')">${denPlain}<b>👑</b><span>Supreme Set</span></button><button onclick="go('eliteSale')">${denPlain}<b>💎</b><span>Elite Sale</span></button></div></section>`;
+  }
   return `<section class="fashion-showcase" data-category="${category}">
     ${stage||`<div class="fashion-stage"><div class="fashion-model"><img src="${portrait}" alt="${alt}"></div><span class="fashion-power">${uiIcon('power')} ${fmt(current.power)}</span></div>`}
     <div class="fashion-detail"><div class="fashion-values">${rows}</div><div class="fashion-selection"><h2>${title}</h2><small>${bonus?bonus+' · ':''}${owned?'Owned':fmt(price)+' gold'}</small><button class="primary" ${equipped||(!owned&&S.gold<price)?'disabled':''} onclick="${action}">${equipped?'Equipped':owned?'Equip':'Buy &amp; equip'}</button></div></div>
