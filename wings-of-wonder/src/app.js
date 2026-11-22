@@ -205,8 +205,34 @@ function fashionCard(name,icon,selected,click){
   const m=fashionCardMeta(click);
   return `<button class="fashion-card fx-card r-${m.r} ${m.own?'':'locked'} ${m.worn?'worn':''}" aria-pressed="${selected}" onclick="${click}"><i class="fx-art"><img src="${icon}" alt=""></i><b class="fx-rar">${m.r.toUpperCase()}</b>${m.worn?'<i class="fx-tick">✓</i>':m.own?'':'<i class="fx-lock">🔒</i>'}<span>${name}</span></button>`;
 }
-const FX_TABS=[['Dresses','Garment','fit-icon-grove'],['Hair','Hairstyle','fit-icon-hair-12'],['Weapons','Fashion Bow','weapon-style-14'],['Wings','Wings','fashion-wing-11'],['Mounts','Mounts','mount-icon-moon-unicorn']];
-function fashionShowcase({portrait,alt,title,bonus,owned,price,equipped,action,cards,extra='',stage=''}){
+const FX_TABS=[['Dresses','Garment','fit-icon-grove'],['Weapons','Fashion Bow','weapon-style-14'],['Avatar','Avatar',''],['Bubble','Bubble',''],['Hair','Hairstyle','fit-icon-hair-12'],['Wings','Wings','fashion-wing-11'],['Mounts','Mounts','mount-icon-moon-unicorn']];
+// Avatar frames and chat bubbles (user photos of the reference's Fashion: Avatar and Bubble tabs). They come from the
+// Supreme Sets; here they are shown, activated / tiered up (when their set is on sale) and worn.
+let decoPick={Avatar:'',Bubble:''};
+function decoRoom(cat){
+ const r=WonderGear,piece=cat==='Avatar'?'frame':'bubble',worn=S.supreme?.[piece]||'',sel=r.supremeSets.find(x=>x.id===decoPick[cat])||r.supremeSets.find(x=>x.id===worn)||r.supremeSale().set;
+ decoPick[cat]=sel.id;
+ const own=r.supremeCopies(S,sel.id,piece),tier=r.supremePieceStars(S,sel.id,piece),max=tier>=r.supremeRules.pieceStars,onSale=r.supremeSale().set.id===sel.id;
+ const now=own?r.supremePieceStats(sel.id,piece,tier):{},next=r.supremePieceStats(sel.id,piece,own?Math.min(r.supremeRules.pieceStars,tier+1):0);
+ const label=k=>k==='penetration'?'ARP':r.percentKeys.has(k)?'Fashion '+(r.labels[k]||k).replace(' Bonus',''):(r.labels[k]||k),val=(k,x)=>r.percentKeys.has(k)?x+'%':fmt(x);
+ const rows=Object.keys(next).map(k=>`<div><span>${label(k)} <b>${val(k,now[k]||0)}</b></span>${max?'':`<em class="up">▲ ${val(k,next[k])}</em>`}</div>`).join('');
+ const cards=r.supremeSets.map(x=>{const o=r.supremeCopies(S,x.id,piece),t=r.supremePieceStars(S,x.id,piece);
+  return `<button class="fashion-card fx-card r-ur ${o?'':'locked'} ${worn===x.id?'worn':''}" aria-pressed="${x.id===sel.id}" onclick="decoPick['${cat}']='${x.id}';reinaAtelier()">${denPlain}<i class="fx-art fx-deco">${supPieceArt(x,piece)}</i><b class="fx-rar">UR</b>${worn===x.id?'<i class="fx-tick">✓</i>':o?'':'<i class="fx-lock">🔒</i>'}${t?`<i class="sup-tier">T${t}</i>`:''}<span>${x.name}</span></button>`}).join('');
+ const act=!own?'Activate':max?'Max tier':'Tier-up';
+ const panel=`<div class="fx-stats">${rows}</div><div class="fx-pick"><span class="fx-ptile r-ur fx-deco">${supPieceArt(sel,piece)}</span><b>${sel.name}</b><small>${own?'Owned · T'+tier:onSale?'On sale now':'In a later Elite Sale'}</small>
+  <button class="fx-btn" ${max||(!own&&!onSale)||(own&&!onSale)?'disabled':''} onclick="supremeGet('${sel.id}','${piece}')">${denPlain}${act}</button>
+  ${own?`<button class="fx-btn alt" onclick="WonderGear.supremeWear(S,'${piece}','${worn===sel.id?'':sel.id}');save();reinaAtelier()">${denPlain}${worn===sel.id?'Unequip':'Equip'}</button>`:''}</div>`;
+ const stage=`<div class="fashion-stage"><h2>${sel.name} (${cat==='Avatar'?'Frame':'Bubble'})</h2><div class="fx-bigdeco">${supPieceArt(sel,piece,true)}</div></div>`;
+ return fashionShowcase({portrait:'',alt:'',title:sel.name,bonus:'',owned:true,price:0,equipped:true,action:'',stage,cards,panel});
+}
+function apparelRecords(){
+ const r=WonderGear,c=(a,b)=>`<div><span>${a}</span><b>${b}</b></div>`,sets=r.supremeSets;
+ const dresses=fittingDresses.filter(([id])=>ownsRegisteredDress(id)&&!premiumLocked(id)).length,hairs=fittingHairs.filter(([n])=>n<=1||styleOwned(styleSets.Hair,n)).length;
+ const bows=styleSets.Weapons.names.filter((n,i)=>n&&styleOwned(styleSets.Weapons,i+1)).length,wings=(S.reinaFashion?.wingSkins||[]).length,mts=mounts.filter(m=>ownsMount(m.id)).length;
+ const deco=p=>sets.filter(x=>r.supremeCopies(S,x.id,p)).length;
+ popup(`<h2>Apparel Records</h2><div class="gld-board fx-rec">${c('Garments',dresses+' / '+fittingDresses.length)}${c('Fashion Bows',bows+' / '+styleSets.Weapons.names.filter(Boolean).length)}${c('Avatar Frames',deco('frame')+' / '+sets.length)}${c('Bubbles',deco('bubble')+' / '+sets.length)}${c('Hairstyles',hairs+' / '+fittingHairs.length)}${c('Wings',wings+' / '+fashionWings.length)}${c('Mounts',mts+' / '+mounts.length)}${c('Supreme Sets complete',sets.filter(x=>r.supremeCount(S,x.id)===r.supremePieceIds.length).length+' / '+sets.length)}</div>`);
+}
+function fashionShowcase({portrait,alt,title,bonus,owned,price,equipped,action,cards,extra='',stage='',panel=''}){
   const category=fashionCategory;
   const tabs=['Dresses','Hair','Weapons','Wings','Mounts'].map(tab=>`<button aria-pressed="${tab===category}" onclick="changeFashionTab('${tab}')">${tab}</button>`).join('');
   const current=stats();
@@ -227,9 +253,9 @@ function fashionShowcase({portrait,alt,title,bonus,owned,price,equipped,action,c
     return `<section class="fashion-showcase fx-room" data-category="${category}">
     <div class="fx-top"><button data-back aria-label="Back" onclick="go('home')">‹</button><strong>Fashion</strong><span class="fx-wallet">${uiIcon('gold')}<b>${fmt(S.gold)}</b></span><span class="fx-wallet">${uiIcon('crystals')}<b>${fmt(S.scales||0)}</b></span></div>
     <div class="fx-stage">${stage||`<div class="fashion-stage"><div class="fashion-model"><img src="${portrait}" alt="${alt}"></div></div>`}<span class="fx-cp">⚔ ${fmt(current.power)}</span>
-      <button class="fx-round l" onclick="wearLeaflightSet()">${denPlain}<i>✦</i><small>Leaflight Set</small></button><button class="fx-round r" onclick="go('eliteSale')">${denPlain}<i>✧</i><small>Elite Sale</small></button></div>
-    <div class="fx-panel"><div class="fx-stats">${statRows}</div><div class="fx-pick"><span class="fx-ptile r-${meta}">${art?`<img src="${art}" alt="">`:''}</span><b>${title}</b><small>${bonus?bonus+' · ':''}${owned?'Owned':fmt(price)+' gold'}</small><button class="fx-btn" ${equipped||(!owned&&S.gold<price)?'disabled':''} onclick="${action}">${denPlain}${btn}</button></div></div>
-    <div class="fx-tabs" role="group" aria-label="Fashion categories">${FX_TABS.map(([id,label,ic])=>`<button aria-pressed="${id===category}" onclick="changeFashionTab('${id}')"><img src="${artPath(ic)}" alt=""><span>${label}</span></button>`).join('')}</div>
+      <button class="fx-round l" onclick="apparelRecords()">${denPlain}<i>📜</i><small>Apparel Records</small></button><button class="fx-round r" onclick="go('eliteSale')">${denPlain}<i>✧</i><small>Elite Sale</small></button></div>
+    <div class="fx-panel">${panel||`<div class="fx-stats">${statRows}</div><div class="fx-pick"><span class="fx-ptile r-${meta}">${art?`<img src="${art}" alt="">`:''}</span><b>${title}</b><small>${bonus?bonus+' · ':''}${owned?'Owned':fmt(price)+' gold'}</small><button class="fx-btn" ${equipped||(!owned&&S.gold<price)?'disabled':''} onclick="${action}">${denPlain}${btn}</button></div>`}</div>
+    <div class="fx-tabs" role="group" aria-label="Fashion categories">${FX_TABS.map(([id,label,ic])=>`<button aria-pressed="${id===category}" onclick="changeFashionTab('${id}')">${denPlain}${ic?`<img src="${artPath(ic)}" alt="">`:`<i class="fx-tabico">${id==='Avatar'?'◯':'💬'}</i>`}<span>${label}</span></button>`).join('')}</div>
     <div class="fashion-cards fx-grid">${cards}</div>${extra}
     <div class="fx-nav"><button aria-current="page">${denPlain}<b>👗</b><span>Fashion</span></button><button onclick="go('citySupreme')">${denPlain}<b>👑</b><span>Supreme Set</span></button><button onclick="go('eliteSale')">${denPlain}<b>💎</b><span>Elite Sale</span></button></div></section>`;
   }
@@ -883,6 +909,7 @@ function reinaAtelier(){
   const price=reinaLookPrice(), equipped=reinaPreview===(S.reinaFashion?.equipped || 0)&&wingPreview===(S.reinaFashion?.wingSkin||'');
   const inSkin=screen==='citySkin';
   if(!inSkin)nav();
+  if(!inSkin&&['Avatar','Bubble'].includes(fashionCategory)){$('#main').innerHTML=decoRoom(fashionCategory);return}
   if(!inSkin&&['Dresses','Hair'].includes(fashionCategory)){
     const previous=document.querySelector('.fashion-showcase');
     const scroll=previous?.dataset?.category===fashionCategory?previous.querySelector('.fashion-cards').scrollTop:0;

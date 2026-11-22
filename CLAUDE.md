@@ -531,7 +531,11 @@ Appearance mode keeps the old layout): full-height starry blue room without the 
 a panel with stats and ▲ / ▼ change plus the chosen item (tile, name, bonus / price, Equip / Buy / Exclusive), five
 tabs with icons (Garment, Hairstyle, Fashion Bow, Wings, Mounts), a 4-column grid of rarity cards (`fashionCardMeta`
 reads id from the card's onclick: UR exclusives red, SSR orange, SR purple; padlock when not owned, green tick when
-worn) and a bottom bar Fashion / Supreme Set / Elite Sale. Found, not fixed: the Skin room (`citySkin`) layout is
+worn) and a bottom bar Fashion / Supreme Set / Elite Sale. Second pass (three more photos): tabs in the reference's order and scrollable:
+Garment, Fashion Bow, Avatar, Bubble, Hairstyle, Wings, Mounts. Avatar and Bubble (`decoRoom`, `decoPick`) list the
+Supreme Set frames / bubbles as UR cards with tiers; the panel shows the piece's stats now and ▲ next, Activate /
+Tier-up (`supremeGet`, only while its set is on sale) and Equip / Unequip (`supremeWear`). Apparel Records pop-up
+(`apparelRecords`) counts owned looks per category. Lighter sky-blue palette like the reference. Found, not fixed: the Skin room (`citySkin`) layout is
 broken (overlapping title, blank square, cut labels) - it was like that before this pass.
 
 ## Fashion Elite Sale and Supreme Sets (2026-11-22)

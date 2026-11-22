@@ -2293,7 +2293,7 @@ function supremePiecePanel(set,p,st){
 function supremeGet(setId,piece){
  const r=WonderGear;if(r.supremeSale().set.id!==setId){toast(supSet(setId).name+' comes back in a later Fashion Elite Sale.');return}
  const got=r.supremeBuy(S,piece);if(!got){toast('Not enough prisms.');return}
- save();citySupreme();toast(got.first?'Activated!':'Tier-up! T'+r.supremePieceStars(S,setId,piece));
+ save();if(screen==='citySupreme')citySupreme();else if(typeof reinaAtelier==='function')reinaAtelier();toast(got.first?'Activated!':'Tier-up! T'+r.supremePieceStars(S,setId,piece));
 }
 function citySupreme(){
  const r=WonderGear,sale=r.supremeSale();if(!supremePick||!supSet(supremePick))supremePick=sale.set.id;
