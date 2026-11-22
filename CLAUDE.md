@@ -101,6 +101,12 @@ global `#main button` rules set position, borders and `::before`.
   Menu button of the screen that had just opened. `openScreen` (and `openCascade`, `showCascade`, `openPairsBoard`)
   stamp `screenChangedAt`; a capture-phase click listener drops clicks on buttons in the next 450 ms. `touch-action:
   manipulation` on the page stops iPad double-tap zoom.
+- Drops to the home screen in the middle of a game (user, twice): no code path navigates on its own; the page
+  RELOADS (the chat preview reloads for everyone when a new version is published, and iPad Safari reloads a heavy page
+  under memory pressure - the preview carries ~75 MB of packed art). Now `openScreen` remembers the screen
+  (`rememberScreen`, localStorage `wow-last-screen`) and start-up reopens it for 30 minutes (`resumeScreen`; running
+  games map to their lobby or Mini Games via `RESUME_AS`) with a short "Welcome back" note. Memory use of the preview
+  packs is still high; lazy-loading packs would be the next step.
 - Crystal Cascade second pass (user: "poor, does not open to the sides, more stylish, first level easier"): full
   screen width (removed from the 55dvh width rule), three columns (Score / Level with progress bar / Rows / Best on the
   left, the well in a gold frame with gem corners, Next and Chests on the right), pause button, turning rune circle and
