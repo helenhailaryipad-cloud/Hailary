@@ -177,9 +177,10 @@ const reinaDresses = [
   ['sunflower','Sunflower Shepherdess'], ['frostqueen','Frostqueen Regalia'], ['autumn','Autumn Minstrel'], ['starlit','Starlit Astronomer'],
   ['coral','Coral Corsair'], ['jade','Jade Empress'],
   // Supreme Set exclusives: only from the Fashion Elite Sale (supremeSets in gear-data.js), never for gold
-  ['phoenix','Phoenix Empress'], ['snowqueen','Crystal Snow Queen'], ['peacock','Peacock Jade'], ['galaxy','Starlit Galaxy']
+  ['phoenix','Phoenix Empress'], ['snowqueen','Crystal Snow Queen'], ['peacock','Peacock Jade'], ['galaxy','Starlit Galaxy'],
+  ['mermaid','Mermaid Princess'], ['icequeen','Ice Queen'], ['sweetheart','Sweetheart']
 ].map(([id,outfit])=>({id,outfit,gold:1200,reinaOnly:true}));
-const PREMIUM_LOOKS=new Set(['phoenix','snowqueen','peacock','galaxy','fashion-wing-21','fashion-wing-22','fashion-wing-23','fashion-wing-24']);
+const PREMIUM_LOOKS=new Set(['phoenix','snowqueen','peacock','galaxy','fashion-wing-21','fashion-wing-22','fashion-wing-23','fashion-wing-24','mermaid','icequeen','sweetheart','fashion-wing-25','fashion-wing-26','fashion-wing-27']);
 const premiumLocked=id=>PREMIUM_LOOKS.has(id)&&!(ownsOutfit(id)||S.reinaFashion?.wingSkins?.includes(id)||S.reinaFashion?.wingSkin===id);
 function premiumNote(){toast('Supreme Set exclusive · find it in the Fashion Elite Sale')}
 for(const dress of reinaDresses)outfitCatalog[dress.id]=dress;
@@ -255,10 +256,10 @@ const reinaPieces = [
 ];
 let reinaPreview=0,wingPreview='',fashionCategory='Dresses';
 const fashionWingNames=['Verdant Veins','Amber Monarch','Swanlight','Scarlet Phoenix','Glacier Shards','Violet Nocturne','Opal Skimmer','Clockwork Halo','Cherry Petals','Midnight Moth',
-  'Aurora Veil','Rose Thorn','Seashell Pearl','Raven Night','Sunflower Gold','Frost Crystal','Autumn Maple','Starmap','Coral Reef','Jade Phoenix','Phoenix Flame','Crystal Frost','Peacock Jade','Starlit Galaxy'];
+  'Aurora Veil','Rose Thorn','Seashell Pearl','Raven Night','Sunflower Gold','Frost Crystal','Autumn Maple','Starmap','Coral Reef','Jade Phoenix','Phoenix Flame','Crystal Frost','Peacock Jade','Starlit Galaxy','Mermaid Fins','Ice Queen','Sweetheart'];
 const fashionWings=fashionWingNames.map((name,i)=>({name,id:'fashion-wing-'+(i+1),cost:1000}));
 
-const wingLights=['#7ad996','#ffb34e','#cce9ff','#ff7039','#87d9ff','#bf7df1','#7be8e0','#e9b35e','#ff9ec2','#a89bff','#6fe3c4','#e0455f','#9fe6e0','#7f8fc9','#ffd24a','#bfe8ff','#ff8a3c','#8fa0ff','#ff8f7a','#58d6a0','#ff7a3a','#9fdcff','#3fd0b8','#9a7aff'];
+const wingLights=['#7ad996','#ffb34e','#cce9ff','#ff7039','#87d9ff','#bf7df1','#7be8e0','#e9b35e','#ff9ec2','#a89bff','#6fe3c4','#e0455f','#9fe6e0','#7f8fc9','#ffd24a','#bfe8ff','#ff8a3c','#8fa0ff','#ff8f7a','#58d6a0','#ff7a3a','#9fdcff','#3fd0b8','#9a7aff','#5fe0e0','#4f8aff','#ff7aa8'];
 function wingFittingRoom(){
   const worn=S.reinaFashion?.wingSkin||'';
   const choices=[{id:'',name:'Original'},...fashionWings];
