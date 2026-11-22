@@ -136,7 +136,7 @@ function pairsRanking() {
   const rows = Pairs.ranking(ADVENTURERS.map(a => a.name), S.pairsBest);
   modal(`<p class="eyebrow">HARVEST PAIRS</p><h2>Today's best times</h2><ol class="pairs-ranking">${rows.map(r => `<li${r.you ? ' class="you"' : ''}><span>${esc(r.you ? S.name : r.name)}${r.ai ? ' <small>AI</small>' : ''}</span><b>${Pairs.clock(r.seconds)}</b></li>`).join('')}</ol><p><small>Rivals marked AI are simulated adventurers, not other players. Their times change each day.${S.pairsBest ? '' : ' Finish a run to enter the board.'}</small></p>`);
 }
-function openPairsBoard() {
+function openPairsBoard() { if (typeof screenChangedAt !== "undefined") screenChangedAt = Date.now();
   if (game?.running) return;
   $('#main').innerHTML = `<section class="pairs-screen">
     <div class="pairs-banner"><img class="pairs-cover" src="${artPath('pairs-cover')}" alt=""><img class="pairs-host" src="${reinaLookPath(false)}" alt="Reina"><h1>Harvest Pairs</h1></div>

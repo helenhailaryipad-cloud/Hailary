@@ -7185,7 +7185,7 @@ body:is([data-screen=cityVault],[data-screen=cityDevour]) #stage>#main{inset:0!i
 .boss-rare{color:#ffe08a;font-weight:700}
 
 /* Summon room (citySummon, 2026-11-21): Basic and Advanced wells, Mark Shop, Summon Festival. Root .satchel.well */
-body:is([data-screen=citySummon],[data-screen=cityContest],[data-screen=citySocial],[data-screen=cityGuild],[data-screen=citySupreme],[data-screen=cascade]) #stage{width:min(100%,55dvh);margin-inline:auto}
+body:is([data-screen=citySummon],[data-screen=cityContest],[data-screen=citySocial],[data-screen=cityGuild],[data-screen=citySupreme]) #stage{width:min(100%,55dvh);margin-inline:auto}
 body:is([data-screen=citySummon],[data-screen=cityContest],[data-screen=citySocial],[data-screen=cityGuild],[data-screen=citySupreme],[data-screen=cascade]) #stage>:is(header,nav,footer){display:none!important}
 body:is([data-screen=citySummon],[data-screen=cityContest],[data-screen=citySocial],[data-screen=cityGuild],[data-screen=citySupreme],[data-screen=cascade]) #stage>#main{inset:0!important;width:100%;height:100%;padding:0!important;display:block;overflow:auto}
 .satchel.well{grid-template-rows:5.6% minmax(0,1fr) auto auto 8%;background-size:cover;background-position:50% 0;background-color:#27407a}
@@ -8143,3 +8143,32 @@ body:has(#main .dungeon-back) #stage>.return-to-menu{display:none!important}
  linear-gradient(#5aa35a,#3f8a4c 55%,#2c6f42)}
 .pairs-field::before{content:"";position:absolute;inset:3% 4% 10%;border-radius:22px;background:radial-gradient(ellipse at 50% 45%,#ffffff1f,transparent 70%);box-shadow:inset 0 0 0 1px #ffffff1a,inset 0 0 40px #0b2a1a55;pointer-events:none}
 .pairs-banner{box-shadow:0 3px 0 #6a3e1c}
+/* Crystal Cascade second pass: full width, side columns, ornate well, pause (user 2026-11-22) */
+body[data-screen=cascade] #stage{width:100%!important;max-width:none!important}
+.cas-screen{display:grid!important;grid-template-rows:auto minmax(0,1fr) auto!important;background:radial-gradient(ellipse at 50% 30%,#4a2a8acc,#1a0f3af2 70%),var(--cover) center/cover!important;background-color:#1a0f3a!important;container-type:size}
+.cas-motes{position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(2px 2px at 20% 30%,#fff8,transparent),radial-gradient(2px 2px at 70% 60%,#d8b8ff99,transparent),radial-gradient(1.5px 1.5px at 40% 80%,#fff7,transparent),radial-gradient(2px 2px at 85% 20%,#ffe9a088,transparent),radial-gradient(1.5px 1.5px at 10% 70%,#bfe8ff88,transparent);background-size:340px 340px;animation:cas-motes 18s linear infinite;opacity:.8}
+@keyframes cas-motes{to{background-position:0 -340px}}
+.cas-top{display:grid!important;grid-template-columns:auto 1fr auto;align-items:center;gap:2cqw;padding:1.2cqh 3cqw .8cqh!important;position:relative;z-index:1}
+.cas-top h1{margin:0;text-align:center;font:900 italic clamp(1.3rem,4.2cqh,2.6rem)/1 Georgia,serif;color:#fff4ff;text-shadow:0 0 10px #c07aff,0 3px 0 #5a2aa0}
+#stage #main .cas-screen .cas-back{position:relative!important;left:auto;top:auto}
+#stage #main .cas-pause{width:clamp(40px,6cqh,58px);height:clamp(40px,6cqh,58px);min-height:0;padding:0;border-radius:50%;border:2px solid #e8d8ff;background:radial-gradient(circle at 40% 30%,#8a5ae0,#3a1a80);color:#fff;font:900 clamp(14px,2.2cqh,22px)/1 Arial,sans-serif;box-shadow:0 0 10px #9a6aff}
+.cas-main{display:grid!important;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)!important;align-items:stretch;gap:2.5cqw!important;padding:0 3cqw!important;min-height:0;position:relative;z-index:1}
+.cas-col{display:flex;flex-direction:column;gap:1.4cqh;justify-content:flex-start;padding-top:1cqh;min-width:0}
+.cas-stat{display:grid;justify-items:center;gap:.3cqh;padding:1cqh .8cqw;border-radius:14px;background:linear-gradient(#2e1f66e6,#1b1240e6);border:1px solid #b79aff88;box-shadow:0 0 0 1px #1a0f3a,0 4px 12px #0007,inset 0 1px 0 #ffffff22}
+.cas-stat small{font:800 clamp(10px,1.5cqh,15px)/1 Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#c8b8ff}
+.cas-stat>b{font:900 clamp(18px,3.4cqh,34px)/1.1 Georgia,serif;color:#ffe9a0;text-shadow:0 0 8px #ffb04a88}
+.cas-lvbar{display:block;width:80%;height:6px;border-radius:4px;background:#0c0828;overflow:hidden}.cas-lvbar u{display:block;height:100%;width:0;background:linear-gradient(90deg,#8affd0,#ffe27a);transition:width .3s}
+.cas-nextbox canvas{width:100%!important;height:auto!important;aspect-ratio:4.6/9.6;border:0!important;background:none!important}
+.cas-chests{display:flex!important;flex-direction:column;gap:.6cqh}.cas-chests .cas-chest{width:clamp(44px,8cqh,84px)!important}
+.cas-well{display:grid;place-items:center;min-height:0;height:100%;aspect-ratio:10/20.5;max-width:52cqw}
+.cas-frame{position:relative;padding:6px;border-radius:14px;background:linear-gradient(145deg,#ffe9a0,#b9852e 30%,#fff0c0 50%,#a0701e 70%,#ffe9a0);box-shadow:0 0 0 2px #3a1a7a,0 0 30px #9a6affaa,0 12px 26px #000a}
+.cas-frame::before,.cas-frame::after{content:"";position:absolute;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#c07aff 45%,#5a2aa0);box-shadow:0 0 10px #c07aff;top:-7px;left:-7px}
+.cas-frame::after{left:auto;right:-7px}
+.cas-well canvas{border-radius:9px!important;border:0!important;box-shadow:inset 0 0 0 1px #000!important}
+.cas-well.paused .cas-frame{filter:saturate(.6)}
+.cas-pad{position:relative;z-index:1;gap:clamp(8px,2.4cqw,22px)!important;padding:1.4cqh 3cqw 2cqh!important}
+#stage #main .cas-pad button{width:clamp(52px,9cqh,96px)!important;height:clamp(52px,9cqh,96px)!important;font-size:clamp(20px,3.6cqh,40px)!important}
+#stage #main .cas-pad button.drop{width:clamp(62px,11cqh,112px)!important;height:clamp(62px,11cqh,112px)!important;background:radial-gradient(circle at 40% 30%,#fff0b0,#f0a030 60%,#a05a10)!important;border-color:#fff4c0!important}
+.cas-pop{font-size:clamp(28px,6cqh,64px)!important}
+/* no double-tap zoom on iPad: a fast second tap must stay a tap */
+html,body,#stage,#stage button{touch-action:manipulation}
