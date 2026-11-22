@@ -304,6 +304,15 @@ of d0-d3 say what the paintings show (Grove Dragonling, Ember Drake, Moon Dragon
   `riposteEvery`). Aftershock (attack): a hit on Reina charges the pet (`p.charged`), its next bolt deals double.
   Icons in `art-source/pets/counter.webp` (atlas row 7).
 
+- Third talent shelf (user sent fifteen photos of the reference's common skills, "add them"): 39 talents now. Thirteen
+  new, original names: Fierce Spirit (+7%), True Aim (+10% vs bosses), Keen Eye (7% crit x1.5), Stunning Bash (15%
+  stun: enemy's next attack 1 s later, `g.enemyCD`), Ambush (+7%), Toxic Blade (10% poison, 1% max HP a second for
+  5 s, `g.poison` in `petSupport`), Wavering Tide (90-120%), Duelist's Art (+4% Reina damage in Star Duel per pet,
+  `duelBoost`), Oak Heart (HP +3%), Steadfast (10% to shrug off a power strike, once per 15 s, `petShrug`), Bulwark
+  (-8% power-strike damage, `petBulwark`), Unshaken (Crit RES +2.5%), Thorn Echo (20% to strike back for 10% ATK, in
+  `petCounter`). Odds and numbers in `talentOdds`, `talentNums`. Icons: `art-source/pets/shelf3.webp` (4x4 sheet, 13
+  used), atlas `comp-pet-talents` is 4 x 10. `build-hosting-avif.py` now uses quality 40 (bundle headroom ~62 KB).
+
 ## Back buttons (2026-11-20)
 User circled a tiny "‹" in a corner: "check all back buttons everywhere, draw them clearer, not so small, with a special
 icon in the style of our game". One painted icon, `ui-back.webp` (gold-rimmed blue disc, ivory arrow; image model;

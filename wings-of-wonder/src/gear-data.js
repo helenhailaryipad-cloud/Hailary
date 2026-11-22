@@ -247,8 +247,23 @@ const petTalents=[
  {id:'apexaegis',name:'Apex Aegis',kind:'def',top:true,text:'Reina takes 5% less damage.',stat:['damageReduction',5]},
  // Counter talents: they answer a hit on Reina.
  {id:'riposte',name:'Riposte',kind:'def',text:'When Reina is hit, this pet strikes back at once for 60% of a bolt. Once every 3 seconds.'},
- {id:'aftershock',name:'Aftershock',kind:'atk',text:'After Reina is hit, the next bolt of this pet deals double damage.'}
+ {id:'aftershock',name:'Aftershock',kind:'atk',text:'After Reina is hit, the next bolt of this pet deals double damage.'},
+ // Third shelf (user photos 2026-11-22 of the reference's common skills; original names, same ideas).
+ {id:'power',name:'Fierce Spirit',kind:'atk',text:'This pet\'s ATK +7%: its bolts deal 7% more damage.'},
+ {id:'aim',name:'True Aim',kind:'atk',text:'Guardians and bosses can no longer turn this pet\'s bolts aside: +10% damage against them.'},
+ {id:'keen',name:'Keen Eye',kind:'atk',text:'This pet\'s bolts have a 7% chance to be critical and deal 150% damage.'},
+ {id:'bash',name:'Stunning Bash',kind:'atk',text:'This pet\'s bolts have a 15% chance to stun the enemy, delaying its next attack by 1 second.'},
+ {id:'ambush',name:'Ambush',kind:'atk',text:'This pet deals 7% more damage.'},
+ {id:'toxin',name:'Toxic Blade',kind:'atk',text:'After a bolt lands there is a 10% chance to poison the enemy: it loses 1% of its maximum health every second for 5 seconds.'},
+ {id:'waver',name:'Wavering Tide',kind:'atk',text:'This pet\'s final damage varies between 90% and 120%.'},
+ {id:'duelist',name:'Duelist\'s Art',kind:'atk',text:'In Star Duel fights Reina deals 4% more damage for every deployed pet with this talent.'},
+ {id:'sturdy',name:'Oak Heart',kind:'def',text:'Pet vigour +6%, shared with Reina: Reina gains HP +3%.',stat:['healthPercent',3]},
+ {id:'steady',name:'Steadfast',kind:'def',text:'When a power strike hits Reina there is a 10% chance she shrugs it off with no damage. Once every 15 seconds.'},
+ {id:'bulwark',name:'Bulwark',kind:'def',text:'Reina takes 8% less damage from power strikes.'},
+ {id:'anchor',name:'Unshaken',kind:'def',text:'Enemies have 2.5% less Crit Rate against Reina.',stat:['critResistance',2.5]},
+ {id:'thorn',name:'Thorn Echo',kind:'def',text:'When Reina takes damage there is a 20% chance to strike back for 10% of her ATK.'}
 ];
+const talentOdds={keen:.07,bash:.15,toxin:.1,steady:.1,thorn:.2},talentNums={keenMul:1.5,aim:1.1,power:1.07,ambush:1.07,poisonShare:.01,poisonSecs:5,stun:1,steadyEvery:15,bulwark:.08,thorn:.1,duelist:.04};
 const riposteShare=.6,riposteEvery=3;
 const talentPrice=id=>talentById[id]?.top?talentTopScroll:talentScroll;
 const talentById=Object.fromEntries(petTalents.map(t=>[t.id,t]));
@@ -330,7 +345,7 @@ function talentBonus(s){
  return sum;
 }
 // How many slots hold each healing talent (they add up).
-function guardTalents(s){const team=petTeam(s),all=talentState(s).slots.flatMap((v,slot)=>team[slot]?v.cells:[]);return {mend:all.filter(id=>id==='mend').length,stand:all.filter(id=>id==='stand').length}}
+function guardTalents(s){const team=petTeam(s),all=talentState(s).slots.flatMap((v,slot)=>team[slot]?v.cells:[]),n=id=>all.filter(x=>x===id).length;return {mend:n('mend'),stand:n('stand'),steady:n('steady'),bulwark:n('bulwark'),thorn:n('thorn'),duelist:n('duelist')}}
 // Pet gear: eight pieces per slot, each with a level (0 = not forged). Ten levels make a tier; crossing into a new
 // tier costs shards as well as gold. The set bonus follows the lowest tier among the eight.
 const petGearPieces=[{id:'horn',name:'Horn Caps',stat:'atk'},{id:'muzzle',name:'Fang Guard',stat:'atk'},{id:'claw',name:'Claw Gauntlet',stat:'atk'},{id:'collar',name:'Jewelled Collar',stat:'hp'},
@@ -365,6 +380,13 @@ function petBolt(s,slot,id,ctx={},rng=Math.random){
  if(have.has('apexfury'))dmg*=1.5;
  if(have.has('apexstar')&&rng()<.3)dmg*=3;
  if(have.has('aftershock')&&ctx.charged)dmg*=2;
+ if(have.has('power'))dmg*=talentNums.power;
+ if(have.has('ambush'))dmg*=talentNums.ambush;
+ if(have.has('aim')&&ctx.boss)dmg*=talentNums.aim;
+ if(have.has('keen')&&rng()<talentOdds.keen){dmg*=talentNums.keenMul;ctx.crit=true}
+ if(have.has('waver'))dmg*=.9+rng()*.3;
+ if(have.has('bash')&&!ctx.riposte&&rng()<talentOdds.bash)ctx.stun=true;
+ if(have.has('toxin')&&!ctx.riposte&&rng()<talentOdds.toxin)ctx.poison=true;
  if(ctx.riposte)dmg*=riposteShare;
  if(have.size>=talentSupremeAt&&ctx.count>0&&ctx.count%5===0)dmg*=3;
  return Math.round(dmg);
@@ -1170,10 +1192,11 @@ function duelQualRank(s,now=Date.now()){
 // One duel: turn by turn until one side falls. Inspiration lowers the damage Reina takes.
 function duelSim(me,op,rng=Math.random){
  const maxA=me.power*12,maxB=op.power*12;let a=maxA*me.hp,b=maxB*op.hp;const hits=[];
- for(let t=0;t<40&&a>0&&b>0;t++){const mine=t%2===0,dmg=Math.round((mine?me.power:op.power)*(2.2+rng()*1.2)*(mine?1:1-(me.red||0)));if(mine)b-=dmg;else a-=dmg;hits.push({mine,dmg,a:Math.max(0,a)/maxA,b:Math.max(0,b)/maxB})}
+ for(let t=0;t<40&&a>0&&b>0;t++){const mine=t%2===0,dmg=Math.round((mine?me.power*(me.boost||1):op.power)*(2.2+rng()*1.2)*(mine?1:1-(me.red||0)));if(mine)b-=dmg;else a-=dmg;hits.push({mine,dmg,a:Math.max(0,a)/maxA,b:Math.max(0,b)/maxB})}
  const ha=Math.max(0,a)/maxA,hb=Math.max(0,b)/maxB;return {win:ha>0&&(hb<=0||ha>=hb),hp:ha,opHp:hb,hits};
 }
 const duelRed=v=>v.insp*duelRules.inspStep/100;
+const duelBoost=s=>1+guardTalents(s).duelist*talentNums.duelist;
 function duelInspire(s,count=1,now=Date.now()){
  const v=duelState(s,now),r=duelRules,n=Math.min(count,r.inspMax-v.insp);if(n<1||(s.scales||0)<n*r.inspCost)return 0;
  s.scales-=n*r.inspCost;v.insp+=n;duelPack(s,v);return n;
@@ -1184,7 +1207,7 @@ function duelQualFight(s,rng=Math.random,now=Date.now()){
  duelAutoBuy(s,now);const v=duelState(s,now),r=duelRules;if(v.stage!=='qual'||v.n>=r.matches)return null;
  if(v.hp<=0)return {tired:true};
  const power=stats(s).power,foe=duelAi(v.season,hashOf('q'+v.season+':'+v.n)%r.field),opPower=Math.max(1,Math.round(power*foe.pow));
- const f=duelSim({power,hp:v.hp/100,red:duelRed(v)},{power:opPower,hp:1},rng);
+ const f=duelSim({power,hp:v.hp/100,red:duelRed(v),boost:duelBoost(s)},{power:opPower,hp:1},rng);
  const pts=f.win?r.winBase+Math.round(r.winPower*Math.min(2,opPower/power))+Math.round(r.winHp*f.hp):r.lossPts;
  v.n++;if(f.win)v.w++;v.pts+=pts;v.hp=Math.round(f.hp*100);duelPack(s,v);for(const [id,k] of Object.entries(duelPart))bagAdd(s,id,k);
  return {...f,pts,foe:{name:foe.name,power:opPower},items:duelPart};
@@ -1206,7 +1229,7 @@ function duelGroup(s,now=Date.now()){
 }
 function duelGroupFight(s,rng=Math.random,now=Date.now()){
  duelAutoBuy(s,now);const v=duelState(s,now),gr=duelGroup(s,now);if(v.stage!=='group'||!gr||gr.next===null)return null;
- const foe=gr.members[gr.next],f=duelSim({power:gr.members[0].power,hp:1,red:duelRed(v)},{power:foe.power,hp:1},rng);
+ const foe=gr.members[gr.next],f=duelSim({power:gr.members[0].power,hp:1,red:duelRed(v),boost:duelBoost(s)},{power:foe.power,hp:1},rng);
  v.g.push(f.win?1:0);duelPack(s,v);return {...f,foe:{name:foe.name,power:foe.power}};
 }
 // Peak Game: 32 players in a knock-out bracket. Reina takes slot 0 if she finished top two of her group.
@@ -1231,7 +1254,7 @@ function duelPeak(s,now=Date.now()){
 function duelPeakFight(s,rng=Math.random,now=Date.now()){
  duelAutoBuy(s,now);const v=duelState(s,now),pk=duelPeak(s,now);if(v.stage!=='peak'||!pk.inn||pk.myRound<0||v.hours>=duelRules.peakHours*(pk.myRound+1)||v.php<=0)return null;
  const m=pk.rounds[pk.myRound].matches.find(x=>x.a===0||x.b===0),foe=pk.players[m.a===0?m.b:m.a];
- const f=duelSim({power:pk.players[0].power,hp:v.php/100,red:duelRed(v)},{power:foe.power,hp:1},rng);
+ const f=duelSim({power:pk.players[0].power,hp:v.php/100,red:duelRed(v),boost:duelBoost(s)},{power:foe.power,hp:1},rng);
  v.p.push(f.win?1:0);v.php=f.win?Math.max(1,Math.round(f.hp*100)):0;duelPack(s,v);return {...f,foe:{name:foe.name,power:foe.power},round:pk.myRound};
 }
 // Bets: before a round is revealed, stake gold on one AI player of an AI match; a right guess pays stake x betPay.
@@ -1262,5 +1285,5 @@ function validDuel(v){
   &&int(v.insp,r.inspMax)&&(v.auto===undefined||v.auto===true)&&Array.isArray(v.g)&&v.g.length<r.groupSize&&v.g.every(x=>x===0||x===1)&&Array.isArray(v.p)&&v.p.length<=r.peakRounds&&v.p.every(x=>x===0||x===1)
   &&int(v.php,100)&&!!v.bets&&typeof v.bets==='object'&&Object.entries(v.bets).every(([k,x])=>/^[0-4]$/.test(k)&&int(x,r.peakSize-1))&&(v.guess===undefined||int(v.guess,r.peakSize-1))&&int(v.done,127);
 }
-return Object.freeze({duelRules,duelPart,duelRanks,duelSeason,duelAi,duelField,duelState,duelQualRank,duelSim,duelInspire,duelAuto,duelQualFight,duelGroup,duelGroupFight,duelPeak,duelPeakFight,duelBet,duelGuess,duelPlace,duelSettle,validDuel,guildRules,guildUpFund,guildSignBoxes,guildAcademy,guildList,guildRivals,guildCrests,guildRoles,guildShop,guildBossRank,guildLevel,guildCap,guildState,guildJoin,guildCreate,guildLeave,guildUpgrade,guildNote,guildSpeaker,guildSign,guildDonate,guildFolkPower,guildPower,guildRanking,guildActivity,guildBoxClaim,guildEnvelopes,guildEnvClaim,guildEnvSend,guildBeastTier,guildBossHp,guildReserve,guildBoss,guildHit,guildBossClaim,guildBuy,guildAcademyCost,guildAcademyCap,guildLearn,guildBonus,validGuild,socialNote,chatBlockX,squadOf,socialFolk,socialRules,socialById,chatChannels,socialState,heartsOf,socialTick,sendFlower,giftAll,friendAnswer,friendAdd,friendBlock,mailClaim,mailDelete,mailRead,chatFeed,chatSay,chatLiveLeft,chatLiveSet,validSocial,cloudOwnReward,cloudOwnTake,cloudRules,cloudPointRewards,cloudShop,cloudRound,cloudRoundEnds,cloudState,cloudNewRound,cloudGain,cloudClaim,buyCloud,validCloud,warFactions,warTotems,warRules,warQuests,warRanks,contestShop,contestState,warNew,warHeld,warHero,warOrder,warTally,warStep,warStanding,warRankPrize,warQuestsDue,warStart,warSettle,buyContest,validContest,summonWells,summonPity,summonLevelMax,summonDupGold,markKinds,markPrice,markLimit,markNeed,galaQuests,galaMilestones,galaEnds,summonState,summonLevel,summonPay,summonDraw,markOffer,buyMarkPet,galaClaim,galaReward,validSummon,bossRare,gearRanks,gearRank,gearCraftFrom,gearNoDevour,bossDropRanks,craftRecipe,craftInputs,craftChance,craftGear,gearGroups,gearGroup,bagCapacity,bagStarter,bagRarity,bagItems,bagItemById,bagCount,bagAdd,bagStacks,bagUsed,vaultCount,vaultMove,useBagItem,devourStep,devourMax,devourNeed,devourWorth,devourState,devourBonus,devourable,devourGear,validBag,riposteShare,riposteEvery,talentCells,talentFree,talentLearn,talentBook,talentScroll,talentTopScroll,talentPrice,talentSupremeAt,talentSupreme,petTalents,talentState,talentIds,supremeReady,addSeals,openCellCost,openTalentCell,learnCost,rollTalent,keepTalent,learnTalent,lockTalent,forgetTalent,setTalentTarget,buyTalentScroll,buyTalentBook,sealRates,sealGold,buySeals,exchangeSpares,talentBonus,guardTalents,petGearPieces,petGearMax,petGearStep,petGearSetStep,petGearLevels,petGearTier,petGearCost,petGearBonus,upgradePetGear,petBolt,petBoltPace,petHit,petPace,assistPages,assistSlots,synthChain,synthNeed,petSpares,addPetSpare,synthesizePet,fashionTraits,companionTypes,companionSkins,companionSkin,ownsCompanionSkin,useCompanionSkin,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
+return Object.freeze({talentOdds,talentNums,duelBoost,duelRules,duelPart,duelRanks,duelSeason,duelAi,duelField,duelState,duelQualRank,duelSim,duelInspire,duelAuto,duelQualFight,duelGroup,duelGroupFight,duelPeak,duelPeakFight,duelBet,duelGuess,duelPlace,duelSettle,validDuel,guildRules,guildUpFund,guildSignBoxes,guildAcademy,guildList,guildRivals,guildCrests,guildRoles,guildShop,guildBossRank,guildLevel,guildCap,guildState,guildJoin,guildCreate,guildLeave,guildUpgrade,guildNote,guildSpeaker,guildSign,guildDonate,guildFolkPower,guildPower,guildRanking,guildActivity,guildBoxClaim,guildEnvelopes,guildEnvClaim,guildEnvSend,guildBeastTier,guildBossHp,guildReserve,guildBoss,guildHit,guildBossClaim,guildBuy,guildAcademyCost,guildAcademyCap,guildLearn,guildBonus,validGuild,socialNote,chatBlockX,squadOf,socialFolk,socialRules,socialById,chatChannels,socialState,heartsOf,socialTick,sendFlower,giftAll,friendAnswer,friendAdd,friendBlock,mailClaim,mailDelete,mailRead,chatFeed,chatSay,chatLiveLeft,chatLiveSet,validSocial,cloudOwnReward,cloudOwnTake,cloudRules,cloudPointRewards,cloudShop,cloudRound,cloudRoundEnds,cloudState,cloudNewRound,cloudGain,cloudClaim,buyCloud,validCloud,warFactions,warTotems,warRules,warQuests,warRanks,contestShop,contestState,warNew,warHeld,warHero,warOrder,warTally,warStep,warStanding,warRankPrize,warQuestsDue,warStart,warSettle,buyContest,validContest,summonWells,summonPity,summonLevelMax,summonDupGold,markKinds,markPrice,markLimit,markNeed,galaQuests,galaMilestones,galaEnds,summonState,summonLevel,summonPay,summonDraw,markOffer,buyMarkPet,galaClaim,galaReward,validSummon,bossRare,gearRanks,gearRank,gearCraftFrom,gearNoDevour,bossDropRanks,craftRecipe,craftInputs,craftChance,craftGear,gearGroups,gearGroup,bagCapacity,bagStarter,bagRarity,bagItems,bagItemById,bagCount,bagAdd,bagStacks,bagUsed,vaultCount,vaultMove,useBagItem,devourStep,devourMax,devourNeed,devourWorth,devourState,devourBonus,devourable,devourGear,validBag,riposteShare,riposteEvery,talentCells,talentFree,talentLearn,talentBook,talentScroll,talentTopScroll,talentPrice,talentSupremeAt,talentSupreme,petTalents,talentState,talentIds,supremeReady,addSeals,openCellCost,openTalentCell,learnCost,rollTalent,keepTalent,learnTalent,lockTalent,forgetTalent,setTalentTarget,buyTalentScroll,buyTalentBook,sealRates,sealGold,buySeals,exchangeSpares,talentBonus,guardTalents,petGearPieces,petGearMax,petGearStep,petGearSetStep,petGearLevels,petGearTier,petGearCost,petGearBonus,upgradePetGear,petBolt,petBoltPace,petHit,petPace,assistPages,assistSlots,synthChain,synthNeed,petSpares,addPetSpare,synthesizePet,fashionTraits,companionTypes,companionSkins,companionSkin,ownsCompanionSkin,useCompanionSkin,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
 })();

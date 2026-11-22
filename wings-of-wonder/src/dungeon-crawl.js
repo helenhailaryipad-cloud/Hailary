@@ -31,9 +31,15 @@ function talentGuard(g,dt){
  if(t.stand&&g.hp>0&&g.hp<g.maxhp*.3&&g.standCD<=0){g.standCD=60;const heal=Math.round(g.maxhp*.15*t.stand);g.hp=Math.min(g.maxhp,g.hp+heal);
   g.particles.push({text:'LAST STAND +'+heal,x:a.hero.x-60,y:a.hero.y-130,color:'#b6ff9e',life:1.4});battleLog('Last Stand restores '+heal+' health.')}
 }
+// Power strikes: Steadfast may shrug one off (once every 15 s), Bulwark lowers its damage.
+function petShrug(g){const t=g.talents??=WonderGear.guardTalents(S);if(!t.steady||g.clock-(g.steadyAt??-99)<WonderGear.talentNums.steadyEvery)return false;
+ if(Math.random()>=1-(1-WonderGear.talentOdds.steady)**t.steady)return false;g.steadyAt=g.clock;return true}
+function petBulwark(g){const t=g.talents??=WonderGear.guardTalents(S);return Math.max(.5,1-WonderGear.talentNums.bulwark*t.bulwark)}
 // A hit has landed on Reina: pets with Riposte answer at once, pets with Aftershock charge their next bolt.
 function petCounter(g){
  const a=g.crawl;if(!a||g.ended||a.exitReady||g.enemy.hp<=0||typeof WonderGear==='undefined'||typeof S==='undefined')return;
+ const guard=g.talents??=WonderGear.guardTalents(S);
+ for(let k=0;k<guard.thorn;k++)if(Math.random()<WonderGear.talentOdds.thorn){g.particles.push({text:'THORN ECHO',x:a.hero.x-40,y:a.hero.y-150,color:'#9dff8a',life:.9});battleDamage(Math.max(1,Math.round(g.stats.attack*WonderGear.talentNums.thorn)));if(g.ended||a.exitReady||g.enemy.hp<=0)return;break}
  for(const p of crawlPets(g)){
   const have=WonderGear.talentIds(S,p.slot);
   if(have.includes('aftershock'))p.charged=true;
@@ -48,13 +54,19 @@ function petCounter(g){
 function petSupport(g,dt){
  const a=g.crawl;if(!a||g.ended)return false;
  if(typeof WonderGear!=='undefined'&&typeof S!=='undefined')talentGuard(g,dt);
- if(a.exitReady||!a.engaged||g.enemy.hp<=0||g.transition>0)return false;
+ if(a.exitReady||!a.engaged||g.enemy.hp<=0||g.transition>0){g.poison=null;return false}
+ if(g.poison){if(g.clock>=g.poison.until)g.poison=null;else{g.poison.acc+=dt;if(g.poison.acc>=1){g.poison.acc-=1;
+  g.particles.push({text:'POISON',x:a.enemy.x+30,y:a.enemy.y-120,color:'#b98cff',life:.8});battleDamage(Math.max(1,Math.round(g.enemy.maxhp*WonderGear.talentNums.poisonShare)));if(g.ended||a.exitReady||g.transition>0)return true}}}
  const pets=crawlPets(g);
  if(pets.length&&!a.petsHailed){a.petsHailed=true;battleLog(pets.map(p=>item(p.id).name).join(', ')+(pets.length>1?' fight':' fights')+' beside REINA.');}
  for(const p of pets){
   p.cd-=dt;if(p.cd>0)continue;p.cd=WonderGear.petBoltPace(S,p.slot);p.kick=.28;p.count++;
   a.petShots.push({x:p.x+16,y:p.y-34,tx:a.enemy.x,ty:a.enemy.y-(g.enemy.boss?110:70),life:.36,max:.36,color:item(p.id).color});
-  battleDamage(WonderGear.petBolt(S,p.slot,p.id,{first:!p.fired,enemyRatio:g.enemy.hp/g.enemy.maxhp,boss:!!g.enemy.boss,count:p.count,charged:!!p.charged}));p.fired=true;p.charged=false;
+  const ctx={first:!p.fired,enemyRatio:g.enemy.hp/g.enemy.maxhp,boss:!!g.enemy.boss,count:p.count,charged:!!p.charged};
+  battleDamage(WonderGear.petBolt(S,p.slot,p.id,ctx));p.fired=true;p.charged=false;
+  if(ctx.crit)g.particles.push({text:'CRIT',x:p.x-16,y:p.y-74,color:'#ffd36b',life:.8});
+  if(ctx.stun&&g.enemy.hp>0){g.enemyCD=Math.max(0,g.enemyCD||0)+WonderGear.talentNums.stun;g.particles.push({text:'STUNNED',x:a.enemy.x-30,y:a.enemy.y-150,color:'#fff3a0',life:1});battleLog('Stunning Bash stuns '+g.enemy.name+'.')}
+  if(ctx.poison&&g.enemy.hp>0){g.poison={until:g.clock+WonderGear.talentNums.poisonSecs,acc:0};battleLog('Toxic Blade poisons '+g.enemy.name+'.')}
   if(g.ended||a.exitReady||g.transition>0)return true;
  }
  return false;

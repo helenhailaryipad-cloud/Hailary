@@ -518,7 +518,7 @@ console.log('PASS: Wonders > Pets opens the Pets room and returns; Summon inside
 vm.runInContext(`{
  const r=WonderGear;stopGame();S=defaults();
  const t0=r.talentState(S);if(t0.seals!==300||t0.books!==0||t0.slots.length!==3||t0.slots[0].open!==6||S.petTalents!==undefined)throw Error('Talents start with 300 seals and six open cells, without touching the save');
- if(r.petTalents.length!==26||new Set(r.petTalents.map(t=>t.id)).size!==26||r.petTalents.filter(t=>t.top).length!==3)throw Error('Twenty-six talents, three of them Top');
+ if(r.petTalents.length!==39||new Set(r.petTalents.map(t=>t.id)).size!==39||r.petTalents.filter(t=>t.top).length!==3)throw Error('Thirty-nine talents, three of them Top');
  const base=stats().attack;
  let roll=r.learnTalent(S,0,()=>0);if(!roll||roll.id!=='fang'||roll.cell!==0||r.talentState(S).seals!==240||!valid(S))throw Error('Learn inscribes a random talent into the first empty cell for 60 seals');
  r.lockTalent(S,0,0);if(r.learnCost(S,0)!==90)throw Error('Each lock makes Learn 50% dearer');
@@ -526,7 +526,7 @@ vm.runInContext(`{
  let v=r.talentState(S).slots[0];if(v.cells.slice(0,6).join()!=='fang,surge,haste,star,pounce,bite')throw Error('Cells fill in order');
  r.addSeals(S,90);roll=r.learnTalent(S,0,()=>0);v=r.talentState(S).slots[0];
  if(roll.cell!==1||roll.replaces!=='surge'||v.cells[0]!=='fang'||v.cells[1]!=='giant')throw Error('A full slot overwrites an unlocked talent, never a locked one');
- r.setTalentTarget(S,0,'bond');r.addSeals(S,500);r.buyTalentBook(S);const held=r.learnTalent(S,0,()=>.2,true);v=r.talentState(S);
+ r.setTalentTarget(S,0,'bond');r.addSeals(S,500);r.buyTalentBook(S);const tpool=r.petTalents.filter(t=>!t.top&&!r.talentState(S).slots[0].cells.includes(t.id)),tidx=tpool.findIndex(t=>t.id==='bond'),held=r.learnTalent(S,0,()=>(tidx+2)/(tpool.length+3),true);v=r.talentState(S);
  if(!held.held||held.id!=='bond'||v.books!==0||v.slots[0].cells.includes('bond'))throw Error('Prophecy shows the result first; the target is likelier');
  if(!r.keepTalent(S,0,held)||!r.talentState(S).slots[0].cells.includes('bond')||stats().attack<=base)throw Error('Keeping it inscribes it; Bonded Might raises Reina ATK');
  const seals=r.talentState(S).seals;if(r.buyTalentScroll(S,0,'mend'))throw Error('A scroll needs an empty cell');
@@ -980,3 +980,14 @@ vm.runInContext(`
 }
 `,context);
 console.log('PASS: Star Duel: season calendar, qualification with HP and inspiration, ranking, group round robin, Peak bracket with bets and guess, mail rewards, validation, screens.');
+
+vm.runInContext(`
+{const r=WonderGear;S=defaults();const t=r.talentState(S);t.slots[0].cells[0]='power';t.slots[0].cells[1]='ambush';t.slots[0].cells[2]='bash';t.slots[0].cells[3]='toxin';t.slots[0].cells[4]='aim';S.petTalents=t;
+ const base=r.petAttack(S,'d0')*.35,ctx={count:1,boss:true},hit=r.petBolt(S,0,'d0',ctx,()=>0);
+ if(hit!==Math.round(base*1.07*1.07*1.1)||!ctx.stun||!ctx.poison)throw Error('Fierce Spirit, Ambush, True Aim multiply; Stunning Bash and Toxic Blade trigger');
+ const calm={count:1};r.petBolt(S,0,'d0',calm,()=>.99);if(calm.stun||calm.poison)throw Error('Stun and poison are chances');
+ t.slots[0].open=9;t.slots[0].cells[5]='duelist';t.slots[0].cells[6]='steady';t.slots[0].cells[7]='bulwark';t.slots[0].cells[8]='thorn';S.petTalents=t;
+ const g=r.guardTalents(S);if(r.duelBoost(S)!==1.04||g.steady!==1||g.bulwark!==1||g.thorn!==1||!valid(S))throw Error('Guard talents and Duelist');
+}
+`,context);
+console.log('PASS: Third talent shelf: thirteen talents, stun, poison, crit, duel boost, guard counts.');
