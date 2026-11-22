@@ -180,6 +180,13 @@ const reinaDresses = [
   ['phoenix','Phoenix Empress'], ['snowqueen','Crystal Snow Queen'], ['peacock','Peacock Jade'], ['galaxy','Starlit Galaxy'],
   ['mermaid','Mermaid Princess'], ['icequeen','Ice Queen'], ['sweetheart','Sweetheart']
 ].map(([id,outfit])=>({id,outfit,gold:1200,reinaOnly:true}));
+// Fashion themes: one gown per own avatar frame (WonderGear.avatarFrames: frame + bubble + gown + bow of one theme).
+// Gold price by the theme's rarity (placeholders).
+const THEME_GOWNS={rose:'Rose Balloon Gala',dragonling:'Dragonling Festival',pumpkin:'Pumpkin Night Witch',harvest:'Harvest Maiden',pirate:'Pirate Captain',
+ clockwork:'Clockwork Engineer',holly:'Winter Holly',lantern:'Lantern Festival',seaside:'Seaside Summer',idol:'Idol Stage',ocean:'Ocean Wave',
+ hourglass:'Hourglass Chronomancer',arcade:'Neon Arcade',inferno:'Inferno Charm',fairy:'Fairy Garden',starmoon:'Star-Moon Empress'};
+const THEME_GOLD={sr:2500,ssr:5000,ur:9000,mr:15000};
+for(const f of WonderGear.avatarFrames)reinaDresses.push({id:f.dress,outfit:THEME_GOWNS[f.id],gold:THEME_GOLD[f.rar],reinaOnly:true,theme:f.id});
 const PREMIUM_LOOKS=new Set(['phoenix','snowqueen','peacock','galaxy','fashion-wing-21','fashion-wing-22','fashion-wing-23','fashion-wing-24','mermaid','icequeen','sweetheart','fashion-wing-25','fashion-wing-26','fashion-wing-27']);
 const premiumLocked=id=>PREMIUM_LOOKS.has(id)&&!(ownsOutfit(id)||S.reinaFashion?.wingSkins?.includes(id)||S.reinaFashion?.wingSkin===id);
 function premiumNote(){toast('Supreme Set exclusive · find it in the Fashion Elite Sale')}
@@ -193,9 +200,9 @@ function currentDress(){
 // rarity frame (UR exclusive, SSR premium, SR basic), owned (lock otherwise) and worn (tick).
 function fashionCardMeta(click){
   let m;
-  if((m=click.match(/previewRegisteredDress\('([^']+)'\)/))){const id=m[1];return {r:PREMIUM_LOOKS.has(id)?'ur':['leaflight','grove','base'].includes(id)?'sr':'ssr',own:ownsRegisteredDress(id)&&!premiumLocked(id),worn:registeredLook().dress===id}}
+  if((m=click.match(/previewRegisteredDress\('([^']+)'\)/))){const id=m[1],th=WonderGear.themeOfDress(id);return {r:th?th.rar:PREMIUM_LOOKS.has(id)?'ur':['leaflight','grove','base'].includes(id)?'sr':'ssr',own:ownsRegisteredDress(id)&&!premiumLocked(id),worn:registeredLook().dress===id}}
   if((m=click.match(/previewRegisteredHair\((\d+)\)/))){const n=+m[1];return {r:n>=12?'ssr':'sr',own:n<=1||styleOwned(styleSets.Hair,n),worn:registeredLook().hair===n}}
-  if((m=click.match(/previewRegisteredEquipment\('Weapons',(-?\d+)\)/))){const n=+m[1];return {r:n>=14?'ssr':'sr',own:styleOwned(styleSets.Weapons,n),worn:wornStyle(styleSets.Weapons)===n}}
+  if((m=click.match(/previewRegisteredEquipment\('Weapons',(-?\d+)\)/))){const n=+m[1],th=WonderGear.themeOfBow(n);return {r:th?th.rar:n>=14?'ssr':'sr',own:styleOwned(styleSets.Weapons,n),worn:wornStyle(styleSets.Weapons)===n}}
   if((m=click.match(/previewRegisteredEquipment\('Wings','([^']*)'\)/))){const id=m[1],n=+(id.match(/(\d+)$/)||[0,0])[1];return {r:!id?'sr':/^fashion-wing-/.test(id)?(n>=21?'ur':n>=11?'ssr':'sr'):'sr',own:!premiumLocked(id)&&wingSkinPrice(id)===0,worn:(S.reinaFashion?.wingSkin||'')===id}}
   if((m=click.match(/mountPreview='([^']+)'/))){const id=m[1];return {r:id==='silver-tabby'?'sr':'ssr',own:ownsMount(id),worn:(currentMount()?.id||'')===id}}
   return {r:'sr',own:true,worn:false};
@@ -232,8 +239,19 @@ function decoRoom(cat){
  const panel=`<div class="fx-stats">${rows}</div><div class="fx-pick"><span class="fx-ptile r-${sel.rar} fx-deco">${art(sel.id,false)}</span><b>${sel.name}</b><small>${note}</small>
   <button class="fx-btn" ${dis?'disabled':''} onclick="${buy}">${denPlain}${act}</button>
   ${i.own?`<button class="fx-btn alt" onclick="WonderGear.supremeWear(S,'${kind}','${worn===sel.id?'':sel.id}');save();render()">${denPlain}${worn===sel.id?'Unequip':'Equip'}</button>`:''}</div>`;
- const stage=`<div class="fashion-stage"><h2>${sel.name} (${kind==='frame'?'Frame':'Bubble'})</h2><div class="fx-bigdeco">${art(sel.id,true)}</div></div>`;
+ const stage=`<div class="fashion-stage"><h2>${sel.name} (${kind==='frame'?'Frame':'Bubble'})</h2><div class="fx-bigdeco">${art(sel.id,true)}</div>${sel.set?'':themeChips(r.frameById[sel.id])}</div>`;
  return fashionShowcase({portrait:'',alt:'',title:sel.name,bonus:'',owned:true,price:0,equipped:true,action:'',stage,cards,panel});
+}
+// The four pieces of a fashion theme as chips (owned = gold tick); a tap jumps to that piece in its Fashion tab.
+function themeChips(th){
+ if(!th)return '';const g=WonderGear,own=[g.decoCopies(S,'frame',th.id)>0,g.decoCopies(S,'bubble',th.id)>0,ownsRegisteredDress(th.dress),styleOwned(styleSets.Weapons,th.bow)];
+ const go_=[`themeJump('Avatar','${th.id}')`,`themeJump('Bubble','${th.id}')`,`themeJump('Dresses','${th.dress}')`,`themeJump('Weapons',${th.bow})`];
+ return `<div class="fx-theme"><b>${th.name} theme ${own.filter(Boolean).length}/4</b>${['Frame','Bubble','Gown','Bow'].map((t,i)=>`<button class="${own[i]?'on':''}" onclick="${go_[i]}">${denPlain}${own[i]?'✓ ':''}${t}</button>`).join('')}</div>`;
+}
+function themeJump(tab,id){
+ if(tab==='Avatar'||tab==='Bubble'){decoPick[tab]=id;changeFashionTab(tab);document.querySelector('.fx-grid [aria-pressed="true"]')?.scrollIntoView?.({block:'nearest'});return}
+ changeFashionTab(tab);(tab==='Dresses'?previewRegisteredDress(id):previewRegisteredEquipment('Weapons',id)).then(()=>
+  document.querySelector('.fx-grid [aria-pressed="true"]')?.scrollIntoView?.({block:'nearest'}));
 }
 function decoGet(kind,id){const g=WonderGear.decoBuy(S,kind,id),f=WonderGear.decoById(kind)[id];if(!g)return toast('Not enough '+(f.price.gold?'gold':'prisms'));
  save();render();toast(g.copies===1?f.name+' activated':'Tier-up: T'+g.tier)}
@@ -262,10 +280,12 @@ function fashionShowcase({portrait,alt,title,bonus,owned,price,equipped,action,c
     const pick=cards.match(/aria-pressed="true"[^>]*>(?:<i class="fx-art">)?<img src="([^"]+)"/),art=pick?pick[1]:'';
     const meta=(cards.match(/class="fashion-card fx-card r-(\w+)[^"]*" aria-pressed="true"/)||[0,'sr'])[1];
     const statRows=fields.map(([stat,label])=>{const change=stat===key?delta:0;return `<div><span>${label} <b>${fmt(current[stat])}</b></span>${change?`<em class="${change>0?'up':'down'}">${change>0?'▲ '+change:'▼ '+(-change)}</em>`:''}</div>`}).join('');
+    const pickClick=(cards.match(/aria-pressed="true" onclick="([^"]+)"/)||[0,''])[1],pd=pickClick.match(/previewRegisteredDress\('([^']+)'\)/),pw=pickClick.match(/previewRegisteredEquipment\('Weapons',(\d+)\)/);
+    const pickTheme=pd?WonderGear.themeOfDress(pd[1]):pw?WonderGear.themeOfBow(+pw[1]):null;
     const btn=equipped?'Equipped':owned?'Equip':PREMIUM_LOOKS.has(String(action.match(/'([^']+)'/)?.[1]||''))?'Exclusive':'Buy';
     return `<section class="fashion-showcase fx-room" data-category="${category}">
     <div class="fx-top"><button data-back aria-label="Back" onclick="go('home')">‹</button><strong>Fashion</strong><span class="fx-wallet">${uiIcon('gold')}<b>${fmt(S.gold)}</b></span><span class="fx-wallet">${uiIcon('crystals')}<b>${fmt(S.scales||0)}</b></span></div>
-    <div class="fx-stage">${stage||`<div class="fashion-stage"><div class="fashion-model"><img src="${portrait}" alt="${alt}"></div></div>`}<span class="fx-cp">⚔ ${fmt(current.power)}</span>
+    <div class="fx-stage">${stage||`<div class="fashion-stage"><div class="fashion-model"><img src="${portrait}" alt="${alt}"></div>${themeChips(pickTheme)}</div>`}<span class="fx-cp">⚔ ${fmt(current.power)}</span>
       <button class="fx-round l" onclick="apparelRecords()">${denPlain}<i>📜</i><small>Apparel Records</small></button><button class="fx-round r" onclick="go('eliteSale')">${denPlain}<i>✧</i><small>Elite Sale</small></button></div>
     <div class="fx-panel">${panel||`<div class="fx-stats">${statRows}</div><div class="fx-pick"><span class="fx-ptile r-${meta}">${art?`<img src="${art}" alt="">`:''}</span><b>${title}</b><small>${bonus?bonus+' · ':''}${owned?'Owned':fmt(price)+' gold'}</small><button class="fx-btn" ${equipped||(!owned&&S.gold<price)?'disabled':''} onclick="${action}">${denPlain}${btn}</button></div>`}</div>
     <div class="fx-tabs" role="group" aria-label="Fashion categories">${FX_TABS.map(([id,label,ic])=>`<button aria-pressed="${id===category}" onclick="changeFashionTab('${id}')">${denPlain}${ic?`<img src="${artPath(ic)}" alt="">`:`<i class="fx-tabico">${id==='Avatar'?'◯':'💬'}</i>`}<span>${label}</span></button>`).join('')}</div>
@@ -530,7 +550,9 @@ const styleSets={
   Hair:{slot:'hair',bit:1,price:400,bonus:'+30 HP',classic:'Original hair',legacy:'Lilac waves',names:['Chestnut Pixie','Pearl Braided Bun','Cherry Bob','Copper Curls','Double Moon Buns','Golden Crown Braid','Storm Asymmetrical Bob','Rose Twin Tails','Lagoon Side Braid','Onyx Topknot','Lavender Braid',
     'Moonsilver Cascade','Sunset Ponytail','Midnight Waves','Rosegold Pixie','Emerald Twin Braids','Snowbell Bob','Violet Star Buns','Golden Halo','Crimson Curls','Mint Curls']},
   Weapons:{slot:'weapon',bit:4,price:800,bonus:'+6 Attack',classic:'Original bow',legacy:'Frostglass bow',names:['Rosewood Thorn','Glacier Recurve','Swanfeather','Amber Sunwheel','Indigo Crescent','Ruby Dragon','Tide Serpent','Raven Thorn','Clockwork Compound','Orchid Butterfly','Azure Laurel',null,null,
-    'Aurora Arc','Thornrose Longbow','Pearl Tide','Ravenfeather','Sunflower Bough','Frostspire','Maple Whisper','Stargazer','Corsair Coral','Jade Phoenix']}
+    'Aurora Arc','Thornrose Longbow','Pearl Tide','Ravenfeather','Sunflower Bough','Frostspire','Maple Whisper','Stargazer','Corsair Coral','Jade Phoenix',
+    // Fashion theme bows 24-39 (WonderGear.themeBows)
+    'Balloon Ribbon','Gift Wing','Pumpkin Lantern','Wheat Sheaf','Anchor Corsair','Cogwheel Repeater','Holly Bell','Crimson Lantern','Shell Breeze','Encore Star','Tidecrest','Sandglass','Pixel Blaster','Heartflame','Vine Bloom','Crescent Moon']}
 };
 let stylePick=null;
 function changeFashionTab(tab){++fashionPreviewRequest;fashionCategory=tab;if(tab==='Wings'){wingPreview=S.reinaFashion?.wingSkin||fashionWings[0].id;}if(tab==='Mounts')mountPreview=currentMount()?.id||chosenMount().id;stylePick=null;clothingPreview=undefined;reinaAtelier()}
@@ -640,10 +662,11 @@ function ensureWardrobeCatalog(){
   WonderWardrobe.register({id:'hair:'+id,kind:'hair',layers});
  }
  // Grip position (fraction of the art's width) and drawn height of each bow; 12 reuses art 2.
- const bowGrip={1:.63,2:.68,3:.68,4:.61,5:.62,6:.56,7:.65,8:.62,9:.65,10:.60,14:.60,15:.60,16:.58,17:.60,18:.61,19:.62,20:.62,21:.62,22:.56,23:.62};
+ const bowGrip={1:.63,2:.68,3:.68,4:.61,5:.62,6:.56,7:.65,8:.62,9:.65,10:.60,14:.60,15:.60,16:.58,17:.60,18:.61,19:.62,20:.62,21:.62,22:.56,23:.62,
+  24:.63,25:.62,26:.60,27:.58,28:.58,29:.59,30:.58,31:.69,32:.60,33:.61,34:.59,35:.58,36:.59,37:.58,38:.64,39:.59};
  // Opaque artwork bounds, including rotation, retain a 12px canvas margin.
  const bowHeight={1:301,2:308,3:319,4:306,5:295,6:340,7:303,8:300,9:279,10:313};
- for(let id=1;id<=23;id++){
+ for(let id=1;id<=39;id++){
   let layers;
   if(id===11||id===13)layers=[
    {slot:'weapon',asset:'fit-control-bow-11',clip:wardrobeLeafPath('bow')},
@@ -867,7 +890,7 @@ function registeredFashionRoom(){
   const chosen=choices.some(([id])=>id===selected)?selected:(isHair?look.hair:look.dress);
   const dress=isHair?look.dress:chosen,hair=isHair?chosen:look.hair;
   const owned=isHair?chosen<=1||styleOwned(styleSets.Hair,chosen):ownsRegisteredDress(chosen);
-  const price=isHair?400:1200;
+  const price=isHair?400:(outfitCatalog[chosen]?.gold??1200);
   const cards=choices.map(([id,name])=>fashionCard(name,id==='leaflight'?leaflightIcon('dress'):isHair?artPath('fit-icon-hair-'+id):(id==='base'?registeredLookPath('base',look.hair):artPath('fit-icon-'+id)),chosen===id,isHair?`previewRegisteredHair(${id})`:`previewRegisteredDress('${id}')`)).join('');
   const bonus=isHair?(chosen?styleSets.Hair.bonus:''):(!['base','grove'].includes(chosen)?'+'+WonderGear.fashionTraits.clothing+' Defense':'');
   return fashionShowcase({portrait:registeredLookPath(dress,hair),alt:'Reina · '+choices.find(([id])=>id===chosen)[1],title:choices.find(([id])=>id===chosen)[1],bonus,owned,price,equipped:chosen===(isHair?look.hair:look.dress),action:`wearRegisteredLook('${dress}',${hair})`,cards});
@@ -877,7 +900,7 @@ function wearRegisteredLook(dress,hair){
   const isHair=fashionCategory==='Hair';
   const owned=isHair?hair<=1||styleOwned(styleSets.Hair,hair):ownsRegisteredDress(dress);
   if(!isHair&&premiumLocked(dress)){premiumNote();return}
-  const price=owned?0:isHair?400:1200;
+  const price=owned?0:isHair?400:(outfitCatalog[dress]?.gold??1200);
   if(S.gold<price){toast('Not enough gold');return;}
   S.gold-=price;
   S.reinaLayers={dress,hair};
