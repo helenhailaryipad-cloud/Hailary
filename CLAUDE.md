@@ -548,7 +548,9 @@ field `S.supreme {own{"set:piece":copies}, bubble, frame, sale{period,bought}}`.
   `sale.bought`). Each set has its own exclusive gown and matching wings painted for it (image model; gowns are edits
   of `base-v2.png`, mounted versions edits of `mounted/base.webp`, so they work in the wardrobe, battles and riding):
   ember = Phoenix Empress (`phoenix`, `fashion-wing-21`), frost = Crystal Snow Queen (`snowqueen`, 22), jade = Peacock
-  Jade (`peacock`, 23), star = Starlit Galaxy (`galaxy`, 24). A sixth piece, Wings (Weapon tab), so a full set is 6/6.
+  Jade (`peacock`, 23), star = Starlit Galaxy (`galaxy`, 24). Added on request: mermaid = Mermaid Princess (`mermaid`, 25), icequeen =
+  Ice Queen (`icequeen`, 26, deep sapphire, unlike the pale Snow Queen), love = Sweetheart (`sweetheart`, 27). Seven
+  sets rotate in the sale (one every four days). A sixth piece, Wings (Weapon tab), so a full set is 6/6.
   Exclusives are never sold for gold (`PREMIUM_LOOKS`, `premiumLocked`, `premiumNote` in `app.js`). Real-money payment
   is NOT built: packs still cost prisms (a payment provider and store accounts would be needed). Gold-jewel styling of
   tiles, cards, ribbon and set room; unowned sets show in full colour. Hosted bundle: AVIF copies of several large maps

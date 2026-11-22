@@ -422,7 +422,7 @@ function stats(save){const b=bonuses(save);
  if((look&1)||save.atelier?.hair)b.health=(b.health||0)+fashionTraits.hair;
  if(look&2)b.defense=(b.defense||0)+fashionTraits.clothing;
  if((look&4)||save.atelier?.weapon)b.attack=(b.attack||0)+fashionTraits.weapon;
- if(/^(?:w[0-3]|fashion-wing-(?:[1-9]|1\d|2[0-4]))$/.test(save.reinaFashion?.wingSkin))b.shieldHealth=(b.shieldHealth||0)+fashionTraits.wings;
+ if(/^(?:w[0-3]|fashion-wing-(?:[1-9]|1\d|2[0-7]))$/.test(save.reinaFashion?.wingSkin))b.shieldHealth=(b.shieldHealth||0)+fashionTraits.wings;
  const bowBonus=['roseguard','starfall','lilyveil','emberleaf'].reduce((total,id)=>{
    const rank=save.fashionBows?.[id];
    return Number.isSafeInteger(rank)&&rank>0 ? total+rank*20 : total;
@@ -1303,7 +1303,10 @@ const supremeSets=[
  {id:'ember',name:'Phoenix Empress',title:'Flame Herald',dress:'phoenix',wings:'fashion-wing-21',hair:20,bow:15,hue:'#ff7a3a',hue2:'#ffd36b'},
  {id:'frost',name:'Crystal Snow Queen',title:'Snow Regent',dress:'snowqueen',wings:'fashion-wing-22',hair:17,bow:19,hue:'#7fc8ff',hue2:'#e8f6ff'},
  {id:'jade',name:'Peacock Jade',title:'Jade Sovereign',dress:'peacock',wings:'fashion-wing-23',hair:16,bow:23,hue:'#2fc0b0',hue2:'#ffd36b'},
- {id:'star',name:'Starlit Galaxy',title:'Star Seer',dress:'galaxy',wings:'fashion-wing-24',hair:18,bow:21,hue:'#8a6aff',hue2:'#c8d8ff'}];
+ {id:'star',name:'Starlit Galaxy',title:'Star Seer',dress:'galaxy',wings:'fashion-wing-24',hair:18,bow:21,hue:'#8a6aff',hue2:'#c8d8ff'},
+ {id:'mermaid',name:'Mermaid Princess',title:'Pearl of the Tides',dress:'mermaid',wings:'fashion-wing-25',hair:12,bow:16,hue:'#3fd0d8',hue2:'#e8d8ff'},
+ {id:'icequeen',name:'Ice Queen',title:'Winter Sovereign',dress:'icequeen',wings:'fashion-wing-26',hair:14,bow:2,hue:'#3f6aff',hue2:'#dff0ff'},
+ {id:'love',name:'Sweetheart',title:'Heart of Roses',dress:'sweetheart',wings:'fashion-wing-27',hair:8,bow:10,hue:'#ff5a8a',hue2:'#ffd0e0'}];
 // Paid pieces (user: "bought for real money, so the stats must be better"): strong flat stats plus a percentage that
 // keeps them useful at any level. Every extra copy of a piece is a tier for THAT piece (T1..T5): each tier adds its
 // full stats once more, as in the reference (4 copies = T3 = 4 x the stats). The set row of 10 stars shows the stars of all its pieces together. Placeholders, tuned later.

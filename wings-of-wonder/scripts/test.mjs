@@ -20,7 +20,7 @@ vm.runInContext(fs.readFileSync('src/wardrobe-engine.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/app.js','utf8'),context);
 vm.runInContext(`
 S=defaults();S.gold=30000;openScreen('fashion');
-if(reinaDresses.length!==24)throw Error('Clothing catalog');
+if(reinaDresses.length!==27)throw Error('Clothing catalog');
 for(const dress of reinaDresses){
   clothingPreview=dress.id;
   if(!reinaLookPath(false,2,dress.id).includes('#registered-'))throw Error('Old body renderer remains');
@@ -330,7 +330,7 @@ console.log('PASS: 100 collectable species, legacy catches, exact duplicate stat
 
 vm.runInContext(`
 S=defaults();S.gold=50000;openScreen('fashion');
-if(fittingDresses.length!==26||fittingHairs.length!==21)throw Error('Registered wardrobe incomplete');
+if(fittingDresses.length!==29||fittingHairs.length!==21)throw Error('Registered wardrobe incomplete');
 for(const {id,outfit} of reinaDresses){
  changeFashionTab('Dresses');clothingPreview=id;
  if(!registeredFashionRoom().includes(outfit==='Moonlit Ballerina'?'Amethyst Lace':outfit))throw Error('Missing garment choice');

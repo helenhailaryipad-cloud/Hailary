@@ -24,7 +24,7 @@ def trim(path, floor=24):
 def save(name, im, quality):
     im.save(OUT/(name+'.webp'), quality=92, method=6); im.save(HOST/(name+'.avif'), quality=quality, speed=4)
 
-for n in range(11, 25):
+for n in range(11, 28):
     w = trim(SRC/'wings'/f'wing-{n}.webp'); w = w.resize((860, round(w.height*860/w.width)), Image.Resampling.LANCZOS)
     save(f'fashion-wing-{n}', w, 58)
 grips = {}
