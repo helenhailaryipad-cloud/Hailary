@@ -175,8 +175,13 @@ const reinaDresses = [
   // Second collection
   ['aurora','Aurora Sorceress'], ['rosethorn','Rosethorn Duelist'], ['seafoam','Seafoam Siren'], ['ravenwing','Ravenwing Huntress'],
   ['sunflower','Sunflower Shepherdess'], ['frostqueen','Frostqueen Regalia'], ['autumn','Autumn Minstrel'], ['starlit','Starlit Astronomer'],
-  ['coral','Coral Corsair'], ['jade','Jade Empress']
+  ['coral','Coral Corsair'], ['jade','Jade Empress'],
+  // Supreme Set exclusives: only from the Fashion Elite Sale (supremeSets in gear-data.js), never for gold
+  ['phoenix','Phoenix Empress'], ['snowqueen','Crystal Snow Queen'], ['peacock','Peacock Jade'], ['galaxy','Starlit Galaxy']
 ].map(([id,outfit])=>({id,outfit,gold:1200,reinaOnly:true}));
+const PREMIUM_LOOKS=new Set(['phoenix','snowqueen','peacock','galaxy','fashion-wing-21','fashion-wing-22','fashion-wing-23','fashion-wing-24']);
+const premiumLocked=id=>PREMIUM_LOOKS.has(id)&&!(ownsOutfit(id)||S.reinaFashion?.wingSkins?.includes(id)||S.reinaFashion?.wingSkin===id);
+function premiumNote(){toast('Supreme Set exclusive · find it in the Fashion Elite Sale')}
 for(const dress of reinaDresses)outfitCatalog[dress.id]=dress;
 outfitCatalog.leaflight={id:'leaflight',outfit:'Leaflight',gold:0,reinaOnly:true};
 let clothingPreview;
@@ -226,6 +231,7 @@ function wearOutfit(hero,outfit,showWardrobe=true){
   if(outfitCatalog[outfit]?.reinaOnly&&hero!=='reina')return;
   if((hero!=='reina'&&!partyWardrobe[hero])||(outfit&&!outfitCatalog[outfit]))return;
   const closet=S.costumes??={};closet.owned??=[];closet.equipped??={};
+  if(!ownsOutfit(outfit)&&premiumLocked(outfit)){premiumNote();return}
   if(!ownsOutfit(outfit)){
     const price=outfitCatalog[outfit].gold;
     if(S.gold<price)return;
@@ -249,10 +255,10 @@ const reinaPieces = [
 ];
 let reinaPreview=0,wingPreview='',fashionCategory='Dresses';
 const fashionWingNames=['Verdant Veins','Amber Monarch','Swanlight','Scarlet Phoenix','Glacier Shards','Violet Nocturne','Opal Skimmer','Clockwork Halo','Cherry Petals','Midnight Moth',
-  'Aurora Veil','Rose Thorn','Seashell Pearl','Raven Night','Sunflower Gold','Frost Crystal','Autumn Maple','Starmap','Coral Reef','Jade Phoenix'];
+  'Aurora Veil','Rose Thorn','Seashell Pearl','Raven Night','Sunflower Gold','Frost Crystal','Autumn Maple','Starmap','Coral Reef','Jade Phoenix','Phoenix Flame','Crystal Frost','Peacock Jade','Starlit Galaxy'];
 const fashionWings=fashionWingNames.map((name,i)=>({name,id:'fashion-wing-'+(i+1),cost:1000}));
 
-const wingLights=['#7ad996','#ffb34e','#cce9ff','#ff7039','#87d9ff','#bf7df1','#7be8e0','#e9b35e','#ff9ec2','#a89bff','#6fe3c4','#e0455f','#9fe6e0','#7f8fc9','#ffd24a','#bfe8ff','#ff8a3c','#8fa0ff','#ff8f7a','#58d6a0'];
+const wingLights=['#7ad996','#ffb34e','#cce9ff','#ff7039','#87d9ff','#bf7df1','#7be8e0','#e9b35e','#ff9ec2','#a89bff','#6fe3c4','#e0455f','#9fe6e0','#7f8fc9','#ffd24a','#bfe8ff','#ff8a3c','#8fa0ff','#ff8f7a','#58d6a0','#ff7a3a','#9fdcff','#3fd0b8','#9a7aff'];
 function wingFittingRoom(){
   const worn=S.reinaFashion?.wingSkin||'';
   const choices=[{id:'',name:'Original'},...fashionWings];
@@ -287,6 +293,7 @@ function rideFashionMount(){
 function wearFashionWings(){
   if((screen!=='fashion'&&!(screen==='citySkin'&&skinMode==='Appearance'))||fashionCategory!=='Wings')return;
   const price=wingSkinPrice(wingPreview);
+  if(premiumLocked(wingPreview)){premiumNote();return}
   if(S.gold<price)return;
   const state=S.reinaFashion??={owned:0,equipped:0};
   S.gold-=price;
@@ -801,6 +808,7 @@ function wearRegisteredLook(dress,hair){
   if(screen!=='fashion'||!fittingDresses.some(([id])=>id===dress)||!fittingHairs.some(([id])=>id===hair))return;
   const isHair=fashionCategory==='Hair';
   const owned=isHair?hair<=1||styleOwned(styleSets.Hair,hair):ownsRegisteredDress(dress);
+  if(!isHair&&premiumLocked(dress)){premiumNote();return}
   const price=owned?0:isHair?400:1200;
   if(S.gold<price){toast('Not enough gold');return;}
   S.gold-=price;

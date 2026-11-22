@@ -422,7 +422,7 @@ function stats(save){const b=bonuses(save);
  if((look&1)||save.atelier?.hair)b.health=(b.health||0)+fashionTraits.hair;
  if(look&2)b.defense=(b.defense||0)+fashionTraits.clothing;
  if((look&4)||save.atelier?.weapon)b.attack=(b.attack||0)+fashionTraits.weapon;
- if(/^(?:w[0-3]|fashion-wing-(?:[1-9]|1\d|20))$/.test(save.reinaFashion?.wingSkin))b.shieldHealth=(b.shieldHealth||0)+fashionTraits.wings;
+ if(/^(?:w[0-3]|fashion-wing-(?:[1-9]|1\d|2[0-4]))$/.test(save.reinaFashion?.wingSkin))b.shieldHealth=(b.shieldHealth||0)+fashionTraits.wings;
  const bowBonus=['roseguard','starfall','lilyveil','emberleaf'].reduce((total,id)=>{
    const rank=save.fashionBows?.[id];
    return Number.isSafeInteger(rank)&&rank>0 ? total+rank*20 : total;
@@ -1294,15 +1294,18 @@ function validDuel(v){
 // one set rotates every four days, each pack has a purchase limit per rotation. Buying a piece also unlocks the dress,
 // hairstyle or bow in the wardrobe. Optional save field `supreme` {own{"set:piece":copies}, bubble, frame,
 // sale{period, bought{piece:n}}}. All numbers are placeholders.
-const supremePieces=[{id:'outfit',name:'Outfit',pack:'Outfit Pack',tab:0,limit:3},{id:'hair',name:'Hair Accessory',pack:'Hair Accessory Pack',tab:0,limit:3},
- {id:'weapon',name:'Weapon',pack:'Weapon Pack',tab:1,limit:3},{id:'bubble',name:'Chat Bubble',pack:'Chat Bubble Pack',tab:2,limit:5},{id:'frame',name:'Avatar Frame',pack:'Avatar Pack',tab:2,limit:5}];
+// Packs are not limited (user: "they are sold for real money, buy as many as you like"); `limit` is no longer used.
+const supremePieces=[{id:'outfit',name:'Outfit',pack:'Outfit Pack',tab:0},{id:'hair',name:'Hair Accessory',pack:'Hair Accessory Pack',tab:0},
+ {id:'weapon',name:'Weapon',pack:'Weapon Pack',tab:1},{id:'wings',name:'Wings',pack:'Wings Pack',tab:1},{id:'bubble',name:'Chat Bubble',pack:'Chat Bubble Pack',tab:2},{id:'frame',name:'Avatar Frame',pack:'Avatar Pack',tab:2}];
+// Each set has its own exclusive gown and matching wings (painted for the sets, never sold for gold), plus a hairstyle
+// and a bow from the wardrobe. Set ids stay as first published (saves keep "ember:outfit" etc.).
 const supremeSets=[
- {id:'ember',name:'Ember Charm',title:'Flame Herald',dress:'rosethorn',hair:20,bow:15,hue:'#e0503a'},
- {id:'frost',name:'Frost Crown',title:'Snow Regent',dress:'frostqueen',hair:17,bow:19,hue:'#6fb8ff'},
- {id:'jade',name:'Jade Phoenix',title:'Jade Sovereign',dress:'jade',hair:16,bow:23,hue:'#3fbf7a'},
- {id:'star',name:'Starlit Night',title:'Star Seer',dress:'starlit',hair:18,bow:21,hue:'#9a6ae0'}];
+ {id:'ember',name:'Phoenix Empress',title:'Flame Herald',dress:'phoenix',wings:'fashion-wing-21',hair:20,bow:15,hue:'#ff7a3a',hue2:'#ffd36b'},
+ {id:'frost',name:'Crystal Snow Queen',title:'Snow Regent',dress:'snowqueen',wings:'fashion-wing-22',hair:17,bow:19,hue:'#7fc8ff',hue2:'#e8f6ff'},
+ {id:'jade',name:'Peacock Jade',title:'Jade Sovereign',dress:'peacock',wings:'fashion-wing-23',hair:16,bow:23,hue:'#2fc0b0',hue2:'#ffd36b'},
+ {id:'star',name:'Starlit Galaxy',title:'Star Seer',dress:'galaxy',wings:'fashion-wing-24',hair:18,bow:21,hue:'#8a6aff',hue2:'#c8d8ff'}];
 const supremeStats={outfit:{attack:15,health:600,defense:15,healthPercent:.2},hair:{attack:30,defense:15,penetration:15,defensePercent:.4},
- weapon:{attack:30,health:300,penetration:15,attackPercent:.2},bubble:{attack:30,defense:15,penetration:15,defensePercent:.4},frame:{attack:30,defense:15,penetration:15,defensePercent:.4}};
+ weapon:{attack:30,health:300,penetration:15,attackPercent:.2},wings:{attack:20,health:400,defense:10,healthPercent:.2},bubble:{attack:30,defense:15,penetration:15,defensePercent:.4},frame:{attack:30,defense:15,penetration:15,defensePercent:.4}};
 const supremeRules={setBonus:{attack:20},starStep:.05,maxStars:10,price:300,oldPrice:900,gold:680,saleStart:Date.UTC(2026,10,14),saleDays:4};
 const supremeById=Object.fromEntries(supremeSets.map(x=>[x.id,x])),supremePieceIds=supremePieces.map(p=>p.id);
 function supremeSale(now=Date.now()){
@@ -1329,11 +1332,12 @@ function supremeBonus(s){
 // Buying a pack: one copy of the piece and some gold. The first copy also unlocks the wardrobe item.
 function supremeBuy(s,piece,now=Date.now()){
  const v=supremeState(s,now),sale=supremeSale(now),p=supremePieces.find(x=>x.id===piece),r=supremeRules;
- if(!p||(v.sale.bought[piece]||0)>=p.limit||(s.scales||0)<r.price)return null;
+ if(!p||(s.scales||0)<r.price)return null;
  s.scales-=r.price;s.gold=(s.gold||0)+r.gold;v.sale.bought[piece]=(v.sale.bought[piece]||0)+1;
  const key=sale.set.id+':'+piece,first=!v.own[key];v.own[key]=(v.own[key]||0)+1;supremePack(s,v);
  if(first){const set=sale.set;
   if(piece==='outfit'){s.costumes??={};s.costumes.owned??=[];if(!s.costumes.owned.includes(set.dress))s.costumes.owned.push(set.dress)}
+  if(piece==='wings'){s.reinaFashion??={owned:0,equipped:0};s.reinaFashion.wingSkins=[...new Set([...(s.reinaFashion.wingSkins||[]),set.wings])]}
   if(piece==='hair'||piece==='weapon'){s.atelier??={owned:[]};s.atelier.owned??=[];const id=piece+(piece==='hair'?set.hair:set.bow);if(!s.atelier.owned.includes(id))s.atelier.owned.push(id)}
   if(piece==='bubble'&&!v.bubble||piece==='frame'&&!v.frame){v[piece]=set.id;supremePack(s,v)}}
  return {set:sale.set,piece,first,copies:v.own[key],gold:r.gold};
@@ -1343,7 +1347,7 @@ function validSupreme(v){
  if(v===undefined)return true;const int=n=>Number.isInteger(n)&&n>=0&&n<=999;
  return !!v&&typeof v==='object'&&!Array.isArray(v)&&!!v.own&&typeof v.own==='object'&&Object.entries(v.own).every(([k,n])=>{const [a,b]=k.split(':');return Object.hasOwn(supremeById,a)&&supremePieceIds.includes(b)&&int(n)})
   &&(v.bubble===undefined||Object.hasOwn(supremeById,v.bubble)&&(v.own[v.bubble+':bubble']||0)>0)&&(v.frame===undefined||Object.hasOwn(supremeById,v.frame)&&(v.own[v.frame+':frame']||0)>0)
-  &&!!v.sale&&Number.isInteger(v.sale.period)&&!!v.sale.bought&&Object.entries(v.sale.bought).every(([k,n])=>{const p=supremePieces.find(x=>x.id===k);return p&&int(n)&&n<=p.limit});
+  &&!!v.sale&&Number.isInteger(v.sale.period)&&!!v.sale.bought&&Object.entries(v.sale.bought).every(([k,n])=>{const p=supremePieces.find(x=>x.id===k);return p&&int(n)});
 }
 return Object.freeze({supremePieceIds,supremePieces,supremeSets,supremeStats,supremeRules,supremeById,supremeSale,supremeState,supremeCopies,supremeCount,supremeStars,supremePieceStats,supremeBonus,supremeBuy,supremeWear,validSupreme,talentOdds,talentNums,duelBoost,duelRules,duelPart,duelRanks,duelSeason,duelAi,duelField,duelState,duelQualRank,duelSim,duelInspire,duelAuto,duelQualFight,duelGroup,duelGroupFight,duelPeak,duelPeakFight,duelBet,duelGuess,duelPlace,duelSettle,validDuel,guildRules,guildUpFund,guildSignBoxes,guildAcademy,guildList,guildRivals,guildCrests,guildRoles,guildShop,guildBossRank,guildLevel,guildCap,guildState,guildJoin,guildCreate,guildLeave,guildUpgrade,guildNote,guildSpeaker,guildSign,guildDonate,guildFolkPower,guildPower,guildRanking,guildActivity,guildBoxClaim,guildEnvelopes,guildEnvClaim,guildEnvSend,guildBeastTier,guildBossHp,guildReserve,guildBoss,guildHit,guildBossClaim,guildBuy,guildAcademyCost,guildAcademyCap,guildLearn,guildBonus,validGuild,socialNote,chatBlockX,squadOf,socialFolk,socialRules,socialById,chatChannels,socialState,heartsOf,socialTick,sendFlower,giftAll,friendAnswer,friendAdd,friendBlock,mailClaim,mailDelete,mailRead,chatFeed,chatSay,chatLiveLeft,chatLiveSet,validSocial,cloudOwnReward,cloudOwnTake,cloudRules,cloudPointRewards,cloudShop,cloudRound,cloudRoundEnds,cloudState,cloudNewRound,cloudGain,cloudClaim,buyCloud,validCloud,warFactions,warTotems,warRules,warQuests,warRanks,contestShop,contestState,warNew,warHeld,warHero,warOrder,warTally,warStep,warStanding,warRankPrize,warQuestsDue,warStart,warSettle,buyContest,validContest,summonWells,summonPity,summonLevelMax,summonDupGold,markKinds,markPrice,markLimit,markNeed,galaQuests,galaMilestones,galaEnds,summonState,summonLevel,summonPay,summonDraw,markOffer,buyMarkPet,galaClaim,galaReward,validSummon,bossRare,gearRanks,gearRank,gearCraftFrom,gearNoDevour,bossDropRanks,craftRecipe,craftInputs,craftChance,craftGear,gearGroups,gearGroup,bagCapacity,bagStarter,bagRarity,bagItems,bagItemById,bagCount,bagAdd,bagStacks,bagUsed,vaultCount,vaultMove,useBagItem,devourStep,devourMax,devourNeed,devourWorth,devourState,devourBonus,devourable,devourGear,validBag,riposteShare,riposteEvery,talentCells,talentFree,talentLearn,talentBook,talentScroll,talentTopScroll,talentPrice,talentSupremeAt,talentSupreme,petTalents,talentState,talentIds,supremeReady,addSeals,openCellCost,openTalentCell,learnCost,rollTalent,keepTalent,learnTalent,lockTalent,forgetTalent,setTalentTarget,buyTalentScroll,buyTalentBook,sealRates,sealGold,buySeals,exchangeSpares,talentBonus,guardTalents,petGearPieces,petGearMax,petGearStep,petGearSetStep,petGearLevels,petGearTier,petGearCost,petGearBonus,upgradePetGear,petBolt,petBoltPace,petHit,petPace,assistPages,assistSlots,synthChain,synthNeed,petSpares,addPetSpare,synthesizePet,fashionTraits,companionTypes,companionSkins,companionSkin,ownsCompanionSkin,useCompanionSkin,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
 })();
