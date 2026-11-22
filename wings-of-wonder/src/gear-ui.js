@@ -693,8 +693,8 @@ function chatLine(c){
  if(c.kind==='roll')return `<div class="chat-note roll"><b>${esc(folk(c.from).name)}</b> ${esc(c.text).replace(/(Bonus: )(.*)$/,'$1<u>$2</u>').replace(/rolled (\d+)/,'rolled <i>$1</i>')}</div>`;
  const me=c.from==='me',time=new Date(c.t).toISOString().slice(11,16),f=me?null:folk(c.from);
  const tag=c.srv?`<span class="srv">[S-${c.srv}]</span> `:'',fac=c.fac!==undefined?` <span class="fac" style="color:${cloudFactions[c.fac][3]}">[${cloudFactions[c.fac][0]}]</span>`:'';
- const bub=me&&S.supreme?.bubble?WonderGear.supremeById[S.supreme.bubble]:null;
- return `<div class="chat-line ${me?'me':''} ${bub?'bub-'+bub.id:''}" ${bub?'style="--hue:'+bub.hue+'"':''}>${me?'':`<button class="chat-face" aria-label="Mention ${esc(f.name)}" onclick="chatMention('${f.name}')">${denPlain}${folkFace(c.from)}</button>`}<div><b>${me?esc(S.name):tag+esc(f.name)+' <small>AI</small>'+fac}<em>${time}</em></b><p>${chatPending.has(c.t)?'<i class="chat-typing">typing…</i>':esc(c.text)}</p></div></div>`;
+ const bub=me&&S.supreme?.bubble?bubbleAt(S.supreme.bubble):'';if(bub)bubbleVars();
+ return `<div class="chat-line ${me?'me':''} ${bub?'pb-line':''}" ${bub?'style="--bp:'+bub+'"':''}>${me?'':`<button class="chat-face" aria-label="Mention ${esc(f.name)}" onclick="chatMention('${f.name}')">${denPlain}${folkFace(c.from)}</button>`}<div><b>${me?esc(S.name):tag+esc(f.name)+' <small>AI</small>'+fac}<em>${time}</em></b><p>${chatPending.has(c.t)?'<i class="chat-typing">typing…</i>':esc(c.text)}</p></div></div>`;
 }
 const chatTarget=()=>chatChannel==='Squad'&&chatWith?'p:'+chatWith:chatChannel;
 function chatSheet(room){
@@ -2218,12 +2218,16 @@ function frameArtVars(){const root=document.documentElement;if(!root?.style?.set
 const FRAME_ROWS=6;
 function frameArt(setId,face=true,cls=''){frameArtVars();const g=WonderGear;let n=g.supremeSets.findIndex(x=>x.id===setId);if(n<0)n=g.supremeSets.length+g.avatarFrames.findIndex(x=>x.id===setId);
  return '<span class="sup-frame pf '+cls+'">'+(face?'<img src="assets/generated/reina-avatar.webp" alt="">':'')+'<i class="pf-ring" style="background-position:'+(n%4)/3*100+'% '+Math.floor(n/4)/(FRAME_ROWS-1)*100+'%"></i></span>'}
+// Painted chat bubbles (comp-chat-bubbles, 4 x 6 atlas: the seven set bubbles, then WonderGear.chatBubbles).
+function bubbleAt(id){const g=WonderGear;let n=g.supremeSets.findIndex(x=>x.id===id);if(n<0)n=g.supremeSets.length+g.chatBubbles.findIndex(x=>x.id===id);return n<0?'':(n%4)/3*100+'% '+Math.floor(n/4)/5*100+'%'}
+function bubbleVars(){const root=document.documentElement;if(!root?.style?.setProperty||root.style.getPropertyValue('--avb'))return;root.style.setProperty('--avb','url("'+artPath('comp-chat-bubbles')+'")')}
+function bubbleArt(id,text=''){bubbleVars();return '<span class="pb" style="background-position:'+bubbleAt(id)+'"><i>'+text+'</i></span>'}
 function supPieceArt(set,piece,big=false){
  if(piece==='outfit')return '<img src="'+artPath('fit-icon-'+set.dress)+'" alt="">';
  if(piece==='hair')return '<img src="'+artPath('fit-icon-hair-'+set.hair)+'" alt="">';
  if(piece==='weapon')return '<img src="'+artPath('weapon-style-'+set.bow)+'" alt="">';
  if(piece==='wings')return '<img src="'+artPath(set.wings)+'" alt="">';
- if(piece==='bubble')return '<span class="sup-bubble" style="--hue:'+set.hue+'">'+(big?'Hello!':'')+'</span>';
+ if(piece==='bubble')return bubbleArt(set.id,big?'Hello!':'');
  return frameArt(set.id,true);
 }
 function supTile(set,piece,extra=''){const own=WonderGear.supremeCopies(S,set.id,piece);

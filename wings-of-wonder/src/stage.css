@@ -8317,3 +8317,12 @@ body[data-screen=fashion]:not([data-playing]) #stage>#main{inset:0!important;wid
 .fx-bigdeco{padding-top:3cqh;box-sizing:border-box}
 /* Avatar tab: MR rarity (the reference's top grade: deep wine with violet) */
 .r-mr{--ra:#8a3a8a;--rc:#2a0a2a;--rb:#ffc8f0}.fx-card.r-mr .fx-rar{color:#ffd0f5;text-shadow:0 1px 0 #3a0030,0 0 6px #ff6ad0}
+/* Painted chat bubbles (comp-chat-bubbles, 4 x 6 atlas; one tile is stretched over the box) */
+.pb{position:relative;display:inline-grid;place-items:center;width:84%;aspect-ratio:1.6;background-image:var(--avb);background-size:400% 600%;background-repeat:no-repeat;filter:drop-shadow(0 2px 4px #0006);padding-bottom:6%;box-sizing:border-box}
+.pb>i{font:800 normal 1em/1 Arial,sans-serif;color:#fff;text-shadow:0 1px 2px #000a}
+.fx-art.fx-deco .pb,.fx-ptile.fx-deco .pb{width:96%;font-size:0}
+.fx-bigdeco .pb{width:58cqw;font-size:6.5cqw}
+.sup-tile .pb{width:92%;font-size:0}.el-deco .pb{width:42cqw;font-size:5cqw}.sup-info-art .pb{width:230px;font-size:26px}.sup-bigdeco .pb{width:46cqw;font-size:5.5cqw}
+.chat-line.pb-line>div{background:none!important;box-shadow:none!important}
+#stage #main .chat-line.pb-line p{background:var(--avb) var(--bp)/400% 600% no-repeat!important;color:#fff!important;padding:1em 1.9em 1.5em!important;min-height:3.4em;border:0!important;box-shadow:none!important;text-shadow:0 1px 2px #000;filter:drop-shadow(0 2px 3px #0005)}
+#stage .pb{background-image:var(--avb)!important;background-size:400% 600%!important;background-repeat:no-repeat!important;background-color:transparent!important;padding:0 0 6%!important;border:0!important;border-radius:0!important}

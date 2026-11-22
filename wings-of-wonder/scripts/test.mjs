@@ -1028,6 +1028,19 @@ vm.runInContext(`
 console.log('PASS: Avatar frames: sixteen own frames, MR/UR/SSR/SR, buy, tiers, wear, validation, Avatar tab.');
 
 vm.runInContext(`
+{const r=WonderGear;S=defaults();S.gold=1e6;S.scales=1e5;
+ if(r.chatBubbles.length!==16)throw Error('Sixteen own bubbles');
+ const hp0=stats().health,got=r.decoBuy(S,'bubble','rose');
+ if(!got||S.supreme.bubble!=='rose'||S.supreme.frame||stats().health<=hp0||!valid(S))throw Error('Buy a bubble: activated and worn, frame untouched');
+ r.decoBuy(S,'bubble','rose');if(r.decoTier(S,'bubble','rose')!==1)throw Error('Bubble tier');
+ if(r.supremeWear(S,'bubble','pirate')||!r.supremeWear(S,'bubble',''))throw Error('Wear only owned bubbles');
+ for(const bad of [{bubbles:{nope:1}},{bubble:'pirate'}])if(valid({...S,supreme:{...S.supreme,...bad}}))throw Error('Invalid bubble accepted '+JSON.stringify(bad));
+ r.supremeWear(S,'bubble','rose');go('fashion');changeFashionTab('Bubble');const h=$('#main').innerHTML;if(!h.includes('Star-Moon')||!h.includes('class="pb"'))throw Error('Bubble tab lists the bubbles');
+}
+`,context);
+console.log('PASS: Chat bubbles: sixteen own bubbles, buy, tiers, wear, validation, Bubble tab.');
+
+vm.runInContext(`
 {const r=WonderGear,R=r.supremeRules,T=R.saleStart+864e5,set=r.supremeSale(T).set;S=defaults();S.scales=1e5;
  r.supremeBuy(S,'weapon',T);const one=r.supremeBonus(S).attack;if(r.supremePieceStars(S,set.id,'weapon')!==0)throw Error('First copy activates');
  r.supremeBuy(S,'weapon',T);if(r.supremePieceStars(S,set.id,'weapon')!==1||r.supremeBonus(S).attack<=one)throw Error('Second copy is a star and raises the stats');

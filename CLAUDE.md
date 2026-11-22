@@ -547,6 +547,15 @@ these. First copy activates the stats for good, every further copy is a tier up 
 once more, `frameStats`, added through `supremeBonus`); SR cost gold, the rest prisms (`frameBuy`). Avatar tab =
 `frameRoom()` (MR, UR incl. the seven set frames, SSR, SR; class `r-mr`). Atlas `comp-avatar-frames` is now 4 x 6
 (sets first, then `avatarFrames`, `FRAME_ROWS`); sources in `art-source/frames/` (haze cleaned). Hosted headroom ~80 KB.
+Painted chat bubbles (user photo of the reference's Bubble tab): `chatBubbles` = the same sixteen themes (ids, names,
+rarities, prices as the frames; stats HP / DEF / ARP), optional `S.supreme.bubbles`, worn `S.supreme.bubble` (set id or
+own id). Shared rules: `decoKinds`, `decoCopies`, `decoTier`, `decoStats`, `decoBuy` (frame* are wrappers). One room
+`decoRoom(cat)` serves Avatar and Bubble. The seven set bubbles are painted too (no more CSS bubbles): `bubbleArt(id,
+text)` / `bubbleAt(id)` in `gear-ui.js`, atlas `comp-chat-bubbles` 4 x 6 of 256 x 160 (sets, then `chatBubbles`) by
+`scripts/build-chat-bubbles.py` from `art-source/bubbles/` (centres flattened where the model left haze). A worn
+bubble stretches its tile behind her chat lines (`.pb-line`). Global `.fashion-card span` rules need the `#stage .pb`
+override. AVIF copies of reina-walk, reina-shoot, fit-control-mount-base, portraits, stat-icons re-saved at quality 32
+(looked identical): hosted headroom ~410 KB.
 Found, not fixed: the Skin room (`citySkin`) layout is
 broken (overlapping title, blank square, cut labels) - it was like that before this pass.
 
