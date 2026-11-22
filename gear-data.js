@@ -1240,7 +1240,7 @@ function duelBet(s,round,slot,now=Date.now()){
  const m=rd.matches.find(x=>x.a===slot||x.b===slot);if(!m||m.a===0&&pk.inn||m.b===0&&pk.inn)return false;
  s.gold-=r.betStake;v.bets[round]=slot;duelPack(s,v);return true;
 }
-function duelGuess(s,slot,now=Date.now()){const v=duelState(s,now),pk=duelPeak(s,now);if(v.day>duelRules.peakDay||v.guess!==undefined||pk.rounds[0]?.revealed||!Number.isInteger(slot)||slot<0||slot>=duelRules.peakSize)return false;v.guess=slot;duelPack(s,v);return true}
+function duelGuess(s,slot,now=Date.now()){const v=duelState(s,now),pk=duelPeak(s,now);if(v.day>duelRules.peakDay||v.guess!==undefined||pk.rounds[3]?.revealed||!Number.isInteger(slot)||slot<0||slot>=duelRules.peakSize)return false;v.guess=slot;duelPack(s,v);return true}
 // Her place in the season (null while it is still open) and the settlement: bets, the guess, and the rewards by mail.
 function duelPlace(s,now=Date.now()){
  const v=duelState(s,now),r=duelRules;if(!v.n)return null;const q=duelQualRank(s,now);if(v.stage==='qual')return null;if(!q.qualified)return q.rank;
