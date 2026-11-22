@@ -2212,13 +2212,17 @@ let eliteTab=0,eliteHero='reina',supremePick=null;
 // ---- Fashion Elite Sale and Supreme Set (rules: WonderGear.supreme*) ------------------------------------------------
 const supSet=id=>WonderGear.supremeById[id];
 // A piece's picture: dress / hair / bow cards come from the wardrobe art; bubble and frame are drawn in CSS.
+// Painted avatar frames (comp-avatar-frames, 4 x 2 atlas in the order of supremeSets), drawn over Reina's avatar.
+function frameArtVars(){const root=document.documentElement;if(!root?.style?.setProperty||root.style.getPropertyValue('--avf'))return;root.style.setProperty('--avf','url("'+artPath('comp-avatar-frames')+'")')}
+function frameArt(setId,face=true,cls=''){frameArtVars();const n=WonderGear.supremeSets.findIndex(x=>x.id===setId);
+ return '<span class="sup-frame pf '+cls+'">'+(face?'<img src="assets/generated/reina-avatar.webp" alt="">':'')+'<i class="pf-ring" style="background-position:'+(n%4)/3*100+'% '+Math.floor(n/4)*100+'%"></i></span>'}
 function supPieceArt(set,piece,big=false){
  if(piece==='outfit')return '<img src="'+artPath('fit-icon-'+set.dress)+'" alt="">';
  if(piece==='hair')return '<img src="'+artPath('fit-icon-hair-'+set.hair)+'" alt="">';
  if(piece==='weapon')return '<img src="'+artPath('weapon-style-'+set.bow)+'" alt="">';
  if(piece==='wings')return '<img src="'+artPath(set.wings)+'" alt="">';
  if(piece==='bubble')return '<span class="sup-bubble" style="--hue:'+set.hue+'">'+(big?'Hello!':'')+'</span>';
- return '<span class="sup-frame" style="--hue:'+set.hue+'">'+(big?'<img src="assets/generated/reina-avatar.webp" alt="">':'')+'</span>';
+ return frameArt(set.id,true);
 }
 function supTile(set,piece,extra=''){const own=WonderGear.supremeCopies(S,set.id,piece);
  return `<button class="sup-tile ${own?'':'locked'} ${screen==='citySupreme'&&supremeSel===piece&&supremePick===set.id?'sel':''}" style="--hue:${set.hue}" onclick="supTap('${set.id}','${piece}')">${denPlain}${supPieceArt(set,piece)}<b>UR</b>${own?'<i class="sup-act">Activated</i>'+(own>1?'<i class="sup-tier">T'+Math.min(WonderGear.supremeRules.pieceStars,own-1)+'</i>':''):'<i class="sup-lock">🔒</i>'}${extra}</button>`}

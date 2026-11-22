@@ -535,7 +535,11 @@ worn) and a bottom bar Fashion / Supreme Set / Elite Sale. Second pass (three mo
 Garment, Fashion Bow, Avatar, Bubble, Hairstyle, Wings, Mounts. Avatar and Bubble (`decoRoom`, `decoPick`) list the
 Supreme Set frames / bubbles as UR cards with tiers; the panel shows the piece's stats now and ▲ next, Activate /
 Tier-up (`supremeGet`, only while its set is on sale) and Equip / Unequip (`supremeWear`). Apparel Records pop-up
-(`apparelRecords`) counts owned looks per category. Lighter sky-blue palette like the reference. Found, not fixed: the Skin room (`citySkin`) layout is
+(`apparelRecords`) counts owned looks per category. Lighter sky-blue palette like the reference.
+Painted avatar frames (user: "beautiful avatars"; chose frames): one per Supreme Set (image model, transparent ring;
+`art-source/frames/<set id>.webp` -> atlas `comp-avatar-frames` 4 x 2 by `scripts/build-avatar-frames.py`, AVIF copy).
+`frameArt(setId,face,cls)` in `gear-ui.js` draws Reina's avatar inside the painted ring; used by `supPieceArt` (sale,
+set room, Avatar tab, item card) and, for the worn frame, on the home avatar (`.pf-city`) and `#profileReadout`. Found, not fixed: the Skin room (`citySkin`) layout is
 broken (overlapping title, blank square, cut labels) - it was like that before this pass.
 
 ## Fashion Elite Sale and Supreme Sets (2026-11-22)
