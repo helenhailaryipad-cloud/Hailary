@@ -19,8 +19,8 @@ vm.runInContext(fs.readFileSync('src/minigame-engine.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/wardrobe-engine.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/app.js','utf8'),context);
 vm.runInContext(`
-S=defaults();S.gold=30000;openScreen('fashion');
-if(reinaDresses.length!==27)throw Error('Clothing catalog');
+S=defaults();S.gold=500000;openScreen('fashion');
+if(reinaDresses.length!==43)throw Error('Clothing catalog');
 for(const dress of reinaDresses){
   clothingPreview=dress.id;
   if(!reinaLookPath(false,2,dress.id).includes('#registered-'))throw Error('Old body renderer remains');
@@ -31,13 +31,13 @@ for(const dress of reinaDresses){
   if(!reinaLookPath(true).includes('#mounted-'+fittedDressId(dress.id)+'-'))throw Error('Mounted outfit');
 }
 S=defaults();
-S=defaults();S.gold=30000;openScreen('fashion');
+S=defaults();S.gold=500000;openScreen('fashion');
 if(!['Dresses','Hair','Weapons'].every(tab=>document.querySelector('#nav').innerHTML.includes('>'+tab+'<')))throw Error('Fashion tabs');
 wearOutfit('reina','pearl',false);
 for(const category of ['Hair','Weapons']){
   changeFashionTab(category);
   const set=styleSets[category];
-  if(set.names.filter(Boolean).length!==21)throw Error('Missing fashion styles');
+  if(set.names.filter(Boolean).length!==(category==='Hair'?21:37))throw Error('Missing fashion styles');
   if(category==='Weapons'){
     // 12 and 13 are the compositor's legacy and original bows, never purchasable styles.
     for(const reserved of [12,13]){stylePick=reserved;const gold=S.gold;wearStyle();if(S.gold!==gold||S.atelier?.weapon===reserved)throw Error('Reserved bow number sold');}
@@ -329,14 +329,14 @@ if(valid({...S,fishCards:{unlisted:{count:1,kg:1}}}))throw Error('Unknown specie
 console.log('PASS: 100 collectable species, legacy catches, exact duplicate stat bonuses and saved card album.');
 
 vm.runInContext(`
-S=defaults();S.gold=50000;openScreen('fashion');
-if(fittingDresses.length!==29||fittingHairs.length!==21)throw Error('Registered wardrobe incomplete');
-for(const {id,outfit} of reinaDresses){
+S=defaults();S.gold=500000;openScreen('fashion');
+if(fittingDresses.length!==45||fittingHairs.length!==21)throw Error('Registered wardrobe incomplete');
+for(const {id,outfit,gold} of reinaDresses){
  changeFashionTab('Dresses');clothingPreview=id;
  if(!registeredFashionRoom().includes(outfit==='Moonlit Ballerina'?'Amethyst Lace':outfit))throw Error('Missing garment choice');
  if(PREMIUM_LOOKS.has(id)){const b0=S.gold;wearRegisteredLook(id,registeredLook().hair);if(S.gold!==b0||registeredLook().dress===id)throw Error('Exclusive gown cannot be bought for gold');S.costumes??={};(S.costumes.owned??=[]).push(id)}
  const balance=S.gold;wearRegisteredLook(id,registeredLook().hair);wearRegisteredLook(id,registeredLook().hair);
- if(S.gold!==balance-(PREMIUM_LOOKS.has(id)?0:1200)||registeredLook().dress!==id||currentDress()!==id)throw Error('Registered garment purchase '+id);
+ if(S.gold!==balance-(PREMIUM_LOOKS.has(id)?0:gold)||registeredLook().dress!==id||currentDress()!==id)throw Error('Registered garment purchase '+id);
  for(let hair=1;hair<=10;hair++){
   changeFashionTab('Hair');const before=S.gold,owned=hair===1||styleOwned(styleSets.Hair,hair);
   wearRegisteredLook(id,hair);wearRegisteredLook(id,hair);

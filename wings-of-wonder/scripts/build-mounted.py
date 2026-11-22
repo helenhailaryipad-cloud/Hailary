@@ -22,7 +22,8 @@ arr, img, dilate, erode, flood, components, keep_big, fill_holes, diff, skin_lik
 SRC = ROOT/'scripts/art-source/mounted'; OUT = ROOT/'src/assets/generated'; HOST = ROOT/'scripts/hosting-art'
 TOP, BOTTOM = 44, 980
 DRESSES = ['leaflight', 'grove', 'frostlace', 'emberveil', 'dawnpetal', 'nightbloom', 'sunweave', 'tidal', 'willow', 'stardust', 'pearl', 'sapphire',
-           'aurora', 'rosethorn', 'seafoam', 'ravenwing', 'sunflower', 'frostqueen', 'autumn', 'starlit', 'coral', 'jade', 'phoenix', 'snowqueen', 'peacock', 'galaxy', 'mermaid', 'icequeen', 'sweetheart']
+           'aurora', 'rosethorn', 'seafoam', 'ravenwing', 'sunflower', 'frostqueen', 'autumn', 'starlit', 'coral', 'jade', 'phoenix', 'snowqueen', 'peacock', 'galaxy', 'mermaid', 'icequeen', 'sweetheart',
+           *['throse', 'thdragonling', 'thpumpkin', 'thharvest', 'thpirate', 'thclockwork', 'thholly', 'thlantern', 'thseaside', 'thidol', 'thocean', 'thhourglass', 'tharcade', 'thinferno', 'thfairy', 'thstarmoon']]   # fashion themes
 WIDE = set(DRESSES[12:])      # second collection: capes and trains may trail over the cat
 HAIRS = list(range(1, 22))
 GREY_HAIR = {2, 10, 12, 17}   # pearl, black, silver, white hair: neutral colours are the hair itself

@@ -556,6 +556,18 @@ text)` / `bubbleAt(id)` in `gear-ui.js`, atlas `comp-chat-bubbles` 4 x 6 of 256 
 bubble stretches its tile behind her chat lines (`.pb-line`). Global `.fashion-card span` rules need the `#stage .pb`
 override. AVIF copies of reina-walk, reina-shoot, fit-control-mount-base, portraits, stat-icons re-saved at quality 32
 (looked identical): hosted headroom ~410 KB.
+Fashion themes (user photos of the reference's Adventure Shop: "they come in pairs, with a gown and a weapon in the
+same theme"): each of the sixteen own frames is a THEME = frame + bubble + gown + bow. Gowns are dress ids 'th'+id
+(`throse` ... `thstarmoon`), painted on base-v2.png like the other gowns (`painted/th<id>.png`, `PAINTED` in
+`build-fitting-v2.py`) with mounted versions (`mounted/dress-th<id>.webp`, `DRESSES` in `build-mounted.py`); names in
+`THEME_GOWNS`, gold by rarity `THEME_GOLD` (the dress price is now `outfitCatalog[id].gold`, not a fixed 1200). Bows are
+weapon styles 24-39 (`themeBows`, sources `art-source/bows/bow-24..39.webp`, `bowGrip` entries, the weapon register
+loop runs to 39). `themeOfDress`, `themeOfBow`; cards take the theme's rarity. `themeChips(th)` (`.fx-theme`, right
+column of the stage) lists the four pieces with ticks and jumps to them (`themeJump`) from the Avatar, Bubble, Garment
+and Fashion Bow tabs. Not done: the reference's event exchange shop (Adventure Shop with tokens).
+All bundled AVIF copies over 40 KB were re-encoded at quality 32 where that saved 15%+ (193 files, -5.6 MB raw; spot
+checks looked identical): hosted bundle 28.1 MB. Chat preview packs `fit-control-*-erase` (`pack-erase.js`) and
+trek pickups / pairs tiles (`pack-minis.js`) to stay under 511 files.
 Found, not fixed: the Skin room (`citySkin`) layout is
 broken (overlapping title, blank square, cut labels) - it was like that before this pass.
 
