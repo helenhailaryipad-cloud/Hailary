@@ -2221,7 +2221,7 @@ function supPieceArt(set,piece,big=false){
  return '<span class="sup-frame" style="--hue:'+set.hue+'">'+(big?'<img src="assets/generated/reina-avatar.webp" alt="">':'')+'</span>';
 }
 function supTile(set,piece,extra=''){const own=WonderGear.supremeCopies(S,set.id,piece);
- return `<button class="sup-tile ${own?'':'locked'} ${screen==='citySupreme'&&supremeSel===piece&&supremePick===set.id?'sel':''}" style="--hue:${set.hue}" onclick="supTap('${set.id}','${piece}')">${denPlain}${supPieceArt(set,piece)}<b>UR</b>${own?'<i class="sup-act">Activated</i>':'<i class="sup-lock">🔒</i>'}${extra}</button>`}
+ return `<button class="sup-tile ${own?'':'locked'} ${screen==='citySupreme'&&supremeSel===piece&&supremePick===set.id?'sel':''}" style="--hue:${set.hue}" onclick="supTap('${set.id}','${piece}')">${denPlain}${supPieceArt(set,piece)}<b>UR</b>${own?'<i class="sup-act">Activated</i>'+(own>1?'<i class="sup-tier">T'+Math.min(WonderGear.supremeRules.pieceStars,own-1)+'</i>':''):'<i class="sup-lock">🔒</i>'}${extra}</button>`}
 // Combat power a piece adds: the difference it makes to stats().power.
 function supremeCp(setId,piece){
  const r=WonderGear,own={...(S.supreme?.own||{})},key=setId+':'+piece,with_={...own,[key]:Math.max(1,own[key]||0)},without={...own};delete without[key];
@@ -2277,7 +2277,7 @@ function supremeWearSet(setId){
  save();citySupreme();toast(set.name+': '+worn+' piece'+(worn>1?'s':'')+' worn.');
 }
 function supremeStarsPop(setId){const r=WonderGear,set=supSet(setId),st=r.supremeStars(S,setId);
- popup(`<h2>Activate Stat · ${set.name}</h2><p>The first copy of a piece activates it. Every further copy you buy is a star for that piece (up to ${r.supremeRules.pieceStars}); each star raises that piece's stats by ${r.supremeRules.starStep*100}%. Tap a piece in the set room to see its next star.</p><p class="sup-stars">${'★'.repeat(st)}<span>${'★'.repeat(r.supremeRules.maxStars-st)}</span></p><div class="gld-board">${r.supremePieces.map(p=>`<div><b>${r.supremeCopies(S,setId,p.id)}</b><span>${p.name}</span><em>${r.supremeCopies(S,setId,p.id)>1?'+'+(r.supremeCopies(S,setId,p.id)-1)+'★':''}</em></div>`).join('')}</div>`)}
+ popup(`<h2>Activate Stat · ${set.name}</h2><p>The first copy of a piece activates it. Every further copy you buy raises that piece one tier (T1 to T${r.supremeRules.pieceStars}); each tier adds the piece's full stats once more, so 4 copies (T3) give 4 times the stats. Tap a piece in the set room to see the next tier.</p><p class="sup-stars">${'★'.repeat(st)}<span>${'★'.repeat(r.supremeRules.maxStars-st)}</span></p><div class="gld-board">${r.supremePieces.map(p=>`<div><b>${r.supremeCopies(S,setId,p.id)}</b><span>${p.name}</span><em>${r.supremeCopies(S,setId,p.id)>1?'+'+(r.supremeCopies(S,setId,p.id)-1)+'★':''}</em></div>`).join('')}</div>`)}
 function supremeFullPop(setId){const r=WonderGear,set=supSet(setId),st=r.supremeStars(S,setId);
  popup(`<h2>Full Set Preview · ${set.name}</h2><div class="sup-full">${r.supremePieces.map(p=>`<div>${supTile(set,p.id)}<div><b>${p.name}</b><ul>${supremeStatLines(r.supremePieceStats(setId,p.id,r.supremePieceStars(S,setId,p.id)))}</ul></div></div>`).join('')}</div><p class="sup-setline"><span>[${r.supremePieceIds.length} Pieces]</span> ${supremeSetBonusText()}</p>`)}
 function supremeSetBonusText(){return Object.entries(WonderGear.supremeRules.setBonus).map(([k,n])=>(WonderGear.labels[k]||k)+' +'+n+(WonderGear.percentKeys.has(k)?'%':'')).join(', ')}
@@ -2286,14 +2286,14 @@ function supremePiecePanel(set,p,st){
  const r=WonderGear,own=r.supremeCopies(S,set.id,p.id),max=st>=r.supremeRules.pieceStars,now=own?r.supremePieceStats(set.id,p.id,st):{},next=r.supremePieceStats(set.id,p.id,own?Math.min(r.supremeRules.pieceStars,st+1):0),onSale=r.supremeSale().set.id===set.id;
  const label=k=>k==='penetration'?'ARP':r.percentKeys.has(k)?'Fashion '+(r.labels[k]||k).replace(' Bonus',''):(r.labels[k]||k),val=(k,x)=>r.percentKeys.has(k)?x+'%':fmt(x);
  const rows=Object.keys(next).map(k=>`<div><span>${label(k)} ${val(k,now[k]||0)}</span>${max?'':`<b class="up">▲ ${val(k,next[k])}</b>`}</div>`).join('');
- const act=!own?'Activate':max?'Max stars':'Star-up';
+ const act=!own?'Activate':max?'Max tier':'Tier-up';
  return `<div class="sup-stats piece"><div class="sup-rows">${rows}</div><div class="sup-pside">${supTile(set,p.id,`<em>${own}</em>`)}<button class="den-gold" ${max?'disabled':''} onclick="supremeGet('${set.id}','${p.id}')">${denPlain}${act}</button><button class="sup-more" onclick="supremeInfo('${set.id}','${p.id}')">${denPlain}Details</button></div></div>`;
 }
 // Activate / Star-up = buy one more copy of this piece in the Elite Sale (only the set on sale can be bought).
 function supremeGet(setId,piece){
  const r=WonderGear;if(r.supremeSale().set.id!==setId){toast(supSet(setId).name+' comes back in a later Fashion Elite Sale.');return}
  const got=r.supremeBuy(S,piece);if(!got){toast('Not enough prisms.');return}
- save();citySupreme();toast(got.first?'Activated!':'Star-up! ★'+r.supremePieceStars(S,setId,piece));
+ save();citySupreme();toast(got.first?'Activated!':'Tier-up! T'+r.supremePieceStars(S,setId,piece));
 }
 function citySupreme(){
  const r=WonderGear,sale=r.supremeSale();if(!supremePick||!supSet(supremePick))supremePick=sale.set.id;
@@ -2304,7 +2304,7 @@ function citySupreme(){
  const rows=['defense','penetration','health','attack'].map(k=>`<div><span>${r.labels[k]==='Armor Piercing'?'ARP':r.labels[k]}</span><b>${fmt(total[k]||0)}</b></div>`).join('')+Object.entries(total).filter(([k])=>r.percentKeys.has(k)).map(([k,x])=>`<div><span>Fashion ${(r.labels[k]||k).replace(' Bonus','')}</span><b>${x}%</b></div>`).join('');
  $('#main').innerHTML=`<section class="sup-room" style="--hue:${set.hue};--hue2:${set.hue2}">
   <div class="sup-top"><strong>Supreme Set</strong>${sumChip(uiIcon('gold'),S.gold,'Gold')}${sumChip(uiIcon('crystals'),S.scales||0,'Prisms')}</div>
-  ${sel?`<h1>${set.name} (${sel.name})</h1><p class="sup-stars">${'★'.repeat(selStars)}<span>${'★'.repeat(r.supremeRules.pieceStars-selStars)}</span></p>`:`<h1>${set.name}</h1><p class="sup-stars">${'★'.repeat(stars)}<span>${'★'.repeat(r.supremeRules.maxStars-stars)}</span></p>`}
+  ${sel?`<h1>${set.name} (${sel.name})${selStars?' · T'+selStars:''}</h1><p class="sup-stars">${'★'.repeat(selStars)}<span>${'★'.repeat(r.supremeRules.pieceStars-selStars)}</span></p>`:`<h1>${set.name}</h1><p class="sup-stars">${'★'.repeat(stars)}<span>${'★'.repeat(r.supremeRules.maxStars-stars)}</span></p>`}
   <div class="sup-stage"><div class="sup-side">${['outfit','hair','bubble'].map(p=>supTile(set,p)).join('')}</div>
    <div class="sup-center ${sel?'piece p-'+sel.id:''}">${sel?(sel.id==='hair'?`<span class="sup-head big"><img src="${registeredLookPath(set.dress,set.hair,0,'','')}" alt=""></span>`:sel.id==='weapon'?`<img class="sup-bigbow" src="${artPath('weapon-style-'+set.bow)}" alt="">`:sel.id==='bubble'||sel.id==='frame'?`<div class="sup-bigdeco">${supPieceArt(set,sel.id,true)}</div>`:`<img src="${registeredLookPath(set.dress,set.hair,0,sel.id==='wings'?set.wings:'','')}" alt="">`):`<img class="${n?'':'shade'}" src="${registeredLookPath(set.dress,set.hair,set.bow,set.wings,'')}" alt="${set.name}">`}<span class="sup-ribbon">${set.title}</span><b class="sup-cp">⚔ ${fmt(sel?supremeCp(set.id,sel.id):cp)}</b></div>
    <div class="sup-side">${['weapon','wings','frame'].map(p=>supTile(set,p)).join('')}</div>

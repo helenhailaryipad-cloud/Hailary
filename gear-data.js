@@ -1305,12 +1305,12 @@ const supremeSets=[
  {id:'jade',name:'Peacock Jade',title:'Jade Sovereign',dress:'peacock',wings:'fashion-wing-23',hair:16,bow:23,hue:'#2fc0b0',hue2:'#ffd36b'},
  {id:'star',name:'Starlit Galaxy',title:'Star Seer',dress:'galaxy',wings:'fashion-wing-24',hair:18,bow:21,hue:'#8a6aff',hue2:'#c8d8ff'}];
 // Paid pieces (user: "bought for real money, so the stats must be better"): strong flat stats plus a percentage that
-// keeps them useful at any level. Every extra copy of a piece is a star for THAT piece (up to 5, +20% of its stats
-// each). The set row of 10 stars shows the stars of all its pieces together. Placeholders, tuned later.
+// keeps them useful at any level. Every extra copy of a piece is a tier for THAT piece (T1..T5): each tier adds its
+// full stats once more, as in the reference (4 copies = T3 = 4 x the stats). The set row of 10 stars shows the stars of all its pieces together. Placeholders, tuned later.
 const supremeStats={outfit:{attack:150,health:6000,defense:150,healthPercent:3},hair:{attack:300,defense:150,penetration:150,defensePercent:3},
  weapon:{attack:300,health:3000,penetration:150,attackPercent:3},wings:{attack:200,health:4000,defense:100,damageBonus:3},
  bubble:{attack:300,defense:150,penetration:150,critResistance:3},frame:{attack:300,defense:150,penetration:150,crit:2}};
-const supremeRules={setBonus:{attack:200,attackPercent:8,healthPercent:8},starStep:.2,pieceStars:5,maxStars:10,price:300,oldPrice:900,gold:680,saleStart:Date.UTC(2026,10,14),saleDays:4};
+const supremeRules={setBonus:{attack:200,attackPercent:8,healthPercent:8},starStep:1,pieceStars:5,maxStars:10,price:300,oldPrice:900,gold:680,saleStart:Date.UTC(2026,10,14),saleDays:4};
 const supremeById=Object.fromEntries(supremeSets.map(x=>[x.id,x])),supremePieceIds=supremePieces.map(p=>p.id);
 function supremeSale(now=Date.now()){
  const r=supremeRules,len=r.saleDays*864e5,period=Math.floor((now-r.saleStart)/len);
