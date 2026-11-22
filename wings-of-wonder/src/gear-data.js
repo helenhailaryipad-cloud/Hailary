@@ -405,7 +405,7 @@ function validPets(s){
  if(!validContest(s.contest))return false;
  if(!validCloud(s.cloud))return false;
  if(!validSocial(s.social))return false;
- if(!validGuild(s.guild))return false; if(!validDuel(s.duel))return false;
+ if(!validGuild(s.guild))return false; if(!validDuel(s.duel))return false; if(!validSupreme(s.supreme))return false;
  if(s.emberShards!==undefined&&(!Number.isSafeInteger(s.emberShards)||s.emberShards<0))return false;
  if(s.petSpares!==undefined&&(!s.petSpares||typeof s.petSpares!=='object'||Array.isArray(s.petSpares)||!Object.entries(s.petSpares).every(([id,n])=>Object.hasOwn(familiarById,id)&&Number.isInteger(n)&&n>0&&n<=9999)))return false;
  if(s.emberStars!==undefined&&(!Number.isInteger(s.emberStars)||s.emberStars<0||s.emberStars>6||!s.owned?.includes('d1')))return false;
@@ -432,6 +432,7 @@ function stats(save){const b=bonuses(save);
  petTeam(save).slice(0,3).forEach((id,slot)=>{if(!id)return;const gear=petGearBonus(save,slot);b.health=(b.health||0)+gear.hp;b.defense=(b.defense||0)+gear.def});
  for(const [key,n] of Object.entries(devourBonus(save)))b[key]=(b[key]||0)+n;
  for(const [key,n] of Object.entries(guildBonus(save)))b[key]=(b[key]||0)+n;
+ for(const [key,n] of Object.entries(supremeBonus(save)))b[key]=(b[key]||0)+n;
  const cards=globalThis.MoonwaterFish.totals(save.fishCards);
  const lv=globalThis.WonderProgress.level(save.xp),d=petTeamAttack(save),w=[40,120,180,240][Number(save.wings[1])];const attack=Math.round((85+lv*7+d+(b.attack||0))*(1+(b.attackPercent||0)/100))+(cards.attack||0)+bowBonus,defense=Math.round((52+lv*4+w+(b.defense||0))*(1+(b.defensePercent||0)/100))+(cards.defense||0),health=Math.round((900+lv*75+(b.health||0))*(1+(b.healthPercent||0)/100))+(cards.health||0),crit=round(Math.min(75,8+(b.crit||0))),speed=100+(b.speed||0),penetration=round(b.penetration||0),damageBonus=round(b.damageBonus||0),damageReduction=round(Math.min(50,b.damageReduction||0)),block=round(Math.min(40,b.block||0)),expBonus=round(b.expBonus||0);const accuracy=round(100+(b.accuracy||0)),dodge=round(Math.min(30,b.dodge||0)),critDamage=round(165+(b.critDamage||0)),critResistance=round(Math.min(30,b.critResistance||0)),shieldHealth=Math.round(b.shieldHealth||0)+(cards.shieldHealth||0),elementalAttack=Math.round(b.elementalAttack||0)+(cards.elementalAttack||0),elementalDefense=Math.round(b.elementalDefense||0)+(cards.elementalDefense||0),armor=round(100-10000/(100+defense*.35)),attackInterval=round(100/speed),healing=Math.round(health*.25);
 const advanced={accuracy,dodge,critDamage,critResistance,shieldHealth,elementalAttack,elementalDefense,armor,attackInterval,healing};
@@ -1285,5 +1286,64 @@ function validDuel(v){
   &&int(v.insp,r.inspMax)&&(v.auto===undefined||v.auto===true)&&Array.isArray(v.g)&&v.g.length<r.groupSize&&v.g.every(x=>x===0||x===1)&&Array.isArray(v.p)&&v.p.length<=r.peakRounds&&v.p.every(x=>x===0||x===1)
   &&int(v.php,100)&&!!v.bets&&typeof v.bets==='object'&&Object.entries(v.bets).every(([k,x])=>/^[0-4]$/.test(k)&&int(x,r.peakSize-1))&&(v.guess===undefined||int(v.guess,r.peakSize-1))&&int(v.done,127);
 }
-return Object.freeze({talentOdds,talentNums,duelBoost,duelRules,duelPart,duelRanks,duelSeason,duelAi,duelField,duelState,duelQualRank,duelSim,duelInspire,duelAuto,duelQualFight,duelGroup,duelGroupFight,duelPeak,duelPeakFight,duelBet,duelGuess,duelPlace,duelSettle,validDuel,guildRules,guildUpFund,guildSignBoxes,guildAcademy,guildList,guildRivals,guildCrests,guildRoles,guildShop,guildBossRank,guildLevel,guildCap,guildState,guildJoin,guildCreate,guildLeave,guildUpgrade,guildNote,guildSpeaker,guildSign,guildDonate,guildFolkPower,guildPower,guildRanking,guildActivity,guildBoxClaim,guildEnvelopes,guildEnvClaim,guildEnvSend,guildBeastTier,guildBossHp,guildReserve,guildBoss,guildHit,guildBossClaim,guildBuy,guildAcademyCost,guildAcademyCap,guildLearn,guildBonus,validGuild,socialNote,chatBlockX,squadOf,socialFolk,socialRules,socialById,chatChannels,socialState,heartsOf,socialTick,sendFlower,giftAll,friendAnswer,friendAdd,friendBlock,mailClaim,mailDelete,mailRead,chatFeed,chatSay,chatLiveLeft,chatLiveSet,validSocial,cloudOwnReward,cloudOwnTake,cloudRules,cloudPointRewards,cloudShop,cloudRound,cloudRoundEnds,cloudState,cloudNewRound,cloudGain,cloudClaim,buyCloud,validCloud,warFactions,warTotems,warRules,warQuests,warRanks,contestShop,contestState,warNew,warHeld,warHero,warOrder,warTally,warStep,warStanding,warRankPrize,warQuestsDue,warStart,warSettle,buyContest,validContest,summonWells,summonPity,summonLevelMax,summonDupGold,markKinds,markPrice,markLimit,markNeed,galaQuests,galaMilestones,galaEnds,summonState,summonLevel,summonPay,summonDraw,markOffer,buyMarkPet,galaClaim,galaReward,validSummon,bossRare,gearRanks,gearRank,gearCraftFrom,gearNoDevour,bossDropRanks,craftRecipe,craftInputs,craftChance,craftGear,gearGroups,gearGroup,bagCapacity,bagStarter,bagRarity,bagItems,bagItemById,bagCount,bagAdd,bagStacks,bagUsed,vaultCount,vaultMove,useBagItem,devourStep,devourMax,devourNeed,devourWorth,devourState,devourBonus,devourable,devourGear,validBag,riposteShare,riposteEvery,talentCells,talentFree,talentLearn,talentBook,talentScroll,talentTopScroll,talentPrice,talentSupremeAt,talentSupreme,petTalents,talentState,talentIds,supremeReady,addSeals,openCellCost,openTalentCell,learnCost,rollTalent,keepTalent,learnTalent,lockTalent,forgetTalent,setTalentTarget,buyTalentScroll,buyTalentBook,sealRates,sealGold,buySeals,exchangeSpares,talentBonus,guardTalents,petGearPieces,petGearMax,petGearStep,petGearSetStep,petGearLevels,petGearTier,petGearCost,petGearBonus,upgradePetGear,petBolt,petBoltPace,petHit,petPace,assistPages,assistSlots,synthChain,synthNeed,petSpares,addPetSpare,synthesizePet,fashionTraits,companionTypes,companionSkins,companionSkin,ownsCompanionSkin,useCompanionSkin,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
+// ---- Supreme Sets and the Fashion Elite Sale ------------------------------------------------------------------------
+// (user photos 2026-11-22). A set has five pieces: outfit (a dress), hair accessory (a hairstyle), weapon (a bow), chat
+// bubble and avatar frame. Owning a piece activates its stats for good (worn or not); five pieces add the set bonus;
+// every extra copy of a piece adds a star to the set (up to 10, +5% of the set's piece stats each). Pieces are sold in
+// the Fashion Elite Sale for prisms (the reference sells them for money; this prototype has in-game currency only):
+// one set rotates every four days, each pack has a purchase limit per rotation. Buying a piece also unlocks the dress,
+// hairstyle or bow in the wardrobe. Optional save field `supreme` {own{"set:piece":copies}, bubble, frame,
+// sale{period, bought{piece:n}}}. All numbers are placeholders.
+const supremePieces=[{id:'outfit',name:'Outfit',pack:'Outfit Pack',tab:0,limit:3},{id:'hair',name:'Hair Accessory',pack:'Hair Accessory Pack',tab:0,limit:3},
+ {id:'weapon',name:'Weapon',pack:'Weapon Pack',tab:1,limit:3},{id:'bubble',name:'Chat Bubble',pack:'Chat Bubble Pack',tab:2,limit:5},{id:'frame',name:'Avatar Frame',pack:'Avatar Pack',tab:2,limit:5}];
+const supremeSets=[
+ {id:'ember',name:'Ember Charm',title:'Flame Herald',dress:'rosethorn',hair:20,bow:15,hue:'#e0503a'},
+ {id:'frost',name:'Frost Crown',title:'Snow Regent',dress:'frostqueen',hair:17,bow:19,hue:'#6fb8ff'},
+ {id:'jade',name:'Jade Phoenix',title:'Jade Sovereign',dress:'jade',hair:16,bow:23,hue:'#3fbf7a'},
+ {id:'star',name:'Starlit Night',title:'Star Seer',dress:'starlit',hair:18,bow:21,hue:'#9a6ae0'}];
+const supremeStats={outfit:{attack:15,health:600,defense:15,healthPercent:.2},hair:{attack:30,defense:15,penetration:15,defensePercent:.4},
+ weapon:{attack:30,health:300,penetration:15,attackPercent:.2},bubble:{attack:30,defense:15,penetration:15,defensePercent:.4},frame:{attack:30,defense:15,penetration:15,defensePercent:.4}};
+const supremeRules={setBonus:{attack:20},starStep:.05,maxStars:10,price:300,oldPrice:900,gold:680,saleStart:Date.UTC(2026,10,14),saleDays:4};
+const supremeById=Object.fromEntries(supremeSets.map(x=>[x.id,x])),supremePieceIds=supremePieces.map(p=>p.id);
+function supremeSale(now=Date.now()){
+ const r=supremeRules,len=r.saleDays*864e5,period=Math.floor((now-r.saleStart)/len);
+ return {period,set:supremeSets[((period%supremeSets.length)+supremeSets.length)%supremeSets.length],end:r.saleStart+(period+1)*len};
+}
+function supremeState(s,now=Date.now()){
+ const v=s.supreme||{},sale=supremeSale(now),same=v.sale?.period===sale.period;
+ return {own:{...v.own},bubble:v.bubble||'',frame:v.frame||'',sale:{period:sale.period,bought:same?{...v.sale.bought}:{}}};
+}
+function supremePack(s,v){const out={own:v.own,sale:v.sale};if(v.bubble)out.bubble=v.bubble;if(v.frame)out.frame=v.frame;s.supreme=out}
+const supremeCopies=(s,setId,piece)=>(s.supreme?.own||{})[setId+':'+piece]||0;
+const supremeCount=(s,setId)=>supremePieceIds.filter(p=>supremeCopies(s,setId,p)>0).length;
+const supremeStars=(s,setId)=>Math.min(supremeRules.maxStars,supremePieceIds.reduce((n,p)=>n+Math.max(0,supremeCopies(s,setId,p)-1),0));
+function supremePieceStats(setId,piece,stars=0){const out={};for(const [k,n] of Object.entries(supremeStats[piece]||{}))out[k]=Math.round(n*(1+stars*supremeRules.starStep)*100)/100;return out}
+function supremeBonus(s){
+ const out={},add=o=>{for(const [k,n] of Object.entries(o))out[k]=Math.round(((out[k]||0)+n)*100)/100};
+ if(!s.supreme)return out;
+ for(const set of supremeSets){const stars=supremeStars(s,set.id);let n=0;
+  for(const p of supremePieceIds)if(supremeCopies(s,set.id,p)>0){n++;add(supremePieceStats(set.id,p,stars))}
+  if(n===supremePieceIds.length)add(supremeRules.setBonus)}
+ return out;
+}
+// Buying a pack: one copy of the piece and some gold. The first copy also unlocks the wardrobe item.
+function supremeBuy(s,piece,now=Date.now()){
+ const v=supremeState(s,now),sale=supremeSale(now),p=supremePieces.find(x=>x.id===piece),r=supremeRules;
+ if(!p||(v.sale.bought[piece]||0)>=p.limit||(s.scales||0)<r.price)return null;
+ s.scales-=r.price;s.gold=(s.gold||0)+r.gold;v.sale.bought[piece]=(v.sale.bought[piece]||0)+1;
+ const key=sale.set.id+':'+piece,first=!v.own[key];v.own[key]=(v.own[key]||0)+1;supremePack(s,v);
+ if(first){const set=sale.set;
+  if(piece==='outfit'){s.costumes??={};s.costumes.owned??=[];if(!s.costumes.owned.includes(set.dress))s.costumes.owned.push(set.dress)}
+  if(piece==='hair'||piece==='weapon'){s.atelier??={owned:[]};s.atelier.owned??=[];const id=piece+(piece==='hair'?set.hair:set.bow);if(!s.atelier.owned.includes(id))s.atelier.owned.push(id)}
+  if(piece==='bubble'&&!v.bubble||piece==='frame'&&!v.frame){v[piece]=set.id;supremePack(s,v)}}
+ return {set:sale.set,piece,first,copies:v.own[key],gold:r.gold};
+}
+function supremeWear(s,kind,setId){if(!['bubble','frame'].includes(kind))return false;const v=supremeState(s);if(setId&&!supremeCopies(s,setId,kind))return false;v[kind]=setId||'';supremePack(s,v);return true}
+function validSupreme(v){
+ if(v===undefined)return true;const int=n=>Number.isInteger(n)&&n>=0&&n<=999;
+ return !!v&&typeof v==='object'&&!Array.isArray(v)&&!!v.own&&typeof v.own==='object'&&Object.entries(v.own).every(([k,n])=>{const [a,b]=k.split(':');return Object.hasOwn(supremeById,a)&&supremePieceIds.includes(b)&&int(n)})
+  &&(v.bubble===undefined||Object.hasOwn(supremeById,v.bubble)&&(v.own[v.bubble+':bubble']||0)>0)&&(v.frame===undefined||Object.hasOwn(supremeById,v.frame)&&(v.own[v.frame+':frame']||0)>0)
+  &&!!v.sale&&Number.isInteger(v.sale.period)&&!!v.sale.bought&&Object.entries(v.sale.bought).every(([k,n])=>{const p=supremePieces.find(x=>x.id===k);return p&&int(n)&&n<=p.limit});
+}
+return Object.freeze({supremePieceIds,supremePieces,supremeSets,supremeStats,supremeRules,supremeById,supremeSale,supremeState,supremeCopies,supremeCount,supremeStars,supremePieceStats,supremeBonus,supremeBuy,supremeWear,validSupreme,talentOdds,talentNums,duelBoost,duelRules,duelPart,duelRanks,duelSeason,duelAi,duelField,duelState,duelQualRank,duelSim,duelInspire,duelAuto,duelQualFight,duelGroup,duelGroupFight,duelPeak,duelPeakFight,duelBet,duelGuess,duelPlace,duelSettle,validDuel,guildRules,guildUpFund,guildSignBoxes,guildAcademy,guildList,guildRivals,guildCrests,guildRoles,guildShop,guildBossRank,guildLevel,guildCap,guildState,guildJoin,guildCreate,guildLeave,guildUpgrade,guildNote,guildSpeaker,guildSign,guildDonate,guildFolkPower,guildPower,guildRanking,guildActivity,guildBoxClaim,guildEnvelopes,guildEnvClaim,guildEnvSend,guildBeastTier,guildBossHp,guildReserve,guildBoss,guildHit,guildBossClaim,guildBuy,guildAcademyCost,guildAcademyCap,guildLearn,guildBonus,validGuild,socialNote,chatBlockX,squadOf,socialFolk,socialRules,socialById,chatChannels,socialState,heartsOf,socialTick,sendFlower,giftAll,friendAnswer,friendAdd,friendBlock,mailClaim,mailDelete,mailRead,chatFeed,chatSay,chatLiveLeft,chatLiveSet,validSocial,cloudOwnReward,cloudOwnTake,cloudRules,cloudPointRewards,cloudShop,cloudRound,cloudRoundEnds,cloudState,cloudNewRound,cloudGain,cloudClaim,buyCloud,validCloud,warFactions,warTotems,warRules,warQuests,warRanks,contestShop,contestState,warNew,warHeld,warHero,warOrder,warTally,warStep,warStanding,warRankPrize,warQuestsDue,warStart,warSettle,buyContest,validContest,summonWells,summonPity,summonLevelMax,summonDupGold,markKinds,markPrice,markLimit,markNeed,galaQuests,galaMilestones,galaEnds,summonState,summonLevel,summonPay,summonDraw,markOffer,buyMarkPet,galaClaim,galaReward,validSummon,bossRare,gearRanks,gearRank,gearCraftFrom,gearNoDevour,bossDropRanks,craftRecipe,craftInputs,craftChance,craftGear,gearGroups,gearGroup,bagCapacity,bagStarter,bagRarity,bagItems,bagItemById,bagCount,bagAdd,bagStacks,bagUsed,vaultCount,vaultMove,useBagItem,devourStep,devourMax,devourNeed,devourWorth,devourState,devourBonus,devourable,devourGear,validBag,riposteShare,riposteEvery,talentCells,talentFree,talentLearn,talentBook,talentScroll,talentTopScroll,talentPrice,talentSupremeAt,talentSupreme,petTalents,talentState,talentIds,supremeReady,addSeals,openCellCost,openTalentCell,learnCost,rollTalent,keepTalent,learnTalent,lockTalent,forgetTalent,setTalentTarget,buyTalentScroll,buyTalentBook,sealRates,sealGold,buySeals,exchangeSpares,talentBonus,guardTalents,petGearPieces,petGearMax,petGearStep,petGearSetStep,petGearLevels,petGearTier,petGearCost,petGearBonus,upgradePetGear,petBolt,petBoltPace,petHit,petPace,assistPages,assistSlots,synthChain,synthNeed,petSpares,addPetSpare,synthesizePet,fashionTraits,companionTypes,companionSkins,companionSkin,ownsCompanionSkin,useCompanionSkin,companionState,companionPoints,improveCompanion,petTeam,petTeamAttack,badgeRank,familiars,emberCost,evolveEmber,petLevel,petAttack,petCap,validPets,trainPet,slots,tiers,stonePrice,buyStone,maxTier,requiredLevel,unlockedTier,artTier,catalog,labels,percentKeys,materialDefs,fresh,valid,repairLoadout,equipBasicSet,state,detail,bonuses,stats,cost,equipped,perform,salvage,addDrop,grant,tierGuardians,encounters,bossGearTier,bossGearLabel,bossLoot,bossLootTables});
 })();

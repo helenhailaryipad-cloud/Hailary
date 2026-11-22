@@ -991,3 +991,21 @@ vm.runInContext(`
 }
 `,context);
 console.log('PASS: Third talent shelf: thirteen talents, stun, poison, crit, duel boost, guard counts.');
+
+vm.runInContext(`
+{const r=WonderGear,R=r.supremeRules,T=R.saleStart+864e5,sale=r.supremeSale(T),set=sale.set;
+ S=defaults();const atk0=stats().attack;if(r.supremeBuy(S,'outfit',T))throw Error('No prisms, no purchase');
+ S.scales=10000;const g0=S.gold,got=r.supremeBuy(S,'outfit',T);
+ if(!got||!got.first||S.scales!==10000-R.price||S.gold!==g0+R.gold||!S.costumes.owned.includes(set.dress)||stats().attack<=atk0||!valid(S))throw Error('Buy outfit: activated, in the wardrobe, stats');
+ r.supremeBuy(S,'outfit',T);r.supremeBuy(S,'outfit',T);if(r.supremeBuy(S,'outfit',T)||r.supremeStars(S,set.id)!==2)throw Error('Limit per sale, spare copies are stars');
+ if(!r.supremeBuy(S,'outfit',T+R.saleDays*864e5)&&r.supremeSale(T+R.saleDays*864e5).set.id===set.id)throw Error('Limit resets next sale');
+ for(const p of ['hair','weapon','bubble','frame'])r.supremeBuy(S,p,T);
+ if(r.supremeCount(S,set.id)!==5||!S.atelier.owned.includes('hair'+set.hair)||!S.atelier.owned.includes('weapon'+set.bow)||S.supreme.bubble!==set.id||S.supreme.frame!==set.id)throw Error('Full set, extras worn');
+ if((r.supremeBonus(S).attack||0)<R.setBonus.attack+15+30*4)throw Error('Set bonus');
+ if(r.supremeWear(S,'bubble','star')||!r.supremeWear(S,'bubble','')||S.supreme.bubble)throw Error('Wear only owned bubbles');
+ for(const bad of [{own:{'x:outfit':1}},{own:{[set.id+':nope']:1}},{bubble:'star'},{sale:{period:0,bought:{outfit:9}}}])if(valid({...S,supreme:{...S.supreme,...bad}}))throw Error('Invalid supreme accepted '+JSON.stringify(bad));
+ go('eliteSale');if(!$('#main').innerHTML.includes('Fashion Elite Sale'))throw Error('Elite Sale screen');
+ go('citySupreme');if(!$('#main').innerHTML.includes('Wear set'))throw Error('Supreme Set screen');
+}
+`,context);
+console.log('PASS: Supreme Sets: Elite Sale purchase for prisms, limits, stars, set bonus, bubble and frame, screens.');

@@ -693,7 +693,8 @@ function chatLine(c){
  if(c.kind==='roll')return `<div class="chat-note roll"><b>${esc(folk(c.from).name)}</b> ${esc(c.text).replace(/(Bonus: )(.*)$/,'$1<u>$2</u>').replace(/rolled (\d+)/,'rolled <i>$1</i>')}</div>`;
  const me=c.from==='me',time=new Date(c.t).toISOString().slice(11,16),f=me?null:folk(c.from);
  const tag=c.srv?`<span class="srv">[S-${c.srv}]</span> `:'',fac=c.fac!==undefined?` <span class="fac" style="color:${cloudFactions[c.fac][3]}">[${cloudFactions[c.fac][0]}]</span>`:'';
- return `<div class="chat-line ${me?'me':''}">${me?'':`<button class="chat-face" aria-label="Mention ${esc(f.name)}" onclick="chatMention('${f.name}')">${denPlain}${folkFace(c.from)}</button>`}<div><b>${me?esc(S.name):tag+esc(f.name)+' <small>AI</small>'+fac}<em>${time}</em></b><p>${chatPending.has(c.t)?'<i class="chat-typing">typing…</i>':esc(c.text)}</p></div></div>`;
+ const bub=me&&S.supreme?.bubble?WonderGear.supremeById[S.supreme.bubble]:null;
+ return `<div class="chat-line ${me?'me':''} ${bub?'bub-'+bub.id:''}" ${bub?'style="--hue:'+bub.hue+'"':''}>${me?'':`<button class="chat-face" aria-label="Mention ${esc(f.name)}" onclick="chatMention('${f.name}')">${denPlain}${folkFace(c.from)}</button>`}<div><b>${me?esc(S.name):tag+esc(f.name)+' <small>AI</small>'+fac}<em>${time}</em></b><p>${chatPending.has(c.t)?'<i class="chat-typing">typing…</i>':esc(c.text)}</p></div></div>`;
 }
 const chatTarget=()=>chatChannel==='Squad'&&chatWith?'p:'+chatWith:chatChannel;
 function chatSheet(room){
@@ -2207,19 +2208,89 @@ function cityCloudWar(){
 
 }
 
-let eliteTab=0,eliteHero='reina';
+let eliteTab=0,eliteHero='reina',supremePick=null;
+// ---- Fashion Elite Sale and Supreme Set (rules: WonderGear.supreme*) ------------------------------------------------
+const supSet=id=>WonderGear.supremeById[id];
+// A piece's picture: dress / hair / bow cards come from the wardrobe art; bubble and frame are drawn in CSS.
+function supPieceArt(set,piece,big=false){
+ if(piece==='outfit')return '<img src="'+artPath('fit-icon-'+set.dress)+'" alt="">';
+ if(piece==='hair')return '<img src="'+artPath('fit-icon-hair-'+set.hair)+'" alt="">';
+ if(piece==='weapon')return '<img src="'+artPath('weapon-style-'+set.bow)+'" alt="">';
+ if(piece==='bubble')return '<span class="sup-bubble" style="--hue:'+set.hue+'">'+(big?'Hello!':'')+'</span>';
+ return '<span class="sup-frame" style="--hue:'+set.hue+'">'+(big?'<img src="assets/generated/reina-avatar.webp" alt="">':'')+'</span>';
+}
+function supTile(set,piece,extra=''){const own=WonderGear.supremeCopies(S,set.id,piece);
+ return `<button class="sup-tile ${own?'':'locked'}" style="--hue:${set.hue}" onclick="supremeInfo('${set.id}','${piece}')">${denPlain}${supPieceArt(set,piece)}<b>UR</b>${own?'':'<i class="sup-lock">🔒</i>'}${extra}</button>`}
+// Combat power a piece adds: the difference it makes to stats().power.
+function supremeCp(setId,piece){
+ const r=WonderGear,own={...(S.supreme?.own||{})},key=setId+':'+piece,with_={...own,[key]:Math.max(1,own[key]||0)},without={...own};delete without[key];
+ const sv=S.supreme||{own:{},sale:{period:0,bought:{}}};
+ return Math.max(0,Math.round(r.stats({...S,supreme:{...sv,own:with_}}).power-r.stats({...S,supreme:{...sv,own:without}}).power));
+}
+function supremeStatLines(stats){return Object.entries(stats).map(([k,n])=>'<li>'+(WonderGear.percentKeys.has(k)?'★ Fashion '+(WonderGear.labels[k]||k).replace(' Bonus','')+' +'+n+'%':(WonderGear.labels[k]||k)+' +'+fmt(n))+'</li>').join('')}
+function supremeInfo(setId,piece){
+ const r=WonderGear,set=supSet(setId),p=r.supremePieces.find(x=>x.id===piece),stars=r.supremeStars(S,setId),own=r.supremeCopies(S,setId,piece);
+ const sale=r.supremeSale(),onSale=sale.set.id===setId;
+ popup(`<div class="sup-info"><div class="sup-info-art" style="--hue:${set.hue}">${piece==='outfit'||piece==='hair'?`<img class="sup-figure" src="${registeredLookPath(set.dress,set.hair,0,'','')}" alt="">`:supPieceArt(set,piece,true)}<b class="sup-cp">⚔ ${fmt(supremeCp(setId,piece))}</b></div>
+ <div class="sup-info-head">${supTile(set,piece)}<div><h2>${set.name} (${p.name})</h2><small>Usage Level: <i>Unlimited</i></small><small>Type: <i>Fashion Materials</i></small></div></div>
+ <div class="sup-info-body"><p>${own?'Activated · '+own+(own>1?' copies':' copy'):'Use to activate Fashion Materials'} <b>${set.name} (${p.name})</b><br>Activated CP: <i>+${fmt(supremeCp(setId,piece))}</i></p>
+ <h3>◆ Activation Stats</h3><ul>${supremeStatLines(r.supremePieceStats(setId,piece,stars))}</ul>
+ <h3>◆ ${set.name} (${r.supremeCount(S,setId)}/5)</h3><p class="sup-setline"><span>[5 Pieces]</span> ${Object.entries(r.supremeRules.setBonus).map(([k,n])=>(r.labels[k]||k)+' +'+n).join(', ')}</p>
+ <p class="sup-where">${own?'':onSale?'On sale now in the Fashion Elite Sale.':'Comes back in a later Fashion Elite Sale.'}</p></div></div>`);
+}
+function eliteBuy(piece){
+ const r=WonderGear,got=r.supremeBuy(S,piece);
+ if(!got){toast((S.scales||0)<r.supremeRules.price?'Not enough prisms.':'Sold out for this sale.');return}
+ save();eliteStore();bagArtVars();
+ popup(`<h2>You received</h2><div class="bag-gains"><span class="bag-gain" style="--rarity:${got.set.hue}">${supPieceArt(got.set,piece)}<b>×1</b><small>${got.set.name} (${r.supremePieces.find(x=>x.id===piece).name})</small></span><span class="bag-gain" style="--rarity:#ffcf5a">${uiIcon('gold')}<b>+${got.gold}</b><small>Gold</small></span></div><p>${got.first?'Activated! The piece now strengthens Reina'+(piece==='outfit'||piece==='hair'||piece==='weapon'?' and is in your wardrobe.':'.'):'A spare copy: the set gains a star.'}</p>`);
+}
 function eliteStore(){
- const sale=activeFashionSale(),set=partyWardrobe[sale.hero];
- const tabs=['Outfit Pack','Weapon Pack','Chat Bubble Pack'];
- const names=[['Outfit Pack','Hair Accessory Pack'],['Weapon Pack'],['Chat Bubble Pack','Avatar Pack']][eliteTab];
- const hero=dressedHero(eliteHero,set.id,set.outfit);
- const previews=[[hero,'<div class="elite-hair">'+hero+'</div>'],[artImage('gear-bow-t'+sale.tier,set.outfit+' bow')],['<span class="elite-bubble">Hello!</span>','<span class="elite-frame">'+artImage('reina-avatar','Avatar frame')+'</span>']][eliteTab];
- const select='<label>Try on <select onchange="eliteHero=this.value;eliteStore()">'+[['reina','Reina'],...Object.entries(partyWardrobe).map(([id,v])=>[id,v.label])].map(([id,name])=>'<option value="'+id+'" '+(eliteHero===id?'selected':'')+'>'+name+'</option>').join('')+'</select></label>';
- const cards=names.map((name,i)=>{
-  const action=name==='Outfit Pack'?'<button onclick="wardrobe(eliteHero,partyWardrobe[activeFashionSale().hero].id)">Try on · All classes</button>':name==='Weapon Pack'?'<button onclick="fashionSale()">Bow upgrades</button>':'';
-  return '<article><div class="elite-art">'+previews[i]+'</div><div class="elite-price"><h3>'+name+'</h3><p>'+artImage('crystal','Crystals')+'680</p><del>€31.99</del><strong>€10.99 · Preview</strong>'+action+'</div></article>';
- }).join('');
- $('#main').innerHTML='<section class="elite-store"><header><small>'+set.outfit+' Collection</small><h1>Fashion Elite Sale</h1><span>Rotation ends '+new Date(sale.end).toISOString().slice(0,10)+' UTC</span>'+(eliteTab===0?select:'')+'</header><div class="elite-cards">'+cards+'</div><nav><button data-back aria-label="Back to city" onclick="go(\'home\')">‹</button>'+tabs.map((t,i)=>'<button aria-pressed="'+(i===eliteTab)+'" onclick="eliteTab='+i+';eliteStore()">'+t+'</button>').join('')+'</nav></section>';
+ const r=WonderGear,R=r.supremeRules,sale=r.supremeSale(),set=sale.set,v=r.supremeState(S);
+ const left=Math.max(0,sale.end-Date.now()),d=Math.floor(left/864e5),h=Math.floor(left%864e5/36e5),m=Math.floor(left%36e5/6e4);
+ const packs=r.supremePieces.filter(p=>p.tab===eliteTab);
+ const figure=piece=>piece==='weapon'?`<div class="el-bow"><img src="${artPath('weapon-style-'+set.bow)}" alt="${set.name} bow"></div>`
+  :piece==='bubble'||piece==='frame'?`<div class="el-deco">${supPieceArt(set,piece,true)}</div>`:`<img class="el-fig" src="${registeredLookPath(set.dress,set.hair,piece==='hair'?0:set.bow,'','')}" alt="${set.name}">`;
+ const card=p=>{const bought=v.sale.bought[p.id]||0,out=bought>=p.limit;
+  return `<div class="el-col">${figure(p.id)}<div class="el-tag"><b>${p.limit-bought}</b><span>Limited-time<br>${p.limit-bought} left</span></div><div class="el-cp">⚔ ${fmt(supremeCp(set.id,p.id))}</div>
+  <div class="el-card"><h3>${p.pack}</h3><div class="el-items">${supTile(set,p.id,'<em>1</em>')}<span class="sup-tile gold">${denPlain}${uiIcon('gold')}<em>${R.gold}</em></span></div>
+  <p class="el-old">Original price: <s>${fmt(R.oldPrice)} prisms</s></p><button class="den-gold el-buy" ${out?'disabled':''} onclick="eliteBuy('${p.id}')">${denPlain}${out?'Sold out':uiIcon('crystals')+' '+R.price}</button></div></div>`};
+ $('#main').innerHTML=`<section class="elite-sale el-t${eliteTab}">
+  <div class="el-top">${sumChip(uiIcon('gold'),S.gold,'Gold')}${sumChip(uiIcon('crystals'),S.scales||0,'Prisms')}</div>
+  <h1 class="el-title">Fashion Elite Sale</h1><p class="el-time">${set.name} · Remaining Time for Direct Purchase: <b>${d}d ${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m</b></p>
+  <div class="el-cols n${packs.length}">${packs.map(card).join('')}</div>
+  <div class="satchel-nav well-nav el-nav"><button data-back aria-label="Back to city" onclick="go('home')">‹</button>${['Outfit Pack','Weapon Pack','Chat Bubble Pack'].map((t,i)=>`<button ${i===eliteTab?'aria-current="page"':''} onclick="eliteTab=${i};eliteStore()">${denPlain}${t}</button>`).join('')}<button onclick="supremePick='${set.id}';go('citySupreme')">${denPlain}Supreme Set</button></div></section>`;
+}
+function supremeWearSet(setId){
+ const r=WonderGear,set=supSet(setId),has=p=>r.supremeCopies(S,setId,p)>0;let worn=0;
+ if(has('outfit')&&ownsOutfit(set.dress)){wearOutfit('reina',set.dress,false);worn++}
+ S.atelier??={owned:[]};const legacy=S.reinaFashion??={equipped:0,owned:0};
+ if(has('hair')){S.atelier.hair=set.hair;legacy.equipped&=~1;S.reinaLayers={...registeredLook(),hair:fittedHairId(set.hair)};worn++}
+ if(has('weapon')){S.atelier.weapon=set.bow;legacy.equipped&=~4;worn++}
+ for(const k of ['bubble','frame'])if(has(k)){r.supremeWear(S,k,setId);worn++}
+ if(!worn){toast('Get a piece of this set first.');return}
+ save();citySupreme();toast(set.name+': '+worn+' piece'+(worn>1?'s':'')+' worn.');
+}
+function supremeStarsPop(setId){const r=WonderGear,set=supSet(setId),st=r.supremeStars(S,setId);
+ popup(`<h2>Activate Stat · ${set.name}</h2><p>Every spare copy of a piece adds a star to the set (up to ${r.supremeRules.maxStars}). Each star raises the stats of the set's pieces by ${r.supremeRules.starStep*100}%.</p><p class="sup-stars">${'★'.repeat(st)}<span>${'★'.repeat(r.supremeRules.maxStars-st)}</span></p><div class="gld-board">${r.supremePieces.map(p=>`<div><b>${r.supremeCopies(S,setId,p.id)}</b><span>${p.name}</span><em>${r.supremeCopies(S,setId,p.id)>1?'+'+(r.supremeCopies(S,setId,p.id)-1)+'★':''}</em></div>`).join('')}</div>`)}
+function supremeFullPop(setId){const r=WonderGear,set=supSet(setId),st=r.supremeStars(S,setId);
+ popup(`<h2>Full Set Preview · ${set.name}</h2><div class="sup-full">${r.supremePieces.map(p=>`<div>${supTile(set,p.id)}<div><b>${p.name}</b><ul>${supremeStatLines(r.supremePieceStats(setId,p.id,st))}</ul></div></div>`).join('')}</div><p class="sup-setline"><span>[5 Pieces]</span> ATK +${r.supremeRules.setBonus.attack}</p>`)}
+function citySupreme(){
+ const r=WonderGear,sale=r.supremeSale();if(!supremePick||!supSet(supremePick))supremePick=sale.set.id;
+ const set=supSet(supremePick),stars=r.supremeStars(S,set.id),n=r.supremeCount(S,set.id);
+ const total={};for(const p of r.supremePieceIds)if(r.supremeCopies(S,set.id,p))for(const [k,x] of Object.entries(r.supremePieceStats(set.id,p,stars)))total[k]=Math.round(((total[k]||0)+x)*100)/100;
+ if(n===5)for(const [k,x] of Object.entries(r.supremeRules.setBonus))total[k]=(total[k]||0)+x;
+ const cp=r.supremePieceIds.reduce((a,p)=>a+(r.supremeCopies(S,set.id,p)?supremeCp(set.id,p):0),0);
+ const rows=['defense','penetration','health','attack'].map(k=>`<div><span>${r.labels[k]==='Armor Piercing'?'ARP':r.labels[k]}</span><b>${fmt(total[k]||0)}</b></div>`).join('')+Object.entries(total).filter(([k])=>r.percentKeys.has(k)).map(([k,x])=>`<div><span>Fashion ${(r.labels[k]||k).replace(' Bonus','')}</span><b>${x}%</b></div>`).join('');
+ $('#main').innerHTML=`<section class="sup-room" style="--hue:${set.hue}">
+  <div class="sup-top"><strong>Supreme Set</strong>${sumChip(uiIcon('gold'),S.gold,'Gold')}${sumChip(uiIcon('crystals'),S.scales||0,'Prisms')}</div>
+  <h1>${set.name}</h1><p class="sup-stars">${'★'.repeat(stars)}<span>${'★'.repeat(r.supremeRules.maxStars-stars)}</span></p>
+  <div class="sup-stage"><div class="sup-side">${['outfit','hair','bubble'].map(p=>supTile(set,p)).join('')}</div>
+   <div class="sup-center"><img class="${n?'':'shade'}" src="${registeredLookPath(set.dress,set.hair,set.bow,'','')}" alt="${set.name}"><span class="sup-ribbon">${set.title}</span><b class="sup-cp">⚔ ${fmt(cp)}</b></div>
+   <div class="sup-side">${['weapon','frame'].map(p=>supTile(set,p)).join('')}</div>
+   <button class="sup-round l" onclick="supremeFullPop('${set.id}')">${denPlain}✦<small>Full Set Preview</small></button><button class="sup-round r" onclick="supremeStarsPop('${set.id}')">${denPlain}✧<small>Activate Stat</small></button></div>
+  <div class="sup-stats"><div class="sup-rows">${rows}</div><button class="den-gold sup-wear" onclick="supremeWearSet('${set.id}')">${denPlain}Wear set</button></div>
+  <div class="sup-sets">${r.supremeSets.map(x=>`<button class="${x.id===set.id?'on':''} ${r.supremeCount(S,x.id)?'':'none'}" style="--hue:${x.hue}" onclick="supremePick='${x.id}';citySupreme()">${denPlain}<img src="${artPath('fit-icon-'+x.dress)}" alt=""><b>${x.name}</b><small>${r.supremeCount(S,x.id)}/5${x.id===sale.set.id?' · on sale':''}</small></button>`).join('')}</div>
+  <div class="satchel-nav well-nav sup-nav"><button data-back aria-label="Back to Fashion" onclick="go('fashion')">‹</button><button onclick="go('fashion')">${denPlain}Wardrobe</button><button onclick="go('eliteSale')">${denPlain}Elite Sale</button><button aria-current="page">${denPlain}Supreme Set</button></div></section>`;
 }
 
 const isleGuilds=['Dawnwing','Moonveil','Embercrest'];

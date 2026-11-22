@@ -469,6 +469,24 @@ placeholders), optional save field `S.duel` (`validDuel`), read through `duelSta
 - Pop-ups: Match Description (three tabs, schedule + intro), Inspiration, Qualification Rankings, Ranking Rewards,
   player pick (bet / guess), the fight window (`duelShow`). No new art: background `comp-war-field`, icons `warIcon`.
 
+## Fashion Elite Sale and Supreme Sets (2026-11-22)
+User sent twelve photos (Fashion Elite Sale with Outfit / Weapon / Chat Bubble packs, item cards with Activation
+Stats and a 5-piece set bonus, Fashion -> Supreme Set). Rules in `gear-data.js` (`supreme*`, placeholders), optional save
+field `S.supreme {own{"set:piece":copies}, bubble, frame, sale{period,bought}}`.
+- Four sets (`supremeSets`: Ember Charm, Frost Crown, Jade Phoenix, Starlit Night), each = an existing dress, hairstyle
+  and bow plus a chat bubble and an avatar frame drawn in CSS (no new pictures). Owning a piece activates its stats
+  for good (`supremeStats`, `supremeBonus` in `stats()`); five pieces add `setBonus`; every spare copy is a set star
+  (max 10, +5% each, `supremeStars`).
+- Elite Sale (screen `eliteSale`, `eliteStore()` rewritten): one set every four UTC days (`supremeSale`), tabs Outfit
+  Pack (outfit + hair accessory), Weapon Pack, Chat Bubble Pack (bubble + avatar frame). A pack = the piece + 680 gold
+  for 300 prisms (real money is never used; struck "original" 900), limit 3 or 5 per sale (`supremeBuy`). The first
+  copy also unlocks the dress / hair / bow in the wardrobe. Tapping a piece opens the item card (`supremeInfo`).
+- Supreme Set (screen `citySupreme`, from Fashion's "Supreme Set" button and the sale): five piece tiles around the
+  figure, stars, title ribbon, CP, stat table, Wear set (`supremeWearSet`: dress, hair, bow, bubble, frame that she
+  owns), Full Set Preview and Activate Stat pop-ups, set strip. The worn bubble frames her chat lines; the worn frame
+  rings the avatar in `#profileReadout`.
+- Not done: Relic tab, Apparel Records, fashion Tier-up, male sets.
+
 ## Cloud War second pass (2026-11-21)
 User sent two photos of the reference's cloud war (territory map with owners and "Boss: N", round timer, Killing
 Points 390/1200, Cloud Shop / Faction Battle Status / Point Rewards / Rankings / Description; the territory hall
