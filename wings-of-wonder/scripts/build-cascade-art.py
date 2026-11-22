@@ -44,4 +44,7 @@ save(atlas, 'cascade-chests')
 
 save(Image.open(SRC/'cover.webp').convert('RGB').resize((720, 1080), Image.Resampling.LANCZOS), 'cascade-cover', 82)
 # Jungle Trek mini-game cover (art-source/trek/cover.webp) is built the same way.
-jt = Image.open("scripts/art-source/trek/cover.webp").convert("RGB").resize((960, 640), Image.Resampling.LANCZOS); save(jt, "cover-jungle", 80)
+jt = Image.open("scripts/art-source/trek/cover.webp").convert("RGB").resize((960, 640), Image.Resampling.LANCZOS); save(jt, "cover-jungle", 82)
+
+# Fishing mini-game cover (art-source/fishing/cover.webp).
+fc = Image.open("scripts/art-source/fishing/cover.webp").convert("RGB").resize((960, 640), Image.Resampling.LANCZOS); save(fc, "cover-fishing", 80)

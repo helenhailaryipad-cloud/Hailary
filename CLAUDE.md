@@ -112,7 +112,13 @@ global `#main button` rules set position, borders and `::before`.
   (`drawMergeFx`), an elastic pop of the new egg (`b.pop`) with a glow, a bouncing gold "+points" / "CHAIN ×n" label and
   a small shake (`g.shake`). The global Menu pill is hidden on gameShell games (they have "Mini Games"), it covered
   the title.
-- Jungle Trek cover was redone cleaner on request (fewer details, Reina fully clothed in tunic and trousers).
+- Covers (user: "you drew a character from someone else's game - never draw characters from other games"; covers must
+  not be over-processed): Jungle Trek cover = OUR Reina (image-model edit with `art-source/leaflight/master.png` as the
+  reference: lavender braid, green-gold dress over green leggings, blue-gold bow), a dragon and barrels; Crystal
+  Cascade cover redone cleaner; Fishing card has its own cover with a leaping fish (`cover-fishing`). Sources in
+  `art-source/{trek,cascade,fishing}/cover.webp`, built by `build-cascade-art.py`. For any picture with a hero, always
+  give the image model Reina's own art as reference and never describe a known character from another game.
+  Helper for edits with reference images: `/tmp/claude-0/pairs/edit.py` (session scratch, not in repo).
 - Mini Games list is a compact 2-column grid (overrides at the end of `stage.css`); Jungle Trek has a new cover with
   the dragon (`cover-jungle`, source `art-source/trek/cover.webp`). Hosted bundle: AVIF copies of crownfall-vale,
   cloud-war-twin-islands and cloud-war-realms-2 were re-saved at quality 34 (headroom ~180 KB).
