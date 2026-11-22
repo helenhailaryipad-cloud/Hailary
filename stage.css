@@ -8296,3 +8296,22 @@ body[data-screen=fashion]:not([data-playing]) #stage>#main{inset:0!important;wid
 .fx-pick{grid-template-areas:"t n" "t s" "b b" "c c"!important}#stage #main .fx-pick .fx-btn.alt{grid-area:c;justify-self:stretch}
 #stage #modal.den-pop .fx-rec>div{grid-template-columns:1fr auto}
 .fx-deco .sup-bubble,.fx-bigdeco .sup-bubble{background:#1b1830!important;color:#fff!important;border-radius:.4em!important;padding:.3em .9em!important}.fx-room .den-x{display:none!important}
+/* Painted avatar frames (2026-11-22) */
+.sup-frame.pf{position:relative;display:inline-block;width:72%;aspect-ratio:1;border:0!important;border-radius:0!important;box-shadow:none!important;overflow:visible!important;background:none!important}
+.sup-frame.pf>img{position:absolute;inset:17%;width:66%!important;height:66%!important;border-radius:50%;object-fit:cover}
+.sup-frame.pf>.pf-ring{position:absolute;inset:0;background-image:var(--avf);background-size:400% 200%;background-repeat:no-repeat;font-style:normal;filter:drop-shadow(0 2px 4px #0007)}
+.fx-art.fx-deco .sup-frame.pf,.fx-ptile.fx-deco .sup-frame.pf{width:92%}
+.fx-bigdeco .sup-frame.pf{width:52cqw}
+.sup-info-art .sup-frame.pf{width:170px}
+.el-deco .sup-frame.pf{width:40cqw}
+.sup-bigdeco .sup-frame.pf{width:44cqw}
+.profile-face.framed{position:relative;overflow:visible!important}
+.profile-face .pf-head{position:absolute;left:50%;top:50%;width:150%!important;transform:translate(-50%,-50%);pointer-events:none;z-index:2}
+.profile-face.framed>img{outline:0!important;box-shadow:none!important}
+.city-status{overflow:visible}
+.city-status .pf-city{position:absolute;left:0;top:50%;height:150%;width:auto!important;aspect-ratio:1;transform:translate(-17%,-50%);pointer-events:none;z-index:2}
+.city-status .pf-city>.pf-ring{border:0}
+.city-status .pf-city img,.city-status .pf-city i{border:0!important}
+.fx-bigdeco .sup-frame.pf{width:44cqw}
+.fx-stage .fashion-stage:has(.fx-bigdeco) h2{top:-.5cqh}
+.fx-bigdeco{padding-top:3cqh;box-sizing:border-box}
