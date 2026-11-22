@@ -312,6 +312,10 @@ of d0-d3 say what the paintings show (Grove Dragonling, Ember Drake, Moon Dragon
   (-8% power-strike damage, `petBulwark`), Unshaken (Crit RES +2.5%), Thorn Echo (20% to strike back for 10% ATK, in
   `petCounter`). Odds and numbers in `talentOdds`, `talentNums`. Icons: `art-source/pets/shelf3.webp` (4x4 sheet, 13
   used), atlas `comp-pet-talents` is 4 x 10. `build-hosting-avif.py` now uses quality 40 (bundle headroom ~62 KB).
+- Talent colours (user: "red are strong, the other colour weak"): badge colour now shows STRENGTH, not kind. All
+  common talents are green enamel, the Top talents red: `build-pet-talents.py` recolours each tile's enamel by hue
+  (`enamel()`, tiers read from `petTalents` in `gear-data.js`). The kind is a corner chip like the reference
+  (`talentIcon` adds `.tal-atk` orange sword / `.tal-def` green shield, CSS at the end of `stage.css`).
 
 ## Back buttons (2026-11-20)
 User circled a tiny "‹" in a corner: "check all back buttons everywhere, draw them clearer, not so small, with a special
