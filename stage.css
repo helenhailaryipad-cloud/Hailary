@@ -8206,3 +8206,18 @@ html,body,#stage,#stage button{touch-action:manipulation}
 .sup-ribbon{background:linear-gradient(90deg,#8a1a1e,var(--hue),#8a1a1e)!important;border:1px solid #ffe9a0}
 .sup-center img.shade{filter:drop-shadow(0 8px 10px #0008)!important}
 .sup-sets button.none img{filter:none!important}
+/* Supreme Set: per-piece view (tap a piece) */
+.sup-tile.sel{outline:3px solid #ffe27a;outline-offset:2px;box-shadow:0 0 14px #ffe27a!important}
+.sup-pstars{color:#ffd84a;letter-spacing:.06em}.sup-pstars i{font-style:normal;color:#ffffff40}
+.sup-stats.piece{grid-template-columns:1fr auto!important}
+.sup-stats.piece .sup-rows>div{display:flex;justify-content:space-between;gap:2cqw}
+.sup-stats.piece .up{color:#7dff8a;font-weight:800}
+.sup-pside{display:grid;justify-items:center;gap:.8cqh}
+#stage #main .sup-room .sup-pside .den-gold{padding:.5em 1.2em;font-size:3.2cqw}
+#stage #main .sup-room .sup-more{min-height:0;padding:.2em .8em;border:0;border-radius:1em;background:#ffffff1f;color:#dfe8ff;font:700 2.6cqw/1.2 Arial,sans-serif}
+.sup-center.piece img{height:80%}
+.sup-head.big{width:min(46cqw,30cqh);height:min(46cqw,30cqh)}
+.sup-head.big img{width:250%!important}
+.sup-bigbow{height:70%!important;transform:rotate(24deg);filter:drop-shadow(0 0 16px #ffd36b)!important}
+.sup-bigdeco .sup-frame{width:32cqw}.sup-bigdeco .sup-bubble{font-size:6cqw}
+.sup-center.piece{overflow:hidden}#stage #main .sup-room .sup-bigbow{height:auto!important;max-height:78%!important;max-width:60%!important;object-fit:contain}
