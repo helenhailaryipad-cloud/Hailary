@@ -147,6 +147,32 @@ function openPairsBoard() {
   </section>`;
   startPairs();
 }
+// Effects: an energy bolt runs along the joining line, then both tiles burst into light and sparks.
+const PAIRS_SVG = 'http://www.w3.org/2000/svg';
+function pairsEnergy(svg, pts) {
+  const g = document.createElementNS(PAIRS_SVG, 'g'), d = 'M' + pts.map(p => p.join(',')).join(' L');
+  g.setAttribute('class', 'pairs-energy');
+  for (const cls of ['glow', 'core']) { const l = document.createElementNS(PAIRS_SVG, 'path'); l.setAttribute('d', d); l.setAttribute('pathLength', '1'); l.setAttribute('class', cls); g.append(l); }
+  const orb = document.createElementNS(PAIRS_SVG, 'circle'); orb.setAttribute('r', '.2'); orb.setAttribute('class', 'orb');
+  const move = document.createElementNS(PAIRS_SVG, 'animateMotion'); move.setAttribute('dur', '.18s'); move.setAttribute('fill', 'freeze'); move.setAttribute('begin', 'indefinite'); move.setAttribute('path', d);
+  orb.append(move); g.append(orb); svg.append(g); try { move.beginElement(); } catch { }
+  return g;
+}
+function pairsBurst(board, tile, b) {
+  const x = (+getComputedStyle(tile).getPropertyValue('--x') + .9) / (b.cols + .8) * 100, y = (+getComputedStyle(tile).getPropertyValue('--y') + .9) / (b.rows + .8) * 100;
+  const fx = document.createElement('div'); fx.className = 'pairs-burst'; fx.style.left = x + '%'; fx.style.top = y + '%';
+  fx.innerHTML = '<i class="flash"></i><i class="ring"></i>' + Array.from({ length: 10 }, (_, k) => `<i class="spark" style="--a:${k * 36 + Math.random() * 20}deg;--d:${.9 + Math.random() * .7}"></i>`).join('');
+  board.append(fx); setTimeout(() => fx.remove(), 800);
+}
+function pairsShower(board) {
+  const fx = document.createElement('div'); fx.className = 'pairs-shower';
+  fx.innerHTML = '<i class="wave"></i>' + Array.from({ length: 28 }, (_, k) => `<i class="star" style="--a:${k * 360 / 28}deg;--d:${1 + Math.random()};--t:${Math.random() * .25}s"></i>`).join('') + '<b>Basket cleared!</b>';
+  board.append(fx); setTimeout(() => fx.remove(), 1300);
+}
+function pairsConfetti(panel) {
+  const hues = ['#ffe27a', '#9af07a', '#ff9ac8', '#8ad0ff', '#ffb35a', '#c8a6ff'];
+  for (let i = 0; i < 36; i++) { const c = document.createElement('i'); c.className = 'pairs-confetti'; c.style.cssText = `left:${50 + (Math.random() - .5) * 30}%;--dx:${(Math.random() - .5) * 340}px;--dy:${-120 - Math.random() * 160}px;--hue:${hues[i % hues.length]};animation-delay:${Math.random() * .25}s`; panel.append(c); setTimeout(() => c.remove(), 2200); }
+}
 function startPairs() {
   if (game?.running || !$('#pairsBoard')) return;
   const g = game = Pairs.create(), board = $('#pairsBoard'), panel = $('#pairsPanel');
@@ -173,8 +199,9 @@ function startPairs() {
     if (record) S.pairsBest = seconds;
     let prizeLine = 'Practice run · rewards return tomorrow';
     if (paid) { Pairs.useRun(S); const prize = Pairs.reward(seconds), got = gain(prize.gold, 0, prize.xp); prizeLine = `${uiIcon('gold')}${prize.gold} gold · ${uiIcon('exp')}${got.xp} XP`; } else save();
-    panel.hidden = false; panel.className = 'pairs-panel';
-    panel.innerHTML = `<small>${record ? 'NEW BEST TIME' : 'HARVEST COMPLETE'}</small><h2>${Pairs.clock(seconds)}</h2><p>Best time · ${Pairs.clock(S.pairsBest)}${g.hints ? ' · Hints used · ' + g.hints : ''}</p><p class="pairs-prize">${prizeLine}</p><button class="primary" onclick="startPairs()">Play again</button><button onclick="go('pairs')">Back to lobby</button>`;
+    panel.hidden = false; panel.className = 'pairs-panel pairs-done';
+    setTimeout(() => pairsConfetti(panel), 250);
+    panel.innerHTML = `<i class="pairs-rays"></i><small>${record ? 'NEW BEST TIME' : 'HARVEST COMPLETE'}</small><h2>${Pairs.clock(seconds)}</h2><p>Best time · ${Pairs.clock(S.pairsBest)}${g.hints ? ' · Hints used · ' + g.hints : ''}</p><p class="pairs-prize">${prizeLine}</p><button class="primary" onclick="startPairs()">Play again</button><button onclick="go('pairs')">Back to lobby</button>`;
   }
   // Short notes sit in the top bar, never over the tiles.
   function flash(text) { const note = $('#pairsPenalty'); note.textContent = text; note.hidden = false; clearTimeout(note.timer); note.timer = setTimeout(() => { note.hidden = true; }, 1100); }
@@ -186,17 +213,18 @@ function startPairs() {
     if ('select' in result) { board.querySelectorAll('.pairs-tile[aria-pressed="true"]').forEach(el => el.setAttribute('aria-pressed', 'false')); if (result.select >= 0) tile.setAttribute('aria-pressed', 'true'); return; }
     const tiles = [result.a, result.b].map(i => board.querySelector(`.pairs-tile[data-i="${i}"]`));
     for (const el of tiles) { el.classList.add('matched'); el.removeAttribute('data-i'); el.disabled = true; }
-    const line = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
-    line.setAttribute('points', result.line.map(([x, y]) => cell(x, y).join(',')).join(' ')); $('#pairsLines').append(line);
+    const line = pairsEnergy($('#pairsLines'), result.line.map(([x, y]) => cell(x, y)));
     const stage = g.stage;
     if (result.cleared) g.locked = true;
+    setTimeout(() => { if (game === g) for (const el of tiles) pairsBurst(board, el, g.board); }, 170);
+    if (result.cleared) setTimeout(() => { if (game === g) pairsShower(board); }, 300);
     setTimeout(() => {
       if (game !== g) return;
       if (result.cleared) { if (Pairs.advance(g)) { draw(); countdown(1, 500); } else { draw(); finish(); } return; }
       if (g.stage !== stage) return;
       for (const el of tiles) el.remove(); line.remove();
       if (!Pairs.hint(g.board)) { Pairs.reshuffle(g.board); flash('Shuffled'); draw(); }
-    }, 240);
+    }, result.cleared ? 1100 : 480);
   }
   // Every finger counts: two tiles touched at the same moment with two fingers pair up at once.
   board.onpointerdown = event => { const tile = event.target.closest('.pairs-tile'); if (tile) { event.preventDefault(); tapTile(tile); } };
