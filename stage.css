@@ -8281,3 +8281,18 @@ body[data-screen=fashion]:not([data-playing]) #stage>#main{inset:0!important;wid
 #stage #main .fx-round{bottom:5cqh}
 #stage #main .fx-grid{grid-auto-rows:max-content!important;grid-template-rows:none!important}#stage #main .fx-card{overflow:visible!important}
 .fx-room{grid-template-rows:auto minmax(0,1fr) auto auto minmax(0,30%) auto!important}#stage #main .fx-grid{height:100%!important;box-sizing:border-box;padding-bottom:2cqh!important}.fx-card>span{margin-bottom:2px}
+/* Fashion third pass (reference photos): lighter sky-blue room, scrollable tabs incl. Avatar and Bubble */
+.fx-room{background:radial-gradient(1.5px 1.5px at 12% 18%,#fff,transparent),radial-gradient(1.5px 1.5px at 78% 12%,#dff,transparent),radial-gradient(2px 2px at 64% 34%,#fff9,transparent),radial-gradient(1.5px 1.5px at 30% 44%,#efe,transparent),radial-gradient(1.5px 1.5px at 88% 50%,#fffa,transparent),linear-gradient(#2a5fae,#3f86c8 45%,#4f9ac8 70%,#3a7aa8)!important}
+.fx-panel{background:linear-gradient(#3a7ac0e6,#2f68aae6)!important}
+#stage #main .fx-tabs{overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap}
+#stage #main .fx-tabs button{flex:0 0 auto;min-width:19cqw}
+.fx-tabico{display:grid;place-items:center;width:6cqw;height:6cqw;font-style:normal;font-size:4cqw;line-height:1;color:#ffe9a0}
+#stage #main .fx-grid{background:#2a5a9ae6!important}
+.fx-deco{display:grid;place-items:center}.fx-art.fx-deco .sup-frame{width:70%}.fx-art.fx-deco .sup-bubble{min-width:70%;min-height:40%;font-size:0}
+.fx-ptile.fx-deco .sup-frame{width:72%}.fx-ptile.fx-deco .sup-bubble{min-width:72%;min-height:42%;font-size:0}
+.fx-bigdeco{display:grid;place-items:center;height:100%}.fx-bigdeco .sup-frame{width:38cqw}.fx-bigdeco .sup-bubble{font-size:7cqw;padding:.5em 1.4em}
+.fx-card .sup-tier{bottom:auto;top:58%}
+#stage #main .fx-btn.alt{background:linear-gradient(#bfe2ff,#6fb0f0);color:#123a66;margin-top:.4cqh}
+.fx-pick{grid-template-areas:"t n" "t s" "b b" "c c"!important}#stage #main .fx-pick .fx-btn.alt{grid-area:c;justify-self:stretch}
+#stage #modal.den-pop .fx-rec>div{grid-template-columns:1fr auto}
+.fx-deco .sup-bubble,.fx-bigdeco .sup-bubble{background:#1b1830!important;color:#fff!important;border-radius:.4em!important;padding:.3em .9em!important}.fx-room .den-x{display:none!important}
