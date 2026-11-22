@@ -8172,3 +8172,19 @@ body[data-screen=cascade] #stage{width:100%!important;max-width:none!important}
 .cas-pop{font-size:clamp(28px,6cqh,64px)!important}
 /* no double-tap zoom on iPad: a fast second tap must stay a tap */
 html,body,#stage,#stage button{touch-action:manipulation}
+/* Elite Sale third pass (reference photos): palace hall with a dais, figures on the dais, Activated ribbon */
+.elite-sale{background:linear-gradient(#3a2a7a33,transparent 30%,transparent 55%,#2a1f5acc 80%),url('assets/generated/elite-hall.webp') center 38%/cover no-repeat!important;background-color:#5a46a8!important}
+.el-title{color:#fff6e8!important;text-shadow:0 0 8px #ff6a2a,0 3px 0 #c0401a,0 6px 10px #6a1a0a99!important}
+.el-fig{height:34cqh!important;filter:drop-shadow(0 10px 8px #2a1a5a66)!important}
+.el-t1 .el-bow img,.el-bow img{filter:drop-shadow(0 0 16px #fff6c0) drop-shadow(0 10px 10px #2a1a5a88)!important}
+.el-tag b{background:radial-gradient(#ff5a3a,#c0201a)!important;clip-path:polygon(50% 0,61% 12%,76% 6%,80% 22%,96% 24%,90% 40%,100% 50%,90% 60%,96% 76%,80% 78%,76% 94%,61% 88%,50% 100%,39% 88%,24% 94%,20% 78%,4% 76%,10% 60%,0 50%,10% 40%,4% 24%,20% 22%,24% 6%,39% 12%);border:0!important;box-shadow:none!important;width:10cqw!important;background-color:#ffcf3a!important}
+.sup-act{position:absolute;left:-26%;top:14%;width:90%;transform:rotate(-45deg);background:#3fae4a;color:#fff;font:800 1.9cqw/1.5 Arial,sans-serif;font-style:normal;text-align:center;box-shadow:0 1px 2px #0006;z-index:2}
+#stage #modal .sup-act{font-size:8px}
+.sup-head{display:block;width:170px;height:170px;border-radius:50%;overflow:hidden;background:radial-gradient(#5a4a9a,#1a1438);box-shadow:0 0 0 3px #ffd36b}
+.sup-head img{width:100%;height:auto;transform:scale(2.6) translateY(16%);transform-origin:50% 0}
+.sup-info-art .sup-weapon{height:170px!important;transform:rotate(24deg);filter:drop-shadow(0 0 12px #ffd36b)}
+.sup-head{position:relative}
+.sup-head img{position:absolute;width:250%!important;height:auto!important;max-width:none;left:50%;top:14px;transform:translateX(-50%)!important}
+#stage #main .elite-sale .el-t1 .el-bow img{height:62cqw!important}
+.el-t1 .el-bow{height:40cqh!important}
+#stage #modal .sup-info-art .sup-head img{max-height:none!important;width:430px!important}

@@ -539,6 +539,10 @@ field `S.supreme {own{"set:piece":copies}, bubble, frame, sale{period,bought}}`.
   figure, stars, title ribbon, CP, stat table, Wear set (`supremeWearSet`: dress, hair, bow, bubble, frame that she
   owns), Full Set Preview and Activate Stat pop-ups, set strip. The worn bubble frames her chat lines; the worn frame
   rings the avatar in `#profileReadout`.
+- Third pass (the photos again): the sale stands in a clean lilac palace hall with a round dais (`elite-hall`,
+  source `art-source/fashion/elite-hall.webp`), sunburst limit badge, a green "Activated" corner ribbon on owned
+  piece tiles (`.sup-act`), the Hair Accessory card shows a head close-up (`.sup-head`), the Weapon card the bow, and
+  the weapon tab shows a big bow over the dais.
 - Not done: Relic tab, Apparel Records, fashion Tier-up, male sets.
 
 ## Cloud War second pass (2026-11-21)

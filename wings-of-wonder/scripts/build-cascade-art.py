@@ -48,3 +48,4 @@ jt = Image.open("scripts/art-source/trek/cover.webp").convert("RGB").resize((960
 
 # Fishing mini-game cover (art-source/fishing/cover.webp).
 fc = Image.open("scripts/art-source/fishing/cover.webp").convert("RGB").resize((960, 640), Image.Resampling.LANCZOS); save(fc, "cover-fishing", 80)
+el=Image.open("scripts/art-source/fashion/elite-hall.webp").convert("RGB").resize((720,1080),Image.Resampling.LANCZOS); save(el,"elite-hall",78)  # Fashion Elite Sale hall
