@@ -671,12 +671,28 @@ function hearts(id){const h=WonderGear.heartsOf(S,id);return Array.from({length:
 // ---- The chat sheet: slides up over the home screen (or fills the room's Chat page). Channels on the left. ----------
 const chatEmojis=['😀','😂','😍','👍','🎉','🌸','⚔️','🐉','💖','😢','🙏','✨'];
 const chatShortcuts=['Hello everyone!','Thank you!','Good luck!','Who wants to team up?','Let us take the next city!','See you later!'];
+// Live AI replies (in-chat preview only): when the page runs inside Claude, `sample` lets an AI adventurer answer her
+// own message with a line written by Claude, at most WonderGear.socialRules.liveDaily a day. Elsewhere (gh-pages, tests)
+// window.claude is absent and the stock replies stay. Background AI chatter never calls Claude.
+let chatAi=null,chatAiOff=false;const chatPending=new Set();
+try{window.claude?.use?.('sample').then(f=>{chatAi=f||null;if(f&&document.querySelector('.chat-sheet'))chatRefresh()}).catch(()=>{})}catch{}
+const chatLiveOn=()=>!!chatAi&&!chatAiOff;
+function chatAsk(r){
+ if(!r||!chatLiveOn()||WonderGear.chatLiveLeft(S)<1)return;
+ const t=r.reply.t,f=folk(r.reply.from),ch=r.me.ch.startsWith('p:')?'a private talk':'the '+r.me.ch+' channel';
+ const recent=WonderGear.socialState(S).chat.filter(c=>c.ch===r.me.ch&&c.t<r.me.t).slice(-4).map(c=>(c.from==='me'?S.name:folk(c.from)?.name||'Someone')+': '+c.text).join('\n');
+ const prompt=`You are ${f.name}, a friendly AI adventurer (players see the tag "AI" next to your name) in the cozy fantasy browser RPG "Wings of Wonder", set in Sky Garden: dungeons, pets, guilds, cloud wars, fishing. The player ${S.name} wrote to you in ${ch}. Reply as ${f.name} in one short chat line, at most 25 words, in the same language as the player's message. Stay in character, be warm and playful, no links, no lists, never pretend to be a human.${recent?'\n\nEarlier lines:\n'+recent:''}\n\n${S.name}: ${r.me.text}\n\nReply with the chat line only.`;
+ chatPending.add(t);chatFeedOnly();
+ chatAi(prompt,{modelTier:'quick',cache:false}).then(({text})=>{if(WonderGear.chatLiveSet(S,t,text))save()})
+  .catch(e=>{if(['not_granted','sampling_disabled','not_declared','capability_disabled','capability_removed'].includes(e?.code))chatAiOff=true;if(e?.code==='rate_limited')toast('AI friends are resting, try later.')})
+  .finally(()=>{chatPending.delete(t);if(document.querySelector('.chat-sheet'))chatRefresh()});
+}
 function chatLine(c){
  if(c.kind==='sys'||c.kind==='quiz')return `<div class="chat-note ${c.kind}">${esc(c.text)}</div>`;
  if(c.kind==='roll')return `<div class="chat-note roll"><b>${esc(folk(c.from).name)}</b> ${esc(c.text).replace(/(Bonus: )(.*)$/,'$1<u>$2</u>').replace(/rolled (\d+)/,'rolled <i>$1</i>')}</div>`;
  const me=c.from==='me',time=new Date(c.t).toISOString().slice(11,16),f=me?null:folk(c.from);
  const tag=c.srv?`<span class="srv">[S-${c.srv}]</span> `:'',fac=c.fac!==undefined?` <span class="fac" style="color:${cloudFactions[c.fac][3]}">[${cloudFactions[c.fac][0]}]</span>`:'';
- return `<div class="chat-line ${me?'me':''}">${me?'':`<button class="chat-face" aria-label="Mention ${esc(f.name)}" onclick="chatMention('${f.name}')">${denPlain}${folkFace(c.from)}</button>`}<div><b>${me?esc(S.name):tag+esc(f.name)+' <small>AI</small>'+fac}<em>${time}</em></b><p>${esc(c.text)}</p></div></div>`;
+ return `<div class="chat-line ${me?'me':''}">${me?'':`<button class="chat-face" aria-label="Mention ${esc(f.name)}" onclick="chatMention('${f.name}')">${denPlain}${folkFace(c.from)}</button>`}<div><b>${me?esc(S.name):tag+esc(f.name)+' <small>AI</small>'+fac}<em>${time}</em></b><p>${chatPending.has(c.t)?'<i class="chat-typing">typing…</i>':esc(c.text)}</p></div></div>`;
 }
 const chatTarget=()=>chatChannel==='Squad'&&chatWith?'p:'+chatWith:chatChannel;
 function chatSheet(room){
@@ -689,7 +705,7 @@ function chatSheet(room){
    <span></span><button class="chat-tool" onclick="chatQuick('📍 I am at Sky Garden · Lv. '+level())">${denPlain}${uiIcon('travel')}Coordinate</button><button class="chat-tool" onclick="chatShortcutsShow()">${denPlain}${socIcon(6)}Shortcut</button><button class="chat-tool" onclick="chatSheetClose();go('cityBag')">${denPlain}${uiIcon('equipment')}Bag</button></div>
   <div class="chat-main">${top}<div class="chat-feed">${feed||`<p class="soc-empty">${v.xblock&&chatChannel==='X-server'?'Cross-server messages are blocked.':'No messages yet. Say hello!'}</p>`}</div>
    ${chatEmoji?`<div class="chat-emoji">${chatEmojis.map(e=>`<button onclick="chatInsert('${e}')">${denPlain}${e}</button>`).join('')}</div>`:''}
-   <div class="chat-input"><input id="chatText" maxlength="80" ${sys?'disabled':''} placeholder="${sys?'System messages only':'Press the avatar or input @ to notify…'}" onkeydown="if(event.key==='Enter')chatSend()"><button class="chat-smile" aria-label="Emoji" onclick="chatEmoji=!chatEmoji;chatRefresh()" ${sys?'disabled':''}>${denPlain}☺</button><button class="den-gold" onclick="chatSend()" ${sys?'disabled':''}>${denPlain}Send</button></div></div></div>`;
+   <div class="chat-input"><input id="chatText" maxlength="80" ${sys?'disabled':''} placeholder="${sys?'System messages only':'Press the avatar or input @ to notify…'}" onkeydown="if(event.key==='Enter')chatSend()"><button class="chat-smile" aria-label="Emoji" onclick="chatEmoji=!chatEmoji;chatRefresh()" ${sys?'disabled':''}>${denPlain}☺</button><button class="den-gold" onclick="chatSend()" ${sys?'disabled':''}>${denPlain}Send</button></div>${chatLiveOn()&&!sys?`<small class="chat-live">✦ Live AI replies today: ${WonderGear.chatLiveLeft(S)}/${WonderGear.socialRules.liveDaily}</small>`:''}</div></div>`;
 }
 function chatRefresh(){
  const el=document.querySelector('.chat-sheet');if(!el){chatStop();return}
@@ -718,10 +734,10 @@ function chatInsert(text){const box=document.getElementById('chatText');if(!box)
 function chatMention(name){chatInsert('@'+name+' ')}
 function chatSend(){
  const box=document.getElementById('chatText'),text=box?.value||'';
- if(!WonderGear.chatSay(S,chatTarget(),text)){toast(chatChannel==='System'?'Nobody can write in System.':'Write something first.');return}
- if(box)box.value='';chatEmoji=false;save();chatRefresh();
+ const r=WonderGear.chatSay(S,chatTarget(),text);if(!r){toast(chatChannel==='System'?'Nobody can write in System.':'Write something first.');return}
+ if(box)box.value='';chatEmoji=false;save();chatRefresh();chatAsk(r);
 }
-function chatQuick(text){if(WonderGear.chatSay(S,chatTarget(),text)){save();if($('#modal').open)$('#modal').close();chatRefresh()}else toast('Nobody can write in System.')}
+function chatQuick(text){const r=WonderGear.chatSay(S,chatTarget(),text);if(r){save();if($('#modal').open)$('#modal').close();chatRefresh();chatAsk(r)}else toast('Nobody can write in System.')}
 function chatShortcutsShow(){popup('<h2>Shortcut</h2><div class="soc-list">'+chatShortcuts.map(t=>`<button class="soc-row" onclick="chatQuick('${t.replace(/'/g,"\\'")}')">${denPlain}${socIcon(6)}<b>${t}</b></button>`).join('')+'</div>')}
 function friendChat(id){chatChannel='Squad';chatWith=id;socialOpen('Chat')}
 function friendFlower(id){if(WonderGear.sendFlower(S,id)){save();citySocial();toast('Flowers sent to '+folk(id).name)}else toast('Already sent today, or no flowers left.')}

@@ -7763,3 +7763,7 @@ body[data-screen=home] #stage #main .city-chat .city-social::before,body[data-sc
 #stage #main .soc-check,#stage #main .chat-sheet .soc-check{position:relative;padding:0;min-height:0;aspect-ratio:1;width:7.5cqw;height:7.5cqw;max-height:none;border:0!important;border-radius:0;box-shadow:none!important;background:url(assets/generated/ui-check-off.webp) center/contain no-repeat!important;align-self:center;flex:none}
 #stage #main .soc-check[aria-pressed=true],#stage #main .chat-sheet .soc-check[aria-pressed=true]{background-image:url(assets/generated/ui-check-on.webp)!important}
 #stage #main .soc-check::before,#stage #main .soc-check::after{display:none!important}
+/* Live AI replies in the chat preview */
+.chat-typing{font-style:italic;opacity:.7;animation:chat-typing 1.2s ease-in-out infinite}
+@keyframes chat-typing{50%{opacity:.35}}
+.chat-sheet .chat-live{display:block;text-align:right;padding:0 2cqw .4cqh;font:600 2.3cqw/1.2 Arial,sans-serif;color:#ffe27a}
