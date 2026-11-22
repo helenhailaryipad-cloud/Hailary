@@ -2220,7 +2220,7 @@ function supPieceArt(set,piece,big=false){
  return '<span class="sup-frame" style="--hue:'+set.hue+'">'+(big?'<img src="assets/generated/reina-avatar.webp" alt="">':'')+'</span>';
 }
 function supTile(set,piece,extra=''){const own=WonderGear.supremeCopies(S,set.id,piece);
- return `<button class="sup-tile ${own?'':'locked'}" style="--hue:${set.hue}" onclick="supremeInfo('${set.id}','${piece}')">${denPlain}${supPieceArt(set,piece)}<b>UR</b>${own?'':'<i class="sup-lock">🔒</i>'}${extra}</button>`}
+ return `<button class="sup-tile ${own?'':'locked'}" style="--hue:${set.hue}" onclick="supremeInfo('${set.id}','${piece}')">${denPlain}${supPieceArt(set,piece)}<b>UR</b>${own?'<i class="sup-act">Activated</i>':'<i class="sup-lock">🔒</i>'}${extra}</button>`}
 // Combat power a piece adds: the difference it makes to stats().power.
 function supremeCp(setId,piece){
  const r=WonderGear,own={...(S.supreme?.own||{})},key=setId+':'+piece,with_={...own,[key]:Math.max(1,own[key]||0)},without={...own};delete without[key];
@@ -2231,7 +2231,7 @@ function supremeStatLines(stats){return Object.entries(stats).map(([k,n])=>'<li>
 function supremeInfo(setId,piece){
  const r=WonderGear,set=supSet(setId),p=r.supremePieces.find(x=>x.id===piece),stars=r.supremeStars(S,setId),own=r.supremeCopies(S,setId,piece);
  const sale=r.supremeSale(),onSale=sale.set.id===setId;
- popup(`<div class="sup-info"><div class="sup-info-art" style="--hue:${set.hue}">${piece==='outfit'||piece==='hair'?`<img class="sup-figure" src="${registeredLookPath(set.dress,set.hair,0,'','')}" alt="">`:supPieceArt(set,piece,true)}<b class="sup-cp">⚔ ${fmt(supremeCp(setId,piece))}</b></div>
+ popup(`<div class="sup-info"><div class="sup-info-art" style="--hue:${set.hue}">${piece==='outfit'?`<img class="sup-figure" src="${registeredLookPath(set.dress,set.hair,0,'','')}" alt="">`:piece==='hair'?`<span class="sup-head"><img src="${registeredLookPath(set.dress,set.hair,0,'','')}" alt=""></span>`:piece==='weapon'?`<img class="sup-weapon" src="${artPath('weapon-style-'+set.bow)}" alt="">`:supPieceArt(set,piece,true)}<b class="sup-cp">⚔ ${fmt(supremeCp(setId,piece))}</b></div>
  <div class="sup-info-head">${supTile(set,piece)}<div><h2>${set.name} (${p.name})</h2><small>Usage Level: <i>Unlimited</i></small><small>Type: <i>Fashion Materials</i></small></div></div>
  <div class="sup-info-body"><p>${own?'Activated · '+own+(own>1?' copies':' copy'):'Use to activate Fashion Materials'} <b>${set.name} (${p.name})</b><br>Activated CP: <i>+${fmt(supremeCp(setId,piece))}</i></p>
  <h3>◆ Activation Stats</h3><ul>${supremeStatLines(r.supremePieceStats(setId,piece,stars))}</ul>
@@ -2249,9 +2249,9 @@ function eliteStore(){
  const left=Math.max(0,sale.end-Date.now()),d=Math.floor(left/864e5),h=Math.floor(left%864e5/36e5),m=Math.floor(left%36e5/6e4);
  const packs=r.supremePieces.filter(p=>p.tab===eliteTab);
  const figure=piece=>piece==='weapon'?`<div class="el-bow"><img src="${artPath('weapon-style-'+set.bow)}" alt="${set.name} bow"></div>`
-  :piece==='bubble'||piece==='frame'?`<div class="el-deco">${supPieceArt(set,piece,true)}</div>`:`<img class="el-fig" src="${registeredLookPath(set.dress,set.hair,piece==='hair'?0:set.bow,'','')}" alt="${set.name}">`;
+  :piece==='bubble'||piece==='frame'?`<div class="el-deco">${supPieceArt(set,piece,true)}</div>`:`<img class="el-fig" src="${registeredLookPath(set.dress,set.hair,set.bow,'','')}" alt="${set.name}">`;
  const card=p=>{const bought=v.sale.bought[p.id]||0,out=bought>=p.limit;
-  return `<div class="el-col">${figure(p.id)}<div class="el-tag"><b>${p.limit-bought}</b><span>Limited-time<br>${p.limit-bought} left</span></div><div class="el-cp">⚔ ${fmt(supremeCp(set.id,p.id))}</div>
+  return `<div class="el-col">${figure(p.id)}<div class="el-tag"><b>${p.limit-bought}</b><span>Limited-time<br>${p.limit-bought} left</span></div>${v.own?.[set.id+':'+p.id]?'':''}<div class="el-cp">⚔ ${fmt(supremeCp(set.id,p.id))}</div>
   <div class="el-card"><h3>${p.pack}</h3><div class="el-items">${supTile(set,p.id,'<em>1</em>')}<span class="sup-tile gold">${denPlain}${uiIcon('gold')}<em>${R.gold}</em></span></div>
   <p class="el-old">Original price: <s>${fmt(R.oldPrice)} prisms</s></p><button class="den-gold el-buy" ${out?'disabled':''} onclick="eliteBuy('${p.id}')">${denPlain}${out?'Sold out':uiIcon('crystals')+' '+R.price}</button></div></div>`};
  $('#main').innerHTML=`<section class="elite-sale el-t${eliteTab}">
