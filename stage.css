@@ -7888,3 +7888,8 @@ body[data-screen=home] #stage #main .city-chat .city-social::before,body[data-sc
 #stage #modal.den-pop .duel-champs b small{opacity:.7;font-size:9px}
 #stage #main .duel-room small small,#stage #main .duel-room b small,#stage #main .duel-room p small{font-size:.7em!important;opacity:.75}
 #stage #main .duel-room .duel-vs.won b{padding:.25em .7em;border-radius:1em;background:#0c1a30d9;font:800 3cqw/1.1 Arial,sans-serif!important}
+/* Talent badges: corner chip for the kind (user 2026-11-22: colour = strength, chip = attack / guard) */
+.den-ico.tal-atk,.den-ico.tal-def{position:relative}
+.den-ico.tal-atk::after,.den-ico.tal-def::after{content:"";position:absolute;left:4%;top:2%;width:32%;aspect-ratio:1;border-radius:22%;border:1px solid #fff6d0;box-shadow:0 1px 2px #0008;background-size:78% 78%;background-position:center;background-repeat:no-repeat}
+.den-ico.tal-atk::after{background-color:#e8952a;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M12 1.5 14 4v10h-4V4zM7 14.5h10v2h-3.5v3l1.5 1.5v1.5H9V21l1.5-1.5v-3H7z'/%3E%3C/svg%3E")}
+.den-ico.tal-def::after{background-color:#4fae6a;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23fff' d='M12 2 20 5v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z'/%3E%3C/svg%3E")}

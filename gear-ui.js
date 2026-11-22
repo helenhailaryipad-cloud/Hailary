@@ -1118,7 +1118,8 @@ let gearPick=0,talentSlotPick=0,talentCell=-1,talentTab='Common',talentProphecy=
 function petArtVars(){const root=document.documentElement;if(!root?.style?.setProperty||root.style.getPropertyValue('--pet-tal'))return;
  for(const [key,id] of [['tal','comp-pet-talents'],['gear','comp-pet-gear'],['misc','comp-pet-misc']])root.style.setProperty('--pet-'+key,'url("'+artPath(id)+'")')}
 const denIcon=(sheet,n,cols,rows)=>'<i class="den-ico" style="background-image:var(--pet-'+sheet+');background-size:'+cols*100+'% '+rows*100+'%;background-position:'+(n%cols)/(cols-1)*100+'% '+(rows>1?Math.floor(n/cols)/(rows-1)*100:0)+'%"></i>';
-const talentIcon=id=>denIcon('tal',WonderGear.petTalents.findIndex(t=>t.id===id),4,Math.ceil(WonderGear.petTalents.length/4));
+// Colour shows strength (green common, red Top); the corner chip shows the kind (sword attack, shield guard).
+const talentIcon=id=>{const t=WonderGear.petTalents.find(x=>x.id===id);return denIcon('tal',WonderGear.petTalents.indexOf(t),4,Math.ceil(WonderGear.petTalents.length/4)).replace('class="den-ico"','class="den-ico tal-'+(t?.kind||'atk')+'"')};
 const talentKind=t=>(t.top?'Top ':'')+(t.kind==='atk'?'Attack':'Guard');
 const talentOf=id=>WonderGear.petTalents.find(t=>t.id===id);
 function petGearUp(times){
