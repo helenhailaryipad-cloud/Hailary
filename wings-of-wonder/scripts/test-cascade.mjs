@@ -5,7 +5,7 @@ let seed=7;const rng=()=>(seed=(seed*1664525+1013904223)%4294967296)/4294967296;
 assert.equal(C.shapes.length,7);for(let k=0;k<7;k++){assert.equal(C.cells(k,0).length,4);assert.deepEqual(C.cells(k,4),C.cells(k,0),'four turns '+k)}
 assert.deepEqual(C.cells(1,1),C.cells(1,0),'square');
 // The bag deals every shape once in each seven.
-const g=C.create(rng);const firstSeven=[g.piece.kind,...g.queue.slice(0,6)];assert.equal([...firstSeven].sort().join(),'0,1,2,3,4,5,6');
+const g=C.create(rng);const firstFive=[g.piece.kind,...g.queue.slice(0,4)];assert.equal([...firstFive].sort().join(),'0,1,2,5,6','level 1 deals only the simple shapes');assert.equal(C.bag(rng,2).length,7);assert.ok(C.speed(1)>C.speed(2));
 // Walls stop sideways moves; a hard drop lands on the floor and gives two points a row.
 for(let i=0;i<12;i++)C.move(g,-1);assert.ok(C.cells(g.piece.kind,g.piece.rot).some(([x])=>g.piece.x+x===0),'reaches the left wall');assert.equal(C.move(g,-1),false);
 const kind=g.piece.kind,ghost=C.ghost(g),rows=C.hard(g);assert.ok(rows>0);assert.equal(g.score,rows*2);

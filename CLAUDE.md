@@ -97,6 +97,16 @@ global `#main button` rules set position, borders and `::before`.
   `go()` opens `leaveAsk(id)`, one `popup` card with Keep playing / Leave (`leaveNow` ends the run, then opens the
   screen); the in-game Finish / Retreat window (`requestFinish` in `game-polish.js`) uses the same card. `.leave-modal`
   hides the close cross and the Menu pill.
+- Double-tap guard (user: "we double tap and it drops back to the main menu"): the second tap landed on a Back /
+  Menu button of the screen that had just opened. `openScreen` (and `openCascade`, `showCascade`, `openPairsBoard`)
+  stamp `screenChangedAt`; a capture-phase click listener drops clicks on buttons in the next 450 ms. `touch-action:
+  manipulation` on the page stops iPad double-tap zoom.
+- Crystal Cascade second pass (user: "poor, does not open to the sides, more stylish, first level easier"): full
+  screen width (removed from the 55dvh width rule), three columns (Score / Level with progress bar / Rows / Best on the
+  left, the well in a gold frame with gem corners, Next and Chests on the right), pause button, turning rune circle and
+  checker cells in the well, a landing beam and filled ghost, a red glow when the stack nears the top, drifting motes.
+  Level 1 falls slower (1 s a row, `speed`) and deals only the simple shapes (`easyShapes`: beam, square, crown, two
+  hooks); the zig-zag steps join from level 2.
 - Harvest Pairs third pass: new clean cover (basket on a soft garden) and lobby background (empty terrace, no painted
   person; the live Reina portrait stands on it); the 3-2-1 dial is a centred CSS dial (`.pairs-dial`); the field has
   soft light, a faint cell lattice and an inner frame instead of flat green.

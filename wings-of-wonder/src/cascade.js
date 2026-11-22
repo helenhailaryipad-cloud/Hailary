@@ -21,7 +21,9 @@ const Cascade = {
   chests: [{ at: 1500, item: 'chest1', name: 'Oak Chest' }, { at: 4000, item: 'chest2', name: 'Moon Chest' }, { at: 8000, item: 'chest3', name: 'Winged Chest' }],
   dailyRuns: 2, goldCap: 800, xpCap: 80,
   lockDelay: .5,
-  speed(level) { return Math.max(.07, .8 - (level - 1) * .07); },
+  // Level 1 is gentle: slower fall and only the simple shapes (no zig-zag steps); from level 2 all seven.
+  easyShapes: [0, 1, 2, 5, 6],
+  speed(level) { return level === 1 ? 1 : Math.max(.07, .8 - (level - 2) * .07); },
   // Rotate a shape's cells k quarter turns clockwise inside its box (3 x 3, or 4 x 4 for the beam, 2 x 2 square stays).
   cells(kind, rot) {
     let c = this.shapes[kind].map(p => p.slice()); const n = kind === 0 ? 4 : 3;
@@ -30,12 +32,12 @@ const Cascade = {
     return c;
   },
   // A seven-crystal bag, shuffled, so every shape comes once in each seven.
-  bag(rng = Math.random) { const a = [0, 1, 2, 3, 4, 5, 6]; for (let i = 6; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; },
+  bag(rng = Math.random, level = 2) { const a = level === 1 ? this.easyShapes.slice() : [0, 1, 2, 3, 4, 5, 6]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; },
   create(rng = Math.random) {
     const g = { grid: Array.from({ length: this.rows }, () => Array(this.cols).fill(-1)), queue: [], score: 0, lines: 0, level: 1, combo: -1, over: false, rng, piece: null, fall: 0, lock: 0, opened: 0, events: [] };
     this.refill(g); this.spawn(g); return g;
   },
-  refill(g) { while (g.queue.length < 7) g.queue.push(...this.bag(g.rng)); },
+  refill(g) { while (g.queue.length < 7) g.queue.push(...this.bag(g.rng, g.level)); },
   spawn(g) {
     const kind = g.queue.shift(); this.refill(g);
     g.piece = { kind, rot: 0, x: kind === 1 ? 3 : 3, y: kind === 0 ? -1 : 0 };
@@ -75,7 +77,7 @@ const Cascade = {
       g.grid = g.grid.filter((_, y) => !full.includes(y)); while (g.grid.length < this.rows) g.grid.unshift(Array(this.cols).fill(-1));
       g.combo++; const gain = this.lineScore[full.length] * g.level + (g.combo > 0 ? 50 * g.combo * g.level : 0);
       g.score += gain; g.lines += full.length; g.events.push({ type: 'score', gain, combo: g.combo });
-      const level = 1 + Math.floor(g.lines / this.linesPerLevel); if (level > g.level) { g.level = level; g.events.push({ type: 'level', level }); }
+      const level = 1 + Math.floor(g.lines / this.linesPerLevel); if (level > g.level) { if (g.level === 1) g.queue = g.queue.slice(0, 2); g.level = level; this.refill(g); g.events.push({ type: 'level', level }); }
       if (g.grid.every(r => r.every(c => c < 0))) { g.score += 1000 * g.level; g.events.push({ type: 'clear' }); }
     } else g.combo = -1;
     this.chestCheck(g);
@@ -99,7 +101,7 @@ const Cascade = {
 // CASCADE_UI ---------------------------------------------------------------------------------------------------------
 let cascadeLoop = 0;
 function cascadeTile(kind) { return '<i class="cas-gem" style="background-position:' + (kind % 4) / 3 * 100 + '% ' + Math.floor(kind / 4) * 100 + '%"></i>'; }
-function showCascade() {
+function showCascade() { if (typeof screenChangedAt !== "undefined") screenChangedAt = Date.now();
   cascadeStop();
   const left = Cascade.runsLeft(S);
   $('#main').innerHTML = `<section class="cas-lobby" style="background-image:url('${artPath('cascade-cover')}')">
@@ -117,19 +119,23 @@ function showCascade() {
     <button class="cas-back" data-back onclick="go('games')" aria-label="Back to Mini Games">‹</button></section>`;
 }
 function cascadeStop() { if (cascadeLoop) cancelAnimationFrame(cascadeLoop); cascadeLoop = 0; if (game?.cascade) game.running = false; document.removeEventListener('keydown', cascadeKey); }
-function openCascade() {
+function openCascade() { if (typeof screenChangedAt !== "undefined") screenChangedAt = Date.now();
   cascadeStop();
-  $('#main').innerHTML = `<section class="cas-screen" style="--cover:url('${artPath('cascade-cover')}')">
+  const stat = (id, label, val) => `<div class="cas-stat"><small>${label}</small><b id="${id}">${val}</b></div>`;
+  $('#main').innerHTML = `<section class="cas-screen" style="--cover:url('${artPath('cascade-cover')}')"><div class="cas-motes"></div>
     <div class="cas-top"><button class="cas-back" data-back onclick="cascadeQuit()" aria-label="Back to the lobby">‹</button>
-      <span>Score<b id="casScore">0</b></span><span>Level<b id="casLevel">1</b></span><span>Rows<b id="casLines">0</b></span></div>
-    <div class="cas-main"><div class="cas-well" id="casWell"><canvas id="casCanvas"></canvas><div class="cas-pops" id="casPops"></div></div>
-      <div class="cas-side"><small>Next</small><canvas id="casNext"></canvas>
-        <small>Chests</small><div class="cas-chests">${Cascade.chests.map((c, i) => `<span id="casChest${i}"><i class="cas-chest c${i}"></i><b>${fmt(c.at)}</b></span>`).join('')}</div>
-        <small>Best</small><b class="cas-best">${fmt(S.cascadeBest || 0)}</b></div></div>
-    <div class="cas-pad"><button data-act="left" aria-label="Move left">${denPlain}◀</button><button data-act="rot" aria-label="Turn">${denPlain}⟳</button><button data-act="soft" aria-label="Fall faster">${denPlain}▼</button><button data-act="hard" aria-label="Drop">${denPlain}⤓</button><button data-act="right" aria-label="Move right">${denPlain}▶</button></div>
+      <h1>Crystal Cascade</h1><button class="cas-pause" id="casPause" onclick="cascadePause()" aria-label="Pause">${denPlain}❚❚</button></div>
+    <div class="cas-main">
+      <div class="cas-col">${stat('casScore', 'Score', 0)}<div class="cas-stat"><small>Level</small><b id="casLevel">1</b><i class="cas-lvbar"><u id="casLvBar"></u></i></div>${stat('casLines', 'Rows', 0)}${stat('casBest', 'Best', fmt(S.cascadeBest || 0))}</div>
+      <div class="cas-well" id="casWell"><div class="cas-frame"><canvas id="casCanvas"></canvas></div><div class="cas-pops" id="casPops"></div></div>
+      <div class="cas-col"><div class="cas-stat cas-nextbox"><small>Next</small><canvas id="casNext"></canvas></div>
+        <div class="cas-stat"><small>Chests</small><div class="cas-chests">${Cascade.chests.map((c, i) => `<span id="casChest${i}"><i class="cas-chest c${i}"></i><b>${fmt(c.at)}</b></span>`).join('')}</div></div></div>
+    </div>
+    <div class="cas-pad"><button data-act="left" aria-label="Move left">${denPlain}◀</button><button data-act="rot" aria-label="Turn">${denPlain}⟳</button><button data-act="hard" class="drop" aria-label="Drop">${denPlain}⤓</button><button data-act="soft" aria-label="Fall faster">${denPlain}▼</button><button data-act="right" aria-label="Move right">${denPlain}▶</button></div>
   </section>`;
   startCascade();
 }
+function cascadePause() { const g = game; if (!g?.cascade || g.state.over) return; g.paused = !g.paused; $('#casPause').textContent = g.paused ? '▶' : '❚❚'; $('#casWell')?.classList.toggle('paused', g.paused); }
 function cascadeQuit() { const g = game; if (g?.cascade && !g.state.over && g.state.score > 0) { if (!confirm('Leave this run? It counts as finished.')) return; cascadeFinish(g, true); return; } cascadeStop(); showCascade(); }
 function cascadeKey(e) {
   const g = game; if (!g?.cascade || g.state.over) return; const k = e.key;
@@ -137,7 +143,7 @@ function cascadeKey(e) {
   else if (k === 'ArrowDown') cascadeAct('soft'); else if (k === ' ') cascadeAct('hard'); else return; e.preventDefault();
 }
 function cascadeAct(act) {
-  const g = game; if (!g?.cascade || g.state.over || g.countdown > 0) return; const s = g.state;
+  const g = game; if (!g?.cascade || g.state.over || g.countdown > 0 || g.paused) return; const s = g.state;
   if (act === 'left') Cascade.move(s, -1); else if (act === 'right') Cascade.move(s, 1); else if (act === 'rot') { if (Cascade.rotate(s)) g.turnFx = .18; }
   else if (act === 'soft') Cascade.soft(s); else if (act === 'hard') Cascade.hard(s);
   cascadeEvents(g);
@@ -176,9 +182,9 @@ function cascadeEvents(g) {
 }
 function startCascade() {
   const g = game = { cascade: true, running: true, state: Cascade.create(), shards: [], sparks: [], rings: [], flashRows: [], shake: 0, countdown: 2.4, turnFx: 0 };
-  const canvas = $('#casCanvas'), next = $('#casNext'), well = $('#casWell'), tiles = new Image(); tiles.src = artPath('cascade-tiles');
+  const canvas = $('#casCanvas'), next = $('#casNext'), well = $('#casWell'), frameBox = well, tiles = new Image(); tiles.src = artPath('cascade-tiles');
   const fit = () => {
-    const box = well.getBoundingClientRect(), cell = Math.floor(Math.min(box.width / Cascade.cols, box.height / Cascade.rows)), dpr = Math.min(2.5, devicePixelRatio || 1);
+    const box = well.getBoundingClientRect(), cell = Math.floor(Math.min((box.width - 18) / Cascade.cols, (box.height - 18) / Cascade.rows)), dpr = Math.min(2.5, devicePixelRatio || 1);
     g.cell = cell; canvas.style.width = cell * Cascade.cols + 'px'; canvas.style.height = cell * Cascade.rows + 'px'; canvas.width = cell * Cascade.cols * dpr; canvas.height = cell * Cascade.rows * dpr; g.dpr = dpr;
     const nb = next.getBoundingClientRect(); next.width = nb.width * dpr; next.height = nb.height * dpr;
   };
@@ -209,9 +215,9 @@ function startCascade() {
   const frame = now => {
     if (game !== g || !g.running || !document.body.contains(canvas)) { cascadeLoop = 0; return; }
     const dt = Math.min(.05, (now - last) / 1000); last = now;
-    if (!document.hidden && !g.paused) {
+    if (!document.hidden) {
       if (g.countdown > 0) { g.countdown -= dt; if (g.countdown <= 0) cascadePop('Go!', 'level'); }
-      else if (!g.state.over) { Cascade.step(g.state, dt); cascadeEvents(g); }
+      else if (!g.state.over && !g.paused) { Cascade.step(g.state, dt); cascadeEvents(g); }
       cascadeDraw(g, canvas, next, tiles, dt);
     }
     cascadeLoop = requestAnimationFrame(frame);
@@ -230,17 +236,23 @@ function cascadeDraw(g, canvas, next, tiles, dt) {
   g.shake = Math.max(0, g.shake - dt); const sx = g.shake ? (Math.random() - .5) * k * .5 * g.shake : 0, sy = g.shake ? (Math.random() - .5) * k * .5 * g.shake : 0;
   c.translate(sx, sy);
   // well: dark glass with faint grid
-  const bg = c.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, 'rgba(20,14,48,.78)'); bg.addColorStop(1, 'rgba(36,18,70,.9)'); c.fillStyle = bg; c.fillRect(0, 0, W, H);
-  c.strokeStyle = 'rgba(190,170,255,.08)'; c.lineWidth = 1;
-  for (let x = 1; x < Cascade.cols; x++) { c.beginPath(); c.moveTo(x * k, 0); c.lineTo(x * k, H); c.stroke(); }
-  for (let y = 1; y < Cascade.rows; y++) { c.beginPath(); c.moveTo(0, y * k); c.lineTo(W, y * k); c.stroke(); }
+  const bg = c.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#1a1240'); bg.addColorStop(.6, '#24145a'); bg.addColorStop(1, '#30175e'); c.fillStyle = bg; c.fillRect(0, 0, W, H);
+  // a slowly turning rune circle and soft cell wells
+  const now = performance.now() / 1000; c.save(); c.translate(W / 2, H * .58); c.rotate(now * .05); c.strokeStyle = 'rgba(200,170,255,.10)'; c.lineWidth = Math.max(1, k * .06);
+  for (const rr of [W * .42, W * .34]) { c.beginPath(); c.arc(0, 0, rr, 0, Math.PI * 2); c.stroke(); }
+  for (let i = 0; i < 12; i++) { c.rotate(Math.PI / 6); c.beginPath(); c.moveTo(W * .34, 0); c.lineTo(W * .42, 0); c.stroke(); } c.restore();
+  c.fillStyle = 'rgba(255,255,255,.035)'; for (let y = 0; y < Cascade.rows; y++) for (let x = 0; x < Cascade.cols; x++) if ((x + y) % 2 === 0) c.fillRect(x * k, y * k, k, k);
+  const high = s.grid.findIndex(r => r.some(v => v >= 0)); if (high >= 0 && high < 5 && !s.over) { const a = (5 - high) / 5 * (.35 + .25 * Math.sin(now * 6)); const dg = c.createLinearGradient(0, 0, 0, k * 4); dg.addColorStop(0, `rgba(255,70,90,${a})`); dg.addColorStop(1, 'rgba(255,70,90,0)'); c.fillStyle = dg; c.fillRect(0, 0, W, k * 4); }
   // settled crystals
   for (let y = 0; y < Cascade.rows; y++) for (let x = 0; x < Cascade.cols; x++) { const v = s.grid[y][x]; if (v >= 0) cascadeGem(c, tiles, v, x * k, y * k, k, s.over ? .55 : 1); }
   // ghost and falling piece
   if (!s.over && s.piece) {
     const cells = Cascade.cells(s.piece.kind, s.piece.rot), gy = Cascade.ghost(s);
-    c.strokeStyle = CASCADE_HUES[s.piece.kind]; c.lineWidth = Math.max(1, k * .06);
-    for (const [cx, cy] of cells) if (gy + cy >= 0) { c.globalAlpha = .45; c.strokeRect((s.piece.x + cx) * k + k * .08, (gy + cy) * k + k * .08, k * .84, k * .84); c.globalAlpha = 1; }
+    c.strokeStyle = CASCADE_HUES[s.piece.kind]; c.fillStyle = CASCADE_HUES[s.piece.kind]; c.lineWidth = Math.max(1, k * .07);
+    for (const [cx, cy] of cells) if (gy + cy >= 0) { c.globalAlpha = .16; c.fillRect((s.piece.x + cx) * k + k * .06, (gy + cy) * k + k * .06, k * .88, k * .88); c.globalAlpha = .6; c.strokeRect((s.piece.x + cx) * k + k * .08, (gy + cy) * k + k * .08, k * .84, k * .84); c.globalAlpha = 1; }
+    // a faint beam from the piece down to where it will land
+    const minX = Math.min(...cells.map(p => p[0])), maxX = Math.max(...cells.map(p => p[0])), lb = c.createLinearGradient(0, s.piece.y * k, 0, gy * k); lb.addColorStop(0, 'rgba(255,255,255,0)'); lb.addColorStop(1, CASCADE_HUES[s.piece.kind] + '33');
+    c.fillStyle = lb; c.fillRect((s.piece.x + minX) * k, (s.piece.y + 1) * k, (maxX - minX + 1) * k, Math.max(0, gy - s.piece.y) * k);
     const glow = .5 + .5 * Math.sin(performance.now() / 160);
     c.save(); c.shadowColor = CASCADE_HUES[s.piece.kind]; c.shadowBlur = k * (.35 + glow * .35);
     for (const [cx, cy] of cells) if (s.piece.y + cy >= 0) cascadeGem(c, tiles, s.piece.kind, (s.piece.x + cx) * k, (s.piece.y + cy) * k, k);
@@ -261,7 +273,8 @@ function cascadeDraw(g, canvas, next, tiles, dt) {
   const n = next.getContext('2d'), nk = Math.min(next.width / 4.6, next.height / 9.6); n.clearRect(0, 0, next.width, next.height);
   s.queue.slice(0, 3).forEach((kind, i) => { const cells = Cascade.cells(kind, 0), minX = Math.min(...cells.map(p => p[0])), maxX = Math.max(...cells.map(p => p[0])), minY = Math.min(...cells.map(p => p[1])), w = (maxX - minX + 1) * nk;
     for (const [cx, cy] of cells) cascadeGem(n, tiles, kind, (next.width - w) / 2 + (cx - minX) * nk, i * nk * 3.2 + (cy - minY) * nk + nk * .3, nk); });
-  $('#casScore').textContent = fmt(s.score); $('#casLevel').textContent = s.level; $('#casLines').textContent = s.lines;
+  $('#casScore').textContent = fmt(s.score); $('#casLevel').textContent = s.level; $('#casLines').textContent = s.lines; const lb = $('#casLvBar'); if (lb) lb.style.width = (s.lines % Cascade.linesPerLevel) / Cascade.linesPerLevel * 100 + '%';
+  if (g.paused) { c.setTransform(1, 0, 0, 1, 0, 0); c.fillStyle = 'rgba(10,6,30,.6)'; c.fillRect(0, 0, canvas.width, canvas.height); c.fillStyle = '#ffe9a0'; c.font = `900 ${k * 1.4}px Georgia,serif`; c.textAlign = 'center'; c.fillText('Paused', canvas.width / 2, canvas.height / 2); }
 }
 function cascadeFinish(g, quit = false) {
   if (g.done) return; g.done = true; g.running = false; cascadeStop();
