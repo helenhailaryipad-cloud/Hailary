@@ -854,6 +854,27 @@ vm.runInContext(`
 `,context);
 console.log('PASS: Social: daily mail and thank-you notes, claim and delete, flowers and hearts, requests and blacklist, chat feed and replies, screens.');
 
+await vm.runInContext(`
+(async()=>{const r=WonderGear,R=r.socialRules,T0=Date.UTC(2026,10,22,10);
+ S=defaults();if(r.chatLiveLeft(S,T0)!==R.liveDaily)throw Error('Live replies at first');
+ const said=r.chatSay(S,'Globe','Привет!',T0,()=>0);if(!r.chatLiveSet(S,said.reply.t,'  Привет, <b>Reina</b>! Идём в данж? ',T0))throw Error('Live set');
+ const line=r.socialState(S,T0).chat.find(c=>c.t===said.reply.t);if(line.text!=='Привет, bReina/b! Идём в данж?'||!line.live||r.chatLiveLeft(S,T0)!==R.liveDaily-1||!valid(S))throw Error('Live line stored');
+ if(r.chatLiveSet(S,said.me.t,'x',T0)||r.chatLiveSet(S,123,'x',T0))throw Error('Only AI lines');
+ S.social.live.n=R.liveDaily;if(r.chatLiveLeft(S,T0)!==0||r.chatLiveSet(S,said.reply.t,'again',T0)||r.chatLiveLeft(S,T0+864e5)!==R.liveDaily)throw Error('Daily limit');
+ if(valid({...S,social:{...S.social,live:{day:'2026-11-22',n:99}}}))throw Error('Bad live count accepted');
+ // No Claude here: sending keeps the stock reply. With a page-side Claude the reply is replaced, and the limit holds.
+ S=defaults();const keepF=chatFeedOnly,keepR=chatRefresh;chatFeedOnly=()=>{};chatRefresh=()=>{};const ask=t=>chatAsk(r.chatSay(S,'Globe',t));
+ const asked=[];chatAi=(p,o)=>{asked.push(o);return Promise.resolve({text:'Hello from the Garden!'})};
+ ask('Hello everyone!');for(let k=0;k<8;k++)await null;for(let k=0;k<8;k++)await null;
+ const mine=r.socialState(S).chat.filter(c=>c.from!=='me');if(asked.length!==1||asked[0].cache!==false||mine.at(-1).text!=='Hello from the Garden!'||r.chatLiveLeft(S)!==R.liveDaily-1)throw Error('Live reply through the page');
+ S.social.live.n=R.liveDaily;ask('Again');for(let k=0;k<8;k++)await null;if(asked.length!==1)throw Error('Page respects the daily limit');
+ chatAi=()=>Promise.reject({code:'not_granted'});S.social.live.n=0;ask('Third');for(let k=0;k<8;k++)await null;for(let k=0;k<8;k++)await null;
+ if(!chatAiOff||r.socialState(S).chat.at(-1).live)throw Error('Declined: stock replies stay');
+ chatAi=null;chatAiOff=false;chatFeedOnly=keepF;chatRefresh=keepR;
+})()
+`,context);
+console.log('PASS: Live chat replies: daily limit, storage and validation, page call with cache off, refusal falls back.');
+
 vm.runInContext(`
 {const r=WonderGear,R=r.guildRules,T0=Date.UTC(2026,10,21,12),day=864e5;
  S=defaults();if(S.guild!==undefined||r.guildState(S)||!valid(S))throw Error('No guild at first');

@@ -512,6 +512,16 @@ There are no other players: every person is an AI adventurer and is labelled "AI
   (`chatOld`). No jerking (user: "the chat window must not twitch"): the 8 s timer only swaps the messages when they
   changed (`chatFeedOnly`) and keeps the reading position unless she is at the bottom; the slide-up animation plays
   only when the sheet opens (`.opening`); `chatRefresh` (full redraw) is only for her own actions.
+- Live AI replies (user 2026-11-22: "bots should answer the real person with a real model, low daily limits, do not
+  spend all the money"): the OpenAI key cannot be used (the proxy injects it only in the dev container, and a key in a
+  browser game would leak). Instead the in-chat preview artifact declares the `sample` capability (publish with
+  `capabilities: {sample: {}}`): when she sends a line (`chatSend`, `chatQuick`), `chatAsk` asks Claude (`modelTier`
+  quick, `cache:false`, prompt with the AI's name, the channel, the last four lines, "at most 25 words, same language")
+  and `chatLiveSet` replaces the stock reply; "typing…" while waiting. At most `socialRules.liveDaily` (30) a UTC day,
+  counted in optional `S.social.live {day,n}`; AI lines may be up to 160 chars (`liveMax`) and carry `live:true`.
+  It spends the viewer's own Claude usage (consent dialog on the first call); background AI chatter and every
+  failure keep the free stock lines; a refusal turns it off for the page load (`chatAiOff`). On gh-pages and in tests
+  `window.claude` is absent, so nothing changes there.
 - Not done: a real guild, voice messages, the reference's Management page, sending mail to friends.
 
 ## Guild (2026-11-21)
