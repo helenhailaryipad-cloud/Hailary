@@ -429,6 +429,26 @@ War = lobby, Fight, Shop). Rules in `gear-data.js` (placeholders, `warRules`), o
   atlases (headroom about 0.42 MB after this pass).
 - Not done: Star Duel, Storm Brawl, Shadow Hunt, betting, the contest privilege, timed opening hours.
 
+## Sky Contest: Star Duel (2026-11-22)
+User sent ten photos of the reference's Peak Duel ("held every two weeks") and chose a schedule by DAYS. Sky Contest ->
+Star Duel is open (`contestModes` flag 'Duel'); it lives in the `cityContest` screen as `contestPage==='Duel'`
+(`duelRoom()`, tabs `duelTab` Qualification / Group / Peak / Ultimate). Rules in `gear-data.js` (`duelRules`,
+placeholders), optional save field `S.duel` (`validDuel`), read through `duelState(s,now)`.
+- Season: 14 UTC days from `duelRules.anchor` (2026-11-21), `duelSeason(now)`. Days 1-3 Qualification: 15 auto-fights
+  (`duelQualFight`, `duelSim`) against the simulated AI field (`duelField`: 1200 AI adventurers with final points and
+  power relative to Reina, `duelAi`); points = win base + foe strength + HP left, 5 for a loss; HP does not recover
+  within a day; a participation reward per fight (`duelPart`). Rank among the field (`duelQualRank`); top 160 promote.
+- Day 4 Group stage (`duelGroup`, `duelGroupFight`): ten players near her rank, round robin (circle method), 3 points
+  a win, AI-vs-AI results by power, unplayed rounds are losses, top two go on.
+- Day 5 Peak Game (`duelPeak`, `duelPeakFight`): 32 players, five knock-out rounds, round k is decided by hour
+  4(k+1) UTC (or when she fights it); HP carries between rounds (`php`). Bets (`duelBet`: 1000 gold on a player of
+  an AI match, pays x2.5) and a champion guess (`duelGuess`, 5000 gold).
+- Inspire (`duelInspire`, `duelAuto`): up to 5 x 6% DMG reduction for 50 prisms each, for the season; auto-maximize.
+- Results: `duelPlace`; `duelSettle` (on opening the room) pays bets and the guess and, after the Peak day, mails the
+  ranking reward (`duelRanks`) from "Arena Herald". Ultimate Showdown is only a placeholder page.
+- Pop-ups: Match Description (three tabs, schedule + intro), Inspiration, Qualification Rankings, Ranking Rewards,
+  player pick (bet / guess), the fight window (`duelShow`). No new art: background `comp-war-field`, icons `warIcon`.
+
 ## Cloud War second pass (2026-11-21)
 User sent two photos of the reference's cloud war (territory map with owners and "Boss: N", round timer, Killing
 Points 390/1200, Cloud Shop / Faction Battle Status / Point Rewards / Rankings / Description; the territory hall

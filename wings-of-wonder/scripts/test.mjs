@@ -945,3 +945,38 @@ vm.runInContext(`
 }
 `,context);
 console.log('PASS: Guild: join and found, old saves, fund and levels, sign-in chests, ranking, red envelopes, Guild Beast booking and gear, shop, academy, screens.');
+
+vm.runInContext(`
+{const r=WonderGear,R=r.duelRules,D=864e5,A=R.anchor,rng=(()=>{let x=7;return()=>(x=(x*16807)%2147483647)/2147483647})();
+ S=defaults();if(!valid(S)||r.duelState(S,A).stage!=='qual'||r.duelSeason(A+3*D).stage!=='group'||r.duelSeason(A+4*D).stage!=='peak'||r.duelSeason(A+9*D).stage!=='rest'||r.duelSeason(A+14*D).season!==1)throw Error('Season calendar');
+ // Qualification: fifteen fights, participation items, HP does not recover within a day, points and rank.
+ const strong=()=>({...S,xp:S.xp});S.gold=1e6;S.scales=1000;
+ if(r.duelInspire(S,9,A+36e5)!==R.inspMax||S.scales!==1000-R.inspMax*R.inspCost||r.duelInspire(S,1,A+36e5))throw Error('Inspire cap');
+ const exp0=r.bagCount(S,'exp1');let fights=0,t=A+2*36e5;
+ while(fights<R.matches){const f=r.duelQualFight(S,rng,t);if(!f)throw Error('Qual fight '+fights);if(f.tired){S.duel.hp=100;continue}fights++}
+ if(r.duelQualFight(S,rng,t)||r.duelState(S,t).n!==R.matches||r.bagCount(S,'exp1')!==exp0+R.matches||!valid(S))throw Error('Fifteen fights');
+ const q=r.duelQualRank(S,t);if(q.rank<1||q.qualified||!q.open)throw Error('Rank while open');
+ // Group stage: make her strong enough to qualify, then nine rounds; AI results appear as she plays.
+ S.duel.pts=600;const q2=r.duelQualRank(S,A+3*D+36e5);if(!q2.qualified||q2.rank>R.promote)throw Error('Qualified');
+ const g=r.duelGroup(S,A+3*D+36e5);if(g.members.length!==R.groupSize||g.next===null||g.done)throw Error('Group');
+ for(let k=0;k<R.groupSize-1;k++)if(!r.duelGroupFight(S,()=>0,A+3*D+2*36e5))throw Error('Group fight '+k);
+ const g2=r.duelGroup(S,A+3*D+3*36e5);if(!g2.done||r.duelGroupFight(S,rng,A+3*D+3*36e5)||g2.table.reduce((n,m)=>n+m.won,0)!==(R.groupSize*(R.groupSize-1))/2)throw Error('Round robin');
+ // Peak Game: force a top-two finish (rng 0 = her hits land first), five rounds, HP carries.
+ S.duel.g=Array(R.groupSize-1).fill(1);const P=A+4*D;let pk=r.duelPeak(S,P+60e3);if(!pk.inn||pk.myRound!==0||pk.rounds[0].revealed)throw Error('Peak start');
+ if(!r.duelGuess(S,0,P+60e3)||r.duelGuess(S,1,P+60e3))throw Error('Champion guess');
+ const other=pk.rounds[0].matches.find(m=>!m.mine);if(!r.duelBet(S,0,other.a,P+60e3)||r.duelBet(S,0,other.b,P+60e3)||r.duelBet(S,0,0,P+60e3))throw Error('Bet');
+ for(let k=0;k<R.peakRounds;k++){let flip=0;S.duel.php=100;const at=P+(k*R.peakHours+1)*36e5,f=r.duelPeakFight(S,()=>(flip++)%2?0:1,at);if(!f||!f.win)throw Error('Peak round '+k);if(r.duelState(S,at).php>=100)throw Error('HP carries')}
+ pk=r.duelPeak(S,P+23*36e5);if(pk.champion!==0||r.duelPlace(S,P+23*36e5)!==1)throw Error('Champion');
+ const gold=S.gold,paid=r.duelSettle(S,P+D+36e5);if(!paid.mail||paid.mail.label!=='Champion'||S.gold-gold!==paid.gold||paid.gold<R.guessPay)throw Error('Settle');
+ const again=r.duelSettle(S,P+D+2*36e5);if(again.mail||again.gold||!r.socialState(S).mail.some(m=>m.title==='Star Duel: Champion')||!valid(S))throw Error('Settle once');
+ // A missed round is a forfeit; a fresh season starts clean.
+ S.duel.p=[1];S.duel.done=0;if(r.duelPlace(S,P+23*36e5)!==16)throw Error('Forfeit place');
+ if(r.duelState(S,A+14*D).n!==0)throw Error('New season');
+ for(const bad of [{n:99},{w:20},{insp:9},{g:[2]},{p:[1,1,1,1,1,1]},{bets:{9:1}},{guess:40},{done:999}])if(valid({...S,duel:{...S.duel,...bad}}))throw Error('Invalid duel accepted '+JSON.stringify(bad));
+ // Screens.
+ S=defaults();contestGo('Duel');if(!$('#main').innerHTML.includes('duel-room'))throw Error('Duel room');
+ for(const t of ['Qualification','Group','Peak','Ultimate']){duelGo(t);if(!$('#main').innerHTML.includes('duel-t-'+t.toLowerCase()))throw Error('Duel tab '+t)}
+ if(!contestList().includes("duelGo('Qualification')"))throw Error('Star Duel open in Sky Contest');
+}
+`,context);
+console.log('PASS: Star Duel: season calendar, qualification with HP and inspiration, ranking, group round robin, Peak bracket with bets and guess, mail rewards, validation, screens.');
