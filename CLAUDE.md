@@ -554,6 +554,13 @@ field `S.supreme {own{"set:piece":copies}, bubble, frame, sale{period,bought}}`.
   tiles, cards, ribbon and set room; unowned sets show in full colour. Hosted bundle: AVIF copies of several large maps
   and sprites (cloud-war-*, companion-poses, reina-silver-tabby, equipment-atlas, dragon/enemy-motion) were re-saved
   smaller to make room (headroom ~560 KB).
+- Piece stars (user photos of the reference's Supreme Set: every repeated purchase raises that piece's stats): the
+  first copy activates a piece, each further copy is a star of THAT piece (`supremePieceStars`, max 5, +20% of its
+  stats each, `starStep`); the 10-star row of the set is all its spares together. Paid stats were raised to strong
+  flat values plus a percentage per piece (`supremeStats`), set bonus ATK +200, ATK +8%, HP +8% (placeholders).
+  Set room: tap a piece to select it (`supremeSel`, `supTap`): title "<set> (<piece>)" with its 5 stars, the piece
+  large in the centre, a panel with stats now and ▲ after the next star, the copies owned and Activate / Star-up
+  (`supremeGet` buys one more copy when the set is on sale), Details opens the item card. Tap again for the set view.
 - Not done: Relic tab, Apparel Records, fashion Tier-up, male sets.
 
 ## Cloud War second pass (2026-11-21)

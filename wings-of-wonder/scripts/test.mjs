@@ -1010,3 +1010,13 @@ vm.runInContext(`
 }
 `,context);
 console.log('PASS: Supreme Sets: Elite Sale purchase for prisms, limits, stars, set bonus, bubble and frame, screens.');
+
+vm.runInContext(`
+{const r=WonderGear,R=r.supremeRules,T=R.saleStart+864e5,set=r.supremeSale(T).set;S=defaults();S.scales=1e5;
+ r.supremeBuy(S,'weapon',T);const one=r.supremeBonus(S).attack;if(r.supremePieceStars(S,set.id,'weapon')!==0)throw Error('First copy activates');
+ r.supremeBuy(S,'weapon',T);if(r.supremePieceStars(S,set.id,'weapon')!==1||r.supremeBonus(S).attack<=one)throw Error('Second copy is a star and raises the stats');
+ for(let i=0;i<9;i++)r.supremeBuy(S,'weapon',T);if(r.supremePieceStars(S,set.id,'weapon')!==R.pieceStars)throw Error('Piece stars cap');
+ if(r.supremePieceStats(set.id,'weapon',5).attack!==Math.round(r.supremeStats.weapon.attack*(1+5*R.starStep)*100)/100)throw Error('Star step');
+}
+`,context);
+console.log('PASS: Supreme piece stars: first copy activates, each further copy stars that piece up to 5.');
