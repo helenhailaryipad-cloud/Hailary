@@ -446,6 +446,13 @@ placeholders), optional save field `S.duel` (`validDuel`), read through `duelSta
 - Inspire (`duelInspire`, `duelAuto`): up to 5 x 6% DMG reduction for 50 prisms each, for the season; auto-maximize.
 - Results: `duelPlace`; `duelSettle` (on opening the room) pays bets and the guess and, after the Peak day, mails the
   ranking reward (`duelRanks`) from "Arena Herald". Ultimate Showdown is only a placeholder page.
+- Peak Game board (user sent five more photos): the 32 are four groups of eight (bracket slots 8g..8g+7); rounds 1-3
+  are played inside a group, drawn as round faces with connecting lines around a VS emblem (`duelBoard`, Group 1-4
+  tabs `duelPeakGroup`, the group winner gets a crown), a live countdown to the next decision (`duelCountdown`,
+  `duelTick`). Ultimate Showdown = rounds 4-5 (semi-finals of the four group winners, then the final): two finalist
+  figures (silhouettes until known, Reina's portrait if she is there), Bet under each, a blue-red VS band, Champ
+  Betting (`duelChampPop`; the champion guess is open until the semi-finals are decided). Record pop-up lists her
+  fights. AI players have lettered faces (no portraits).
 - Pop-ups: Match Description (three tabs, schedule + intro), Inspiration, Qualification Rankings, Ranking Rewards,
   player pick (bet / guess), the fight window (`duelShow`). No new art: background `comp-war-field`, icons `warIcon`.
 

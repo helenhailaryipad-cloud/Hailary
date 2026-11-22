@@ -935,7 +935,7 @@ function duelInfo(tab){
   Peak:Array.from({length:R.peakRounds},(_,k)=>['Round '+(k+1),d(R.peakDay)+' until '+String(R.peakHours*(k+1)).padStart(2,'0')+':00'])}[duelInfoTab];
  const intro={Qualification:['The qualification lasts three days (UTC).','Each adventurer can match for '+R.matches+' games and gets a reward after each battle.','After the qualification, the top '+R.promote+' are promoted to the group stage.','Beating stronger opponents and keeping more HP gives more points.','HP does not recover during a day of qualification; it is full again the next day.'],
   Group:['The '+R.promote+' qualified adventurers are divided into groups of '+R.groupSize+' by strength.','Everyone fights everyone in the group; a victory gives '+R.groupWin+' points.','Rounds you do not fight by the end of the day count as losses.','The top two of each group enter the Peak Game.','Every group fight starts with full HP.'],
-  Peak:['32 adventurers, five knock-out rounds on one day.','Fight your round before its deadline, or it counts as a loss.','The HP left after a match carries over to the next one; nothing restores it.','Before a round is decided you may bet '+fmt(R.betStake)+' gold on a player of another match; a right bet pays ×'+R.betPay+'.','Before the first round you may guess the champion; a right guess pays '+fmt(R.guessPay)+' gold.','Ranking rewards arrive by mail when the Peak Game ends.']}[duelInfoTab];
+  Peak:['32 adventurers in four groups of eight: three knock-out rounds inside each group, then the four group winners meet in the Ultimate Showdown (semi-finals and final). Five rounds on one day.','Fight your round before its deadline, or it counts as a loss.','The HP left after a match carries over to the next one; nothing restores it.','Before a round is decided you may bet '+fmt(R.betStake)+' gold on a player of another match; a right bet pays ×'+R.betPay+'.','Before the first round you may guess the champion; a right guess pays '+fmt(R.guessPay)+' gold.','Ranking rewards arrive by mail when the Peak Game ends.']}[duelInfoTab];
  popup(`<h2>Match Description</h2><div class="duel-info"><h3>${duelInfoTab==='Peak'?'Peak Game':duelInfoTab} Schedule</h3>${sched.map(([a,b])=>`<p class="duel-sched"><span>◆ ${a}</span><b>${b}</b></p>`).join('')}<h3>${duelInfoTab==='Peak'?'Peak Game':duelInfoTab} Intro</h3><ol>${intro.map(x=>`<li>${x}</li>`).join('')}</ol></div>
  <div class="duel-infotabs">${['Qualification','Group','Peak'].map(t=>`<button ${t===duelInfoTab?'aria-current="page"':''} onclick="duelInfo('${t}')">${denPlain}${t==='Peak'?'Peak Game':t}</button>`).join('')}</div>`);
 }
@@ -973,9 +973,74 @@ function duelMatch(){
  const r=WonderGear,v=r.duelState(S);let f=null,title='',after='';
  if(duelTab==='Qualification'){f=r.duelQualFight(S);if(f?.tired){toast('No HP left today. It is full again tomorrow.');return}title='Qualification · Match '+r.duelState(S).n;if(f)after=`<br>+${f.pts} points · participation reward in the bag`}
  else if(duelTab==='Group'){f=r.duelGroupFight(S);title='Group stage · Round '+r.duelState(S).g.length;if(f)after=f.win?'<br>+'+r.duelRules.groupWin+' points':''}
- else if(duelTab==='Peak'){f=r.duelPeakFight(S);if(f){title='Peak Game · Round '+(f.round+1);after=f.win?'<br>HP carried to the next round: '+r.duelState(S).php+'%':'<br>Out of the Peak Game.'}}
+ else if(duelTab==='Peak'||duelTab==='Ultimate'){f=r.duelPeakFight(S);if(f){title=['Round of 32','Round of 16','Group final','Semi-final','Final'][f.round];after=f.win?'<br>HP carried to the next round: '+r.duelState(S).php+'%':'<br>Out of the Peak Game.'}}
  if(!f){toast('No match open right now.');return}
  save();cityContest();duelShow(f,title,after);
+}
+// Peak Game board (user photos 2026-11-22): four groups of eight, each a small bracket of round-faces around a VS
+// emblem; the four group winners meet in the Ultimate Showdown (semi-finals and final, with champion betting).
+let duelPeakGroup=null,duelClock=0;
+const duelSpots=[[13,9],[13,37],[87,9],[87,37],[13,63],[13,91],[87,63],[87,91]],duelMid=[[36,23],[64,23],[36,77],[64,77]],duelCore=[[50,36],[50,64]];
+function duelFace(pk,k,cls=''){
+ if(k===null||k===undefined)return `<span class="duel-face unknown ${cls}"><i>?</i></span>`;
+ const p=pk.players[k];if(p.me)return `<span class="duel-face me ${cls}"><img src="${reinaLookPath(false)}" alt=""></span>`;
+ const h=[...p.name].reduce((a,c)=>(a*31+c.charCodeAt(0))%360,7);return `<span class="duel-face ${cls}" style="--hue:${h}"><i>${esc(p.name[0])}</i></span>`;
+}
+const duelShort=(pk,k)=>k===null||k===undefined?'This round':pk.players[k].me?esc(S.name):esc(pk.players[k].name.split(' ')[0])+' <small>AI</small>';
+function duelCountdown(v){
+ const R=WonderGear.duelRules,dayStart=v.start+R.peakDay*864e5,now=Date.now();
+ if(v.day<R.peakDay)return ['Top 32 start countdown',dayStart];
+ if(v.day>R.peakDay||v.hours>=R.peakRounds*R.peakHours)return ['Season ends in',v.start+R.period*864e5];
+ const k=Math.min(R.peakRounds-1,Math.floor(v.hours/R.peakHours));return [k<3?'Round '+(k+1)+' decides in':k===3?'Semi-finals decide in':'Final decides in',dayStart+(k+1)*R.peakHours*36e5];
+}
+function duelTick(){
+ const el=document.querySelector('.duel-count'),b=el?.querySelector?.('b');if(!el?.dataset||!b){clearInterval(duelClock);duelClock=0;return}
+ const left=Math.max(0,+el.dataset.to-Date.now()),d=Math.floor(left/864e5),h=Math.floor(left%864e5/36e5),m=Math.floor(left%36e5/6e4),s=Math.floor(left%6e4/1e3);
+ b.textContent=(d?d+'d ':'')+(d||h?h+'h ':'')+m+'m '+String(s).padStart(2,'0')+'s';
+}
+function duelClockOn(){if(!duelClock)duelClock=setInterval(duelTick,1000);duelTick()}
+function duelBoard(pk,g){
+ const at=(k,i)=>pk.rounds[k]?.matches[i],win=m=>m?m.win:null;
+ const slots=Array.from({length:8},(_,j)=>8*g+j),r0=[0,1,2,3].map(j=>at(0,4*g+j)),r1=[0,1].map(j=>at(1,2*g+j)),r2=at(2,g);
+ const node=(x,y,k,cls,label)=>`<button class="duel-node ${cls}" style="left:${x}%;top:${y}%" ${k===null||k===undefined?'disabled':`onclick="duelPick(${k})"`}>${denPlain}${duelFace(pk,k,k!==null&&k!==undefined&&pk.players[k].me?'mine':'')}${label?`<small>${label}</small>`:''}</button>`;
+ const lines=[[0,0],[1,0],[2,1],[3,1],[4,2],[5,2],[6,3],[7,3]].map(([s,m])=>`<path d="M${duelSpots[s][0]} ${duelSpots[s][1]}H${duelSpots[s][0]<50?24:76}V${duelMid[m][1]}H${duelMid[m][0]}"/>`).join('')
+  +duelMid.map(([x,y],m)=>`<path d="M${x} ${y}H50V${duelCore[m<2?0:1][1]}"/>`).join('');
+ const lost=(m,k)=>m&&m.win!==null&&m.win!==k?'out':'';
+ const champ=win(r2);
+ return `<div class="duel-board"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${lines}</svg>
+  ${slots.map((k,j)=>node(duelSpots[j][0],duelSpots[j][1],k,lost(r0[j>>1],k),duelShort(pk,k))).join('')}
+  ${r0.map((m,j)=>node(duelMid[j][0],duelMid[j][1],win(m),lost(r1[j>>1],win(m)),'')).join('')}
+  ${r1.map((m,j)=>node(duelCore[j][0],duelCore[j][1],win(m),lost(r2,win(m)),'')).join('')}
+  ${champ!==null?`<div class="duel-vs won" style="left:50%;top:50%">${duelFace(pk,champ,'big')}<b>👑 ${duelShort(pk,champ)}</b></div>`:`<div class="duel-vs" style="left:50%;top:50%">VS</div>`}</div>`;
+}
+function duelChampPop(){
+ const r=WonderGear,pk=r.duelPeak(S),v=r.duelState(S),last=[...pk.rounds].reverse().find(x=>x.revealed);
+ const alive=last?last.matches.map(m=>m.win).filter(k=>k!==null):pk.players.map((_,k)=>k);
+ const open=v.guess===undefined&&!pk.rounds[3]?.revealed&&v.day<=r.duelRules.peakDay;
+ popup(`<h2>Champ Betting</h2><p>Guess the champion before the semi-finals are decided. A right guess pays <b>${fmt(r.duelRules.guessPay)}</b> gold.</p>${v.guess!==undefined?`<p>Your bet is on: <b>${duelWho(pk,v.guess)}</b></p>`:''}
+ <div class="duel-champs">${alive.map(k=>`<button ${open?'':'disabled'} onclick="duelGuessNow(${k})">${denPlain}${duelFace(pk,k)}<b>${duelShort(pk,k)}</b></button>`).join('')}</div>${open?'':'<p class="duel-note">Champion betting is closed.</p>'}`);
+}
+function duelRecordPop(){
+ const r=WonderGear,v=r.duelState(S),pk=r.duelPeak(S),names=['Round of 32','Round of 16','Group final','Semi-final','Final'];
+ const peak=pk.rounds.flatMap(rd=>rd.matches.filter(m=>m.mine&&m.win!==null).map(m=>`<div class="${m.win===0?'me':''}"><b>${names[rd.k]}</b><span>vs ${duelWho(pk,m.a===0?m.b:m.a)}</span><em>${m.win===0?'Win':'Loss'}</em></div>`));
+ popup(`<h2>Record</h2><div class="gld-board"><div><b>Qual.</b><span>${v.n} fights · ${v.w} wins · ${v.pts} points</span><em></em></div>${v.g.length?`<div><b>Group</b><span>${v.g.filter(x=>x).length} wins · ${v.g.filter(x=>!x).length} losses</span><em></em></div>`:''}${peak.join('')}</div>`);
+}
+function duelBigTabs(pk,v,R){
+ if(duelTab==='Peak'){
+  const mine=pk.inn?0:-1;if(duelPeakGroup===null)duelPeakGroup=mine>=0?0:0;const g=duelPeakGroup;
+  const canMatch=v.stage==='peak'&&pk.myRound>=0&&pk.myRound<3;
+  return {main:`<div class="duel-ghead"><b>Group ${g+1}</b><small>${pk.inn?pk.meAlive?'You fight in Group 1 · HP '+v.php+'%':'You are out of the Peak Game':'Tap a player to bet or guess the champion'}</small></div>${duelBoard(pk,g)}`,
+   bar:`<div class="duel-gtabs">${[0,1,2,3].map(i=>`<button ${i===g?'aria-current="page"':''} onclick="duelPeakGroup=${i};cityContest()">${denPlain}Group ${i+1}</button>`).join('')}</div>`,canMatch};
+ }
+ const semis=pk.rounds[3],fin=pk.rounds[4],w=m=>m?.win??null;
+ const finalists=fin?[fin.matches[0].a,fin.matches[0].b]:[null,null],champ=pk.champion;
+ const fig=(k,side)=>`<div class="duel-fin ${side}">${k!==null&&pk.players[k].me?`<img src="${reinaLookPath(false)}" alt="">`:`<img class="shade" src="${reinaLookPath(false)}" alt="">`}${champ!==null&&champ===k?'<b class="duel-crown">👑</b>':''}
+  ${k!==null&&fin&&!fin.revealed&&!pk.players[k].me?`<button class="duel-bet" onclick="duelPick(${k})">${denPlain}Bet</button>`:''}</div>`;
+ const canMatch=v.stage==='peak'&&pk.myRound>=3;
+ return {main:`<div class="duel-ult">${fig(finalists[0],'l')}${fig(finalists[1],'r')}
+  <div class="duel-band"><span>${duelFace(pk,finalists[0])}<b>${finalists[0]===null?'Undetermined':duelWho(pk,finalists[0])}</b></span><i>VS</i><span><b>${finalists[1]===null?'Undetermined':duelWho(pk,finalists[1])}</b>${duelFace(pk,finalists[1])}</span></div></div>`,
+  bar:`<div class="duel-panel duel-champ"><h3>Champ Betting<button class="duel-q" onclick="duelInfo('Peak')">${denPlain}?</button></h3><p>Successful guess wins: ${uiIcon('gold')} <b>${fmt(R.guessPay)}</b></p><p>Your bet is on: <b>${v.guess===undefined?'—':duelWho(pk,v.guess)}</b></p>
+  ${semis?`<p class="duel-semis">Semi-finals: ${semis.matches.map(m=>duelWho(pk,m.a)+' vs '+duelWho(pk,m.b)+(m.win!==null?' → '+duelWho(pk,m.win):'')).join(' · ')}</p>`:'<p class="duel-semis">The four group winners of the Peak Game meet here: semi-finals, then the final.</p>'}</div>`,canMatch,champBtn:true};
 }
 function duelRoom(){
  const r=WonderGear,R=r.duelRules;warArtVars();bagArtVars();
@@ -995,19 +1060,17 @@ function duelRoom(){
   else{canMatch=v.stage==='group'&&g.next!==null;matchNote=v.stage!=='group'?'Closed':g.next===null?'Done':'';
    panel=`<h3>Your Group · Round ${Math.min(v.g.length+1,R.groupSize-1)}/${R.groupSize-1}<button class="duel-q" onclick="duelInfo('Group')">${denPlain}?</button></h3><div class="duel-table">${g.standing.map((m,i)=>`<div class="${m.me?'me':''} ${i<2?'up':''}"><b>${i+1}</b><span>${m.me?esc(S.name):esc(m.name)+' <small>AI</small>'}</span><em>${m.won}–${m.lost}</em><i>${m.pts}</i></div>`).join('')}</div>
    <p class="duel-note">${g.next!==null?'Next: '+esc(g.members[g.next].name)+' AI':g.top2?'Top two: you enter the Peak Game!':'The group is over.'}</p>`}
- }else if(duelTab==='Peak'){
-  const pk=r.duelPeak(S),rd=pk.rounds[pk.rounds.length-1];
-  canMatch=v.stage==='peak'&&pk.myRound>=0;matchNote=!pk.inn?'Watch':v.stage!=='peak'?'Closed':'';
-  const names=['Round of 32','Round of 16','Quarter-finals','Semi-finals','Final'];
-  panel=`<h3>${names[rd.k]}${pk.champion!==null?' · Champion: '+duelWho(pk,pk.champion):''}<button class="duel-q" onclick="duelInfo('Peak')">${denPlain}?</button></h3>
-  ${pk.inn?`<i class="gld-bar duel-hp"><u style="width:${v.php}%"></u><em>Peak HP ${v.php}%</em></i>`:''}
-  <div class="duel-rounds">${pk.rounds.map(x=>`<button ${x.k===rd.k?'aria-current="page"':''} disabled>${denPlain}${x.k+1}</button>`).join('')}<span>Bet: ${Object.keys(v.bets).length} · Guess: ${v.guess===undefined?'—':duelWho(pk,v.guess)}</span></div>
-  <div class="duel-bracket">${rd.matches.map(m=>{const side=k=>`<button class="${m.win===k?'won':m.win!==null?'lost':''} ${k===0&&pk.inn?'me':''} ${v.bets[rd.k]===k?'bet':''}" onclick="duelPick(${k})">${denPlain}${duelWho(pk,k)}</button>`;return `<div>${side(m.a)}<i>vs</i>${side(m.b)}</div>`}).join('')}</div>`;
- }else{
-  panel=`<h3>Ultimate Showdown</h3><p class="duel-note">The champions of past Peak Games meet here once a month. Opens after your first Peak Game title.${place===1?' You are a champion this season!':''}</p>`;
  }
  const nav=`<div class="satchel-nav well-nav duel-nav"><button data-back aria-label="Back to Sky Contest" onclick="contestLeave()">‹</button>${[['Qualification',4],['Group',5],['Peak',6],['Ultimate',7]].map(([t,i])=>`<button ${t===duelTab?'aria-current="page"':''} onclick="duelGo('${t}')">${denPlain}${warIcon(i)}${t==='Peak'?'Peak Game':t==='Ultimate'?'Ultimate Showdown':t}</button>`).join('')}</div>`;
  const tool=(icon,label,click)=>`<button class="duel-tool" onclick="${click}">${denPlain}${icon}<small>${label}</small></button>`;
+ if(duelTab==='Peak'||duelTab==='Ultimate'){
+  const pk=r.duelPeak(S),big=duelBigTabs(pk,v,R),[label,to]=duelCountdown(v);
+  $('#main').innerHTML=`<section class="satchel duel-room duel-big duel-t-${duelTab.toLowerCase()}" style="background-image:url('${artPath('comp-war-field')}')">
+  <div class="duel-time duel-count" data-to="${to}">${label}: <b></b><button class="duel-q" onclick="duelInfo('Peak')">${denPlain}?</button></div>
+  ${big.main}${big.bar}
+  <div class="duel-acts">${tool(warIcon(3),'Inspire '+v.insp+'/'+R.inspMax,'duelInspirePop()')}${big.champBtn?`<button class="den-gold duel-match" onclick="duelChampPop()">${denPlain}Champ Betting</button>`:`<button class="den-gold duel-match" ${big.canMatch?'':'disabled'} onclick="duelMatch()">${denPlain}${big.canMatch?'Match':pk.inn?pk.meAlive?'Wait':'Out':'Watch'}</button>`}${big.champBtn&&big.canMatch?`<button class="den-gold duel-match" onclick="duelMatch()">${denPlain}Match</button>`:tool(bagIcon('chest3'),'Rewards','duelRewardsPop()')}${tool(warIcon(7),'Record','duelRecordPop()')}</div>
+  ${nav}</section>`;duelClockOn();return;
+ }
  $('#main').innerHTML=`<section class="satchel duel-room duel-t-${duelTab.toLowerCase()}" style="background-image:url('${artPath('comp-war-field')}')">
   <div class="duel-time">${duelWindow(v)}</div>
   <div class="duel-hero"><small>Lv ${level()} ${esc(S.name)}</small><img src="${reinaLookPath(false)}" alt="Reina"><b>⚔ ${fmt(Math.round(st.power))}</b></div>
