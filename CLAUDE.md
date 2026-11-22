@@ -92,6 +92,25 @@ the player's best. Original art: lobby background, Sprout mascot, 8 ingredient t
 `build-fashion-extras.py`). Logic tests: `node scripts/test-pairs.mjs`. Game buttons need very specific selectors:
 global `#main button` rules set position, borders and `::before`.
 
+## Crystal Cascade, Pairs effects, Mini Games grid (2026-11-22)
+- Crystal Cascade (`src/cascade.js`, screen id `cascade`, Mini Games card + sub-nav tab): a falling-block puzzle with
+  original magic art. Rules in `Cascade` (pure, `node scripts/test-cascade.mjs`): 10 x 20 well, seven four-crystal
+  shapes with a seven-bag, kicks, ghost, soft / hard drop, lock delay, 100/300/500/800 x level for 1-4 rows with names
+  (Spark!, Twin Burst!, Triple Nova!, Arcane Cascade!), combo, Crystal Clear bonus, a level every ten rows. Chests at
+  1,500 / 4,000 / 8,000 points (Oak / Moon / Winged into the bag); gold = score / 10 (cap 800), XP cap 80, two rewarded
+  runs a UTC day (optional `S.cascadeDaily {day,runs}`, `S.cascadeBest`). UI under the `CASCADE_UI` marker: canvas well,
+  shards / rings / sparks / row flash / shake on bursts, queued pop-ups (`cascadePop`, never two at once), chest
+  pop-ups, result pop-up with chests opening one by one and confetti. Touch: tap turns, drag moves, flick down drops;
+  pad buttons repeat while held; keyboard arrows / space. Art (image model): `art-source/cascade/{tiles,chests,cover}`
+  -> `cascade-tiles`, `cascade-chests`, `cascade-cover` by `scripts/build-cascade-art.py` (also writes AVIF copies).
+- Harvest Pairs effects (user: "too primitive"): an energy bolt draws along the joining line with a glowing orb
+  (`pairsEnergy`, SVG animateMotion), both tiles flare and burst into a ring and sparks (`pairsBurst`), a cleared basket
+  sends a star shower and "Basket cleared!" (`pairsShower`), the finish panel pops in with turning rays and confetti
+  (`.pairs-done`, `pairsConfetti`). Tiles are freed at once as before; only the visuals last longer.
+- Mini Games list is a compact 2-column grid (overrides at the end of `stage.css`); Jungle Trek has a new cover with
+  the dragon (`cover-jungle`, source `art-source/trek/cover.webp`). Hosted bundle: AVIF copies of crownfall-vale,
+  cloud-war-twin-islands and cloud-war-realms-2 were re-saved at quality 34 (headroom ~180 KB).
+
 ## Jungle Trek second pass (2026-11-18)
 The user sent photos of a reference runner-shooter (no text); Jungle Trek was restyled toward it with original art:
 painted clearing background (`trek-bg`), barrel sprite (`trek-barrel`), power-up orbs (`trek-pickup-1..3`), violet-gold

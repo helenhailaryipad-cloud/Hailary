@@ -6592,7 +6592,7 @@ body[data-screen="pairs"] #stage #main{position:fixed!important;inset:0!importan
 .pairs-line polyline{animation:pairs-line-out .24s ease-in forwards}
 @keyframes pairs-line-out{70%{opacity:1}to{opacity:0}}
 .pairs-gate>small:only-child{padding:.5rem 1.4rem;border-radius:1.4rem;background:#1d4a3ae6}
-@media (prefers-reduced-motion:reduce){.pairs-tile.matched,.pairs-line polyline{animation-duration:.01s}}
+@media (prefers-reduced-motion:reduce){.pairs-tile.matched{animation-duration:.01s!important}}
 /* Harvest Pairs: controls sit in their own row under the board, so the tallest basket never runs under them */
 .pairs-screen{grid-template-rows:minmax(84px,20%) auto 1fr auto}
 .pairs-field{padding:1.5% 2%}
@@ -8056,3 +8056,59 @@ body[data-screen=home] #stage #main .city-chat .city-social::before,body[data-sc
 #stage #modal.den-pop .cas-rscore{animation:cas-score .7s cubic-bezier(.2,1.6,.4,1) both}
 @keyframes cas-score{0%{transform:scale(.2);opacity:0}60%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}}
 .cas-pop.leave{animation:cas-leave .25s ease-in forwards!important}@keyframes cas-leave{to{opacity:0;transform:translateY(-30px) scale(.8)}}
+/* Harvest Pairs effects (2026-11-22): energy bolt along the line, tile bursts, basket shower, finish panel */
+.pairs-energy path{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:pairs-draw .17s linear forwards,pairs-fade .3s ease-in .3s forwards}
+.pairs-energy .glow{stroke:#ffcf3a;stroke-width:.32;opacity:.55;filter:blur(.06px)}
+.pairs-energy .core{stroke:#fffbe0;stroke-width:.1}
+.pairs-energy .orb{fill:#fff;filter:drop-shadow(0 0 .12px #fff36b) drop-shadow(0 0 .25px #ff9a2e);animation:pairs-fade .15s ease-in .2s forwards}
+@keyframes pairs-draw{to{stroke-dashoffset:0}}
+@keyframes pairs-fade{to{opacity:0}}
+.pairs-tile.matched{pointer-events:none;animation:pairs-pop .46s cubic-bezier(.3,1.6,.5,1) forwards!important}
+@keyframes pairs-pop{0%{transform:scale(1)}30%{transform:scale(1.28);filter:brightness(1.8) drop-shadow(0 0 10px #fff6a0)}55%{opacity:1;transform:scale(1.1) rotate(6deg);filter:brightness(2.4) drop-shadow(0 0 16px #ffd36b)}100%{opacity:0;transform:scale(.2) rotate(-25deg);filter:brightness(3)}}
+.pairs-burst{position:absolute;width:0;height:0;pointer-events:none;z-index:4}
+.pairs-burst i{position:absolute;left:0;top:0;border-radius:50%;transform:translate(-50%,-50%)}
+.pairs-burst .flash{width:calc(var(--cell)*1.3);height:calc(var(--cell)*1.3);background:radial-gradient(#fff 0,#fff8c0 25%,#ffd36b66 50%,transparent 70%);animation:pairs-flash .45s ease-out forwards}
+.pairs-burst .ring{width:calc(var(--cell)*.4);height:calc(var(--cell)*.4);border:3px solid #fff6b0;box-shadow:0 0 10px #ffd36b,inset 0 0 8px #ffd36b;animation:pairs-ring .55s ease-out forwards}
+.pairs-burst .spark{width:calc(var(--cell)*.16);height:calc(var(--cell)*.16);background:radial-gradient(#fff,#ffe27a 50%,#ff9a2e00 75%);animation:pairs-spark .6s cubic-bezier(.1,.7,.3,1) forwards}
+@keyframes pairs-flash{0%{transform:translate(-50%,-50%) scale(.3);opacity:1}100%{transform:translate(-50%,-50%) scale(1.4);opacity:0}}
+@keyframes pairs-ring{0%{transform:translate(-50%,-50%) scale(.4);opacity:1}100%{transform:translate(-50%,-50%) scale(3.6);opacity:0;border-width:1px}}
+@keyframes pairs-spark{0%{transform:translate(-50%,-50%) rotate(var(--a)) translateX(0) scale(1.3);opacity:1}100%{transform:translate(-50%,-50%) rotate(var(--a)) translateX(calc(var(--cell)*var(--d))) scale(.2);opacity:0}}
+.pairs-shower{position:absolute;inset:0;pointer-events:none;z-index:5;display:grid;place-items:center}
+.pairs-shower i{position:absolute;left:50%;top:50%}
+.pairs-shower .wave{width:20%;aspect-ratio:1;border-radius:50%;border:4px solid #fff6b0;box-shadow:0 0 24px #ffd36b,inset 0 0 18px #ffd36b;transform:translate(-50%,-50%);animation:pairs-wave .9s ease-out forwards}
+.pairs-shower .star{width:calc(var(--cell)*.32);aspect-ratio:1;background:#fff6b0;clip-path:polygon(50% 0,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0 50%,39% 39%);filter:drop-shadow(0 0 4px #ffd36b);animation:pairs-star 1s cubic-bezier(.1,.7,.3,1) var(--t) both}
+.pairs-shower b{position:relative;font:900 italic clamp(1.4rem,7cqw,2.6rem)/1 Georgia,serif;color:#fff8d0;text-shadow:0 0 12px #ffb32e,0 3px 0 #8a4a10,0 6px 10px #000a;animation:pairs-banner 1.25s cubic-bezier(.2,1.6,.4,1) forwards}
+@keyframes pairs-wave{to{transform:translate(-50%,-50%) scale(7);opacity:0}}
+@keyframes pairs-star{0%{transform:translate(-50%,-50%) rotate(var(--a)) translateX(0) scale(.3);opacity:1}100%{transform:translate(-50%,-50%) rotate(var(--a)) translateX(calc(var(--cell)*3*var(--d))) rotate(180deg) scale(1);opacity:0}}
+@keyframes pairs-banner{0%{transform:scale(.2);opacity:0}25%{transform:scale(1.2);opacity:1}40%{transform:scale(1)}80%{opacity:1}100%{opacity:0;transform:translateY(-20px)}}
+.pairs-panel.pairs-done{overflow:visible;animation:pairs-done .7s cubic-bezier(.2,1.5,.4,1) both;box-shadow:0 0 0 3px #ffe27a,0 0 40px #ffd36b88,0 10px 30px #0009}
+@keyframes pairs-done{0%{transform:translateY(-58%) scale(.3);opacity:0}60%{transform:translateY(-58%) scale(1.08);opacity:1}100%{transform:translateY(-58%) scale(1)}}
+.pairs-done .pairs-rays{position:absolute;left:50%;top:30%;width:240%;aspect-ratio:1;transform:translate(-50%,-50%);background:repeating-conic-gradient(#fff6b033 0 8deg,transparent 8deg 22deg);mask:radial-gradient(closest-side,#000 30%,transparent);-webkit-mask:radial-gradient(closest-side,#000 30%,transparent);animation:pairs-rays 9s linear infinite;pointer-events:none;z-index:-1}
+@keyframes pairs-rays{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.pairs-done h2{animation:pairs-banner-in .8s cubic-bezier(.2,1.6,.4,1) .2s both;text-shadow:0 0 14px #ffb32e}
+.pairs-done .pairs-prize{animation:pairs-banner-in .7s cubic-bezier(.2,1.6,.4,1) .55s both}
+@keyframes pairs-banner-in{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.2);opacity:1}100%{transform:scale(1)}}
+.pairs-confetti{position:absolute;top:35%;width:8px;height:13px;border-radius:2px;background:var(--hue);pointer-events:none;animation:pairs-conf 1.9s cubic-bezier(.2,.6,.4,1) forwards;z-index:3}
+@keyframes pairs-conf{0%{transform:translate(0,0) rotate(0);opacity:1}35%{transform:translate(calc(var(--dx)*.6),var(--dy)) rotate(200deg)}100%{transform:translate(var(--dx),260px) rotate(620deg);opacity:0}}
+@media (prefers-reduced-motion:reduce){.pairs-burst,.pairs-shower,.pairs-confetti{display:none}}
+.pairs-shower b{white-space:nowrap;text-align:center}
+.pairs-done h2{font-size:2.8rem!important}.pairs-confetti{z-index:6}
+/* Mini Games list: compact 2 x 2 cards (user 2026-11-22: "the cards are huge") */
+body[data-screen=games] #stage .game-portals{grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-template-rows:none!important;grid-auto-rows:auto!important;align-content:start;gap:12px!important;padding:6px 10px 10px!important;overflow-y:auto;min-height:0}
+body[data-screen=games] #stage .game-portal{height:auto!important;aspect-ratio:1/1.08;border-radius:16px;box-shadow:0 5px 14px #48311966}
+body[data-screen=games] #stage .game-portal .portal-illustration{border-radius:16px}
+body[data-screen=games] #stage .portal-emblem{transform:scale(.6);transform-origin:top left}
+body[data-screen=games] #stage .portal-game-info{left:8px!important;right:8px!important;bottom:8px!important}
+body[data-screen=games] #stage .portal-game-info>small{font-size:11px!important;letter-spacing:.5px}
+body[data-screen=games] #stage .portal-game-info h2{font-size:clamp(15px,4.2cqw,24px)!important;margin:2px 0 1px!important}
+body[data-screen=games] #stage .portal-game-info .booth-title span{font-size:11px!important}
+body[data-screen=games] #stage .portal-game-info .portal-prizes{display:none}
+body[data-screen=games] #stage .portal-game-info>button{position:static!important;width:100%;margin-top:6px!important;min-height:34px!important;min-width:0!important;padding:4px 8px!important;font-size:14px!important;white-space:nowrap}
+body[data-screen=games] #stage .portal-game-info>button .gpt-icon{width:18px;height:18px}
+body[data-screen=games] #stage #main{container-type:inline-size}
+body[data-screen=games] #stage .game-portals{container-type:inline-size;display:grid!important;flex:1 1 auto}
+body[data-screen=games] #stage .game-portal{aspect-ratio:auto!important;height:calc((100cqw - 32px)/2*1.05)!important;min-height:0!important;max-height:none!important}
+body[data-screen=games] #stage .portal-game-info .booth-title{display:block!important}
+body[data-screen=games] #stage .portal-game-info h2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+body[data-screen=games] #stage .portal-shade{border-radius:16px}
+body[data-screen=games] #stage .portal-game-info{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:0!important}body[data-screen=games] #stage .portal-game-info .booth-title{min-width:0;text-align:left}

@@ -43,3 +43,5 @@ for n, (x0, x1) in enumerate(spans):
 save(atlas, 'cascade-chests')
 
 save(Image.open(SRC/'cover.webp').convert('RGB').resize((720, 1080), Image.Resampling.LANCZOS), 'cascade-cover', 82)
+# Jungle Trek mini-game cover (art-source/trek/cover.webp) is built the same way.
+jt = Image.open("scripts/art-source/trek/cover.webp").convert("RGB").resize((960, 640), Image.Resampling.LANCZOS); save(jt, "cover-jungle", 80)
