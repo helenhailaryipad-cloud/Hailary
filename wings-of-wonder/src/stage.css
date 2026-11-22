@@ -8221,3 +8221,4 @@ html,body,#stage,#stage button{touch-action:manipulation}
 .sup-bigbow{height:70%!important;transform:rotate(24deg);filter:drop-shadow(0 0 16px #ffd36b)!important}
 .sup-bigdeco .sup-frame{width:32cqw}.sup-bigdeco .sup-bubble{font-size:6cqw}
 .sup-center.piece{overflow:hidden}#stage #main .sup-room .sup-bigbow{height:auto!important;max-height:78%!important;max-width:60%!important;object-fit:contain}
+.sup-tier{position:absolute;right:3px;bottom:2px;padding:0 4px;border-radius:4px;background:#1a0f3acc;color:#ffe9a0;font:900 2.6cqw/1.3 Georgia,serif;font-style:normal;z-index:2}#stage #modal .sup-tier{font-size:11px}

@@ -1019,4 +1019,4 @@ vm.runInContext(`
  if(r.supremePieceStats(set.id,'weapon',5).attack!==Math.round(r.supremeStats.weapon.attack*(1+5*R.starStep)*100)/100)throw Error('Star step');
 }
 `,context);
-console.log('PASS: Supreme piece stars: first copy activates, each further copy stars that piece up to 5.');
+console.log('PASS: Supreme piece tiers: first copy activates, each further copy adds the full stats again, up to T5.');
