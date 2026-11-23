@@ -181,7 +181,8 @@ icon (`ui-back`, user crossed the pill out). Smoother pendulum: `response` 6, `t
 (`holdVel`), calmer drift and green band (a simple bot still lands every fish). No jerks on cast / Cast again: the
 tackle shop and the dial share one footer grid cell and cross-fade, `.controls` has a fixed height (footer never moves),
 arrows fade in, and `castFlight()` flies the float from the rod tip to the water on an arc with a splash ring.
-While reeling the arrows are lifted beside the dial's horns (`placeArrows`: a transform only, footer unchanged).
+Fishing is its own content (user): the back button goes to the home screen, and Fishing is no longer in the Mini
+Games hub or the games sub-tabs (its own home icon stays). While reeling the arrows are lifted beside the dial's horns (`placeArrows`: a transform only, footer unchanged).
 
 ## Pet Siege event (2026-11-23)
 User sent twelve photos of the reference's pet siege (no text). Home promo "Pet Siege" opens screen `siege`

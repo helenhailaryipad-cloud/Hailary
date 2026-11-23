@@ -195,8 +195,8 @@ body:is([data-phase=reel],[data-phase=landed],[data-phase=wait]) .controls{width
 <script src="fish-catalog.js"></script><script>
 const el=id=>document.getElementById(id),dialog=document.querySelector('dialog');
 el('exitFishing').onclick=()=>{
- try{if(parent!==window && typeof parent.go==='function'){parent.go('games');return}}catch{}
- location.assign('./?screen=games');
+ try{if(parent!==window && typeof parent.go==='function'){parent.go('home');return}}catch{}
+ location.assign('./');
 };
 const fish=MoonwaterFish.species;
 const album=parent.WonderFishAlbum || {
@@ -270,7 +270,7 @@ standings();setInterval(standings,1000);
 // ---- anglers on the shore ----
 const art=id=>{try{if(parent!==window&&typeof parent.artPath==='function')return parent.artPath(id)}catch{}return 'assets/generated/'+id+'.webp'};
 const ROD={reina:[.998,.002],folk:[[.934,.053],[.919,.003],[.957,.06]]},FOLK_SPOT=[[47,.95],[62,1],[76,.9]];
-el('reinaAngler').src=art('comp-fish-reina');el('exitFishing').style.backgroundImage='url("'+art('ui-back')+'")';el('exitFishing').setAttribute('aria-label','Back to Mini Games');el('lake').style.backgroundImage='url("'+art('comp-fish-water')+'")';
+el('reinaAngler').src=art('comp-fish-reina');el('exitFishing').style.backgroundImage='url("'+art('ui-back')+'")';el('exitFishing').setAttribute('aria-label','Back');el('lake').style.backgroundImage='url("'+art('comp-fish-water')+'")';
 el('folkRow').innerHTML=anglers.slice(0,3).map((n,i)=>`<div class="folk" id="folk${i}" style="left:${FOLK_SPOT[i][0]}%;height:${30*FOLK_SPOT[i][1]}%"><b>${n} <small>AI</small></b><img src="${art('comp-fish-folk-'+(i+1))}" alt=""><i></i></div>`).join('');
 function drawLine(){
  const L=el('lagoon').getBoundingClientRect(),R=el('reinaAngler').getBoundingClientRect(),F=el('float').getBoundingClientRect();if(!L.width||!R.width)return;

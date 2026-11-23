@@ -77,7 +77,7 @@ const sectionPages={
 home:[['home','City'],['profile','Profile'],['attributes','Attributes'],['fashion','Fashion']],
 bag:[['bag','Loadout'],['inventory','Bag'],['forge','Crafting'],['warehouse','Warehouse']],
 dungeons:[['dungeons','Bosses'],['expLobby','EXP Dungeon']],
-games:[['games','All games'],['fishing','Fishing'],['defense','Castle Defense'],['merge','Dragon Merge'],['vale','Crownfall Vale'],['jungle','Jungle Trek'],['pairs','Harvest Pairs'],['cascade','Crystal Cascade'],['party','Splash Party']],
+games:[['games','All games'],['defense','Castle Defense'],['merge','Dragon Merge'],['vale','Crownfall Vale'],['jungle','Jungle Trek'],['pairs','Harvest Pairs'],['cascade','Crystal Cascade'],['party','Splash Party']],
 collection:[['collection','Pets'],['wings','Wings'],['wish','Wishes']],
 cards:[['cards','Fish Journal']],
 more:[['more','Menu'],['world','Realm'],['rankings','Rankings'],['quests','Quests'],['settings','Journal']]
@@ -1168,7 +1168,6 @@ const MINI_GAMES=[['party','comp-party-bg','Splash Party','Event · merge pets',
  ['pairs','pairs-cover','Harvest Pairs','Match the pairs',()=>'Best '+(S.pairsBest?Pairs.clock(S.pairsBest):'—')],
  ['cascade','cascade-cover','Crystal Cascade','Falling crystals',()=>'Best '+fmt(S.cascadeBest||0)],
  ['merge','cover-merge-v2','Dragon Merge','Merge the eggs',()=>'Best '+fmt(S.mergeBest||0)],
- ['fishing','cover-fishing','Fishing','Moonwater Lagoon',()=>'Cast a line'],
  ['defense','cover-castle-v2','Castle Defense','Guard the Grove',()=>'Wins '+fmt(S.defenseWins||0)],
  ['vale','cover-crownfall','Crownfall Vale','Castle conquest',()=>'Four battlefields']];
 function games(){
