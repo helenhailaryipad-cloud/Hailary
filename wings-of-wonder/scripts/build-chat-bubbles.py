@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Painted chat bubbles (image model; sources scripts/art-source/bubbles/<id>.webp). Packed into
-src/assets/generated/comp-chat-bubbles.webp, a 4 x 6 atlas of 256 x 160 tiles in the order: the seven Supreme Set
+src/assets/generated/comp-chat-bubbles.webp, a 4 x 12 atlas of 256 x 160 tiles in the order: the seven Supreme Set
 bubbles (supremeSets), then WonderGear.chatBubbles; plus an AVIF copy for hosting. A tile is stretched over a chat
 line, so each bubble is fitted to the whole tile (not letter-boxed).
 
@@ -13,8 +13,10 @@ import numpy as np
 SRC = Path('scripts/art-source/bubbles'); OUT = Path('src/assets/generated'); HOST = Path('scripts/hosting-art'); W, H = 256, 160
 IDS = ['ember', 'frost', 'jade', 'star', 'mermaid', 'icequeen', 'love',
        'starmoon', 'inferno', 'arcade', 'fairy', 'lantern', 'seaside', 'idol', 'ocean', 'hourglass',
-       'rose', 'dragonling', 'pumpkin', 'harvest', 'pirate', 'clockwork', 'holly']
-atlas = Image.new('RGBA', (4*W, 6*H))
+       'rose', 'dragonling', 'pumpkin', 'harvest', 'pirate', 'clockwork', 'holly',
+       'melody', 'northlight', 'royal', 'knight', 'storm', 'gem', 'gothic', 'lotus', 'sakura', 'meadow', 'candy', 'teaparty', 'bunny',
+       'carnival', 'library', 'snowfall', 'oasis', 'tropic', 'papillon', 'kitty', 'foxwood', 'owl', 'honey', 'rainbow']
+atlas = Image.new('RGBA', (4*W, 12*H))
 for n, i in enumerate(IDS):
     im = Image.open(SRC/f'{i}.webp').convert('RGBA'); im = im.crop(im.getbbox())
     pad = Image.new('RGBA', (im.width + im.width//40, im.height + im.height//25)); pad.alpha_composite(im, (im.width//80, im.height//50))

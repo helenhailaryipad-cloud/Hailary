@@ -22,7 +22,8 @@ UNUSED = re.compile(r'^assets/generated/(?:fitting-|atelier-(?!icon-)|parts-|fit
 PACKS = {'gear': re.compile(r'^assets/generated/gear-'), 'familiar': re.compile(r'^assets/generated/familiar-'),
          'guardian': re.compile(r'^assets/generated/guardian-t'), 'fish': re.compile(r'^assets/moonwater/'),
          'icons': re.compile(r'^assets/generated/(?:fit-icon-|atelier-icon-|mount-icon-)'), 'bows': re.compile(r'^assets/generated/weapon-style-'), 'wings': re.compile(r'^assets/generated/fashion-wing-'), 'comp': re.compile(r'^assets/generated/(?:comp-|explore-marker-)'),
-         'erase': re.compile(r'^assets/generated/fit-control-[a-z]+-erase\.'), 'minis': re.compile(r'^assets/generated/(?:trek-pickup-|pairs-tile-)')}
+         'erase': re.compile(r'^assets/generated/fit-control-[a-z]+-erase\.'), 'minis': re.compile(r'^assets/generated/(?:trek-pickup-|pairs-tile-)'),
+         'hairs': re.compile(r'^assets/generated/fit-control-(?:mount)?hair-')}
 packed = {k: {} for k in PACKS}
 tracked = subprocess.run(['git', 'ls-files', 'src'], cwd=ROOT, capture_output=True, text=True, check=True).stdout.split('\n')
 for f in filter(None, tracked):

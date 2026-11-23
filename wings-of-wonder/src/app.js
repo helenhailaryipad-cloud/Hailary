@@ -184,8 +184,12 @@ const reinaDresses = [
 // Gold price by the theme's rarity (placeholders).
 const THEME_GOWNS={rose:'Rose Balloon Gala',dragonling:'Dragonling Festival',pumpkin:'Pumpkin Night Witch',harvest:'Harvest Maiden',pirate:'Pirate Captain',
  clockwork:'Clockwork Engineer',holly:'Winter Holly',lantern:'Lantern Festival',seaside:'Seaside Summer',idol:'Idol Stage',ocean:'Ocean Wave',
- hourglass:'Hourglass Chronomancer',arcade:'Neon Arcade',inferno:'Inferno Charm',fairy:'Fairy Garden',starmoon:'Star-Moon Empress'};
-const THEME_GOLD={sr:2500,ssr:5000,ur:9000,mr:15000};
+ hourglass:'Hourglass Chronomancer',arcade:'Neon Arcade',inferno:'Inferno Charm',fairy:'Fairy Garden',starmoon:'Star-Moon Empress',
+ sakura:'Sakura Spring',meadow:'Daisy Meadow',candy:'Candy Land',teaparty:'Tea Party',bunny:'Spring Bunny',carnival:'Carnival Ringmaster',
+ library:'Grand Scholar',melody:'Melody Concert',snowfall:'Snowfall Coat',northlight:'Northern Lights',oasis:'Desert Oasis',tropic:'Tropical Bloom',
+ papillon:'Butterfly Dream',kitty:'Kitty Cafe',foxwood:'Fox Ranger',royal:'Royal Court',knight:'Silver Knight',owl:'Night Owl',storm:'Thunderstorm',
+ gem:'Crystal Gems',honey:'Honey Bee',rainbow:'Rainbow Sky',gothic:'Gothic Rose',lotus:'Lotus Pond'};
+const THEME_GOLD={sr:2500,ssr:5000};
 for(const f of WonderGear.avatarFrames)reinaDresses.push({id:f.dress,outfit:THEME_GOWNS[f.id],gold:THEME_GOLD[f.rar],reinaOnly:true,theme:f.id});
 const PREMIUM_LOOKS=new Set(['phoenix','snowqueen','peacock','galaxy','fashion-wing-21','fashion-wing-22','fashion-wing-23','fashion-wing-24','mermaid','icequeen','sweetheart','fashion-wing-25','fashion-wing-26','fashion-wing-27']);
 const premiumLocked=id=>PREMIUM_LOOKS.has(id)&&!(ownsOutfit(id)||S.reinaFashion?.wingSkins?.includes(id)||S.reinaFashion?.wingSkin===id);
@@ -552,7 +556,9 @@ const styleSets={
   Weapons:{slot:'weapon',bit:4,price:800,bonus:'+6 Attack',classic:'Original bow',legacy:'Frostglass bow',names:['Rosewood Thorn','Glacier Recurve','Swanfeather','Amber Sunwheel','Indigo Crescent','Ruby Dragon','Tide Serpent','Raven Thorn','Clockwork Compound','Orchid Butterfly','Azure Laurel',null,null,
     'Aurora Arc','Thornrose Longbow','Pearl Tide','Ravenfeather','Sunflower Bough','Frostspire','Maple Whisper','Stargazer','Corsair Coral','Jade Phoenix',
     // Fashion theme bows 24-39 (WonderGear.themeBows)
-    'Balloon Ribbon','Gift Wing','Pumpkin Lantern','Wheat Sheaf','Anchor Corsair','Cogwheel Repeater','Holly Bell','Crimson Lantern','Shell Breeze','Encore Star','Tidecrest','Sandglass','Pixel Blaster','Heartflame','Vine Bloom','Crescent Moon']}
+    'Balloon Ribbon','Gift Wing','Pumpkin Lantern','Wheat Sheaf','Anchor Corsair','Cogwheel Repeater','Holly Bell','Crimson Lantern','Shell Breeze','Encore Star','Tidecrest','Sandglass','Pixel Blaster','Heartflame','Vine Bloom','Crescent Moon',
+    'Sakura Bough','Daisy Chain','Candy Cane','Teatime','Bunny Hop','Big Top','Scholar Quill','Violin Scroll','Snowman','Northern Glow','Oasis Lamp','Hibiscus',
+    'Papillon','Kitten Paw','Fox Tail','Royal Crown','Knight Laurel','Owl Feather','Thunderclap','Amethyst Shard','Honeycomb','Rainbow Arc','Black Rose','Lotus Koi']}
 };
 let stylePick=null;
 function changeFashionTab(tab){++fashionPreviewRequest;fashionCategory=tab;if(tab==='Wings'){wingPreview=S.reinaFashion?.wingSkin||fashionWings[0].id;}if(tab==='Mounts')mountPreview=currentMount()?.id||chosenMount().id;stylePick=null;clothingPreview=undefined;reinaAtelier()}
@@ -663,10 +669,11 @@ function ensureWardrobeCatalog(){
  }
  // Grip position (fraction of the art's width) and drawn height of each bow; 12 reuses art 2.
  const bowGrip={1:.63,2:.68,3:.68,4:.61,5:.62,6:.56,7:.65,8:.62,9:.65,10:.60,14:.60,15:.60,16:.58,17:.60,18:.61,19:.62,20:.62,21:.62,22:.56,23:.62,
-  24:.63,25:.62,26:.60,27:.58,28:.58,29:.59,30:.58,31:.69,32:.60,33:.61,34:.59,35:.58,36:.59,37:.58,38:.64,39:.59};
+  24:.63,25:.62,26:.60,27:.58,28:.58,29:.59,30:.58,31:.69,32:.60,33:.61,34:.59,35:.58,36:.59,37:.58,38:.64,39:.59,
+  40:.57,41:.59,42:.57,43:.56,44:.61,45:.56,46:.72,47:.58,48:.67,49:.56,50:.57,51:.55,52:.63,53:.65,54:.58,55:.56,56:.60,57:.61,58:.55,59:.59,60:.58,61:.61,62:.59,63:.64};
  // Opaque artwork bounds, including rotation, retain a 12px canvas margin.
  const bowHeight={1:301,2:308,3:319,4:306,5:295,6:340,7:303,8:300,9:279,10:313};
- for(let id=1;id<=39;id++){
+ for(let id=1;id<=63;id++){
   let layers;
   if(id===11||id===13)layers=[
    {slot:'weapon',asset:'fit-control-bow-11',clip:wardrobeLeafPath('bow')},

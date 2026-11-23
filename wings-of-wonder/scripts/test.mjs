@@ -20,7 +20,7 @@ vm.runInContext(fs.readFileSync('src/wardrobe-engine.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/app.js','utf8'),context);
 vm.runInContext(`
 S=defaults();S.gold=500000;openScreen('fashion');
-if(reinaDresses.length!==43)throw Error('Clothing catalog');
+if(reinaDresses.length!==67)throw Error('Clothing catalog');
 for(const dress of reinaDresses){
   clothingPreview=dress.id;
   if(!reinaLookPath(false,2,dress.id).includes('#registered-'))throw Error('Old body renderer remains');
@@ -37,7 +37,7 @@ wearOutfit('reina','pearl',false);
 for(const category of ['Hair','Weapons']){
   changeFashionTab(category);
   const set=styleSets[category];
-  if(set.names.filter(Boolean).length!==(category==='Hair'?21:37))throw Error('Missing fashion styles');
+  if(set.names.filter(Boolean).length!==(category==='Hair'?21:61))throw Error('Missing fashion styles');
   if(category==='Weapons'){
     // 12 and 13 are the compositor's legacy and original bows, never purchasable styles.
     for(const reserved of [12,13]){stylePick=reserved;const gold=S.gold;wearStyle();if(S.gold!==gold||S.atelier?.weapon===reserved)throw Error('Reserved bow number sold');}
@@ -330,7 +330,7 @@ console.log('PASS: 100 collectable species, legacy catches, exact duplicate stat
 
 vm.runInContext(`
 S=defaults();S.gold=500000;openScreen('fashion');
-if(fittingDresses.length!==45||fittingHairs.length!==21)throw Error('Registered wardrobe incomplete');
+if(fittingDresses.length!==69||fittingHairs.length!==21)throw Error('Registered wardrobe incomplete');
 for(const {id,outfit,gold} of reinaDresses){
  changeFashionTab('Dresses');clothingPreview=id;
  if(!registeredFashionRoom().includes(outfit==='Moonlit Ballerina'?'Amethyst Lace':outfit))throw Error('Missing garment choice');
@@ -1013,23 +1013,27 @@ console.log('PASS: Supreme Sets: Elite Sale purchase for prisms, limits, stars, 
 
 vm.runInContext(`
 {const r=WonderGear;S=defaults();S.gold=0;S.scales=0;
- if(r.avatarFrames.length!==16||new Set(r.avatarFrames.map(f=>f.id)).size!==16)throw Error('Sixteen own frames');
+ if(r.avatarFrames.length!==40||new Set(r.avatarFrames.map(f=>f.id)).size!==40||r.avatarFrames.some(f=>!['sr','ssr'].includes(f.rar)||f.stats.attack>=r.supremeStats.frame.attack))throw Error('Forty weak own frames');
  if(r.frameBuy(S,'rose'))throw Error('No gold, no frame');
  S.gold=1e6;S.scales=1e5;const atk0=stats().attack,got=r.frameBuy(S,'rose');
  if(!got||S.gold!==1e6-5000||S.supreme.frame!=='rose'||r.frameTier(S,'rose')!==0||stats().attack<=atk0||!valid(S))throw Error('Buy an SR frame: activated and worn');
- r.frameBuy(S,'rose');if(r.frameTier(S,'rose')!==1||r.supremeBonus(S).attack!==300)throw Error('Second copy is T1 (2 x stats)');
- r.frameBuy(S,'starmoon');if(S.supreme.frame!=='rose'||S.scales!==1e5-600)throw Error('MR for prisms, worn frame kept');
+ r.frameBuy(S,'rose');if(r.frameTier(S,'rose')!==1||r.supremeBonus(S).attack!==200)throw Error('Second copy is T1 (2 x stats)');
+ const g1=S.gold;r.frameBuy(S,'starmoon');if(S.supreme.frame!=='rose'||S.gold!==g1-12000)throw Error('SSR for gold, worn frame kept');
  if(!r.supremeWear(S,'frame','starmoon')||r.supremeWear(S,'frame','pirate'))throw Error('Wear only owned frames');
  for(let i=0;i<25;i++)r.frameBuy(S,'holly');if(r.frameTier(S,'holly')!==r.frameRules.maxTier)throw Error('Tier cap');
  for(const bad of [{frames:{nope:1}},{frames:{rose:-1}},{frame:'pirate'}])if(valid({...S,supreme:{...S.supreme,...bad}}))throw Error('Invalid frame accepted '+JSON.stringify(bad));
- go('fashion');changeFashionTab('Avatar');const h=$('#main').innerHTML;if(!h.includes('Star-Moon')||!h.includes('Tier-up')||!h.includes('r-mr'))throw Error('Avatar tab lists the frames '+screen+' '+h.slice(0,300));
+ go('fashion');changeFashionTab('Avatar');const h=$('#main').innerHTML;if(!h.includes('Star-Moon')||!h.includes('Tier-up')||!h.includes('Lotus Pond'))throw Error('Avatar tab lists the frames');
 }
 `,context);
-console.log('PASS: Avatar frames: sixteen own frames, MR/UR/SSR/SR, buy, tiers, wear, validation, Avatar tab.');
+console.log('PASS: Avatar frames: forty weak own frames (SR/SSR), buy, tiers, wear, validation, Avatar tab.');
+{const order=f=>[...fs.readFileSync(f,'utf8').match(/IDS = \[([^\]]+)\]/)[1].matchAll(/'([a-z]+)'/g)].map(m=>m[1]);
+ const want=vm.runInContext('[...WonderGear.supremeSets.map(x=>x.id),...WonderGear.avatarFrames.map(x=>x.id)].join()',context);
+ for(const f of ['scripts/build-avatar-frames.py','scripts/build-chat-bubbles.py'])assert.equal(order(f).join(),want,f+' atlas order');
+ console.log('PASS: Frame and bubble atlases follow the catalog order.');}
 
 vm.runInContext(`
 {const r=WonderGear;S=defaults();S.gold=1e6;S.scales=1e5;
- if(r.chatBubbles.length!==16)throw Error('Sixteen own bubbles');
+ if(r.chatBubbles.length!==40)throw Error('Forty own bubbles');
  const hp0=stats().health,got=r.decoBuy(S,'bubble','rose');
  if(!got||S.supreme.bubble!=='rose'||S.supreme.frame||stats().health<=hp0||!valid(S))throw Error('Buy a bubble: activated and worn, frame untouched');
  r.decoBuy(S,'bubble','rose');if(r.decoTier(S,'bubble','rose')!==1)throw Error('Bubble tier');

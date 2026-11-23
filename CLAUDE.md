@@ -565,6 +565,14 @@ weapon styles 24-39 (`themeBows`, sources `art-source/bows/bow-24..39.webp`, `bo
 loop runs to 39). `themeOfDress`, `themeOfBow`; cards take the theme's rarity. `themeChips(th)` (`.fx-theme`, right
 column of the stage) lists the four pieces with ticks and jumps to them (`themeJump`) from the Avatar, Bubble, Garment
 and Fashion Bow tabs. Not done: the reference's event exchange shop (Adventure Shop with tokens).
+Themes are the WEAK, plentiful line (user: "these are not Supreme Sets; they are weak, but there must be many so there is
+a choice"): 40 themes, only SR / SSR (`themeRarStats`, `themeRarPrice`: all for gold; frame ATK 100/140 against the
+Supreme frame's 300; bubbles `bubbleStatsBy`). The 24 added in the third pass: melody northlight royal knight storm gem
+gothic lotus (SSR), sakura meadow candy teaparty bunny carnival library snowfall oasis tropic papillon kitty foxwood owl
+honey rainbow (SR); bows 40-63. Frame and bubble atlases are 4 x 12 (`FRAME_ROWS` 12); the build scripts' `IDS` must
+follow sets + `avatarFrames` order (a test checks it). Bubbles from the image model often have see-through centres:
+their panels are refilled with a per-theme colour (session helper, the sources in `art-source/bubbles/` are already
+fixed). Hosted bundle 31.9 MB (about 1.7 MB spare). Chat preview packs hair layers too (`pack-hairs.js`).
 All bundled AVIF copies over 40 KB were re-encoded at quality 32 where that saved 15%+ (193 files, -5.6 MB raw; spot
 checks looked identical): hosted bundle 28.1 MB. Chat preview packs `fit-control-*-erase` (`pack-erase.js`) and
 trek pickups / pairs tiles (`pack-minis.js`) to stay under 511 files.

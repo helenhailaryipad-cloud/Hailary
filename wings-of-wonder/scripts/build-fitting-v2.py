@@ -201,7 +201,8 @@ def build_frostlace():  # Amethyst Lace, painted at 500 x 750
 PAINTED = ['emberveil', 'dawnpetal', 'nightbloom', 'sunweave', 'tidal', 'willow', 'stardust', 'pearl', 'sapphire',
            'aurora', 'rosethorn', 'seafoam', 'ravenwing', 'sunflower', 'frostqueen', 'autumn', 'starlit', 'coral', 'jade',
            'phoenix', 'snowqueen', 'peacock', 'galaxy', 'mermaid', 'icequeen', 'sweetheart',   # Supreme Set exclusives
-           *['throse', 'thdragonling', 'thpumpkin', 'thharvest', 'thpirate', 'thclockwork', 'thholly', 'thlantern', 'thseaside', 'thidol', 'thocean', 'thhourglass', 'tharcade', 'thinferno', 'thfairy', 'thstarmoon']]   # fashion themes (frame + bubble + gown + bow)
+           *['throse', 'thdragonling', 'thpumpkin', 'thharvest', 'thpirate', 'thclockwork', 'thholly', 'thlantern', 'thseaside', 'thidol', 'thocean', 'thhourglass', 'tharcade', 'thinferno', 'thfairy', 'thstarmoon',
+            'thsakura', 'thmeadow', 'thcandy', 'thteaparty', 'thbunny', 'thcarnival', 'thlibrary', 'thmelody', 'thsnowfall', 'thnorthlight', 'thoasis', 'thtropic', 'thpapillon', 'thkitty', 'thfoxwood', 'throyal', 'thknight', 'thowl', 'thstorm', 'thgem', 'thhoney', 'thrainbow', 'thgothic', 'thlotus']]   # fashion themes (frame + bubble + gown + bow)
 def build_painted(name):  # repainted on the base body at 1024 x 1536
     P = arr(Image.open(SRC/'fitting-control/painted'/(name+'.png')))
     return save_painted(name, P, *painted_layer(P, arr(body_hi)))

@@ -1315,37 +1315,34 @@ const supremeStats={outfit:{attack:150,health:6000,defense:150,healthPercent:3},
  bubble:{attack:300,defense:150,penetration:150,critResistance:3},frame:{attack:300,defense:150,penetration:150,crit:2}};
 const supremeRules={setBonus:{attack:200,attackPercent:8,healthPercent:8},starStep:1,pieceStars:5,maxStars:10,price:300,oldPrice:900,gold:680,saleStart:Date.UTC(2026,10,14),saleDays:4};
 const supremeById=Object.fromEntries(supremeSets.map(x=>[x.id,x])),supremePieceIds=supremePieces.map(p=>p.id);
-// Avatar frames of their own (user photos of the reference's Avatar tab: many themed frames, MR / UR / SSR / SR, each
-// with stats and tiers). Kept in S.supreme.frames {id: copies}; the worn frame (S.supreme.frame) is a set id or one of
-// these. Owning a frame activates its stats for good; every further copy is a tier (T1..T20), each tier adds the base
-// stats once more (base 150 ATK -> T1 300 ATK, as in the photo). SR for gold, the rest for prisms. Placeholders.
+// Avatar frames of their own (user photos of the reference's Avatar tab: many themed frames, each with stats and
+// tiers). Kept in S.supreme.frames {id: copies}; the worn frame (S.supreme.frame) is a set id or one of these. Owning a
+// frame activates its stats for good; every further copy is a tier (T1..T20), each tier adds the base stats once more.
+// Fashion themes are the WEAK, plentiful line (user: "these are not Supreme Sets, they are weak, but even weak ones there
+// must be many so there is a choice"): only SR and SSR, all for gold, stats well below the Supreme pieces.
+const themeRarStats={sr:{attack:100,health:1500,defense:40},ssr:{attack:140,health:2000,defense:55}};
+const themeRarPrice={sr:{gold:5000},ssr:{gold:12000}};
 const avatarFrames=[
- {id:'starmoon',name:'Star-Moon',rar:'mr',price:{scales:600},stats:{attack:400,health:5000,defense:150,crit:1}},
- {id:'inferno',name:'Inferno Charm',rar:'ur',price:{scales:300},stats:{attack:250,health:3500,defense:100}},
- {id:'arcade',name:'Arcade',rar:'ur',price:{scales:300},stats:{attack:250,health:3500,defense:100}},
- {id:'fairy',name:'Fairy Garden',rar:'ur',price:{scales:300},stats:{attack:250,health:3500,defense:100}},
- {id:'lantern',name:'Lantern Festival',rar:'ssr',price:{scales:120},stats:{attack:200,health:2500,defense:70}},
- {id:'seaside',name:'Seaside',rar:'ssr',price:{scales:120},stats:{attack:200,health:2500,defense:70}},
- {id:'idol',name:'Idol Stage',rar:'ssr',price:{scales:120},stats:{attack:200,health:2500,defense:70}},
- {id:'ocean',name:'Ocean Wave',rar:'ssr',price:{scales:120},stats:{attack:200,health:2500,defense:70}},
- {id:'hourglass',name:'Hourglass',rar:'ssr',price:{scales:120},stats:{attack:200,health:2500,defense:70}},
- {id:'rose',name:'Rose Balloon',rar:'sr',price:{gold:5000},stats:{attack:150,health:2000,defense:50}},
- {id:'dragonling',name:'Dragonling Gift',rar:'sr',price:{gold:5000},stats:{attack:150,health:2000,defense:50}},
- {id:'pumpkin',name:'Pumpkin Night',rar:'sr',price:{gold:5000},stats:{attack:150,health:2000,defense:50}},
- {id:'harvest',name:'Harvest',rar:'sr',price:{gold:5000},stats:{attack:150,health:2000,defense:50}},
- {id:'pirate',name:'Pirate Cove',rar:'sr',price:{gold:5000},stats:{attack:150,health:2000,defense:50}},
- {id:'clockwork',name:'Clockwork',rar:'sr',price:{gold:5000},stats:{attack:150,health:2000,defense:50}},
- {id:'holly',name:'Winter Holly',rar:'sr',price:{gold:5000},stats:{attack:150,health:2000,defense:50}}];
-// Chat bubbles of their own (user photo of the reference's Bubble tab): the same sixteen themes as the frames, painted
-// as speech bubbles; S.supreme.bubbles {id: copies}, worn one in S.supreme.bubble (a set id or one of these). Same tier
-// rule; their stats lean on HP / DEF / ARP as in the photo. Placeholders.
+ ['starmoon','Star-Moon','ssr'],['inferno','Inferno Charm','ssr'],['arcade','Arcade','ssr'],['fairy','Fairy Garden','ssr'],
+ ['lantern','Lantern Festival','ssr'],['seaside','Seaside','ssr'],['idol','Idol Stage','ssr'],['ocean','Ocean Wave','ssr'],['hourglass','Hourglass','ssr'],
+ ['rose','Rose Balloon','sr'],['dragonling','Dragonling Gift','sr'],['pumpkin','Pumpkin Night','sr'],['harvest','Harvest','sr'],['pirate','Pirate Cove','sr'],
+ ['clockwork','Clockwork','sr'],['holly','Winter Holly','sr'],
+ // third pass: 24 more themes
+ ['melody','Melody','ssr'],['northlight','Northern Lights','ssr'],['royal','Royal Court','ssr'],['knight','Silver Knight','ssr'],['storm','Thunderstorm','ssr'],
+ ['gem','Crystal Gems','ssr'],['gothic','Gothic Rose','ssr'],['lotus','Lotus Pond','ssr'],
+ ['sakura','Sakura Spring','sr'],['meadow','Daisy Meadow','sr'],['candy','Candy Land','sr'],['teaparty','Tea Party','sr'],['bunny','Spring Bunny','sr'],
+ ['carnival','Carnival','sr'],['library','Grand Library','sr'],['snowfall','Snowfall','sr'],['oasis','Desert Oasis','sr'],['tropic','Tropical Bloom','sr'],
+ ['papillon','Butterfly Dream','sr'],['kitty','Kitty Cafe','sr'],['foxwood','Fox Forest','sr'],['owl','Night Owl','sr'],['honey','Honey Bee','sr'],['rainbow','Rainbow Sky','sr']
+].map(([id,name,rar])=>({id,name,rar,price:themeRarPrice[rar],stats:themeRarStats[rar]}));
 // Fashion themes (user photos of the reference's Adventure Shop: a frame and a bubble come as a pair, with a gown and a
 // weapon of the same theme). Every own frame has a bubble, a gown (dress id 'th'+id, painted on the base body like the
 // other gowns, in the wardrobe) and a bow (weapon style number) of its theme.
-const themeBows={rose:24,dragonling:25,pumpkin:26,harvest:27,pirate:28,clockwork:29,holly:30,lantern:31,seaside:32,idol:33,ocean:34,hourglass:35,arcade:36,inferno:37,fairy:38,starmoon:39};
+const themeBows={rose:24,dragonling:25,pumpkin:26,harvest:27,pirate:28,clockwork:29,holly:30,lantern:31,seaside:32,idol:33,ocean:34,hourglass:35,arcade:36,inferno:37,fairy:38,starmoon:39,
+ sakura:40,meadow:41,candy:42,teaparty:43,bunny:44,carnival:45,library:46,melody:47,snowfall:48,northlight:49,oasis:50,tropic:51,papillon:52,kitty:53,
+ foxwood:54,royal:55,knight:56,owl:57,storm:58,gem:59,honey:60,rainbow:61,gothic:62,lotus:63};
 for(const f of avatarFrames){f.dress='th'+f.id;f.bow=themeBows[f.id]}
 const themeOfDress=id=>avatarFrames.find(f=>f.dress===id)||null,themeOfBow=n=>avatarFrames.find(f=>f.bow===n)||null;
-const bubbleStatsBy={mr:{health:6000,defense:200,penetration:200,critResistance:1},ur:{health:4000,defense:150,penetration:150},ssr:{health:3000,defense:100,penetration:100},sr:{health:2000,defense:60,penetration:60}};
+const bubbleStatsBy={sr:{health:1200,defense:50,penetration:50},ssr:{health:1600,defense:70,penetration:70}};
 const chatBubbles=avatarFrames.map(f=>({id:f.id,name:f.name,rar:f.rar,price:f.price,dress:f.dress,bow:f.bow,stats:bubbleStatsBy[f.rar]}));
 const decoKinds={frame:{list:avatarFrames,store:'frames'},bubble:{list:chatBubbles,store:'bubbles'}};
 const frameRules={maxTier:20},frameById=Object.fromEntries(avatarFrames.map(x=>[x.id,x])),bubbleById=Object.fromEntries(chatBubbles.map(x=>[x.id,x]));

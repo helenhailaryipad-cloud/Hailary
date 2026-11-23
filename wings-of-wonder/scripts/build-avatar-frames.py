@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Painted avatar frames of the Supreme Sets (image model; sources scripts/art-source/frames/<set id>.webp, the inside
-of each ring is transparent). Packed into src/assets/generated/comp-avatar-frames.webp, a 4 x 6 atlas of 256 px tiles
+of each ring is transparent). Packed into src/assets/generated/comp-avatar-frames.webp, a 4 x 12 atlas of 256 px tiles
 in the order of supremeSets (ember frost jade star mermaid icequeen love), then the frames of their own
 (WonderGear.avatarFrames, sources cleaned of background haze when copied in), plus an AVIF copy for hosting.
 
@@ -13,8 +13,10 @@ import numpy as np
 SRC = Path('scripts/art-source/frames'); OUT = Path('src/assets/generated'); HOST = Path('scripts/hosting-art'); T = 256
 IDS = ['ember', 'frost', 'jade', 'star', 'mermaid', 'icequeen', 'love',
        'starmoon', 'inferno', 'arcade', 'fairy', 'lantern', 'seaside', 'idol', 'ocean', 'hourglass',
-       'rose', 'dragonling', 'pumpkin', 'harvest', 'pirate', 'clockwork', 'holly']
-atlas = Image.new('RGBA', (4*T, 6*T))
+       'rose', 'dragonling', 'pumpkin', 'harvest', 'pirate', 'clockwork', 'holly',
+       'melody', 'northlight', 'royal', 'knight', 'storm', 'gem', 'gothic', 'lotus', 'sakura', 'meadow', 'candy', 'teaparty', 'bunny',
+       'carnival', 'library', 'snowfall', 'oasis', 'tropic', 'papillon', 'kitty', 'foxwood', 'owl', 'honey', 'rainbow']
+atlas = Image.new('RGBA', (4*T, 12*T))
 for n, i in enumerate(IDS):
     a = np.array(Image.open(SRC/f'{i}.webp').convert('RGBA')); a[..., 3] = np.where(a[..., 3] < 20, 0, a[..., 3]); a[a[..., 3] == 0] = 0
     im = Image.fromarray(a); im = im.crop(im.getbbox()); side = max(im.size)

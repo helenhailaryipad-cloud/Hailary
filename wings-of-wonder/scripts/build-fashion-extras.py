@@ -28,7 +28,7 @@ for n in range(11, 28):
     w = trim(SRC/'wings'/f'wing-{n}.webp'); w = w.resize((860, round(w.height*860/w.width)), Image.Resampling.LANCZOS)
     save(f'fashion-wing-{n}', w, 58)
 grips = {}
-for n in range(14, 40):
+for n in range(14, 64):
     b = trim(SRC/'bows'/f'bow-{n}.webp'); b = b.resize((round(b.width*560/b.height), 560), Image.Resampling.LANCZOS)
     save(f'weapon-style-{n}', b, 62)
     a = np.array(b)[..., 3] > 128; band = a[int(b.height*.46):int(b.height*.54)]
