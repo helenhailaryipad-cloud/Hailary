@@ -2215,11 +2215,11 @@ const supSet=id=>WonderGear.supremeById[id];
 // Painted avatar frames (comp-avatar-frames, 4 x 2 atlas in the order of supremeSets), drawn over Reina's avatar.
 function frameArtVars(){const root=document.documentElement;if(!root?.style?.setProperty||root.style.getPropertyValue('--avf'))return;root.style.setProperty('--avf','url("'+artPath('comp-avatar-frames')+'")')}
 // Atlas order: the seven Supreme Set frames, then WonderGear.avatarFrames; 4 columns x FRAME_ROWS rows.
-const FRAME_ROWS=6;
+const FRAME_ROWS=12;
 function frameArt(setId,face=true,cls=''){frameArtVars();const g=WonderGear;let n=g.supremeSets.findIndex(x=>x.id===setId);if(n<0)n=g.supremeSets.length+g.avatarFrames.findIndex(x=>x.id===setId);
  return '<span class="sup-frame pf '+cls+'">'+(face?'<img src="assets/generated/reina-avatar.webp" alt="">':'')+'<i class="pf-ring" style="background-position:'+(n%4)/3*100+'% '+Math.floor(n/4)/(FRAME_ROWS-1)*100+'%"></i></span>'}
-// Painted chat bubbles (comp-chat-bubbles, 4 x 6 atlas: the seven set bubbles, then WonderGear.chatBubbles).
-function bubbleAt(id){const g=WonderGear;let n=g.supremeSets.findIndex(x=>x.id===id);if(n<0)n=g.supremeSets.length+g.chatBubbles.findIndex(x=>x.id===id);return n<0?'':(n%4)/3*100+'% '+Math.floor(n/4)/5*100+'%'}
+// Painted chat bubbles (comp-chat-bubbles, 4 x 12 atlas: the seven set bubbles, then WonderGear.chatBubbles).
+function bubbleAt(id){const g=WonderGear;let n=g.supremeSets.findIndex(x=>x.id===id);if(n<0)n=g.supremeSets.length+g.chatBubbles.findIndex(x=>x.id===id);return n<0?'':(n%4)/3*100+'% '+Math.floor(n/4)/(FRAME_ROWS-1)*100+'%'}
 function bubbleVars(){const root=document.documentElement;if(!root?.style?.setProperty||root.style.getPropertyValue('--avb'))return;root.style.setProperty('--avb','url("'+artPath('comp-chat-bubbles')+'")')}
 function bubbleArt(id,text=''){bubbleVars();return '<span class="pb" style="background-position:'+bubbleAt(id)+'"><i>'+text+'</i></span>'}
 function supPieceArt(set,piece,big=false){
