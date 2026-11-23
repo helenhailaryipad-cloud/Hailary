@@ -8429,3 +8429,8 @@ body[data-screen=party] #stage .toast{top:6%!important;bottom:auto!important;lef
 #modal .pp-gift>b{color:#fff!important}#modal .pp-gift small{color:#6a5a4a!important}
 #modal .pp-pod :is(b,small,i){color:#fff!important}
 #modal .pp-rules{color:#f6e8c8!important}
+/* Home: Splash Party event icon; section tabs scroll instead of squeezing their labels */
+.city-pp{width:100%!important;aspect-ratio:1;background-size:200% 200%!important;filter:drop-shadow(0 2px 2px #0006)}
+#stage>nav>.section-tabs{justify-content:flex-start!important;overflow-x:auto!important;scrollbar-width:none}
+#stage>nav>.section-tabs button{flex:0 0 auto!important;white-space:nowrap!important;min-width:max-content!important;overflow:visible!important}
+.city-party .city-caption{white-space:nowrap}
