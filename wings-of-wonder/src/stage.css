@@ -8459,3 +8459,7 @@ body[data-screen=games] #stage #main{align-items:stretch!important}
 body[data-screen=games] #stage #main>.mg-hub{width:100%;flex:1 1 auto;min-height:0}
 @media (max-aspect-ratio:3/4){.mg-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px}.mg-tile b{font-size:clamp(13px,3.6cqw,22px)!important}.mg-tile :is(small,em){font-size:clamp(10px,2.4cqw,15px)!important}}
 .pp-hud .pp-zero{background:#8a1a1ae6!important;color:#ffd0d0;animation:ppwob 1.2s ease-in-out infinite}
+/* Home: one prominent Mini Games icon instead of separate game icons */
+.city-extra .city-minigames{grid-row:span 2;align-self:start}
+.city-extra .city-minigames .city-glyph{transform:scale(1.55);transform-origin:50% 30%;filter:drop-shadow(0 0 6px #ffe27a)}
+.city-extra .city-minigames .city-caption{margin-top:28%;font-weight:900;color:#fff3c0}

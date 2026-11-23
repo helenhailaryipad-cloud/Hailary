@@ -151,6 +151,10 @@ User: "all games in one place, names on the main field, not hunted through sub-t
 Mini Games; `games()` in `app.js` draws `.mg-hub`: one tile per game from `MINI_GAMES` (cover, name, line, best
 result; a tap opens the game), 4 columns (3 on tall screens), no sub-tab strip on that screen (hidden in CSS). The old
 portal layout is kept as `gamesOld()` (unused). A new game only needs a row in `MINI_GAMES`.
+Home screen (user circled the separate game icons: "put all mini games into one Mini Games icon"): Fishing, Harvest
+Pairs and Splash Party icons are gone from `.city-extra`; one larger `.city-minigames` icon (painted tent,
+`art-source/ui/minigames.webp` -> `comp-minigames-icon` by `build-ui-icons.py`) opens the hub. Isle Expedition and
+Cloud War stay (not mini games).
 
 ## Splash Party event mini-game (2026-11-23)
 User sent eleven photos of the reference's "Pet Party" event ("add this one too"). Original name and art, same
