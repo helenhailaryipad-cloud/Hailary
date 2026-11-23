@@ -224,6 +224,7 @@ function ritePull(count, free = false) {
        <div class="rt-row"><button class="primary" onclick="riteExchange(${short},${count})">${denPlain}Exchange ${uiIcon('crystals')}${fmt(short)} prisms and pull</button><button onclick="riteShop()">${denPlain}Ticket packs</button></div></div>`); }
     return toast('The free pull is back tomorrow');
   }
+  if (typeof trailTick === 'function') trailTick('pull', res.results.length);
   save(); showRites(); riteShow(res);
 }
 function riteExchange(n, count) { $('#modal').close(); if (!Rites.exchange(S, n)) return toast('Not enough prisms'); ritePull(count); }

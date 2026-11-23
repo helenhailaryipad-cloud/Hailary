@@ -456,6 +456,7 @@ function startCast(){
   localStorage.setItem(quotaKey,JSON.stringify({day:t.day,used:used+1,afterTestRefill:t.day==='2026-11-13'}));
   {const tk=tackle();castFed=tk.feed>0;if(castFed){tk.feed--;setTackle(tk)}}
  }catch{refreshQuota();return}
+ try{parent.trailTick?.('fish')}catch{}
  castFlight();phase='wait';time=progress=0;holdVel=0;pos=target=steeringGoal=.5;seed=Math.random()*6;renderDial();last=performance.now();renderCatch();el('status').textContent='Watching the float…';el('castLabel').textContent='Line cast';controls();requestAnimationFrame(tick)};
 el('cast').onclick=()=>navigator.locks ? navigator.locks.request(quotaKey,startCast) : startCast();
 window.addEventListener('storage',refreshQuota);

@@ -155,6 +155,7 @@ function siegeQuick() { const v = S.siege; siegeTeam = sgOwned().filter(id => !v
 function siegeGo() {
   const [c, s] = siegeTarget, v = S.siege, team = siegeTeam.map(id => ({ id, atk: sgAtk(id) })), res = Siege.attack(v, c, s, team);
   if (!res.ok) return toast({ used: 'A pet already attacked today', broken: 'This arena is already broken', team: 'Pick up to five pets' }[res.err] || 'Cannot attack');
+  if (typeof trailTick === 'function') trailTick('siege');
   save(); siegeTeam = []; screenChangedAt = Date.now();
   const mine = team.map((p, i) => `<div class="sg-f me f${i}"><img src="${sgPet(p.id)}" alt=""><span class="sg-hp"><i style="width:100%"></i></span></div>`).join('');
   const foe = res.d.pets.map((id, i) => `<div class="sg-f foe f${i}"><img src="${sgPet(id)}" alt=""><span class="sg-hp"><i id="sgFoe${i}" style="width:${res.hpBefore}%"></i></span></div>`).join('');

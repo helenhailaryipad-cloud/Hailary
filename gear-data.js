@@ -796,7 +796,7 @@ function warQuestsDue(s,g,paid){
  warQuests.forEach((q,n)=>{if(hero.points>=q.at&&!g.claimed.includes(n)){g.claimed.push(n);if(paid){const v=contestState(s);v.medals+=q.medals;s.contest=v;bagAdd(s,q.item,q.n)}out.push(q)}});
  return out;
 }
-function warStart(s,now=Date.now()){const v=contestState(s,now),paid=v.runs<warRules.daily;if(paid){v.runs++;s.contest=v}return paid}
+function warStart(s,now=Date.now()){const v=contestState(s,now),paid=v.runs<warRules.daily;if(typeof trailTick==='function')trailTick('contest');if(paid){v.runs++;s.contest=v}return paid}
 function warSettle(s,g,paid,now=Date.now()){
  if(!g.over||g.settled)return null;g.settled=true;
  const {rank}=warStanding(g),hero=warHero(g),prize=warRankPrize(rank),v=contestState(s,now),won=g.scores[g.faction]===Math.max(...g.scores);
@@ -833,7 +833,7 @@ function cloudNewRound(s,owners={},now=Date.now()){
 }
 function cloudGain(s,points,now=Date.now()){
  const v=cloudState(s,now),gain=Math.max(0,Math.min(Math.round(points),cloudRules.carnageCap-v.carnage));
- v.carnage+=gain;v.tokens+=gain;s.cloud=v;return gain;
+ v.carnage+=gain;v.tokens+=gain;s.cloud=v;if(gain)if(typeof trailTick==='function')trailTick('carnage',gain);return gain;
 }
 function cloudClaim(s,n,now=Date.now()){
  const r=cloudPointRewards[n],v=cloudState(s,now);if(!r||v.claimed.includes(n)||v.carnage<r.at)return null;
@@ -907,7 +907,7 @@ const squadOf=s=>{const v=socialState(s);return v.friends.filter(id=>!v.blocked.
 // Flowers: up to ten sent and ten received a day. Gift All does both for every friend.
 function sendFlower(s,id,now=Date.now()){
  const v=socialState(s,now);if(!v.friends.includes(id)||v.sent.includes(id)||v.sent.length>=socialRules.giftsPerDay)return false;
- v.sent.push(id);v.hearts[id]=Math.min(socialRules.hearts*socialRules.heartPoints,(v.hearts[id]||0)+socialRules.flowerHeart);s.social=socialPack({...v,day:v.day});return true;
+ v.sent.push(id);if(typeof trailTick==='function')trailTick('flower');v.hearts[id]=Math.min(socialRules.hearts*socialRules.heartPoints,(v.hearts[id]||0)+socialRules.flowerHeart);s.social=socialPack({...v,day:v.day});return true;
 }
 function giftAll(s,now=Date.now()){
  let sent=0;for(const id of socialState(s,now).friends)if(sendFlower(s,id,now))sent++;
@@ -1048,7 +1048,7 @@ function guildGain(g,fund,contrib,coins){g.fund+=fund;g.contrib+=contrib;g.coins
 function guildUpgrade(s,now=Date.now()){const g=guildState(s,now);if(!g||g.role>1||g.lv>=guildRules.maxLevel||g.fund<guildUpFund(g.lv))return false;g.fund-=guildUpFund(g.lv);g.lv++;s.guild=guildPack(g);return true}
 function guildNote(s,text,now=Date.now()){const g=guildState(s,now),t=guildClean(text,guildRules.noteMax);if(!g||g.role>1||!t)return false;g.note=t;s.guild=guildPack(g);return true}
 function guildSpeaker(s,text,now=Date.now()){const g=guildState(s,now),t=guildClean(text,guildRules.speakerMax);if(!g||g.role>1||!t)return false;g.speaker=t;s.guild=guildPack(g);return true}
-function guildSign(s,now=Date.now()){const g=guildState(s,now),r=guildRules;if(!g||g.signed)return false;g.signed=true;guildGain(g,r.signFund,r.signContrib,r.signCoins);s.guild=guildPack(g);return true}
+function guildSign(s,now=Date.now()){const g=guildState(s,now),r=guildRules;if(!g||g.signed)return false;g.signed=true;if(typeof trailTick==='function')trailTick('guildsign');guildGain(g,r.signFund,r.signContrib,r.signCoins);s.guild=guildPack(g);return true}
 function guildDonate(s,kind,now=Date.now()){
  const g=guildState(s,now),r=guildRules;if(!g)return false;
  if(kind==='gold'){if(g.gold>=r.goldTimes||s.gold<r.goldDonate)return false;s.gold-=r.goldDonate;g.gold++;guildGain(g,r.goldFund,r.goldGain,r.goldGain)}
@@ -1117,7 +1117,7 @@ function guildBoss(s,now=Date.now()){
 }
 function guildHit(s,rng=Math.random,now=Date.now()){
  const g=guildState(s,now);if(!g||!g.reserved||g.hits>=guildRules.bossHits||guildBoss(s,now).dead)return null;
- const dmg=Math.round(stats(s).power*(.8+rng()*.4)*1.5);g.hits++;g.dmg+=dmg;guildGain(g,0,10,10);s.guild=guildPack(g);return dmg;
+ const dmg=Math.round(stats(s).power*(.8+rng()*.4)*1.5);g.hits++;g.dmg+=dmg;if(typeof trailTick==='function')trailTick('guildhit');guildGain(g,0,10,10);s.guild=guildPack(g);return dmg;
 }
 function guildBossClaim(s,rng=Math.random,now=Date.now()){
  const b=guildBoss(s,now),g=guildState(s,now);if(!b||!b.dead||g.bossDone||!g.dmg)return null;
@@ -1211,7 +1211,7 @@ function duelQualFight(s,rng=Math.random,now=Date.now()){
  const power=stats(s).power,foe=duelAi(v.season,hashOf('q'+v.season+':'+v.n)%r.field),opPower=Math.max(1,Math.round(power*foe.pow));
  const f=duelSim({power,hp:v.hp/100,red:duelRed(v),boost:duelBoost(s)},{power:opPower,hp:1},rng);
  const pts=f.win?r.winBase+Math.round(r.winPower*Math.min(2,opPower/power))+Math.round(r.winHp*f.hp):r.lossPts;
- v.n++;if(f.win)v.w++;v.pts+=pts;v.hp=Math.round(f.hp*100);duelPack(s,v);for(const [id,k] of Object.entries(duelPart))bagAdd(s,id,k);
+ v.n++;if(f.win)v.w++;v.pts+=pts;if(typeof trailTick==='function')trailTick('contest');v.hp=Math.round(f.hp*100);duelPack(s,v);for(const [id,k] of Object.entries(duelPart))bagAdd(s,id,k);
  return {...f,pts,foe:{name:foe.name,power:opPower},items:duelPart};
 }
 // Group stage: Reina (slot 0) and nine AI adventurers ranked near her; a round-robin by the circle method.
