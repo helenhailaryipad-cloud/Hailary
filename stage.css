@@ -8483,3 +8483,11 @@ body[data-screen=games] #stage #main>.mg-hub{width:100%;flex:1 1 auto;min-height
 #modal .pp-refund{position:relative;margin:8px 0 6px;color:#fff!important;font:700 12px/1.3 Arial,sans-serif}.pp-refund b{color:#8dff9a}
 #modal .pp-buy{position:relative;min-width:150px}
 .pp-offer-box{max-height:none!important;overflow:visible!important}.pp-offer-box .pp-scroll{max-height:21vh;overflow:auto;padding:2px;border-radius:6px;background:#0002}
+/* Splash Party: smaller, tidier reward icons (user: "make the icons smaller, it is a mess"): no name labels, the
+   name is in the tooltip; counts stay. */
+.pp-gift{width:34px!important}.pp-gift :is(.pp-ico,.bag-ico,.ui-icon,img){width:28px!important;height:28px!important}
+.pp-gift>small{display:none!important}.pp-gift>b{top:17px!important;right:-2px!important;font-size:9px!important;padding:0 3px!important}
+#stage .pp-cellg{min-height:40px!important;gap:1px!important;padding:3px 2px!important}
+.pp-trow{padding:3px!important;gap:3px!important}.pp-tlist{gap:4px!important}
+.pp-gl{gap:2px!important}
+.pp-ach .pp-gift,.pp-pack .pp-gift{width:38px!important}.pp-ach .pp-gift :is(.pp-ico,.bag-ico,.ui-icon,img),.pp-pack .pp-gift :is(.pp-ico,.bag-ico,.ui-icon,img){width:32px!important;height:32px!important}
