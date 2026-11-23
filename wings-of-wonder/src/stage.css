@@ -8491,3 +8491,14 @@ body[data-screen=games] #stage #main>.mg-hub{width:100%;flex:1 1 auto;min-height
 .pp-trow{padding:3px!important;gap:3px!important}.pp-tlist{gap:4px!important}
 .pp-gl{gap:2px!important}
 .pp-ach .pp-gift,.pp-pack .pp-gift{width:38px!important}.pp-ach .pp-gift :is(.pp-ico,.bag-ico,.ui-icon,img),.pp-pack .pp-gift :is(.pp-ico,.bag-ico,.ui-icon,img){width:32px!important;height:32px!important}
+/* Heavenly Gifts track like the reference: a progress line through the point diamonds, big green ticks on claimed */
+.pp-trow{grid-template-columns:1fr 46px 1fr 1.6fr!important;position:relative}
+.pp-at{position:relative;align-self:stretch;display:grid;place-items:center;background:none!important;padding:0!important}
+.pp-at::before{content:'';position:absolute;left:50%;top:-6px;bottom:-6px;width:6px;transform:translateX(-50%);background:#c9b98e;border-radius:3px}
+.pp-trow.open .pp-at::before{background:linear-gradient(#8de04a,#5ab82a)}
+.pp-trow.open:not(.next) .pp-at::before{background:linear-gradient(#8de04a 50%,#c9b98e 50%)}
+.pp-at>i{position:relative;font-style:normal;padding:3px 4px;transform:rotate(0);background:#e9c46a;color:#6a4a12;border-radius:5px;font:900 10px/1 Arial,sans-serif;box-shadow:0 0 0 2px #fff8}
+.pp-at.on>i{background:#ffd36b;color:#5a3a08}
+#stage .pp-cellg.got{opacity:1!important}#stage .pp-cellg.got .pp-gift{opacity:.55}
+.pp-cellg.got .pp-tick{position:absolute;inset:0;display:grid;place-items:center;font-size:30px!important;color:#5ad02a!important;text-shadow:0 0 3px #fff,0 2px 2px #0006;z-index:2;pointer-events:none}
+.pp-cellg .pp-lock{font-size:12px!important;z-index:2}

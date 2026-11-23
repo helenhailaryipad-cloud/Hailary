@@ -171,7 +171,8 @@ scripts/test-party.mjs`; UI below the `PARTY_UI` marker; also loaded by `scripts
 - Event = 7 UTC days from `Party.anchor` (`period`). Best round score ranks against 40 simulated AI (`field`, labelled
   AI; ties go to the earlier).
 - Total points open Heavenly Gifts (`track`, columns Basic free / Advanced 680 / Heavenly 1280 prisms).
-- Heavenly Gifts second pass (six photos of the reference's offers): 18 rows up to 72,000 points; lobby buttons
+- Heavenly Gifts second pass (six photos of the reference's offers, then five of the whole track): 21 rows up to 72,000
+  points (Basic one material, Advanced the same doubled, Heavenly two special items; green progress line, big ticks); lobby buttons
   Advanced benefits / Heavenly gifts (`.pp-passes`) open an offer window (`partyUnlock`: Value, all rewards, rewards of
   the rows already open, prisms returned at once `Party.refund`, price button `partyUnlockBuy`; `Party.colGifts`).
 - Gift Packs for prisms with event limits (real money is not built).

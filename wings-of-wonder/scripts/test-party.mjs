@@ -31,7 +31,7 @@ const d=P.roll(undefined,T0,rng).v;d.round.board=[1,2,1,2, 2,1,2,1, 1,2,1,2, 2,1
 assert.equal(P.swipe(d,'left',T0,rng).ok,false);d.round.over=!P.canMove(d.round.board);assert.ok(d.round.over);assert.equal(P.swipe(d,'left',T0,rng).err,'deadlock');
 assert.ok(P.useItem({...d,items:{fire:1}},'fire').ok,'an item can break a deadlock');P.restart(d,rng);assert.equal(d.best,500);
 // Heavenly Gifts: rows open with total points; Advanced and Heavenly need an unlock for prisms.
-const g=P.roll(undefined,T0,rng).v;g.total=4500;const save={scales:1500};assert.equal(P.track.length,18);assert.equal(P.track.at(-1).at,72000);
+const g=P.roll(undefined,T0,rng).v;g.total=4500;const save={scales:1500};assert.equal(P.track.length,21);assert.equal(P.track.at(-1).at,72000);
 assert.ok(P.trackClaim(g,'b',2));assert.equal(P.trackClaim(g,'b',2),null,'once');assert.equal(P.trackClaim(g,'b',3),null,'row not open');
 assert.equal(P.trackClaim(g,'a',0),null,'locked column');assert.ok(P.unlockCol(g,save,'a'));assert.equal(save.scales,1500-P.unlock.a+P.refund.a);assert.ok(P.trackClaim(g,'a',0));
 assert.equal(P.unlockCol(g,save,'h'),false,'not enough prisms');
