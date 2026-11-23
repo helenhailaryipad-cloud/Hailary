@@ -167,6 +167,22 @@ shore, and when one of their scheduled cup catches comes due a small pop shows t
 Art via `parent.artPath` (packed art in the chat preview). Sources `art-source/fishing/{reina,folk}.png`, built by
 `scripts/build-fishing-anglers.py` (prints rod tips). Narrow windows get a compact header and a taller lagoon.
 
+## Pet Siege event (2026-11-23)
+User sent twelve photos of the reference's pet siege (no text). Home promo "Pet Siege" opens screen `siege`
+(`src/siege.js`: rules `Siege`, pure, `node scripts/test-siege.mjs`; UI below `SIEGE_UI`; loaded by `scripts/test.mjs`).
+- Moonwing (Reina's faction, ally) vs Sunmane (enemy) for 7 UTC days from `Siege.anchor`. Map (`comp-siege-map`): five
+  cities (`Siege.cities`, positions are % of the picture, placed with `50% + (y-50)*1.5cqw` because the map is
+  width-fitted) with HP segments for their five defenders. City hall (`comp-siege-hall`, height-fitted, pedestals
+  `Siege.spots`): castellan + four guards, AI adventurers; each has a deterministic lineup of five familiars and a CP
+  scaled from Reina's top-five pet ATK at event start (`v.base`, `Siege.defender`).
+- Defensive lineup pop-up -> Offense Formation (`siegeForm`: up to five owned pets, Quick deploy; a pet may attack once
+  per UTC day, `v.used`) -> automatic battle (`siegeGo`, DMG Stats, countdown, Skip) -> result (`siegeResult`).
+  Points = % of HP taken + 10 for breaking (`Siege.attack`); defender HP stays down for the week.
+- Bottom bar: Rules, Report (last 20 attacks), Reward Preview (rank rewards paid by `siegeState()` when a new week
+  starts), Siege Quest (three daily quests), Point Rewards (50 ... 800), Rankings (40 simulated AI). Faction points =
+  hers + simulated ally AI (`Siege.allyAi`). Optional save field `S.siege` (`Siege.valid` from `valid()`).
+- Art (image model): `art-source/siege/{map,hall}.webp` by `scripts/build-siege-art.py`. Placeholders throughout.
+
 ## Splash Party event mini-game (2026-11-23)
 User sent eleven photos of the reference's "Pet Party" event ("add this one too"). Original name and art, same
 mechanics. Mini Games card + sub-nav tab, screen id `party`, `src/party.js` (rules `Party`, pure, `node

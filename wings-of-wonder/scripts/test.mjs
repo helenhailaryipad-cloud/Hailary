@@ -18,6 +18,7 @@ vm.runInContext(fs.readFileSync('src/game-polish.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/minigame-engine.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/wardrobe-engine.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/party.js','utf8'),context);
+vm.runInContext(fs.readFileSync('src/siege.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/app.js','utf8'),context);
 vm.runInContext(`
 S=defaults();S.gold=500000;openScreen('fashion');
@@ -1055,6 +1056,15 @@ vm.runInContext(`
  if(valid({...S,party:{...S.party,stamina:-1}}))throw Error('Invalid party save accepted');}
 `,context);
 console.log('PASS: Splash Party: lobby, board, swipe, items, Heavenly Gifts, ranking, rewards, gallery, packs, Mini Games card, validation.');
+
+vm.runInContext(`
+{S=defaults();go('siege');let h=$('#main').innerHTML;if(!h.includes('Dragon Keep')||!S.siege||!valid(S))throw Error('Pet Siege map');
+ siegeOpen(1);if(!$('#main').innerHTML.includes('castellan'))throw Error('City hall');siegeLineup(1,2);siegeForm(1,2);siegeQuick();
+ if(!siegeTeam.includes('d0'))throw Error('Quick deploy');const pts=S.siege.points;siegeGo();if(!(S.siege.points>pts)||!S.siege.used.includes('d0')||!valid(S))throw Error('Siege attack');
+ siegeResult();siegeRules();siegeReport();siegePoints();siegeQuests();siegeQuest('attack');siegeRanks();siegePreview();if(!(S.bag.exp1>0))throw Error('Quest reward');
+ if(valid({...S,siege:{...S.siege,points:-1}}))throw Error('Invalid siege save accepted');}
+`,context);
+console.log('PASS: Pet Siege: map, city hall, lineup, formation, attack, result, rules, report, rewards, quests, rankings, validation.');
 
 vm.runInContext(`
 {const r=WonderGear,R=r.supremeRules,T=R.saleStart+864e5,set=r.supremeSale(T).set;S=defaults();S.scales=1e5;
