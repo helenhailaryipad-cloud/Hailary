@@ -157,6 +157,16 @@ Pairs and Splash Party icons are gone from `.city-extra`; one larger `.city-mini
 Cloud War stay (not mini games). Fishing came back as its own icon (user: "it is daily, by time"); the four icons
 sit in one row (`.city-extra` 4 columns, 34% wide).
 
+## Fishing cleanup and anglers (2026-11-23)
+User circled the app's sub-tab strip and bottom nav on the fishing screen ("clutter, keep only the fishing; not just a
+rod - show Reina and the other bots"). The fishing screen is full screen now (CSS hides the app header / nav / footer;
+the page's own "Mini Games" button goes back). In `fishing.html`: Reina sits on a pier at the left (`comp-fish-reina`,
+image-model edit of `leaflight/master.png`) and her line runs from the painted rod tip to the float (`drawLine`, tips in
+`ROD`); three AI anglers (`comp-fish-folk-1..3`, the first three Daily Cup `anglers`, name tags "AI") fish on the far
+shore, and when one of their scheduled cup catches comes due a small pop shows the fish and weight (`folkCatches`).
+Art via `parent.artPath` (packed art in the chat preview). Sources `art-source/fishing/{reina,folk}.png`, built by
+`scripts/build-fishing-anglers.py` (prints rod tips). Narrow windows get a compact header and a taller lagoon.
+
 ## Splash Party event mini-game (2026-11-23)
 User sent eleven photos of the reference's "Pet Party" event ("add this one too"). Original name and art, same
 mechanics. Mini Games card + sub-nav tab, screen id `party`, `src/party.js` (rules `Party`, pure, `node

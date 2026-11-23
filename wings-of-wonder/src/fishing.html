@@ -51,8 +51,31 @@ body[data-phase=landed] .float-value{background:#684b1b;color:#fff9d9}
 @keyframes bob-lake{50%{transform:translateY(2px) rotate(2deg)}}
 @media(prefers-reduced-motion:reduce){.float-art{animation:none}}
 @media(max-height:540px){header{padding:7px 12px}h1{font-size:24px}footer{padding-top:4px;gap:2px}.compass{height:118px}.controls :is(#left,#right){width:63px}.controls button{min-height:42px}.float{--size:46px}.lagoon{min-height:110px;flex-basis:110px}}
-</style><main><header><div><button type="button" id="exitFishing">‹ Mini Games</button><h1>Moonwater Fishing</h1><span id="best"></span><span id="dailyCasts" style="display:block"></span></div><button id="basket">Fish basket</button></header><details id="cup"><summary id="cupTitle"></summary><ol id="ranks"></ol><p id="cupPrize">First prize · Moonwater Pearl</p></details><div class="lagoon">
- <div class="water"></div>
+
+/* Anglers (user: "not just a rod, show Reina and the other bots"): Reina on the pier at the left, her line goes from
+   the painted rod tip to the float; three AI anglers on the far shore, each with a short line and a name tag. */
+.lagoon>svg{display:none}
+.lagoon .line{position:absolute;inset:0;width:100%;height:100%;display:block!important;pointer-events:none;z-index:2}
+.reina-angler{position:absolute;left:-2%;bottom:-6%;height:min(86%,64vw);z-index:3;pointer-events:none;filter:drop-shadow(0 6px 8px #0006)}
+.folk{position:absolute;top:2%;height:30%;z-index:1;pointer-events:none;text-align:center}
+.folk img{height:100%;display:block;filter:drop-shadow(0 3px 4px #0005) brightness(.95)}
+.folk b{position:absolute;left:50%;top:-1.3em;transform:translateX(-50%);white-space:nowrap;padding:1px 7px;border-radius:9px;background:#102e47d9;border:1px solid #ae9868;font:700 11px/1.4 Arial,sans-serif;color:#fff4d6}
+.folk b small{color:#9fd0ff;font-weight:600}
+.folk i{position:absolute;width:8px;height:8px;border-radius:50%;background:#ff5a4a;box-shadow:0 0 0 2px #fff8;animation:bob-lake 2s ease-in-out infinite}
+.folk em{position:absolute;left:50%;top:-3.2em;transform:translateX(-50%);white-space:nowrap;padding:3px 8px;border-radius:10px;background:#ffe9a0;color:#5a3a08;font:800 11px/1.2 Arial,sans-serif;font-style:normal;box-shadow:0 2px 6px #0006;animation:catchpop 4s ease-out forwards}
+@keyframes catchpop{0%{opacity:0;transform:translate(-50%,6px)}10%,80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0}}
+@media(max-width:560px){.folk b{font-size:9.5px}.folk{height:26%}}
+
+.reina-angler{height:100%!important;bottom:-8%!important;max-height:none}
+@media(max-width:700px){header{padding:8px 12px 4px!important}h1{font-size:24px!important;margin:2px 0!important}#exitFishing,#basket{padding:6px 12px!important;font-size:14px!important;min-height:0!important}
+ #best,#dailyCasts{font-size:13px!important}#cup{font-size:13px!important;padding:6px 10px!important}
+ .compass{height:clamp(120px,24svh,190px)!important}.controls button{min-height:50px!important}footer{padding-top:4px!important}
+ .lagoon{min-height:200px!important}.folk{height:34%!important}}
+
+.folk em{left:50%!important;transform:translateX(-50%);animation:catchpop2 4s ease-out forwards!important}.folk:last-child em{left:auto!important;right:0;transform:none}
+@keyframes catchpop2{0%{opacity:0;margin-top:6px}10%,80%{opacity:1;margin-top:0}100%{opacity:0}}
+</style><main><header><div><button type="button" id="exitFishing">‹ Mini Games</button><h1>Moonwater Fishing</h1><span id="best"></span><span id="dailyCasts" style="display:block"></span></div><button id="basket">Fish basket</button></header><details id="cup"><summary id="cupTitle"></summary><ol id="ranks"></ol><p id="cupPrize">First prize · Moonwater Pearl</p></details><div class="lagoon" id="lagoon">
+ <div class="water"></div><div id="folkRow"></div><img class="reina-angler" id="reinaAngler" alt="Reina fishing" draggable="false"><svg class="line" id="lineSvg" aria-hidden="true"><path id="linePath" fill="none" stroke="#fff4cd" stroke-width="1.6"/></svg>
  <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M3 100 Q18 31 34 10" fill="none" stroke="#d9b36c" stroke-width="3" vector-effect="non-scaling-stroke"/><path d="M34 10 Q43 39 57 51" fill="none" stroke="#fff4cd" stroke-width="1.3" vector-effect="non-scaling-stroke"/></svg>
  <div class="float" id="float" role="progressbar" aria-label="Catch progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
   <span class="float-ripple" aria-hidden="true"></span>
@@ -180,6 +203,31 @@ function standings(){
 
 }
 standings();setInterval(standings,1000);
+// ---- anglers on the shore ----
+const art=id=>{try{if(parent!==window&&typeof parent.artPath==='function')return parent.artPath(id)}catch{}return 'assets/generated/'+id+'.webp'};
+const ROD={reina:[.998,.002],folk:[[.934,.053],[.919,.003],[.957,.06]]},FOLK_SPOT=[[47,.95],[62,1],[76,.9]];
+el('reinaAngler').src=art('comp-fish-reina');
+el('folkRow').innerHTML=anglers.slice(0,3).map((n,i)=>`<div class="folk" id="folk${i}" style="left:${FOLK_SPOT[i][0]}%;height:${30*FOLK_SPOT[i][1]}%"><b>${n} <small>AI</small></b><img src="${art('comp-fish-folk-'+(i+1))}" alt=""><i></i></div>`).join('');
+function drawLine(){
+ const L=el('lagoon').getBoundingClientRect(),R=el('reinaAngler').getBoundingClientRect(),F=el('float').getBoundingClientRect();if(!L.width||!R.width)return;
+ const svg=el('lineSvg');svg.setAttribute('viewBox','0 0 '+L.width+' '+L.height);
+ const x1=R.left-L.left+R.width*ROD.reina[0],y1=R.top-L.top+R.height*ROD.reina[1],x2=F.left-L.left+F.width/2,y2=F.top-L.top+F.height*.18;
+ el('linePath').setAttribute('d',`M${x1} ${y1} Q${(x1+x2)/2} ${Math.min(y1,y2)+(y2-y1)*.75} ${x2} ${y2}`);
+ // each AI angler: a short line from the rod tip to a bobber in front of them
+ for(let i=0;i<3;i++){const f=el('folk'+i);if(!f)continue;const img=f.querySelector('img'),dot=f.querySelector('i');if(!img.naturalWidth)continue;
+  const w=img.getBoundingClientRect().width,h=img.getBoundingClientRect().height;dot.style.left=(w*ROD.folk[i][0]+12)+'px';dot.style.top=(h*1.08)+'px'}
+}
+el('reinaAngler').onload=drawLine;addEventListener('resize',drawLine);setInterval(drawLine,200);
+// AI catches pop up over their heads when their scheduled catch time passes.
+let folkSeen=null;
+function folkCatches(){
+ const t=eventTime();if(t.day!==cachedDay)loadCup(t.day);
+ const now=schedule.slice(0,3).map(b=>b.catches.filter(c=>c.at<=t.elapsed).length);
+ if(folkSeen)now.forEach((n,i)=>{if(n>folkSeen[i]){const c=schedule[i].catches[n-1],f=el('folk'+i);if(f){document.querySelectorAll('.folk em').forEach(e=>e.remove());f.insertAdjacentHTML('beforeend',`<em>${c.species} · ${c.kg.toFixed(2)} kg</em>`)}}});
+ folkSeen=now;
+}
+folkCatches();setInterval(folkCatches,1000);
+
 function best(){el('best').textContent='Personal best · '+Math.max(0,...Object.values(album.read()).map(r=>r.kg)).toFixed(2)+' kg'}
 function popup(title,message,cardId){
  const fish=MoonwaterFish.byId.get(cardId),art=el('caughtArt');
