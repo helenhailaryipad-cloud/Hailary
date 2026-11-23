@@ -8524,3 +8524,8 @@ body[data-screen=games] #stage #main>.mg-hub{width:100%;flex:1 1 auto;min-height
 #stage #main :is(.pp-bar,.pp-side) button,#stage #main button.pp-side{background:none!important;border:0!important;box-shadow:none!important;outline:0}
 #stage #main .pp-help{background:#1f2f4ccc!important;box-shadow:0 0 0 2px #ffe9a0aa!important}
 .pp-room{--ppi:min(9cqw,60px);--ppt:min(2.3cqw,14px)}
+/* Fishing: full screen, no app header / sub-tabs / bottom nav (user circled them: "too much clutter, keep only the fishing").
+   The page inside the frame has its own "Mini Games" back button. */
+body[data-screen=fishing] #stage>:is(header,nav,footer),body[data-screen=fishing] .return-to-menu{display:none!important}
+body[data-screen=fishing] #stage>#main{inset:0!important;width:100%;height:100%;padding:0!important;display:block;overflow:hidden}
+body[data-screen=fishing] #stage>#main>iframe{height:100%!important;border-radius:0!important}
