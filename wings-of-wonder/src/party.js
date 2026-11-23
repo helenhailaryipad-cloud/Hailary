@@ -4,7 +4,7 @@
 // UTC, Stamina Potions add more). Party Fireworks, Party Cake and the Magic Wand help; each item has a limit per
 // round. A full board with no moves is a deadlock: use an item or start a new round (that finalizes the score). The
 // event lasts a week: the best round score ranks Reina against AI adventurers, the total points of all rounds open the
-// Heavenly Gifts track (Basic free, Advanced and Heavenly unlocked for prisms), tiers reached pay achievements, and the
+// Tide Treasures track (Basic free, Pearl Pass and Coral Crown unlocked for prisms), tiers reached pay achievements, and the
 // final rank pays personal rewards when the event ends. Event items are cleared when it ends. All numbers are
 // placeholders. Rules first (pure, tested by scripts/test-party.mjs), the screen below the PARTY_UI marker.
 const Party = {
@@ -13,7 +13,7 @@ const Party = {
   tiers: [['d47', 'Bubblewing'], ['d4', 'Leafcurl'], ['d5', 'Cinderpip'], ['d6', 'Shellkin'], ['d8', 'Plumwing'], ['d11', 'Sandfrill'],
     ['d15', 'Frostglass'], ['d22', 'Venomfrill'], ['d27', 'Bloomwing'], ['d36', 'Pearl Seraph'], ['d43', 'Starborn']],
   points(tier) { return 10 * tier; },           // making a tier-n pet: +10 x n (tier 2 = +20, as in the reference's gallery)
-  eventDays: 7, anchor: Date.UTC(2026, 10, 23),
+  eventDays: 3, anchor: Date.UTC(2026, 10, 23),
   staminaMax: 200, regenMs: 5 * 60e3, potionStamina: 5,
   itemIds: ['fire', 'cake', 'wand', 'potion'],
   items: { fire: { name: 'Party Fireworks', text: 'Clears every pet of the lowest tier on the board.' },
@@ -22,7 +22,7 @@ const Party = {
     potion: { name: 'Stamina Potion', text: '+5 stamina.' } },
   roundLimit: { fire: 3, cake: 3, wand: 3, potion: 10 },
   starter: { fire: 1, cake: 1, wand: 1, potion: 5 },
-  // Heavenly Gifts (user photos of the whole reference track): 21 rows from 1 to 72,000 total points. Each row: Basic =
+  // Tide Treasures (user photos of the whole reference track): 21 rows from 1 to 72,000 total points. Each row: Basic =
   // one material (x6, or x3 for rarer ones), Advanced = the same material doubled, Heavenly = two special items x1.
   track: [[1, 'exp1', 6, 'chest1', 'potion'], [2000, 'stonebag', 6, 'shardbag', 'gembox'], [4000, 'sealbag', 6, 'chest2', 'essence'],
     [6000, 'gold1', 6, 'gembox', 'sealbag'], [8000, 'exp2', 6, 'wish', 'chest2'], [10000, 'shardbag', 6, 'fire', 'cake'],
@@ -206,6 +206,7 @@ function partyTick() {
 let partyFirstShow = true;
 function partyMark(view) { try { localStorage.setItem('wow-party-view', view); } catch {} }
 function showParty() {
+  if (typeof arcadeOpen === 'function' && !arcadeOpen('party')) return partyClosed();
   if (partyFirstShow) { partyFirstShow = false; let was = ''; try { was = localStorage.getItem('wow-party-view') || ''; } catch {}
     if (was === 'board') { partyState(); save(); return partyPlay(); } }
   partyMark('lobby');
@@ -217,8 +218,8 @@ function showParty() {
    <h1 class="pp-title">Lagoon Gala</h1>
    <div class="pp-score"><span>My Point: <b>${fmt(v.best)}</b></span><span>My Rank: <b>${rank || 'None'}</b></span></div>
    <button class="pp-side pp-help" onclick="partyRules()">${denPlain}?</button>
-   <button class="pp-side pp-gifts" onclick="partyTrack()">${denPlain}<i>🎁</i><small>Heavenly Gifts</small>${claim.track ? '<em></em>' : ''}</button>
-   <div class="pp-passes"><button class="a ${v.unlock.a ? 'on' : ''}" onclick="partyUnlock('a')">${denPlain}<img src="${partyArt(10)}" alt=""><span>Advanced<br>benefits</span>${v.unlock.a ? '<b>✓</b>' : ''}</button><button class="h ${v.unlock.h ? 'on' : ''}" onclick="partyUnlock('h')">${denPlain}<img src="${partyArt(11)}" alt=""><span>Heavenly<br>gifts</span>${v.unlock.h ? '<b>✓</b>' : ''}</button></div>
+   <button class="pp-side pp-gifts" onclick="partyTrack()">${denPlain}<i>🎁</i><small>Tide Treasures</small>${claim.track ? '<em></em>' : ''}</button>
+   <div class="pp-passes"><button class="a ${v.unlock.a ? 'on' : ''}" onclick="partyUnlock('a')">${denPlain}<img src="${partyArt(10)}" alt=""><span>Pearl<br>Pass</span>${v.unlock.a ? '<b>✓</b>' : ''}</button><button class="h ${v.unlock.h ? 'on' : ''}" onclick="partyUnlock('h')">${denPlain}<img src="${partyArt(11)}" alt=""><span>Coral<br>Crown</span>${v.unlock.h ? '<b>✓</b>' : ''}</button></div>
    <div class="pp-crew">${crew}</div>
    <button class="pp-start" onclick="partyPlay()">${denPlain}${v.round.score || v.round.board.filter(Boolean).length > 2 ? 'Continue' : 'Start game'}</button>
    <div class="pp-bar"><button onclick="partyRewardsPop()">${denPlain}<i>🏅</i><small>Rewards</small></button><button onclick="partyRankPop()">${denPlain}<i>🏆</i><small>Rank</small></button>
@@ -227,7 +228,14 @@ function showParty() {
   partyStop(); partyTimer = setInterval(partyTick, 1000); partyTick();
 }
 function partyClaimable(v) { return { track: Party.track.some((row, i) => Party.trackOpen(v, i) && (!v.track.b.includes(i) || (v.unlock.a && !v.track.a.includes(i)) || (v.unlock.h && !v.track.h.includes(i)))), ach: Object.keys(Party.achieve).some(t => v.reach >= +t && !v.ach.includes(+t)) }; }
-function partyPlay() { screenChangedAt = Date.now(); partyView = 'board'; partyMark('board'); partyBoard(); }
+// Between its turns in the mini game rotation (ARCADE in app.js) the lagoon is closed: when it returns and what runs now.
+function partyClosed() {
+  partyView = 'lobby'; const back = ARCADE.nextStart('party'), now = MINI_GAMES.find(r => r[0] === ARCADE.game(ARCADE.slot()));
+  $('#main').innerHTML = `<section class="pp-room pp-closed" style="--ppbg:url('${artPath('comp-party-bg')}')"><div class="pp-top"><button data-back aria-label="Back" onclick="go('games')">‹</button></div>
+   <div class="pp-closed-card"><h1 class="pp-title">Lagoon Gala</h1><p>The lagoon is resting. It returns in <b>${partyClock(back - Date.now()).replace(/ \d+s$/, '')}</b>.</p>
+   <p>Now on: <b>${now[2]}</b></p><button class="primary" onclick="go('${now[0]}')">${denPlain}Play ${now[2]}</button></div></section>`;
+}
+function partyPlay() { if (typeof arcadeOpen === 'function' && !arcadeOpen('party')) return partyClosed(); screenChangedAt = Date.now(); partyView = 'board'; partyMark('board'); partyBoard(); }
 function partyBoard(fx = null) {
   const v = S.party, r = v.round, merged = new Set((fx?.merges || []).map(m => m.at));
   const cells = r.board.map((t, i) => `<div class="pp-cell">${t ? `<button class="pp-tile t${t} ${merged.has(i) ? 'pop' : ''} ${fx?.spawned === i ? 'new' : ''} ${partyWandArmed ? 'pick' : ''}" onclick="partyTileTap(${i})" aria-label="${Party.tiers[t - 1][1]}">${denPlain}<img src="${partyArt(t)}" alt=""><b>${t}</b></button>` : ''}</div>`).join('');
@@ -271,7 +279,7 @@ function partyItem(id) {
   const v = S.party;
   if (id === 'wand') { if ((v.items.wand || 0) < 1) return toast('No Magic Wand'); partyWandArmed = !partyWandArmed; return partyBoard(); }
   const res = Party.useItem(v, id);
-  if (!res.ok) return toast({ none: 'None left: Heavenly Gifts and Gift Packs give more', limit: 'Limit for this round reached', empty: 'The board is empty', nothing: 'No tier 1 pets on the board' }[res.err] || 'Cannot use now');
+  if (!res.ok) return toast({ none: 'None left: Tide Treasures and Gift Packs give more', limit: 'Limit for this round reached', empty: 'The board is empty', nothing: 'No tier 1 pets on the board' }[res.err] || 'Cannot use now');
   save(); partyBoard(); toast(Party.items[id].name + ' used');
 }
 function partyTileTap(i) {
@@ -286,12 +294,12 @@ function partyRules() {
   popup(`<h2>Lagoon Gala</h2><ol class="pp-rules"><li>Swipe up, down, left or right: every pet on the board slides.</li><li>Each move costs 1 stamina. It recovers over time (+1 every 5 minutes) and refills to ${Party.staminaMax} at 00:00 UTC. Stamina Potions add more.</li>
   <li>Two identical pets that meet merge into the next tier and give synthesis points (tier n: +${Party.points(1)} x n).</li><li>Party Fireworks, Party Cake and the Magic Wand make merging easier; each item has a limit per round.</li>
   <li>When the board is full and nothing can move, it is a deadlock: use an item or start a new round.</li><li>A new round keeps the old score as a result. The ranking uses your best round score; whoever reached it first ranks higher on a tie.</li>
-  <li>All points of all rounds open the Heavenly Gifts. Tier achievements pay once per event.</li><li>The event lasts ${Party.eventDays} days. Personal rewards are sent when it ends; event items are cleared then.</li><li>Everyone else on the ranking is an AI adventurer.</li></ol>`);
+  <li>All points of all rounds open the Tide Treasures. Tier achievements pay once per event.</li><li>The event lasts ${Party.eventDays} days. Personal rewards are sent when it ends; event items are cleared then.</li><li>Everyone else on the ranking is an AI adventurer.</li></ol>`);
 }
 function partyTrack() {
   const v = S.party, col = (row, c, i) => { const got = v.track[c].includes(i), open = Party.trackOpen(v, i), locked = c !== 'b' && !v.unlock[c];
     return `<button class="pp-cellg ${c} ${got ? 'got' : ''} ${open && !got && !locked ? 'ready' : ''}" onclick="partyTrackTap('${c}',${i})">${denPlain}${partyGifts(row[c])}${locked ? '<i class="pp-lock">🔒</i>' : got ? '<i class="pp-tick">✓</i>' : ''}</button>`; };
-  popup(`<div class="pp-track"><h2>Heavenly Gifts</h2><div class="pp-thead"><span>Basic</span><button onclick="partyUnlock('a')" ${v.unlock.a ? 'disabled' : ''}>${denPlain}Advanced ${v.unlock.a ? '✓' : '🔒 ' + Party.unlock.a}</button><button onclick="partyUnlock('h')" ${v.unlock.h ? 'disabled' : ''}>${denPlain}Heavenly ${v.unlock.h ? '✓' : '🔒 ' + Party.unlock.h}</button></div>
+  popup(`<div class="pp-track"><h2>Tide Treasures</h2><div class="pp-thead"><span>Basic</span><button onclick="partyUnlock('a')" ${v.unlock.a ? 'disabled' : ''}>${denPlain}Pearl Pass ${v.unlock.a ? '✓' : '🔒 ' + Party.unlock.a}</button><button onclick="partyUnlock('h')" ${v.unlock.h ? 'disabled' : ''}>${denPlain}Coral Crown ${v.unlock.h ? '✓' : '🔒 ' + Party.unlock.h}</button></div>
    <div class="pp-tlist">${Party.track.map((row, i) => `<div class="pp-trow ${Party.trackOpen(v, i) ? 'open' : ''} ${Party.track[i + 1] && Party.trackOpen(v, i + 1) ? 'next' : ''}">${col(row, 'b', i)}<span class="pp-at ${Party.trackOpen(v, i) ? 'on' : ''}"><i>${fmt(row.at)}</i></span>${col(row, 'a', i)}${col(row, 'h', i)}</div>`).join('')}</div>
    <p class="pp-total">Total points earned: <b>${fmt(v.total)}</b> · unlocks cost prisms</p></div>`);
 }
@@ -304,7 +312,7 @@ function partyTrackTap(c, i) {
 // level rewards after purchase", "Returned immediately after purchase", price button). Our price is in prisms.
 function partyUnlock(c) {
   const v = S.party; if (v.unlock[c]) return partyTrack();
-  const name = c === 'a' ? 'Advanced Benefits' : 'Heavenly Gifts', open = Party.colGifts(v, c, true);
+  const name = c === 'a' ? 'Pearl Pass' : 'Coral Crown', open = Party.colGifts(v, c, true);
   popup(`<div class="pp-offer ${c}" style="--ppbg:url('${artPath('comp-party-bg')}')"><img class="pp-offer-pet" src="${partyArt(c === 'a' ? 10 : 11)}" alt="">
    <span class="pp-value">Value ${uiIcon('crystals')} ${fmt(Party.value[c])}</span><h2>${name}</h2>
    <div class="pp-offer-box"><small>All available rewards after purchase</small><div class="pp-gl pp-scroll">${partyGifts(Party.colGifts(v, c, false))}</div>
@@ -314,7 +322,7 @@ function partyUnlock(c) {
 }
 function partyUnlockBuy(c) {
   const v = S.party; if (!Party.unlockCol(v, S, c)) return toast('Not enough prisms (' + Party.unlock[c] + ')');
-  save(); wallet(); partyTrack(); toast((c === 'a' ? 'Advanced benefits' : 'Heavenly gifts') + ' unlocked');
+  save(); wallet(); partyTrack(); toast((c === 'a' ? 'Pearl Pass' : 'Coral Crown') + ' unlocked');
 }
 function partyPacksPop() {
   const v = S.party;

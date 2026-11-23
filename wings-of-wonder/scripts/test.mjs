@@ -1047,15 +1047,27 @@ vm.runInContext(`
 console.log('PASS: Chat bubbles: sixteen own bubbles, buy, tiers, wear, validation, Bubble tab.');
 
 vm.runInContext(`
-{S=defaults();S.scales=5000;go('party');let h=$('#main').innerHTML;if(!h.includes('Lagoon Gala')||!S.party||!valid(S))throw Error('Lagoon Gala lobby');
+{const realSlot=ARCADE.slot;ARCADE.slot=()=>0;S=defaults();S.scales=5000;go('party');let h=$('#main').innerHTML;if(!h.includes('Lagoon Gala')||!S.party||!valid(S))throw Error('Lagoon Gala lobby');
  partyPlay();h=$('#main').innerHTML;if(!h.includes('pp-board')||!h.includes('Party Fireworks'))throw Error('Lagoon Gala board');
  S.party.round.board=[1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0];partyMove('left');if(S.party.round.score!==20||!valid(S))throw Error('Swipe on the board');
- partyItem('potion');partyTrack();partyTrackTap('b',0);if(!S.bag||!(S.bag.chest1>0))throw Error('Heavenly gift into the bag');
+ partyItem('potion');partyTrack();partyTrackTap('b',0);if(!S.bag||!(S.bag.chest1>0))throw Error('Tide Treasure into the bag');
  partyRankPop();partyRewardsPop();partyAchPop('gal');partyPacksPop();partyBuyPack('p1');if(S.party.packs.p1!==1)throw Error('Gift pack');
  partyAchPop('ach');go('games');if(!$('#main').innerHTML.includes('Lagoon Gala'))throw Error('Mini Games card');
- if(valid({...S,party:{...S.party,stamina:-1}}))throw Error('Invalid party save accepted');}
+ if(valid({...S,party:{...S.party,stamina:-1}}))throw Error('Invalid party save accepted');
+ // Mini game rotation: three-day turns from Party.anchor, Lagoon Gala closed off its turn, rankings and rewards.
+ ARCADE.slot=realSlot;const A=ARCADE,T=Party.anchor;
+ if(A.game(A.slot(T+1))!=='party'||A.game(1)!=='jungle'||A.game(5)!=='party'||A.nextStart('party',T+1)!==A.start(5)||A.ends(0)-A.start(0)!==3*864e5)throw Error('Rotation order');
+ const pf=A.field(3,'pairs',A.ends(3));if(pf.length<30||pf.some((x,i)=>i&&x.score<pf[i-1].score)||A.rankOf(3,'pairs',60,0,A.ends(3))!==1||A.rankOf(3,'pairs',999,0,A.ends(3))!==pf.length+1)throw Error('Pairs ranking is by lowest time');
+ const cf=A.field(2,'cascade',A.ends(2));if(cf.some((x,i)=>i&&x.score>cf[i-1].score)||A.rankOf(2,'cascade',1e6,0,A.ends(2))!==1)throw Error('Score ranking');
+ ARCADE.slot=()=>2;S.arcade=undefined;arcadeScore('cascade',5000);arcadeScore('cascade',3000);arcadeScore('jungle',9000);
+ if(S.arcade.best!==5000||S.arcade.game!=='cascade'||!valid(S))throw Error('Only the featured game counts');
+ const gold0=S.gold,chest0=S.bag.chest1||0;S.arcade.slot--;arcadeState();if(S.arcade!==undefined||S.gold<=gold0)throw Error('Turn end pays rank rewards');
+ if(valid({...S,arcade:{slot:1,game:'fishing',best:1,at:0}}))throw Error('Invalid arcade save accepted');
+ ARCADE.slot=()=>1;go('party');if(!$('#main').innerHTML.includes('resting'))throw Error('Lagoon Gala closed off its turn');
+ go('games');let hub=$('#main').innerHTML;if(!hub.includes('Returns in')||!hub.includes('Jungle Trek')||!hub.includes('Up next'))throw Error('Hub shows the featured game and the closed Gala');
+ arcadeRanks();ARCADE.slot=realSlot;}
 `,context);
-console.log('PASS: Lagoon Gala: lobby, board, swipe, items, Heavenly Gifts, ranking, rewards, gallery, packs, Mini Games card, validation.');
+console.log('PASS: Lagoon Gala: lobby, board, swipe, items, Tide Treasures, mini game rotation (turns, rankings, rewards, closed Gala), ranking, rewards, gallery, packs, Mini Games card, validation.');
 
 vm.runInContext(`
 {S=defaults();go('siege');let h=$('#main').innerHTML;if(!h.includes('Dragon Keep')||!S.siege||!valid(S))throw Error('Pet Siege map');

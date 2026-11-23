@@ -182,7 +182,7 @@ function startJungle(){
   canvas.onpointermove=e=>{if(pointer===e.pointerId&&!g.paused){e.preventDefault();const r=canvas.getBoundingClientRect();g.target=Trek.clamp(start+(e.clientX-origin)/r.width*3.5,-1.25,1.25)}};
   canvas.onpointercancel=canvas.onpointerup=canvas.onlostpointercapture=e=>{if(e.pointerId===pointer){pointer=null;g.touch=false}};
   canvas.onkeydown=e=>{if(['ArrowLeft','ArrowRight','a','d'].includes(e.key)){e.preventDefault();g.target=Trek.clamp(g.target+(['ArrowLeft','a'].includes(e.key)?-.3:.3),-1.25,1.25)}else if(e.key==='Escape'){e.preventDefault();pauseJungle()}};
-  function finish(){if(g.rewarded)return;g.rewarded=true;S.jungleBest=Math.max(S.jungleBest||0,g.score);
+  function finish(){if(g.rewarded)return;g.rewarded=true;S.jungleBest=Math.max(S.jungleBest||0,g.score);if(typeof arcadeScore==='function')arcadeScore('jungle',g.score);
     const barrels=Math.min(800,g.kills*12),gold=barrels+g.loot.gold,xp=Math.min(80,g.kills*2),wishes=g.loot.wishes,seals=g.loot.chests*10;gain(gold,wishes,xp);if(seals&&typeof WonderGear!=='undefined')WonderGear.addSeals(S,seals);if(g.bossDown&&typeof WonderGear!=='undefined')WonderGear.bagAdd(S,'chest2',1);save();
     const title=g.bossDown?'DRAGON DEFEATED':!g.hp?'ADVENTURE ENDED':g.bossSpawned?'THE DRAGON ESCAPED':'TRAIL COMPLETE';
     const chest=n=>`<img src="${artPath(n<g.loot.chests?'trek-chest-open':'trek-chest')}" class="${n<g.loot.chests?'':'shut'}" alt="">`;

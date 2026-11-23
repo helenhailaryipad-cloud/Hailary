@@ -30,7 +30,7 @@ P.restart(it,rng);assert.equal(it.round.score,0);eq(it.round.used,{},'a new roun
 const d=P.roll(undefined,T0,rng).v;d.round.board=[1,2,1,2, 2,1,2,1, 1,2,1,2, 2,1,2,3];d.round.over=false;d.best=500;
 assert.equal(P.swipe(d,'left',T0,rng).ok,false);d.round.over=!P.canMove(d.round.board);assert.ok(d.round.over);assert.equal(P.swipe(d,'left',T0,rng).err,'deadlock');
 assert.ok(P.useItem({...d,items:{fire:1}},'fire').ok,'an item can break a deadlock');P.restart(d,rng);assert.equal(d.best,500);
-// Heavenly Gifts: rows open with total points; Advanced and Heavenly need an unlock for prisms.
+// Tide Treasures: rows open with total points; Pearl Pass and Coral Crown need an unlock for prisms.
 const g=P.roll(undefined,T0,rng).v;g.total=4500;const save={scales:1500};assert.equal(P.track.length,21);assert.equal(P.track.at(-1).at,72000);
 assert.ok(P.trackClaim(g,'b',2));assert.equal(P.trackClaim(g,'b',2),null,'once');assert.equal(P.trackClaim(g,'b',3),null,'row not open');
 assert.equal(P.trackClaim(g,'a',0),null,'locked column');assert.ok(P.unlockCol(g,save,'a'));assert.equal(save.scales,1500-P.unlock.a+P.refund.a);assert.ok(P.trackClaim(g,'a',0));
@@ -49,4 +49,4 @@ assert.ok(P.valid(next.v));assert.ok(!P.valid({...next.v,round:{...next.v.round,
 // A long bot game never breaks the rules.
 const b=P.roll(undefined,T0,rng).v;b.stamina=5000;let moves=0;for(let i=0;i<4000&&!b.round.over;i++){for(const dir of ['down','left','right','up'])if(P.swipe(b,dir,T0,rng).ok){moves++;break}}
 assert.ok(b.round.over&&moves>50&&b.round.top>=6&&P.valid(b),'bot reaches tier '+b.round.top+' in '+moves+' moves, score '+b.round.score);
-console.log('PASS Party: slides and merges, deadlock, stamina and daily refill, items and round limits, new round, Heavenly Gifts and unlocks, packs, achievements, AI ranking, event end, bot game (top tier '+b.round.top+', score '+b.round.score+')');
+console.log('PASS Party: slides and merges, deadlock, stamina and daily refill, items and round limits, new round, Tide Treasures and unlocks, packs, achievements, AI ranking, event end, bot game (top tier '+b.round.top+', score '+b.round.score+')');

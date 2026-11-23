@@ -210,6 +210,19 @@ User sent twelve photos of the reference's pet siege (no text). Home promo "Pet 
   hers + simulated ally AI (`Siege.allyAi`). Optional save field `S.siege` (`Siege.valid` from `valid()`).
 - Art (image model): `art-source/siege/{map,hall}.webp` by `scripts/build-siege-art.py`. Placeholders throughout.
 
+## Mini game rotation (2026-11-23)
+User: "all these mini games except fishing take turns, each runs 2-3 days, then another; rankings go by them".
+`ARCADE` in `app.js` (next to `MINI_GAMES`): one featured game every `ARCADE.days` (3) UTC days from `Party.anchor`, in
+the order `ARCADE.order` = Lagoon Gala, Jungle Trek, Crystal Cascade, Harvest Pairs, Dragon Merge (Castle Defense and
+Crownfall Vale are campaigns, not in the rotation). The hub's banner shows the featured game (time left, best, rank,
+Play, Ranking pop-up `arcadeRanks`) and "Up next". Runs of the featured game count (`arcadeScore`, called where each
+game saves its best); optional save field `S.arcade {slot, game, best, at}` (`ARCADE.valid`). When the turn ends
+`arcadeState()` pays rank rewards (`ARCADE.ranks`) into the bag; AI field per game in `ARCADE.field` (`scale`, Pairs is a
+time, lower is better). Lagoon Gala is open only on its own turn (`arcadeOpen`, `partyClosed()` says when it returns);
+its own event is now 3 days (`Party.eventDays`), so its ranking, Tide Treasures and rank rewards follow the turn.
+Own names (user: "we need our own names"): Heavenly Gifts -> Tide Treasures, Advanced benefits -> Pearl Pass,
+Heavenly gifts -> Coral Crown.
+
 ## Lagoon Gala event mini-game (2026-11-23; renamed from "Splash Party" so the name is clearly our own)
 User sent eleven photos of the reference's "Pet Party" event ("add this one too"). Original name and art, same
 mechanics. Mini Games card + sub-nav tab, screen id `party`, `src/party.js` (rules `Party`, pure, `node
@@ -223,7 +236,7 @@ scripts/test-party.mjs`; UI below the `PARTY_UI` marker; also loaded by `scripts
 - Deadlock overlay when nothing can move; New round keeps the score as a result.
 - Event = 7 UTC days from `Party.anchor` (`period`). Best round score ranks against 40 simulated AI (`field`, labelled
   AI; ties go to the earlier).
-- Total points open Heavenly Gifts (`track`, columns Basic free / Advanced 680 / Heavenly 1280 prisms).
+- Total points open Tide Treasures (`track`, columns Basic free / Pearl Pass 680 / Coral Crown 1280 prisms).
 - Heavenly Gifts second pass (six photos of the reference's offers, then five of the whole track): 21 rows up to 72,000
   points (Basic one material, Advanced the same doubled, Heavenly two special items; green progress line, big ticks); lobby buttons
   Advanced benefits / Heavenly gifts (`.pp-passes`) open an offer window (`partyUnlock`: Value, all rewards, rewards of
