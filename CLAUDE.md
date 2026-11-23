@@ -153,11 +153,11 @@ result; a tap opens the game), 4 columns (3 on tall screens), no sub-tab strip o
 portal layout is kept as `gamesOld()` (unused). A new game only needs a row in `MINI_GAMES`.
 The hub is full screen (user: "why so many sub-menus"): no app header, bottom nav or Menu pill; its round `data-back`
 button (`.mg-back`) goes to the home screen (CSS `body[data-screen=games]` at the end of `stage.css`). The hub is a narrow
-centred column (at most 560 px): a wide event banner for the first `MINI_GAMES` row (Splash Party: three party pets,
+centred column (at most 560 px): a wide event banner for the first `MINI_GAMES` row (Lagoon Gala: three party pets,
 time left, Play; `.mg-event`), an "All games" divider, then the other six games in a 3 x 2 grid (user: "arrange them
 more interestingly"). Short windows use flatter covers so everything fits 590 x 690.
 Home screen (user circled the separate game icons: "put all mini games into one Mini Games icon"): Fishing, Harvest
-Pairs and Splash Party icons are gone from `.city-extra`; one larger `.city-minigames` icon (painted tent,
+Pairs and Lagoon Gala icons are gone from `.city-extra`; one larger `.city-minigames` icon (painted tent,
 `art-source/ui/minigames.webp` -> `comp-minigames-icon` by `build-ui-icons.py`) opens the hub. Isle Expedition and
 Cloud War stay (not mini games). Fishing came back as its own icon (user: "it is daily, by time"); the four icons
 sit in one row (`.city-extra` 4 columns, 34% wide).
@@ -210,7 +210,7 @@ User sent twelve photos of the reference's pet siege (no text). Home promo "Pet 
   hers + simulated ally AI (`Siege.allyAi`). Optional save field `S.siege` (`Siege.valid` from `valid()`).
 - Art (image model): `art-source/siege/{map,hall}.webp` by `scripts/build-siege-art.py`. Placeholders throughout.
 
-## Splash Party event mini-game (2026-11-23)
+## Lagoon Gala event mini-game (2026-11-23; renamed from "Splash Party" so the name is clearly our own)
 User sent eleven photos of the reference's "Pet Party" event ("add this one too"). Original name and art, same
 mechanics. Mini Games card + sub-nav tab, screen id `party`, `src/party.js` (rules `Party`, pure, `node
 scripts/test-party.mjs`; UI below the `PARTY_UI` marker; also loaded by `scripts/test.mjs`).
@@ -858,7 +858,7 @@ The user wants to play the game inside the chat, and wants SHORT replies in Russ
   `python3 wings-of-wonder/scripts/build-chat-preview.py <scratchpad>/chat`, then Artifact publish of
   `<scratchpad>/chat/wings-of-wonder.html` with `url` set to that link, `root` = `<scratchpad>/chat/files`, and only the
   CHANGED files in `files` (unchanged ones are kept). A first full upload needs two publishes (files-1.json, files-2.json).
-- Durable save copy (user lost a Splash Party round: the viewer's browser storage came back empty): the artifact declares
+- Durable save copy (user lost a Lagoon Gala round: the viewer's browser storage came back empty): the artifact declares
   `capabilities: {sample:{}, db:{}, user:{}}`; `initDbSave()` / `dbSaveWrite()` in `app.js` keep the save as a JSON
   string in the private doc `data/users/<id>/save` (2.5 s debounce after `save()`); on load the newer of local and
   stored (`updated`) wins. ALWAYS republish with those capabilities (omitting `capabilities` carries them forward).

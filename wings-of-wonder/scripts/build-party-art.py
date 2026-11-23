@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Splash Party art (image model): the beach-party lobby (scripts/art-source/party/bg.webp) and a 2 x 2 sheet of the
+"""Lagoon Gala art (image model): the beach-party lobby (scripts/art-source/party/bg.webp) and a 2 x 2 sheet of the
 four event items in the order of Party.itemIds (fire, cake, wand, potion). Writes comp-party-bg and comp-party-items
 (256 px tiles, each icon trimmed and centred), plus AVIF copies for hosting.
 

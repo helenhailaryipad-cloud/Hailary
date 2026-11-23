@@ -1047,15 +1047,15 @@ vm.runInContext(`
 console.log('PASS: Chat bubbles: sixteen own bubbles, buy, tiers, wear, validation, Bubble tab.');
 
 vm.runInContext(`
-{S=defaults();S.scales=5000;go('party');let h=$('#main').innerHTML;if(!h.includes('Splash Party')||!S.party||!valid(S))throw Error('Splash Party lobby');
- partyPlay();h=$('#main').innerHTML;if(!h.includes('pp-board')||!h.includes('Party Fireworks'))throw Error('Splash Party board');
+{S=defaults();S.scales=5000;go('party');let h=$('#main').innerHTML;if(!h.includes('Lagoon Gala')||!S.party||!valid(S))throw Error('Lagoon Gala lobby');
+ partyPlay();h=$('#main').innerHTML;if(!h.includes('pp-board')||!h.includes('Party Fireworks'))throw Error('Lagoon Gala board');
  S.party.round.board=[1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0];partyMove('left');if(S.party.round.score!==20||!valid(S))throw Error('Swipe on the board');
  partyItem('potion');partyTrack();partyTrackTap('b',0);if(!S.bag||!(S.bag.chest1>0))throw Error('Heavenly gift into the bag');
  partyRankPop();partyRewardsPop();partyAchPop('gal');partyPacksPop();partyBuyPack('p1');if(S.party.packs.p1!==1)throw Error('Gift pack');
- partyAchPop('ach');go('games');if(!$('#main').innerHTML.includes('Splash Party'))throw Error('Mini Games card');
+ partyAchPop('ach');go('games');if(!$('#main').innerHTML.includes('Lagoon Gala'))throw Error('Mini Games card');
  if(valid({...S,party:{...S.party,stamina:-1}}))throw Error('Invalid party save accepted');}
 `,context);
-console.log('PASS: Splash Party: lobby, board, swipe, items, Heavenly Gifts, ranking, rewards, gallery, packs, Mini Games card, validation.');
+console.log('PASS: Lagoon Gala: lobby, board, swipe, items, Heavenly Gifts, ranking, rewards, gallery, packs, Mini Games card, validation.');
 
 vm.runInContext(`
 {S=defaults();go('siege');let h=$('#main').innerHTML;if(!h.includes('Dragon Keep')||!S.siege||!valid(S))throw Error('Pet Siege map');
