@@ -170,6 +170,13 @@ Painted lake (user: "draw the water more beautifully"): `.lake` under the lagoon
 `comp-fish-water` (image model, `art-source/fishing/water.png`, same build script), faded into the shore, with drifting
 sun glints and rings spreading from the float; the old dark gradients were removed. Then calmed (user: "not motley,
 not messy"): glints off, one soft ring, the picture desaturated, slightly blurred and under a teal veil.
+Tackle shop (user: "don't show the pendulum until fishing starts; show buying worms and feed here, like the game
+photos" - those photos are not in this session's history): the dial is hidden while `data-phase=idle`; instead
+`#tackle` offers Bait Worms (200 gold, +1 cast after the 10 free ones; a cast past the limit takes a worm) and Fish
+Feed (300 gold for 3 portions; a cast with feed picks species with exponent 1 instead of 1.7 and heavier weights).
+Optional save field `S.fishTackle {worms, feed}` (validated in `valid()`); the iframe reaches the live save through
+`fishSave()` in `app.js` (`S` is a `let`, not a window property). Icons `comp-fish-tackle` from
+`art-source/fishing/tackle.png` (`build-fishing-anglers.py`).
 
 ## Pet Siege event (2026-11-23)
 User sent twelve photos of the reference's pet siege (no text). Home promo "Pet Siege" opens screen `siege`
