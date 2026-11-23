@@ -154,7 +154,8 @@ portal layout is kept as `gamesOld()` (unused). A new game only needs a row in `
 Home screen (user circled the separate game icons: "put all mini games into one Mini Games icon"): Fishing, Harvest
 Pairs and Splash Party icons are gone from `.city-extra`; one larger `.city-minigames` icon (painted tent,
 `art-source/ui/minigames.webp` -> `comp-minigames-icon` by `build-ui-icons.py`) opens the hub. Isle Expedition and
-Cloud War stay (not mini games).
+Cloud War stay (not mini games). Fishing came back as its own icon (user: "it is daily, by time"); the four icons
+sit in one row (`.city-extra` 4 columns, 34% wide).
 
 ## Splash Party event mini-game (2026-11-23)
 User sent eleven photos of the reference's "Pet Party" event ("add this one too"). Original name and art, same
