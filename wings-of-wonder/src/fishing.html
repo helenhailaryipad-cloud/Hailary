@@ -111,7 +111,10 @@ body:not([data-phase=idle]) .tackle{display:none!important}
 .tk button{justify-self:start;min-height:0;padding:5px 12px;margin-top:3px;font:700 13px/1 Georgia,serif;border-radius:20px}
 .tk-note{grid-column:1/-1;margin:0;text-align:center;font:600 12px/1.3 Arial,sans-serif;color:#ffe9a0;min-height:1em}
 @media(max-width:560px){.tk{grid-template-columns:1fr;justify-items:center;text-align:center}.tk i{grid-row:auto;width:46px;height:46px}.tk small{font-size:11px}.tk button{justify-self:center}}
-footer{z-index:4!important}</style><main><header><div><button type="button" id="exitFishing">‹ Mini Games</button><h1>Moonwater Fishing</h1><span id="best"></span><span id="dailyCasts" style="display:block"></span></div><button id="basket">Fish basket</button></header><details id="cup"><summary id="cupTitle"></summary><ol id="ranks"></ol><p id="cupPrize">First prize · Moonwater Pearl</p></details><div class="lagoon" id="lagoon">
+footer{z-index:4!important}
+/* Back: the game's painted round back icon instead of the "Mini Games" pill (user crossed the pill out). */
+#exitFishing{width:52px;height:52px;min-height:0!important;padding:0!important;border:0!important;border-radius:50%;background:center/contain no-repeat;box-shadow:none!important;font-size:0!important;color:transparent!important;filter:drop-shadow(0 2px 3px #0007)}
+</style><main><header><div><button type="button" id="exitFishing">‹ Mini Games</button><h1>Moonwater Fishing</h1><span id="best"></span><span id="dailyCasts" style="display:block"></span></div><button id="basket">Fish basket</button></header><details id="cup"><summary id="cupTitle"></summary><ol id="ranks"></ol><p id="cupPrize">First prize · Moonwater Pearl</p></details><div class="lagoon" id="lagoon">
  <div class="lake" id="lake"><i class="glint"></i><i class="glint g2"></i></div><div class="water"></div><div id="folkRow"></div><img class="reina-angler" id="reinaAngler" alt="Reina fishing" draggable="false"><svg class="line" id="lineSvg" aria-hidden="true"><path id="linePath" fill="none" stroke="#fff4cd" stroke-width="1.6"/></svg>
  <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M3 100 Q18 31 34 10" fill="none" stroke="#d9b36c" stroke-width="3" vector-effect="non-scaling-stroke"/><path d="M34 10 Q43 39 57 51" fill="none" stroke="#fff4cd" stroke-width="1.3" vector-effect="non-scaling-stroke"/></svg>
  <div class="float" id="float" role="progressbar" aria-label="Catch progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
@@ -243,7 +246,7 @@ standings();setInterval(standings,1000);
 // ---- anglers on the shore ----
 const art=id=>{try{if(parent!==window&&typeof parent.artPath==='function')return parent.artPath(id)}catch{}return 'assets/generated/'+id+'.webp'};
 const ROD={reina:[.998,.002],folk:[[.934,.053],[.919,.003],[.957,.06]]},FOLK_SPOT=[[47,.95],[62,1],[76,.9]];
-el('reinaAngler').src=art('comp-fish-reina');el('lake').style.backgroundImage='url("'+art('comp-fish-water')+'")';
+el('reinaAngler').src=art('comp-fish-reina');el('exitFishing').style.backgroundImage='url("'+art('ui-back')+'")';el('exitFishing').setAttribute('aria-label','Back to Mini Games');el('lake').style.backgroundImage='url("'+art('comp-fish-water')+'")';
 el('folkRow').innerHTML=anglers.slice(0,3).map((n,i)=>`<div class="folk" id="folk${i}" style="left:${FOLK_SPOT[i][0]}%;height:${30*FOLK_SPOT[i][1]}%"><b>${n} <small>AI</small></b><img src="${art('comp-fish-folk-'+(i+1))}" alt=""><i></i></div>`).join('');
 function drawLine(){
  const L=el('lagoon').getBoundingClientRect(),R=el('reinaAngler').getBoundingClientRect(),F=el('float').getBoundingClientRect();if(!L.width||!R.width)return;

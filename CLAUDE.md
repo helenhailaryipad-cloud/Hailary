@@ -176,7 +176,8 @@ photos" - those photos are not in this session's history): the dial is hidden wh
 Feed (300 gold for 3 portions; a cast with feed picks species with exponent 1 instead of 1.7 and heavier weights).
 Optional save field `S.fishTackle {worms, feed}` (validated in `valid()`); the iframe reaches the live save through
 `fishSave()` in `app.js` (`S` is a `let`, not a window property). Icons `comp-fish-tackle` from
-`art-source/fishing/tackle.png` (`build-fishing-anglers.py`).
+`art-source/fishing/tackle.png` (`build-fishing-anglers.py`). The "‹ Mini Games" pill is now the painted round back
+icon (`ui-back`, user crossed the pill out).
 
 ## Pet Siege event (2026-11-23)
 User sent twelve photos of the reference's pet siege (no text). Home promo "Pet Siege" opens screen `siege`
