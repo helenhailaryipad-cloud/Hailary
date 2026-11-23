@@ -232,7 +232,6 @@ function showParty() {
    <button class="pp-side pp-gifts" onclick="partyTrack()">${denPlain}<i>🎁</i><small>Heavenly Gifts</small>${claim.track ? '<em></em>' : ''}</button>
    <div class="pp-passes"><button class="a ${v.unlock.a ? 'on' : ''}" onclick="partyUnlock('a')">${denPlain}<img src="${partyArt(10)}" alt=""><span>Advanced<br>benefits</span>${v.unlock.a ? '<b>✓</b>' : ''}</button><button class="h ${v.unlock.h ? 'on' : ''}" onclick="partyUnlock('h')">${denPlain}<img src="${partyArt(11)}" alt=""><span>Heavenly<br>gifts</span>${v.unlock.h ? '<b>✓</b>' : ''}</button></div>
    <div class="pp-crew">${crew}</div>
-   <div class="pp-stam">${partyIcon('potion')}<span>Stamina <b>${v.stamina}</b>/${Party.staminaMax}</span><small></small></div>
    <button class="pp-start" onclick="partyPlay()">${denPlain}${v.round.score || v.round.board.filter(Boolean).length > 2 ? 'Continue' : 'Start game'}</button>
    <div class="pp-bar"><button onclick="partyRewardsPop()">${denPlain}<i>🏅</i><small>Rewards</small></button><button onclick="partyRankPop()">${denPlain}<i>🏆</i><small>Rank</small></button>
     <button onclick="partyPacksPop()">${denPlain}<i>💎</i><small>Gift Pack</small></button><button onclick="partyAchPop()">${denPlain}<i>⭐</i><small>Achievements</small>${claim.ach ? '<em></em>' : ''}</button></div>
