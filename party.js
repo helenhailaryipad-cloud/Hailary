@@ -201,7 +201,14 @@ function partyTick() {
   const t = document.querySelector('.pp-time'); if (t) t.textContent = partyClock(Party.ends(v.period) - Date.now());
   const st = document.querySelector('.pp-stam small'); if (st) { const n = Party.nextStamina(v); st.textContent = n ? '+1 in ' + Math.ceil(n / 60000) + 'm' : 'Full'; }
 }
+// After a page reload (the chat preview reloads when a new version is published) go straight back to the board if it
+// was open, so a running round never looks lost.
+let partyFirstShow = true;
+function partyMark(view) { try { localStorage.setItem('wow-party-view', view); } catch {} }
 function showParty() {
+  if (partyFirstShow) { partyFirstShow = false; let was = ''; try { was = localStorage.getItem('wow-party-view') || ''; } catch {}
+    if (was === 'board') { partyState(); save(); return partyPlay(); } }
+  partyMark('lobby');
   partyView = 'lobby'; partyWandArmed = false; const v = partyState(); save();
   const rank = Party.rankOf(v.best, v.bestAt, v.period), claim = partyClaimable(v);
   const crew = [5, 8, 10, 3, 1].map((t, i) => `<img class="pp-pet pp-pet${i}" src="${partyArt(t)}" alt="${Party.tiers[t - 1][1]}">`).join('');
@@ -220,7 +227,7 @@ function showParty() {
   partyStop(); partyTimer = setInterval(partyTick, 1000); partyTick();
 }
 function partyClaimable(v) { return { track: Party.track.some((row, i) => Party.trackOpen(v, i) && (!v.track.b.includes(i) || (v.unlock.a && !v.track.a.includes(i)) || (v.unlock.h && !v.track.h.includes(i)))), ach: Object.keys(Party.achieve).some(t => v.reach >= +t && !v.ach.includes(+t)) }; }
-function partyPlay() { screenChangedAt = Date.now(); partyView = 'board'; partyBoard(); }
+function partyPlay() { screenChangedAt = Date.now(); partyView = 'board'; partyMark('board'); partyBoard(); }
 function partyBoard(fx = null) {
   const v = S.party, r = v.round, merged = new Set((fx?.merges || []).map(m => m.at));
   const cells = r.board.map((t, i) => `<div class="pp-cell">${t ? `<button class="pp-tile t${t} ${merged.has(i) ? 'pop' : ''} ${fx?.spawned === i ? 'new' : ''} ${partyWandArmed ? 'pick' : ''}" onclick="partyTileTap(${i})" aria-label="${Party.tiers[t - 1][1]}">${denPlain}<img src="${partyArt(t)}" alt=""><b>${t}</b></button>` : ''}</div>`).join('');
