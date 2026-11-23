@@ -422,7 +422,7 @@ function stats(save){const b=bonuses(save);
  if((look&1)||save.atelier?.hair)b.health=(b.health||0)+fashionTraits.hair;
  if(look&2)b.defense=(b.defense||0)+fashionTraits.clothing;
  if((look&4)||save.atelier?.weapon)b.attack=(b.attack||0)+fashionTraits.weapon;
- if(/^(?:w[0-3]|fashion-wing-(?:[1-9]|1\d|2[0-7]))$/.test(save.reinaFashion?.wingSkin))b.shieldHealth=(b.shieldHealth||0)+fashionTraits.wings;
+ if(/^(?:w[0-3]|fashion-wing-(?:[1-9]|1\d|2\d|3[01]))$/.test(save.reinaFashion?.wingSkin))b.shieldHealth=(b.shieldHealth||0)+fashionTraits.wings;
  const bowBonus=['roseguard','starfall','lilyveil','emberleaf'].reduce((total,id)=>{
    const rank=save.fashionBows?.[id];
    return Number.isSafeInteger(rank)&&rank>0 ? total+rank*20 : total;
@@ -433,6 +433,7 @@ function stats(save){const b=bonuses(save);
  for(const [key,n] of Object.entries(devourBonus(save)))b[key]=(b[key]||0)+n;
  for(const [key,n] of Object.entries(guildBonus(save)))b[key]=(b[key]||0)+n;
  for(const [key,n] of Object.entries(supremeBonus(save)))b[key]=(b[key]||0)+n;
+ if(typeof Rites!=='undefined')for(const [key,n] of Object.entries(Rites.bonus(save)))b[key]=(b[key]||0)+n;
  const cards=globalThis.MoonwaterFish.totals(save.fishCards);
  const lv=globalThis.WonderProgress.level(save.xp),d=petTeamAttack(save),w=[40,120,180,240][Number(save.wings[1])];const attack=Math.round((85+lv*7+d+(b.attack||0))*(1+(b.attackPercent||0)/100))+(cards.attack||0)+bowBonus,defense=Math.round((52+lv*4+w+(b.defense||0))*(1+(b.defensePercent||0)/100))+(cards.defense||0),health=Math.round((900+lv*75+(b.health||0))*(1+(b.healthPercent||0)/100))+(cards.health||0),crit=round(Math.min(75,8+(b.crit||0))),speed=100+(b.speed||0),penetration=round(b.penetration||0),damageBonus=round(b.damageBonus||0),damageReduction=round(Math.min(50,b.damageReduction||0)),block=round(Math.min(40,b.block||0)),expBonus=round(b.expBonus||0);const accuracy=round(100+(b.accuracy||0)),dodge=round(Math.min(30,b.dodge||0)),critDamage=round(165+(b.critDamage||0)),critResistance=round(Math.min(30,b.critResistance||0)),shieldHealth=Math.round(b.shieldHealth||0)+(cards.shieldHealth||0),elementalAttack=Math.round(b.elementalAttack||0)+(cards.elementalAttack||0),elementalDefense=Math.round(b.elementalDefense||0)+(cards.elementalDefense||0),armor=round(100-10000/(100+defense*.35)),attackInterval=round(100/speed),healing=Math.round(health*.25);
 const advanced={accuracy,dodge,critDamage,critResistance,shieldHealth,elementalAttack,elementalDefense,armor,attackInterval,healing};
