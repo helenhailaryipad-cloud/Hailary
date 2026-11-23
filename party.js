@@ -23,18 +23,28 @@ const Party = {
   roundLimit: { fire: 3, cake: 3, wand: 3, potion: 10 },
   starter: { fire: 1, cake: 1, wand: 1, potion: 5 },
   // Heavenly Gifts: total points of the event open each row; Basic is free, the other two columns need an unlock.
+  // Heavenly Gifts: total points of the event open each row (1 ... 72,000, as in the reference); Basic is free, the
+  // other two columns need an unlock (`unlock` prisms, `refund` prisms back at once, `value` shown on the offer).
   track: [
     { at: 1, b: { chest1: 1 }, a: { chest1: 2 }, h: { gold2: 1, potion: 5 } },
     { at: 2000, b: { exp1: 3 }, a: { exp1: 6 }, h: { shardbag: 1, fire: 1 } },
     { at: 4000, b: { potion: 5 }, a: { potion: 10 }, h: { stonebag: 2, cake: 1 } },
     { at: 6000, b: { gold1: 3 }, a: { gold2: 2 }, h: { gembox: 1, wand: 1 } },
     { at: 8000, b: { fire: 1 }, a: { fire: 2 }, h: { chest2: 2 } },
-    { at: 12000, b: { wish: 1 }, a: { wish: 2 }, h: { sealbag: 2 } },
-    { at: 16000, b: { cake: 1 }, a: { cake: 2 }, h: { chest3: 1, potion: 10 } },
-    { at: 22000, b: { chest2: 1 }, a: { chest2: 2 }, h: { petegg: 1 } },
-    { at: 30000, b: { wand: 1 }, a: { wand: 2 }, h: { gembox: 2, wish: 2 } },
-    { at: 40000, b: { petegg: 1 }, a: { petegg: 1, chest3: 1 }, h: { petegg: 2, chest3: 2 } }],
-  unlock: { a: 680, h: 1280 },                 // prisms (real-money payment is not built)
+    { at: 10000, b: { exp1: 6 }, a: { exp2: 2 }, h: { sealbag: 1, potion: 5 } },
+    { at: 14000, b: { gold1: 4 }, a: { gold2: 3 }, h: { shardbag: 2 } },
+    { at: 18000, b: { stonebag: 3 }, a: { stonebag: 6 }, h: { gembox: 2 } },
+    { at: 22000, b: { fire: 1 }, a: { potion: 6 }, h: { fire: 1, potion: 5 } },
+    { at: 26000, b: { exp2: 1 }, a: { exp2: 3 }, h: { essence: 2, sealbag: 1 } },
+    { at: 30000, b: { wish: 1 }, a: { wish: 2 }, h: { chest3: 1 } },
+    { at: 34000, b: { chest2: 1 }, a: { chest2: 2 }, h: { shardbag: 2, stonebag: 2 } },
+    { at: 38000, b: { wand: 1 }, a: { wand: 1, potion: 5 }, h: { wand: 1, potion: 5 } },
+    { at: 46000, b: { gold2: 2 }, a: { gold2: 4 }, h: { essence: 3 } },
+    { at: 52000, b: { sealbag: 1 }, a: { sealbag: 2 }, h: { gembox: 2 } },
+    { at: 58000, b: { shardbag: 1 }, a: { shardbag: 2 }, h: { chest3: 1, wish: 2 } },
+    { at: 64000, b: { stonebag: 3 }, a: { stonebag: 6 }, h: { petegg: 1 } },
+    { at: 72000, b: { cake: 1 }, a: { cake: 1 }, h: { petegg: 1, potion: 5 } }],
+  unlock: { a: 680, h: 1280 }, refund: { a: 60, h: 300 }, value: { a: 7000, h: 29000 },   // prisms (real money is not built)
   packs: [
     { id: 'p1', name: 'Event Pack I', price: 30, limit: 1, give: { potion: 20, gold: 2000 } },
     { id: 'p2', name: 'Event Pack II', price: 120, limit: 2, give: { potion: 20, fire: 1, gold: 5000 } },
@@ -141,7 +151,9 @@ const Party = {
     if (!this.track[row] || !['b', 'a', 'h'].includes(col) || v.track[col].includes(row) || !this.trackOpen(v, row) || (col !== 'b' && !v.unlock[col])) return null;
     v.track[col].push(row); return this.track[row][col];
   },
-  unlockCol(v, s, col) { const p = this.unlock[col]; if (!p || v.unlock[col] || (s.scales || 0) < p) return false; s.scales -= p; v.unlock[col] = true; return true; },
+  unlockCol(v, s, col) { const p = this.unlock[col]; if (!p || v.unlock[col] || (s.scales || 0) < p) return false; s.scales -= p - (this.refund[col] || 0); v.unlock[col] = true; return true; },
+  // Everything a column holds, and what it holds in the rows already open (the offer window shows both).
+  colGifts(v, col, openOnly) { const out = {}; this.track.forEach((row, i) => { if (openOnly && !this.trackOpen(v, i)) return; for (const [k, n] of Object.entries(row[col])) out[k] = (out[k] || 0) + n; }); return out; },
   buyPack(v, s, id) { const p = this.packs.find(x => x.id === id); if (!p || (v.packs[id] || 0) >= p.limit || (s.scales || 0) < p.price) return null; s.scales -= p.price; v.packs[id] = (v.packs[id] || 0) + 1; return p.give; },
   achClaim(v, tier) { if (!this.achieve[tier] || v.ach.includes(tier) || v.reach < tier) return null; v.ach.push(tier); return this.achieve[tier]; },
   // Split a reward into event items (into S.party.items), gold and bag items.
@@ -218,6 +230,7 @@ function showParty() {
    <div class="pp-score"><span>My Point: <b>${fmt(v.best)}</b></span><span>My Rank: <b>${rank || 'None'}</b></span></div>
    <button class="pp-side pp-help" onclick="partyRules()">${denPlain}?</button>
    <button class="pp-side pp-gifts" onclick="partyTrack()">${denPlain}<i>🎁</i><small>Heavenly Gifts</small>${claim.track ? '<em></em>' : ''}</button>
+   <div class="pp-passes"><button class="a ${v.unlock.a ? 'on' : ''}" onclick="partyUnlock('a')">${denPlain}<img src="${partyArt(10)}" alt=""><span>Advanced<br>benefits</span>${v.unlock.a ? '<b>✓</b>' : ''}</button><button class="h ${v.unlock.h ? 'on' : ''}" onclick="partyUnlock('h')">${denPlain}<img src="${partyArt(11)}" alt=""><span>Heavenly<br>gifts</span>${v.unlock.h ? '<b>✓</b>' : ''}</button></div>
    <div class="pp-crew">${crew}</div>
    <div class="pp-stam">${partyIcon('potion')}<span>Stamina <b>${v.stamina}</b>/${Party.staminaMax}</span><small></small></div>
    <button class="pp-start" onclick="partyPlay()">${denPlain}${v.round.score || v.round.board.filter(Boolean).length > 2 ? 'Continue' : 'Start game'}</button>
@@ -300,9 +313,20 @@ function partyTrackTap(c, i) {
   const give = Party.trackClaim(v, c, i); if (!give) return toast(Party.trackOpen(v, i) ? 'Already claimed' : 'Reach ' + fmt(Party.track[i].at) + ' total points');
   partyPay(give); save(); partyTrack(); toast('Gift claimed');
 }
+// The offer window of a locked column (reference: big art, Value, "All available rewards after purchase", "Current
+// level rewards after purchase", "Returned immediately after purchase", price button). Our price is in prisms.
 function partyUnlock(c) {
-  const v = S.party; if (v.unlock[c]) return;
-  if (!Party.unlockCol(v, S, c)) return toast('Not enough prisms (' + Party.unlock[c] + ')');
+  const v = S.party; if (v.unlock[c]) return partyTrack();
+  const name = c === 'a' ? 'Advanced Benefits' : 'Heavenly Gifts', open = Party.colGifts(v, c, true);
+  popup(`<div class="pp-offer ${c}" style="--ppbg:url('${artPath('comp-party-bg')}')"><img class="pp-offer-pet" src="${partyArt(c === 'a' ? 10 : 11)}" alt="">
+   <span class="pp-value">Value ${uiIcon('crystals')} ${fmt(Party.value[c])}</span><h2>${name}</h2>
+   <div class="pp-offer-box"><small>All available rewards after purchase</small><div class="pp-gl pp-scroll">${partyGifts(Party.colGifts(v, c, false))}</div>
+    <small>Current level rewards after purchase</small><div class="pp-gl pp-scroll">${Object.keys(open).length ? partyGifts(open) : '<p class="pp-p">Reach 1 point first</p>'}</div></div>
+   <p class="pp-refund">Returned immediately after purchase ${uiIcon('crystals')} <b>${Party.refund[c]}</b></p>
+   <button class="primary pp-buy" onclick="partyUnlockBuy('${c}')">${denPlain}${uiIcon('crystals')} ${fmt(Party.unlock[c])}</button></div>`);
+}
+function partyUnlockBuy(c) {
+  const v = S.party; if (!Party.unlockCol(v, S, c)) return toast('Not enough prisms (' + Party.unlock[c] + ')');
   save(); wallet(); partyTrack(); toast((c === 'a' ? 'Advanced benefits' : 'Heavenly gifts') + ' unlocked');
 }
 function partyPacksPop() {
