@@ -139,8 +139,7 @@ body.casting .float{animation:castArc .85s cubic-bezier(.25,.7,.35,1) both}
 body:is([data-phase=reel],[data-phase=landed]) .controls{width:var(--ctlW,min(100%,600px));transform:translateY(calc(-1 * var(--lift,0px)))}
 .controls{transition:none}
 
-/* No exit button on the fishing screen (user crossed it out); the catch % chip fades in instead of popping. */
-#exitFishing{display:none!important}
+/* The catch % chip fades in instead of popping. */
 .float-value{transition:opacity .3s ease}body:is([data-phase=idle],[data-phase=wait]) .float-value{display:block!important;opacity:0}
 </style><main><header><div><button type="button" id="exitFishing">‹ Mini Games</button><h1>Moonwater Fishing</h1><span id="best"></span><span id="dailyCasts" style="display:block"></span></div><button id="basket">Fish basket</button></header><details id="cup"><summary id="cupTitle"></summary><ol id="ranks"></ol><p id="cupPrize">First prize · Moonwater Pearl</p></details><div class="lagoon" id="lagoon">
  <div class="lake" id="lake"><i class="glint"></i><i class="glint g2"></i></div><div class="water"></div><div id="folkRow"></div><img class="reina-angler" id="reinaAngler" alt="Reina fishing" draggable="false"><svg class="line" id="lineSvg" aria-hidden="true"><path id="linePath" fill="none" stroke="#fff4cd" stroke-width="1.6"/></svg>
@@ -274,7 +273,7 @@ standings();setInterval(standings,1000);
 // ---- anglers on the shore ----
 const art=id=>{try{if(parent!==window&&typeof parent.artPath==='function')return parent.artPath(id)}catch{}return 'assets/generated/'+id+'.webp'};
 const ROD={reina:[.998,.002],folk:[[.934,.053],[.919,.003],[.957,.06]]},FOLK_SPOT=[[47,.95],[62,1],[76,.9]];
-el('reinaAngler').src=art('comp-fish-reina');el('exitFishing').style.backgroundImage='url("'+art('ui-back')+'")';el('exitFishing').setAttribute('aria-label','Back');el('lake').style.backgroundImage='url("'+art('comp-fish-water')+'")';
+el('reinaAngler').src=art('comp-fish-reina');el('exitFishing').style.backgroundImage='url("'+art('ui-back')+'")';el('exitFishing').setAttribute('aria-label','Back to the main menu');el('lake').style.backgroundImage='url("'+art('comp-fish-water')+'")';
 el('folkRow').innerHTML=anglers.slice(0,3).map((n,i)=>`<div class="folk" id="folk${i}" style="left:${FOLK_SPOT[i][0]}%;height:${30*FOLK_SPOT[i][1]}%"><b>${n} <small>AI</small></b><img src="${art('comp-fish-folk-'+(i+1))}" alt=""><i></i></div>`).join('');
 function drawLine(){
  const L=el('lagoon').getBoundingClientRect(),R=el('reinaAngler').getBoundingClientRect(),F=el('float').getBoundingClientRect();if(!L.width||!R.width)return;

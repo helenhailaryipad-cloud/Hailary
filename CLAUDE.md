@@ -181,8 +181,8 @@ icon (`ui-back`, user crossed the pill out). Smoother pendulum: `response` 6, `t
 (`holdVel`), calmer drift and green band (a simple bot still lands every fish). No jerks on cast / Cast again: the
 tackle shop and the dial share one footer grid cell and cross-fade, `.controls` has a fixed height (footer never moves),
 arrows fade in, and `castFlight()` flies the float from the rod tip to the water on an arc with a splash ring.
-Fishing is its own content (user): the back button was removed (user crossed it out; there is no exit button on
-the fishing screen now), the lift of the arrows applies only while reeling (the Cast button used to jump up during the
+Fishing is its own content (user): the round back button goes to the home screen (it was hidden for a
+moment, the user asked for it back), the lift of the arrows applies only while reeling (the Cast button used to jump up during the
 wait), the catch % chip fades in, and Fishing is no longer in the Mini
 Games hub or the games sub-tabs (its own home icon stays). While reeling the arrows are lifted beside the dial's horns (`placeArrows`: a transform only, footer unchanged).
 
