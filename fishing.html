@@ -133,7 +133,12 @@ body.casting .float{animation:castArc .85s cubic-bezier(.25,.7,.35,1) both}
 .splash{position:absolute;left:50%;bottom:8%;width:40%;height:10%;transform:translateX(-50%);border:2px solid #fffffff0;border-radius:50%;animation:splash .7s ease-out forwards;pointer-events:none}
 @keyframes splash{to{width:300%;height:40%;opacity:0}}
 @media(prefers-reduced-motion:reduce){body.casting .float{animation:none}}
-.controls{min-height:clamp(80px,11.6vw,106px);align-items:center}@media(max-height:540px){.controls{min-height:63px}}</style><main><header><div><button type="button" id="exitFishing">‹ Mini Games</button><h1>Moonwater Fishing</h1><span id="best"></span><span id="dailyCasts" style="display:block"></span></div><button id="basket">Fish basket</button></header><details id="cup"><summary id="cupTitle"></summary><ol id="ranks"></ol><p id="cupPrize">First prize · Moonwater Pearl</p></details><div class="lagoon" id="lagoon">
+.controls{min-height:clamp(80px,11.6vw,106px);align-items:center}@media(max-height:540px){.controls{min-height:63px}}
+/* Arrows beside the dial's ends while reeling (user drew them up next to the horns). Only a transform: the footer
+   keeps its height, so nothing jumps. */
+body:is([data-phase=reel],[data-phase=landed],[data-phase=wait]) .controls{width:var(--ctlW,min(100%,600px));transform:translateY(calc(-1 * var(--lift,0px)))}
+.controls{transition:transform .35s ease}
+</style><main><header><div><button type="button" id="exitFishing">‹ Mini Games</button><h1>Moonwater Fishing</h1><span id="best"></span><span id="dailyCasts" style="display:block"></span></div><button id="basket">Fish basket</button></header><details id="cup"><summary id="cupTitle"></summary><ol id="ranks"></ol><p id="cupPrize">First prize · Moonwater Pearl</p></details><div class="lagoon" id="lagoon">
  <div class="lake" id="lake"><i class="glint"></i><i class="glint g2"></i></div><div class="water"></div><div id="folkRow"></div><img class="reina-angler" id="reinaAngler" alt="Reina fishing" draggable="false"><svg class="line" id="lineSvg" aria-hidden="true"><path id="linePath" fill="none" stroke="#fff4cd" stroke-width="1.6"/></svg>
  <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M3 100 Q18 31 34 10" fill="none" stroke="#d9b36c" stroke-width="3" vector-effect="non-scaling-stroke"/><path d="M34 10 Q43 39 57 51" fill="none" stroke="#fff4cd" stroke-width="1.3" vector-effect="non-scaling-stroke"/></svg>
  <div class="float" id="float" role="progressbar" aria-label="Catch progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
@@ -367,7 +372,7 @@ document.addEventListener('touchstart',event=>{
 },{capture:true,passive:false});
 
 function controls(){
- document.body.dataset.phase=phase;
+ document.body.dataset.phase=phase;if(typeof placeArrows==='function')requestAnimationFrame(placeArrows);
  el('cast').disabled=phase!=='idle';
  const showingCatch=phase==='reel'||phase==='landed';
  lakeFloat.setAttribute('aria-hidden',String(!showingCatch));
@@ -418,6 +423,15 @@ function tick(now){
 }
 
 // The float flies from the rod tip to its spot on the water; the line follows every frame while it flies.
+
+// Lift the arrows to the level of the dial's horns and spread them to the dial's width.
+function placeArrows(){
+ const C=el('rail').getBoundingClientRect(),K=document.querySelector('.controls').getBoundingClientRect();if(!C.width||!K.height)return;
+ const st=document.querySelector('.controls').style,cur=parseFloat(st.getPropertyValue('--lift'))||0;
+ const mid=K.top+cur+K.height/2,horn=C.top+C.height*.8;
+ st.setProperty('--lift',Math.max(0,mid-horn)+'px');st.setProperty('--ctlW',Math.min(innerWidth*.98,C.width+40)+'px');
+}
+addEventListener('resize',placeArrows);setInterval(placeArrows,500);
 function castFlight(){
  const R=el('reinaAngler').getBoundingClientRect(),F=lakeFloat.getBoundingClientRect();
  if(R.width&&F.width){lakeFloat.style.setProperty('--fx',Math.max(60,F.left+F.width/2-(R.left+R.width*ROD.reina[0]))+'px');lakeFloat.style.setProperty('--fy',Math.max(40,F.top-(R.top+R.height*ROD.reina[1]))+'px')}
