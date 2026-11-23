@@ -18,8 +18,19 @@ def save(name, im, h):
     im = im.resize((round(im.width*h/im.height), h), Image.Resampling.LANCZOS)
     im.save(OUT/(name+'.webp'), quality=88, method=6); im.save(HOST/(name+'.avif'), quality=40); print(name, im.size, tip(im))
 save('comp-fish-reina', trim(Image.open(SRC/'reina.png')), 520)
-sheet = Image.open(SRC/'folk.png').convert('RGBA'); w = sheet.width//3
-for n in range(3): save(f'comp-fish-folk-{n+1}', trim(sheet.crop((n*w, 0, (n+1)*w, sheet.height))), 300)
+def grow(seed, m):  # the opaque region joined to the seed (8-neighbours)
+    r = seed.copy()
+    while True:
+        d = r.copy(); d[1:] |= r[:-1]; d[:-1] |= r[1:]; d[:, 1:] |= r[:, :-1]; d[:, :-1] |= r[:, 1:]
+        d[1:, 1:] |= r[:-1, :-1]; d[:-1, :-1] |= r[1:, 1:]; d[1:, :-1] |= r[:-1, 1:]; d[:-1, 1:] |= r[1:, :-1]; d &= m
+        if d.sum() == r.sum(): return r
+        r = d
+# Each angler is the region joined to a point in the middle of its third: the figures overlap the thirds, so a plain
+# crop carried slivers of the neighbour (user circled them).
+sheet = Image.open(SRC/'folk.png').convert('RGBA'); w = sheet.width//3; A = np.array(sheet); m = A[..., 3] > 24
+for n in range(3):
+    cx = n*w + w//2; ys = np.nonzero(m[:, cx])[0]; seed = np.zeros_like(m); seed[ys[len(ys)*2//3], cx] = True
+    B = A.copy(); B[~grow(seed, m)] = 0; save(f'comp-fish-folk-{n+1}', trim(Image.fromarray(B)), 300)
 
 # The lake surface under the lagoon (image model): shoreline cut off, top edge left opaque (the page fades it).
 w = Image.open(SRC/'water.png').convert('RGB'); w = w.crop((0, round(w.height*.05), w.width, w.height)).resize((1200, 760), Image.Resampling.LANCZOS)

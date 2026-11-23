@@ -61,12 +61,15 @@ body[data-phase=landed] .float-value{background:#684b1b;color:#fff9d9}
 .folk img{height:100%;display:block;filter:drop-shadow(0 3px 4px #0005) brightness(.95)}
 .folk b{position:absolute;left:50%;top:-1.3em;transform:translateX(-50%);white-space:nowrap;padding:1px 7px;border-radius:9px;background:#102e47d9;border:1px solid #ae9868;font:700 11px/1.4 Arial,sans-serif;color:#fff4d6}
 .folk b small{color:#9fd0ff;font-weight:600}
+.folk .fl{position:absolute;left:0;top:0;width:1px;height:1px;overflow:visible;pointer-events:none}
 .folk i{position:absolute;width:8px;height:8px;border-radius:50%;background:#ff5a4a;box-shadow:0 0 0 2px #fff8;animation:bob-lake 2s ease-in-out infinite}
 .folk em{position:absolute;left:50%;top:-3.2em;transform:translateX(-50%);white-space:nowrap;padding:3px 8px;border-radius:10px;background:#ffe9a0;color:#5a3a08;font:800 11px/1.2 Arial,sans-serif;font-style:normal;box-shadow:0 2px 6px #0006;animation:catchpop 4s ease-out forwards}
 @keyframes catchpop{0%{opacity:0;transform:translate(-50%,6px)}10%,80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0}}
 @media(max-width:560px){.folk b{font-size:9.5px}.folk{height:26%}}
 
 .reina-angler{height:100%!important;bottom:-8%!important;max-height:none}
+/* Tall iPad portrait: a smaller Reina keeps her rod tip clear of the AI anglers. */
+@media(min-width:701px) and (orientation:portrait){.reina-angler{height:min(100%,50vw)!important;bottom:-2%!important}}
 @media(max-width:700px){header{padding:8px 12px 4px!important}h1{font-size:24px!important;margin:2px 0!important}#exitFishing,#basket{padding:6px 12px!important;font-size:14px!important;min-height:0!important}
  #best,#dailyCasts{font-size:13px!important}#cup{font-size:13px!important;padding:6px 10px!important}
  .compass{height:clamp(120px,24svh,190px)!important}.controls button{min-height:50px!important}footer{padding-top:4px!important}
@@ -272,9 +275,9 @@ function standings(){
 standings();setInterval(standings,1000);
 // ---- anglers on the shore ----
 const art=id=>{try{if(parent!==window&&typeof parent.artPath==='function')return parent.artPath(id)}catch{}return 'assets/generated/'+id+'.webp'};
-const ROD={reina:[.998,.002],folk:[[.934,.053],[.919,.003],[.957,.06]]},FOLK_SPOT=[[47,.95],[62,1],[76,.9]];
+const ROD={reina:[.998,.002],folk:[[.995,.057],[.996,.003],[.96,.06]]},FOLK_SPOT=[[47,.95],[62,1],[76,.9]];
 el('reinaAngler').src=art('comp-fish-reina');el('exitFishing').style.backgroundImage='url("'+art('ui-back')+'")';el('exitFishing').setAttribute('aria-label','Back to the main menu');el('lake').style.backgroundImage='url("'+art('comp-fish-water')+'")';
-el('folkRow').innerHTML=anglers.slice(0,3).map((n,i)=>`<div class="folk" id="folk${i}" style="left:${FOLK_SPOT[i][0]}%;height:${30*FOLK_SPOT[i][1]}%"><b>${n} <small>AI</small></b><img src="${art('comp-fish-folk-'+(i+1))}" alt=""><i></i></div>`).join('');
+el('folkRow').innerHTML=anglers.slice(0,3).map((n,i)=>`<div class="folk" id="folk${i}" style="left:${FOLK_SPOT[i][0]}%;height:${30*FOLK_SPOT[i][1]}%"><b>${n} <small>AI</small></b><img src="${art('comp-fish-folk-'+(i+1))}" alt=""><svg class="fl" aria-hidden="true"><path fill="none" stroke="#fff4cdaa" stroke-width="1"/></svg><i></i></div>`).join('');
 function drawLine(){
  const L=el('lagoon').getBoundingClientRect(),R=el('reinaAngler').getBoundingClientRect(),F=el('float').getBoundingClientRect();if(!L.width||!R.width)return;
  const svg=el('lineSvg');svg.setAttribute('viewBox','0 0 '+L.width+' '+L.height);
@@ -282,7 +285,8 @@ function drawLine(){
  el('linePath').setAttribute('d',`M${x1} ${y1} Q${(x1+x2)/2} ${Math.min(y1,y2)+(y2-y1)*.75} ${x2} ${y2}`);
  // each AI angler: a short line from the rod tip to a bobber in front of them
  for(let i=0;i<3;i++){const f=el('folk'+i);if(!f)continue;const img=f.querySelector('img'),dot=f.querySelector('i');if(!img.naturalWidth)continue;
-  const w=img.getBoundingClientRect().width,h=img.getBoundingClientRect().height;dot.style.left=(w*ROD.folk[i][0]+12)+'px';dot.style.top=(h*1.08)+'px'}
+  const w=img.getBoundingClientRect().width,h=img.getBoundingClientRect().height;const dx=w*ROD.folk[i][0]+10,dy=h*1.06;dot.style.left=dx+'px';dot.style.top=dy+'px';
+  const tx=w*ROD.folk[i][0],ty=h*ROD.folk[i][1];f.querySelector('.fl path').setAttribute('d',`M${tx} ${ty} Q${tx+8} ${(ty+dy)/2} ${dx+3} ${dy+3}`)}
 }
 el('reinaAngler').onload=drawLine;addEventListener('resize',drawLine);setInterval(drawLine,200);
 // AI catches pop up over their heads when their scheduled catch time passes.

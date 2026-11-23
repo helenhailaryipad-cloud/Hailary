@@ -164,6 +164,9 @@ the page's own "Mini Games" button goes back). In `fishing.html`: Reina sits on 
 image-model edit of `leaflight/master.png`) and her line runs from the painted rod tip to the float (`drawLine`, tips in
 `ROD`); three AI anglers (`comp-fish-folk-1..3`, the first three Daily Cup `anglers`, name tags "AI") fish on the far
 shore, and when one of their scheduled cup catches comes due a small pop shows the fish and weight (`folkCatches`).
+Each angler is cut from the sheet as the region joined to its own figure (`grow()`; plain thirds carried slivers of the
+neighbour, user circled them) and has a thin line from its rod tip to its float. On tall portrait screens Reina is
+capped at 50vw so her rod does not cross the anglers.
 Art via `parent.artPath` (packed art in the chat preview). Sources `art-source/fishing/{reina,folk}.png`, built by
 `scripts/build-fishing-anglers.py` (prints rod tips). Narrow windows get a compact header and a taller lagoon.
 Painted lake (user: "draw the water more beautifully"): `.lake` under the lagoon and the controls shows
