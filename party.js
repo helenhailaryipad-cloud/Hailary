@@ -1,4 +1,4 @@
-// Splash Party (user photos of the reference's "Pet Party" event): an event mini-game on a 4 x 4 board. Swipe up,
+// Lagoon Gala (renamed from Splash Party; user photos of the reference's "Pet Party" event): an event mini-game on a 4 x 4 board. Swipe up,
 // down, left or right: all pets slide, two identical pets that meet merge into the next of eleven tiers (our own
 // familiar paintings) and give synthesis points. Each move costs 1 stamina (recovers over time, back to full at 00:00
 // UTC, Stamina Potions add more). Party Fireworks, Party Cake and the Magic Wand help; each item has a limit per
@@ -184,7 +184,7 @@ function partyGifts(give) { if (typeof bagArtVars === 'function') bagArtVars(); 
 // State with the clock applied; pays the final result of a finished event week once.
 function partyState() {
   const { v, due } = Party.roll(S.party, Date.now());
-  if (due && due.give) { partyPay(due.give, v); if (WonderGear.socialNote) WonderGear.socialNote(S, `Splash Party ended: rank ${due.rank}, rewards sent to the bag.`); toast('Splash Party rewards: rank ' + due.rank); }
+  if (due && due.give) { partyPay(due.give, v); if (WonderGear.socialNote) WonderGear.socialNote(S, `Lagoon Gala ended: rank ${due.rank}, rewards sent to the bag.`); toast('Lagoon Gala rewards: rank ' + due.rank); }
   S.party = v; return v;
 }
 function partyPay(give, v = S.party) {
@@ -214,7 +214,7 @@ function showParty() {
   const crew = [5, 8, 10, 3, 1].map((t, i) => `<img class="pp-pet pp-pet${i}" src="${partyArt(t)}" alt="${Party.tiers[t - 1][1]}">`).join('');
   $('#main').innerHTML = `<section class="pp-room" style="--ppbg:url('${artPath('comp-party-bg')}')">
    <div class="pp-top"><button data-back aria-label="Back" onclick="go('games')">‹</button><span class="pp-time">${partyClock(Party.ends(v.period) - Date.now())}</span><span class="pp-wallet">${uiIcon('crystals')}<b>${fmt(S.scales || 0)}</b></span></div>
-   <h1 class="pp-title">Splash Party</h1>
+   <h1 class="pp-title">Lagoon Gala</h1>
    <div class="pp-score"><span>My Point: <b>${fmt(v.best)}</b></span><span>My Rank: <b>${rank || 'None'}</b></span></div>
    <button class="pp-side pp-help" onclick="partyRules()">${denPlain}?</button>
    <button class="pp-side pp-gifts" onclick="partyTrack()">${denPlain}<i>🎁</i><small>Heavenly Gifts</small>${claim.track ? '<em></em>' : ''}</button>
@@ -283,7 +283,7 @@ function partyTileTap(i) {
 function partyAskRestart() { popup(`<h2>New round?</h2><p class="pp-p">Your score of this round (${fmt(S.party.round.score)}) stays as a result. Synthesis points and item uses start again; stamina is kept.</p><div class="pp-row"><button class="primary" onclick="partyRestart()">${denPlain}New round</button><button onclick="document.querySelector('#modal').close()">${denPlain}Keep playing</button></div>`); }
 function partyRestart() { document.querySelector('#modal')?.close?.(); Party.restart(S.party); save(); partyBoard(); }
 function partyRules() {
-  popup(`<h2>Splash Party</h2><ol class="pp-rules"><li>Swipe up, down, left or right: every pet on the board slides.</li><li>Each move costs 1 stamina. It recovers over time (+1 every 5 minutes) and refills to ${Party.staminaMax} at 00:00 UTC. Stamina Potions add more.</li>
+  popup(`<h2>Lagoon Gala</h2><ol class="pp-rules"><li>Swipe up, down, left or right: every pet on the board slides.</li><li>Each move costs 1 stamina. It recovers over time (+1 every 5 minutes) and refills to ${Party.staminaMax} at 00:00 UTC. Stamina Potions add more.</li>
   <li>Two identical pets that meet merge into the next tier and give synthesis points (tier n: +${Party.points(1)} x n).</li><li>Party Fireworks, Party Cake and the Magic Wand make merging easier; each item has a limit per round.</li>
   <li>When the board is full and nothing can move, it is a deadlock: use an item or start a new round.</li><li>A new round keeps the old score as a result. The ranking uses your best round score; whoever reached it first ranks higher on a tie.</li>
   <li>All points of all rounds open the Heavenly Gifts. Tier achievements pay once per event.</li><li>The event lasts ${Party.eventDays} days. Personal rewards are sent when it ends; event items are cleared then.</li><li>Everyone else on the ranking is an AI adventurer.</li></ol>`);
