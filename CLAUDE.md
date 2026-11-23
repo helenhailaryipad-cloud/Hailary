@@ -178,7 +178,9 @@ Optional save field `S.fishTackle {worms, feed}` (validated in `valid()`); the i
 `fishSave()` in `app.js` (`S` is a `let`, not a window property). Icons `comp-fish-tackle` from
 `art-source/fishing/tackle.png` (`build-fishing-anglers.py`). The "‹ Mini Games" pill is now the painted round back
 icon (`ui-back`, user crossed the pill out). Smoother pendulum: `response` 6, `tapDistance` .045, a held arrow eases in
-(`holdVel`), calmer drift and green band (a simple bot still lands every fish).
+(`holdVel`), calmer drift and green band (a simple bot still lands every fish). No jerks on cast / Cast again: the
+tackle shop and the dial share one footer grid cell and cross-fade, `.controls` has a fixed height (footer never moves),
+arrows fade in, and `castFlight()` flies the float from the rod tip to the water on an arc with a splash ring.
 
 ## Pet Siege event (2026-11-23)
 User sent twelve photos of the reference's pet siege (no text). Home promo "Pet Siege" opens screen `siege`
