@@ -197,6 +197,7 @@ function startPairs() {
     if (g.rewarded) return; g.rewarded = true;
     const seconds = Math.round(g.time * 10) / 10, record = !S.pairsBest || seconds < S.pairsBest, paid = Pairs.runsLeft(S) > 0;
     if (record) S.pairsBest = seconds;
+    if (typeof arcadeScore === 'function') arcadeScore('pairs', seconds);
     let prizeLine = 'Practice run · rewards return tomorrow';
     if (paid) { Pairs.useRun(S); const prize = Pairs.reward(seconds), got = gain(prize.gold, 0, prize.xp); prizeLine = `${uiIcon('gold')}${prize.gold} gold · ${uiIcon('exp')}${got.xp} XP`; } else save();
     panel.hidden = false; panel.className = 'pairs-panel pairs-done';

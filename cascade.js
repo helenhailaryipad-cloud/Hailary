@@ -280,6 +280,7 @@ function cascadeFinish(g, quit = false) {
   if (g.done) return; g.done = true; g.running = false; cascadeStop();
   const s = g.state, record = s.score > (S.cascadeBest || 0), paid = Cascade.runsLeft(S) > 0 && s.score > 0;
   if (record) S.cascadeBest = s.score;
+  if (typeof arcadeScore === 'function') arcadeScore('cascade', s.score);
   let prize = null;
   if (paid) { Cascade.useRun(S); prize = Cascade.reward(s); for (const id of prize.items) WonderGear.bagAdd(S, id, 1); const got = gain(prize.gold, 0, prize.xp); prize.xp = got.xp; } else save();
   bagArtVars?.();

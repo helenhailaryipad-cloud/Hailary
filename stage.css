@@ -8641,3 +8641,25 @@ body[data-screen=games] .mg-tile :is(small,em){font-size:clamp(10px,2.3cqw,12px)
 .mg-label::before,.mg-label::after{content:'';flex:1;height:2px;background:linear-gradient(90deg,#f3d27a00,#f3d27a,#f3d27a00)}
 body[data-screen=games] .mg-hub{justify-content:center}
 @media(max-height:760px){body[data-screen=games] .mg-event{aspect-ratio:3.1!important}body[data-screen=games] .mg-art{aspect-ratio:1.55!important}body[data-screen=games] .mg-hub{gap:6px!important}body[data-screen=games] .mg-grid{gap:8px!important}}
+/* Mini game rotation: featured banner for any game, Up next line, closed Lagoon Gala tile, ranking pop-up */
+#stage #main .mg-event.cover .mg-ev-art img{object-position:center 40%}
+.mg-ev-btns{display:flex;gap:8px;margin-top:5px}.mg-ev-btns .mg-ev-go{margin-top:0}
+.mg-ev-rk{padding:6px 14px;border-radius:2em;border:1px solid #cfe6ff;background:linear-gradient(#2f6aa8,#173c6a);color:#eaf4ff;font:900 clamp(11px,2.5cqw,14px)/1 Georgia,serif;box-shadow:0 3px 0 #0b2442,0 4px 10px #0006;cursor:pointer}
+.mg-ev-rk:active{transform:scale(.95)}
+.mg-ev-text i{white-space:nowrap}
+#stage .mg-next{margin:0 4px;text-align:center;color:#fff;font:700 12.5px/1.3 Arial,sans-serif;text-shadow:0 1px 3px #000c}
+#stage .mg-next b{color:#ffe9a0}
+#stage #main .mg-tile.shut .mg-art img{filter:saturate(.55) brightness(.8)}
+.mg-art{position:relative}
+.mg-shut{position:absolute;left:50%;bottom:8%;transform:translateX(-50%);white-space:nowrap;padding:3px 9px;border-radius:2em;background:#0b2a48e0;border:1px solid #f3d27a;color:#ffe9a0;font:800 clamp(9px,2.1cqw,12px)/1.2 Arial,sans-serif;font-style:normal}
+#stage #main .mg-tile.shut em{color:#9fd0ff}
+#modal .mg-rk h2{margin:0 0 4px}.mg-rk-note{margin:2px 0 8px;font-size:12px;opacity:.85}
+.mg-rk-me{margin:0 0 8px;padding:6px 10px;border-radius:10px;background:#ffe9a033;border:1px solid #f3d27a}
+.mg-rk-list{margin:0;padding-left:26px;max-height:46vh;overflow:auto}
+.mg-rk-list li{padding:3px 0;border-bottom:1px solid #ffffff1a}.mg-rk-list li>*{display:inline-flex}.mg-rk-list li{display:list-item}
+.mg-rk-list span{gap:4px}.mg-rk-list small{font-size:10px;color:#9fd0ff}.mg-rk-list b{float:right;color:#ffe9a0}
+/* Lagoon Gala between its turns */
+.pp-closed{display:flex;flex-direction:column;align-items:center;background:var(--ppbg) center/cover}
+.pp-closed-card{margin:auto;max-width:400px;padding:20px 24px;border-radius:18px;background:#0b2a48d9;border:2px solid #f3d27a;color:#fff;text-align:center;box-shadow:0 8px 20px #0008}
+.pp-closed-card p{margin:8px 0;font:600 15px/1.4 Arial,sans-serif}.pp-closed-card b{color:#ffe9a0}
+#modal .mg-rk-list li{text-align:left}
