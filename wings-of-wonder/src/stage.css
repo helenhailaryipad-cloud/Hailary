@@ -8434,3 +8434,5 @@ body[data-screen=party] #stage .toast{top:6%!important;bottom:auto!important;lef
 #stage>nav>.section-tabs{justify-content:flex-start!important;overflow-x:auto!important;scrollbar-width:none}
 #stage>nav>.section-tabs button{flex:0 0 auto!important;white-space:nowrap!important;min-width:max-content!important;overflow:visible!important}
 .city-party .city-caption{white-space:nowrap}
+/* "Mini Games" is the longest bottom-nav label: let it shrink in narrow windows */
+@media (max-width:640px){#stage>nav>button[onclick="go('games')"] .nav-label{font-size:clamp(10px,2.25vw,15px)!important;letter-spacing:-.03em;white-space:nowrap}}

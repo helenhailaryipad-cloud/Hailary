@@ -62,7 +62,7 @@ const sectionPages={
 home:[['home','City'],['profile','Profile'],['attributes','Attributes'],['fashion','Fashion']],
 bag:[['bag','Loadout'],['inventory','Bag'],['forge','Crafting'],['warehouse','Warehouse']],
 dungeons:[['dungeons','Bosses'],['expLobby','EXP Dungeon']],
-games:[['games','Festival'],['fishing','Fishing'],['defense','Castle Defense'],['merge','Dragon Merge'],['vale','Crownfall Vale'],['jungle','Jungle Trek'],['pairs','Harvest Pairs'],['cascade','Crystal Cascade'],['party','Splash Party']],
+games:[['games','All games'],['fishing','Fishing'],['defense','Castle Defense'],['merge','Dragon Merge'],['vale','Crownfall Vale'],['jungle','Jungle Trek'],['pairs','Harvest Pairs'],['cascade','Crystal Cascade'],['party','Splash Party']],
 collection:[['collection','Pets'],['wings','Wings'],['wish','Wishes']],
 cards:[['cards','Fish Journal']],
 more:[['more','Menu'],['world','Realm'],['rankings','Rankings'],['quests','Quests'],['settings','Journal']]
@@ -75,7 +75,7 @@ if(screen==='fashion'){
 const selected=screen==='collection'&&filter==='wings'?'wings':screen;
 const active=Object.keys(sectionPages).find(section=>sectionPages[section].some(([id])=>id===selected))||'dungeons';
 const tabs=sectionPages[active].map(([id,label])=>`<button aria-current="${selected===id?'page':'false'}" onclick="chooseSectionPage('${id}')">${label}</button>`).join('');
-$('#nav').innerHTML='<div class="section-tabs" aria-label="Section pages">'+tabs+'</div>'+[['home','♧','Hero'],['bag','▣','Gear'],['dungeons','⚔','Dungeons'],['games','♜','Games'],['collection','◇','Wonders'],['cards','▤','Cards'],['more','☰','More']].map(([id,icon,label])=>`<button class="${active===id?'active':''}" onclick="go('${id}')"><span class="navico">${uiIcon(({home:'hero',bag:'equipment',dungeons:'dungeons',games:'castle',collection:'dragon',cards:'quests',more:'more'})[id])}</span><span class="nav-label">${label}</span></button>`).join('')}
+$('#nav').innerHTML='<div class="section-tabs" aria-label="Section pages">'+tabs+'</div>'+[['home','♧','Hero'],['bag','▣','Gear'],['dungeons','⚔','Dungeons'],['games','♜','Mini Games'],['collection','◇','Wonders'],['cards','▤','Cards'],['more','☰','More']].map(([id,icon,label])=>`<button class="${active===id?'active':''}" onclick="go('${id}')"><span class="navico">${uiIcon(({home:'hero',bag:'equipment',dungeons:'dungeons',games:'castle',collection:'dragon',cards:'quests',more:'more'})[id])}</span><span class="nav-label">${label}</span></button>`).join('')}
 
 function intro(){chooseIntro('2d')}
 
