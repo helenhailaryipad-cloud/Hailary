@@ -159,7 +159,7 @@ scripts/test-party.mjs`; UI below the `PARTY_UI` marker; also loaded by `scripts
 - Board 4 x 4: a swipe (pointer on `#ppBoard`, or arrow keys) slides every pet. Two equal pets merge into the next of
   eleven tiers (our familiars `Party.tiers`, d47 ... d43) for 10 x tier points. A new tier 1 pet (10% tier 2) comes
   after each move.
-- Stamina: 1 per move, 100 max, +1 every 5 min, full at 00:00 UTC; Stamina Potion +5.
+- Stamina: 1 per move, 200 max (user asked for 200 instead of 100), +1 every 5 min, full at 00:00 UTC; Stamina Potion +5.
 - Items with per-round limits (`roundLimit`): Party Fireworks (clears the lowest tier), Party Cake (tier 1 -> 2),
   Magic Wand (tap a pet: +1 tier), Stamina Potion.
 - Deadlock overlay when nothing can move; New round keeps the score as a result.
