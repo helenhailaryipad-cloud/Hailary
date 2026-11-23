@@ -1022,7 +1022,7 @@ function buyFashionBow(id){
 }
 let cityExpanded=true;
 const cityGroups=[
- [['top-up','Top-up'],['shop','Shop'],['benefits','benefits'],['treasure','TresHunt'],['summon','Summon','citySummon'],['challenge','Challenge','dungeons'],['gear','Master of Gear','forge'],['discord','Discord']],
+ [['top-up','Top-up'],['shop','Shop'],['benefits','benefits'],['treasure','TresHunt'],['summon','Summon','citySummon'],['gear','Master of Gear','forge'],['discord','Discord']],
  [['pass','ValuePass'],['siege','Pet Siege','siege'],['goldpass','GoldPass'],['gift','DailyGift','quests'],['clan','Guild','cityGuild'],['superpack','SuperPack'],['fashion','Fashion Sale','sale'],['snow','Snowland'],['dream','DreamPass'],['fest','FestEvent'],['gacha','Star Rites','rites'],['spend','SpendRank'],['rush','Rush Rank','rankings'],['chain','Chain Buy']],
  [['character','Character','character'],['bag','Bag','cityBag'],['pet','Pet','cityPet'],['companion','Companion','cityCompanion'],['skin','Skin','citySkin'],['forge','Forge','cityForge'],['more','More','more']]
 ];
