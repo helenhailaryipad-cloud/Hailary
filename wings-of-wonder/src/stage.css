@@ -8663,3 +8663,8 @@ body[data-screen=games] .mg-hub{justify-content:center}
 .pp-closed-card{margin:auto;max-width:400px;padding:20px 24px;border-radius:18px;background:#0b2a48d9;border:2px solid #f3d27a;color:#fff;text-align:center;box-shadow:0 8px 20px #0008}
 .pp-closed-card p{margin:8px 0;font:600 15px/1.4 Arial,sans-serif}.pp-closed-card b{color:#ffe9a0}
 #modal .mg-rk-list li{text-align:left}
+/* Castle Defense: Score and Time join Wave, Crystal, Energy in the vitals bar (5 columns) */
+body #main .defense-vitals{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:4px!important}
+body #main .defense-vitals .hud-metric b{font-size:clamp(12px,2.6vw,17px)!important;white-space:nowrap}
+body #main .defense-vitals .hud-metric small{font-size:11px!important}
+body #main .defense-vitals .hud-metric>.gpt-icon{width:22px!important;height:22px!important}

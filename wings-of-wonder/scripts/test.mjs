@@ -1056,7 +1056,7 @@ vm.runInContext(`
  if(valid({...S,party:{...S.party,stamina:-1}}))throw Error('Invalid party save accepted');
  // Mini game rotation: three-day turns from Party.anchor, Lagoon Gala closed off its turn, rankings and rewards.
  ARCADE.slot=realSlot;const A=ARCADE,T=Party.anchor;
- if(A.game(A.slot(T+1))!=='party'||A.game(1)!=='jungle'||A.game(5)!=='party'||A.nextStart('party',T+1)!==A.start(5)||A.ends(0)-A.start(0)!==3*864e5)throw Error('Rotation order');
+ if(A.game(A.slot(T+1))!=='party'||A.game(1)!=='jungle'||A.game(6)!=='party'||A.nextStart('party',T+1)!==A.start(6)||A.ends(0)-A.start(0)!==3*864e5)throw Error('Rotation order');
  const pf=A.field(3,'pairs',A.ends(3));if(pf.length<30||pf.some((x,i)=>i&&x.score<pf[i-1].score)||A.rankOf(3,'pairs',60,0,A.ends(3))!==1||A.rankOf(3,'pairs',999,0,A.ends(3))!==pf.length+1)throw Error('Pairs ranking is by lowest time');
  const cf=A.field(2,'cascade',A.ends(2));if(cf.some((x,i)=>i&&x.score>cf[i-1].score)||A.rankOf(2,'cascade',1e6,0,A.ends(2))!==1)throw Error('Score ranking');
  ARCADE.slot=()=>2;S.arcade=undefined;arcadeScore('cascade',5000);arcadeScore('cascade',3000);arcadeScore('jungle',9000);
@@ -1065,7 +1065,15 @@ vm.runInContext(`
  if(valid({...S,arcade:{slot:1,game:'fishing',best:1,at:0}}))throw Error('Invalid arcade save accepted');
  ARCADE.slot=()=>1;go('party');if(!$('#main').innerHTML.includes('resting'))throw Error('Lagoon Gala closed off its turn');
  go('games');let hub=$('#main').innerHTML;if(!hub.includes('Returns in')||!hub.includes('Jungle Trek')||!hub.includes('Up next'))throw Error('Hub shows the featured game and the closed Gala');
- arcadeRanks();ARCADE.slot=realSlot;}
+ arcadeRanks();
+ // Castle Defense: points per kill, the clock stops at the target, the fastest time ranks (lower is better).
+ if(A.game(5)!=='defense'||!A.low('defense'))throw Error('Castle Defense rotates and ranks by time');
+ ARCADE.slot=()=>5;S.arcade=undefined;S.defenseBest=undefined;openScreen('defense');game.wave=3;game.clock=95;game.score=DEFENSE_TARGET-30;
+ game.enemies=[{id:1,x:400,y:150,hp:0,maxhp:60,speed:0,slow:0,boss:false,hurt:0}];updateDefense(.1);
+ if(game.score!==DEFENSE_TARGET||game.targetAt!==95.1||S.defenseBest!==95.1||S.arcade?.game!=='defense'||S.arcade.best!==95.1||!valid(S))throw Error('Castle Defense target time');
+ if(!$('#hud').innerHTML.includes('1:35'))throw Error('Defense HUD time');endDefense(false);$('#modal').close();
+ if(valid({...S,defenseBest:-1}))throw Error('Invalid defense best accepted');
+ ARCADE.slot=realSlot;}
 `,context);
 console.log('PASS: Lagoon Gala: lobby, board, swipe, items, Tide Treasures, mini game rotation (turns, rankings, rewards, closed Gala), ranking, rewards, gallery, packs, Mini Games card, validation.');
 

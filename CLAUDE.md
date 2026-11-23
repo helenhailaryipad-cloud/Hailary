@@ -213,12 +213,15 @@ User sent twelve photos of the reference's pet siege (no text). Home promo "Pet 
 ## Mini game rotation (2026-11-23)
 User: "all these mini games except fishing take turns, each runs 2-3 days, then another; rankings go by them".
 `ARCADE` in `app.js` (next to `MINI_GAMES`): one featured game every `ARCADE.days` (3) UTC days from `Party.anchor`, in
-the order `ARCADE.order` = Lagoon Gala, Jungle Trek, Crystal Cascade, Harvest Pairs, Dragon Merge (Castle Defense and
-Crownfall Vale are campaigns, not in the rotation). The hub's banner shows the featured game (time left, best, rank,
+the order `ARCADE.order` = Lagoon Gala, Jungle Trek, Crystal Cascade, Harvest Pairs, Dragon Merge, Castle Defense
+(Crownfall Vale is a campaign, not in the rotation). Castle Defense ranks by TIME (user: "reach a set number of points
+in less time"): each defeated enemy gives 10 x its wave points (boss 200, `defensePoints`), the clock (build time
+between waves included) stops at `DEFENSE_TARGET` 1,000 (`defenseTarget`, optional `S.defenseBest` seconds); Score and
+Time are in the vitals bar. The hub's banner shows the featured game (time left, best, rank,
 Play, Ranking pop-up `arcadeRanks`) and "Up next". Runs of the featured game count (`arcadeScore`, called where each
 game saves its best); optional save field `S.arcade {slot, game, best, at}` (`ARCADE.valid`). When the turn ends
-`arcadeState()` pays rank rewards (`ARCADE.ranks`) into the bag; AI field per game in `ARCADE.field` (`scale`, Pairs is a
-time, lower is better). Lagoon Gala is open only on its own turn (`arcadeOpen`, `partyClosed()` says when it returns);
+`arcadeState()` pays rank rewards (`ARCADE.ranks`) into the bag; AI field per game in `ARCADE.field` (`scale`; Pairs and
+Castle Defense are times, lower is better). Lagoon Gala is open only on its own turn (`arcadeOpen`, `partyClosed()` says when it returns);
 its own event is now 3 days (`Party.eventDays`), so its ranking, Tide Treasures and rank rewards follow the turn.
 Own names (user: "we need our own names"): Heavenly Gifts -> Tide Treasures, Advanced benefits -> Pearl Pass,
 Heavenly gifts -> Coral Crown.
