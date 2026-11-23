@@ -166,6 +166,9 @@ image-model edit of `leaflight/master.png`) and her line runs from the painted r
 shore, and when one of their scheduled cup catches comes due a small pop shows the fish and weight (`folkCatches`).
 Art via `parent.artPath` (packed art in the chat preview). Sources `art-source/fishing/{reina,folk}.png`, built by
 `scripts/build-fishing-anglers.py` (prints rod tips). Narrow windows get a compact header and a taller lagoon.
+Painted lake (user: "draw the water more beautifully"): `.lake` under the lagoon and the controls shows
+`comp-fish-water` (image model, `art-source/fishing/water.png`, same build script), faded into the shore, with drifting
+sun glints and rings spreading from the float; the old dark gradients were removed.
 
 ## Pet Siege event (2026-11-23)
 User sent twelve photos of the reference's pet siege (no text). Home promo "Pet Siege" opens screen `siege`

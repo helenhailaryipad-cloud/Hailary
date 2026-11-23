@@ -20,3 +20,7 @@ def save(name, im, h):
 save('comp-fish-reina', trim(Image.open(SRC/'reina.png')), 520)
 sheet = Image.open(SRC/'folk.png').convert('RGBA'); w = sheet.width//3
 for n in range(3): save(f'comp-fish-folk-{n+1}', trim(sheet.crop((n*w, 0, (n+1)*w, sheet.height))), 300)
+
+# The lake surface under the lagoon (image model): shoreline cut off, top edge left opaque (the page fades it).
+w = Image.open(SRC/'water.png').convert('RGB'); w = w.crop((0, round(w.height*.05), w.width, w.height)).resize((1200, 760), Image.Resampling.LANCZOS)
+w.save(OUT/'comp-fish-water.webp', quality=80, method=6); w.save(HOST/'comp-fish-water.avif', quality=36); print('comp-fish-water', (OUT/'comp-fish-water.webp').stat().st_size)
