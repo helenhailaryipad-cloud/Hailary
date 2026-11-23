@@ -8436,3 +8436,25 @@ body[data-screen=party] #stage .toast{top:6%!important;bottom:auto!important;lef
 .city-party .city-caption{white-space:nowrap}
 /* "Mini Games" is the longest bottom-nav label: let it shrink in narrow windows */
 @media (max-width:640px){#stage>nav>button[onclick="go('games')"] .nav-label{font-size:clamp(10px,2.25vw,15px)!important;letter-spacing:-.03em;white-space:nowrap}}
+/* ---- Mini Games hub: all games as tiles on one screen, no sub-tab strip ---- */
+body[data-screen=games] #stage>nav>.section-tabs{display:none!important}
+body[data-screen=games] #stage>nav:has(.section-tabs){grid-template-rows:minmax(0,1fr)!important}
+body[data-screen=games] #stage>nav:has(.section-tabs)>button{grid-row:1!important}
+body[data-screen=games]:not([data-playing]):has(#nav .section-tabs) #stage{--menu-nav:84px}
+.mg-hub{height:100%;box-sizing:border-box;display:flex;flex-direction:column;gap:8px;padding:6px 8px 8px;container-type:inline-size;overflow:auto}
+.mg-head{display:flex;align-items:center;gap:8px}.mg-head h1{margin:0;font:900 clamp(22px,6cqw,34px)/1 Georgia,serif;color:#fff;text-shadow:0 2px 0 #6a3a12,0 0 8px #0008}
+.mg-head .gpt-icon,.mg-head .ui-icon{width:34px;height:34px}
+#stage #main .mg-help{margin-left:auto;min-height:0;padding:.45em 1em;border:1px solid #ffe9a0;border-radius:2em;background:linear-gradient(#7a4a22,#4a2a12);color:#ffe9b0;font:800 13px/1 Arial,sans-serif;box-shadow:0 2px 0 #2a1608}
+.mg-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;align-content:start}
+@container (max-width:520px){.mg-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+#stage #main .mg-tile{position:relative;display:grid;grid-template-rows:auto auto auto auto;justify-items:center;gap:2px;min-height:0;padding:5px 5px 7px;border:2px solid #e9c46a;border-radius:14px;background:linear-gradient(#5a3a1e,#2e1c0e);box-shadow:0 4px 10px #0006;color:#fff;text-align:center;overflow:hidden}
+#stage #main .mg-tile::before,#stage #main .mg-tile::after{display:none}
+.mg-art{display:block;width:100%;aspect-ratio:1.15;border-radius:10px;overflow:hidden;background:#123}
+.mg-art img{width:100%;height:100%;object-fit:cover;display:block}
+.mg-tile b{font:900 clamp(12px,3.4cqw,17px)/1.1 Georgia,serif;color:#ffe9a0;text-shadow:0 1px 0 #000;margin-top:3px}
+.mg-tile small{font:600 clamp(9px,2.3cqw,12px)/1.15 Arial,sans-serif;color:#e8d8c0}
+.mg-tile em{font:800 clamp(9px,2.3cqw,12px)/1.15 Arial,sans-serif;font-style:normal;color:#8dff9a}
+#stage #main .mg-tile:active{transform:scale(.97)}
+body[data-screen=games] #stage #main{align-items:stretch!important}
+body[data-screen=games] #stage #main>.mg-hub{width:100%;flex:1 1 auto;min-height:0}
+@media (max-aspect-ratio:3/4){.mg-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px}.mg-tile b{font-size:clamp(13px,3.6cqw,22px)!important}.mg-tile :is(small,em){font-size:clamp(10px,2.4cqw,15px)!important}}
