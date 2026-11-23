@@ -19,6 +19,7 @@ vm.runInContext(fs.readFileSync('src/minigame-engine.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/wardrobe-engine.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/party.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/siege.js','utf8'),context);
+vm.runInContext(fs.readFileSync('src/rites.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/app.js','utf8'),context);
 vm.runInContext(`
 S=defaults();S.gold=500000;openScreen('fashion');
@@ -1076,6 +1077,18 @@ vm.runInContext(`
  ARCADE.slot=realSlot;}
 `,context);
 console.log('PASS: Lagoon Gala: lobby, board, swipe, items, Tide Treasures, mini game rotation (turns, rankings, rewards, closed Gala), ranking, rewards, gallery, packs, Mini Games card, validation.');
+vm.runInContext(`
+{S=defaults();S.scales=3000;go('rites');let h=$('#main').innerHTML;if(!h.includes('STAR RITES')||!h.includes('Pull ×10')||!S.rites||!valid(S))throw Error('Star Rites room');
+ const r=Rites.rite(Rites.period());ritePull(10);if(S.rites.ev.pulls!==10||!$('#modalBody').innerHTML.includes('rt-card'))throw Error('Ten pulls and the result window');
+ S.rites.t[r.id]=0;ritePull(1,true);if(S.rites.ev.pulls!==11)throw Error('Free pull');ritePull(1);if(!$('#modalBody').innerHTML.includes('Not enough'))throw Error('Short of tickets offers an exchange');
+ riteExchange(50,1);if(S.rites.ev.pulls!==12||S.scales!==2950)throw Error('Exchange and pull');
+ riteRates();riteSteps();riteShop();riteBuyPack(0);if(S.scales!==2950-Rites.packs[0])throw Error('Ticket pack');riteCollection();riteSchedule();riteRules();
+ Rites.give(S,S.rites,{kind:'aura',id:'moon',name:'',rarity:'mythic'});riteWear('moon');if(S.rites.aura!=='moon'&&S.rites.aura!=='')throw Error('Wear aura');S.rites.aura='moon';
+ const atk=stats().attack;if(!(Rites.bonus(S).attackPercent>=3))throw Error('Aura stats');go('home');if(!$('#main').innerHTML.includes('comp-rites-aura-moon'))throw Error('Worn aura on the home screen');
+ if(!$('#main').innerHTML.includes('Star Rites'))throw Error('Home promo');
+ S.reinaFashion={owned:0,equipped:0};if(!premiumLocked('fashion-wing-28'))throw Error('Rite wings are exclusive');Rites.give(S,S.rites,{kind:'wings',id:'fashion-wing-28',name:'',rarity:'legend'});if(premiumLocked('fashion-wing-28')||!valid(S))throw Error('Won wings unlock');}
+`,context);
+console.log('PASS: Star Rites room: pulls, free pull, exchange, result window, rates, rewards, shop, collection, aura on the home screen, exclusive wings.');
 
 vm.runInContext(`
 {S=defaults();go('siege');let h=$('#main').innerHTML;if(!h.includes('Dragon Keep')||!S.siege||!valid(S))throw Error('Pet Siege map');

@@ -226,6 +226,30 @@ its own event is now 3 days (`Party.eventDays`), so its ranking, Tide Treasures 
 Own names (user: "we need our own names"): Heavenly Gifts -> Tide Treasures, Advanced benefits -> Pearl Pass,
 Heavenly gifts -> Coral Crown.
 
+## Star Rites gacha (2026-11-23)
+User: "can we make a gacha?" then shared her ChatGPT chat about the reference's gachas (read through chatgpt.com, now
+allowed in the environment) and said "our own names, great prizes". `src/rites.js` (rules `Rites`, pure,
+`node scripts/test-rites.mjs`; UI below `RITES_UI`; loaded by `scripts/test.mjs`), screen id `rites`; the home promo
+that said "GodGacha" (a reference name) is now "Star Rites".
+- Four rites take turns, 14 UTC days each from `Rites.anchor`: Moonwell Rite (Moon Sigil), Dragon Hoard (Ember Scale),
+  Starfall Vault (Star Key), Celestial Bloom (Bloom Charm). Own ticket each, tickets never expire (`S.rites.t`).
+- 50 tickets a pull, 500 for ten (same odds), one free pull a UTC day. Odds (`Rites.odds`): exclusive wings 0.3%,
+  aura 1.2%, Wish Orb 7%, rare bag item 25%, common the rest. Luck: an orb or better within 15 pulls. The rite's wings
+  are certain by pull 300 of the event (`grandAt`).
+- Milestones by pulls in the event pay tickets of the NEXT rite (15/30/60/135/240 = 400/740/1240/1240/1240, plus an orb
+  at 240); Moonwell and Dragon Hoard return their own tickets at 120/250; Starfall Vault gives a free choice (wings,
+  aura copy or orb, `Rites.choose`) at 360/720/800; Celestial Bloom's Petal Path pays prisms at 50/100/200.
+- Prizes: exclusive wings `fashion-wing-28..31` (Moonwell Seraph, Dragonfire Crest, Starfall Comet, Celestial Bloom;
+  in `PREMIUM_LOOKS`, never sold for gold, `RITE_WINGS` names the rite in the note); four auras (`comp-rites-aura-<id>`,
+  copies raise the tier to T5, all owned auras give stats, the worn one glows under her feet on the home screen,
+  `img.rite-aura`); ten Wish Orbs (collection, set bonuses at 4 / 7 / 10). Stats through `Rites.bonus` in `stats()`.
+  Repeats become stardust (Dust Shop: tickets or an orb of choice). Rite Shop: seven 500-ticket packs per rite for
+  prisms and a 1:1 prism exchange; real money is not built. Welcome gift 1,000 tickets of the running rite.
+- Optional save field `S.rites {t, auras, aura, orbs, dust, ev{period,pulls,luck,got,picks,grand,packs,free}}`
+  (`Rites.valid` from `valid()`). Art (image model): `art-source/rites/` + `art-source/wings/wing-28..31.webp`, built by
+  `scripts/build-rites-art.py` (wings, auras, hall backgrounds `comp-rites-bg-<id>`, icon atlas `comp-rites-icons`:
+  tickets, orbs, luck chest, stardust). Hosted bundle 33.03 MB (about 0.5 MB spare). All numbers are placeholders.
+
 ## Lagoon Gala event mini-game (2026-11-23; renamed from "Splash Party" so the name is clearly our own)
 User sent eleven photos of the reference's "Pet Party" event ("add this one too"). Original name and art, same
 mechanics. Mini Games card + sub-nav tab, screen id `party`, `src/party.js` (rules `Party`, pure, `node
