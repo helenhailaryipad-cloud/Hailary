@@ -137,6 +137,14 @@ const Rites = {
     if (what === 'orb') { if (v.dust < this.dust.orbBuy || !this.orbs.some(o => o[0] === id)) return null; v.dust -= this.dust.orbBuy; return this.give(s, v, { kind: 'orb', id, name: this.orbName(id), rarity: 'epic' }); }
     return null;
   },
+  // Starlit Vouchers: universal tickets (boss wheel, dungeon guardians) kept in v.v, swapped 1:1 for tickets of the
+  // running rite whenever she likes, so she can save them for the rite she wants.
+  vouchers(s) { return s.rites?.v || 0; },
+  addVouchers(s, n, now = Date.now()) { if (!(n > 0)) return 0; const v = this.state(s, now); v.v = (v.v || 0) + n; return n; },
+  redeem(s, n, now = Date.now()) {
+    const v = this.state(s, now), rite = this.rite(v.ev.period); n = Math.floor(n);
+    if (!(n > 0) || (v.v || 0) < n) return null; v.v -= n; v.t[rite.id] = (v.t[rite.id] || 0) + n; return { n, rite };
+  },
   wear(s, id) { const v = s.rites; if (!v || (id && !v.auras[id])) return false; v.aura = id || ''; return true; },
   auraTier(s, id) { return Math.min(this.auraTiers, s.rites?.auras?.[id] || 0); },
   orbCount(s) { return Object.keys(s.rites?.orbs || {}).length; },
@@ -152,7 +160,7 @@ const Rites = {
   valid(v) {
     if (v === undefined) return true;
     const int = n => Number.isSafeInteger(n) && n >= 0 && n <= 1e9, obj = o => !!o && typeof o === 'object' && !Array.isArray(o);
-    if (!obj(v) || !obj(v.t) || !obj(v.auras) || !obj(v.orbs) || !int(v.dust) || typeof v.aura !== 'string') return false;
+    if (!obj(v) || !obj(v.t) || !obj(v.auras) || !obj(v.orbs) || !int(v.dust) || typeof v.aura !== 'string' || !(v.v === undefined || int(v.v))) return false;
     if (!Object.entries(v.t).every(([k, n]) => this.list.some(r => r.id === k) && int(n))) return false;
     if (!Object.entries(v.auras).every(([k, n]) => Object.hasOwn(this.auras, k) && int(n) && n >= 1 && n <= this.auraTiers)) return false;
     if (!Object.entries(v.orbs).every(([k, n]) => this.orbs.some(o => o[0] === k) && int(n) && n >= 1)) return false;
@@ -181,7 +189,7 @@ function riteStop() { clearInterval(ritesTimer); ritesTimer = 0; }
 function riteTick() { if (screen !== 'rites') return riteStop(); const t = document.querySelector('.rt-time b'); if (t) t.textContent = riteClock(Rites.ends(Rites.period()) - Date.now()); }
 function riteWallet() {
   const v = Rites.state(S), rite = Rites.rite(v.ev.period);
-  return `<span class="rt-chip" onclick="riteShop()">${riteTicket(rite)}<b>${fmt(Rites.tickets(S, rite.id))}</b><i>+</i></span><span class="rt-chip" onclick="riteShop()">${uiIcon('crystals')}<b>${fmt(S.scales || 0)}</b></span>`;
+  return `<span class="rt-chip" onclick="riteShop()">${riteTicket(rite)}<b>${fmt(Rites.tickets(S, rite.id))}</b><i>+</i></span><span class="rt-chip" onclick="riteVoucher()">${riteVoucherIcon()}<b>${fmt(Rites.vouchers(S))}</b></span><span class="rt-chip" onclick="riteShop()">${uiIcon('crystals')}<b>${fmt(S.scales || 0)}</b></span>`;
 }
 function showRites() {
   const v = Rites.state(S), rite = Rites.rite(v.ev.period), ev = v.ev, next = Rites.milestones(rite).find(m => !ev.got.includes(m.at));
@@ -271,10 +279,21 @@ function riteShop() {
   const v = Rites.state(S), rite = Rites.rite(v.ev.period);
   popup(`<div class="rt-pop"><h2>Rite Shop</h2><p>Packs refresh with every rite. ${riteTicket(rite)} ${rite.ticket}: <b>${fmt(Rites.tickets(S, rite.id))}</b> · ${uiIcon('crystals')} <b>${fmt(S.scales || 0)}</b></p>
    <div class="rt-packs">${Rites.packs.map((p, i) => `<button ${v.ev.packs.includes(i) ? 'disabled' : ''} onclick="riteBuyPack(${i})">${denPlain}${riteTicket(rite)}<b>${fmt(Rites.packTickets)}</b><small>${v.ev.packs.includes(i) ? 'Bought' : uiIcon('crystals') + p}</small>${p < Rites.packTickets ? `<em>-${Math.round((1 - p / Rites.packTickets) * 100)}%</em>` : ''}</button>`).join('')}</div>
+   <div class="rt-vbar">${riteVoucherIcon()}<span><b>${fmt(Rites.vouchers(S))} Starlit Vouchers</b><small>Universal: swap 1:1 for ${rite.ticket}s</small></span><button ${Rites.vouchers(S) ? '' : 'disabled'} onclick="riteRedeem()">${denPlain}Swap all</button></div>
    <div class="rt-row"><button onclick="riteExchangeOnly(${Rites.cost})">${denPlain}${uiIcon('crystals')}${Rites.cost} → ${riteTicket(rite)}${Rites.cost}</button><button onclick="riteExchangeOnly(${Rites.cost * 10})">${denPlain}${uiIcon('crystals')}${Rites.cost * 10} → ${riteTicket(rite)}${Rites.cost * 10}</button></div>
    <h3>Dust Shop · ${riteIcon(15)} ${fmt(v.dust)} stardust</h3><p class="rt-small">Repeats turn into stardust: wings ${Rites.dust.wings}, a full aura ${Rites.dust.aura}, an orb ${Rites.dust.orb}.</p>
    <div class="rt-row"><button ${v.dust < Rites.dust.pull ? 'disabled' : ''} onclick="riteDust('pull')">${denPlain}${riteIcon(15)}${Rites.dust.pull} → ${riteTicket(rite)}${Rites.cost}</button><button ${v.dust < Rites.dust.orbBuy ? 'disabled' : ''} onclick="riteDustOrb()">${denPlain}${riteIcon(15)}${Rites.dust.orbBuy} → an orb you choose</button></div></div>`);
 }
+function riteVoucherIcon(cls = '') { return `<img class="rt-vico ${cls}" src="${artPath('comp-rites-voucher')}" alt="Starlit Voucher">`; }
+// Item card of the universal ticket, like the reference's item tooltips (the .den-item card).
+function riteVoucher() {
+  const v = Rites.state(S), rite = Rites.rite(v.ev.period), n = Rites.vouchers(S);
+  popup(`<div class="den-item rt-vcard"><div class="den-item-head">${riteVoucherIcon('big')}<div><b>Starlit Voucher</b><small>Usable at: any level</small><small>Type: <em>Universal ticket</em></small></div></div>
+   <h3>Item Description</h3><p>Won on the boss wheel and from dungeon guardians. Swap it 1:1 for tickets of the Star Rite that is running, whenever you like: save them for the rite you love.</p>
+   <p>You have <b>${fmt(n)}</b>. Running now: ${riteTicket(rite)} <b>${rite.name}</b>.</p>
+   <div class="rt-row"><button class="primary" ${n ? '' : 'disabled'} onclick="riteRedeem()">${denPlain}Swap ${fmt(n)} for ${rite.ticket}s</button></div></div>`);
+}
+function riteRedeem() { const r = Rites.redeem(S, Rites.vouchers(S)); if (!r) return toast('No Starlit Vouchers yet'); save(); $('#modal').close(); if (screen === 'rites') showRites(); toast('+' + fmt(r.n) + ' ' + r.rite.ticket + 's'); }
 function riteBuyPack(i) { if (!Rites.buyPack(S, i)) return toast('Not enough prisms'); save(); riteShop(); showRitesKeep(); toast('+' + Rites.packTickets + ' tickets'); }
 function riteExchangeOnly(n) { if (!Rites.exchange(S, n)) return toast('Not enough prisms'); save(); riteShop(); showRitesKeep(); toast('+' + n + ' tickets'); }
 function riteDust(what) { if (!Rites.dustBuy(S, what)) return toast('Not enough stardust'); save(); riteShop(); showRitesKeep(); }

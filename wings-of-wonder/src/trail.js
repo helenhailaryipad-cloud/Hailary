@@ -3,7 +3,8 @@
 // Diamond). Our version: twelve daily tasks counted by trailTick() hooks across the game, reset 00:00 UTC. Each done
 // task can be claimed once per tab: Silver is free, Gold and Diamond need the month's Wayfarer Pass (prisms; real money
 // is not built). Silver claims fill Wayfarer EXP for the month (UTC calendar month), whose milestones pay chests,
-// tickets and pets. Star Rites tickets come in small amounts from here and from dungeon guardians (Trail.dungeonTickets)
+// tickets and pets. Star Rites tickets come in small amounts from here, and universal Starlit Vouchers from dungeon
+// guardians (Trail.dungeonTickets) and the boss wheel,
 // so the free player gets a few pulls a day. All numbers are placeholders. Pure rules first (node scripts/test-trail.mjs),
 // UI below TRAIL_UI.
 const Trail = {
@@ -53,6 +54,7 @@ const Trail = {
     const out = {};
     if (give.gold) { s.gold = (s.gold || 0) + give.gold; out.gold = give.gold; }
     if (give.prisms) { s.scales = (s.scales || 0) + give.prisms; out.prisms = give.prisms; }
+    if (give.voucher && typeof Rites !== 'undefined') { Rites.addVouchers(s, give.voucher); out.voucher = give.voucher; }
     if (give.rite && typeof Rites !== 'undefined') { const v = Rites.state(s), id = Rites.rite(v.ev.period).id; v.t[id] = (v.t[id] || 0) + give.rite; out.rite = give.rite; out.riteId = id; }
     for (const [k, n] of Object.entries(give.items || {})) { s.bag ??= {}; s.bag[k] = (s.bag[k] || 0) + n; (out.items ??= {})[k] = n; }
     return out;
@@ -85,6 +87,7 @@ function trailGive(out) {
   const bits = [];
   if (out.exp) bits.push(`<span class="tq-r exp"><b>EXP</b><small>${fmt(out.exp)}</small></span>`);
   if (out.rite && typeof riteIcon === 'function') { const rite = out.riteId ? Rites.list.find(r => r.id === out.riteId) : Rites.rite(Rites.period()); bits.push(`<span class="tq-r">${riteIcon(rite.icon)}<small>${fmt(out.rite)}</small></span>`); }
+  if (out.voucher && typeof riteVoucherIcon === 'function') bits.push(`<span class="tq-r">${riteVoucherIcon()}<small>${fmt(out.voucher)}</small></span>`);
   if (out.prisms) bits.push(`<span class="tq-r">${uiIcon('crystals')}<small>${fmt(out.prisms)}</small></span>`);
   if (out.gold) bits.push(`<span class="tq-r">${uiIcon('gold')}<small>${fmt(out.gold)}</small></span>`);
   for (const [k, n] of Object.entries(out.items || {})) bits.push(`<span class="tq-r">${typeof bagIcon === 'function' ? bagIcon(k) : k}<small>${n}</small></span>`);

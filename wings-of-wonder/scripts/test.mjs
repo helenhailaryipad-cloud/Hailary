@@ -1095,7 +1095,7 @@ vm.runInContext(`
  trailTick('flower',5);cityTrail();h=$('#main').innerHTML;if(!h.includes('Claim</button>'))throw Error('Done task shows Claim');
  const g=S.gold;trailClaim('flower');if(S.gold!==g+1000||S.trail.exp!==100)throw Error('Claim pays');trailTab='g';cityTrail();if(!$('#main').innerHTML.includes('🔒'))throw Error('Gold tab locked');
  trailClaimAll();if(!$('#modalBody').innerHTML.includes('Wayfarer Pass'))throw Error('Pass offer');trailMilestone(0);trailTab='s';
- S.adventure={...WonderAdventure.fresh(),pending:3};for(let i=0;i<3;i++)WonderAdventure.spin(S,()=>6/12+.01);if(!(Rites.tickets(S,Rites.rite(Rites.period()).id)>=Rites.welcome+90))throw Error('Wheel pays rite tickets');
+ S.adventure={...WonderAdventure.fresh(),pending:3};for(let i=0;i<3;i++)WonderAdventure.spin(S,()=>6/12+.01);if(Rites.vouchers(S)!==90)throw Error('Wheel pays Starlit Vouchers');const tk=Rites.tickets(S,Rites.rite(Rites.period()).id);riteVoucher();riteRedeem();if(Rites.vouchers(S)!==0||Rites.tickets(S,Rites.rite(Rites.period()).id)!==tk+90)throw Error('Vouchers swap 1:1');
  go('home');if(!$('#main').innerHTML.includes("go('cityTrail')"))throw Error('Daily opens Wayfarer Quests');if(!valid(S))throw Error('valid');}
 `,context);
 console.log('PASS: Wayfarer Quests: tasks, claims, locked tabs and pass offer, milestones, wheel pays rite tickets, Daily button.');

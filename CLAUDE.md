@@ -263,8 +263,13 @@ the home "Daily" button (the old `cityDaily` shell is unused).
 - Each done task is claimed once per tab: Silver free (100 Wayfarer EXP, 30 Star Rites tickets, 10 prisms, 1,000 gold),
   Gold / Diamond need that month's Wayfarer Pass (680 / 1,280 prisms; real money not built). Wayfarer EXP fills a
   monthly track of twelve milestones (`Trail.track`). Claim all, You received pop-up.
-- Gacha tickets drip in: +20 rite tickets per dungeon guardian (`Trail.dungeonTickets`), the quests above, and two
-  slots of the existing boss wheel (`WonderAdventure.wheel`, a free spin per guardian win) now pay 30 / 60 rite tickets.
+- Gacha tickets drip in: the quests above pay tickets of the running rite; +20 Starlit Vouchers per dungeon guardian
+  (`Trail.dungeonTickets`) and two slots of the existing boss wheel (`WonderAdventure.wheel`, a free spin per guardian
+  win) pay 30 / 60 vouchers.
+- Starlit Vouchers (user photo of the reference's "General Lottery Ticket": universal tokens swapped for draw tickets
+  at a fixed rate): `S.rites.v`, +20 per dungeon guardian and two boss-wheel slots (30 / 60); swapped 1:1 for tickets of
+  the running rite (`Rites.redeem`, Rite Shop "Swap all", the item card `riteVoucher()` from the wallet chip), so she
+  can save them for the rite she wants. Icon `comp-rites-voucher` (image model, `art-source/rites/voucher.png`).
 - Optional save field `S.trail {day, c, got{s,g,d}, season, exp, ms, pass}` (`Trail.valid`). Banner art
   `comp-trail-banner` (image model, `art-source/trail/banner.png`, built in `build-rites-art.py`).
 

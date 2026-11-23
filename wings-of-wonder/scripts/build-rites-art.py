@@ -43,3 +43,6 @@ save('comp-rites-icons', atlas, 88, 50)
 # Wayfarer Quests banner (trail.js): a camp with a treasure chest, no characters.
 b = Image.open(SRC/'trail'/'banner.png').convert('RGB'); b = b.resize((960, 640), Image.Resampling.LANCZOS)
 save('comp-trail-banner', b, 78, 34)
+# Starlit Voucher (universal rite ticket) icon.
+v = Image.open(SRC/'rites'/'voucher.png').convert('RGBA'); a = np.array(v); a[a[..., 3] < 24] = 0; v = Image.fromarray(a); v = v.crop(v.getbbox()); v.thumbnail((176, 176), Image.Resampling.LANCZOS)
+c = Image.new('RGBA', (192, 192)); c.alpha_composite(v, ((192-v.width)//2, (192-v.height)//2)); save('comp-rites-voucher', c, 88, 50)

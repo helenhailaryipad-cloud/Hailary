@@ -8802,3 +8802,12 @@ body[data-screen=cityTrail] #stage .toast{top:7%!important;bottom:auto!important
 #stage #main .tq-tabs button.all{background:linear-gradient(#8dff9a,#3fae4a);color:#0a3a12;padding:8px 10px}
 #modal .tq-pop .tq-gifts{justify-content:center;margin:8px 0}#modal .tq-pop p{font-size:13px}
 .tq-list>.tq-row{flex:none}
+/* Starlit Voucher (universal rite ticket) */
+.rt-vico{width:1.5em;height:1.5em;object-fit:contain;vertical-align:-.4em}.rt-vico.big{width:64px;height:64px}
+.rt-chip .rt-vico{width:20px;height:20px}
+#modal .rt-vbar{display:flex;align-items:center;gap:8px;margin:6px 0;padding:6px 8px;border-radius:10px;background:#ffe9a022;border:1px solid #ffe9a066;text-align:left}
+#modal .rt-vbar .rt-vico{width:38px;height:38px}#modal .rt-vbar span{flex:1;display:grid}#modal .rt-vbar small{font-size:11px;opacity:.85}
+#modal .rt-vbar button{min-height:0;padding:7px 12px;font-size:12.5px}
+#modal .rt-vcard .den-item-head{display:flex;gap:10px;align-items:center;text-align:left}#modal .rt-vcard .den-item-head div{display:grid}#modal .rt-vcard em{color:#8dff9a;font-style:normal}
+.tq-r .rt-vico{width:34px;height:34px}
+.boss-wheel img.rt-vico.wheel-reward-icon{width:3em;height:3em;vertical-align:middle;filter:drop-shadow(0 1px 2px #0006)}
