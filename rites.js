@@ -31,8 +31,10 @@ const Rites = {
     choice: [{ at: 360, pick: 1 }, { at: 720, pick: 1 }, { at: 800, pick: 1 }],
     petals: [{ at: 50, prisms: 100 }, { at: 100, prisms: 200 }, { at: 200, prisms: 400 }]
   },
-  // Ticket packs for prisms, once each per event (cheaper than the 1:1 exchange), and the Dust Shop.
-  packs: [175, 175, 175, 175, 175, 175, 350], packTickets: 500,
+  // Ticket packs for prisms, once each per event, each step dearer (user photos of the reference's Secret Shop: 500
+  // tickets for 50, 100 ... 450 crystals), all cheaper than the 1:1 exchange; and the Dust Shop. Tickets are NEVER sold
+  // for real money directly (user): when payments come, money buys prism packs with tickets only as a bonus.
+  packs: [50, 100, 150, 200, 250, 300, 350, 400, 450], packTickets: 500,
   dust: { wings: 300, aura: 100, orb: 20, pull: 40, orbBuy: 300 },
   welcome: 1000,
   auraStats: { attack: 150, health: 1500, attackPercent: 3, healthPercent: 3 },
