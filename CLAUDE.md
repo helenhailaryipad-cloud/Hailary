@@ -146,6 +146,30 @@ global `#main button` rules set position, borders and `::before`.
   the dragon (`cover-jungle`, source `art-source/trek/cover.webp`). Hosted bundle: AVIF copies of crownfall-vale,
   cloud-war-twin-islands and cloud-war-realms-2 were re-saved at quality 34 (headroom ~180 KB).
 
+## Splash Party event mini-game (2026-11-23)
+User sent eleven photos of the reference's "Pet Party" event ("add this one too"). Original name and art, same
+mechanics. Mini Games card + sub-nav tab, screen id `party`, `src/party.js` (rules `Party`, pure, `node
+scripts/test-party.mjs`; UI below the `PARTY_UI` marker; also loaded by `scripts/test.mjs`).
+- Board 4 x 4: a swipe (pointer on `#ppBoard`, or arrow keys) slides every pet. Two equal pets merge into the next of
+  eleven tiers (our familiars `Party.tiers`, d47 ... d43) for 10 x tier points. A new tier 1 pet (10% tier 2) comes
+  after each move.
+- Stamina: 1 per move, 100 max, +1 every 5 min, full at 00:00 UTC; Stamina Potion +5.
+- Items with per-round limits (`roundLimit`): Party Fireworks (clears the lowest tier), Party Cake (tier 1 -> 2),
+  Magic Wand (tap a pet: +1 tier), Stamina Potion.
+- Deadlock overlay when nothing can move; New round keeps the score as a result.
+- Event = 7 UTC days from `Party.anchor` (`period`). Best round score ranks against 40 simulated AI (`field`, labelled
+  AI; ties go to the earlier).
+- Total points open Heavenly Gifts (`track`, columns Basic free / Advanced 680 / Heavenly 1280 prisms).
+- Gift Packs for prisms with event limits (real money is not built).
+- Tier achievements once per event, and a Gallery of merges.
+- Personal rewards by final rank (`ranks`) are paid into the bag by `partyState()` when a new week starts (`Party.roll`
+  returns `due`); event items reset then.
+- Optional save field `S.party` (validated by `Party.valid` from `valid()` in `app.js`).
+- Art (image model): `art-source/party/{bg,items}.webp` -> `comp-party-bg`, `comp-party-items` by
+  `scripts/build-party-art.py`. The board view is a flex column sized in cqh (`.pp-room` is a size container) so it
+  fits 590 x 690 and iPad portrait; pop-up rows need the `#modal .pp-*` colour overrides.
+- All numbers are placeholders.
+
 ## Jungle Trek second pass (2026-11-18)
 The user sent photos of a reference runner-shooter (no text); Jungle Trek was restyled toward it with original art:
 painted clearing background (`trek-bg`), barrel sprite (`trek-barrel`), power-up orbs (`trek-pickup-1..3`), violet-gold
