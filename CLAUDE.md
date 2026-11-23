@@ -151,6 +151,8 @@ User: "all games in one place, names on the main field, not hunted through sub-t
 Mini Games; `games()` in `app.js` draws `.mg-hub`: one tile per game from `MINI_GAMES` (cover, name, line, best
 result; a tap opens the game), 4 columns (3 on tall screens), no sub-tab strip on that screen (hidden in CSS). The old
 portal layout is kept as `gamesOld()` (unused). A new game only needs a row in `MINI_GAMES`.
+The hub is full screen (user: "why so many sub-menus"): no app header, bottom nav or Menu pill; its round `data-back`
+button (`.mg-back`) goes to the home screen (CSS `body[data-screen=games]` at the end of `stage.css`).
 Home screen (user circled the separate game icons: "put all mini games into one Mini Games icon"): Fishing, Harvest
 Pairs and Splash Party icons are gone from `.city-extra`; one larger `.city-minigames` icon (painted tent,
 `art-source/ui/minigames.webp` -> `comp-minigames-icon` by `build-ui-icons.py`) opens the hub. Isle Expedition and

@@ -8609,3 +8609,10 @@ body[data-screen=siege] #stage .toast{top:6%!important;bottom:auto!important;lef
 #stage #main .sg-room button{outline:0!important}#stage #main .sg-room button::after,#stage #main .sg-room button::before{content:none!important;display:none!important;background:none!important}
 #modal .sg-tries b{color:#8a5a12!important}#modal .sg-tries small{color:#8a5a12!important}
 .sg-stage{top:calc(3.6cqh + min(8cqw,46px))!important}
+
+/* Mini Games hub is full screen (user: "too many sub-menus"): no app header, bottom nav or Menu pill; the round back
+   button in its title row goes to the home screen. */
+body[data-screen=games] #stage>:is(header,nav,footer),body[data-screen=games] .return-to-menu,body[data-screen=games] #subnav{display:none!important}
+body[data-screen=games] #stage>#main{inset:0!important;width:100%;height:100%;padding:0!important}
+body[data-screen=games] .mg-hub{padding:max(10px,env(safe-area-inset-top)) 10px 10px}
+body[data-screen=games] .mg-head{gap:12px}
