@@ -8467,3 +8467,19 @@ body[data-screen=games] #stage #main>.mg-hub{width:100%;flex:1 1 auto;min-height
 .city-extra .city-minigames{grid-row:auto!important}
 .city-extra .city-minigames .city-glyph{transform:scale(1.35)!important}
 .city-extra .city-minigames .city-caption{margin-top:16%!important}
+/* Splash Party: Advanced / Heavenly passes (lobby buttons and offer window) */
+.pp-passes{position:absolute;right:3cqw;top:calc(9cqh + 36cqw);display:grid;gap:1.4cqh;z-index:3}
+#stage #main .pp-passes button{position:relative;display:flex;align-items:center;gap:1cqw;width:27cqw;min-height:0;padding:.6cqh 1.4cqw;border:2px solid #ffe9a0;border-radius:2.4cqw;color:#fff;font:900 2.7cqw/1.05 Arial,sans-serif;text-align:left;text-shadow:0 1px 2px #0008;box-shadow:0 3px 8px #0005}
+#stage #main .pp-passes .a{background:linear-gradient(135deg,#4a8ff0,#2a4fb0)}#stage #main .pp-passes .h{background:linear-gradient(135deg,#ff9a3a,#e0442a)}
+.pp-passes img{width:9cqw;height:9cqw;object-fit:contain;filter:drop-shadow(0 2px 2px #0006)}.pp-passes b{position:absolute;right:4px;top:2px;color:#8dff9a}
+#modal .pp-offer{position:relative;margin:-6px;padding:10px 10px 12px;border-radius:14px;background:linear-gradient(#5ab6e8cc,#2a6ab0ee),var(--ppbg) 50% 30%/cover;overflow:hidden;text-align:center}
+#modal .pp-offer.h{background:linear-gradient(#ffb36bcc,#c0442aee),var(--ppbg) 50% 30%/cover}
+.pp-offer-pet{position:absolute;left:-8%;top:8%;width:55%;opacity:.95;filter:drop-shadow(0 6px 10px #0006);pointer-events:none}
+#modal .pp-offer h2{position:relative;margin:4px 0 6px;font:900 italic 24px/1 Georgia,serif;color:#fff3c0!important;text-shadow:0 2px 0 #b4400c,0 0 10px #ff8a3a}
+.pp-value{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:6px;background:#d93a2a;color:#fff;font:800 12px/1.4 Arial,sans-serif}.pp-value img,.pp-refund img,.pp-buy img{width:16px;height:16px}
+.pp-offer-box{position:relative;margin-left:38%;padding:6px;border-radius:10px;background:#1b3a7acc;display:grid;gap:4px;max-height:44vh;overflow:auto}
+.pp-offer-box small{font:700 10.5px/1.2 Arial,sans-serif;color:#ffe9b0;text-align:left}.pp-offer-box .pp-gl{justify-content:flex-start}
+#modal .pp-offer-box .pp-gift small{color:#dfe9ff!important}
+#modal .pp-refund{position:relative;margin:8px 0 6px;color:#fff!important;font:700 12px/1.3 Arial,sans-serif}.pp-refund b{color:#8dff9a}
+#modal .pp-buy{position:relative;min-width:150px}
+.pp-offer-box{max-height:none!important;overflow:visible!important}.pp-offer-box .pp-scroll{max-height:21vh;overflow:auto;padding:2px;border-radius:6px;background:#0002}
