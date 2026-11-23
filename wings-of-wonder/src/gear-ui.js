@@ -472,6 +472,7 @@ function summonShow(title,results,note=''){
 function summonDo(kind,count){
  const r=WonderGear,before=r.summonState(S).marks,result=r.summonDraw(S,kind,count);
  if(!result.ok){toast(kind==='basic'?'Not enough wishes or Wish Tickets.':'Not enough prisms or Star Orbs.');return}
+ if(typeof trailTick==='function')trailTick('summon',result.results.length);
  const best=result.results.find(x=>x.rarity==='Super Rare');if(best)r.socialNote(S,'Summoned a Super Rare pet: '+r.familiars.find(p=>p.id===best.id).name+'!');
  save();citySummon();
  const after=r.summonState(S).marks,gained=r.markKinds.map(([,key,name])=>after[key]>before[key]?'+'+(after[key]-before[key])+' '+name:'').filter(Boolean);

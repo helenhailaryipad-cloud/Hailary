@@ -250,6 +250,24 @@ that said "GodGacha" (a reference name) is now "Star Rites".
   `scripts/build-rites-art.py` (wings, auras, hall backgrounds `comp-rites-bg-<id>`, icon atlas `comp-rites-icons`:
   tickets, orbs, luck chest, stardust). Hosted bundle 33.03 MB (about 0.5 MB spare). All numbers are placeholders.
 
+## Wayfarer Quests: daily tasks (2026-11-23)
+User: "the core is grind + gacha: every day a set amount of everything, a small CP rise, and a bit of excitement",
+then three photos of the reference's Adventure Quest (task list paying adventure EXP and a few gacha tickets, chest
+track, Silver / Gold / Diamond tabs) and its World Boss roulette ("a few tickets for dungeons and for daily quests").
+`src/trail.js` (rules `Trail`, pure, `node scripts/test-trail.mjs`; UI below `TRAIL_UI`), screen `cityTrail`, opened by
+the home "Daily" button (the old `cityDaily` shell is unused).
+- Twelve daily tasks (`Trail.quests`: guardians, EXP Forest, featured mini game, fishing casts, Cloud War carnage,
+  guild sign-in and boss, flowers, Sky Contest fights, Pet Siege, pet summons, Star Rites pulls), reset 00:00 UTC,
+  counted by `trailTick(key,n)` hooks where the thing happens (world.js, exp-dungeon.js, gear-data.js, gear-ui.js,
+  siege.js, rites.js, fishing.html via `parent.trailTick`, `arcadeScore`). Go buttons open the right screen.
+- Each done task is claimed once per tab: Silver free (100 Wayfarer EXP, 30 Star Rites tickets, 10 prisms, 1,000 gold),
+  Gold / Diamond need that month's Wayfarer Pass (680 / 1,280 prisms; real money not built). Wayfarer EXP fills a
+  monthly track of twelve milestones (`Trail.track`). Claim all, You received pop-up.
+- Gacha tickets drip in: +20 rite tickets per dungeon guardian (`Trail.dungeonTickets`), the quests above, and two
+  slots of the existing boss wheel (`WonderAdventure.wheel`, a free spin per guardian win) now pay 30 / 60 rite tickets.
+- Optional save field `S.trail {day, c, got{s,g,d}, season, exp, ms, pass}` (`Trail.valid`). Banner art
+  `comp-trail-banner` (image model, `art-source/trail/banner.png`, built in `build-rites-art.py`).
+
 ## Lagoon Gala event mini-game (2026-11-23; renamed from "Splash Party" so the name is clearly our own)
 User sent eleven photos of the reference's "Pet Party" event ("add this one too"). Original name and art, same
 mechanics. Mini Games card + sub-nav tab, screen id `party`, `src/party.js` (rules `Party`, pure, `node

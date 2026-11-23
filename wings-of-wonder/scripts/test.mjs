@@ -20,6 +20,7 @@ vm.runInContext(fs.readFileSync('src/wardrobe-engine.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/party.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/siege.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/rites.js','utf8'),context);
+vm.runInContext(fs.readFileSync('src/trail.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/app.js','utf8'),context);
 vm.runInContext(`
 S=defaults();S.gold=500000;openScreen('fashion');
@@ -1089,6 +1090,15 @@ vm.runInContext(`
  S.reinaFashion={owned:0,equipped:0};if(!premiumLocked('fashion-wing-28'))throw Error('Rite wings are exclusive');Rites.give(S,S.rites,{kind:'wings',id:'fashion-wing-28',name:'',rarity:'legend'});if(premiumLocked('fashion-wing-28')||!valid(S))throw Error('Won wings unlock');}
 `,context);
 console.log('PASS: Star Rites room: pulls, free pull, exchange, result window, rates, rewards, shop, collection, aura on the home screen, exclusive wings.');
+vm.runInContext(`
+{S=defaults();go('cityTrail');let h=$('#main').innerHTML;if(!h.includes('Wayfarer Quests')||!h.includes('Go</button>'))throw Error('Wayfarer Quests room');
+ trailTick('flower',5);cityTrail();h=$('#main').innerHTML;if(!h.includes('Claim</button>'))throw Error('Done task shows Claim');
+ const g=S.gold;trailClaim('flower');if(S.gold!==g+1000||S.trail.exp!==100)throw Error('Claim pays');trailTab='g';cityTrail();if(!$('#main').innerHTML.includes('🔒'))throw Error('Gold tab locked');
+ trailClaimAll();if(!$('#modalBody').innerHTML.includes('Wayfarer Pass'))throw Error('Pass offer');trailMilestone(0);trailTab='s';
+ S.adventure={...WonderAdventure.fresh(),pending:3};for(let i=0;i<3;i++)WonderAdventure.spin(S,()=>6/12+.01);if(!(Rites.tickets(S,Rites.rite(Rites.period()).id)>=Rites.welcome+90))throw Error('Wheel pays rite tickets');
+ go('home');if(!$('#main').innerHTML.includes("go('cityTrail')"))throw Error('Daily opens Wayfarer Quests');if(!valid(S))throw Error('valid');}
+`,context);
+console.log('PASS: Wayfarer Quests: tasks, claims, locked tabs and pass offer, milestones, wheel pays rite tickets, Daily button.');
 
 vm.runInContext(`
 {S=defaults();go('siege');let h=$('#main').innerHTML;if(!h.includes('Dragon Keep')||!S.siege||!valid(S))throw Error('Pet Siege map');
