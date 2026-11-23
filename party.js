@@ -22,28 +22,16 @@ const Party = {
     potion: { name: 'Stamina Potion', text: '+5 stamina.' } },
   roundLimit: { fire: 3, cake: 3, wand: 3, potion: 10 },
   starter: { fire: 1, cake: 1, wand: 1, potion: 5 },
-  // Heavenly Gifts: total points of the event open each row; Basic is free, the other two columns need an unlock.
-  // Heavenly Gifts: total points of the event open each row (1 ... 72,000, as in the reference); Basic is free, the
-  // other two columns need an unlock (`unlock` prisms, `refund` prisms back at once, `value` shown on the offer).
-  track: [
-    { at: 1, b: { chest1: 1 }, a: { chest1: 2 }, h: { gold2: 1, potion: 5 } },
-    { at: 2000, b: { exp1: 3 }, a: { exp1: 6 }, h: { shardbag: 1, fire: 1 } },
-    { at: 4000, b: { potion: 5 }, a: { potion: 10 }, h: { stonebag: 2, cake: 1 } },
-    { at: 6000, b: { gold1: 3 }, a: { gold2: 2 }, h: { gembox: 1, wand: 1 } },
-    { at: 8000, b: { fire: 1 }, a: { fire: 2 }, h: { chest2: 2 } },
-    { at: 10000, b: { exp1: 6 }, a: { exp2: 2 }, h: { sealbag: 1, potion: 5 } },
-    { at: 14000, b: { gold1: 4 }, a: { gold2: 3 }, h: { shardbag: 2 } },
-    { at: 18000, b: { stonebag: 3 }, a: { stonebag: 6 }, h: { gembox: 2 } },
-    { at: 22000, b: { fire: 1 }, a: { potion: 6 }, h: { fire: 1, potion: 5 } },
-    { at: 26000, b: { exp2: 1 }, a: { exp2: 3 }, h: { essence: 2, sealbag: 1 } },
-    { at: 30000, b: { wish: 1 }, a: { wish: 2 }, h: { chest3: 1 } },
-    { at: 34000, b: { chest2: 1 }, a: { chest2: 2 }, h: { shardbag: 2, stonebag: 2 } },
-    { at: 38000, b: { wand: 1 }, a: { wand: 1, potion: 5 }, h: { wand: 1, potion: 5 } },
-    { at: 46000, b: { gold2: 2 }, a: { gold2: 4 }, h: { essence: 3 } },
-    { at: 52000, b: { sealbag: 1 }, a: { sealbag: 2 }, h: { gembox: 2 } },
-    { at: 58000, b: { shardbag: 1 }, a: { shardbag: 2 }, h: { chest3: 1, wish: 2 } },
-    { at: 64000, b: { stonebag: 3 }, a: { stonebag: 6 }, h: { petegg: 1 } },
-    { at: 72000, b: { cake: 1 }, a: { cake: 1 }, h: { petegg: 1, potion: 5 } }],
+  // Heavenly Gifts (user photos of the whole reference track): 21 rows from 1 to 72,000 total points. Each row: Basic =
+  // one material (x6, or x3 for rarer ones), Advanced = the same material doubled, Heavenly = two special items x1.
+  track: [[1, 'exp1', 6, 'chest1', 'potion'], [2000, 'stonebag', 6, 'shardbag', 'gembox'], [4000, 'sealbag', 6, 'chest2', 'essence'],
+    [6000, 'gold1', 6, 'gembox', 'sealbag'], [8000, 'exp2', 6, 'wish', 'chest2'], [10000, 'shardbag', 6, 'fire', 'cake'],
+    [12000, 'potion', 3, 'potion', 'wand'], [14000, 'stonebag', 6, 'gembox', 'essence'], [16000, 'essence', 3, 'petegg', 'chest2'],
+    [18000, 'gold2', 3, 'wish', 'sealbag'], [22000, 'fire', 1, 'fire', 'potion'], [26000, 'sealbag', 6, 'chest3', 'shardbag'],
+    [30000, 'exp2', 6, 'gembox', 'wish'], [34000, 'shardbag', 6, 'chest3', 'essence'], [38000, 'stonebag', 6, 'petegg', 'gembox'],
+    [42000, 'gold2', 6, 'wish', 'chest3'], [46000, 'exp2', 6, 'petegg', 'sealbag'], [52000, 'gembox', 3, 'chest3', 'wish'],
+    [58000, 'essence', 3, 'petegg', 'gembox'], [64000, 'sealbag', 3, 'petegg', 'chest3'], [72000, 'cake', 1, 'petegg', 'potion']]
+    .map(([at, m, n, h1, h2]) => ({ at, b: { [m]: n }, a: { [m]: n * 2 }, h: h1 === h2 ? { [h1]: 2 } : { [h1]: h1 === 'potion' ? 5 : 1, [h2]: h2 === 'potion' ? 5 : 1 } })),
   unlock: { a: 680, h: 1280 }, refund: { a: 60, h: 300 }, value: { a: 7000, h: 29000 },   // prisms (real money is not built)
   packs: [
     { id: 'p1', name: 'Event Pack I', price: 30, limit: 1, give: { potion: 20, gold: 2000 } },
@@ -304,7 +292,7 @@ function partyTrack() {
   const v = S.party, col = (row, c, i) => { const got = v.track[c].includes(i), open = Party.trackOpen(v, i), locked = c !== 'b' && !v.unlock[c];
     return `<button class="pp-cellg ${c} ${got ? 'got' : ''} ${open && !got && !locked ? 'ready' : ''}" onclick="partyTrackTap('${c}',${i})">${denPlain}${partyGifts(row[c])}${locked ? '<i class="pp-lock">🔒</i>' : got ? '<i class="pp-tick">✓</i>' : ''}</button>`; };
   popup(`<div class="pp-track"><h2>Heavenly Gifts</h2><div class="pp-thead"><span>Basic</span><button onclick="partyUnlock('a')" ${v.unlock.a ? 'disabled' : ''}>${denPlain}Advanced ${v.unlock.a ? '✓' : '🔒 ' + Party.unlock.a}</button><button onclick="partyUnlock('h')" ${v.unlock.h ? 'disabled' : ''}>${denPlain}Heavenly ${v.unlock.h ? '✓' : '🔒 ' + Party.unlock.h}</button></div>
-   <div class="pp-tlist">${Party.track.map((row, i) => `<div class="pp-trow">${col(row, 'b', i)}<span class="pp-at ${Party.trackOpen(v, i) ? 'on' : ''}">${fmt(row.at)}</span>${col(row, 'a', i)}${col(row, 'h', i)}</div>`).join('')}</div>
+   <div class="pp-tlist">${Party.track.map((row, i) => `<div class="pp-trow ${Party.trackOpen(v, i) ? 'open' : ''} ${Party.track[i + 1] && Party.trackOpen(v, i + 1) ? 'next' : ''}">${col(row, 'b', i)}<span class="pp-at ${Party.trackOpen(v, i) ? 'on' : ''}"><i>${fmt(row.at)}</i></span>${col(row, 'a', i)}${col(row, 'h', i)}</div>`).join('')}</div>
    <p class="pp-total">Total points earned: <b>${fmt(v.total)}</b> · unlocks cost prisms</p></div>`);
 }
 function partyTrackTap(c, i) {
