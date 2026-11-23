@@ -796,6 +796,10 @@ The user wants to play the game inside the chat, and wants SHORT replies in Russ
   `python3 wings-of-wonder/scripts/build-chat-preview.py <scratchpad>/chat`, then Artifact publish of
   `<scratchpad>/chat/wings-of-wonder.html` with `url` set to that link, `root` = `<scratchpad>/chat/files`, and only the
   CHANGED files in `files` (unchanged ones are kept). A first full upload needs two publishes (files-1.json, files-2.json).
+- Durable save copy (user lost a Splash Party round: the viewer's browser storage came back empty): the artifact declares
+  `capabilities: {sample:{}, db:{}, user:{}}`; `initDbSave()` / `dbSaveWrite()` in `app.js` keep the save as a JSON
+  string in the private doc `data/users/<id>/save` (2.5 s debounce after `save()`); on load the newer of local and
+  stored (`updated`) wins. ALWAYS republish with those capabilities (omitting `capabilities` carries them forward).
 - Limits that shaped it: 511 files per artifact, no .glb, no external iframes. The builder drops unused art and packs
   gear/familiar/guardian/fish/wardrobe-card/bow icons into `pack-*.js` data URIs. The builder only sees files tracked by
   git (commit new art first) and writes `files-delta.json` (what to send, `null` = remove) against

@@ -22,7 +22,20 @@ let screen=globalThis.location?.search==='?screen=cloudWar'?'cloudWar':globalThi
 const item=id=>ITEMS.find(i=>i.id===id),level=()=>globalThis.WonderProgress.level(S.xp),gearLevel=id=>S.upgrades[id]||0;
 function stats(){return globalThis.WonderGear.stats(S)}
 function toast(t){$('#toast').textContent=t;$('#toast').classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('#toast').classList.remove('show'),3000)}
-function save(){reconcileLeaflightMount();S.updated=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch{toast('Device storage is unavailable. Export a backup.')}wallet();if(cloudReady&&!cloudBlocked){clearTimeout(saveTimer);saveTimer=setTimeout(syncCloud,900)}}
+// Durable copy in the artifact's own database (user: "where did my game go, start all over?" - the chat viewer's browser
+// storage can come back empty). Only in the claude.ai preview (window.claude with the `db` + `user` capabilities); one
+// private document data/users/<id>/save holding the save as a JSON string. The newer of local / stored wins on load.
+let dbSaveRef=null,dbSaveTimer=0,dbSaveLast='';
+function dbSaveWrite(){if(!dbSaveRef)return;clearTimeout(dbSaveTimer);dbSaveTimer=setTimeout(()=>{const json=JSON.stringify(S);if(json===dbSaveLast)return;if(json.length>250000)return;dbSaveLast=json;dbSaveRef.set({json,updated:S.updated||0}).catch(()=>{dbSaveLast=''})},2500)}
+async function initDbSave(){try{
+ if(!globalThis.claude?.use)return;const [db,user]=await Promise.all([claude.use('db'),claude.use('user')]);if(!db||!user)return;
+ const id=await user.id();if(!id)return;const ref=db.doc('data/users/'+id+'/save');const snap=await ref.get();dbSaveRef=ref;
+ if(snap.exists){const d=snap.data();let remote=null;try{remote=JSON.parse(d.json)}catch{}
+  if(remote&&valid(remote)&&(remote.updated||0)>(S.updated||0)){S=normalizeAdventure(remote);dbSaveLast=d.json;try{localStorage.setItem(KEY,JSON.stringify(S))}catch{}
+   if(!game){render();toast('Progress restored from your saved copy')}return}}
+ dbSaveWrite();
+}catch{}}
+function save(){reconcileLeaflightMount();S.updated=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch{toast('Device storage is unavailable. Export a backup.')}wallet();dbSaveWrite();if(cloudReady&&!cloudBlocked){clearTimeout(saveTimer);saveTimer=setTimeout(syncCloud,900)}}
 function wallet(){const compact=n=>n>=1000?new Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:1}).format(n):fmt(n);for(const [id,value,icon,label] of [['gold',S.gold,'◈','gold'],['tickets',S.tickets,'✧','wishes'],['scales',S.scales,'◇','scales']]){const cell=$('#'+id);cell.innerHTML=uiIcon(id==='gold'?'gold':id==='tickets'?'wishes':'crystals')+compact(value)+' <small>'+label+'</small>';cell.title=fmt(value)+' '+label;cell.setAttribute('aria-label',fmt(value)+' '+label)}}
 function gain(g,t,x){const awardedXP=globalThis.WonderProgress.award(S,x,stats().expBonus);S.gold+=g;S.tickets+=t;save();return {gold:g,wishes:t,xp:awardedXP}}
 // A small pop-up card in the middle of the screen (Pets room): same dialog, compact look, no Menu button.
@@ -1212,7 +1225,7 @@ async function resolveCloud(keepLocal){try{const r=await fetch('/api/save');if(!
 async function loadLeaderboard(){await loadRankingPlayers();if(!$('#leaderboard'))return;$('#leaderboard').innerHTML=rankingMarkup(true);}
 
 async function publishProfile(){if(!cloudReady||cloudBlocked){toast('Connect and sync your cloud save first');return}if(!await syncCloud()){toast('Save to the cloud before sharing your hero.');return}try{const r=await fetch('/api/leaderboard',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});if(!r.ok)throw Error();toast('Your hero joined the Hall of Wonders');loadLeaderboard()}catch{toast('The hall is unavailable. Please try again.')}}
-{const back=globalThis.location?.search?null:resumeScreen();if(back){screen=back;try{render();setTimeout(()=>toast('Welcome back! The page reloaded, you are where you were.'),400)}catch(e){screen='home';render()}}else render();}initCloud().finally(()=>{
+{const back=globalThis.location?.search?null:resumeScreen();if(back){screen=back;try{render();setTimeout(()=>toast('Welcome back! The page reloaded, you are where you were.'),400)}catch(e){screen='home';render()}}else render();}initDbSave();initCloud().finally(()=>{
  if(S.fishCards===undefined){
   const legacy=MoonwaterFish.deviceRecords();
   if(Object.keys(legacy).length){S.fishCards=legacy;save();if(!game && screen!=='fishing')render()}
