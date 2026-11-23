@@ -227,7 +227,7 @@ function partyBoard(fx = null) {
   const items = Party.itemIds.map(id => `<button class="pp-item ${partyWandArmed && id === 'wand' ? 'armed' : ''}" onclick="partyItem('${id}')" aria-label="${Party.items[id].name}">${denPlain}${partyIcon(id, v.items[id] || 0)}<small>${r.used[id] || 0}/${Party.roundLimit[id]}</small></button>`).join('');
   $('#main').innerHTML = `<section class="pp-room pp-play" style="--ppbg:url('${artPath('comp-party-bg')}')">
    <div class="pp-top"><button data-back aria-label="Back" onclick="showParty()">‹</button><span class="pp-time">${partyClock(Party.ends(v.period) - Date.now())}</span><span class="pp-wallet">${partyIcon('potion')}<b>${v.stamina}</b></span></div>
-   <div class="pp-hud"><span>Score<b>${fmt(r.score)}</b></span><span>Best<b>${fmt(v.best)}</b></span><span>Top pet<b>${r.top ? Party.tiers[r.top - 1][1] : '—'}</b></span></div>
+   <div class="pp-hud"><span>Score<b>${fmt(r.score)}</b></span><span>Best<b>${fmt(v.best)}</b></span><span>Top pet<b>${r.top ? Party.tiers[r.top - 1][1] : '—'}</b></span><span class="${v.stamina ? '' : 'pp-zero'}">Stamina<b>${v.stamina}/${Party.staminaMax}</b></span></div>
    <div class="pp-board" id="ppBoard">${cells}${r.over ? `<div class="pp-dead"><h2>Deadlock!</h2><p>No moves left. Use an item or start a new round (your score ${fmt(r.score)} is kept as a result).</p><button onclick="partyRestart()">${denPlain}New round</button></div>` : ''}</div>
    ${fx?.points ? `<div class="pp-float">+${fx.points}</div>` : ''}
    <p class="pp-hint">${partyWandArmed ? 'Tap a pet to raise it one tier.' : 'Swipe on the board (or use the arrow keys) to move all pets.'}</p>
@@ -246,10 +246,17 @@ function partyUp(e) {
 function partyMove(dir) {
   if (screen !== 'party' || partyView !== 'board') return;
   const v = S.party, res = Party.swipe(v, dir);
-  if (!res.ok) { if (res.err === 'stamina') toast('No stamina: use a Stamina Potion or wait'); return; }
+  if (!res.ok) { if (res.err === 'stamina') partyNoStamina(); return; }
   save(); partyBoard(res);
   const top = res.merges.reduce((m, x) => Math.max(m, x.tier), 0);
   if (top >= 6 && top === v.round.top && res.merges.some(m => m.tier === top)) toast(Party.tiers[top - 1][1] + ' joined the party!');
+}
+// Out of stamina: say so plainly and offer the potion (if the round limit allows) or the wait.
+function partyNoStamina() {
+  const v = S.party, have = v.items.potion || 0, used = v.round.used.potion || 0, lim = Party.roundLimit.potion, next = Party.nextStamina(v);
+  const can = have > 0 && used < lim, midnight = Math.ceil((Math.floor(Date.now() / 864e5) + 1) * 864e5 - Date.now());
+  popup(`<h2>Out of stamina</h2><p class="pp-p">Every move costs 1 stamina. You have 0.</p><ul class="pp-rules"><li>+1 stamina in ${Math.max(1, Math.ceil(next / 60000))} min (one every 5 minutes)</li><li>Full ${Party.staminaMax} at 00:00 UTC, in ${partyClock(midnight)}</li><li>Stamina Potion: +${Party.potionStamina} (you have ${have}, used ${used}/${lim} this round)</li></ul>
+   <div class="pp-row">${can ? `<button class="primary" onclick="document.querySelector('#modal').close();partyItem('potion')">${denPlain}Drink a potion (+${Party.potionStamina})</button>` : ''}<button onclick="document.querySelector('#modal').close()">${denPlain}Wait</button></div>${have ? '' : '<p class="pp-p">More potions: Heavenly Gifts and Gift Packs.</p>'}`);
 }
 function partyKey(e) { if (screen === 'party' && partyView === 'board' && !document.querySelector('#modal[open]')) { const d = { ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down' }[e.key]; if (d) { e.preventDefault(); partyMove(d); } } }
 if (typeof document !== 'undefined' && document.addEventListener) document.addEventListener('keydown', partyKey);
