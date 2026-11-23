@@ -933,6 +933,8 @@ The user wants to play the game inside the chat, and wants SHORT replies in Russ
   `<scratchpad>/chat-published.json`; copy `files-now.json` over that file after each publish.
 
 Still to do:
+- Home promo "Challenge" was removed (2026-11-23, user: it duplicated Dungeons, Hunting is the way in); bring the
+  slot back only when a real Challenge feature exists (user: "maybe something will come later").
 - Mounted hair: small redraw specks can remain along the jaw at high zoom (hairs 2, 10); hair 8 has a dark spot in
   the left tail that is in the painting itself.
 - User has not yet approved the nine repainted designs (details differ slightly from the old art).
