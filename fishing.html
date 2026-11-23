@@ -322,7 +322,9 @@ function renderDial(){
 // The most recent finger steers. Lifting it returns control to the other held arrow.
 const presses=new Map();
 let steeringGoal=.5,heldDirection=0;
-const tapDistance=.065,holdSpeed=.46,response=15;
+// Smoother pendulum (user: "the pendulum should move more smoothly"): softer easing, smaller taps, a held arrow
+// speeds up gently instead of jumping to full speed, calmer drift and a slower green band.
+const tapDistance=.045,holdSpeed=.38,response=6;let holdVel=0;
 function steer(key,direction){
  if(phase!=='reel'||presses.has(key))return;
  if((steeringGoal-pos)*direction<0)steeringGoal=pos;
@@ -384,9 +386,9 @@ function tick(now){
  const dt=Math.min(.06,(now-last)/1000);last=now;time+=dt;
  if(phase==='wait'&&time>1.4){phase='reel';time=0;controls();el('status').textContent='Use the arrows to keep the needle in green.';el('castLabel').textContent='Reeling'}
  if(phase==='reel'){
- target=.5+.22*Math.sin(time*.95);
- const drift=.102*Math.sin(time*1.4+seed);
- steeringGoal=clampNeedle(steeringGoal+(drift+heldDirection*holdSpeed)*dt);
+ target=.5+.22*Math.sin(time*.8);
+ const drift=.08*Math.sin(time*1.1+seed);holdVel+=(heldDirection*holdSpeed-holdVel)*(-Math.expm1(-5*dt));
+ steeringGoal=clampNeedle(steeringGoal+(drift+holdVel)*dt);
  pos+=(steeringGoal-pos)*(-Math.expm1(-response*dt));
  const inGreen=Math.abs(target-pos)<=greenArcWidth/2;
  progress=Math.max(0,Math.min(1,progress+(inGreen ? .24 : -.11)*dt));
@@ -405,7 +407,7 @@ function startCast(){
   localStorage.setItem(quotaKey,JSON.stringify({day:t.day,used:used+1,afterTestRefill:t.day==='2026-11-13'}));
   {const tk=tackle();castFed=tk.feed>0;if(castFed){tk.feed--;setTackle(tk)}}
  }catch{refreshQuota();return}
- phase='wait';time=progress=0;pos=target=steeringGoal=.5;seed=Math.random()*6;renderDial();last=performance.now();renderCatch();el('status').textContent='Watching the float…';el('castLabel').textContent='Line cast';controls();requestAnimationFrame(tick)};
+ phase='wait';time=progress=0;holdVel=0;pos=target=steeringGoal=.5;seed=Math.random()*6;renderDial();last=performance.now();renderCatch();el('status').textContent='Watching the float…';el('castLabel').textContent='Line cast';controls();requestAnimationFrame(tick)};
 el('cast').onclick=()=>navigator.locks ? navigator.locks.request(quotaKey,startCast) : startCast();
 window.addEventListener('storage',refreshQuota);
 setInterval(refreshQuota,1000);
