@@ -8502,3 +8502,25 @@ body[data-screen=games] #stage #main>.mg-hub{width:100%;flex:1 1 auto;min-height
 #stage .pp-cellg.got{opacity:1!important}#stage .pp-cellg.got .pp-gift{opacity:.55}
 .pp-cellg.got .pp-tick{position:absolute;inset:0;display:grid;place-items:center;font-size:30px!important;color:#5ad02a!important;text-shadow:0 0 3px #fff,0 2px 2px #0006;z-index:2;pointer-events:none}
 .pp-cellg .pp-lock{font-size:12px!important;z-index:2}
+/* Splash Party: one clean size system (user: "keep the button sizes consistent, they are huge, one clean style").
+   Round icon buttons: 9cqw (max 52px) everywhere; captions 2.3cqw; one modest gold Start button; passes as slim chips. */
+.pp-room{--ppi:min(9cqw,52px);--ppt:min(2.3cqw,13px)}
+.pp-bar{left:4cqw!important;right:auto!important;gap:3cqw!important;bottom:2.2cqh!important}
+.pp-play .pp-bar{left:auto!important;margin-top:auto;width:auto!important}
+#stage #main .pp-bar button{flex:0 0 auto!important;width:calc(var(--ppi) + 4cqw)}
+.pp-bar i,.pp-play .pp-bar i{width:var(--ppi)!important;height:var(--ppi)!important;font-size:calc(var(--ppi) * .48)!important;box-shadow:0 0 0 2px #ffe9a0aa,0 2px 5px #0005!important}
+.pp-side small,.pp-bar small{font-size:var(--ppt)!important;white-space:nowrap}
+.pp-gifts{top:calc(9cqh + 22cqw)!important;left:4cqw!important}
+.pp-gifts i{width:var(--ppi)!important;height:var(--ppi)!important;font-size:calc(var(--ppi) * .5)!important;box-shadow:0 0 0 2px #ffe9a0aa,0 2px 5px #0005!important}
+#stage #main .pp-help{top:calc(9cqh + 22cqw)!important;right:4cqw!important;width:var(--ppi)!important;height:var(--ppi)!important;font:900 calc(var(--ppi) * .5)/var(--ppi) Arial,sans-serif!important}
+.pp-passes{right:4cqw!important;top:calc(9cqh + 22cqw + var(--ppi) + 4cqh)!important;gap:1cqh!important}
+#stage #main .pp-passes button{width:auto!important;min-width:24cqw;padding:.4cqh 1.6cqw .4cqh .8cqw!important;border-width:1.5px!important;border-radius:2em!important;font-size:var(--ppt)!important}
+.pp-passes img{width:calc(var(--ppi) * .7)!important;height:calc(var(--ppi) * .7)!important}
+#stage #main .pp-start{bottom:calc(2.2cqh + var(--ppi) + 5cqh)!important;padding:.5em 2.2em!important;font-size:min(4.2cqw,24px)!important;border-width:1.5px!important;box-shadow:0 3px 0 #b46a12,0 4px 10px #0004!important}
+.pp-title{font-size:min(8cqw,52px)!important}
+.pp-score{font-size:min(3cqw,17px)!important;padding:.4em 1em!important}
+.pp-top .pp-time,.pp-wallet{font-size:min(2.8cqw,15px)!important}
+#stage #main .pp-item{padding:.8cqw 0 .4cqw!important}.pp-play .pp-item .pp-ico{width:min(9cqw,6cqh)!important}
+#stage #main :is(.pp-bar,.pp-side) button,#stage #main button.pp-side{background:none!important;border:0!important;box-shadow:none!important;outline:0}
+#stage #main .pp-help{background:#1f2f4ccc!important;box-shadow:0 0 0 2px #ffe9a0aa!important}
+.pp-room{--ppi:min(9cqw,60px);--ppt:min(2.3cqw,14px)}
