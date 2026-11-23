@@ -114,7 +114,26 @@ body:not([data-phase=idle]) .tackle{display:none!important}
 footer{z-index:4!important}
 /* Back: the game's painted round back icon instead of the "Mini Games" pill (user crossed the pill out). */
 #exitFishing{width:52px;height:52px;min-height:0!important;padding:0!important;border:0!important;border-radius:50%;background:center/contain no-repeat;box-shadow:none!important;font-size:0!important;color:transparent!important;filter:drop-shadow(0 2px 3px #0007)}
-</style><main><header><div><button type="button" id="exitFishing">‹ Mini Games</button><h1>Moonwater Fishing</h1><span id="best"></span><span id="dailyCasts" style="display:block"></span></div><button id="basket">Fish basket</button></header><details id="cup"><summary id="cupTitle"></summary><ol id="ranks"></ol><p id="cupPrize">First prize · Moonwater Pearl</p></details><div class="lagoon" id="lagoon">
+
+/* Smooth cast / Cast again (user: "make the Cast again change and the cast itself without a jerk"): the tackle shop and
+   the dial share one footer cell and cross-fade, so nothing jumps; the arrows fade in; the float flies from the rod
+   tip to the water on an arc and lands with a splash ring. */
+footer{grid-template-areas:"status" "panel" "controls"}
+footer .status{grid-area:status}.controls{grid-area:controls}
+.tackle,.compass{grid-area:panel;transition:opacity .45s ease,transform .45s ease,visibility 0s linear}
+.tackle{align-self:end}
+body[data-phase=idle] .compass{display:block!important;opacity:0;transform:translateY(14px) scale(.97);visibility:hidden;pointer-events:none;transition:opacity .35s ease,transform .35s ease,visibility 0s linear .35s}
+body:not([data-phase=idle]) .tackle{display:grid!important;opacity:0;transform:translateY(10px);visibility:hidden;pointer-events:none;transition:opacity .3s ease,transform .3s ease,visibility 0s linear .3s}
+.controls button:not([hidden]){animation:fadeUp .35s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}}
+body.casting .float{animation:castArc .85s cubic-bezier(.25,.7,.35,1) both}
+@keyframes castArc{0%{transform:translate(calc(-50% - var(--fx,180px)),calc(-7% - var(--fy,160px))) scale(.55) rotate(-25deg);opacity:.2}
+ 55%{transform:translate(calc(-50% - var(--fx,180px)*.35),calc(-7% - var(--fy,160px)*1.05)) scale(.85) rotate(-8deg);opacity:1}
+ 88%{transform:translate(-50%,-2%) scale(1.04)}100%{transform:translate(-50%,-7%) scale(1)}}
+.splash{position:absolute;left:50%;bottom:8%;width:40%;height:10%;transform:translateX(-50%);border:2px solid #fffffff0;border-radius:50%;animation:splash .7s ease-out forwards;pointer-events:none}
+@keyframes splash{to{width:300%;height:40%;opacity:0}}
+@media(prefers-reduced-motion:reduce){body.casting .float{animation:none}}
+.controls{min-height:clamp(80px,11.6vw,106px);align-items:center}@media(max-height:540px){.controls{min-height:63px}}</style><main><header><div><button type="button" id="exitFishing">‹ Mini Games</button><h1>Moonwater Fishing</h1><span id="best"></span><span id="dailyCasts" style="display:block"></span></div><button id="basket">Fish basket</button></header><details id="cup"><summary id="cupTitle"></summary><ol id="ranks"></ol><p id="cupPrize">First prize · Moonwater Pearl</p></details><div class="lagoon" id="lagoon">
  <div class="lake" id="lake"><i class="glint"></i><i class="glint g2"></i></div><div class="water"></div><div id="folkRow"></div><img class="reina-angler" id="reinaAngler" alt="Reina fishing" draggable="false"><svg class="line" id="lineSvg" aria-hidden="true"><path id="linePath" fill="none" stroke="#fff4cd" stroke-width="1.6"/></svg>
  <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M3 100 Q18 31 34 10" fill="none" stroke="#d9b36c" stroke-width="3" vector-effect="non-scaling-stroke"/><path d="M34 10 Q43 39 57 51" fill="none" stroke="#fff4cd" stroke-width="1.3" vector-effect="non-scaling-stroke"/></svg>
  <div class="float" id="float" role="progressbar" aria-label="Catch progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
@@ -397,6 +416,15 @@ function tick(now){
  }
  requestAnimationFrame(tick)
 }
+
+// The float flies from the rod tip to its spot on the water; the line follows every frame while it flies.
+function castFlight(){
+ const R=el('reinaAngler').getBoundingClientRect(),F=lakeFloat.getBoundingClientRect();
+ if(R.width&&F.width){lakeFloat.style.setProperty('--fx',Math.max(60,F.left+F.width/2-(R.left+R.width*ROD.reina[0]))+'px');lakeFloat.style.setProperty('--fy',Math.max(40,F.top-(R.top+R.height*ROD.reina[1]))+'px')}
+ document.body.classList.remove('casting');void document.body.offsetWidth;document.body.classList.add('casting');
+ const t0=performance.now();(function follow(now){drawLine();if(now-t0<900)requestAnimationFrame(follow);else{document.body.classList.remove('casting');drawLine();
+  const sp=document.createElement('span');sp.className='splash';lakeFloat.appendChild(sp);setTimeout(()=>sp.remove(),750)}})(t0);
+}
 function startCast(){
  if(phase!=='idle')return;
  const t=eventTime();
@@ -407,7 +435,7 @@ function startCast(){
   localStorage.setItem(quotaKey,JSON.stringify({day:t.day,used:used+1,afterTestRefill:t.day==='2026-11-13'}));
   {const tk=tackle();castFed=tk.feed>0;if(castFed){tk.feed--;setTackle(tk)}}
  }catch{refreshQuota();return}
- phase='wait';time=progress=0;holdVel=0;pos=target=steeringGoal=.5;seed=Math.random()*6;renderDial();last=performance.now();renderCatch();el('status').textContent='Watching the float…';el('castLabel').textContent='Line cast';controls();requestAnimationFrame(tick)};
+ castFlight();phase='wait';time=progress=0;holdVel=0;pos=target=steeringGoal=.5;seed=Math.random()*6;renderDial();last=performance.now();renderCatch();el('status').textContent='Watching the float…';el('castLabel').textContent='Line cast';controls();requestAnimationFrame(tick)};
 el('cast').onclick=()=>navigator.locks ? navigator.locks.request(quotaKey,startCast) : startCast();
 window.addEventListener('storage',refreshQuota);
 setInterval(refreshQuota,1000);
