@@ -177,7 +177,8 @@ Feed (300 gold for 3 portions; a cast with feed picks species with exponent 1 in
 Optional save field `S.fishTackle {worms, feed}` (validated in `valid()`); the iframe reaches the live save through
 `fishSave()` in `app.js` (`S` is a `let`, not a window property). Icons `comp-fish-tackle` from
 `art-source/fishing/tackle.png` (`build-fishing-anglers.py`). The "‹ Mini Games" pill is now the painted round back
-icon (`ui-back`, user crossed the pill out).
+icon (`ui-back`, user crossed the pill out). Smoother pendulum: `response` 6, `tapDistance` .045, a held arrow eases in
+(`holdVel`), calmer drift and green band (a simple bot still lands every fish).
 
 ## Pet Siege event (2026-11-23)
 User sent twelve photos of the reference's pet siege (no text). Home promo "Pet Siege" opens screen `siege`
