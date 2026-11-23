@@ -14,7 +14,7 @@ const Party = {
     ['d15', 'Frostglass'], ['d22', 'Venomfrill'], ['d27', 'Bloomwing'], ['d36', 'Pearl Seraph'], ['d43', 'Starborn']],
   points(tier) { return 10 * tier; },           // making a tier-n pet: +10 x n (tier 2 = +20, as in the reference's gallery)
   eventDays: 7, anchor: Date.UTC(2026, 10, 23),
-  staminaMax: 100, regenMs: 5 * 60e3, potionStamina: 5,
+  staminaMax: 200, regenMs: 5 * 60e3, potionStamina: 5,
   itemIds: ['fire', 'cake', 'wand', 'potion'],
   items: { fire: { name: 'Party Fireworks', text: 'Clears every pet of the lowest tier on the board.' },
     cake: { name: 'Party Cake', text: 'Turns every tier 1 pet on the board into tier 2.' },
