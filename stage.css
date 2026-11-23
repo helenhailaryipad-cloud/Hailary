@@ -8616,3 +8616,9 @@ body[data-screen=games] #stage>:is(header,nav,footer),body[data-screen=games] .r
 body[data-screen=games] #stage>#main{inset:0!important;width:100%;height:100%;padding:0!important}
 body[data-screen=games] .mg-hub{padding:max(10px,env(safe-area-inset-top)) 10px 10px}
 body[data-screen=games] .mg-head{gap:12px}
+/* Hub in a narrow centred column (user: "not across the full width"): three tiles a row, at most 560 px wide. */
+body[data-screen=games] #stage #main>.mg-hub{width:min(560px,100%)!important;margin:0 auto;flex:0 1 auto}
+body[data-screen=games] .mg-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important}
+body[data-screen=games] .mg-tile b{font-size:clamp(13px,3.4cqw,17px)!important}
+body[data-screen=games] .mg-tile :is(small,em){font-size:clamp(10px,2.3cqw,12px)!important}
+@media(max-height:760px){body[data-screen=games] .mg-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important}body[data-screen=games] .mg-tile b{font-size:clamp(11px,2.8cqw,15px)!important;white-space:nowrap}body[data-screen=games] .mg-tile :is(small,em){font-size:clamp(9px,2cqw,11px)!important}}
