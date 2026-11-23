@@ -146,6 +146,12 @@ global `#main button` rules set position, borders and `::before`.
   the dragon (`cover-jungle`, source `art-source/trek/cover.webp`). Hosted bundle: AVIF copies of crownfall-vale,
   cloud-war-twin-islands and cloud-war-realms-2 were re-saved at quality 34 (headroom ~180 KB).
 
+## Mini Games hub (2026-11-23)
+User: "all games in one place, names on the main field, not hunted through sub-tabs". The bottom-nav tab is called
+Mini Games; `games()` in `app.js` draws `.mg-hub`: one tile per game from `MINI_GAMES` (cover, name, line, best
+result; a tap opens the game), 4 columns (3 on tall screens), no sub-tab strip on that screen (hidden in CSS). The old
+portal layout is kept as `gamesOld()` (unused). A new game only needs a row in `MINI_GAMES`.
+
 ## Splash Party event mini-game (2026-11-23)
 User sent eleven photos of the reference's "Pet Party" event ("add this one too"). Original name and art, same
 mechanics. Mini Games card + sub-nav tab, screen id `party`, `src/party.js` (rules `Party`, pure, `node
