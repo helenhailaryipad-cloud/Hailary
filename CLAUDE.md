@@ -243,8 +243,10 @@ that said "GodGacha" (a reference name) is now "Star Rites".
   in `PREMIUM_LOOKS`, never sold for gold, `RITE_WINGS` names the rite in the note); four auras (`comp-rites-aura-<id>`,
   copies raise the tier to T5, all owned auras give stats, the worn one glows under her feet on the home screen,
   `img.rite-aura`); ten Wish Orbs (collection, set bonuses at 4 / 7 / 10). Stats through `Rites.bonus` in `stats()`.
-  Repeats become stardust (Dust Shop: tickets or an orb of choice). Rite Shop: seven 500-ticket packs per rite for
-  prisms and a 1:1 prism exchange; real money is not built. Welcome gift 1,000 tickets of the running rite.
+  Repeats become stardust (Dust Shop: tickets or an orb of choice). Rite Shop: nine 500-ticket packs per rite for
+  50, 100 ... 450 prisms (once each, like the reference's Secret Shop) and a 1:1 prism exchange.
+- MONETIZATION RULE (user): gacha tickets are never sold for real money directly. Tickets are bought only with prisms
+  (the player's choice); real-money packs (later) sell prisms, with tickets and items only as a bonus inside them. Welcome gift 1,000 tickets of the running rite.
 - Optional save field `S.rites {t, auras, aura, orbs, dust, ev{period,pulls,luck,got,picks,grand,packs,free}}`
   (`Rites.valid` from `valid()`). Art (image model): `art-source/rites/` + `art-source/wings/wing-28..31.webp`, built by
   `scripts/build-rites-art.py` (wings, auras, hall backgrounds `comp-rites-bg-<id>`, icon atlas `comp-rites-icons`:
