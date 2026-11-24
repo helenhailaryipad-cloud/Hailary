@@ -298,7 +298,12 @@ the round back button. Tab in `vowTab`; the room's class is `vw-tab-<tab>` (do n
   head with petals, Reina ♥ partner portraits, cards with a portrait in a gold ring, intimacy hearts and a tagline
   (`VOW_TAGS`), segmented tabs, painted gift cards with a tick, a lined note field, a stepper and a gold Send button that
   names the points it earns.
-- Not done: Bond Transfer, a real parade with other couples, blessings / wishes in the venue, the reference's outfit
+- Sub-tabs as pop-ups (user: "some say coming soon, some change the page; make them consistent"): Partner Bond
+  (`vowBondPop`: pair, intimacy hearts, Love Lock bar, stats, Send the Oath), Bond Transfer (`vowTransferPop`,
+  `Vow.transfer`: once per event week, 30 heart crystals or 120 prisms, `transferCost`; today's points stay, the new
+  bond starts at 0; optional `S.vow.moved`), Bond Gift (`vowShopPop`, `vowBuyPop`) and Bond Reward (`vowRewards`), all
+  `.vp` cards (`vpHead`, `vpPair`). The old full-page Bond and Shop views are gone (`vowGo('bond'|'shop')` opens the pop-up).
+- Not done: a real parade with other couples, blessings / wishes in the venue, the reference's outfit
   and weapon-skin rank prizes (rewards are gifts, crystals and bag items), Nearby / Cross-Server players (nobody there).
   All numbers are placeholders.
 

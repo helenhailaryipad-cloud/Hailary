@@ -1123,7 +1123,7 @@ vm.runInContext(`
  vowFindPop('Friends');vowFindPop('Guild');vowFindPop('Nearby');vowAccept('kael');if(S.vow.partner!=='kael')throw Error('Vow partner');vowAccept('nyra');if(S.vow.partner!=='kael')throw Error('One partner per event');
  vowSendPop();vowPick('rose');vowSel.to='kael';vowSend();if(S.vow.gifts.rose!==Vow.freeRoses-1||!(S.vow.lock>0)||!(WonderGear.socialState(S).hearts.kael>0)||!valid(S))throw Error('Vow send');
  if(!Vow.closed(Date.now())&&!(Vow.score(S.vow)>0))throw Error('Mutual gifts score');
- vowRewards();vowRules();vowItem('ring');for(const t of ['goal','ceremony','test','witness','bond','shop','venue','main'])vowGo(t);
+ vowRewards();vowRules();vowItem('ring');for(const t of ['goal','ceremony','test','witness','bond','shop','venue','main'])vowGo(t);vowBondPop();vowShopPop();vowTransferPop();vowMoveTo='orin';S.vow.crystal=(S.vow.crystal||0)+Vow.transferCost.crystal;vowTransfer('crystal');if(S.vow.partner!=='orin'||!S.vow.moved||!valid(S))throw Error('Bond Transfer');vowMoveTo='pip';vowTransfer('crystal');if(S.vow.partner!=='orin')throw Error('Transfer once per event');S.vow.partner='kael';delete S.vow.moved;
  S.scales=1000;vowBuy('p1');if(!(S.vow.crystal>=10)||S.scales!==1000-Vow.packs[0].price||!valid(S))throw Error('Vow pack');vowBuy('rose');
  if(Vow.score(S.vow)>=Vow.goals[0].at){vowClaimGoal(0);if(!S.vow.goal.includes(0))throw Error('Oath Goal')}
  if(!vowDrop()||!(S.vow.drops===1))throw Error('Vow dungeon drop');
