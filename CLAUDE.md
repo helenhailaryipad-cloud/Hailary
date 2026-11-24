@@ -837,6 +837,14 @@ territory windows with ten defenders and the fight; defenders never came back an
   `cloudNewRound`). Until taken, a SMALL (20 px, user: "it is small and shows the city is taken") bobbing chest (cut from `comp-bag-items` with the SVG clip `#cloudChestClip`)
   floats above the city on the map; tapping it (`cloudOwnClaim`) or the city window's "Ownership Reward" button pays
   into the bag. Nested `<svg viewBox>` did not clip there, use the clip path.
+- Timed background fights (2026-11-24, user: "each fight about a minute, auto, you can see Reina fighting, and I can
+  leave to the menus instead of only watching"): a fight lasts `CLOUD_FIGHT` seconds (Guard 45, Elite 60, Boss 75; less
+  for a hurt defender) on a wall clock (`cloudBattle {index,slot,role,hp0,start,dur}`); `cloudFightTick` (1 s interval,
+  any screen) settles it (`cloudFightSettle`: hits, Carnage, loot) and, with Auto next, starts the next one after the
+  loot (`CLOUD_LOOT_MS`) and the ride (`cloudRideMs`). `cloudBattleView` only draws: Reina's volleys, her three pets'
+  bolts, the defender's orbs, damage numbers, HP and time left; Celestial Arrow takes 4 s off (8 s cooldown). Buttons:
+  Leave · keeps fighting (back to the city, fight goes on), Stop (`cloudFightStop(true)` keeps the damage done). On other
+  screens a pill (`#cloudPill`, `cloudPill`) shows the fight; tapping it returns to the view. Not saved across a reload.
 - Not done: Cloud Hunt, buying extra Carnage, Bizarre Lands, other players' damage shares on the boss bar.
 
 ## Social room: chat, friends, mail (2026-11-21)

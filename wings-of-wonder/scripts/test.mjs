@@ -1102,6 +1102,15 @@ vm.runInContext(`
  go('home');if(!$('#main').innerHTML.includes("go('cityTrail')"))throw Error('Daily opens Wayfarer Quests');if(!valid(S))throw Error('valid');}
 `,context);
 console.log('PASS: Wayfarer Quests: tasks, Silver / Gold / Diamond free tabs, claims, spending and wheel counters, chest track, vouchers, Daily button.');
+vm.runInContext(`
+{S=defaults();go('cloudWar');const idx=cloudMine*6+1;cloudStrike(idx,0);if(!cloudBattle||cloudBattle.index!==idx||!$('#main').innerHTML.includes('Leave · keeps fighting'))throw Error('Cloud fight view');
+ const role0=cloudPortalSlots[0][0];if(Math.abs(cloudBattle.dur-CLOUD_FIGHT[role0]*1000)>1)throw Error('A full fight lasts CLOUD_FIGHT[role]');
+ go('home');cloudPill();if(!cloudBattle||cloudBattle.done)throw Error('The fight keeps running on other screens');
+ cloudBattle.start-=cloudBattle.dur+10;cloudFightTick();if(!cloudBattle.done||cloudDamage(idx,0)<cloudEnemyHealth[role0]||!(WonderGear.cloudState(S).carnage>0))throw Error('Fight settles in the background');
+ cloudBattle.doneAt-=CLOUD_LOOT_MS+10;cloudFightTick();if(cloudAutoNext&&(!cloudBattle||cloudBattle.slot===0))throw Error('Auto next rides on');
+ const b=cloudBattle;b.start=Date.now()-b.dur/2;cloudFightStop(true);if(cloudBattle||!(cloudDamage(idx,b.slot)>0))throw Error('Stop keeps the damage');if(!valid(S))throw Error('valid after cloud fights');}
+`,context);
+console.log('PASS: Cloud War timed fights: view, background settle, pill, auto next, stop keeps damage.');
 
 vm.runInContext(`
 {S=defaults();go('siege');let h=$('#main').innerHTML;if(!h.includes('Dragon Keep')||!S.siege||!valid(S))throw Error('Pet Siege map');
