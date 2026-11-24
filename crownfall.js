@@ -20,7 +20,7 @@ function createVale(stage=0){
 function upgradeVale(g,index,side){
  const k=g.keeps[index];if(g.ended||!k||k.side!==side||k.tier>=3)return false;
  const cost=k.tier===1?8:16;if(k.n<cost+1)return false;
- k.n-=cost;k.tier++;k.pulse=.65;return true;
+ k.n-=cost;k.tier++;k.pulse=.65;valeFx(g,'upgrade',k.x,k.y-10,side,'Tier '+['I','II','III'][k.tier-1]+'!');return true;
 }
 function playerUpgradeVale(){
  if(game?.kind==='vale'&&!gamePaused)upgradeVale(game,game.selected,1);
@@ -34,6 +34,41 @@ function valeChips(g,x,y){
  if(!motionAllowed()||g.chips.length>=96)return;
  for(let i=0;i<4;i++)g.chips.push({x,y,vx:(Math.random()-.5)*110,vy:-30-Math.random()*65,age:0,spin:Math.random()*6});
 }
+// Battle effects (render only): flashes, rings, rays, sparks and floating words. g.fx entries live VALE_FX[kind].life s.
+const VALE_FX={send:{life:.55},clash:{life:.45},capture:{life:1.3},upgrade:{life:1.1},zap:{life:.3}};
+const VALE_RGB=['230,220,190','80,235,190','255,95,120'];
+function valeFx(g,kind,x,y,side,text){
+ if(!motionAllowed())return;(g.fx||(g.fx=[])).push({kind,x,y,side,text,t0:g.clock});if(g.fx.length>60)g.fx.shift();
+ const n={send:6,clash:9,capture:28,upgrade:16,zap:5}[kind];g.sparks||(g.sparks=[]);
+ for(let i=0;i<n&&g.sparks.length<260;i++){const a=Math.random()*Math.PI*2,v=(kind==='capture'?90:50)+Math.random()*(kind==='capture'?170:90);
+  g.sparks.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-(kind==='upgrade'?80:30),age:0,life:.45+Math.random()*.5,rgb:kind==='upgrade'?'255,220,120':VALE_RGB[side]||VALE_RGB[0],r:1.6+Math.random()*2.2});}
+}
+function drawValeFx(c,g){
+ c.save();c.globalCompositeOperation='lighter';
+ for(const f of g.fx||[]){
+  const age=g.clock-f.t0,life=VALE_FX[f.kind].life,k=age/life;if(k<0||k>1)continue;const rgb=f.kind==='upgrade'?'255,215,120':VALE_RGB[f.side]||VALE_RGB[0],fade=1-k;
+  if(f.kind==='send'){c.strokeStyle=`rgba(${rgb},${.8*fade})`;c.lineWidth=3*fade+1;c.beginPath();c.ellipse(f.x,f.y+4,18+46*k,6+15*k,0,0,7);c.stroke();softLight(c,f.x,f.y-14,40,rgb,.5*fade);}
+  if(f.kind==='clash'||f.kind==='zap'){const r=(f.kind==='zap'?16:30)*(.4+k);softLight(c,f.x,f.y,r*1.6,f.kind==='zap'?'190,130,255':'255,235,180',fade);
+   c.strokeStyle=`rgba(255,250,230,${fade})`;c.lineWidth=2.4;c.beginPath();for(let i=0;i<4;i++){const a=i*Math.PI/4+f.t0*3;c.moveTo(f.x-Math.cos(a)*r,f.y-Math.sin(a)*r);c.lineTo(f.x+Math.cos(a)*r,f.y+Math.sin(a)*r);}c.stroke();}
+  if(f.kind==='capture'){
+   const pillar=c.createLinearGradient(0,f.y-170,0,f.y+20);pillar.addColorStop(0,`rgba(${rgb},0)`);pillar.addColorStop(.7,`rgba(${rgb},${.55*fade})`);pillar.addColorStop(1,`rgba(255,255,255,${.7*fade})`);
+   c.fillStyle=pillar;const w=34*(1-k*.5);c.fillRect(f.x-w/2,f.y-170,w,190);
+   c.save();c.translate(f.x,f.y-10);c.rotate(age*1.4);for(let i=0;i<12;i++){c.rotate(Math.PI/6);c.fillStyle=`rgba(${rgb},${.35*fade})`;c.beginPath();c.moveTo(0,-6);c.lineTo(90+60*k,-2);c.lineTo(90+60*k,2);c.lineTo(0,6);c.fill();}c.restore();
+   for(const d of [0,.18]){const kk=Math.max(0,k-d)/(1-d);c.strokeStyle=`rgba(${rgb},${.9*(1-kk)})`;c.lineWidth=5*(1-kk)+1;c.beginPath();c.ellipse(f.x,f.y+6,20+110*kk,7+36*kk,0,0,7);c.stroke();}
+   softLight(c,f.x,f.y-16,120*(1-k*.4),rgb,fade);if(k<.25)softLight(c,f.x,f.y-16,70,'255,255,255',1-k*4);}
+  if(f.kind==='upgrade'){for(const d of [0,.25]){const kk=Math.max(0,k-d)/(1-d);c.strokeStyle=`rgba(255,220,120,${1-kk})`;c.lineWidth=3;c.beginPath();c.ellipse(f.x,f.y+4-60*kk,40-10*kk,13-3*kk,0,0,7);c.stroke();}softLight(c,f.x,f.y-30,70,'255,215,120',fade);}
+ }
+ for(const p of g.sparks||[]){const fade=1-p.age/p.life;softLight(c,p.x,p.y,p.r*5,p.rgb,fade*.8);c.fillStyle=`rgba(255,255,255,${fade})`;c.beginPath();c.arc(p.x,p.y,p.r*.7,0,7);c.fill();}
+ c.restore();
+ for(const f of g.fx||[]){if(!f.text)continue;const age=g.clock-f.t0,life=VALE_FX[f.kind].life,k=age/life;if(k<0||k>1)continue;
+  const sc=k<.15?.6+k/.15*.5:1.1-(k-.15)*.12;c.save();c.translate(f.x,f.y-70-40*k);c.scale(sc,sc);c.globalAlpha=k>.7?(1-k)/.3:1;c.textAlign='center';c.font='bold 26px WonderStory';c.lineWidth=5;c.strokeStyle='#2a1406';c.strokeText(f.text,0,0);
+  c.fillStyle=f.kind==='upgrade'?'#ffe08a':f.side===1?'#bfffe8':'#ffd0d8';c.fillText(f.text,0,0);c.restore();}
+}
+function tickValeFx(g,dt){
+ for(const p of g.sparks||[]){p.age+=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=140*dt;p.vx*=.97;}
+ if(g.sparks)g.sparks=g.sparks.filter(p=>p.age<p.life);
+ if(g.fx)g.fx=g.fx.filter(f=>g.clock-f.t0<VALE_FX[f.kind].life);
+}
 function tickValeTowers(g,dt){
  for(const k of g.keeps){
   if(k.type!=='tower'||!k.side)continue;
@@ -46,7 +81,7 @@ function tickValeTowers(g,dt){
  for(const shot of g.shots){
   shot.age+=dt;
   if(shot.age>=.2&&!shot.target.dead){
-   shot.target.dead=true;const p=unitPosition(g,shot.target);valeChips(g,p.x,p.y-8);
+   shot.target.dead=true;const p=unitPosition(g,shot.target);valeChips(g,p.x,p.y-8);valeFx(g,'zap',p.x,p.y-10,shot.target.side);
   }
  }
  g.shots=g.shots.filter(s=>s.age<.2);
@@ -56,6 +91,7 @@ function orderVale(g,from,to,side){
  if(g.ended||!home||!dest||home===dest||home.side!==side||home.n<2)return false;
  const count=Math.floor(home.n/2),distance=Math.hypot(dest.x-home.x,dest.y-home.y);
  home.n-=count;
+ valeFx(g,'send',home.x,home.y,side);
  for(let i=0;i<count;i++)g.units.push({from,to,side,age:-Math.floor(i/3)*.14,travel:distance/82,lane:(i%3-1)*5});
  return true;
 }
@@ -82,17 +118,17 @@ function advanceVale(g,dt){
   });
   if(best)orderVale(g,best.i,best.j,2);
  }
- tickValeTowers(g,dt);
+ tickValeTowers(g,dt);tickValeFx(g,dt);
  for(const p of g.chips){p.age+=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=200*dt;}
  g.chips=g.chips.filter(p=>p.age<.38);
  g.units=g.units.filter(u=>{
   if(u.dead)return false;
   u.age+=dt;if(u.age<u.travel||u.marked)return true;
   const k=g.keeps[u.to];
-  if(k.side!==u.side&&k.hit<.10){k.hit=.25;valeChips(g,k.x,k.y-23);}
+  if(k.side!==u.side&&k.hit<.10){k.hit=.25;valeChips(g,k.x,k.y-23);valeFx(g,'clash',k.x+(Math.random()-.5)*30,k.y-26,u.side);}
   if(k.side===u.side)k.n++;
   else if(k.n>0)k.n--;
-  else {k.side=u.side;k.n=1;k.recruit=0;k.pulse=.8;}
+  else {const lost=k.side===1;k.side=u.side;k.n=1;k.recruit=0;k.pulse=.8;valeFx(g,'capture',k.x,k.y-6,u.side,u.side===1?'Captured!':lost?'Lost!':'Taken!');}
   return false;
  });
  if(g.selected>=0&&g.keeps[g.selected].side!==1){g.selected=-1;g.aim=null;}
@@ -109,6 +145,7 @@ function drawVale(){
   const a=g.keeps[u.from],b=g.keeps[u.to],t=u.age/u.travel,dx=b.x-a.x,dy=b.y-a.y,d=u.travel*82;
   const x=a.x+dx*t-u.lane*dy/d,y=a.y+dy*t+u.lane*dx/d;
   const bob=motionAllowed()?2*Math.abs(Math.sin(12*u.age+u.lane)):0;
+  softLight(c,x,y-6,15,VALE_RGB[u.side],.45);
   c.save();c.translate(x,y);if((dx<0)===(u.side===1))c.scale(-1,1);
   drawArtSprite(c,u.side===1?'lancer-jade':'lancer-ruby',0,-bob,23,27);c.restore();
  }
@@ -128,21 +165,29 @@ function drawVale(){
   c.lineWidth=s.arcane?4:2.6;c.beginPath();c.moveTo(-14,0);c.lineTo(2,0);c.stroke();
   c.fillStyle=s.arcane?'#fff4ff':'#ffe2a1';c.beginPath();c.moveTo(5,0);c.lineTo(-2,-3);c.lineTo(-2,3);c.fill();c.restore();
  }
+ drawValeFx(c,g);
  for(const p of g.chips){c.save();c.translate(p.x,p.y);c.rotate(p.spin+p.age*7);c.globalAlpha=1-p.age/.38;c.fillStyle=p.spin>3?'#ffde95':'#8a5937';c.fillRect(-3,-1,7,2);c.restore();}
 
 }
+// Stars for a won level by time (seconds): under VALE_STARS[0] three, under VALE_STARS[1] two, else one. Placeholders.
+const VALE_STARS=[90,150];
 function endVale(won){
  const g=game;if(!g||g.kind!=='vale'||g.ended)return;
  g.running=false;g.ended=true;g.aim=null;
  if(won)S.valeChapter=Math.max(S.valeChapter||0,Math.min(VALE_MAPS.length-1,g.stage+1));
- const next=won&&g.stage+1<VALE_MAPS.length?'<button class="primary" onclick="replayVale('+ (g.stage+1) +')">Next level · '+VALE_MAPS[g.stage+1].name+'</button>':'';
- const xp=won?gain(450,85,70).xp:0;
- modal((won?artImage('vale-crown','Victory crown','vale-victory-crown'):'')+'<h2>'+(won?'The vale is yours':'The campaign has ended')+'</h2>'+(won?'<p>450 gold · 85 wishes · '+xp+' XP</p>':'')+next+'<button onclick="replayVale('+g.stage+')">Replay level</button><button onclick="$(\'#modal\').close();openScreen(\'games\')">Mini Games</button>');
+ const xp=won?gain(450,85,70).xp:0,t=Math.round(g.clock),stars=won?(t<VALE_STARS[0]?3:t<VALE_STARS[1]?2:1):0;
+ const held=g.keeps.filter(k=>k.side===1).length,tile=(icon,n,name,hue,i)=>`<span class="wr-prize" style="--rarity:${hue};--d:${1.4+i*.15}s">${icon}<b>${n}</b><small>${name}</small></span>`;
+ const buttons=[];if(won&&g.stage+1<VALE_MAPS.length)buttons.push(['Next level','gold','replayVale('+(g.stage+1)+')']);
+ buttons.push(['Replay',won&&buttons.length?'violet':'gold','replayVale('+g.stage+')'],['Mini Games','violet',"openScreen('games')"]);
+ resultShow({win:won,title:won?'Victory!':'Defeat',kicker:'Level '+(g.stage+1)+' · '+VALE_MAPS[g.stage].name,stars,
+  body:(won?artImage('vale-crown','Victory crown','wr-crown'):'')+`<p class="wr-line">Time ${Math.floor(t/60)}:${String(t%60).padStart(2,'0')} · Buildings held ${held} / ${g.keeps.length}${won?' · ★★★ under '+VALE_STARS[0]+' s':''}</p>`+
+   (won?`<div class="wr-prizes">${tile(uiIcon('gold'),'+450','Gold','#ffcf5a',0)}${tile(uiIcon('wishes'),'+85','Wishes','#ff9ad8',1)}${tile(uiIcon('exp'),'+'+xp,'XP','#8fd0ff',2)}</div>`:'<p class="wr-practice">The ruby army holds the vale. Try another route!</p>'),
+  buttons});
 }
-function replayVale(stage){valeReplay=stage;$('#modal').close();openScreen('vale');}
+function replayVale(stage){valeReplay=stage;$('#modal').close?.();openScreen('vale');}
 function startVale(){
  const stage=valeReplay??S.valeChapter??0;valeReplay=null;
- gameShell('Crownfall Vale','Level '+(stage+1)+' · '+VALE_MAPS[stage].name,'<p id="valeStatus" aria-live="polite"></p><button id="valeUpgrade" onclick="playerUpgradeVale()">Upgrade</button>');
+ gameShell('Crownfall Vale','Level '+(stage+1)+' · '+VALE_MAPS[stage].name,'<p id="valeStatus" aria-live="polite"></p><button id="valeUpgrade" class="idle" disabled onclick="playerUpgradeVale()">Choose your building to upgrade</button>');
  game=createVale(stage);$('#gameHelp').textContent=VALE_HELP;
  const canvas=$('#game'),g=game;let pointer=null;
  const point=e=>{const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)*720/r.width,y:(e.clientY-r.top)*520/r.height};};
@@ -164,9 +209,9 @@ function startVale(){
  gameLoop(dt=>{
   const result=advanceVale(g,dt);
   const k=g.keeps[g.selected],btn=$('#valeUpgrade'),cost=k?.tier===1?8:16;
-  btn.hidden=!k;btn.disabled=!k||k.tier===3||k.n<=cost;
-  if(k)paintGameHTML('#valeUpgrade',k.tier===3?'Fully upgraded':'Upgrade · '+cost+' troops');
-  paintGameHTML('#valeStatus',k?VALE_ROLES[k.type]+' · Tier '+k.tier+' / 3 · '+({castle:'Large garrison',village:'Fast recruitment',tower:'Fires on passing enemies'}[k.type]):'Drag to march · Tap your building to upgrade');
+  btn.disabled=!k||k.tier===3||k.n<=cost;btn.classList.toggle('idle',!k);
+  paintGameHTML('#valeUpgrade',!k?'Choose your building to upgrade':k.tier===3?'Fully upgraded':'Upgrade · '+cost+' troops');
+  paintGameHTML('#valeStatus',k?VALE_ROLES[k.type]+' · Tier '+k.tier+' / 3 · '+({castle:'Large garrison',village:'Fast recruitment',tower:'Fires on passing enemies'}[k.type]):'Drag to march · tap yours to upgrade');
   paintGameHTML('#hud','<strong>Lv. '+(stage+1)+' · '+VALE_MAPS[stage].name+'</strong><strong>Jade '+g.keeps.filter(k=>k.side===1).length+' · Ruby '+g.keeps.filter(k=>k.side===2).length+'</strong>');
   if(result)endVale(result===1);
  },drawVale);

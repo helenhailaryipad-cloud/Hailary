@@ -133,12 +133,23 @@ function openCascade() { if (typeof screenChangedAt !== "undefined") screenChang
       <div class="cas-col"><div class="cas-stat cas-nextbox"><small>Next</small><canvas id="casNext"></canvas></div>
         <div class="cas-stat"><small>Chests</small><div class="cas-chests">${Cascade.chests.map((c, i) => `<span id="casChest${i}"><i class="cas-chest c${i}"></i><b>${fmt(c.at)}</b></span>`).join('')}</div></div></div>
     </div>
-    <div class="cas-pad">${[['left', 0, 'Move left'], ['rot', 1, 'Turn'], ['hard', 2, 'Drop'], ['soft', 4, 'Fall faster'], ['right', 3, 'Move right']].map(([act, n, label]) => `<button data-act="${act}" class="${act === 'hard' ? 'drop' : ''}" style="--bp:${casBp(n)}" aria-label="${label}">${denPlain}</button>`).join('')}</div>
+    <div class="cas-pad">${[['left', 0, 'Move left', 'Left'], ['rot', 1, 'Turn', 'Turn'], ['hard', 2, 'Drop', 'Drop'], ['soft', 4, 'Fall faster', 'Faster'], ['right', 3, 'Move right', 'Right']].map(([act, n, label, cap]) => `<div class="cas-key"><button data-act="${act}" class="${act === 'hard' ? 'drop' : ''}" style="--bp:${casBp(n)}" aria-label="${label}">${denPlain}</button><small>${cap}</small></div>`).join('')}</div>
+    <div class="cas-menu" id="casMenu" hidden></div>
   </section>`;
   startCascade();
 }
-function cascadePause() { const g = game; if (!g?.cascade || g.state.over) return; g.paused = !g.paused; $('#casPause').style.setProperty('--bp', casBp(g.paused ? 6 : 5)); $('#casWell')?.classList.toggle('paused', g.paused); }
-function cascadeQuit() { const g = game; if (g?.cascade && !g.state.over && g.state.score > 0) { if (!confirm('Leave this run? It counts as finished.')) return; cascadeFinish(g, true); return; } cascadeStop(); showCascade(); }
+// Pause and leave use one card over the well (no browser confirm(): the chat preview blocks it, so Back did nothing).
+function cascadePause(force) { const g = game; if (!g?.cascade || g.state.over || g.done) return; g.paused = force ?? !g.paused; $('#casPause')?.style.setProperty('--bp', casBp(g.paused ? 6 : 5)); $('#casWell')?.classList.toggle('paused', g.paused); cascadeMenu(g.paused ? 'pause' : ''); }
+function cascadeMenu(kind) {
+  const m = $('#casMenu'); if (!m) return; m.hidden = !kind; if (!kind) return;
+  const b = (t, c, js) => `<button class="wr-btn ${c}" onclick="${js}">${denPlain}<span>${t}</span></button>`;
+  m.innerHTML = kind === 'leave'
+    ? `<div class="cas-menucard"><h2>Leave this run?</h2><p>Your score so far counts as a finished run.</p>${b('Keep playing', 'gold', 'cascadePause(false)')}${b('Leave', 'violet', 'cascadeLeave()')}</div>`
+    : `<div class="cas-menucard"><h2>Paused</h2>${b('Resume', 'gold', 'cascadePause(false)')}${b('Restart', 'violet', 'cascadeRestart()')}${b('Lobby', 'violet', 'cascadeQuit()')}</div>`;
+}
+function cascadeQuit() { const g = game; if (g?.cascade && !g.done && !g.state.over && g.state.score > 0) { g.paused = true; $('#casPause')?.style.setProperty('--bp', casBp(6)); $('#casWell')?.classList.add('paused'); cascadeMenu('leave'); return; } cascadeStop(); showCascade(); }
+function cascadeLeave() { const g = game; cascadeMenu(''); if (g?.cascade && !g.done) { cascadeFinish(g, true); return; } cascadeStop(); showCascade(); }
+function cascadeRestart() { const g = game; cascadeMenu(''); if (g?.cascade && !g.done && g.state.score > 0) { cascadeMenu('leave'); return; } openCascade(); }
 function cascadeKey(e) {
   const g = game; if (!g?.cascade || g.state.over) return; const k = e.key;
   if (k === 'ArrowLeft') cascadeAct('left'); else if (k === 'ArrowRight') cascadeAct('right'); else if (k === 'ArrowUp' || k === 'x') cascadeAct('rot');
@@ -317,7 +328,7 @@ function cascadeDraw(g, canvas, next, tiles, dt) {
   s.queue.slice(0, 3).forEach((kind, i) => { const cells = Cascade.cells(kind, 0), minX = Math.min(...cells.map(p => p[0])), maxX = Math.max(...cells.map(p => p[0])), minY = Math.min(...cells.map(p => p[1])), w = (maxX - minX + 1) * nk;
     for (const [cx, cy] of cells) cascadeGem(n, tiles, kind, (next.width - w) / 2 + (cx - minX) * nk, i * nk * 3.2 + (cy - minY) * nk + nk * .3, nk); });
   $('#casScore').textContent = fmt(s.score); $('#casLevel').textContent = s.level; $('#casLines').textContent = s.lines; const lb = $('#casLvBar'); if (lb) lb.style.width = (s.lines % Cascade.linesPerLevel) / Cascade.linesPerLevel * 100 + '%';
-  if (g.paused) { c.setTransform(1, 0, 0, 1, 0, 0); c.fillStyle = 'rgba(10,6,30,.6)'; c.fillRect(0, 0, canvas.width, canvas.height); c.fillStyle = '#ffe9a0'; c.font = `900 ${k * 1.4}px Georgia,serif`; c.textAlign = 'center'; c.fillText('Paused', canvas.width / 2, canvas.height / 2); }
+  if (g.paused) { c.setTransform(1, 0, 0, 1, 0, 0); c.fillStyle = 'rgba(10,6,30,.6)'; c.fillRect(0, 0, canvas.width, canvas.height); }
 }
 function cascadeFinish(g, quit = false) {
   if (g.done) return; g.done = true; g.running = false; cascadeStop();
@@ -327,12 +338,12 @@ function cascadeFinish(g, quit = false) {
   let prize = null;
   if (paid) { Cascade.useRun(S); prize = Cascade.reward(s); for (const id of prize.items) WonderGear.bagAdd(S, id, 1); const got = gain(prize.gold, 0, prize.xp); prize.xp = got.xp; } else save();
   bagArtVars?.();
-  const chests = Cascade.chests.map((c, i) => `<div class="cas-rchest ${i < s.opened ? 'won' : ''}" style="--d:${.5 + i * .45}s"><i class="cas-chest ${i < s.opened ? 'open' : ''} c${i}"></i><small>${i < s.opened ? c.name : fmt(c.at)}</small></div>`).join('');
-  popup(`<div class="cas-result"><p class="cas-rhead">${quit ? 'RUN ENDED' : record ? 'NEW BEST SCORE' : 'THE WELL IS FULL'}</p><h2 class="cas-rscore">${fmt(s.score)}</h2>
-    <p>Level ${s.level} · ${s.lines} rows burst · Best ${fmt(S.cascadeBest || 0)}</p><div class="cas-rchests">${chests}</div>
-    ${prize ? `<div class="bag-gains"><span class="bag-gain" style="--rarity:#ffcf5a">${uiIcon('gold')}<b>+${prize.gold}</b><small>Gold</small></span><span class="bag-gain" style="--rarity:#8fd0ff">${uiIcon('exp')}<b>+${prize.xp}</b><small>XP</small></span>${prize.items.map(id => `<span class="bag-gain" style="--rarity:${bagHue(WonderGear.bagItemById[id].rarity)}">${bagIcon(id)}<b>×1</b><small>${WonderGear.bagItemById[id].name}</small></span>`).join('')}</div>` : '<p class="cas-practice">Practice run · rewards return tomorrow</p>'}
-    <div class="den-actions"><button class="den-gold" onclick="$('#modal').close();openCascade()">${denPlain}Play again</button><button class="duel-blue" onclick="$('#modal').close();showCascade()">${denPlain}Lobby</button></div></div>`);
-  if (record && !quit) setTimeout(() => confettiBurst?.(), 300);
+  const chests = Cascade.chests.map((c, i) => `<div class="cas-rchest ${i < s.opened ? 'won' : ''}" style="--d:${1 + i * .4}s"><i class="cas-chest ${i < s.opened ? 'open' : ''} c${i}"></i><small>${i < s.opened ? c.name : fmt(c.at)}</small></div>`).join('');
+  const tile = (icon, n, name, hue, i) => `<span class="wr-prize" style="--rarity:${hue};--d:${1.5 + i * .15}s">${icon}<b>${n}</b><small>${name}</small></span>`;
+  const prizes = prize ? `<div class="wr-prizes">${[tile(uiIcon('gold'), '+' + fmt(prize.gold), 'Gold', '#ffcf5a', 0), tile(uiIcon('exp'), '+' + prize.xp, 'XP', '#8fd0ff', 1), ...prize.items.map((id, i) => tile(bagIcon(id), '×1', WonderGear.bagItemById[id].name, bagHue(WonderGear.bagItemById[id].rarity), i + 2))].join('')}</div>` : '<p class="wr-practice">Practice run · rewards return tomorrow</p>';
+  resultShow({ win: !quit && s.score > 0, title: quit ? 'Run Ended' : record ? 'New Record!' : 'Well Is Full', kicker: record && !quit ? 'Best score ever' : '', stars: s.opened, score: s.score,
+    body: `<p class="wr-line">Level ${s.level} · ${s.lines} rows burst · Best ${fmt(S.cascadeBest || 0)}</p><div class="wr-chests cas-rchests">${chests}</div>${prizes}`,
+    buttons: [['Play again', 'gold', 'openCascade()'], ['Lobby', 'violet', 'showCascade()']] });
 }
 function confettiBurst() {
   const box = document.querySelector('#modal'); if (!box) return;
