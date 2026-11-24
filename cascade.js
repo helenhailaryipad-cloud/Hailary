@@ -14,7 +14,7 @@ const Cascade = {
     [[2, 0], [0, 1], [1, 1], [2, 1]]           // 6 hook right (rose)
   ],
   names: ['Ruby Ember', 'Sapphire Frost', 'Emerald Leaf', 'Amethyst Star', 'Topaz Sun', 'Aqua Tide', 'Rose Moon'],
-  lineScore: [0, 100, 300, 500, 800],
+  lineScore: [0, 100, 400, 900, 1600],   // several rows at once pay much more (placeholder)
   bursts: ['', 'Spark!', 'Twin Burst!', 'Triple Nova!', 'Arcane Cascade!'],
   linesPerLevel: 10,
   // Chests: score thresholds reached during the run; each opens a bag item.
@@ -101,7 +101,7 @@ const Cascade = {
 // CASCADE_UI ---------------------------------------------------------------------------------------------------------
 let cascadeLoop = 0;
 function cascadeTile(kind) { return '<i class="cas-gem" style="background-position:' + (kind % 4) / 3 * 100 + '% ' + Math.floor(kind / 4) * 100 + '%"></i>'; }
-function showCascade() { if (typeof screenChangedAt !== "undefined") screenChangedAt = Date.now();
+function showCascade() { if (typeof screenChangedAt !== "undefined") screenChangedAt = Date.now(); cascadePreload();
   cascadeStop();
   const left = Cascade.runsLeft(S);
   $('#main').innerHTML = `<section class="cas-lobby" style="background-image:url('${artPath('cascade-cover')}')">
@@ -121,7 +121,12 @@ function showCascade() { if (typeof screenChangedAt !== "undefined") screenChang
 function cascadeStop() { if (cascadeLoop) cancelAnimationFrame(cascadeLoop); cascadeLoop = 0; if (game?.cascade) game.running = false; document.removeEventListener('keydown', cascadeKey); }
 const casBp = n => `${(n % 4) * 100 / 3}% ${Math.floor(n / 4) * 100}%`;
 function cascadeArtVars() { const r = document.documentElement; if (!r?.style?.setProperty || r.style.getPropertyValue('--cas-pad')) return; r.style.setProperty('--cas-pad', 'url("' + artPath('cascade-pad') + '")'); r.style.setProperty('--cas-stats', 'url("' + artPath('cascade-stats') + '")'); }
-function openCascade() { if (typeof screenChangedAt !== "undefined") screenChangedAt = Date.now(); cascadeArtVars();
+// Every picture of the game screen, its pause card and result window is fetched and decoded on the lobby, so nothing
+// pops in later (user: "the buttons load only when I press pause").
+const CASCADE_ART = ['cascade-pad', 'cascade-stats', 'cascade-tiles', 'cascade-chests', 'cascade-cover', 'cascade-fx', 'ui-btn-gold', 'ui-btn-violet', 'ui-result-ribbon', 'ui-result-burst'];
+let cascadeKeep = null;
+function cascadePreload() { if (cascadeKeep || typeof Image !== 'function') return; cascadeKeep = CASCADE_ART.map(id => { const i = new Image(); i.decoding = 'async'; i.src = artPath(id); i.decode?.().catch(() => {}); return i; }); }
+function openCascade() { if (typeof screenChangedAt !== "undefined") screenChangedAt = Date.now(); cascadePreload(); cascadeArtVars();
   cascadeStop();
   const stat = (id, label, val, n) => `<div class="cas-stat"><i class="cas-sico" style="--n:${n}"></i><small>${label}</small><b id="${id}">${val}</b></div>`;
   $('#main').innerHTML = `<section class="cas-screen" style="--cover:url('${artPath('cascade-cover')}')"><div class="cas-motes"></div>
@@ -168,7 +173,7 @@ function cascadePop(text, cls = '') {
   setTimeout(() => { const box = $('#casPops'); if (!box) return; for (const old of box.querySelectorAll('.cas-pop')) old.classList.add('leave'); const el = document.createElement('div'); el.className = 'cas-pop ' + cls; el.innerHTML = text; box.appendChild(el); setTimeout(() => el.remove(), 1700); }, wait);
 }
 // A finger held still on the well: wait, then one row every CASCADE_HOLD_MS.
-const CASCADE_HOLD_WAIT = 220, CASCADE_HOLD_MS = 38, CASCADE_SWEEP = 3.2;
+const CASCADE_HOLD_WAIT = 220, CASCADE_HOLD_MS = 38, CASCADE_SWEEP = 3.2, CASCADE_REPEAT_WAIT = 160, CASCADE_REPEAT_MS = 50;
 const CASCADE_HUES = ['#ff5a4a', '#4fa8ff', '#4fd87a', '#b77aff', '#ffcf3a', '#3fe0d8', '#ff8ac8'];
 // React to what the rules report: shards and rings for bursts, pop-ups, chests.
 function cascadeEvents(g) {
@@ -177,17 +182,16 @@ function cascadeEvents(g) {
     if (e.type === 'burst') {
       for (const [n, y] of e.rows.entries()) for (let x = 0; x < Cascade.cols; x++) {
         const kind = e.cells[n][x];
-        for (let k = 0; k < 3; k++) g.shards.push({ x: x + .5, y: y + .5, vx: (Math.random() - .5) * 14, vy: -4 - Math.random() * 9, rot: Math.random() * 6, vr: (Math.random() - .5) * 14, life: 1.1 + Math.random() * .5, kind, size: .35 + Math.random() * .35 });
-        g.sparks.push({ x: x + .5, y: y + .5, life: .6, hue: CASCADE_HUES[kind] });
+        for (let k = 0; k < 2; k++) g.shards.push({ x: x + .5, y: y + .5, vx: (Math.random() - .5) * 14, vy: -4 - Math.random() * 9, rot: Math.random() * 6, vr: (Math.random() - .5) * 14, life: 1.1 + Math.random() * .5, kind, size: .35 + Math.random() * .35 });
       }
       g.rings.push(...e.rows.map(y => ({ y: y + .5, life: .7 })));
       g.beams.push(...e.rows.map((y, i) => ({ y: y + .5, life: .6 + i * .05, max: .6 + i * .05, big: e.count })));
-      for (const [n, y] of e.rows.entries()) for (let x = 0; x < Cascade.cols; x++) for (let m = 0; m < 4; m++) g.motes.push({ x: x + Math.random(), y: y + Math.random(), vx: (Math.random() - .5) * 3, vy: -2 - Math.random() * 5, life: .8 + Math.random() * .7, max: 1.5, hue: CASCADE_HUES[e.cells[n][x]] });
+      cascadeBlast(g, e);
       if (e.count >= 3) g.rays = { y: (e.rows[0] + e.rows[e.rows.length - 1]) / 2 + .5, life: 1.1, max: 1.1 };
-      g.whiteout = Math.max(g.whiteout || 0, e.count >= 4 ? .45 : e.count >= 2 ? .2 : .1);
+      g.whiteout = Math.max(g.whiteout || 0, e.count >= 4 ? .25 : e.count >= 3 ? .1 : 0);
       g.flashRows = e.rows.map(y => ({ y, life: .35 }));
       g.shake = Math.max(g.shake, e.count >= 3 ? .45 : .2);
-      cascadePop('<b>' + e.name + '</b>', 'burst b' + e.count);
+      cascadePop('<b>' + e.name + '</b><small>+' + fmt(Cascade.lineScore[e.count] * s.level) + '</small>', 'burst b' + e.count);
       navigator.vibrate?.(e.count >= 4 ? [40, 30, 60] : 25);
     } else if (e.type === 'score' && e.combo > 0) cascadePop('Combo ×' + (e.combo + 1), 'combo');
     else if (e.type === 'level') { cascadePop('Level ' + e.level + '<small>The crystals fall faster</small>', 'level'); }
@@ -200,8 +204,8 @@ function cascadeEvents(g) {
   }
 }
 function startCascade() {
-  const g = game = { cascade: true, running: true, state: Cascade.create(), shards: [], sparks: [], rings: [], flashRows: [], beams: [], motes: [], rays: null, whiteout: 0, shake: 0, countdown: 2.4, turnFx: 0 };
-  const canvas = $('#casCanvas'), next = $('#casNext'), well = $('#casWell'), frameBox = well, tiles = new Image(); tiles.src = artPath('cascade-tiles');
+  const g = game = { cascade: true, running: true, state: Cascade.create(), shards: [], sparks: [], rings: [], flashRows: [], beams: [], motes: [], fx: [], rays: null, whiteout: 0, shake: 0, countdown: 2.4, turnFx: 0 };
+  const canvas = $('#casCanvas'), next = $('#casNext'), well = $('#casWell'), frameBox = well, tiles = new Image(); tiles.src = artPath('cascade-tiles'); g.fxImg = new Image(); g.fxImg.src = artPath('cascade-fx');
   const fit = () => {
     const box = well.getBoundingClientRect(), cell = Math.floor(Math.min((box.width - 18) / Cascade.cols, (box.height - 18) / Cascade.rows)), dpr = Math.min(2.5, devicePixelRatio || 1);
     g.cell = cell; canvas.style.width = cell * Cascade.cols + 'px'; canvas.style.height = cell * Cascade.rows + 'px'; canvas.width = cell * Cascade.cols * dpr; canvas.height = cell * Cascade.rows * dpr; g.dpr = dpr;
@@ -212,14 +216,20 @@ function startCascade() {
   let touch = null;
   // Holding a finger still on the well (user: "when I hold, it should go down faster") makes the piece fall fast until
   // the finger lifts; a hold never turns the piece.
-  const holdEnd = () => { if (touch) { clearTimeout(touch.hold); clearInterval(touch.rep); } };
+  const holdEnd = () => { if (touch) { clearTimeout(touch.hold); clearInterval(touch.rep); clearInterval(touch.slide); } };
+  // After a sideways drag, a finger that rests keeps sliding the piece that way (one cell every CASCADE_REPEAT_MS);
+  // the finger's origin moves with it, so dragging back still works.
+  const slideOn = () => { if (!touch || touch.slide) return; touch.slide = setInterval(() => {
+    if (!touch || !touch.dir || touch.held || performance.now() - touch.last < CASCADE_REPEAT_WAIT) return;
+    cascadeAct(touch.dir > 0 ? 'right' : 'left'); touch.moved += touch.dir; touch.x -= touch.dir * g.cell; }, CASCADE_REPEAT_MS); };
   well.onpointerdown = e => { e.preventDefault(); holdEnd(); touch = { x: e.clientX, y: e.clientY, t: performance.now(), moved: 0, down: 0, held: false };
     touch.hold = setTimeout(() => { if (!touch || touch.moved) return; touch.held = true; touch.rep = setInterval(() => cascadeAct('soft'), CASCADE_HOLD_MS); }, CASCADE_HOLD_WAIT);
-    well.setPointerCapture?.(e.pointerId); };
+    try { well.setPointerCapture(e.pointerId); } catch {} };
   well.onpointermove = e => {
     if (!touch || !g.cell) return; const dx = e.clientX - touch.x, dy = e.clientY - touch.y;
     if (Math.abs(dx) > 12 && !touch.held) clearTimeout(touch.hold);
-    while (Math.abs(dx - touch.moved * g.cell) >= g.cell * .9) { const step = dx > touch.moved * g.cell ? 1 : -1; touch.moved += step; cascadeAct(step > 0 ? 'right' : 'left'); }
+    while (Math.abs(dx - touch.moved * g.cell) >= g.cell * .9) { const step = dx > touch.moved * g.cell ? 1 : -1; touch.moved += step; touch.dir = step; touch.last = performance.now(); cascadeAct(step > 0 ? 'right' : 'left'); slideOn(); }
+    if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 12) touch.dir = 0;
     while (dy - touch.down * g.cell >= g.cell && Math.abs(dy) > Math.abs(dx)) { touch.down++; cascadeAct('soft'); }
   };
   well.onpointercancel = () => { holdEnd(); touch = null; };
@@ -232,8 +242,10 @@ function startCascade() {
   // Buttons: left / right / soft repeat while held.
   for (const b of document.querySelectorAll('.cas-pad button')) {
     const act = b.dataset.act; let rep = 0;
-    b.onpointerdown = e => { e.preventDefault(); b.classList.add('held'); cascadeAct(act); if (act === 'left' || act === 'right' || act === 'soft') { clearInterval(rep); const ms = act === 'soft' ? CASCADE_HOLD_MS : 55, wait = Math.ceil(220 / ms); let n = 0; rep = setInterval(() => { if (++n > wait) cascadeAct(act); }, ms); } };
-    b.onpointerup = b.onpointerleave = b.onpointercancel = () => { clearInterval(rep); b.classList.remove('held'); };
+    // A held button keeps going (user: "when I hold my finger it should keep moving, not tap again"): the finger is
+    // captured so a small slide off the button does not stop it; after CASCADE_REPEAT_WAIT it repeats.
+    b.onpointerdown = e => { e.preventDefault(); try { b.setPointerCapture(e.pointerId); } catch {} b.classList.add('held'); cascadeAct(act); if (act === 'left' || act === 'right' || act === 'soft') { clearInterval(rep); clearTimeout(b.wait); const ms = act === 'soft' ? CASCADE_HOLD_MS : CASCADE_REPEAT_MS; b.wait = setTimeout(() => { rep = setInterval(() => cascadeAct(act), ms); }, act === 'soft' ? 120 : CASCADE_REPEAT_WAIT); } };
+    b.onpointerup = b.onpointercancel = b.onlostpointercapture = () => { clearInterval(rep); clearTimeout(b.wait); b.classList.remove('held'); };
     b.oncontextmenu = e => e.preventDefault();
   }
   document.addEventListener('keydown', cascadeKey);
@@ -256,6 +268,35 @@ function cascadeGem(c, tiles, kind, x, y, size, alpha = 1) {
   if (tiles.complete && tiles.naturalWidth) { const w = tiles.naturalWidth / 4, h = tiles.naturalHeight / 2; c.drawImage(tiles, (kind % 4) * w, Math.floor(kind / 4) * h, w, h, x, y, size, size); }
   else { c.fillStyle = CASCADE_HUES[kind]; c.fillRect(x + 1, y + 1, size - 2, size - 2); }
   c.globalAlpha = 1;
+}
+// Painted bursts (user: "beautiful explosions and glow, not silly little balls; more rows, a bigger blast"): sprites
+// from cascade-fx (0 starburst, 1 crystal blast, 2 light streak, 3 ring; drawn additively, black = nothing).
+// Positions are in cells; size in cells; delay in seconds.
+function cascadeBlast(g, e) {
+  const n = e.count, mid = (e.rows[0] + e.rows[e.rows.length - 1]) / 2 + .5, W = Cascade.cols, add = (kind, x, y, size, life, delay = 0, grow = 1.6) => g.fx.push({ kind, x, y, size, life, max: life, delay, grow, rot: Math.random() * 6.3, spin: (Math.random() - .5) * 2 });
+  for (const y of e.rows) {
+    add(2, W / 2, y + .5, W * 1.7, .55, 0, 1.25);                                   // streak along the row
+  }
+  // crystal blasts: 3 + rows of them, spread over the cleared rows and across the well, the middle ones first
+  for (let i = 0, m = 2 + n; i <= m; i++) { const x = .9 + (W - 1.8) * i / m, y = e.rows[i % n] + .5; add(1, x, y, 2.3 + n * .2, .6, Math.abs(x - W / 2) * .025, 1.6); }
+  for (let i = 0; i < n; i++) add(0, 1.5 + Math.random() * (W - 3), e.rows[i] + .5, 2.6 + n * .35, .75, .1 + Math.random() * .2, 1.4);
+  add(3, W / 2, mid, 2.5, .6, 0, 2.6 + n * .6);                                        // shock ring
+  if (n >= 2) add(1, W / 2, mid, W * (.4 + n * .1), .85, .12, 1.5);                      // big central blast
+  if (n >= 3) { add(3, W / 2, mid, 3, .8, .15, 4 + n); add(0, W / 2, mid, W * .9, .9, .1, 1.3); }
+  if (n >= 4) { add(0, W / 2, mid, W * 1.2, 1.1, .3, 1.2); for (let i = 0; i < 5; i++) add(0, 1 + Math.random() * (W - 2), mid + (Math.random() - .5) * 5, 3, .8, .45 + i * .1, 1.4); }
+}
+function cascadeDrawFx(c, g, fxImg, k, dt) {
+  if (!fxImg?.complete || !fxImg.naturalWidth) { g.fx = []; return; }
+  const S = fxImg.naturalWidth / 2; c.save(); c.globalCompositeOperation = 'screen';
+  for (const f of g.fx) {
+    if (f.delay > 0) { f.delay -= dt; continue; }
+    f.life -= dt; const t = 1 - Math.max(0, f.life) / f.max, a = t < .15 ? t / .15 : Math.max(0, 1 - (t - .15) / .85), sz = f.size * k * (.35 + (f.grow - .35) * (1 - Math.pow(1 - t, 3)));
+    c.globalAlpha = a * (f.size > 6 ? .55 : .7); c.save(); c.translate(f.x * k, f.y * k);
+    if (f.kind === 2) { c.drawImage(fxImg, 0, S, S, S, -sz / 2, -sz / 2, sz, sz); }
+    else { c.rotate(f.rot + f.spin * t); c.drawImage(fxImg, (f.kind % 2) * S, Math.floor(f.kind / 2) * S, S, S, -sz / 2, -sz / 2, sz, sz); }
+    c.restore();
+  }
+  c.restore(); g.fx = g.fx.filter(f => f.life > 0);
 }
 function cascadeDraw(g, canvas, next, tiles, dt) {
   const c = canvas.getContext('2d'), s = g.state, k = g.cell * g.dpr, W = Cascade.cols * k, H = Cascade.rows * k;
@@ -302,7 +343,7 @@ function cascadeDraw(g, canvas, next, tiles, dt) {
   // burst effects (user: "rows should burst with beautiful light"): a beam of light runs out from the middle of the
   // row, the row glows white, glowing motes rise, rays fan out on three or more rows, the well flashes.
   c.save(); c.globalCompositeOperation = 'lighter';
-  for (const b of g.beams) { b.life -= dt; const t = 1 - b.life / b.max, reach = Math.min(1, t * 3.2), a = Math.max(0, b.life / b.max), y = b.y * k, hh = k * (.55 + (b.big - 1) * .12) * (1 - t * .6);
+  for (const b of g.beams) { b.life -= dt; const t = 1 - b.life / b.max, reach = Math.min(1, t * 3.2), a = Math.max(0, b.life / b.max) * (b.big >= 3 ? .3 : .5), y = b.y * k, hh = k * (.55 + (b.big - 1) * .12) * (1 - t * .6);
     const hg = c.createLinearGradient(W / 2 - W * .6 * reach, 0, W / 2 + W * .6 * reach, 0); hg.addColorStop(0, 'rgba(255,240,200,0)'); hg.addColorStop(.5, `rgba(255,255,255,${a})`); hg.addColorStop(1, 'rgba(255,240,200,0)');
     const vg = c.createLinearGradient(0, y - hh * 2.4, 0, y + hh * 2.4); vg.addColorStop(0, 'rgba(255,200,255,0)'); vg.addColorStop(.5, `rgba(255,220,150,${a * .55})`); vg.addColorStop(1, 'rgba(160,200,255,0)');
     c.fillStyle = vg; c.fillRect(0, y - hh * 2.4, W, hh * 4.8); c.fillStyle = hg; c.fillRect(0, y - hh / 2, W, hh);
@@ -312,7 +353,7 @@ function cascadeDraw(g, canvas, next, tiles, dt) {
   for (const m of g.motes) { m.life -= dt; m.vy -= 1.5 * dt; m.x += m.vx * dt; m.y += m.vy * dt; const a = Math.max(0, Math.min(1, m.life / .5)), rr = k * .22 * (.6 + a * .6); const mg = c.createRadialGradient(m.x * k, m.y * k, 0, m.x * k, m.y * k, rr); mg.addColorStop(0, `rgba(255,255,255,${a})`); mg.addColorStop(.35, m.hue + 'cc'); mg.addColorStop(1, m.hue + '00'); c.fillStyle = mg; c.beginPath(); c.arc(m.x * k, m.y * k, rr, 0, Math.PI * 2); c.fill(); }
   g.motes = g.motes.filter(m => m.life > 0);
   c.restore();
-  for (const f of g.flashRows) { f.life -= dt; const a = Math.max(0, f.life / .35); const fg = c.createLinearGradient(0, f.y * k, 0, (f.y + 1) * k); fg.addColorStop(0, `rgba(255,255,255,${a * .5})`); fg.addColorStop(.5, `rgba(255,252,235,${a})`); fg.addColorStop(1, `rgba(255,255,255,${a * .5})`); c.fillStyle = fg; c.fillRect(0, f.y * k, W, k); }
+  for (const f of g.flashRows) { f.life -= dt; const a = Math.max(0, f.life / .35); const fg = c.createLinearGradient(0, f.y * k, 0, (f.y + 1) * k); fg.addColorStop(0, `rgba(255,255,255,${a * .25})`); fg.addColorStop(.5, `rgba(255,252,235,${a})`); fg.addColorStop(1, `rgba(255,255,255,${a * .5})`); c.fillStyle = fg; c.fillRect(0, f.y * k, W, k); }
   g.flashRows = g.flashRows.filter(f => f.life > 0);
   for (const r of g.rings) { r.life -= dt; const t = 1 - r.life / .7; c.strokeStyle = `rgba(255,236,160,${Math.max(0, r.life / .7)})`; c.lineWidth = k * .18 * (1 - t) + 1; c.beginPath(); c.ellipse(W / 2, r.y * k, W * (.2 + t * .7), k * (.4 + t * 1.6), 0, 0, Math.PI * 2); c.stroke(); }
   g.rings = g.rings.filter(r => r.life > 0);
@@ -320,6 +361,7 @@ function cascadeDraw(g, canvas, next, tiles, dt) {
   g.sparks = g.sparks.filter(p => p.life > 0);
   for (const p of g.shards) { p.life -= dt; p.vy += 22 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.vr * dt; const sz = p.size * k; c.save(); c.translate(p.x * k, p.y * k); c.rotate(p.rot); c.shadowColor = CASCADE_HUES[p.kind]; c.shadowBlur = k * .4; cascadeGem(c, tiles, p.kind, -sz / 2, -sz / 2, sz, Math.max(0, Math.min(1, p.life))); c.restore(); }
   g.shards = g.shards.filter(p => p.life > 0 && p.y < Cascade.rows + 4);
+  cascadeDrawFx(c, g, g.fxImg, k, dt);
   if (g.whiteout > 0) { g.whiteout = Math.max(0, g.whiteout - dt); c.fillStyle = `rgba(255,250,235,${g.whiteout * .9})`; c.fillRect(0, 0, W, H); }
   if (g.slam) { g.slam.life -= dt; c.fillStyle = `rgba(255,255,255,${Math.max(0, g.slam.life) * 1.2})`; c.fillRect(0, H - k * .2, W, k * .2); if (g.slam.life <= 0) g.slam = null; }
   if (g.countdown > 0) { c.fillStyle = 'rgba(10,6,30,.45)'; c.fillRect(0, 0, W, H); c.fillStyle = '#ffe9a0'; c.font = `900 ${k * 2.6}px Georgia,serif`; c.textAlign = 'center'; c.fillText(String(Math.ceil(g.countdown / .8)), W / 2, H / 2 + k); }
