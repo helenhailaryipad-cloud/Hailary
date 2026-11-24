@@ -117,15 +117,13 @@ function showPairs() {
     <img class="pairs-lobby-bg" src="${artPath('pairs-lobby')}" alt="">
     <h1>Harvest Pairs</h1>
     <img class="pairs-lobby-host" src="${reinaLookPath(false)}" alt="Reina">
-    <div class="pairs-rules"><h2>Rules</h2><ol>
-      <li>Tap two matching ingredients to collect them, one after the other or both at once with two fingers.</li>
-      <li>A pair joins only along a line with no more than two turns.</li>
-      <li>Clear ${Pairs.stages.length} baskets, each larger than the last, as fast as you can.</li>
-      <li>Stuck? Tap Sprout for a hint. Each hint adds ${Pairs.hintPenalty} seconds.</li>
-      <li>Reward: 300 gold and 30 XP, plus 200 gold under ${Pairs.clock(Pairs.bonusSeconds)}, for ${Pairs.dailyRuns} runs each day. Leaving a run does not use one.</li>
-    </ol></div>
+    <div class="pairs-rules pairs-quick"><p class="pq-tag">Match pairs · beat the clock!</p><div class="pq-how">
+      <span><i class="pq-pair"><img src="${artPath('pairs-tile-3')}" alt=""><img src="${artPath('pairs-tile-3')}" alt=""></i>Tap two the same</span>
+      <span><i class="pq-path"><svg viewBox="0 0 60 40"><path d="M8 32 V10 H52 V30" fill="none" stroke="#ffe27a" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 7"/></svg></i>Line with ≤ 2 turns</span>
+      <span><i class="pq-num">${Pairs.stages.length}</i>Baskets, fast!</span></div>
+      <p class="pq-prize">${uiIcon('gold')}300 · +200 under ${Pairs.clock(Pairs.bonusSeconds)} · ${uiIcon('exp')}30</p></div>
     <p class="pairs-runs">Rewarded runs today: <b>${left} / ${Pairs.dailyRuns}</b> · Best time <b>${best}</b></p>
-    <button class="primary pairs-go" onclick="openPairsBoard()">Go challenge</button>
+    <button class="primary pairs-go" onclick="openPairsBoard()">${denPlain}Play</button>
     <button class="pairs-rank" onclick="pairsRanking()"><img src="${artPath('hud-rank')}" alt=""><span>Rankings</span></button>
     <button class="pairs-exit" data-back onclick="go('games')" aria-label="Leave Harvest Pairs">‹</button>
   </section>`;
@@ -189,7 +187,7 @@ function startPairs() {
   function countdown(n, beat = 450) {
     if (game !== g) return;
     g.locked = true; panel.hidden = false; panel.className = 'pairs-panel pairs-gate'; panel.parentElement.classList.add('gating');
-    panel.innerHTML = g.stage ? `<small>Basket ${g.stage + 1} of ${Pairs.stages.length}</small>` : `<div class="pairs-dial"><i class="pairs-dial-ring"></i><b class="pairs-dial-n" key="${n}">${n}</b></div><small>Starting soon</small>`;
+    panel.innerHTML = g.stage ? `<small>Basket ${g.stage + 1} of ${Pairs.stages.length}</small>` : `<div class="pairs-dial"><i class="pairs-dial-ring"></i><b class="pairs-dial-n" key="${n}"><span>${n}</span></b></div><small>Starting soon</small>`;
     if (n > 1) setTimeout(() => countdown(n - 1, beat), beat);
     else setTimeout(() => { if (game !== g) return; panel.hidden = true; panel.parentElement.classList.remove('gating'); g.locked = false; last = performance.now(); }, beat);
   }
