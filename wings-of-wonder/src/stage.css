@@ -9063,3 +9063,80 @@ body[data-playing=merge] #hud span,body[data-playing=merge] #hud small{font-size
 body[data-playing=merge] #hud .gpt-icon,body[data-playing=merge] #hud img{width:clamp(30px,4vw,44px);height:clamp(30px,4vw,44px)}
 body[data-playing=merge] #main .topline h1{font-size:clamp(22px,4.2vw,44px)!important;min-width:min(70%,520px)}
 body[data-playing=merge] #main .game-action-dock button{font-size:clamp(15px,2vw,22px)!important;min-height:clamp(46px,5.4vw,64px)!important}
+/* ===== Jungle Trek polish (2026-11-24, user: "shorter rules, better buttons, a beautiful interface; the left buttons do
+   nothing; the font is primitive; the ending cuts off"): rules card, round pause disc, bonus status pills, end banner. */
+.jungle-field .jungle-overlay.trek-card{inset:auto 5%;top:50%;transform:translateY(-50%)!important;width:auto;padding:0 0 4.4cqw;gap:2.6cqw;overflow:hidden;border:0;border-radius:5.4cqw;
+ background:linear-gradient(170deg,#1f4a52,#14313c 55%,#102531);box-shadow:0 0 0 2px #d9b45a,0 0 0 4.5px #173d33,0 0 30px #7fe0b955,0 18px 40px #000a;color:#fff4d7}
+.jungle-field .jungle-overlay.trek-card[hidden]{display:none}
+.tl-cover{position:relative;width:100%;aspect-ratio:16/7.6;background:center 38%/cover no-repeat;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding-bottom:2.2cqw;box-sizing:border-box}
+.tl-cover::after{content:"";position:absolute;inset:0;background:linear-gradient(#10253100 35%,#14313cd9 78%,#183a44)}
+.tl-cover>*{position:relative;z-index:1}
+.jungle-field .trek-card .tl-cover small{font:800 max(10px,2.3cqw)/1 Arial,sans-serif;letter-spacing:.32em;text-transform:uppercase;color:#bff0d6;text-shadow:0 1px 3px #000}
+.jungle-field .trek-card .tl-cover h2{margin:.6cqw 0 0;font:700 max(30px,9.4cqw)/1 var(--font-display);letter-spacing:.02em;background:linear-gradient(#fffbe6,#ffd76a 55%,#e8962a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #4a2206) drop-shadow(0 0 10px #ffb04a88)}
+.jungle-field .trek-card .tl-hook{margin:0 5cqw;font:700 italic max(13px,3.7cqw)/1.3 var(--font-story);color:#fff1c8;text-align:center}
+.tl-rules{list-style:none;margin:0;padding:0 4.4cqw;display:grid;grid-template-columns:1fr 1fr;gap:2cqw;width:100%;box-sizing:border-box}
+.tl-rules li{display:flex;align-items:center;gap:2cqw;padding:1.6cqw 2cqw;border-radius:3cqw;background:linear-gradient(#ffffff17,#ffffff08);box-shadow:inset 0 0 0 1px #9fe0c044;text-align:left;font:800 max(11px,3cqw)/1.2 Arial,sans-serif;color:#eafff2}
+.tl-rules li>img,.tl-rules li>i{flex:none;width:max(30px,9.4cqw);height:max(30px,9.4cqw);object-fit:contain;filter:drop-shadow(0 2px 3px #0008)}
+.tl-drag{display:grid;place-items:center;border-radius:50%;background:radial-gradient(circle at 40% 35%,#4c8fd0,#1d3f78);box-shadow:inset 0 0 0 2px #e8c66e,0 2px 4px #0008}
+.tl-drag svg{width:74%;height:74%;fill:#fff7de}
+.tl-meta{display:flex;justify-content:center;gap:2.4cqw;width:100%}
+.tl-meta span{display:grid;justify-items:center;min-width:17cqw;padding:1.2cqw 2.4cqw;border-radius:3cqw;background:#0b1f2899;box-shadow:inset 0 0 0 1px #d9b45a66;font:700 max(9px,2.3cqw)/1.2 Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#bcd9cd}
+.tl-meta b{font:700 max(16px,4.8cqw)/1.1 var(--font-display);letter-spacing:0;color:#ffe08a;text-transform:none}
+.tl-meta b.tl-heart{color:#ff6179;letter-spacing:.05em}
+.tl-prizes{display:flex;align-items:center;justify-content:center;gap:1.8cqw}
+.tl-prizes small{font:800 max(10px,2.4cqw)/1 Arial,sans-serif;letter-spacing:.2em;text-transform:uppercase;color:#bcd9cd;margin-right:1cqw}
+.tl-prizes .gpt-icon,.tl-prizes img{width:max(26px,7.4cqw)!important;height:max(26px,7.4cqw)!important;object-fit:contain;filter:drop-shadow(0 2px 3px #0008)}
+.jungle-field .jungle-overlay.trek-pausecard{padding:6cqw 5cqw;gap:3cqw}
+.jungle-field .trek-pausecard h2{font:700 max(28px,8.4cqw)/1 var(--font-display);color:#ffe0a2;text-shadow:0 2px 0 #4a2206,0 0 12px #ffb04a88}
+.jungle-field .trek-pausecard p{font:700 max(13px,3.4cqw)/1.3 var(--font-story);color:#d9eee3}
+html body #stage #main .jungle-field button.trek-btn{position:relative;display:grid;place-items:center;width:min(62%,330px);height:auto;aspect-ratio:170/66;min-height:0;margin:0;padding:0 0 .6cqw;border:0;border-radius:99px;outline:0;box-shadow:none;
+ background:url(assets/generated/ui-btn-gold.webp) center/100% 100% no-repeat;color:#5a2a06;font:700 max(19px,5.6cqw)/1 var(--font-display);text-shadow:0 1px 0 #fff6c8;cursor:pointer;transition:transform .08s,filter .08s}
+html body #stage #main .jungle-field button.trek-btn.violet{width:min(54%,290px);background-image:url(assets/generated/ui-btn-violet.webp);color:#fff;text-shadow:0 2px 0 #3a0a6a,0 0 8px #c07aff}
+html body #stage #main .jungle-field button.trek-btn::before,html body #stage #main .jungle-field button.trek-btn::after{content:none!important;display:none!important}
+html body #stage #main .jungle-field button.trek-btn>svg{display:none}
+html body #stage #main .jungle-field button.trek-btn:active{transform:scale(.93);filter:brightness(1.18)}
+html body #stage #main .jungle-field .trek-lobby button.trek-btn{animation:tl-breathe 2.2s ease-in-out infinite}
+@keyframes tl-breathe{50%{transform:scale(1.045);filter:brightness(1.08) drop-shadow(0 0 10px #ffd76a99)}}
+/* Pause: a round disc like the back button, ivory bars inside */
+html body #stage #main .trek-top button.trek-pause{display:grid;place-items:center;width:max(44px,10.4cqw);height:max(44px,10.4cqw);min-height:0;margin-top:1cqw;padding:0;border:0;border-radius:50%;outline:0;
+ background:radial-gradient(circle at 38% 30%,#6aa8e6,#2a5aa8 55%,#183a78);box-shadow:inset 0 0 0 2.5px #e8c66e,inset 0 0 0 4px #7a5a1a,0 3px 6px #0009;cursor:pointer}
+html body #stage #main .trek-top button.trek-pause::before,html body #stage #main .trek-top button.trek-pause::after{content:none!important;display:none!important}
+html body #stage #main .trek-top button.trek-pause svg{width:52%;height:52%;fill:#fff7de;filter:drop-shadow(0 1px 1px #0008)}
+html body #stage #main .trek-top button.trek-pause:active{transform:scale(.9)}
+/* HUD: display face for numbers, lost hearts grey, the clock turns red in the last ten seconds */
+.trek-top strong{font-family:var(--font-display)!important;font-weight:700}
+.trek-top #trekLives b{color:#ff6179;text-shadow:0 0 6px #ff3a5a88,0 2px 2px #0008}.trek-top #trekLives b.gone{color:#3a4f60;text-shadow:none}
+.trek-top #trekTime.low{color:#ff8a8a;-webkit-text-fill-color:#ff8a8a;animation:trek-low .8s ease-in-out infinite}
+@keyframes trek-low{50%{transform:scale(1.12)}}
+/* Active bonuses: status pills, not buttons (icon, name, value, a draining bar for timed ones) */
+.jungle-field .trek-buffs{left:1.6cqw;bottom:15%;display:flex;flex-direction:column;gap:1.4cqw;pointer-events:none;transition:opacity .3s}
+.jungle-field .trek-buffs .trek-buff{position:relative;display:flex;align-items:center;gap:1.2cqw;min-width:25cqw;padding:.8cqw 2.6cqw .8cqw .8cqw;border-radius:99px 3cqw 3cqw 99px;background:linear-gradient(90deg,#0b1d2ae6,#0b1d2a99);box-shadow:inset 0 0 0 1px #ffffff26;overflow:hidden}
+.jungle-field .trek-buffs .trek-buff[hidden]{display:none!important}
+.jungle-field .trek-buffs .trek-buff img{width:max(26px,7.2cqw);height:max(26px,7.2cqw);object-fit:contain;filter:drop-shadow(0 0 4px #ffffff66)}
+.jungle-field .trek-buffs .trek-buff span{position:static;display:grid;width:auto;height:auto;padding:0;opacity:1;background:none;border:0;border-radius:0;box-shadow:none;gap:.2cqw}
+.jungle-field .trek-buffs .trek-buff b{position:static;min-width:0;font:800 max(9px,2.3cqw)/1 Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#cfe6f0;text-shadow:none}
+.jungle-field .trek-buffs .trek-buff small{font:700 max(14px,3.8cqw)/1 var(--font-display);color:#ffe27a;text-shadow:0 1px 2px #000}
+.jungle-field .trek-buffs .trek-buff u{position:absolute;left:max(30px,8.6cqw);right:2.2cqw;bottom:.7cqw;height:max(3px,.7cqw);border-radius:2px;background:#ffffff1f;overflow:hidden}
+.jungle-field .trek-buffs .trek-buff u i{display:block;height:100%;background:linear-gradient(90deg,#7fe9ff,#ffe27a);transform-origin:0 50%;transition:transform .15s linear}
+.jungle-field .trek-buffs .trek-buff.fresh{animation:trek-buffin .55s cubic-bezier(.2,1.6,.4,1)}
+@keyframes trek-buffin{from{transform:translateX(-70%) scale(.7);opacity:0;box-shadow:inset 0 0 0 1px #ffe27a,0 0 18px #ffe27a}}
+.trek-ending .trek-buffs,.trek-ending .trek-controls span{opacity:0}
+/* The end of a run: a big word over the field (rays behind it), then the result window */
+.trek-banner{position:absolute;inset:23% 0 auto;z-index:5;display:grid;place-content:center;justify-items:center;gap:1cqw;pointer-events:none;text-align:center;overflow:hidden}
+.trek-banner[hidden]{display:none}
+.trek-banner b{position:relative;font:700 max(46px,15cqw)/1 var(--font-display);letter-spacing:.02em;background:linear-gradient(#fffef2,#ffe07a 50%,#e88a1a);-webkit-background-clip:text;background-clip:text;color:transparent;
+ filter:drop-shadow(0 3px 0 #5a2406) drop-shadow(0 0 16px #ffb04acc);animation:trek-word .7s cubic-bezier(.2,1.7,.4,1) both}
+.trek-banner small{position:relative;font:700 italic max(15px,4.4cqw)/1.2 var(--font-story);color:#fff4d7;text-shadow:0 2px 4px #000,0 0 10px #000;animation:wr-fade .5s .35s both}
+.trek-banner.lose b{background:linear-gradient(#ffffff,#bfe4ff 55%,#6a9ad0);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 3px 0 #10284a) drop-shadow(0 0 14px #7fc4ff99)}
+.tb-rays{position:absolute;left:50%;top:50%;width:150cqw;height:150cqw;margin:-75cqw 0 0 -75cqw;background:repeating-conic-gradient(from 0deg,#fff3c055 0 6deg,#fff3c000 6deg 18deg);-webkit-mask-image:radial-gradient(circle,#000 8%,transparent 46%);mask-image:radial-gradient(circle,#000 8%,transparent 46%);animation:wr-spin 14s linear infinite,wr-fade .6s both}
+.trek-banner.lose .tb-rays{opacity:.35}
+@keyframes trek-word{from{transform:scale(2.6);opacity:0;filter:blur(6px)}}
+/* Result window chests (resultShow): won chests drop in open, the rest stay dark */
+.trek-rchests{gap:2%;width:100%}
+.trek-rchests img{width:15%;max-width:64px;height:auto;filter:drop-shadow(0 4px 5px #0008);animation:wr-prize .45s var(--d) cubic-bezier(.2,1.6,.4,1) both}
+.trek-rchests img.won{filter:drop-shadow(0 0 8px #ffd76a) drop-shadow(0 4px 5px #0008)}
+.trek-rchests img.shut{filter:grayscale(1) brightness(.5);opacity:.55}
+@media (prefers-reduced-motion:reduce){.trek-banner b,.tb-rays,.trek-buff.fresh,html body #stage #main .jungle-field .trek-lobby button.trek-btn{animation:none}}
+.jungle-field:has(.trek-lobby:not([hidden])) .trek-top,.jungle-field:has(.trek-lobby:not([hidden])) .trek-controls span{opacity:0}
+.trek-top #trekLives b{font-size:max(22px,5.4cqw);margin-left:.4cqw}
+.wr-body .trek-wrprizes{flex-wrap:nowrap;gap:6px}.wr-body .trek-wrprizes .wr-prize{width:min(70px,17vw);padding:6px 3px 5px}

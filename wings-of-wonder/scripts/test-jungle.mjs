@@ -22,7 +22,12 @@ g=T.create();g.row=999;g.hazardAt=999;g.shot=999;g.drops=[{x:.45,z:.66,kind:'shi
 g=T.create();g.row=999;g.hazardAt=999;T.collect(g,'multi');T.collect(g,'multi');T.step(g,.01);assert.equal(g.bolts.length,3);for(let i=0;i<5;i++)T.collect(g,'multi');assert.equal(g.arrows,4);
 g=T.create();g.row=999;g.hazardAt=999;T.collect(g,'power');g.foes=[{x:0,z:.8,hp:8,kind:0}];T.step(g,.05);assert.equal(g.score,50,'a power arrow deals 8');
 g=T.create();g.row=999;g.hazardAt=999;g.shot=999;T.collect(g,'rocket');g.foes=[{x:0,z:.5,hp:60,kind:0},{x:.4,z:.5,hp:60,kind:0},{x:1.24,z:.5,hp:60,kind:0}];for(let i=0;i<20&&g.score<100;i++)T.step(g,.05);assert.equal(g.score,100,'one rocket breaks both close barrels');assert.equal(g.foes.length,1);
-assert.equal(T.nextDrop(Object.assign(T.create(),{arrows:4})),'rocket');assert.equal(T.nextDrop(Object.assign(T.create(),{dropCount:8})),'shield','no heart at full health');
+assert.equal(T.nextDrop(Object.assign(T.create(),{arrows:4})),'rocket');assert.equal(T.nextDrop(Object.assign(T.create(),{dropCount:13})),'frost','no heart at full health');
+// Shields are rare: at most two in 28 drops, never two bonuses of one kind in a row, none while a shield is up.
+{const g=T.create(),seen=[];for(let i=0;i<28;i++)seen.push(T.nextDrop(g));assert.ok(seen.filter(k=>k==='shield').length<=2);assert.ok(seen.every((k,i)=>!i||k!==seen[i-1]));
+ const up=Object.assign(T.create(),{dropCount:7,shield:4});assert.notEqual(T.nextDrop(up),'shield');}
+// The outro (picture only, after the run): leftover barrels pop, an escaping dragon flies off.
+{const g=T.create();g.ended=true;g.running=false;g.foes=[{x:0,z:.3,hp:50,max:50},{boss:true,x:0,z:.3,hp:900,max:T.bossHp}];for(let i=0;i<60;i++)T.outro(g,.05);assert.equal(g.foes.length,0);assert.ok(g.outro>2.9);}
 assert.deepEqual([...new Set(T.dropOrder)].sort(),['chain','frost','heart','laser','multi','power','rocket','shield','wings']);
 // Sun beam burns what is straight ahead, chain lightning jumps to two more barrels, frost slows barrels and adds damage.
 g=T.create();g.row=999;g.hazardAt=999;g.shot=999;T.collect(g,'laser');assert.equal(g.laser,6);g.foes=[{x:0,z:.3,hp:40,kind:0},{x:0,z:.6,hp:40,kind:0},{x:.62,z:.5,hp:40,kind:0}];for(let i=0;i<10;i++)T.step(g,.05);assert.equal(g.score,100,'the beam breaks both barrels in its column');assert.equal(g.foes.length,1);assert.equal(g.foes[0].hp,40);

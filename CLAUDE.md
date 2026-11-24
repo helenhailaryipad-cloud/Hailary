@@ -395,6 +395,21 @@ animate her shot with the image model"):
 - Bots with human-like reaction delays (`/tmp` sim, not in repo): slow 42% win, medium 72%, perfect 80%.
 - Found and fixed: `art-meta.js` still held the 240 px bounds of the old tier guardians, so canvas battles drew only
   the top-left corner of the sharp 600 px art (tier dungeon bosses). `build-fashion-extras.py` now rewrites the bounds.
+Eighth pass (2026-11-24, user: "shorter rules, better buttons, a beautiful interface; the left buttons do nothing; the
+font is primitive; too many shields; the win cuts off into a pop-up"): the lobby is a rules card (`trekLobby()`: the
+`cover-jungle` picture, one line, four icon tips, lives / seconds / best, reward icons, a painted gold Play button
+`.trek-btn`); the HUD is hidden behind it. Pause is a round disc with an svg (`TREK_PAUSE` / `TREK_PLAY`) and opens a
+card with Continue / Leave run (`leaveNow`, no extra question). The left icons were status indicators that looked like
+buttons: now pills `TREK_BUFFS` (icon, name, value, a draining bar for timed bonuses, slide-in when gained), never
+tappable, hidden during the ending. Floating words are drawn by `trekWord()` in WonderDisplay with a dark outline,
+coloured glow and a pop-in; `Trek.say(g,text,x,z,tone)` tones `TREK_TONES` (bonus, bad, block, good, score, gold, big =
+announcements on a ribbon at a fixed height). Bonuses: `dropOrder` has 14 slots with ONE shield; a full-health heart
+becomes frost; a shield never drops while one is up or twice in a row (`g.lastDrop`, `dropSpare`). Ending: rewards are
+paid at once, then the field plays on: a "Victory!" banner (`trekBanner`, rays) comes up as the dragon bursts, the
+chests land and open, then `Trek.outro()` (picture only: leftover barrels pop, an escaping dragon flies off) runs for
+`TREK_OUTRO` 1.7 s (win) / 2.3 s ("Time's up!" / "Out of hearts"), then the shared `resultShow` window (stars = dragon 3
+or sub-bosses beaten, counting points, five chests, prize tiles incl. seals and Moon Chest, Play again / Mini Games).
+The old `#trekPanel.trek-result` panel is gone. CSS under "Jungle Trek polish" at the end of `stage.css`.
 Mini Games (`games()` in `app.js`): covers are preloaded 0.9 s after start (`preloadGameCovers`) and never lazy
 (`eagerArt`); best score/time sit under each title in `.booth-title span` with an explicit colour. The user saw the
 old best-score text as black on the iPad; that could not be reproduced in Chromium.
