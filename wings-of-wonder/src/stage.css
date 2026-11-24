@@ -9375,3 +9375,33 @@ body[data-screen=vow] #stage .toast{top:6%!important;bottom:auto!important;left:
 .vw-petals{top:36cqh}.vw-petals i{animation-duration:2.4s}
 /* home promo: event time left */
 .city-vow .city-glyph{position:relative}.city-vow .city-caption{white-space:nowrap;letter-spacing:-.06em}.city-left-time{position:absolute;left:50%;bottom:-2px;transform:translateX(-50%);padding:0 4px;border-radius:6px;background:#c0285ae6;color:#fff;font:800 normal clamp(7px,1.3cqw,12px)/1.4 Arial,sans-serif;white-space:nowrap;pointer-events:none}
+/* ===== Blossom Vow polish (user 2026-11-24: nav labels cut off; the ranking does not look scrollable; too many button
+   styles; Reina blends into the background) ===== */
+/* ranking: a framed board with a header, a visible scroll bar, a fade and a bouncing arrow while more rows are below,
+   and her own couple pinned at the bottom */
+.vw-board{position:absolute;left:41cqw;right:14cqw;top:27cqh;bottom:29.5cqh;z-index:2;display:flex;flex-direction:column;border-radius:2cqw;background:#fff1f6ee;box-shadow:0 0 0 2px #f3c86a,0 0 0 4px #a2386a,0 6px 16px #6a103066;overflow:hidden}
+.vw-bhead{display:flex;align-items:baseline;justify-content:space-between;gap:6px;padding:.7cqh 1.6cqw;background:linear-gradient(#c84a80,#8a2456);color:#fff}
+.vw-bhead b{font:900 min(2.9cqw,2.1cqh)/1.1 Georgia,serif;color:#ffe9a0}.vw-bhead small{font:700 min(2.1cqw,1.5cqh)/1 Arial,sans-serif;color:#ffd6e6}
+.vw-board .vw-list{position:relative!important;inset:auto!important;flex:1;min-height:0;border-radius:0!important;box-shadow:none!important;background:none!important;padding-right:2.2cqw!important;scrollbar-width:thin;scrollbar-color:#d8487a #ffd6e4;-webkit-mask-image:linear-gradient(#000 85%,#0000);mask-image:linear-gradient(#000 85%,#0000)}
+.vw-board .vw-list::-webkit-scrollbar{width:6px}.vw-board .vw-list::-webkit-scrollbar-track{background:#ffd6e4;border-radius:3px}.vw-board .vw-list::-webkit-scrollbar-thumb{background:#d8487a;border-radius:3px}
+.vw-board.end .vw-list{-webkit-mask-image:none;mask-image:none}
+.vw-more{position:absolute;left:50%;bottom:calc(min(5.4cqw,4cqh) + .6cqh);transform:translateX(-50%);font:900 normal min(4cqw,3cqh)/1 Arial,sans-serif;color:#d8487a;text-shadow:0 1px 0 #fff;animation:vwmore 1.1s ease-in-out infinite;pointer-events:none}
+.vw-board.end .vw-more{display:none}
+@keyframes vwmore{50%{transform:translate(-50%,4px)}}
+.vw-mine{padding:.7cqh 1.6cqw;min-height:min(5.4cqw,4cqh);box-sizing:border-box;display:flex;align-items:center;background:linear-gradient(90deg,#ffe0ea,#fff);border-top:2px solid #f3c86a;font:800 min(2.3cqw,1.7cqh)/1.1 Arial,sans-serif;color:#8a2456}
+.vw-mine b{margin-right:.5em;padding:.15em .5em;border-radius:1em;background:#d8487a;color:#fff}
+/* Reina stands out: a soft light behind her, a white rim and a deeper shadow */
+.vw-stage::before{content:"";position:absolute;left:50%;bottom:-2%;width:115%;height:95%;transform:translateX(-50%);background:radial-gradient(ellipse 50% 48% at 50% 58%,#fff7fbcc,#ffd0e480 45%,#0000 72%);z-index:0;pointer-events:none}
+.vw-stage::after{content:"";position:absolute;left:50%;bottom:-1%;width:70%;height:8%;transform:translateX(-50%);background:radial-gradient(ellipse,#5a0a2a88,#0000 70%);z-index:0}
+.vw-stage .vw-hero{z-index:1;filter:drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 10px #ffe0ee) drop-shadow(0 10px 8px #4a1020aa)!important}
+/* one button family: gold painted plates for actions, violet painted plates for the sub-tabs, round gold-rimmed discs
+   for the corner buttons */
+#stage #main .vw-subs button{min-height:min(6.4cqw,4.8cqh);border:0!important;border-radius:2em!important;background:url(assets/generated/ui-btn-violet.webp) center/100% 100% no-repeat!important;box-shadow:none!important;color:#fff!important;text-shadow:0 1px 0 #3a0a4a!important;font:800 min(2.3cqw,1.7cqh)/1.1 Georgia,serif!important;padding:.5em .6em!important}
+#stage #main .vw-subs button.on{filter:brightness(1.2) drop-shadow(0 0 6px #ffd6ff)}
+#stage #main .vw-room .vw-price{background:url(assets/generated/ui-btn-gold.webp) center/100% 100% no-repeat!important;border:0!important;border-radius:2em!important;box-shadow:none!important;padding:.55em 1.3em!important;color:#5a2a06!important}
+#stage #main .vw-room .vw-help{border:0!important;background:radial-gradient(circle at 40% 32%,#ffd0e2,#c8336e 62%,#7a1440)!important;box-shadow:0 0 0 3px #f3c86a,0 0 0 5px #7a1440,0 3px 8px #0007!important;color:#fff!important;font:900 min(4cqw,3cqh)/1 Georgia,serif!important}
+#stage #main .vw-room :is(.vw-subs,.vw-cta,.vw-cards,.vw-parch) button::before,#stage #main .vw-room :is(.vw-subs,.vw-cta,.vw-cards,.vw-parch) button::after{display:none!important}
+/* bottom nav: labels may wrap to two short lines and always fit their column */
+.vw-nav{grid-template-columns:minmax(0,.75fr) repeat(5,minmax(0,1fr))!important;column-gap:.6cqw}
+#stage #main .vw-nav button{min-width:0;width:100%}
+#stage #main .vw-room .vw-nav small{display:block;width:100%;max-width:none!important;white-space:normal;overflow-wrap:anywhere;font-size:min(2.2cqw,1.6cqh)!important;line-height:1.05!important;min-height:2.1em}

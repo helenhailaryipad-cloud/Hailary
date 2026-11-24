@@ -286,6 +286,11 @@ the round back button. Tab in `vowTab`; the room's class is `vw-tab-<tab>` (do n
   `comp-vow-badges`, `comp-vow-nav` (3 x 2), `comp-vow-shrine`, `comp-vow-couple` (Reina from `leaflight/master.png`
   as reference + an original young man) by `scripts/build-vow-art.py` (+ AVIF copies). Atlases are CSS variables set
   on the page root by `vowArtVars()` so pop-ups can use them. Hosted bundle 32,868,350 bytes (~686 KB spare).
+- Polish (user: "nav labels cut off; unclear the ranking scrolls; too many button styles; Reina blends in"): the
+  ranking is a framed board `.vw-board` (header "Today's couples · Swipe to see all N", visible scroll bar, a fade and a
+  bouncing ▾ until the end, `vowListScroll`; her couple pinned in `.vw-mine`); one button family (gold painted plates
+  for actions incl. pack prices, violet painted plates for the sub-tabs, gold-rimmed round discs for ? and Back); nav
+  labels wrap to two lines; Reina has a soft light behind her, a white rim and a deeper shadow.
 - Not done: Bond Transfer, a real parade with other couples, blessings / wishes in the venue, the reference's outfit
   and weapon-skin rank prizes (rewards are gifts, crystals and bag items), Nearby / Cross-Server players (nobody there).
   All numbers are placeholders.
