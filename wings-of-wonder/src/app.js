@@ -250,7 +250,7 @@ function fashionCard(name,icon,selected,click){
   const m=fashionCardMeta(click);
   return `<button class="fashion-card fx-card r-${m.r} ${m.own?'':'locked'} ${m.worn?'worn':''}" aria-pressed="${selected}" onclick="${click}">${denPlain}<i class="fx-art">${fxBowArt(click)||fxDressArt(click,icon)}</i><b class="fx-rar">${m.r.toUpperCase()}</b>${m.worn?'<i class="fx-tick">✓</i>':m.own?'':'<i class="fx-lock">🔒</i>'}<span>${name}</span></button>`;
 }
-const FX_TABS=[['Dresses','Garment','fit-icon-grove'],['Weapons','Fashion Bow','weapon-style-14'],['Avatar','Avatar',''],['Bubble','Bubble',''],['Hair','Hairstyle','fit-icon-hair-12'],['Wings','Wings','fashion-wing-11'],['Mounts','Mounts','mount-icon-moon-unicorn']];
+const FX_TABS=[['Dresses','Garment','fit-icon-grove'],['Weapons','Bow','weapon-style-14'],['Avatar','Avatar',''],['Bubble','Bubble',''],['Hair','Hair','fit-icon-hair-12'],['Wings','Wings','fashion-wing-11'],['Mounts','Mounts','mount-icon-moon-unicorn']];
 // Avatar frames and chat bubbles (user photos of the reference's Fashion: Avatar and Bubble tabs). They come from the
 // Supreme Sets; here they are shown, activated / tiered up (when their set is on sale) and worn.
 let decoPick={Avatar:'',Bubble:''};

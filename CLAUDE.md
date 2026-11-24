@@ -788,6 +788,9 @@ from ONE atlas `fashion-bows` (bow laid diagonally, 10 x 7 of 200 px, order `FX_
 `--fx-bows`), built by `scripts/build-fashion-bows.py`; Original bow (= the Leaflight bow, also Azure Laurel) and
 Frostglass got clean item paintings (`art-source/fashion-cards/bow-{original,frost}.webp`, image-model edits of the bow
 cut from a render). A new bow needs its number in `FX_BOW_IDS` and a rebuild.
+Tabs like notebook index tabs (user): all seven in one fixed row (grid, no scrolling), short labels (Garment, Bow,
+Avatar, Bubble, Hair, Wings, Mounts), the chosen tab taller, in the colour of the card sheet and joined to it; the
+others lower and darker.
 Found, not fixed: the Skin room (`citySkin`) layout is
 broken (overlapping title, blank square, cut labels) - it was like that before this pass.
 
