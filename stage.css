@@ -9472,3 +9472,41 @@ body[data-screen=vow] #stage .toast{top:6%!important;bottom:auto!important;left:
 #stage #modal .vp .vp-pair p small{font:700 12px/1.25 Arial,sans-serif!important;color:#b0507a!important}
 #stage #modal .vp .vp-pair p b{font:900 15px/1.15 Georgia,serif!important}
 @media (min-width:800px){#stage #modal.den-pop:has(.vp){max-width:520px!important;width:520px!important}.vp{font-size:14px}.vp-face{width:60px;height:60px}}
+/* Blossom Vow sub-tab pop-ups (Partner Bond, Bond Transfer, Bond Gift, Bond Reward): same .vp card family */
+#stage #modal .vp :is(.vp-wide,.vp-pay){display:grid;place-items:center;gap:1px;width:100%;min-height:54px;padding:0 10px 4px;border:0;border-radius:2em;background:url(assets/generated/ui-btn-gold.webp) center/100% 100% no-repeat;box-shadow:none;color:#5a2a06;text-shadow:0 1px 0 #fff6c8;font:900 18px/1 Georgia,serif}
+#stage #modal .vp .vp-pay.alt{background-image:url(assets/generated/ui-btn-violet.webp);color:#fff;text-shadow:0 2px 0 #3a0a4a}
+#stage #modal .vp .vp-pay span{display:inline-flex;align-items:center;gap:6px}#stage #modal .vp .vp-pay small{font:800 10.5px/1 Arial,sans-serif;opacity:.9}
+#stage #modal .vp .vp-pay :is(img,.vw-ico){width:22px!important;height:22px!important}
+.vp-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.vp-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:14px;background:#fff;box-shadow:inset 0 0 0 1.5px #f6c7d8;font:800 13px/1 Arial,sans-serif;color:#8a2a52}
+.vp-hearts.big i{font-size:20px;margin-left:2px}
+.vp-lock{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;padding:10px 12px;border-radius:16px;background:linear-gradient(90deg,#fff,#ffeef4);box-shadow:inset 0 0 0 1.5px #f3c86a}
+.vp-lock .vw-ico.big{width:52px!important;height:52px!important}
+.vp-lock b{display:block;font:900 15px/1.1 Georgia,serif;color:#8a1a48}.vp-lock small{font:700 11px/1.2 Arial,sans-serif;color:#9a5a72}
+.vp-bar{display:block;height:9px;margin:5px 0 3px;border-radius:6px;background:#f8cadb;overflow:hidden;box-shadow:inset 0 1px 2px #8a1a4844}.vp-bar u{display:block;height:100%;background:linear-gradient(90deg,#ff8ab8,#e8326a)}
+.vp-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.vp-stats span{display:grid;justify-items:center;gap:2px;padding:8px 4px;border-radius:14px;background:#fff;box-shadow:inset 0 0 0 1.5px #f6c7d8}
+.vp-stats small{font:800 10px/1 Arial,sans-serif;letter-spacing:.1em;color:#b0507a}.vp-stats b{font:900 18px/1 Georgia,serif;color:#6a1a3a}.vp-stats em{font:800 11px/1 Arial,sans-serif;font-style:normal;color:#2a9a5a}
+.vp-own{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.vp-own span{display:inline-flex;align-items:center;gap:4px;padding:4px 10px 4px 4px;border-radius:2em;background:#fff;box-shadow:inset 0 0 0 1.5px #f3c86a;font:900 13px/1 Arial,sans-serif;color:#6a1a3a}
+.vp-own .vw-ico{width:26px!important;height:26px!important}
+.vp-gico{display:grid;place-items:center;width:52px;height:52px;border-radius:14px;box-shadow:inset 0 0 0 2px #fff8}
+.vp-gico.c-b{background:linear-gradient(170deg,#7ec3ff,#2a6ad0)}.vp-gico.c-p{background:linear-gradient(170deg,#c99aff,#7a3ae0)}.vp-gico.c-o{background:linear-gradient(170deg,#ffc07a,#e0661a)}
+.vp-gico .vw-ico.big{width:42px!important;height:42px!important}
+#stage #modal .vp .vp-price span{display:inline-flex;align-items:center;gap:4px}#stage #modal .vp .vp-price :is(img,.vw-ico,.gpt-icon){width:18px!important;height:18px!important}
+.vp-pair.one{grid-template-columns:1fr;text-align:center}.vp-pair.one p{margin:0}
+.vp-card.rw{grid-template-columns:86px 1fr}
+.vp-card.rw.top.t1{background:linear-gradient(90deg,#fff1c2,#fff)}.vp-card.rw.top.t2{background:linear-gradient(90deg,#e4ecff,#fff)}.vp-card.rw.top.t3{background:linear-gradient(90deg,#ffe2cf,#fff)}
+.vp-rank{display:grid;justify-items:center;gap:2px;font:900 13px/1 Georgia,serif;color:#8a1a48}.vp-rank .vw-badge{width:46px!important}
+.vp-card.rw .vw-tiles{display:flex;flex-wrap:wrap;gap:5px}
+#stage #modal .vp .vp-who button:disabled{opacity:.35}
+#stage #modal .vp .vp-who button small{font:800 11px/1.1 Arial,sans-serif!important;color:#8a2a52!important;text-shadow:none!important}
+#stage #modal .vp .vp-who button{min-height:0!important;border:0!important;background:none!important;box-shadow:none!important;padding:0!important}
+#stage #modal .vp .vp-rank b,#stage #modal .vp .vp-row>span:first-child{color:#8a1a48!important;font:900 13px/1.1 Georgia,serif!important}
+#stage #modal .vp .vp-pay small{color:inherit!important}
+#stage #modal .vp .vw-tile{width:46px!important;height:46px!important;min-width:0!important;flex:none}
+#stage #modal .vp .vw-tile .vw-ico,#stage #modal .vp .vw-tile img,#stage #modal .vp .vw-tile .gpt-icon{width:34px!important;height:34px!important}
+#stage #modal .vp .vp-own b{display:inline!important;font:900 13px/1 Arial,sans-serif!important;color:#6a1a3a!important}
+#stage #modal .vp .vw-tile b{position:absolute;right:-3px;bottom:-3px;min-width:16px;padding:1px 4px;border-radius:8px;background:#6a1a3a;color:#fff;font:900 10px/1.3 Arial,sans-serif!important;text-align:center}
+#stage #modal .vp .vp-list{outline:0!important}
+.vw-pair .portrait-badge{border-radius:50%!important;box-shadow:0 0 0 2.5px #f3c86a,0 0 0 4px #b03a6e,0 3px 6px #6a123855!important;border:0!important}

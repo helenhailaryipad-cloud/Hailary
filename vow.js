@@ -63,13 +63,23 @@ const Vow = {
       v.day = this.day(now); v.pts = 0; v.back = 0; v.sends = 0; delete v.frozen; v.goal = []; v.buys = {}; v.drops = 0; v.venue = 0;
       v.gifts.rose = Math.min(9999, v.gifts.rose + this.freeRoses);
     }
-    if (v.period !== this.period(now)) { v.period = this.period(now); v.partner = null; v.bond = 0; }
+    if (v.period !== this.period(now)) { v.period = this.period(now); v.partner = null; v.bond = 0; delete v.moved; }
     if (this.closed(now)) settle();
     return { v, due };
   },
   rewardFor(rank, score) { const t = this.ranks.find(r => rank >= r.from && rank <= r.to); return t ? t.give : score >= this.partNeed ? this.part.give : null; },
   // ---- partner ----
   bond(v, id) { if (v.partner || !id) return false; v.partner = id; v.bond = 0; return true; },
+  // Bond Transfer: once per event week she may pass her vow to another partner for a fee (heart crystals or prisms).
+  // Today's Bond Points stay with her; the new partner starts with no bond and no return gifts yet.
+  transferCost: { crystal: 30, prisms: 120 },
+  transfer(v, id, pay, wallet) {
+    if (!v.partner || !id || id === v.partner || v.moved) return { ok: false, err: v.moved ? 'once' : 'who' };
+    const c = this.transferCost[pay]; if (!c) return { ok: false, err: 'pay' };
+    if (pay === 'crystal') { if (v.crystal < c) return { ok: false, err: 'crystal' }; v.crystal -= c; }
+    else { if ((wallet.scales || 0) < c) return { ok: false, err: 'prisms' }; wallet.scales -= c; }
+    const from = v.partner; v.partner = id; v.bond = 0; v.back = 0; v.moved = true; return { ok: true, from };
+  },
   // One send: n gifts of a kind to `to` (the partner or any friend), with a short message. Applies everything.
   send(v, to, gift, n = 1, msg = '', now = Date.now()) {
     const g = this.gifts[gift]; n = Math.floor(n);
@@ -132,7 +142,7 @@ const Vow = {
     const int = (n, m = 1e9) => Number.isInteger(n) && n >= 0 && n <= m, obj = o => !!o && typeof o === 'object' && !Array.isArray(o), id = x => typeof x === 'string' && /^[a-z]{1,16}$/.test(x);
     const allBuys = [...this.wares, ...this.packs];
     return obj(v) && Number.isInteger(v.period) && Number.isInteger(v.day) && (v.partner === null || id(v.partner)) && int(v.bond) && int(v.pts) && int(v.back) && int(v.sends, 1e5)
-      && (v.frozen === undefined || int(v.frozen)) && obj(v.gifts) && this.giftIds.every(k => int(v.gifts[k], 9999)) && Object.keys(v.gifts).length === 3 && int(v.crystal, 1e6) && int(v.lock)
+      && (v.frozen === undefined || int(v.frozen)) && (v.moved === undefined || v.moved === true) && obj(v.gifts) && this.giftIds.every(k => int(v.gifts[k], 9999)) && Object.keys(v.gifts).length === 3 && int(v.crystal, 1e6) && int(v.lock)
       && Array.isArray(v.goal) && new Set(v.goal).size === v.goal.length && v.goal.every(i => int(i, this.goals.length - 1))
       && obj(v.buys) && Object.entries(v.buys).every(([k, n]) => { const w = allBuys.find(x => x.id === k); return !!w && int(n, w.limit); })
       && int(v.drops, this.dropDaily) && int(v.venue, this.venueCeremony) && Number.isInteger(v.paid) && Number.isInteger(v.buff)
@@ -189,16 +199,18 @@ function vowChrome(title, sub, body, extra = '') {
 }
 // The atlases as CSS variables on the page root, so pop-ups (outside the room) can use them too.
 function vowArtVars() { const r = document.documentElement; if (!r?.style?.setProperty) return; for (const [k, id] of [['--vwico', 'comp-vow-icons'], ['--vwnav', 'comp-vow-nav'], ['--vwbadge', 'comp-vow-badges'], ['--vwcouple', 'comp-vow-couple']]) r.style.setProperty(k, `url('${artPath(id)}')`); }
-function vowGo(tab) { vowTab = tab; if (typeof screenChangedAt !== 'undefined') screenChangedAt = Date.now(); showVow(); }
+function vowGo(tab) { if (tab === 'bond') return vowBondPop(); if (tab === 'shop') return vowShopPop(); vowTab = tab; if (typeof screenChangedAt !== 'undefined') screenChangedAt = Date.now(); showVow(); }
 function showVow() {
   const v = vowState(); save(); vowStop(); vowArtVars();
   if (vowTab === 'goal') vowGoal(v); else if (vowTab === 'ceremony') vowCeremony(v); else if (vowTab === 'test') vowTest(v); else if (vowTab === 'witness') vowWitness(v);
-  else if (vowTab === 'bond') vowBond(v); else if (vowTab === 'shop') vowShop(v); else if (vowTab === 'venue') vowVenueView(v); else vowMain(v);
+  else if (vowTab === 'venue') vowVenueView(v); else vowMain(v);
   if (vowTab !== 'venue') vowTimer = setInterval(vowTick, 1000);
 }
+// The four buttons under the main page all open pop-ups in the same .vp style (user: "some say coming soon, some
+// change the page - clean it up, make them consistent").
 function vowSubTabs() {
-  return `<div class="vw-subs">${[['bond', 'Partner Bond', 'vowGo(\'bond\')'], ['transfer', 'Bond Transfer', 'vowSoon(\'Bond Transfer\')'], ['shop', 'Bond Gift', 'vowGo(\'shop\')'], ['reward', 'Bond Reward', 'vowRewards()']]
-    .map(([id, t, f]) => `<button class="${vowTab === id ? 'on' : ''}" onclick="${f}">${denPlain}${t}</button>`).join('')}</div>`;
+  return `<div class="vw-subs">${[['Partner Bond', 'vowBondPop()'], ['Bond Transfer', 'vowTransferPop()'], ['Bond Gift', 'vowShopPop()'], ['Bond Reward', 'vowRewards()']]
+    .map(([t, f]) => `<button onclick="${f}">${denPlain}${t}</button>`).join('')}</div>`;
 }
 function vowListScroll(el) { el.parentElement?.classList.toggle('end', el.scrollTop + el.clientHeight >= el.scrollHeight - 4); }
 function vowMain(v) {
@@ -244,22 +256,45 @@ function vowWitness(v) {
    <button class="vw-go" onclick="vowGo('venue')">${denPlain}Enter the Venue</button>`;
   $('#main').innerHTML = vowChrome('Oath Witness', 'A sincere oath, witnessed by all', body);
 }
-function vowBond(v) {
-  const p = v.partner, lk = Vow.lockLevel(v.lock), now = Vow.lockBonus(lk.lv), next = Vow.lockBonus(Math.min(Vow.lockMax, lk.lv + 1)), hearts = p && WonderGear.heartsOf ? WonderGear.heartsOf(S, p) : 0;
-  const hs = Array.from({ length: 5 }, (_, i) => `<i class="${hearts >= i + 1 ? 'on' : hearts > i ? 'half' : ''}">♥</i>`).join('');
-  const body = `<div class="vw-panel"><div class="vw-duo"><span>${typeof portrait === 'function' ? portrait('reina') : ''}<b>${esc(S.name || 'Reina')}</b></span><i class="vw-heart">♥</i>
-    <span>${p ? vwFace(p) + `<b>${esc(vwName(p))} <small>AI</small></b>` : `<button class="vw-claim" onclick="vowFindPop()">${denPlain}Find a partner</button>`}</span></div>
-   ${p ? `<div class="vw-hearts">${hs}</div><p class="vw-line">Bond this event: <b>${fmt(v.bond)}</b> intimacy · today's team points <b>${fmt(Vow.score(v))}</b></p>` : '<p class="vw-line">One partner per event week. Only mutual gifts inside the team count, and they count double.</p>'}
-   <div class="vw-lock">${vwIco('lock', 'big')}<div><b>Love Lock Lv. ${lk.lv}</b><span class="vw-bar"><u style="width:${lk.need ? lk.into / lk.need * 100 : 100}%"></u></span><small>${lk.need ? fmt(lk.into) + ' / ' + fmt(lk.need) + ' EXP' : 'Max level'}</small></div></div>
-   <div class="vw-stats">${Object.keys(Vow.lockStats).map(k => `<span>${{ attack: 'ATK', health: 'HP', defense: 'DEF' }[k]} <b>+${fmt(now[k])}</b>${lk.lv < Vow.lockMax ? ` <em>▲ ${fmt(next[k])}</em>` : ''}</span>`).join('')}</div>
-   <p class="vw-line">Every gift adds Love Lock EXP: rose ${Vow.gifts.rose.lock}, ring ${Vow.gifts.ring.lock}, rosebox ${Vow.gifts.box.lock}.</p></div>${vowSubTabs()}`;
-  $('#main').innerHTML = vowChrome('Partner Bond', '', body);
+function vpHead(t) { return `<div class="vp-head"><h2>${t}</h2><span class="vp-petal l"></span><span class="vp-petal r"></span></div>`; }
+function vpPair(v, sub) { const p = v.partner; return `<div class="vp-pair"><span class="vp-face me">${portrait('reina')}</span><i>♥</i><span class="vp-face">${p ? vwFace(p) : '<b class="vp-q">?</b>'}</span><p><b>${p ? esc(S.name || 'Reina') + ' &amp; ' + esc(vwName(p)) : 'No partner yet'}</b><small>${sub}</small></p></div>`; }
+function vowBondPop() {
+  const v = vowState(), p = v.partner, lk = Vow.lockLevel(v.lock), now = Vow.lockBonus(lk.lv), next = Vow.lockBonus(Math.min(Vow.lockMax, lk.lv + 1));
+  popup(`<div class="vp vp-bond">${vpHead('Partner Bond')}${vpPair(v, p ? 'Bond this event: ' + fmt(v.bond) + ' intimacy · team ' + fmt(Vow.score(v)) + ' pts' : 'One partner per event week')}
+   ${p ? `<div class="vp-row"><span>Intimacy</span><span class="vp-hearts big">${vowHearts(p)}</span></div>` : `<button class="vp-wide" onclick="vowFindPop()">${denPlain}Find a partner</button>`}
+   <div class="vp-lock">${vwIco('lock', 'big')}<div><b>Love Lock Lv. ${lk.lv}</b><span class="vp-bar"><u style="width:${lk.need ? lk.into / lk.need * 100 : 100}%"></u></span><small>${lk.need ? fmt(lk.into) + ' / ' + fmt(lk.need) + ' EXP to Lv. ' + (lk.lv + 1) : 'Max level'}</small></div></div>
+   <div class="vp-stats">${Object.keys(Vow.lockStats).map(k => `<span><small>${{ attack: 'ATK', health: 'HP', defense: 'DEF' }[k]}</small><b>+${fmt(now[k])}</b>${lk.lv < Vow.lockMax ? `<em>▲ ${fmt(next[k])}</em>` : ''}</span>`).join('')}</div>
+   <p class="vp-lead">Every gift raises the Love Lock for good: rose +${Vow.gifts.rose.lock}, ring +${Vow.gifts.ring.lock}, rosebox +${Vow.gifts.box.lock} EXP.</p>
+   ${p ? `<button class="vp-wide" onclick="vowSendPop()">${denPlain}Send the Oath</button>` : ''}</div>`);
 }
-function vowShop(v) {
-  const rows = Vow.wares.map(w => { const left = Vow.left(v, w.id), [ck, cn] = Object.entries(w.cost)[0], cur = ck === 'gold' ? uiIcon('gold') : ck === 'prisms' ? `<img src="${artPath('hud-prisms')}" alt="">` : vwIco('crystal');
-    return `<div class="vw-ware">${vwIco(w.item, 'big')}<div><b>${Vow.names[w.item]}</b><small>${left}/${w.limit} left today</small></div><button class="vw-price" ${left ? '' : 'disabled'} onclick="vowBuy('${w.id}')">${denPlain}<span>${cur}${fmt(cn)}</span></button></div>`; }).join('');
-  const own = Vow.giftIds.map(k => `<span>${vwIco(k)}<b>${fmt(v.gifts[k])}</b></span>`).join('');
-  $('#main').innerHTML = vowChrome('Bond Gift', '', `<div class="vw-panel"><div class="vw-own">${own}<span>${vwIco('crystal')}<b>${fmt(v.crystal)}</b></span></div><div class="vw-wares">${rows}</div><p class="vw-line">+${Vow.freeRoses} free Red Roses every day. Limits reset at 00:00 UTC.</p></div>${vowSubTabs()}`);
+let vowMoveTo = '';
+function vowTransferPop() {
+  const v = vowState(), soc = WonderGear.socialState ? WonderGear.socialState(S) : { friends: [] }, p = v.partner;
+  if (!p) return popup(`<div class="vp">${vpHead('Bond Transfer')}${vpPair(v, 'Bond with someone first')}<p class="vp-lead">Bond Transfer passes your vow to another gentleman. Find a partner first.</p><button class="vp-wide" onclick="vowFindPop()">${denPlain}Find a partner</button></div>`);
+  const men = vowMen(Object.keys(vwFolk())).filter(id => id !== p); if (!men.includes(vowMoveTo)) vowMoveTo = men.find(id => soc.friends.includes(id)) || men[0] || '';
+  const c = Vow.transferCost;
+  popup(`<div class="vp vp-move">${vpHead('Bond Transfer')}${vpPair(v, v.moved ? 'Transfer already used this event' : 'Once per event week')}
+   <p class="vp-lead">Pass your vow to another gentleman. Today's Bond Points stay yours; the new bond starts fresh.</p>
+   <div class="vp-who">${men.map(id => `<button class="${id === vowMoveTo ? 'on' : ''}" ${v.moved ? 'disabled' : ''} onclick="vowMoveTo='${id}';vowTransferPop()">${denPlain}${vwFace(id)}<small>${esc(vwName(id))}</small></button>`).join('')}</div>
+   ${v.moved ? '<p class="vp-empty">You have already transferred your vow this event. A new event starts with a free choice.</p>' : `<div class="vp-two">
+    <button class="vp-pay" onclick="vowTransfer('crystal')">${denPlain}<span>${vwIco('crystal')}${fmt(c.crystal)}</span><small>Heart crystals · you have ${fmt(v.crystal)}</small></button>
+    <button class="vp-pay alt" onclick="vowTransfer('prisms')">${denPlain}<span><img src="${artPath('hud-prisms')}" alt="">${fmt(c.prisms)}</span><small>Prisms · you have ${fmt(S.scales || 0)}</small></button></div>`}</div>`);
+}
+function vowTransfer(pay) {
+  const r = Vow.transfer(S.vow, vowMoveTo, pay, S); if (!r.ok) return toast({ once: 'Already transferred this event', who: 'Choose a new partner', crystal: 'Not enough heart crystals', prisms: 'Not enough prisms' }[r.err] || 'Cannot transfer');
+  if (WonderGear.socialNote) WonderGear.socialNote(S, 'Blossom Vow passed from ' + vwName(r.from) + ' to ' + vwName(vowMoveTo) + '.');
+  save(); document.querySelector('#modal')?.close?.(); showVow(); toast(vwName(vowMoveTo) + ' (AI) is your partner now');
+}
+function vowShopPop() {
+  const v = vowState();
+  const rows = Vow.wares.map(w => { const left = Vow.left(v, w.id), [ck, cn] = Object.entries(w.cost)[0], cur = ck === 'gold' ? uiIcon('gold') : ck === 'prisms' ? `<img src="${artPath('hud-prisms')}" alt="">` : vwIco('crystal'), g = Vow.gifts[w.item];
+    return `<div class="vp-card"><span class="vp-gico c-${g ? g.card : 'b'}">${vwIco(w.item, 'big')}</span><div class="vp-info"><b>${Vow.names[w.item]}</b><span class="vp-tag">${g ? '♥ +' + fmt(g.pts) + ' · 🔒 +' + g.lock : ''}</span><span class="vp-tag">${left}/${w.limit} left today · you have ${fmt(v.gifts[w.item] || 0)}</span></div><button class="vp-invite vp-price" ${left ? '' : 'disabled'} onclick="vowBuyPop('${w.id}')">${denPlain}${left ? `<span>${cur}${fmt(cn)}</span>` : 'Sold out'}</button></div>`; }).join('');
+  popup(`<div class="vp vp-shop">${vpHead('Bond Gift')}<div class="vp-own">${Vow.giftIds.map(k => `<span>${vwIco(k)}<b>${fmt(v.gifts[k])}</b></span>`).join('')}<span>${vwIco('crystal')}<b>${fmt(v.crystal)}</b></span></div>
+   <div class="vp-list">${rows}</div><p class="vp-lead">+${Vow.freeRoses} free Red Roses every day · limits reset at 00:00 UTC.</p></div>`);
+}
+function vowBuyPop(id) {
+  const r = Vow.buy(S.vow, id, S); if (!r.ok) return toast({ limit: 'Sold out for today', gold: 'Not enough gold', prisms: 'Not enough prisms', crystal: 'Not enough heart crystals' }[r.err] || 'Cannot buy');
+  vowPay(r.give); save(); vowShopPop(); toast('Bought!');
 }
 function vowSoon(name) { popup(`<div class="vw-pop"><h2>${name}</h2><p class="vw-note">Coming soon.</p></div>`); }
 function vowRules() {
@@ -268,9 +303,9 @@ function vowRules() {
 }
 function vowRewards() {
   const v = S.vow, rank = Vow.score(v) ? Vow.rankOf(Vow.score(v), v.day, Date.now()) : 0;
-  const rows = Vow.ranks.map(t => [t.from === t.to ? 'No.' + t.from : 'No.' + t.from + '-' + t.to, t.give]).concat([['Reach ' + Vow.partNeed + ' pts', Vow.part.give]]);
-  popup(`<div class="vw-pop"><h2>Ranking Reward</h2><p class="vw-note">Rewards are sent by mail after 21:00 UTC · Current reward: <b>${rank ? 'No.' + rank : 'not ranked'}</b></p>
-   <div class="vw-rlist">${rows.map(([t, g]) => `<div class="vw-rrow"><b>${t}</b><div class="vw-tiles">${vwTiles(g)}</div></div>`).join('')}</div>${v.last ? `<p class="vw-note">Last closed day: ${v.last.rank ? 'No.' + v.last.rank : 'not ranked'} · ${fmt(v.last.score)} pts</p>` : ''}</div>`);
+  const rows = Vow.ranks.map(t => [t.from === t.to ? 'No.' + t.from : 'No.' + t.from + '–' + t.to, t.give, t.from]).concat([['Reach ' + fmt(Vow.partNeed), Vow.part.give, 99]]);
+  popup(`<div class="vp vp-rew">${vpHead('Bond Reward')}<div class="vp-pair one"><p><b>Current reward: ${rank ? 'No.' + rank : 'not ranked'}</b><small>Sent by mail after 21:00 UTC${v.last ? ' · last day: ' + (v.last.rank ? 'No.' + v.last.rank : 'not ranked') + ', ' + fmt(v.last.score) + ' pts' : ''}</small></p></div>
+   <div class="vp-list">${rows.map(([t, g, n]) => `<div class="vp-card rw ${n <= 3 ? 'top t' + n : ''}"><span class="vp-rank">${n <= 3 ? `<i class="vw-badge" style="background-position:${(n - 1) * 50}% 0"></i>` : ''}<b>${t}</b></span><div class="vw-tiles">${vwTiles(g)}</div></div>`).join('')}</div></div>`);
 }
 // Searching Partner (user: "opposite sex; much better, stylish pop-ups"): only young men can bond with Reina
 // (`VOW_PARTNER_SEX`). Friends = her male friends, Guild = male guild members, Nearby = every other male AI
