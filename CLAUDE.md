@@ -763,6 +763,10 @@ fixed). Hosted bundle 31.9 MB (about 1.7 MB spare). Chat preview packs hair laye
 All bundled AVIF copies over 40 KB were re-encoded at quality 32 where that saved 15%+ (193 files, -5.6 MB raw; spot
 checks looked identical): hosted bundle 28.1 MB. Chat preview packs `fit-control-*-erase` (`pack-erase.js`) and
 trek pickups / pairs tiles (`pack-minis.js`) to stay under 511 files.
+Big figure (2026-11-24, user photo of the reference next to ours, figure circled): the card grid row is 21%, the
+stage slides under the top bar (`margin-top:-6cqw`), the figure fills it down to the CP plate (feet on the plate; an
+old `height:100%` rule had pushed the feet under the panel), round side buttons without boxes, no name over a figure
+(the panel names the item; Avatar / Bubble keep it). Rules at the end of `stage.css`.
 Found, not fixed: the Skin room (`citySkin`) layout is
 broken (overlapping title, blank square, cut labels) - it was like that before this pass.
 
