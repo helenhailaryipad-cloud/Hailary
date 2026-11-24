@@ -1097,6 +1097,8 @@ vm.runInContext(`
  trailClaim('flower');if(!S.trail.got.g.includes('flower'))throw Error('Gold claim');trailTab='d';cityTrail();trailClaimAll();trailMilestone(0);trailTab='s';
  S.gold+=5000;save();S.gold-=4000;save();if(S.trail.c.goldspend!==4000)throw Error('Gold spending counts');
  const v0=Rites.vouchers(S),w0=S.trail.c.wheel||0;S.adventure={...WonderAdventure.fresh(),pending:3};for(let i=0;i<3;i++)WonderAdventure.spin(S,()=>6/12+.01);if(Rites.vouchers(S)!==v0+90||S.trail.c.wheel!==w0+3)throw Error('Wheel pays Starlit Vouchers and counts');const tk=Rites.tickets(S,Rites.rite(Rites.period()).id);const vv=Rites.vouchers(S);riteVoucher();riteRedeem();if(Rites.vouchers(S)!==0||Rites.tickets(S,Rites.rite(Rites.period()).id)!==tk+vv)throw Error('Vouchers swap 1:1');
+ trailPage='shop';S.trail.coins=5000;cityTrail();if(!$('#main').innerHTML.includes('Wayfarer Shop')||!$('#main').innerHTML.includes('tq-ware'))throw Error('Wayfarer Shop page');
+ S.trail.shop=[{kind:'frame',id:'rose',n:1,price:900,sold:false,off:false},{kind:'bubble',id:'rose',n:1,price:900,sold:false,off:true}];cityTrail();trailBuy(0);if(WonderGear.decoCopies(S,'frame','rose')!==1)throw Error('Shop frame copy');trailBuy(1);if(WonderGear.decoCopies(S,'bubble','rose')!==1||!S.trail.shop.every(w=>!w.sold))throw Error('Shop bubble and refresh');trailRefresh();trailObtain();trailPage='quests';if(!valid(S))throw Error('valid after shop');
  go('home');if(!$('#main').innerHTML.includes("go('cityTrail')"))throw Error('Daily opens Wayfarer Quests');if(!valid(S))throw Error('valid');}
 `,context);
 console.log('PASS: Wayfarer Quests: tasks, Silver / Gold / Diamond free tabs, claims, spending and wheel counters, chest track, vouchers, Daily button.');

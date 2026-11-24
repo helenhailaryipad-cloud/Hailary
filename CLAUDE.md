@@ -268,6 +268,13 @@ the home "Daily" button (the old `cityDaily` shell is unused).
   Spend goals are counted by `trailSpend()` (called from `save()`, compares balances). The reference's "Top-up EUR"
   goals are left out (no real money). Wayfarer EXP fills a DAILY chest track (`Trail.track`, 300 ... 6,000; reset
   00:00 UTC with the tasks). The old monthly pass is gone; `pass` / `season` in old saves still validate.
+- Wayfarer Shop (user photo of the reference's Adventure Shop): every claim pays Wayfarer Coins (`give.coins` 20 / 30 / 40,
+  kept across days in `S.trail.coins`); bottom switch Quests / Wayfarer Shop (`trailPage`). Six wares from `Trail.wares`
+  (theme avatar frames and chat bubbles by rarity, bag items, Starlit Vouchers), one at -30%, sold-out stamp, auto refresh
+  when all are sold, manual refresh 100 coins, Obtain pop-up. A frame / bubble ware adds a copy (first activates and
+  wears it, repeats raise its tier; `Trail.grant` through the exported `supremeState` / `supremePack`). Optional
+  `S.trail.shop` (validated). Coin icon `comp-trail-coin` (image model). The reference's face accessories ("Glasses (F)")
+  are a slot we do not have; its Pet Pass tab is not built.
 - Gacha tickets drip in: the quests above pay tickets of the running rite; +20 Starlit Vouchers per dungeon guardian
   (`Trail.dungeonTickets`) and two slots of the existing boss wheel (`WonderAdventure.wheel`, a free spin per guardian
   win) pay 30 / 60 vouchers.

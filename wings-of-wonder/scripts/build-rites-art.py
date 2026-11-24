@@ -46,3 +46,6 @@ save('comp-trail-banner', b, 78, 34)
 # Starlit Voucher (universal rite ticket) icon.
 v = Image.open(SRC/'rites'/'voucher.png').convert('RGBA'); a = np.array(v); a[a[..., 3] < 24] = 0; v = Image.fromarray(a); v = v.crop(v.getbbox()); v.thumbnail((176, 176), Image.Resampling.LANCZOS)
 c = Image.new('RGBA', (192, 192)); c.alpha_composite(v, ((192-v.width)//2, (192-v.height)//2)); save('comp-rites-voucher', c, 88, 50)
+# Wayfarer Coin (trail.js shop currency).
+c = Image.open(SRC/'trail'/'coin.png').convert('RGBA'); a = np.array(c); a[a[..., 3] < 24] = 0; c = Image.fromarray(a); c = c.crop(c.getbbox()); c.thumbnail((120, 120), Image.Resampling.LANCZOS)
+t = Image.new('RGBA', (128, 128)); t.alpha_composite(c, ((128-c.width)//2, (128-c.height)//2)); save('comp-trail-coin', t, 88, 50)
