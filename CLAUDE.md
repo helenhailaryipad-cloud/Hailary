@@ -238,6 +238,14 @@ User sent twelve photos of the reference's pet siege (no text). Home promo "Pet 
   starts), Siege Quest (three daily quests), Point Rewards (50 ... 800), Rankings (40 simulated AI). Faction points =
   hers + simulated ally AI (`Siege.allyAi`). Optional save field `S.siege` (`Siege.valid` from `valid()`).
 - Art (image model): `art-source/siege/{map,hall}.webp` by `scripts/build-siege-art.py`. Placeholders throughout.
+- Reward tabs (2026-11-24, four more photos of the reference's Reward Preview): four factions take part
+  (`Siege.factions`: Moonwing hers, Sunmane the enemy, Tidefin and Stormhorn simulated; `factionPoints`, `factionRank`).
+  Reward Preview (`siegePreview(tab,fac)`) has Individual Points (one page per final place of her faction, "Now" on
+  the current one; counts scaled by `factionMul`, `scaled`), Faction Ranking (`factionRewards`, paid to every Moonwing
+  member at the end on top of the personal reward) and Daily Reward (`daily.win` / `daily.lose`: each UTC day her faction's
+  battle against Sunmane is won if the simulated ally share plus her points that day reach the enemy's, `dayScore`,
+  `dayWin`; `Siege.roll` returns `daily` once when the day turns and `siegeState()` pays it). Personal tiers are
+  1 / 2-3 / 4-10 / 11-999. No new save fields.
 
 ## Mini game rotation (2026-11-23)
 User: "all these mini games except fishing take turns, each runs 2-3 days, then another; rankings go by them".

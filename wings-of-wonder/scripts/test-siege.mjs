@@ -19,5 +19,10 @@ v.points=120;assert.ok(G.claimPoint(v,0));assert.ok(G.claimPoint(v,1));assert.eq
 const n=G.roll(v,T0+864e5,500).v;assert.equal(n.used.length,0);assert.equal(n.qdone.length,0);assert.equal(n.hp['3:2'],0);
 // Event end pays the ranking and starts fresh.
 const e=G.roll(v,G.ends(v.period)+1000,500);assert.equal(e.v.points,0);assert.ok(e.due&&e.due.rank>=1);assert.ok(G.valid(e.v));
+assert.ok(e.due.faction>=1&&e.due.faction<=4&&Object.keys(e.due.give).length>0,'end pays the faction place');
+// A new UTC day settles yesterday's faction battle once: a win or a loss reward.
+const dd=G.roll(v,T0+864e5,500);assert.ok(dd.daily&&(dd.daily.give===G.daily.win||dd.daily.give===G.daily.lose));assert.equal(G.roll(dd.v,T0+864e5+60e3,500).daily,null);
+// Higher faction place, larger personal reward; four factions ranked 1-4.
+assert.ok(G.scaled({chest2:2},1).chest2>G.scaled({chest2:2},4).chest2);assert.equal(G.factionPoints(100,v.period,T0+864e5).map(f=>f.rank).join(),'1,2,3,4');
 assert.ok(!G.valid({...v,hp:{'9:9':5}}));assert.ok(G.field(v.period,T0+5*864e5).every(x=>x.ai));
-console.log('PASS Siege: defenders, attacks and points, daily pet rest, breaks and bonus, quests, point rewards, day roll, event end, validation');
+console.log('PASS Siege: defenders, attacks and points, daily pet rest, breaks and bonus, quests, point rewards, day roll, event end, faction place and daily battle rewards, validation');

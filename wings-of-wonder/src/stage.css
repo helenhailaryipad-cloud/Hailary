@@ -9188,3 +9188,23 @@ html body .wr-end .td-gear{display:flex;flex-wrap:wrap;justify-content:center;ga
 html body .wr-end .td-gear .reward{min-height:0!important;padding:4px 12px!important;font:700 14px/1.2 var(--font-story)!important;border-radius:20px!important}
 html body .wr-end .td-gear .reward img,html body .wr-end .td-gear .reward .gpt-icon{width:22px!important;height:22px!important}
 @media (prefers-reduced-motion:reduce){html body[data-screen=defense] #main .controls button.td-act{animation:none!important}}
+/* Pet Siege Reward Preview with tabs (user photos 2026-11-24): personal rewards per faction place, faction rewards, daily */
+#stage #modal .sg-prev .sg-ptabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:10px}
+#stage #modal .sg-prev .sg-ptabs button,#stage #modal .sg-prev .sg-ftabs button{min-height:36px;padding:4px 6px;border:0;border-radius:10px;background:#5a6a8a;color:#fff;font:800 12px/1.1 Arial,sans-serif;box-shadow:none}
+#stage #modal .sg-prev .sg-ptabs button.on{background:#fff6e0;color:#a0601a;box-shadow:0 0 0 2px #e9c46a}
+#stage #modal .sg-prev .sg-ftabs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:4px 0 8px}
+#stage #modal .sg-prev .sg-ftabs button{position:relative;background:#fff;color:#7a4a1a;box-shadow:inset 0 0 0 1px #e0c89a}
+#stage #modal .sg-prev .sg-ftabs button.on{background:#fff3b8;box-shadow:0 0 0 2px #f0b548}
+#stage #modal .sg-prev .sg-ftabs small{position:absolute;top:-9px;left:50%;transform:translateX(-50%);padding:1px 6px;border-radius:6px;background:#e0503a;color:#fff;font:800 9px/1.3 Arial,sans-serif;white-space:nowrap}
+#stage #modal .sg-prev :is(button)::before,#stage #modal .sg-prev :is(button)::after{display:none!important}
+.sg-badge{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:50%;font:900 18px/1 Georgia,serif;font-style:normal;color:#fff;text-shadow:0 1px 2px #0008;box-shadow:0 0 0 3px #fff8,0 2px 6px #0006}
+.sg-badge.b1{background:radial-gradient(circle at 40% 30%,#c7a6ff,#6a3ae0);box-shadow:0 0 0 3px #ffe27a,0 0 10px #c7a6ff}
+.sg-badge.b2{background:radial-gradient(circle at 40% 30%,#ffb0d0,#e0408a);box-shadow:0 0 0 3px #ffd0e0}
+.sg-badge.b3{background:radial-gradient(circle at 40% 30%,#ffc890,#e06a1a);box-shadow:0 0 0 3px #ffe0b0}
+.sg-badge.b4{background:radial-gradient(circle at 40% 30%,#a0d8ff,#2a7ad0);box-shadow:0 0 0 3px #d0ecff}
+#stage #modal .sg-prev .sg-prow.me{background:#fff7c8;box-shadow:inset 0 0 0 2px #f0b548}
+#stage #modal .sg-prev .sg-fname{margin-left:auto;font:800 11px/1.2 Arial,sans-serif;font-style:normal;text-align:right;color:#7a4a1a}
+#stage #modal .sg-day{margin:6px 0;border-radius:12px;overflow:hidden;background:#fffaf0;box-shadow:inset 0 0 0 2px #e9c46a}
+#stage #modal .sg-day h3{margin:0;padding:6px;text-align:center;font:900 15px/1.2 Arial,sans-serif;color:#fff}
+#stage #modal .sg-day.win h3{background:linear-gradient(90deg,#f6a23a,#f0c04a)}#stage #modal .sg-day.lose h3{background:linear-gradient(90deg,#3a8ae0,#5aaaf0)}
+#stage #modal .sg-day .pp-gl{justify-content:center;padding:10px}
