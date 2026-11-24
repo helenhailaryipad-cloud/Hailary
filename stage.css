@@ -8815,3 +8815,29 @@ body[data-screen=cityTrail] #stage .toast{top:7%!important;bottom:auto!important
 #stage #main .tq-tabs button{position:relative}
 #stage #main .tq-tabs button em{position:absolute;right:-4px;top:-6px;min-width:18px;padding:1px 4px;border-radius:9px;background:#e0443a;color:#fff;font:800 11px/1.3 Arial,sans-serif;font-style:normal}
 .tq-row h3 em.no{color:#ff9a8a}
+/* Wayfarer Shop (trail.js): coins, six wares, refresh; bottom switch Quests / Wayfarer Shop */
+.tq-coin{width:1.4em;height:1.4em;object-fit:contain;vertical-align:-.35em}.tq-coin.big{width:64px;height:64px}
+.tq-r .tq-coin{width:34px;height:34px}
+.tq-nav{flex:none;display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:0 8px max(8px,env(safe-area-inset-bottom));background:#123020}
+#stage #main .tq-nav button{min-height:0;padding:7px 4px;border-radius:10px;border:1.5px solid #8a6a3a;background:#3a2a16;color:#f3e6c8;font:800 13px/1.1 Georgia,serif}
+#stage #main .tq-nav button.on{background:linear-gradient(#ffe48a,#e9a63a);color:#4a2400;border-color:#fff}
+.tq-room .tq-tabs{padding-bottom:6px}
+.tq-shop{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:8px 10px;background:linear-gradient(#5a3a1e,#3a2410)}
+.tq-shop-head{display:flex;align-items:center;gap:8px}.tq-shop-head h2{margin:0 auto 0 0;font:900 20px/1 Georgia,serif;color:#ffe9a0;text-shadow:0 2px 0 #3a1a00}
+#stage #main .tq-obtain{min-height:0;padding:6px 12px;border-radius:99px;border:1.5px solid #8dff9a;background:#0d2414;color:#8dff9a;font:800 12px/1 Arial,sans-serif}
+.tq-shop-note{margin:0;text-align:center;color:#f3e6c8;font:700 12px/1.3 Arial,sans-serif}
+.tq-wares{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+#stage #main .tq-ware{position:relative;display:grid;justify-items:center;gap:3px;min-width:0;min-height:0;padding:8px 4px 0;border-radius:12px;border:2px solid #c9a46a;background:#fff6e2;color:#4a2a10;overflow:hidden;box-shadow:0 3px 0 #2a1608}
+.tq-ware .nm{font:800 12px/1.15 Arial,sans-serif;color:#6a3aa0;text-align:center;min-height:2.3em;display:flex;align-items:center}
+.tq-ware.r-ssr .nm{color:#c25a10}.tq-ware.r-item .nm,.tq-ware.r-voucher .nm{color:#8a4a10}
+.tq-ware .art{display:grid;place-items:center;width:100%;height:64px}.tq-ware .art .bag-ico,.tq-ware .art .rt-vico{width:54px;height:54px}
+.tq-ware .art .pb{transform:scale(.8)}.tq-ware .art .tq-ware-frame{width:62px;height:62px}
+.tq-ware small b{font:800 11px/1.2 Arial,sans-serif}.tq-ware small b.own{color:#2a8a3a}.tq-ware small b.new{color:#c0392b}
+.tq-ware .price{align-self:end;width:100%;display:flex;justify-content:center;align-items:center;gap:4px;padding:5px 0;background:linear-gradient(#ffe48a,#e9b44a);font:900 15px/1 Georgia,serif;color:#4a2400}
+.tq-ware .off{position:absolute;left:-2px;top:20px;padding:2px 6px;border-radius:6px;background:#e0443a;color:#fff;font:900 12px/1.2 Arial,sans-serif;font-style:normal;transform:rotate(-12deg);z-index:2}
+.tq-ware.sold{filter:grayscale(.7);opacity:.75}.tq-ware .stamp{position:absolute;top:44%;left:50%;transform:translate(-50%,-50%) rotate(-12deg);padding:3px 10px;border:2px solid #fff;border-radius:6px;background:#c0392bd9;color:#fff;font:900 13px/1.2 Arial,sans-serif;font-style:normal}
+.tq-refresh{display:flex;align-items:center;gap:8px;color:#fff;font:700 12px/1.3 Arial,sans-serif}.tq-refresh span{flex:1}
+#stage #main .tq-refresh button{min-height:0;padding:6px 12px;border-radius:99px;border:1.5px solid #8dff9a;background:#0d2414;color:#fff;font:800 13px/1 Arial,sans-serif;display:flex;align-items:center;gap:4px}
+#stage #main .tq-ware small{color:#6a4a2a;opacity:1}.tq-ware small b{color:#6a4a2a}
+.tq-ware .art{height:clamp(64px,12vw,110px)}.tq-ware .art .bag-ico,.tq-ware .art .rt-vico{width:clamp(54px,10vw,92px);height:clamp(54px,10vw,92px)}.tq-ware .art .tq-ware-frame{width:clamp(62px,11vw,100px);height:clamp(62px,11vw,100px)}
+.tq-ware .art .pb{transform:none;width:clamp(96px,16vw,150px);font-size:12px}
