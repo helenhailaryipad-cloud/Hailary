@@ -8978,6 +8978,13 @@ body[data-playing=vale] #stage #valeUpgrade.idle{opacity:.55}
 .fx-room[data-category=Hair] .fx-panel{background:linear-gradient(#2f68aa99,#24569499)!important;backdrop-filter:blur(1px)}
 .fx-room[data-category=Hair] .fx-cp{bottom:1cqw!important}
 .fx-room[data-category=Hair] .fx-stage .fashion-stage,.fx-room[data-category=Hair] .fx-stage .fashion-model{overflow:visible!important;contain:none!important;clip-path:none!important}
-/* Fashion tab strip scrolls sideways only (user 2026-11-24: on the iPad it could be dragged up and the tabs were cut) */
-#stage #main .fx-tabs{overflow-y:hidden!important;overflow-x:auto;touch-action:pan-x;overscroll-behavior:contain;align-items:stretch;flex-shrink:0}
-#stage #main .fx-tabs button{transform:none!important;margin-top:0!important;margin-bottom:0!important}
+/* Fashion tabs like notebook index tabs (user 2026-11-24): all seven always visible, nothing scrolls or moves; the
+   chosen tab is the colour of the card sheet and joins it, the others sit a little lower and darker behind it. */
+#stage #main .fx-tabs{display:grid!important;grid-template-columns:repeat(7,1fr);gap:.6cqw;overflow:visible!important;touch-action:manipulation;padding:0 3.4cqw!important;align-items:end;flex-shrink:0;position:relative;z-index:2}
+#stage #main .fx-tabs button{transform:none!important;min-width:0!important;width:auto;height:8.6cqw;margin:1.2cqw 0 0!important;padding:.6cqw .2cqw .4cqw!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3cqw;border:1px solid #6f9ae0aa!important;border-bottom:0!important;border-radius:1.6cqw 1.6cqw 0 0!important;background:linear-gradient(#1a3470,#132a5c)!important;color:#b9cdf5!important;box-shadow:inset 0 1px 0 #ffffff1f;font:700 2.15cqw/1 Arial,sans-serif!important;white-space:nowrap;overflow:hidden}
+#stage #main .fx-tabs button[aria-pressed=true]{height:9.8cqw;margin-top:0!important;background:linear-gradient(#3f78c4,#2a5a9a)!important;color:#fff!important;border-color:#ffd77a!important;box-shadow:inset 0 2px 0 #ffe9a0,0 -3px 8px #0004;position:relative;z-index:1;margin-bottom:-1px!important}
+#stage #main .fx-tabs img{width:4.6cqw;height:4.6cqw}
+#stage #main .fx-tabs .fx-tabico{font-size:3.6cqw;line-height:1;font-style:normal}
+#stage #main .fx-tabs span{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+#stage #main .fx-grid{border-top:0!important;background:#2a5a9a!important}
+#stage #main .fx-tabs .fx-tabico{display:grid;place-items:center;width:4.6cqw;height:4.6cqw;font-size:3.2cqw;overflow:hidden}
