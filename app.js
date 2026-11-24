@@ -37,7 +37,7 @@ async function initDbSave(){try{
 }catch{}}
 // The fishing page (an iframe) reads the live save through this; `S` is not a window property.
 function fishSave(){return S}
-function save(){reconcileLeaflightMount();S.updated=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch{toast('Device storage is unavailable. Export a backup.')}wallet();dbSaveWrite();if(cloudReady&&!cloudBlocked){clearTimeout(saveTimer);saveTimer=setTimeout(syncCloud,900)}}
+function save(){reconcileLeaflightMount();if(typeof trailSpend==='function')trailSpend();S.updated=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch{toast('Device storage is unavailable. Export a backup.')}wallet();dbSaveWrite();if(cloudReady&&!cloudBlocked){clearTimeout(saveTimer);saveTimer=setTimeout(syncCloud,900)}}
 function wallet(){const compact=n=>n>=1000?new Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:1}).format(n):fmt(n);for(const [id,value,icon,label] of [['gold',S.gold,'◈','gold'],['tickets',S.tickets,'✧','wishes'],['scales',S.scales,'◇','scales']]){const cell=$('#'+id);cell.innerHTML=uiIcon(id==='gold'?'gold':id==='tickets'?'wishes':'crystals')+compact(value)+' <small>'+label+'</small>';cell.title=fmt(value)+' '+label;cell.setAttribute('aria-label',fmt(value)+' '+label)}}
 function gain(g,t,x){const awardedXP=globalThis.WonderProgress.award(S,x,stats().expBonus);S.gold+=g;S.tickets+=t;save();return {gold:g,wishes:t,xp:awardedXP}}
 // A small pop-up card in the middle of the screen (Pets room): same dialog, compact look, no Menu button.
