@@ -238,10 +238,14 @@ function fashionCardMeta(click){
   if((m=click.match(/mountPreview='([^']+)'/))){const id=m[1];return {r:id==='silver-tabby'?'sr':'ssr',own:ownsMount(id),worn:(currentMount()?.id||'')===id}}
   return {r:'sr',own:true,worn:false};
 }
+// Garment cards in the Fashion room: Reina in the dress, head to thighs, from one atlas (scripts/build-fashion-cards.py,
+// 10 columns, this order). A dress missing here falls back to its fit-icon.
+const FX_CARD_IDS=['leaflight','grove','dawnpetal','frostlace','nightbloom','sunweave','tidal','emberveil','willow','stardust','pearl','sapphire','aurora','rosethorn','seafoam','ravenwing','sunflower','frostqueen','autumn','starlit','coral','jade','phoenix','snowqueen','peacock','galaxy','mermaid','icequeen','sweetheart','thstarmoon','thinferno','tharcade','thfairy','thlantern','thseaside','thidol','thocean','thhourglass','throse','thdragonling','thpumpkin','thharvest','thpirate','thclockwork','thholly','thmelody','thnorthlight','throyal','thknight','thstorm','thgem','thgothic','thlotus','thsakura','thmeadow','thcandy','thteaparty','thbunny','thcarnival','thlibrary','thsnowfall','thoasis','thtropic','thpapillon','thkitty','thfoxwood','thowl','thhoney','thrainbow'];
+function fxDressArt(click,icon){const m=click.match(/previewRegisteredDress\('([^']+)'\)/),i=m?FX_CARD_IDS.indexOf(m[1]):-1;if(i<0)return `<img src="${icon}" alt="">`;const rows=Math.ceil(FX_CARD_IDS.length/10);const r=document.documentElement;if(r?.style?.setProperty&&!r.style.getPropertyValue('--fx-cards'))r.style.setProperty('--fx-cards','url("'+artPath('fashion-cards')+'")');return `<em class="fx-dcard" style="background-image:var(--fx-cards);background-position:${(i%10)*100/9}% ${Math.floor(i/10)*100/(rows-1)}%;background-size:1000% ${rows*100}%"></em>`}
 function fashionCard(name,icon,selected,click){
   if(screen!=='fashion')return `<button class="fashion-card" aria-pressed="${selected}" onclick="${click}"><img src="${icon}" alt=""><span>${name}</span></button>`;
   const m=fashionCardMeta(click);
-  return `<button class="fashion-card fx-card r-${m.r} ${m.own?'':'locked'} ${m.worn?'worn':''}" aria-pressed="${selected}" onclick="${click}"><i class="fx-art"><img src="${icon}" alt=""></i><b class="fx-rar">${m.r.toUpperCase()}</b>${m.worn?'<i class="fx-tick">✓</i>':m.own?'':'<i class="fx-lock">🔒</i>'}<span>${name}</span></button>`;
+  return `<button class="fashion-card fx-card r-${m.r} ${m.own?'':'locked'} ${m.worn?'worn':''}" aria-pressed="${selected}" onclick="${click}">${denPlain}<i class="fx-art">${fxDressArt(click,icon)}</i><b class="fx-rar">${m.r.toUpperCase()}</b>${m.worn?'<i class="fx-tick">✓</i>':m.own?'':'<i class="fx-lock">🔒</i>'}<span>${name}</span></button>`;
 }
 const FX_TABS=[['Dresses','Garment','fit-icon-grove'],['Weapons','Fashion Bow','weapon-style-14'],['Avatar','Avatar',''],['Bubble','Bubble',''],['Hair','Hairstyle','fit-icon-hair-12'],['Wings','Wings','fashion-wing-11'],['Mounts','Mounts','mount-icon-moon-unicorn']];
 // Avatar frames and chat bubbles (user photos of the reference's Fashion: Avatar and Bubble tabs). They come from the
@@ -308,7 +312,7 @@ function fashionShowcase({portrait,alt,title,bonus,owned,price,equipped,action,c
     return `<div><span>${label}</span><b>${fmt(current[stat])}</b><em>${change>0?'+'+change:change||''}</em></div>`;
   }).join('');
   if(screen==='fashion'){
-    const pick=cards.match(/aria-pressed="true"[^>]*>(?:<i class="fx-art">)?<img src="([^"]+)"/),art=pick?pick[1]:'';
+    const pick=cards.match(/aria-pressed="true"[^>]*>(?:<svg[^>]*><\/svg>)?(?:<i class="fx-art">)?<img src="([^"]+)"/),art=pick?pick[1]:'',artHtml=(cards.match(/aria-pressed="true"[^>]*>(?:<svg[^>]*><\/svg>)?<i class="fx-art">(<em class="fx-dcard"[^>]*><\/em>)/)||[0,''])[1];
     const meta=(cards.match(/class="fashion-card fx-card r-(\w+)[^"]*" aria-pressed="true"/)||[0,'sr'])[1];
     const statRows=fields.map(([stat,label])=>{const change=stat===key?delta:0;return `<div><span>${label} <b>${fmt(current[stat])}</b></span>${change?`<em class="${change>0?'up':'down'}">${change>0?'▲ '+change:'▼ '+(-change)}</em>`:''}</div>`}).join('');
     const pickClick=(cards.match(/aria-pressed="true" onclick="([^"]+)"/)||[0,''])[1],pd=pickClick.match(/previewRegisteredDress\('([^']+)'\)/),pw=pickClick.match(/previewRegisteredEquipment\('Weapons',(\d+)\)/);
@@ -318,7 +322,7 @@ function fashionShowcase({portrait,alt,title,bonus,owned,price,equipped,action,c
     <div class="fx-top"><button data-back aria-label="Back" onclick="go('home')">‹</button><strong>Fashion</strong><span class="fx-wallet">${uiIcon('gold')}<b>${fmt(S.gold)}</b></span><span class="fx-wallet">${uiIcon('crystals')}<b>${fmt(S.scales||0)}</b></span></div>
     <div class="fx-stage">${stage||`<div class="fashion-stage"><div class="fashion-model"><img src="${portrait}" alt="${alt}"></div>${themeChips(pickTheme)}</div>`}<span class="fx-cp">⚔ ${fmt(current.power)}</span>
       <button class="fx-round l" onclick="apparelRecords()">${denPlain}<i>📜</i><small>Apparel Records</small></button><button class="fx-round r" onclick="go('eliteSale')">${denPlain}<i>✧</i><small>Elite Sale</small></button></div>
-    <div class="fx-panel">${panel||`<div class="fx-stats">${statRows}</div><div class="fx-pick"><span class="fx-ptile r-${meta}">${art?`<img src="${art}" alt="">`:''}</span><b>${title}</b><small>${bonus?bonus+' · ':''}${owned?'Owned':fmt(price)+' gold'}</small><button class="fx-btn" ${equipped||(!owned&&S.gold<price)?'disabled':''} onclick="${action}">${denPlain}${btn}</button></div>`}</div>
+    <div class="fx-panel">${panel||`<div class="fx-stats">${statRows}</div><div class="fx-pick"><span class="fx-ptile r-${meta}">${artHtml||(art?`<img src="${art}" alt="">`:'')}</span><b>${title}</b><small>${bonus?bonus+' · ':''}${owned?'Owned':fmt(price)+' gold'}</small><button class="fx-btn" ${equipped||(!owned&&S.gold<price)?'disabled':''} onclick="${action}">${denPlain}${btn}</button></div>`}</div>
     <div class="fx-tabs" role="group" aria-label="Fashion categories">${FX_TABS.map(([id,label,ic])=>`<button aria-pressed="${id===category}" onclick="changeFashionTab('${id}')">${denPlain}${ic?`<img src="${artPath(ic)}" alt="">`:`<i class="fx-tabico">${id==='Avatar'?'◯':'💬'}</i>`}<span>${label}</span></button>`).join('')}</div>
     <div class="fashion-cards fx-grid">${cards}</div>${extra}
     <div class="fx-nav"><button aria-current="page">${denPlain}<b>👗</b><span>Fashion</span></button><button onclick="go('citySupreme')">${denPlain}<b>👑</b><span>Supreme Set</span></button><button onclick="go('eliteSale')">${denPlain}<b>💎</b><span>Elite Sale</span></button></div></section>`;

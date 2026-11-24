@@ -8948,3 +8948,26 @@ body[data-playing=vale] #stage #valeUpgrade.idle{opacity:.55}
 .fx-stage .fashion-stage h2,.fx-stage .fashion-stage:has(.fx-bigdeco) h2{top:7.5cqw!important;z-index:2}
 .fx-stage .fashion-stage:has(.fx-bigdeco) .fx-bigdeco{margin-top:6cqw}
 .fx-stage .fashion-stage:not(:has(.fx-bigdeco)) h2{display:none}
+/* Fashion room, second look (user 2026-11-24): starrier night sky, the figure free of the side buttons, a light CP
+   line instead of a black band, garment cards as close shots from the fashion-cards atlas. */
+.fx-room{background:
+ radial-gradient(1px 1px at 8% 12%,#fff,transparent),radial-gradient(1.5px 1.5px at 22% 30%,#fffb,transparent),radial-gradient(1px 1px at 35% 8%,#fff9,transparent),
+ radial-gradient(2px 2px at 48% 22%,#fff,transparent),radial-gradient(1px 1px at 61% 40%,#dff,transparent),radial-gradient(1.5px 1.5px at 74% 16%,#fff,transparent),
+ radial-gradient(1px 1px at 86% 34%,#fffa,transparent),radial-gradient(2px 2px at 93% 9%,#e8f4ff,transparent),radial-gradient(1px 1px at 14% 48%,#fff8,transparent),
+ radial-gradient(1.5px 1.5px at 30% 58%,#fff9,transparent),radial-gradient(1px 1px at 81% 55%,#fff,transparent),radial-gradient(1px 1px at 55% 6%,#fff,transparent),
+ radial-gradient(1px 1px at 4% 30%,#fff9,transparent),radial-gradient(1.5px 1.5px at 67% 28%,#fffc,transparent),radial-gradient(1px 1px at 41% 44%,#fff7,transparent),
+ radial-gradient(ellipse 60% 34% at 50% 34%,#5a8cff40,transparent 70%),
+ linear-gradient(#0b1a44,#14306e 30%,#1d4592 55%,#1a3c80 80%,#132e66)!important}
+.fx-room::before{content:"";position:absolute;inset:0 0 40% 0;pointer-events:none;z-index:0;opacity:.55;
+ background-image:radial-gradient(1px 1px,#fff 50%,transparent 51%),radial-gradient(1px 1px,#cfe6ff 50%,transparent 51%);
+ background-size:53px 61px,89px 73px;background-position:7px 11px,31px 43px;animation:fx-twinkle 5s ease-in-out infinite alternate}
+@keyframes fx-twinkle{to{opacity:.25}}
+.fx-cp{background:radial-gradient(ellipse 50% 60% at 50% 55%,#0b1a4a8c,transparent 75%)!important;padding:.1em 1.4em .15em!important;text-shadow:0 0 10px #ffb04a,0 2px 0 #7a3a00,0 0 2px #000!important}
+#stage #main .fx-round{bottom:1cqw!important;width:13cqw!important}
+#stage #main .fx-round.l{left:1.5cqw!important}#stage #main .fx-round.r{right:1.5cqw!important}
+.fx-round i{width:8.5cqw!important;font-size:4cqw!important}
+.fx-round small{font-size:2.1cqw!important}
+.fx-room{grid-template-rows:auto minmax(0,1fr) auto auto minmax(0,20%) auto!important}
+.fx-panel,.fx-tabs,.fx-grid{background-color:transparent}
+.fx-card .fx-art .fx-dcard{display:block;width:100%;height:100%;background-repeat:no-repeat}
+#stage .fx-dcard{display:block;width:100%;height:100%;margin:0;padding:0;border:0;border-radius:0;background-color:transparent;background-repeat:no-repeat;font-style:normal}

@@ -767,6 +767,14 @@ Big figure (2026-11-24, user photo of the reference next to ours, figure circled
 stage slides under the top bar (`margin-top:-6cqw`), the figure fills it down to the CP plate (feet on the plate; an
 old `height:100%` rule had pushed the feet under the panel), round side buttons without boxes, no name over a figure
 (the panel names the item; Avatar / Bubble keep it). Rules at the end of `stage.css`.
+Second look (same day: "starrier background, the figure is lost among the buttons, cards need not show the whole
+outfit, the CP must not be so black on her legs"): night-sky gradient with many stars and a twinkle layer, smaller side
+buttons in the bottom corners, CP as glowing text on a faint shadow. Garment cards are close shots of Reina (hair 11)
+wearing the dress, head to thighs, from ONE atlas `fashion-cards` (10 x 7 of 200 px, order `FX_CARD_IDS` in `app.js`,
+`fxDressArt`, CSS var `--fx-cards`); made by `node scripts/render-fashion-cards.mjs` (needs the preview running; PNGs are
+not committed) + `python3 scripts/build-fashion-cards.py`. A new dress needs its id appended to `FX_CARD_IDS` and a
+rebuild, otherwise its card falls back to the fit-icon. The chat preview packs the atlas into `pack-icons.js` (the
+preview is at the 511-file limit). Hosted bundle 33,520,105 bytes: about 34 KB spare, compress older art first.
 Found, not fixed: the Skin room (`citySkin`) layout is
 broken (overlapping title, blank square, cut labels) - it was like that before this pass.
 
