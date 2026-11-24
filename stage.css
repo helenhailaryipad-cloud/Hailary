@@ -8978,3 +8978,6 @@ body[data-playing=vale] #stage #valeUpgrade.idle{opacity:.55}
 .fx-room[data-category=Hair] .fx-panel{background:linear-gradient(#2f68aa99,#24569499)!important;backdrop-filter:blur(1px)}
 .fx-room[data-category=Hair] .fx-cp{bottom:1cqw!important}
 .fx-room[data-category=Hair] .fx-stage .fashion-stage,.fx-room[data-category=Hair] .fx-stage .fashion-model{overflow:visible!important;contain:none!important;clip-path:none!important}
+/* Fashion tab strip scrolls sideways only (user 2026-11-24: on the iPad it could be dragged up and the tabs were cut) */
+#stage #main .fx-tabs{overflow-y:hidden!important;overflow-x:auto;touch-action:pan-x;overscroll-behavior:contain;align-items:stretch;flex-shrink:0}
+#stage #main .fx-tabs button{transform:none!important;margin-top:0!important;margin-bottom:0!important}
