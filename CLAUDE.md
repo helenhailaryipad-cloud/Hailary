@@ -992,6 +992,33 @@ counters reset 00:00 UTC, shop limits on Monday). Every member besides Reina is 
 - Hosted bundle headroom is only about 0.1 MB now: compress older art before adding pictures.
 - Not done: guild wars, guild quests, applications from other players, roles management, Warehouse, Hire, Auction.
 
+## Castle Defense restyle (2026-11-24)
+User: "made by ChatGPT, very primitive; animate the characters, preload everything, beautiful explosions and hits, the
+suns should fly out, nicer texts". Rules, scores (`defensePoints`, `DEFENSE_TARGET`), rewards and save fields unchanged.
+- Art (image model, sources `scripts/art-source/defense/`, built by `scripts/build-defense-art.py` into
+  `src/assets/generated/td-*.webp` + AVIF in `scripts/hosting-art/`): `td-reina` (edit of `leaflight/master.png`),
+  `td-nyra`, `td-kael` = 4 x 2 sheets (row 0 idle loop, row 1 shot / cast; cells 240 x 280, feet at 100,274; the
+  build aligns every frame on its feet and drops specks from neighbouring cells), `td-foes` (4 x 3 walk cycles facing
+  left), `td-boss` (4 walk frames of emberpeak), `td-fx` (4 x 2 on black, drawn with 'screen': starburst, fire blast,
+  ice shatter, ring, sparkles, death poof, ice bolt, sun comet), `td-sun` (pickup). Layout constants `TD_ART`, `TD_FX`
+  in `minigame-engine.js` must match the build script. The Archer is always the painted Leaflight Reina (not the worn
+  wardrobe look).
+- Code (all Castle Defense code in `minigame-engine.js` above `MERGE_STEP`): `defensePreload` (decodes every picture
+  when the game opens, and 1.5 s after the Mini Games covers), `drawDefender` (idle 5 fps + breathing, shot frames
+  timed by `TD_SHOT`, release at the projectile's windup, charge glow, pop when built / upgraded), `drawFoe` (walk
+  cycle, knock-back `e.kb`, white hit flash and squash via cached silhouettes `tdSilhouette`, frost tint when slowed),
+  `defenseHit` / `defenseDeath` (painted bursts `tdFx`, shards and sparks `tdBurst`, swelling white corpse `g.dead`,
+  shake), `tdText` / `drawDefenseTexts` (outlined gradient numbers that pop, rise and fade: damage, +points, +energy
+  with a sun, -crystal), `drawDefenseBanner` (WAVE N / WAVE CLEARED ribbon), `drawIncoming` (red edge, moving chevrons).
+  Suns: the sky sun (`g.sun`, same random calls as before) plus suns that pop out of fallen foes (`g.drops`,
+  `TD_DROP_SUN` 30%, every boss drops 3; `TD_DROP_VALUE` 15) bounce and bob; tapping one bursts into sparkles and it
+  flies to the energy counter (`g.sunFly`). Visual randomness uses `tdRand()`, never `Math.random()` (keeps the
+  balance test's sequence).
+- UI: controls painted by `updateDefenseControls` (`game-polish.js`): vitals plaques, defender cards with the unit's
+  own idle frame (`defensePick`, CSS var `--td-art`), violet Upgrade and gold Wave buttons side by side; CSS under
+  "CASTLE DEFENSE UI" at the end of `stage.css`. The end window is `resultShow` (`defenseResult`, stars by
+  `DEFENSE_STARS` 150 s). Hosted bundle after this: 32,554,965 bytes.
+
 ## In-chat playable preview (user requirement)
 The user wants to play the game inside the chat, and wants SHORT replies in Russian, no fluff.
 - Artifact: https://claude.ai/artifact/L9owNJPMaZjAsTmU3tDGs6 (private). After game changes, rebuild and republish:

@@ -8994,3 +8994,51 @@ body[data-playing=vale] #stage #valeUpgrade.idle{opacity:.55}
 #stage #main .cas-pad button{width:clamp(46px,7.6cqh,84px)!important;height:clamp(46px,7.6cqh,84px)!important}
 #stage #main .cas-pad button.drop{width:clamp(52px,8.8cqh,96px)!important;height:clamp(52px,8.8cqh,96px)!important}
 .cas-screen{height:min(100%,100dvh)!important}
+
+/* ==== CASTLE DEFENSE UI (2026-11-24, user: "the interface is primitive"): painted plaques for the vitals, defender
+   cards that show the animated unit's own art (td-* atlas, idle frame), gold / violet game buttons. Strong selectors:
+   the global #main button rules set position, borders and ::before. ==== */
+html body[data-screen=defense] #main .game-action-dock .controls{display:grid!important;grid-template-columns:1fr!important;gap:7px!important;padding:0!important;overflow:visible}
+html body[data-screen=defense] #main #defenderSelection{display:none!important}
+html body[data-screen=defense] #main .td-vitals{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:5px!important;border:0!important;padding:0!important}
+html body[data-screen=defense] #main .td-vitals .hud-metric{display:flex;align-items:center;gap:4px;min-width:0;padding:4px 6px;border-radius:11px;background:linear-gradient(#4a321f,#2a1b10);border:1px solid #c9a25a;box-shadow:inset 0 1px 0 #ffe7a855,inset 0 -2px 4px #0006,0 2px 4px #0005}
+html body[data-screen=defense] #main .td-vitals .hud-metric>.gpt-icon{width:24px!important;height:24px!important;flex:none}
+html body[data-screen=defense] #main .td-vitals .hud-metric small{display:block;font:700 10px/1.1 var(--font-story)!important;color:#e9cf98!important;letter-spacing:.03em;text-transform:uppercase}
+html body[data-screen=defense] #main .td-vitals .hud-metric b{display:block;font:800 clamp(12px,2.5vw,17px)/1.1 var(--font-display)!important;color:#fff6dc!important;white-space:nowrap;text-shadow:0 1px 0 #000a}
+html body[data-screen=defense] #main .td-picks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+html body[data-screen=defense] #main .controls button.td-pick{position:relative;display:grid!important;grid-template-columns:auto 1fr;grid-template-rows:1fr auto;align-items:center;gap:0 6px;min-height:0!important;height:76px;padding:5px 7px 5px 5px!important;margin:0!important;text-align:left;border-radius:15px!important;border:2px solid #b98d45!important;background:linear-gradient(170deg,#6b4a2c,#3c2716 70%)!important;box-shadow:inset 0 1px 0 #ffe7a866,inset 0 -3px 0 #2a170a,0 3px 0 #1d1006,0 5px 10px #0006!important;color:#fff3d6!important;overflow:hidden;transition:transform .1s,filter .15s,box-shadow .15s;transform:none}
+html body[data-screen=defense] #main .controls button.td-pick::before,html body[data-screen=defense] #main .controls button.td-pick::after,html body[data-screen=defense] #main .controls button.td-act::before,html body[data-screen=defense] #main .controls button.td-act::after{display:none!important;content:none!important}
+html body[data-screen=defense] #main .controls button.td-pick>svg{display:none}
+html body[data-screen=defense] #main .controls button.td-pick .td-fig{grid-row:1/3;width:50px;height:64px;border-radius:11px;background:var(--td-art) -40px -3px/640px 373px no-repeat,radial-gradient(circle at 50% 40%,#fff3c0,#d7a548 55%,#6b4420);box-shadow:inset 0 0 0 2px #f2cf7e,0 2px 4px #0007}
+html body[data-screen=defense] #main .controls button.td-pick .td-ptxt{min-width:0}
+html body[data-screen=defense] #main .controls button.td-pick .td-ptxt b{display:block;font:800 clamp(12px,2.6vw,16px)/1.1 var(--font-display)!important;color:#fff6dc!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 0 #000}
+html body[data-screen=defense] #main .controls button.td-pick .td-ptxt small{display:block;margin-top:2px;font:600 11px/1.1 var(--font-story)!important;color:#e9d3a4!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html body[data-screen=defense] #main .controls .td-cost{display:inline-flex;align-items:center;gap:2px;justify-self:start;padding:1px 8px 1px 2px;border-radius:20px;background:linear-gradient(#2a1b10,#120a05);border:1px solid #e2b85c;font:800 14px/1.2 var(--font-display)!important;font-style:normal;color:#ffe48a!important;box-shadow:0 1px 0 #ffe7a833}
+html body[data-screen=defense] #main .controls .td-cost .gpt-icon{width:19px!important;height:19px!important;margin:0!important}
+html body[data-screen=defense] #main .controls .td-cost.short{color:#ff9a8a!important;border-color:#c0584a}
+html body[data-screen=defense] #main .controls button.td-pick[aria-pressed=true]{border-color:#ffeaa0!important;background:linear-gradient(170deg,#a2723a,#5a3818 75%)!important;box-shadow:inset 0 1px 0 #fff4c8,inset 0 -3px 0 #3a1d06,0 0 0 2px #ffd76a,0 0 16px #ffcf5aaa,0 3px 0 #1d1006!important}
+html body[data-screen=defense] #main .controls button.td-pick[aria-pressed=true] .td-fig{box-shadow:inset 0 0 0 2px #fff4c8,0 0 10px #ffd76a}
+html body[data-screen=defense] #main .controls button.td-pick:disabled{filter:grayscale(.55) brightness(.78);opacity:1!important;cursor:not-allowed}
+html body[data-screen=defense] #main .controls button.td-pick:disabled .td-cost{color:#ff9a8a!important;border-color:#c0584a}
+html body[data-screen=defense] #main .controls button.td-pick:not(:disabled):active{transform:scale(.95)}
+html body[data-screen=defense] #main .td-acts{display:grid;grid-template-columns:1fr 1.25fr;gap:7px}
+html body[data-screen=defense] #main .td-acts>button{grid-column:auto!important;width:auto!important}
+html body[data-screen=defense] #main .controls button.td-act{position:relative;display:flex!important;align-items:center;justify-content:flex-start;gap:7px;min-height:0!important;height:54px;margin:0!important;padding:0 10px 0 8px!important;border-radius:17px!important;border:2px solid #5a2e08!important;background:linear-gradient(#ffeaa6,#f6be4c 45%,#cf7a1e)!important;box-shadow:inset 0 2px 0 #fff8d4,inset 0 -4px 0 #a2560e,0 3px 0 #3a1d06,0 6px 12px #0005!important;color:#4a2306!important;text-align:left;transition:transform .08s,filter .15s}
+html body[data-screen=defense] #main .controls button.td-act.td-up{border-color:#2c0d4e!important;background:linear-gradient(#e2b8ff,#a76ae8 45%,#6a2fb8)!important;box-shadow:inset 0 2px 0 #f6e6ff,inset 0 -4px 0 #4b1a8a,0 3px 0 #1a0632,0 6px 12px #0005!important;color:#fff!important}
+html body[data-screen=defense] #main .controls button.td-act .td-bico{display:grid;place-items:center;flex:none;width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#fffbe8,#ffe39a 50%,#c98a2a);box-shadow:inset 0 0 0 2px #fff6,0 1px 2px #0006}
+html body[data-screen=defense] #main .controls button.td-act .td-bico .gpt-icon{width:26px!important;height:26px!important;margin:0!important}
+html body[data-screen=defense] #main .controls button.td-act .td-btxt{min-width:0;flex:1}
+html body[data-screen=defense] #main .controls button.td-act .td-btxt b{display:block;font:900 clamp(13px,2.8vw,18px)/1.05 var(--font-display)!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:inherit!important;text-shadow:0 1px 0 #fff7cf}
+html body[data-screen=defense] #main .controls button.td-act.td-up .td-btxt b{text-shadow:0 2px 0 #3a0a6a,0 0 8px #c07aff}
+html body[data-screen=defense] #main .controls button.td-act .td-btxt small{display:block;margin-top:2px;font:700 11px/1.1 var(--font-story)!important;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:inherit!important}
+html body[data-screen=defense] #main .controls button.td-act .td-cost{flex:none}
+html body[data-screen=defense] #main .controls button.td-act:disabled{filter:grayscale(.75) brightness(.72);opacity:1!important;cursor:default}
+html body[data-screen=defense] #main .controls button.td-act:not(:disabled):active{transform:scale(.95);filter:brightness(1.12)}
+html body[data-screen=defense] #main .controls button.td-wave:not(:disabled){animation:tdWaveGlow 1.6s ease-in-out infinite}
+html body[data-screen=defense] #main .controls button.td-up.ready{animation:tdUpGlow 1.6s ease-in-out infinite}
+@keyframes tdWaveGlow{50%{box-shadow:inset 0 2px 0 #fff8d4,inset 0 -4px 0 #a2560e,0 3px 0 #3a1d06,0 0 18px #ffd76acc}}
+@keyframes tdUpGlow{50%{box-shadow:inset 0 2px 0 #f6e6ff,inset 0 -4px 0 #4b1a8a,0 3px 0 #1a0632,0 0 18px #c07affcc}}
+html body .wr-end .td-gear{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:8px 0 0}
+html body .wr-end .td-gear .reward{min-height:0!important;padding:4px 12px!important;font:700 14px/1.2 var(--font-story)!important;border-radius:20px!important}
+html body .wr-end .td-gear .reward img,html body .wr-end .td-gear .reward .gpt-icon{width:22px!important;height:22px!important}
+@media (prefers-reduced-motion:reduce){html body[data-screen=defense] #main .controls button.td-act{animation:none!important}}
