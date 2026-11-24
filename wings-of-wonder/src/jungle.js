@@ -15,11 +15,12 @@ const Trek = {
     return names.map(name=>{let h=2166136261;for(const ch of name+day)h=Math.imul(h^ch.charCodeAt(0),16777619)>>>0;return {name,final:2800+(h%55)*50}})},
   standing(rivals,score,time){const now=rivals.map(r=>Math.floor(r.final*Math.min(1,time/this.length)/50)*50),lead=Math.max(score,...now);
     return {rank:1+now.filter(s=>s>score).length,of:rivals.length+1,gap:lead-score}},
-  hit(g){if(g.hurt>0)return;if(g.shield>0){g.shield=0;g.hurt=.7;g.shieldBreak=.5;g.shake=.22;this.say(g,'Blocked!',g.x,.86);return}g.hp=Math.max(0,g.hp-1);g.hurt=1.3;g.shake=.45;g.hitFlash=.3;this.say(g,'−1 ♥',g.x,.86);this.burst(g,g.x,.86,'#ff6a6a')},
+  hit(g){if(g.hurt>0)return;if(g.shield>0){g.shield=0;g.hurt=.7;g.shieldBreak=.5;g.shake=.22;this.say(g,'Blocked!',g.x,.86,'block');return}g.hp=Math.max(0,g.hp-1);g.hurt=1.3;g.shake=.45;g.hitFlash=.3;this.say(g,'−1 ♥',g.x,.86,'bad');this.burst(g,g.x,.86,'#ff6a6a')},
   // Feedback for every hit: a quick ring and spark where it lands (picture only).
   pop(g,x,z,color,big,lift){if(g.pops.length<40)g.pops.push({x,z,color,big:!!big,lift:lift||34,life:big?.32:.2})},
   burst(g,x,z,color){for(let i=0;i<12;i++)g.sparks.push({x,z,vx:(Math.random()-.5)*1.8,vz:(Math.random()-.5)*.45,life:.6,color})},
-  say(g,text,x,z){(g.texts??=[]).push({text,x,z,life:1.3})},
+  // Floating words: tone picks the colour and size (bonus, bad, block, good, big = an announcement across the field).
+  say(g,text,x,z,tone){(g.texts??=[]).push({text,x,z,life:tone==='big'?1.8:1.3,max:tone==='big'?1.8:1.3,tone:tone||'bonus'})},
   // Five lanes of barrels across the clearing.
   lanes:[-1.24,-.62,0,.62,1.24],
   lane(x){return this.lanes.reduce((best,at)=>Math.abs(at-x)<Math.abs(best-x)?at:best)},
@@ -28,28 +29,32 @@ const Trek = {
     for(const f of g.foes){if(f.dead||f.z>.82||f.z<-.06)continue;const value=f.z-Math.abs(f.x-g.x)*.45+(f.boss?.15:f.sub?.12:0);if(value>score){score=value;best=f}}
     return best},
   // Bonuses, in the order they drop; one that is already maxed or not needed turns into another.
-  dropOrder:['multi','wings','laser','shield','power','chain','rocket','frost','heart'],
+  // Shields are rare (once in fourteen) and never come twice in a row or while one is still up (user: "too many shields").
+  dropOrder:['multi','wings','laser','power','rocket','chain','frost','shield','multi','laser','power','rocket','chain','heart'],
+  dropSpare:['laser','chain','rocket','frost','wings'],
   nextDrop(g){let kind=this.dropOrder[g.dropCount++%this.dropOrder.length];
-    if(kind==='multi'&&g.arrows>=4)kind='rocket';if(kind==='power'&&g.power>=3)kind='wings';if(kind==='heart'&&g.hp>=3)kind='shield';return kind},
+    if(kind==='multi'&&g.arrows>=4)kind='rocket';if(kind==='power'&&g.power>=3)kind='wings';if(kind==='heart'&&g.hp>=3)kind='frost';
+    if(kind==='shield'&&g.shield>0||kind===g.lastDrop)kind=this.dropSpare.find(k=>k!==g.lastDrop&&k!==kind)||kind;
+    g.lastDrop=kind;return kind},
   collect(g,kind){
     if(kind==='heart'){g.hp=Math.min(3,g.hp+1);this.say(g,'+1 Life',g.x,.72)}
-    else if(kind==='shield'){g.shield=9;this.say(g,'Shield',g.x,.72)}
+    else if(kind==='shield'){g.shield=9;this.say(g,'Shield up!',g.x,.72)}
     else if(kind==='multi'){g.arrows=Math.min(4,g.arrows+1);this.say(g,'Arrows ×'+g.arrows,g.x,.72)}
     else if(kind==='power'){g.power=Math.min(3,g.power+1);this.say(g,'Power +'+g.power,g.x,.72)}
     else if(kind==='rocket'){g.rocket=10;this.say(g,'Rockets!',g.x,.72)}
     else if(kind==='laser'){g.laser=6;this.say(g,'Sun beam!',g.x,.72)}
     else if(kind==='chain'){g.chain=9;this.say(g,'Chain lightning!',g.x,.72)}
     else if(kind==='frost'){g.frost=8;this.say(g,'Frost!',g.x,.72)}
-    else{g.boost=9;this.say(g,'SPD +200%',g.x,.72)}
+    else{g.boost=9;this.say(g,'Rapid fire!',g.x,.72)}
     this.burst(g,g.x,.85,'#b9eaff')},
   damage(g,f,amount){if(f.dead)return;f.hp-=amount;f.flash=.12;if(f.hp<=0)this.kill(g,f)},
   kill(g,f){f.dead=true;g.kills++;this.burst(g,f.x,f.z,'#ffd584');
     // The dragon does not simply vanish: it breaks apart (g.booms), then three chests fly out, then the run ends.
     if(f.boss){g.score+=1000;g.kills+=4;g.bossDown=true;g.finale=1e-6;g.hazards=[];g.bolts=[];g.booms.push({x:f.x,z:f.z,t:0,art:'emberpeak',size:250,boss:true,face:f.face||1});
-      g.loot.gold+=3*this.bossChest;g.loot.wishes+=this.bossWishes;g.loot.chests+=3;this.say(g,'Boss defeated!',0,.45);return}
+      g.loot.gold+=3*this.bossChest;g.loot.wishes+=this.bossWishes;g.loot.chests+=3;return}   // the screen shows a Victory banner once the dragon bursts
     if(f.sub){g.score+=300;g.kills+=3;g.loot.gold+=this.subChest;g.loot.chests++;g.booms.push({x:f.x,z:f.z,t:0,art:f.art,size:250});this.chest(g,f.x,f.z,1,this.subChest);
-      g.drops.push({x:this.clamp(f.x,-1.1,1.1),z:Math.max(.1,f.z),kind:this.nextDrop(g)});g.hazardAt=Math.max(g.hazardAt,2.5);this.say(g,f.name+' defeated!',0,.45);return}
-    g.score+=50;this.pop(g,f.x,f.z,'#ffd584',true);g.texts.push({text:'+50',x:f.x,z:f.z,life:.7,small:true});
+      g.drops.push({x:this.clamp(f.x,-1.1,1.1),z:Math.max(.1,f.z),kind:this.nextDrop(g)});g.hazardAt=Math.max(g.hazardAt,2.5);this.say(g,f.name+' defeated!',0,.45,'big');return}
+    g.score+=50;this.pop(g,f.x,f.z,'#ffd584',true);g.texts.push({text:'+50',x:f.x,z:f.z,life:.7,max:.7,small:true,tone:'score'});
     if(g.kills%4===0)g.drops.push({x:f.x,z:f.z,kind:this.nextDrop(g)});
     // Storm barrel: lightning jumps to the three nearest barrels; a barrel it breaks carries the chain on.
     if(f.type==='elec'){const near=g.foes.filter(o=>!o.dead&&!o.boss&&Math.abs(o.x-f.x)<1.35&&Math.abs(o.z-f.z)<.34).sort((a,b)=>Math.hypot(a.x-f.x,(a.z-f.z)*3)-Math.hypot(b.x-f.x,(b.z-f.z)*3)).slice(0,3);
@@ -71,15 +76,21 @@ const Trek = {
         for(let i=0;i<(e.boss?46:20);i++){const a=Math.random()*6.283,v=.5+Math.random()*1.4;g.debris.push({x:e.x,z:e.z,h:40+Math.random()*60,vx:Math.cos(a)*v,vz:Math.sin(a)*v*.16,vh:120+Math.random()*260,life:.9+Math.random()*.7,hot:i%3})}
         if(e.boss)this.chest(g,e.x,e.z,3,this.bossChest)}}
     for(const p of g.debris){p.life-=dt;p.x+=p.vx*dt;p.z+=p.vz*dt;p.vh-=520*dt;p.h+=p.vh*dt;if(p.h<0){p.h=0;p.vh*=-.35;p.vx*=.5;p.vz*=.5}}
-    for(const c of g.chests){const before=c.t;c.t+=dt;if(before<1.05&&c.t>=1.05){c.open=true;g.texts.push({text:'+'+c.gold,x:c.tx,z:c.tz,life:1.5,small:true,gold:true});this.burst(g,c.tx,c.tz,'#ffd84a')}}
+    for(const c of g.chests){const before=c.t;c.t+=dt;if(before<1.05&&c.t>=1.05){c.open=true;g.texts.push({text:'+'+c.gold,x:c.tx,z:c.tz,life:1.5,max:1.5,small:true,gold:true,tone:'gold'});this.burst(g,c.tx,c.tz,'#ffd84a')}}
     g.whiteout=(g.whiteout||0)-dt;
     g.drops=g.drops.filter(d=>!d.dead&&d.z<1.1);g.sparks=g.sparks.filter(p=>p.life>0);g.texts=g.texts.filter(t=>t.life>0);g.arcs=g.arcs.filter(a=>a.life>0);g.blasts=g.blasts.filter(e=>e.life>0);g.pops=g.pops.filter(e=>e.life>0);
     g.booms=g.booms.filter(e=>e.t<(e.boss?1.9:1));g.debris=g.debris.filter(p=>p.life>0);g.chests=g.chests.filter(c=>c.keep||c.t<2.6)},
+  // After the run is over (picture only): what is left on the field pops one by one, an escaping dragon flies off
+  // into the distance, and the chests and sparks play out before the result window comes up.
+  outro(g,dt){const before=g.outro||0;if(!before)g.texts=g.texts.filter(t=>t.tone!=='big');g.outro=before+dt;g.hazards=[];g.bolts=[];g.drops=[];g.hurt-=dt;g.shake-=dt;g.hitFlash-=dt;g.shieldBreak-=dt;g.kick=Math.max(0,g.kick-dt*8);
+    for(const f of g.foes)if(f.boss&&!f.dead){f.fly=Math.min(1,(f.fly||0)+dt*.55);f.flash-=dt;if(f.fly>=1)f.dead=true}
+    if(Math.floor(g.outro/.11)!==Math.floor(before/.11)){const f=g.foes.find(f=>!f.dead&&!f.boss);if(f){f.dead=true;this.pop(g,f.x,f.z,'#ffd584',true);this.burst(g,f.x,f.z,'#ffd584')}}
+    g.foes=g.foes.filter(f=>!f.dead);this.effects(g,dt)},
   step(g,dt,rng=Math.random){
     if(!g.running||g.paused||g.ended)return;
     dt=this.clamp(dt,0,.05);
     // Finale: the clock stops, nothing can hurt her, the barrels left on the field pop one after another.
-    if(g.finale>0){const before=g.finale;g.finale+=dt;g.hurt-=dt;g.shake-=dt;g.hitFlash-=dt;g.shieldBreak-=dt;g.kick=Math.max(0,g.kick-dt*8);g.x+=(g.target-g.x)*Math.min(1,dt*14);g.lean+=(this.clamp((g.target-g.x)*2.4,-1,1)-g.lean)*Math.min(1,dt*10);g.pets[0]+=(g.x-g.pets[0])*Math.min(1,dt*6.5);g.pets[1]+=(g.x-g.pets[1])*Math.min(1,dt*4.5);g.pets[2]+=(g.x-g.pets[2])*Math.min(1,dt*3.4);
+    if(g.finale>0){const before=g.finale;g.finale+=dt;g.hurt-=dt;g.shield-=dt*3;g.boost-=dt*3;g.rocket-=dt*3;g.laser-=dt*3;g.chain-=dt*3;g.frost-=dt*3;g.shake-=dt;g.hitFlash-=dt;g.shieldBreak-=dt;g.kick=Math.max(0,g.kick-dt*8);g.x+=(g.target-g.x)*Math.min(1,dt*14);g.lean+=(this.clamp((g.target-g.x)*2.4,-1,1)-g.lean)*Math.min(1,dt*10);g.pets[0]+=(g.x-g.pets[0])*Math.min(1,dt*6.5);g.pets[1]+=(g.x-g.pets[1])*Math.min(1,dt*4.5);g.pets[2]+=(g.x-g.pets[2])*Math.min(1,dt*3.4);
       if(Math.floor(g.finale/.09)!==Math.floor(before/.09)){const f=g.foes.find(f=>!f.dead);if(f){f.dead=true;this.pop(g,f.x,f.z,'#ffd584',true);this.burst(g,f.x,f.z,'#ffd584')}}
       g.foes=g.foes.filter(f=>!f.dead);this.effects(g,dt);
       if(g.finale>=this.finaleLength){g.ended=true;g.running=false}
@@ -97,9 +108,9 @@ const Trek = {
     }
     // Sub-bosses walk in at their time, whatever else is on the field.
     const next=this.subs[g.subsMet];
-    if(next&&g.time>=next.at){g.subsMet++;g.foes.push({sub:g.subsMet,name:next.name,art:next.art,kind:next.kind,x:0,tx:0,z:this.far,hp:next.hp,max:next.hp,flash:0,act:2.2});this.say(g,next.name+' blocks the trail!',0,.4)}
+    if(next&&g.time>=next.at){g.subsMet++;g.foes.push({sub:g.subsMet,name:next.name,art:next.art,kind:next.kind,x:0,tx:0,z:this.far,hp:next.hp,max:next.hp,flash:0,act:2.2});this.say(g,next.name+' blocks the trail!',0,.4,'big')}
     // The guardian of the trail arrives for the last stretch.
-    if(g.time>=this.bossAt&&!g.bossSpawned){g.bossSpawned=true;g.foes.push({boss:true,x:0,z:this.far,hp:this.bossHp,max:this.bossHp,kind:0,flash:0});this.say(g,'Boss incoming!',0,.4);g.hazardAt=Math.min(g.hazardAt,4)}
+    if(g.time>=this.bossAt&&!g.bossSpawned){g.bossSpawned=true;g.foes.push({boss:true,x:0,z:this.far,hp:this.bossHp,max:this.bossHp,kind:0,flash:0});this.say(g,'The dragon is coming!',0,.4,'big');g.hazardAt=Math.min(g.hazardAt,4)}
     const boss=g.foes.find(f=>f.boss&&!f.dead);
     if(g.shot<=0){const target=this.aim(g);let vx=0;
       if(target){const time=Math.max(.08,(.84-target.z)/1.095);vx=this.clamp((target.x-g.x)/time,-3.2,3.2)}
@@ -141,12 +152,12 @@ const Trek = {
       if(!boss&&Math.floor(g.time/6.2)%2===0)for(const f of g.foes)if(!f.dead&&!f.boom&&!f.boss&&!f.sub&&f.z<.5&&f.z>0&&(!foe||Math.abs(f.x-g.x)<Math.abs(foe.x-g.x)))foe=f;
       if(foe)foe.boom=true;
       // Below half health the dragon is enraged: it breathes sooner and sets a second lane alight.
-      const rage=boss&&boss.hp<boss.max/2;if(rage&&!g.raged){g.raged=true;this.say(g,'The dragon is enraged!',0,.4)}
+      const rage=boss&&boss.hp<boss.max/2;if(rage&&!g.raged){g.raged=true;this.say(g,'The dragon is enraged!',0,.4,'big')}
       if(!sub||boss){g.hazards.push({x:foe?foe.x:this.lane(g.x),age:boss?(rage?.65:.5):.35,laser:!foe&&!boss&&Math.floor(g.time/7)%2===0,foe,breath:!!boss});
         if(rage){const at=this.lanes.indexOf(this.lane(g.x));g.hazards.push({x:this.lanes[at+(at===0?1:at===4?-1:rng()<.5?1:-1)],age:.6})}}
       g.hazardAt=boss?(rage?1.9:2.4):sub?2.5:3.8}
     for(const h of g.hazards){h.age+=dt;
-      if(h.foe){if(h.foe.dead&&h.age<1.6){h.age=9;this.say(g,'Defused',h.x,h.foe.z);continue}if(h.age>=1.6&&!h.launched){h.launched=true;h.foe.dash=true}}
+      if(h.foe){if(h.foe.dead&&h.age<1.6){h.age=9;this.say(g,'Defused!',h.x,h.foe.z,'good');continue}if(h.age>=1.6&&!h.launched){h.launched=true;h.foe.dash=true}}
       if(h.age>=1.6&&h.age<2.3&&Math.abs(g.x-h.x)<.31)this.hit(g)}
     // Bonuses are picked up as soon as they touch Reina, anywhere on her figure (see effects).
     this.effects(g,dt);
@@ -154,6 +165,21 @@ const Trek = {
     if(g.hp<=0||!g.finale&&g.time>=this.length){g.ended=true;g.running=false}
   }
 };
+// Floating words in the field: a bold display face with a dark outline, a coloured glow and a pop-in (scale up past
+// full size, then settle). Tones: score (+50), gold (chest coins), bonus (a pickup), bad (lost heart), block
+// (shield), good (defused), big (announcements, on a ribbon across the field).
+const TREK_TONES={score:['#fffbe6','#ffc84a','#5b2a08','#ffb347'],gold:['#fffbe6','#ffd23a','#5b2a08','#ffcf4a'],bonus:['#ffffff','#8fe4ff','#0b2754','#4ac8ff'],
+  bad:['#ffffff','#ff6f86','#4f0616','#ff3048'],block:['#ffffff','#a4f0ff','#063548','#46dcff'],good:['#ffffff','#a6ff7c','#103d0c','#62f04a'],big:['#fffbe6','#ffd76a','#4a1a06','#ff9a2a']};
+function trekWord(c,t,p){t.max??=t.life;const tone=TREK_TONES[t.tone]||TREK_TONES[t.gold?'gold':t.small?'score':'bonus'],max=t.max||t.life||1,age=Math.max(0,max-t.life),big=t.tone==='big';
+  const pop=age<.14?.35+age/.14*.95:age<.3?1.3-(age-.14)/.16*.3:1,size=big?30:t.gold?Math.max(18,30*p.s):t.small?Math.max(16,26*p.s):t.at?Math.max(15,26*p.s):25;
+  const y=t.at??(t.small?p.y-(84+age*60)*p.s:big?215:p.y-150-age*22),x=big?240:Trek.clamp(p.x,70,410);
+  c.save();c.globalAlpha=Math.max(0,Math.min(1,t.life*2.6));c.translate(x,y);c.scale(pop,pop);c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';
+  c.font=`bold ${size}px WonderDisplay,Palatino,Georgia,serif`;
+  if(big){const w=Math.min(470,c.measureText(t.text).width+70),band=c.createLinearGradient(-w/2,0,w/2,0);band.addColorStop(0,'#2a0f4a00');band.addColorStop(.18,'#2a0f4ae0');band.addColorStop(.82,'#2a0f4ae0');band.addColorStop(1,'#2a0f4a00');
+    c.fillStyle=band;c.fillRect(-w/2,-size*.78,w,size*1.5);const edge=c.createLinearGradient(-w/2,0,w/2,0);edge.addColorStop(0,'#ffd76a00');edge.addColorStop(.25,'#ffd76a');edge.addColorStop(.75,'#ffd76a');edge.addColorStop(1,'#ffd76a00');c.fillStyle=edge;c.fillRect(-w/2,-size*.78,w,1.6);c.fillRect(-w/2,size*.72,w,1.6)}
+  const fill=c.createLinearGradient(0,-size*.5,0,size*.45);fill.addColorStop(0,tone[0]);fill.addColorStop(.55,tone[1]);fill.addColorStop(1,tone[1]);
+  c.shadowColor=tone[3];c.shadowBlur=size*.6;c.lineWidth=Math.max(4,size*.24);c.strokeStyle=tone[2];c.strokeText(t.text,0,0);c.shadowBlur=0;
+  c.lineWidth=Math.max(1.2,size*.06);c.strokeStyle='#ffffff55';c.strokeText(t.text,0,-1);c.fillStyle=fill;c.fillText(t.text,0,0);c.restore()}
 // The picture is drawn in a 480x800 space and rendered at the screen's real resolution, so nothing is stretched.
 function trekSharp(canvas){
   const box=canvas.getBoundingClientRect(),k=Trek.clamp((box.width||480)*(globalThis.devicePixelRatio||1)/480,1,2.5),w=Math.round(480*k),h=Math.round(800*k);
@@ -168,30 +194,68 @@ function trekMip(image,want){
   return levels[i]}
 // The pets that run with her are her own deployed pets (the first two Primary Pets), as in the dungeons.
 function trekCrew(){return typeof WonderGear==='undefined'||typeof S==='undefined'||typeof petArtId!=='function'?['d0','d1']:WonderGear.petTeam(S).slice(0,3).filter(Boolean).map(petArtId)}
+// Active bonuses at the left edge: status pills (icon, name, value, a bar that drains for timed ones), never buttons.
+const TREK_BUFFS=[['arrows','trek-pickup-4','Arrows',0],['power','trek-pickup-6','Power',0],['boost','trek-pickup-1','Rapid fire',9],['rocket','trek-pickup-5','Rockets',10],
+  ['laser','trek-pickup-7','Sun beam',6],['chain','trek-pickup-8','Lightning',9],['frost','trek-pickup-9','Frost',8],['shield','trek-pickup-2','Shield',9]];
+const TREK_PAUSE='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4.2" height="14" rx="1.4"/><rect x="13.8" y="5" width="4.2" height="14" rx="1.4"/></svg>',
+  TREK_PLAY='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.2v13.6a1 1 0 0 0 1.5.86l10.6-6.8a1 1 0 0 0 0-1.72L9.5 4.34A1 1 0 0 0 8 5.2z"/></svg>',
+  TREK_OUTRO={win:1.7,lose:2.3};   // seconds the field keeps playing after the end before the result window
+function trekLobby(){
+  const tip=(ico,text)=>`<li>${ico}<span>${text}</span></li>`,img=(id,alt)=>`<img src="${artPath(id)}" alt="${alt}">`;
+  return `<div class="tl-cover" style="background-image:url('${artPath('cover-jungle')}')"><small>Mini game</small><h2>Jungle Trek</h2></div>
+  <p class="tl-hook">Smash the barrels, dodge the fire, topple the dragon!</p>
+  <ul class="tl-rules">${tip('<i class="tl-drag"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M6 24l7-6v4h22v-4l7 6-7 6v-4H13v4z"/><circle cx="24" cy="24" r="5.5"/></svg></i>','Drag to steer')}${tip(img('trek-pickup-4','Arrows'),'Arrows fire by themselves')}${tip(img('trek-pickup-6','Power orb'),'Grab orbs for power')}${tip(img('trek-chest','Chest'),'Beat the dragon for chests')}</ul>
+  <div class="tl-meta"><span><b class="tl-heart">♥♥♥</b>3 lives</span><span><b>${Trek.length}</b>seconds</span><span><b>${fmt(S.jungleBest||0)}</b>best</span></div>
+  <div class="tl-prizes"><small>Rewards</small>${uiIcon('gold')}${uiIcon('wishes')}${uiIcon('exp')}${img('trek-chest-open','Chests')}</div>
+  <button class="trek-btn gold" onclick="startJungle()">${denPlain}<span>Play</span></button>`}
 function showJungle(){
-  $('#main').innerHTML=`<section class="jungle-screen"><div class="jungle-field"><canvas id="trekField" width="480" height="800" tabindex="0" aria-label="Jungle Trek. Drag left and right or use arrow keys. Automatic shooting. Escape pauses."></canvas><div id="trekHud" class="trek-top"><div><small>CURRENT SCORE</small><strong id="trekScore">0</strong><small id="trekBest">BEST ${fmt(S.jungleBest||0)}</small><span class="trek-rank" id="trekRank"></span></div><div class="trek-clock"><small>JUNGLE TREK</small><strong id="trekTime">01:03</strong></div><div><span id="trekLives" aria-label="3 lives">♥ ♥ ♥</span><button id="trekPause" onclick="pauseJungle()" aria-label="Pause run">Ⅱ</button></div></div><div class="trek-buffs" id="trekBuffs"></div><div class="trek-controls"><button data-back onclick="go('games')" aria-label="Exit Jungle Trek">‹</button><span>DRAG TO MOVE · AUTO FIRE</span></div><div class="jungle-overlay" id="trekPanel"><small>WINGS OF WONDER</small><h2>Jungle Trek</h2><p>Break the barrels and grab the bonuses: more arrows, power, rockets, sun beam, chain lightning, frost, wings, shields.<br>Two sub-bosses block the trail: Thornback rushes down your lane, Stormwing strikes three lanes at once.<br>Beat the dragon before the clock runs out. Every boss leaves a chest of gold.</p><p class="trek-instruction">Drag left or right · 3 lives · about a minute</p><button class="primary" onclick="startJungle()">Start adventure</button><button onclick="go('games')">Back to Mini Games</button></div></div></section>`;
+  $('#main').innerHTML=`<section class="jungle-screen"><div class="jungle-field"><canvas id="trekField" width="480" height="800" tabindex="0" aria-label="Jungle Trek. Drag left and right or use arrow keys. Automatic shooting. Escape pauses."></canvas><div id="trekHud" class="trek-top"><div><small>SCORE</small><strong id="trekScore">0</strong><small id="trekBest">BEST ${fmt(S.jungleBest||0)}</small><span class="trek-rank" id="trekRank"></span></div><div class="trek-clock"><small>TIME</small><strong id="trekTime">01:03</strong></div><div><span id="trekLives" aria-label="3 lives">♥ ♥ ♥</span><button id="trekPause" class="trek-pause" onclick="pauseJungle()" aria-label="Pause run">${TREK_PAUSE}</button></div></div><div class="trek-buffs" id="trekBuffs" aria-label="Active bonuses">${TREK_BUFFS.map(([k,art,name,max])=>`<div class="trek-buff${max?' timed':''}" data-k="${k}" hidden><img src="${artPath(art)}" alt=""><span><b>${name}</b><small></small></span>${max?'<u><i></i></u>':''}</div>`).join('')}</div><div class="trek-controls"><button data-back onclick="go('games')" aria-label="Exit Jungle Trek">‹</button><span>DRAG TO MOVE · AUTO FIRE</span></div><div class="trek-banner" id="trekBanner" hidden></div><div class="jungle-overlay trek-card trek-lobby" id="trekPanel">${trekLobby()}</div></div></section>`;
   const g=Trek.create();g.running=false;g.foes=[{x:-1.24,z:.3,hp:120,max:120,kind:0},{x:-.62,z:.22,hp:60,max:60,kind:2},{x:0,z:.5,hp:60,max:60,kind:1},{x:.62,z:.39,hp:90,max:90,kind:3},{x:1.24,z:.22,hp:100,max:100,kind:4}];
+  try{document.fonts?.load('bold 30px WonderDisplay')}catch{}
   const canvas=$('#trekField');['trek-bg','trek-barrel','trek-pickup-1','trek-pickup-2','trek-pickup-3','trek-pickup-4','trek-pickup-5','trek-pickup-6','trek-pickup-7','trek-pickup-8','trek-pickup-9','trek-bomb','trek-elec','trek-rocket','reina-t3',...trekCrew(),'guard-forest','guard-astral','guard-ember','emberpeak','trek-chest','trek-chest-open','trek-shot',...Trek.subs.map(x=>x.art)].forEach(artBitmap);if(typeof registeredCombatBitmap==='function'){registeredCombatBitmap();registeredCombatBitmap(true)}if(typeof registeredCombatLayers==='function')registeredCombatLayers();
   let ticks=0;function preview(){if(!canvas.isConnected||game?.kind==='jungle')return;drawJungle(trekSharp(canvas),g);if(++ticks<90)requestAnimationFrame(preview)}preview();
 }
-function pauseJungle(force){const g=game;if(g?.kind!=='jungle'||!g.running)return;g.paused=force===undefined?!g.paused:force;const p=$('#trekPanel');p.hidden=!g.paused;if(g.paused)p.innerHTML='<h2>Trail paused</h2><p>Your adventure is waiting.</p><button class="primary" onclick="pauseJungle(false)">Continue</button><button onclick="go(\'games\')">Leave run</button>';$('#trekPause').textContent=g.paused?'▶':'Ⅱ'}
+function pauseJungle(force){const g=game;if(g?.kind!=='jungle'||!g.running)return;g.paused=force===undefined?!g.paused:force;const p=$('#trekPanel');p.hidden=!g.paused;p.className='jungle-overlay trek-card trek-pausecard';
+  if(g.paused)p.innerHTML=`<h2>Paused</h2><p>The trail waits for you.</p><button class="trek-btn gold" onclick="pauseJungle(false)">${denPlain}<span>Continue</span></button><button class="trek-btn violet" onclick="leaveTo='games';leaveNow()">${denPlain}<span>Leave run</span></button>`;
+  const b=$('#trekPause');b.innerHTML=g.paused?TREK_PLAY:TREK_PAUSE;b.setAttribute('aria-label',g.paused?'Continue run':'Pause run')}
+// The big word when the run is over; the field keeps playing under it, then the result window fades in.
+function trekBanner(win,title,line){const b=$('#trekBanner');if(!b)return;b.className='trek-banner '+(win?'win':'lose');b.innerHTML=`<i class="tb-rays"></i><b>${title}</b><small>${line}</small>`;b.hidden=false}
 function startJungle(){
-  if(game?.running)return;const canvas=$('#trekField');if(!canvas)return;let ctx=trekSharp(canvas);const g=game=Trek.create();$('#trekPanel').hidden=true;$('#trekPanel').classList.remove('trek-result');canvas.focus({preventScroll:true});let pointer=null,origin=0,start=0,last=performance.now(),hud=-1,frames=0,hearts=3;const rivals=Trek.rivals(typeof ADVENTURERS==='undefined'?[]:ADVENTURERS.map(a=>a.name));
+  if(game?.running)return;const canvas=$('#trekField');if(!canvas)return;let ctx=trekSharp(canvas);const g=game=Trek.create();$('#trekPanel').hidden=true;$('#trekBanner').hidden=true;canvas.parentNode.classList.remove('trek-ending');if(typeof resultClose==='function')resultClose();canvas.focus({preventScroll:true});let pointer=null,origin=0,start=0,last=performance.now(),hud=-1,frames=0,hearts=3;const rivals=Trek.rivals(typeof ADVENTURERS==='undefined'?[]:ADVENTURERS.map(a=>a.name));
   // The newest finger steers: a touch the browser never reports as lifted can not lock the controls.
   canvas.onpointerdown=e=>{if(g.paused)return;e.preventDefault();pointer=e.pointerId;origin=e.clientX;start=g.x;g.touch=true;const r=canvas.getBoundingClientRect();g.stick={x:(e.clientX-r.left)/r.width*480,y:(e.clientY-r.top)/r.height*800};try{canvas.setPointerCapture(pointer)}catch{}};
   canvas.onpointermove=e=>{if(pointer===e.pointerId&&!g.paused){e.preventDefault();const r=canvas.getBoundingClientRect();g.target=Trek.clamp(start+(e.clientX-origin)/r.width*3.5,-1.25,1.25)}};
   canvas.onpointercancel=canvas.onpointerup=canvas.onlostpointercapture=e=>{if(e.pointerId===pointer){pointer=null;g.touch=false}};
   canvas.onkeydown=e=>{if(['ArrowLeft','ArrowRight','a','d'].includes(e.key)){e.preventDefault();g.target=Trek.clamp(g.target+(['ArrowLeft','a'].includes(e.key)?-.3:.3),-1.25,1.25)}else if(e.key==='Escape'){e.preventDefault();pauseJungle()}};
-  function finish(){if(g.rewarded)return;g.rewarded=true;S.jungleBest=Math.max(S.jungleBest||0,g.score);if(typeof arcadeScore==='function')arcadeScore('jungle',g.score);
-    const barrels=Math.min(800,g.kills*12),gold=barrels+g.loot.gold,xp=Math.min(80,g.kills*2),wishes=g.loot.wishes,seals=g.loot.chests*10;gain(gold,wishes,xp);if(seals&&typeof WonderGear!=='undefined')WonderGear.addSeals(S,seals);if(g.bossDown&&typeof WonderGear!=='undefined')WonderGear.bagAdd(S,'chest2',1);save();
-    const title=g.bossDown?'DRAGON DEFEATED':!g.hp?'ADVENTURE ENDED':g.bossSpawned?'THE DRAGON ESCAPED':'TRAIL COMPLETE';
-    const chest=n=>`<img src="${artPath(n<g.loot.chests?'trek-chest-open':'trek-chest')}" class="${n<g.loot.chests?'':'shut'}" alt="">`;
-    const prize=(icon,amount,label)=>`<span>${uiIcon(icon)}<b>+${fmt(amount)}</b><small>${label}</small></span>`;
-    const p=$('#trekPanel');p.hidden=false;p.classList.add('trek-result');
-    p.innerHTML=`<small>${title}</small><h2>${fmt(g.score)} points</h2><div class="trek-chests" aria-label="${g.loot.chests} of 5 chests">${[0,1,2,3,4].map(chest).join('')}</div><div class="trek-prizes">${prize('gold',gold,'gold')}${wishes?prize('wishes',wishes,'wishes'):''}${prize('exp',xp,'XP')}</div><p>Barrels ${fmt(barrels)} gold · chests ${fmt(g.loot.gold)} gold (${g.loot.chests} of 5)${seals?' · +'+seals+' talent seals':''}${g.bossDown?' · a Moon Chest in the bag':''}<br>Personal best · ${fmt(S.jungleBest)} · Rank ${Trek.standing(rivals,g.score,Trek.length).rank} of ${rivals.length+1}<br><i>Rivals are simulated AI adventurers</i></p><button class="primary" onclick="startJungle()">Play again</button><button onclick="go('games')">Mini Games</button>`}
-  function frame(now){if(game!==g||!canvas.isConnected)return;const dt=Math.min(.05,(now-last)/1000);last=now;if(document.hidden&&!g.paused)pauseJungle(true);if(++frames%40===0)ctx=trekSharp(canvas);Trek.step(g,dt);drawJungle(ctx,g);
-    const stamp=[Math.ceil(g.time),g.hp,g.score,Math.ceil(g.boost),Math.ceil(g.shield),Math.ceil(g.rocket),Math.ceil(g.laser),Math.ceil(g.chain),Math.ceil(g.frost),g.arrows,g.power,g.paused,g.kills,g.loot.gold].join();if(stamp!==hud){hud=stamp;$('#trekScore').textContent=fmt(g.score);const place=Trek.standing(rivals,g.score,g.time);$('#trekRank').innerHTML=`Ranking <b>${place.rank}</b><br>Gap to leader <b>${fmt(place.gap)}</b><br>Gold <b class="gold">${fmt(Math.min(800,g.kills*12)+g.loot.gold)}</b>`;const t=Math.ceil(Trek.length-g.time);$('#trekTime').textContent=String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0');$('#trekLives').innerHTML=[0,1,2].map(i=>`<b style="color:${i<g.hp?'#ff6179':'#344e62'}">♥</b>`).join(' ');$('#trekLives').setAttribute('aria-label',g.hp+' lives');if(g.hp<hearts){const el=$('#trekLives');el.classList.remove('hit');void el.offsetWidth;el.classList.add('hit');try{navigator.vibrate?.(70)}catch{}}hearts=g.hp;$('#trekBuffs').innerHTML=[['trek-pickup-4',g.arrows>1,'×'+g.arrows,'Arrows'],['trek-pickup-6',g.power>0,'+'+g.power,'Power'],['trek-pickup-1',g.boost>0,Math.ceil(g.boost),'Wings'],['trek-pickup-5',g.rocket>0,Math.ceil(g.rocket),'Rockets'],['trek-pickup-7',g.laser>0,Math.ceil(g.laser),'Sun beam'],['trek-pickup-8',g.chain>0,Math.ceil(g.chain),'Chain lightning'],['trek-pickup-9',g.frost>0,Math.ceil(g.frost),'Frost'],['trek-pickup-2',g.shield>0,Math.ceil(g.shield),'Shield']].map(([art,on,label,name])=>`<span class="${on?'on':''}"><img src="${artPath(art)}" alt="${name}"><b>${on?label:''}</b></span>`).join('')}
-    if(g.ended){finish();return}loop=requestAnimationFrame(frame)
+  // Rewards are paid the moment the run ends (leaving during the outro loses nothing); the window comes after the outro.
+  function finish(){if(g.rewarded)return;g.rewarded=true;const record=g.score>0&&g.score>(S.jungleBest||0);S.jungleBest=Math.max(S.jungleBest||0,g.score);if(typeof arcadeScore==='function')arcadeScore('jungle',g.score);
+    const barrels=Math.min(800,g.kills*12),gold=barrels+g.loot.gold,wishes=g.loot.wishes,seals=g.loot.chests*10;let xp=Math.min(80,g.kills*2);const got=gain(gold,wishes,xp);if(Number.isFinite(got?.xp))xp=got.xp;
+    if(seals&&typeof WonderGear!=='undefined')WonderGear.addSeals(S,seals);if(g.bossDown&&typeof WonderGear!=='undefined')WonderGear.bagAdd(S,'chest2',1);save();
+    g.summary={record,gold,wishes,xp,seals,rank:Trek.standing(rivals,g.score,Trek.length).rank};
+    $('#trekField')?.parentNode.classList.add('trek-ending');
+    if(g.bossDown)trekBanner(true,'Victory!','The dragon is beaten');else trekBanner(false,g.hp?'Time\'s up!':'Out of hearts',g.bossSpawned?'The dragon escaped':'The trail goes on')}
+  function result(){const r=g.summary,banner=$('#trekBanner');if(banner)banner.hidden=true;
+    if(typeof bagArtVars==='function')bagArtVars();if(typeof petArtVars==='function')petArtVars();
+    const tile=(icon,n,name,hue,i)=>`<span class="wr-prize" style="--rarity:${hue};--d:${1.4+i*.15}s">${icon}<b>${n}</b><small>${name}</small></span>`,tiles=[tile(uiIcon('gold'),'+'+fmt(r.gold),'Gold','#ffcf5a',0)];
+    if(r.wishes)tiles.push(tile(uiIcon('wishes'),'+'+fmt(r.wishes),'Wishes','#ff9ad8',tiles.length));tiles.push(tile(uiIcon('exp'),'+'+fmt(r.xp),'XP','#8fd0ff',tiles.length));
+    if(r.seals&&typeof denIcon==='function')tiles.push(tile(denIcon('misc',0,4,1),'+'+r.seals,'Seals','#9dffb0',tiles.length));
+    if(g.bossDown&&typeof bagIcon==='function')tiles.push(tile(bagIcon('chest2'),'×1','Moon Chest','#b8a4ff',tiles.length));
+    const chests=[0,1,2,3,4].map(n=>`<img src="${artPath(n<g.loot.chests?'trek-chest-open':'trek-chest')}" class="${n<g.loot.chests?'won':'shut'}" style="--d:${.9+n*.12}s" alt="">`).join('');
+    resultShow({win:g.bossDown,title:g.bossDown?'Victory!':g.hp?'Time\'s Up':'Out of Hearts',kicker:r.record?'New personal best':g.bossDown?'Dragon defeated':g.bossSpawned?'The dragon escaped':'Keep going next time',
+      stars:g.bossDown?3:Math.min(2,g.loot.chests),score:g.score,label:'Points',
+      body:`<div class="wr-chests trek-rchests" aria-label="${g.loot.chests} of 5 chests">${chests}</div><p class="wr-line">Rank ${r.rank} of ${rivals.length+1} · Best ${fmt(S.jungleBest||0)}</p><div class="wr-prizes trek-wrprizes">${tiles.join('')}</div>`,
+      buttons:[['Play again','gold','startJungle()'],['Mini Games','violet',"openScreen('games')"]]})}
+  function buffs(){for(const el of $('#trekBuffs')?.children||[]){const k=el.dataset.k,max=TREK_BUFFS.find(b=>b[0]===k)[3],v=k==='arrows'?g.arrows-1:k==='power'?g.power:Math.max(0,g[k]),on=v>0&&!g.finale;
+      if(el.hidden===on){el.hidden=!on;if(on){el.classList.remove('fresh');void el.offsetWidth;el.classList.add('fresh')}}
+      if(on)el.querySelector('small').textContent=k==='arrows'?'×'+g.arrows:k==='power'?'+'+g.power:Math.ceil(v)+' s'}}
+  function frame(now){if(game!==g||!canvas.isConnected)return;const dt=Math.min(.05,(now-last)/1000);last=now;if(++frames%40===0)ctx=trekSharp(canvas);
+    // After the end the field keeps playing (outro), then the result window fades in over it.
+    if(g.ended){finish();Trek.outro(g,dt);drawJungle(ctx,g);if(g.outro>=(g.bossDown?TREK_OUTRO.win:TREK_OUTRO.lose)){result();return}loop=requestAnimationFrame(frame);return}
+    if(document.hidden&&!g.paused)pauseJungle(true);Trek.step(g,dt);drawJungle(ctx,g);
+    if(g.finale>1.25&&!g.cheered){g.cheered=true;canvas.parentNode.classList.add('trek-ending');trekBanner(true,'Victory!','The dragon is beaten')}
+    for(const el of $('#trekBuffs')?.querySelectorAll('.timed:not([hidden]) i')||[]){const k=el.closest('[data-k]').dataset.k;el.style.transform=`scaleX(${Trek.clamp(g[k]/TREK_BUFFS.find(b=>b[0]===k)[3],0,1)})`}
+    const stamp=[Math.ceil(Trek.length-g.time),g.hp,g.score,Math.ceil(g.boost),Math.ceil(g.shield),Math.ceil(g.rocket),Math.ceil(g.laser),Math.ceil(g.chain),Math.ceil(g.frost),g.arrows,g.power,g.paused,g.kills,g.loot.gold,g.finale>0].join();if(stamp!==hud){hud=stamp;$('#trekScore').textContent=fmt(g.score);const place=Trek.standing(rivals,g.score,g.time);$('#trekRank').innerHTML=`Rank <b>${place.rank}</b> / ${place.of}<br>Gap <b>${fmt(place.gap)}</b><br>Gold <b class="gold">${fmt(Math.min(800,g.kills*12)+g.loot.gold)}</b>`;const t=Math.ceil(Trek.length-g.time);$('#trekTime').textContent=String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0');$('#trekTime').classList.toggle('low',t<=10&&!g.finale);$('#trekLives').innerHTML=[0,1,2].map(i=>`<b class="${i<g.hp?'':'gone'}">♥</b>`).join('');$('#trekLives').setAttribute('aria-label',g.hp+' lives');if(g.hp<hearts){const el=$('#trekLives');el.classList.remove('hit');void el.offsetWidth;el.classList.add('hit');try{navigator.vibrate?.(70)}catch{}}hearts=g.hp;buffs()}
+    if(g.ended)finish();loop=requestAnimationFrame(frame)
   }loop=requestAnimationFrame(frame);
 }
 function drawJungle(c,g){
@@ -254,13 +318,13 @@ function drawJungle(c,g){
       c.save();c.globalCompositeOperation='lighter';glow(p.x,p.y-size*.42,size*.62,f.kind==='storm'?[[0,'#7fb4ff55'],[1,'#3a6dff00']]:[[0,'#9dff7a44'],[1,'#3aa81c00']]);c.restore();
       c.save();c.translate(p.x,0);if(f.dash)c.scale(1.08,1.08);sprite(f.art,0,(p.y-hover)/(f.dash?1.08:1),size,size);c.restore();
       if(f.flash>0){c.save();c.globalCompositeOperation='lighter';c.globalAlpha=Math.min(1,jolt);glow(p.x,p.y-size*.42,size*.4,[[0,'#fffbe055'],[1,'#ff8a2a00']]);c.restore()}
-      if(f.boom&&!f.dash){c.save();c.textAlign='center';c.lineJoin='round';c.font=`900 ${Math.max(14,26*p.s)}px Arial,sans-serif`;c.lineWidth=4;c.strokeStyle='#7a1010';c.fillStyle='#ffd0c0';c.strokeText('Charge!',p.x,p.y-size*.95);c.fillText('Charge!',p.x,p.y-size*.95);c.restore()}
+      if(f.boom&&!f.dash)trekWord(c,{text:'Charge!',tone:'bad',life:1,max:1.3+Math.sin(T*12)*.02,at:p.y-size*.95},p);
       continue}
-    if(f.boss){const size=250*p.s*(1+jolt*.025),hover=Math.sin(T*2.6)*5*p.s,rage=f.hp<f.max/2;p.x+=Math.sin(T*95)*2.5*jolt;ellipse(p.x,p.y+4*p.s,size*.42-hover,18*p.s,'#0c2a1f77');
+    if(f.boss){const fly=f.fly||0,size=250*p.s*(1+jolt*.025)*(1-fly*.55),hover=Math.sin(T*2.6)*5*p.s-fly*fly*320,rage=f.hp<f.max/2;p.x+=Math.sin(T*95)*2.5*jolt;if(fly){c.save();c.globalAlpha=Math.max(0,1-fly)}ellipse(p.x,p.y+4*p.s,size*.42-hover,18*p.s,'#0c2a1f77');
       c.save();c.globalCompositeOperation='lighter';glow(p.x,p.y-size*.45,size*(rage?.85+Math.sin(T*9)*.05:.7),rage?[[0,'#ff3a2a77'],[1,'#ff1a0c00']]:[[0,'#ff7a3a44'],[1,'#ff3a1c00']]);c.restore();
       c.save();c.translate(p.x,0);c.scale(f.face||1,1);sprite('emberpeak',0,p.y+hover,size,size);c.restore();
       if(f.flash>0){c.save();c.globalCompositeOperation='lighter';c.globalAlpha=Math.min(1,jolt);glow(p.x,p.y-size*.45,size*.42,[[0,'#fffbe04d'],[1,'#ff8a2a00']]);c.restore()}
-      continue}
+      if(fly)c.restore();continue}
     const w=100*p.s*(1+jolt*.08),h=(barrel?w*barrel.naturalHeight/barrel.naturalWidth:74*p.s)*(1-jolt*.1);
     ellipse(p.x,p.y+3*p.s,w*.5,11*p.s,'#0c2a1f66');
     if(f.type){c.save();c.globalCompositeOperation='lighter';glow(p.x,p.y-h*.5,w*.8,f.type==='elec'?[[0,'#7fd4ff77'],[1,'#3a8dff00']]:[[0,'#ff9a5a66'],[1,'#ff3a1c00']]);c.restore()}
@@ -385,8 +449,8 @@ function drawJungle(c,g){
     c.save();c.translate(cx-rx*.42,cy-ry*.52);c.rotate(-.62);ellipse(0,0,rx*.2,ry*.045,'#ffffff59');c.restore();
     c.beginPath();c.ellipse(cx,cy,rx*.86,ry*.88,0,.35,1.25);c.strokeStyle='#bff4ff55';c.lineWidth=3;c.lineCap='round';c.stroke();
     c.restore()}
-  const lead=g.foes.find(f=>f.boss)||g.foes.find(f=>f.sub);if(lead){const w=236,x=160,y=74,k=Math.max(0,lead.hp/lead.max);c.fillStyle='#1a0d0dcc';c.beginPath();c.roundRect?c.roundRect(x-3,y-3,w+6,20,7):c.rect(x-3,y-3,w+6,20);c.fill();c.fillStyle='#5a1b1b';c.fillRect(x,y,w,14);const bar=c.createLinearGradient(x,0,x+w,0);bar.addColorStop(0,'#ffb347');bar.addColorStop(1,'#ff3a2a');c.fillStyle=bar;c.fillRect(x,y,w*k,14);if(lead.flash>0){c.fillStyle=`rgba(255,255,255,${Math.min(.55,lead.flash*5)})`;c.fillRect(x,y,w*k,14)}c.save();c.textAlign='center';c.font='900 13px Arial,sans-serif';c.fillStyle='#fff3d0';c.fillText((lead.boss?'ASHEN CROWN':lead.name.toUpperCase())+' · '+Math.max(0,Math.ceil(lead.hp)),x+w/2,y+12);c.restore()}
-  for(const t of g.texts||[]){const p=P(t.x,t.z);c.save();c.globalAlpha=Math.min(1,t.life*2);c.textAlign='center';c.lineJoin='round';const y=t.small?p.y-(84+(.7-t.life)*46)*p.s:p.y-150;c.font=t.small?`900 ${Math.max(12,20*p.s)}px Arial,sans-serif`:'900 22px Arial,sans-serif';c.lineWidth=4;c.strokeStyle=t.small?'#5b3418':t.text[0]==='−'?'#6b1020':'#2b2a6a';if(t.gold)c.font=`900 ${Math.max(15,26*p.s)}px Arial,sans-serif`;c.fillStyle=t.gold?'#ffe27a':t.small?'#ffe9a0':t.text[0]==='−'?'#ffb0b8':t.text==='Defused'?'#b6ff9e':'#bfe4ff';c.strokeText(t.text,p.x,y);c.fillText(t.text,p.x,y);c.restore()}
+  const lead=g.foes.find(f=>f.boss&&!f.fly)||g.foes.find(f=>f.sub);if(lead){const w=236,x=160,y=74,k=Math.max(0,lead.hp/lead.max);c.fillStyle='#1a0d0dcc';c.beginPath();c.roundRect?c.roundRect(x-3,y-3,w+6,20,7):c.rect(x-3,y-3,w+6,20);c.fill();c.fillStyle='#5a1b1b';c.fillRect(x,y,w,14);const bar=c.createLinearGradient(x,0,x+w,0);bar.addColorStop(0,'#ffb347');bar.addColorStop(1,'#ff3a2a');c.fillStyle=bar;c.fillRect(x,y,w*k,14);if(lead.flash>0){c.fillStyle=`rgba(255,255,255,${Math.min(.55,lead.flash*5)})`;c.fillRect(x,y,w*k,14)}c.save();c.textAlign='center';c.font='900 13px Arial,sans-serif';c.fillStyle='#fff3d0';c.fillText((lead.boss?'ASHEN CROWN':lead.name.toUpperCase())+' · '+Math.max(0,Math.ceil(lead.hp)),x+w/2,y+12);c.restore()}
+  for(const t of g.texts||[])trekWord(c,t,P(t.x,t.z));
   // A translucent thumb stick appears under the finger and never intercepts input.
   const stick=g.touch&&g.stick?g.stick:{x:240,y:742};ellipse(stick.x,stick.y,40,40,'#12322f38');c.strokeStyle='#e4fff238';c.lineWidth=2;c.beginPath();c.arc(stick.x,stick.y,40,0,7);c.stroke();ellipse(stick.x+Trek.clamp((g.target-g.x)*60,-24,24),stick.y,18,18,g.touch?'#d6fff866':'#dafff22b');
   if(g.hurt>0){c.save();c.globalAlpha=Math.min(1,g.hurt*1.4);const edge=c.createRadialGradient(240,400,250,240,400,520);edge.addColorStop(0,'#ff3b4a00');edge.addColorStop(1,'#ff3b4a88');c.fillStyle=edge;c.fillRect(-10,-10,W+20,H+20);c.restore()}
