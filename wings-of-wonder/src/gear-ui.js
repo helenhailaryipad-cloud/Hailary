@@ -738,7 +738,7 @@ function chatMention(name){chatInsert('@'+name+' ')}
 function chatSend(){
  const box=document.getElementById('chatText'),text=box?.value||'';
  const r=WonderGear.chatSay(S,chatTarget(),text);if(!r){toast(chatChannel==='System'?'Nobody can write in System.':'Write something first.');return}
- if(box)box.value='';chatEmoji=false;save();chatRefresh();chatAsk(r);
+ if(typeof trailTick==='function')trailTick('chat');if(box)box.value='';chatEmoji=false;save();chatRefresh();chatAsk(r);
 }
 function chatQuick(text){const r=WonderGear.chatSay(S,chatTarget(),text);if(r){save();if($('#modal').open)$('#modal').close();chatRefresh();chatAsk(r)}else toast('Nobody can write in System.')}
 function chatShortcutsShow(){popup('<h2>Shortcut</h2><div class="soc-list">'+chatShortcuts.map(t=>`<button class="soc-row" onclick="chatQuick('${t.replace(/'/g,"\\'")}')">${denPlain}${socIcon(6)}<b>${t}</b></button>`).join('')+'</div>')}

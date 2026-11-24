@@ -262,9 +262,12 @@ the home "Daily" button (the old `cityDaily` shell is unused).
   guild sign-in and boss, flowers, Sky Contest fights, Pet Siege, pet summons, Star Rites pulls), reset 00:00 UTC,
   counted by `trailTick(key,n)` hooks where the thing happens (world.js, exp-dungeon.js, gear-data.js, gear-ui.js,
   siege.js, rites.js, fishing.html via `parent.trailTick`, `arcadeScore`). Go buttons open the right screen.
-- Each done task is claimed once per tab: Silver free (100 Wayfarer EXP, 30 Star Rites tickets, 10 prisms, 1,000 gold),
-  Gold / Diamond need that month's Wayfarer Pass (680 / 1,280 prisms; real money not built). Wayfarer EXP fills a
-  monthly track of twelve milestones (`Trail.track`). Claim all, You received pop-up.
+- Second pass (user sent 16 photos of all three tabs): Silver / Gold / Diamond are NOT paywalls. They are the same task
+  kinds (`Trail.kinds`, now 16: + boss wheel spins, chat message, Spend gold, Spend prisms) with rising goals per tab
+  (`Trail.goals.s/g/d`, 0 = not in that tab) and bigger rewards (`Trail.tiers`); one counter per task, a claim per tab.
+  Spend goals are counted by `trailSpend()` (called from `save()`, compares balances). The reference's "Top-up EUR"
+  goals are left out (no real money). Wayfarer EXP fills a DAILY chest track (`Trail.track`, 300 ... 6,000; reset
+  00:00 UTC with the tasks). The old monthly pass is gone; `pass` / `season` in old saves still validate.
 - Gacha tickets drip in: the quests above pay tickets of the running rite; +20 Starlit Vouchers per dungeon guardian
   (`Trail.dungeonTickets`) and two slots of the existing boss wheel (`WonderAdventure.wheel`, a free spin per guardian
   win) pay 30 / 60 vouchers.

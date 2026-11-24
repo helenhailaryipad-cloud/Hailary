@@ -1093,12 +1093,13 @@ console.log('PASS: Star Rites room: pulls, free pull, exchange, result window, r
 vm.runInContext(`
 {S=defaults();go('cityTrail');let h=$('#main').innerHTML;if(!h.includes('Wayfarer Quests')||!h.includes('Go</button>'))throw Error('Wayfarer Quests room');
  trailTick('flower',5);cityTrail();h=$('#main').innerHTML;if(!h.includes('Claim</button>'))throw Error('Done task shows Claim');
- const g=S.gold;trailClaim('flower');if(S.gold!==g+1000||S.trail.exp!==100)throw Error('Claim pays');trailTab='g';cityTrail();if(!$('#main').innerHTML.includes('🔒'))throw Error('Gold tab locked');
- trailClaimAll();if(!$('#modalBody').innerHTML.includes('Wayfarer Pass'))throw Error('Pass offer');trailMilestone(0);trailTab='s';
- S.adventure={...WonderAdventure.fresh(),pending:3};for(let i=0;i<3;i++)WonderAdventure.spin(S,()=>6/12+.01);if(Rites.vouchers(S)!==90)throw Error('Wheel pays Starlit Vouchers');const tk=Rites.tickets(S,Rites.rite(Rites.period()).id);riteVoucher();riteRedeem();if(Rites.vouchers(S)!==0||Rites.tickets(S,Rites.rite(Rites.period()).id)!==tk+90)throw Error('Vouchers swap 1:1');
+ const g=S.gold;trailClaim('flower');if(S.gold!==g+1000||S.trail.exp!==100)throw Error('Claim pays');trailTab='g';cityTrail();if($('#main').innerHTML.includes('🔒'))throw Error('Gold tab is free');
+ trailClaim('flower');if(!S.trail.got.g.includes('flower'))throw Error('Gold claim');trailTab='d';cityTrail();trailClaimAll();trailMilestone(0);trailTab='s';
+ S.gold+=5000;save();S.gold-=4000;save();if(S.trail.c.goldspend!==4000)throw Error('Gold spending counts');
+ const v0=Rites.vouchers(S),w0=S.trail.c.wheel||0;S.adventure={...WonderAdventure.fresh(),pending:3};for(let i=0;i<3;i++)WonderAdventure.spin(S,()=>6/12+.01);if(Rites.vouchers(S)!==v0+90||S.trail.c.wheel!==w0+3)throw Error('Wheel pays Starlit Vouchers and counts');const tk=Rites.tickets(S,Rites.rite(Rites.period()).id);const vv=Rites.vouchers(S);riteVoucher();riteRedeem();if(Rites.vouchers(S)!==0||Rites.tickets(S,Rites.rite(Rites.period()).id)!==tk+vv)throw Error('Vouchers swap 1:1');
  go('home');if(!$('#main').innerHTML.includes("go('cityTrail')"))throw Error('Daily opens Wayfarer Quests');if(!valid(S))throw Error('valid');}
 `,context);
-console.log('PASS: Wayfarer Quests: tasks, claims, locked tabs and pass offer, milestones, wheel pays rite tickets, Daily button.');
+console.log('PASS: Wayfarer Quests: tasks, Silver / Gold / Diamond free tabs, claims, spending and wheel counters, chest track, vouchers, Daily button.');
 
 vm.runInContext(`
 {S=defaults();go('siege');let h=$('#main').innerHTML;if(!h.includes('Dragon Keep')||!S.siege||!valid(S))throw Error('Pet Siege map');
