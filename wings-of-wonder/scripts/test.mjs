@@ -1127,7 +1127,7 @@ vm.runInContext(`
  S.scales=1000;vowBuy('p1');if(!(S.vow.crystal>=10)||S.scales!==1000-Vow.packs[0].price||!valid(S))throw Error('Vow pack');vowBuy('rose');
  if(Vow.score(S.vow)>=Vow.goals[0].at){vowClaimGoal(0);if(!S.vow.goal.includes(0))throw Error('Oath Goal')}
  if(!vowDrop()||!(S.vow.drops===1))throw Error('Vow dungeon drop');
- const v0=S.vow;S.vow={...v0,last:null,paid:-1,day:v0.day-1,pts:3000,back:600};vowState();if(S.vow.paid!==S.vow.day-1&&S.vow.paid!==S.vow.day)throw Error('Vow day settle');
+ const v0=S.vow;S.vow={...v0,last:null,paid:-1,day:v0.day-1,pts:3000,back:600};delete S.vow.frozen;vowState();if(S.vow.paid!==S.vow.day-1&&S.vow.paid!==S.vow.day)throw Error('Vow day settle');
  if(!WonderGear.socialState(S).mail.some(m=>m.title.startsWith('Blossom Vow')))throw Error('Vow reward mail');if(!valid(S))throw Error('Vow after settle');
  S.vow={...S.vow,buff:Vow.day(Date.now())};if(Vow.buffOn(S.vow)!==Vow.expBuff)throw Error('Vow EXP buff');home();if(!$('#main').innerHTML.includes('Blossom Vow'))throw Error('Vow home icon');
  if(valid({...S,vow:{...S.vow,pts:-1}}))throw Error('Invalid vow save accepted');}
