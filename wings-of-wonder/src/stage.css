@@ -9208,3 +9208,170 @@ html body .wr-end .td-gear .reward img,html body .wr-end .td-gear .reward .gpt-i
 #stage #modal .sg-day h3{margin:0;padding:6px;text-align:center;font:900 15px/1.2 Arial,sans-serif;color:#fff}
 #stage #modal .sg-day.win h3{background:linear-gradient(90deg,#f6a23a,#f0c04a)}#stage #modal .sg-day.lose h3{background:linear-gradient(90deg,#3a8ae0,#5aaaf0)}
 #stage #modal .sg-day .pp-gl{justify-content:center;padding:10px}
+
+/* ==== Blossom Vow (src/vow.js, screen vow): full screen, blossom backdrop on every tab, room = size container ==== */
+body[data-screen=vow] #stage>:is(header,nav,footer),body[data-screen=vow] .return-to-menu{display:none!important}
+body[data-screen=vow] #stage>#main{inset:0!important;width:100%;height:100%;padding:0!important;display:block;overflow:hidden}
+body[data-screen=vow] #stage .toast{top:6%!important;bottom:auto!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:auto!important;max-width:76%!important;min-height:0!important;padding:7px 16px!important;border-radius:99px!important;font:700 14px/1.25 Arial,sans-serif!important;z-index:30}
+.vw-room{position:relative;height:100%;container-type:size;overflow:hidden;background:var(--vwbg) 50% 100%/cover no-repeat,#f7c6d4;color:#4a2030;font-family:Arial,sans-serif;--vf:min(2.6cqw,1.95cqh);user-select:none;-webkit-user-select:none}
+.vw-room::before{content:"";position:absolute;inset:0;background:linear-gradient(#fff0 55%,#3a102044);pointer-events:none}
+#stage #main .vw-room button::before,#stage #main .vw-room button::after{display:none}
+#stage #main .vw-room button{min-height:0;box-shadow:none;outline:0}
+.vw-ico{display:inline-block;width:1.6em;height:1.6em;flex:none;background:var(--vwico,none) 0 0/400% 200% no-repeat;font-style:normal;vertical-align:middle}
+.vw-ico.big{width:3.2em;height:3.2em}
+.vw-nico{display:block;flex:none;background:var(--vwnav,none) 0 0/300% 200% no-repeat;font-style:normal}
+/* top bar, title, ribbon, countdown */
+.vw-top{position:absolute;left:2cqw;right:2cqw;top:1.2cqh;display:flex;justify-content:space-between;align-items:center;gap:1cqw;z-index:4;font:700 var(--vf)/1 Arial,sans-serif}
+.vw-chip,.vw-wallet>span{display:inline-flex;align-items:center;gap:.3em;padding:.25em .7em .25em .3em;border-radius:2em;background:#3a1428b3;color:#fff;box-shadow:inset 0 0 0 1px #ffd9a066;white-space:nowrap}
+.vw-chip b{color:#ffe27a}.vw-wallet{display:flex;gap:.6cqw}.vw-wallet img,.vw-wallet .ui-icon,.vw-wallet .gpt-icon{width:1.5em!important;height:1.5em!important;object-fit:contain}
+.vw-title{position:absolute;left:0;right:0;top:6.4cqh;margin:0;text-align:center;z-index:3;font:900 italic min(10cqw,7.2cqh)/1 Georgia,'Times New Roman',serif;letter-spacing:.01em;
+ background:linear-gradient(#fffbe8 8%,#ffd1e6 40%,#ff7fb2 58%,#ffd77a 86%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:1.2px #a2245a;filter:drop-shadow(0 2px 0 #6a1238) drop-shadow(0 0 8px #ffffffaa)}
+.vw-ribbon{position:absolute;left:50%;top:calc(6.4cqh + min(10cqw,7.2cqh) + .6cqh);transform:translateX(-50%);z-index:3;padding:.32em 2.2em;white-space:nowrap;color:#fff;font:800 var(--vf)/1.1 Georgia,serif;text-shadow:0 1px 1px #7a1030;
+ background:linear-gradient(#ff8fb4,#d8406e);clip-path:polygon(0 0,100% 0,96% 50%,100% 100%,0 100%,4% 50%)}
+.vw-count{position:absolute;left:50%;top:calc(6.4cqh + min(10cqw,7.2cqh) + 1.4cqh + 1.9 * var(--vf));transform:translateX(-50%);z-index:3;padding:.3em 1.1em;border-radius:2em;background:#2a0c1ccc;color:#fff;font:700 var(--vf)/1 Arial,sans-serif;white-space:nowrap;box-shadow:0 0 0 1px #ffc6dd88}
+#stage #main .vw-help{position:absolute;right:2.4cqw;top:7cqh;width:min(7cqw,5cqh);height:min(7cqw,5cqh);padding:0;border:2px solid #fff;border-radius:50%;background:radial-gradient(#ff9ec0,#d03a6a);color:#fff;font:900 min(4cqw,3cqh)/1 Georgia,serif;z-index:5}
+/* bottom nav: back + five painted icons */
+.vw-nav{position:absolute;left:0;right:0;bottom:0;height:12.5cqh;display:grid;grid-template-columns:.8fr repeat(5,1fr);align-items:end;padding:0 1cqw .8cqh;z-index:6;background:linear-gradient(#5a1a3a00,#5a1a3ad9 35%,#3a0c22f2)}
+#stage #main .vw-nav button{position:relative;display:grid;justify-items:center;gap:.3cqh;padding:0;border:0;background:none;color:#fff}
+.vw-nav .vw-nico{width:min(12cqw,8cqh);height:min(12cqw,8cqh);filter:drop-shadow(0 2px 2px #0007);transition:transform .15s}
+.vw-nav small{font:800 min(2.3cqw,1.7cqh)/1.05 Arial,sans-serif;text-align:center;text-shadow:0 1px 2px #000;max-width:18cqw}
+#stage #main .vw-nav button.on .vw-nico{transform:translateY(-.8cqh) scale(1.1);filter:drop-shadow(0 0 6px #ffe27a)}.vw-nav button.on small{color:#ffe27a}
+#stage #main .vw-nav button[data-back]{align-self:center;justify-self:start;width:min(11cqw,8cqh);height:min(11cqw,8cqh)}
+.vw-nav em,.vw-big em{position:absolute;top:0;right:22%;width:10px;height:10px;border-radius:50%;background:#ff2d4a;box-shadow:0 0 0 2px #fff}
+/* main page */
+.vw-stage{position:absolute;left:0;width:42cqw;top:28cqh;bottom:29cqh;z-index:2;display:grid;justify-items:center;align-items:end}
+.vw-hero{position:absolute;left:50%;bottom:0;transform:translateX(-50%);height:100%;max-width:100%;object-fit:contain;object-position:50% 100%;filter:drop-shadow(0 8px 6px #4a102055)}
+.vw-pair{position:absolute;right:0;top:0;display:grid;justify-items:center;gap:2px}.vw-pair .portrait-badge{position:relative;width:min(10cqw,7cqh);height:min(10cqw,7cqh);box-shadow:0 0 0 2px #fff,0 0 0 4px #ff7fb2}
+.vw-pair b{padding:1px 6px;border-radius:1em;background:#3a1428cc;color:#fff;font:700 min(2.2cqw,1.6cqh)/1.2 Arial,sans-serif}.vw-pair small,.vw-row small,.vw-prow small,.vw-duo small{color:#ffb3cf;font-size:.8em}
+#stage #main .vw-gift{position:absolute;right:1cqw;top:28cqh;width:12cqw;display:grid;justify-items:center;padding:0;border:0;background:none;color:#fff;z-index:3}
+.vw-gift .vw-nico{width:min(11cqw,8cqh);height:min(11cqw,8cqh);background-position:100% 100%;animation:vwbob 2.4s ease-in-out infinite}.vw-gift small{font:800 min(2.2cqw,1.6cqh)/1.05 Arial,sans-serif;text-align:center;text-shadow:0 1px 2px #000,0 0 3px #000}
+@keyframes vwbob{50%{transform:translateY(-6%) rotate(-4deg)}}
+.vw-list{position:absolute;left:41cqw;right:14cqw;top:28cqh;bottom:30.5cqh;z-index:2;overflow:auto;display:grid;align-content:start;gap:.7cqh;padding:.8cqh .8cqw;border-radius:2cqw;background:#fff1f6d9;box-shadow:0 0 0 2px #ffd3e2,0 4px 12px #6a103055;overscroll-behavior:contain}
+.vw-row{display:grid;grid-template-columns:min(10cqw,7cqh) minmax(0,1fr);align-items:center;gap:1cqw;padding:.4cqh .8cqw;border-radius:1.4cqw;background:linear-gradient(90deg,#ffe0ea,#fff6f9);font:var(--vf)/1.2 Arial,sans-serif}
+.vw-row.top{background:linear-gradient(90deg,#ffd6a0,#fff2dc)}.vw-row.me{box-shadow:inset 0 0 0 2px #ff4f8a}
+.vw-row b{display:block;font-weight:800;color:#6a1a3a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.vw-row b u{text-decoration:none;color:#e8326a}.vw-row small{color:#b0507a}
+.vw-row span{display:block;font-size:.86em;color:#9a5a72}
+.vw-badge{position:relative;display:grid;place-items:center;width:min(10cqw,7cqh);aspect-ratio:1;background:var(--vwbadge,none) 0 0/300% 100% no-repeat;font-style:normal}
+.vw-badge b{margin-top:42%;font:900 min(2.6cqw,1.9cqh)/1 Georgia,serif;color:#fff;text-shadow:0 1px 1px #000}
+.vw-no{display:grid;place-items:center;height:min(6cqw,4.4cqh);border-radius:1em;background:linear-gradient(#ff9ec0,#d8487a);color:#fff;font:900 normal min(2.3cqw,1.7cqh)/1 Arial,sans-serif}
+.vw-cta{position:absolute;left:3cqw;right:3cqw;bottom:21cqh;display:grid;grid-template-columns:1fr 1fr;gap:4cqw;z-index:4}
+#stage #main .vw-big,#stage #main .vw-go,#stage #main .vw-claim,#stage #main .vw-send-btn{position:relative;padding:.6em .4em;border:0;border-radius:2em;background:url(assets/generated/ui-btn-gold.webp) center/100% 100% no-repeat,linear-gradient(#fff09a,#f2b63c);color:#6a3208;font:900 min(3.6cqw,2.7cqh)/1.05 Georgia,serif;text-shadow:0 1px 0 #fff6c8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#stage #main .vw-big{min-height:7cqh}
+.vw-subs{position:absolute;left:2cqw;right:2cqw;bottom:13.6cqh;display:grid;grid-template-columns:repeat(4,1fr);gap:1.4cqw;z-index:4}
+#stage #main .vw-subs button{padding:.55em .2em;border:0;border-radius:1.2cqw;background:linear-gradient(#a2386a,#6a1a44);color:#ffe9f2;font:800 min(2.4cqw,1.8cqh)/1.1 Arial,sans-serif;box-shadow:inset 0 0 0 1px #ffc6dd77}
+#stage #main .vw-subs button.on{background:linear-gradient(#ffb8d2,#e8588c);color:#fff}
+/* card rows (Oath Goal, Oath Ceremony) */
+.vw-cards{position:absolute;left:3cqw;right:3cqw;top:27cqh;bottom:14cqh;z-index:2;overflow:auto;display:grid;align-content:start;gap:1.2cqh;overscroll-behavior:contain}
+.vw-card{border-radius:2cqw;overflow:hidden;background:#fff1f6;box-shadow:0 3px 10px #5a103044}
+.vw-card h3{margin:0;padding:.45em .9em;background:linear-gradient(90deg,#7a3aa8,#a85ad0);color:#fff;font:800 var(--vf)/1.2 Arial,sans-serif;text-align:left}.vw-card h3 small{color:#f2d6ff;font-weight:600}
+.vw-cbody{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:2cqw;padding:1cqh 2cqw;background:linear-gradient(#ffe4ee,#fff6f9)}
+.vw-tiles{display:flex;flex-wrap:wrap;gap:1.4cqw}
+.vw-tile{position:relative;display:grid;place-items:center;width:min(11cqw,7.6cqh);aspect-ratio:1;border-radius:1.4cqw;background:radial-gradient(#fff,#ffd0e0);box-shadow:inset 0 0 0 2px #f3a8c0;font-style:normal}
+.vw-tile .vw-ico,.vw-tile .bag-ico,.vw-tile .ui-icon,.vw-tile .gpt-icon,.vw-tile img{width:80%!important;height:80%!important}
+.vw-tile>b{position:absolute;right:2px;bottom:1px;padding:0 3px;border-radius:5px;background:#3a1428cc;color:#fff!important;font:800 min(2.1cqw,1.6cqh)/1.35 Arial,sans-serif}
+#stage #main .vw-claim{padding:.5em 1.1em;font-size:min(3.2cqw,2.4cqh)}
+.vw-prog{font:800 min(2.8cqw,2.1cqh)/1 Arial,sans-serif;color:#9a3a62;white-space:nowrap}
+.vw-stamp{display:inline-block;padding:.35em .6em;border:3px double currentColor;border-radius:.5em;transform:rotate(-10deg);font:900 min(2.8cqw,2.1cqh)/1 Georgia,serif;text-transform:uppercase;white-space:nowrap}
+.vw-stamp.done{color:#2a9a4a}.vw-stamp.miss{color:#c0304a;opacity:.8}
+.vw-shrine{position:absolute;left:50%;top:25cqh;transform:translateX(-50%);height:15cqh;z-index:2;filter:drop-shadow(0 0 12px #fff8)}
+.vw-tab-ceremony .vw-cards{top:40cqh}
+.vw-off{position:absolute;left:-.4cqw;top:-1.4cqh;z-index:2;display:grid;place-items:center;width:min(10cqw,7cqh);aspect-ratio:1;background:#ff3a5a;clip-path:polygon(50% 0,61% 18%,82% 10%,80% 32%,100% 40%,85% 57%,96% 77%,74% 80%,68% 100%,50% 88%,32% 100%,26% 80%,4% 77%,15% 57%,0 40%,20% 32%,18% 10%,39% 18%);color:#fff;font:900 normal min(1.8cqw,1.35cqh)/1 Arial,sans-serif;text-align:center}
+.vw-off b{display:block;font-size:1.3em}
+.vw-tab-ceremony .vw-cbody{padding-left:min(10cqw,7cqh)}
+#stage #main .vw-price{display:grid;justify-items:center;gap:2px;padding:.45em .9em;border:0;border-radius:1.4cqw;background:linear-gradient(#ffef9a,#f2b63c);color:#6a3208;font:900 min(3cqw,2.2cqh)/1 Arial,sans-serif;box-shadow:0 3px 0 #b46a12}
+.vw-price span{display:inline-flex;align-items:center;gap:.25em}.vw-price img,.vw-price .ui-icon,.vw-price .gpt-icon,.vw-price .vw-ico{width:1.3em!important;height:1.3em!important;object-fit:contain}
+.vw-price s{font-size:.75em;color:#9a5a2a}#stage #main .vw-price:disabled{filter:grayscale(1);opacity:.7}
+/* Oath Test parchment */
+.vw-parch{position:absolute;left:6cqw;right:6cqw;top:28cqh;z-index:2;display:grid;gap:1.2cqh;padding:3cqh 5cqw;border-radius:2cqw;background:linear-gradient(#fff8e6,#f6e2bc);box-shadow:inset 0 0 0 3px #d8b67a,inset 0 0 30px #c8975a55,0 6px 16px #4a102055;color:#5a3a1a;font:600 var(--vf)/1.4 Georgia,serif}
+.vw-parch p{margin:0}.vw-tag{justify-self:start;margin-left:-6.5cqw;padding:.3em 1.6em .3em 1.2em;background:linear-gradient(#ffa64a,#e0701a);color:#fff;font:900 var(--vf)/1.2 Georgia,serif;clip-path:polygon(0 0,100% 0,92% 50%,100% 100%,0 100%)}
+.vw-drops{display:grid;grid-template-columns:repeat(3,1fr);gap:3cqw}.vw-dcard{display:grid;justify-items:center;gap:.4cqh;padding:1cqh .5cqw;border-radius:1.6cqw;color:#fff;font:700 min(2.4cqw,1.8cqh)/1.15 Arial,sans-serif;text-align:center}
+.vw-dcard .vw-ico{width:min(12cqw,8cqh);height:min(12cqw,8cqh)}.vw-dcard em{font-style:normal;color:#fff6b0}
+.c-b{background:linear-gradient(#5aa8ff,#2a62c8)}.c-p{background:linear-gradient(#c07aff,#7a3ac8)}.c-o{background:linear-gradient(#ffb85a,#e0701a)}
+#stage #main .vw-parch .vw-go{justify-self:center;padding:.6em 2.4em;margin-top:.6cqh}
+/* Oath Witness */
+.vw-photo{position:absolute;left:5cqw;right:5cqw;top:27cqh;height:min(24cqh,40cqw);z-index:2;border-radius:2cqw;overflow:hidden;box-shadow:0 0 0 3px #fff,0 0 0 5px #ffb3cf,0 6px 16px #4a102066}
+.vw-photo img{width:100%;height:100%;object-fit:cover;object-position:50% 30%}
+.vw-buff{position:absolute;left:0;right:0;top:calc(28cqh + min(24cqh,40cqw));margin:0;text-align:center;z-index:3;color:#ffe27a;font:900 var(--vf)/1 Arial,sans-serif;text-shadow:0 1px 2px #000}
+.vw-wcards{position:absolute;left:5cqw;right:5cqw;top:calc(30cqh + min(24cqh,40cqw));bottom:22cqh;z-index:2;display:grid;grid-template-rows:repeat(4,1fr);gap:.9cqh}
+.vw-wcard{display:grid;grid-template-columns:min(18cqw,11cqh) 1fr;min-height:0;border-radius:1.6cqw;overflow:hidden;background:#fff1f6e6;box-shadow:0 2px 6px #5a103044}
+.vw-wcard i{background:var(--vwcouple,none) 0 50%/auto 260% no-repeat;border-right:2px solid #ffb3cf}
+.vw-wcard p{margin:0;align-self:center;padding:.3em 1em;color:#6a1a3a;font:700 var(--vf)/1.25 Arial,sans-serif}
+#stage #main .vw-tab-witness>.vw-go{position:absolute;left:50%;bottom:14cqh;transform:translateX(-50%);z-index:4;padding:.6em 2.6em!important}
+/* Partner Bond, Bond Gift */
+.vw-panel{position:absolute;left:4cqw;right:4cqw;top:24cqh;bottom:21cqh;z-index:2;overflow:auto;display:grid;align-content:start;gap:1.3cqh;padding:2cqh 4cqw;border-radius:2cqw;background:#fff1f6eb;box-shadow:0 4px 14px #5a103055;font:600 var(--vf)/1.35 Arial,sans-serif}
+.vw-duo{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;justify-items:center}.vw-duo>span{display:grid;justify-items:center;gap:.6cqh}
+.vw-duo .portrait-badge{position:relative;width:min(16cqw,11cqh);height:min(16cqw,11cqh);box-shadow:0 0 0 3px #fff,0 0 0 5px #ff7fb2}.vw-duo b{color:#6a1a3a}
+.vw-heart{font:normal min(9cqw,6cqh)/1 Georgia,serif;color:#ff3a6a;animation:vwbeat 1.2s ease-in-out infinite;text-shadow:0 0 10px #ff9ec0}@keyframes vwbeat{20%{transform:scale(1.2)}40%{transform:scale(1)}}
+.vw-hearts{display:flex;justify-content:center;gap:1cqw;font:min(5cqw,3.6cqh)/1 Georgia,serif}.vw-hearts i{font-style:normal;color:#e6c8d2}.vw-hearts i.on{color:#ff3a6a}.vw-hearts i.half{background:linear-gradient(90deg,#ff3a6a 50%,#e6c8d2 50%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.vw-line{margin:0;text-align:center;color:#7a3a5a}.vw-line b{color:#c0285a}
+.vw-lock{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:3cqw;padding:1cqh 3cqw;border-radius:1.6cqw;background:#ffe2ec}.vw-lock b{color:#8a2a52}.vw-lock small{color:#9a5a72}
+.vw-bar{display:block;height:1.1cqh;margin:.6cqh 0;border-radius:1em;background:#e6c8d2;overflow:hidden}.vw-bar u{display:block;height:100%;background:linear-gradient(90deg,#ff7fb2,#ffd36b)}
+.vw-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:2cqw;text-align:center}.vw-stats span{padding:.6cqh 0;border-radius:1.2cqw;background:#fff;color:#7a3a5a;box-shadow:inset 0 0 0 1px #f3a8c0}.vw-stats b{color:#2a8a4a}.vw-stats em{font-style:normal;color:#e0701a;font-size:.9em}
+.vw-own{display:flex;justify-content:center;gap:4cqw}.vw-own span{display:inline-flex;align-items:center;gap:.3em;color:#6a1a3a}
+.vw-wares{display:grid;gap:1cqh}.vw-ware{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:3cqw;padding:.8cqh 3cqw;border-radius:1.6cqw;background:#fff;box-shadow:inset 0 0 0 1px #f3a8c0}
+.vw-ware b{display:block;color:#6a1a3a}.vw-ware small{color:#9a5a72}
+/* venue */
+.vw-venue{position:absolute;inset:26cqh 0 13cqh;z-index:2;overflow:hidden;display:grid;justify-items:center;align-items:end;touch-action:none}.vw-venue .vw-hero{height:55%}
+.vw-vhud{position:absolute;left:4cqw;right:4cqw;top:24cqh;z-index:4;display:flex;justify-content:space-between;gap:2cqw;font:800 var(--vf)/1 Arial,sans-serif}.vw-vhud span{padding:.4em .9em;border-radius:2em;background:#3a1428cc;color:#fff}.vw-vhud b{color:#ffe27a}
+.vw-venue~.vw-start{position:absolute!important;left:50%;top:55cqh;transform:translateX(-50%);z-index:5;padding:.7em 3em!important}
+#stage #main .vw-fall{position:absolute;top:-14cqh;width:min(14cqw,10cqh);height:min(14cqw,10cqh);padding:0;border:0;background:none;animation:vwfall linear forwards;touch-action:none;z-index:3}
+.vw-fall .vw-ico{width:100%;height:100%;background-position:100% 100%;filter:drop-shadow(0 4px 4px #0005)}
+@keyframes vwfall{to{transform:translateY(80cqh) rotate(40deg)}}
+.vw-fall.got{animation-play-state:paused}.vw-fall.got .vw-ico{animation:vwpop .5s ease-out forwards}@keyframes vwpop{to{transform:scale(1.6);opacity:0}}
+.vw-fall em{position:absolute;left:50%;top:0;transform:translateX(-50%);white-space:nowrap;font:900 normal min(3cqw,2.2cqh)/1 Arial,sans-serif;color:#fff;text-shadow:0 1px 2px #a2245a,0 0 4px #a2245a;animation:ppfloat .6s ease-out forwards}
+/* the oath-sent moment */
+.vw-burst{position:absolute;inset:0;z-index:20;display:grid;place-items:center;background:radial-gradient(#ffd6e6cc,#5a103099 70%);animation:vwfade .3s ease-out}
+.vw-bheart{position:absolute;font:normal min(60cqw,40cqh)/1 Georgia,serif;color:#ff4f8a;text-shadow:0 0 40px #fff,0 0 80px #ff9ec0;animation:vwbig 1.2s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes vwbig{0%{transform:scale(.1);opacity:0}60%{transform:scale(1.08);opacity:1}100%{transform:scale(1);opacity:.85}}
+.vw-petals{position:absolute;left:50%;top:50%}.vw-petals i{position:absolute;width:min(4cqw,3cqh);height:min(6cqw,4.4cqh);border-radius:80% 0 80% 0;background:linear-gradient(#ffd6e6,#ff7fb2);transform:rotate(var(--a)) translateY(0);animation:vwpetal 1.6s var(--d) ease-out forwards;opacity:0}
+@keyframes vwpetal{0%{opacity:1;transform:rotate(var(--a)) translateY(0) rotate(0)}100%{opacity:0;transform:rotate(var(--a)) translateY(-46cqh) rotate(300deg)}}
+.vw-bcard{position:relative;display:grid;justify-items:center;gap:.8cqh;max-width:80cqw;padding:2.4cqh 6cqw;border-radius:3cqw;background:#fff6f9f2;box-shadow:0 0 0 3px #ffb3cf,0 10px 30px #5a103088;color:#6a1a3a;font:700 var(--vf)/1.3 Arial,sans-serif;text-align:center;animation:vwup .6s .3s ease-out both}
+.vw-bcard>b{font:900 min(4.4cqw,3.2cqh)/1.1 Georgia,serif;color:#c0285a}.vw-bcard q{font-style:italic;color:#9a3a62}.vw-back{color:#2a8a4a}
+@keyframes vwup{from{transform:translateY(30px) scale(.8);opacity:0}}@keyframes vwfade{from{opacity:0}}
+/* pop-ups */
+#modal.den-pop:has(.vw-pop){background:linear-gradient(#fff6f9,#ffe4ee);border:2px solid #f3a8c0;color:#5a2038}
+#modal .vw-pop{color:#5a2038;text-align:center}#modal .vw-pop h2{margin:0 0 8px;color:#c0285a!important;font:900 22px/1.1 Georgia,serif}
+#modal .vw-note{margin:6px 0;color:#7a3a5a!important;font:600 12.5px/1.4 Arial,sans-serif}#modal .vw-note b{color:#c0285a!important}
+.vw-rules{margin:0;padding-left:1.3em;text-align:left;font:600 13px/1.45 Arial,sans-serif}#modal .vw-rules li{color:#5a2038!important;margin:3px 0}
+.vw-rlist{display:grid;gap:6px}.vw-rrow{display:grid;grid-template-columns:72px 1fr;align-items:center;gap:6px;padding:6px;border-radius:10px;background:#fff;box-shadow:inset 0 0 0 1px #f3a8c0}
+#modal .vw-rrow>b{color:#7a3aa8!important;font:900 13px/1.2 Georgia,serif}
+#modal .vw-pop .vw-tile{width:44px;border-radius:8px}#modal .vw-pop .vw-tile>b{font-size:10px}
+#modal .vw-pop .vw-ico{width:24px;height:24px}#modal .vw-pop .vw-ico.big{width:52px;height:52px}
+.vw-plist{display:grid;gap:6px;max-height:44vh;overflow:auto;margin:6px 0}.vw-prow{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;background:#fff;text-align:left;box-shadow:inset 0 0 0 1px #f3a8c0}
+.vw-prow .portrait-badge{position:relative;width:44px;height:44px}#modal .vw-prow b{display:block;color:#5a2038!important}#modal .vw-prow span{color:#9a5a72!important;font-size:12px}
+#modal .vw-pop button{min-height:0;box-shadow:none}#modal .vw-pop button::before,#modal .vw-pop button::after{display:none}
+#modal .vw-prow button{padding:7px 14px;border:0;border-radius:2em;background:linear-gradient(#ffef9a,#f2b63c);color:#6a3208!important;font:800 13px/1 Arial,sans-serif}#modal .vw-prow button:disabled{filter:grayscale(1);opacity:.6}
+#modal .vw-ok{font-style:normal;color:#2a8a4a!important;font-weight:800}
+.vw-ptabs{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}#modal .vw-ptabs button{padding:7px 2px;border:0;border-radius:8px;background:#e8c0d2;color:#6a1a3a!important;font:800 11.5px/1.1 Arial,sans-serif}#modal .vw-ptabs button.on{background:linear-gradient(#ff9ec0,#d8487a);color:#fff!important}
+.vw-gcards{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+#modal .vw-gcard{position:relative;display:grid;justify-items:center;gap:2px;padding:8px 4px 6px;border:3px solid transparent;border-radius:12px;color:#fff!important;font:700 10.5px/1.2 Arial,sans-serif}
+#modal .vw-gcard .vw-ico{width:46px;height:46px}#modal .vw-gcard b{color:#fff!important;font-size:12px}#modal .vw-gcard small{color:#fff!important;opacity:.95}#modal .vw-gcard em{position:absolute;left:5px;top:4px;font-style:normal;font-size:11px;color:#fff6b0!important}
+#modal .vw-gcard.on{border-color:#ffe27a;box-shadow:0 0 0 2px #c0285a,0 0 12px #ffd36b}
+#modal .vw-info{position:absolute;right:4px;top:4px;width:18px;height:18px;border-radius:50%;background:#fff;color:#7a3aa8;font:900 normal 12px/18px Georgia,serif}
+.vw-msg{position:relative;display:block;margin:8px 0 6px}#modal .vw-msg input{box-sizing:border-box;width:100%;padding:10px 48px 10px 12px;border:2px solid #f3a8c0;border-radius:10px;background:#ffe9f1;color:#6a1a3a;font:600 14px/1.2 Arial,sans-serif}
+#modal .vw-msg small{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:#b0507a!important;font:700 11px/1 Arial,sans-serif}
+.vw-srow{display:grid;grid-template-columns:auto auto 1fr;align-items:center;gap:6px;font-size:12px}#modal .vw-srow span{color:#7a3a5a!important}
+#modal .vw-srow select{min-width:0;padding:8px 6px;border:1px solid #f3a8c0;border-radius:8px;background:#fff;color:#5a2038;font:600 12.5px/1.2 Arial,sans-serif}
+.vw-qty{display:flex;justify-content:center;align-items:center;gap:14px;margin:8px 0}#modal .vw-qty button{width:34px;height:34px;padding:0;border:0;border-radius:50%;background:linear-gradient(#ff9ec0,#d8487a);color:#fff!important;font:900 20px/1 Arial,sans-serif}#modal .vw-qty b{min-width:34px;color:#5a2038!important;font-size:18px}
+#modal .vw-send-btn,#modal .vw-pop .vw-claim{display:block;width:70%;margin:4px auto 0;padding:11px;border:0;border-radius:2em;background:url(assets/generated/ui-btn-gold.webp) center/100% 100% no-repeat,linear-gradient(#fff09a,#f2b63c);color:#6a3208!important;font:900 17px/1 Georgia,serif}
+.vw-ihead{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:10px;margin:-14px -14px 8px;padding:12px 14px;text-align:left}#modal .vw-ihead b{display:block;color:#fff!important;font-size:16px}#modal .vw-ihead small{color:#fff!important;opacity:.9}
+#modal .vw-pop h3{margin:6px 0 2px;color:#7a3aa8!important;font:800 13px/1.2 Arial,sans-serif;text-align:left}
+#modal .vw-gcard small{font:700 10.5px/1.25 Arial,sans-serif!important}#modal .vw-gcard b{font:800 12px/1.2 Arial,sans-serif!important}#modal .vw-srow b{color:#c0285a!important}
+/* global p / small sizes inside #main come from nested rules: pin them inside the room */
+#stage #main .vw-room p{margin:0;font-size:var(--vf)!important;line-height:1.35!important}
+#stage #main .vw-room small{font-size:min(2.2cqw,1.65cqh)!important;line-height:1.15!important}
+#stage #main .vw-room .vw-nav small{font-size:min(2.3cqw,1.7cqh)!important;line-height:1.05!important}
+#stage #main .vw-room .vw-card h3 small{font-size:.9em!important}
+#stage #main .vw-parch p{color:#5a3a1a!important;font-family:Georgia,serif!important}
+#stage #main .vw-wcard p{color:#6a1a3a!important;font-weight:700}
+#stage #main .vw-line{color:#7a3a5a!important}#stage #main .vw-buff{color:#ffe27a!important}
+#stage #main .vw-dcard small{color:#fff!important;font-weight:800}
+.vw-cards{grid-auto-rows:max-content}
+.vw-wcard i{background-size:320% auto!important}
+#modal .vw-ihead{padding-right:48px}#modal .vw-ihead small{display:block;font:600 12px/1.3 Arial,sans-serif!important;color:#fff!important}#modal .vw-icard .vw-note{text-align:left}
+#stage #main .vw-wcard p{font-size:min(2.4cqw,1.65cqh)!important;line-height:1.25!important}.vw-photo{height:min(22cqh,36cqw)}.vw-wcards{top:calc(30cqh + min(22cqh,36cqw));bottom:21cqh}.vw-buff{top:calc(28cqh + min(22cqh,36cqw))}
+.vw-pair{right:auto;left:3cqw}.vw-badge b{position:absolute;top:64%;margin:0}
+.vw-bheart{top:12cqh;color:#ff2d6a;text-shadow:0 0 30px #fff,0 0 60px #ff7fb2,0 6px 0 #a2245a}.vw-bcard{margin-top:26cqh}
+.vw-petals{top:36cqh}.vw-petals i{animation-duration:2.4s}
+/* home promo: event time left */
+.city-vow .city-glyph{position:relative}.city-vow .city-caption{white-space:nowrap;letter-spacing:-.06em}.city-left-time{position:absolute;left:50%;bottom:-2px;transform:translateX(-50%);padding:0 4px;border-radius:6px;background:#c0285ae6;color:#fff;font:800 normal clamp(7px,1.3cqw,12px)/1.4 Arial,sans-serif;white-space:nowrap;pointer-events:none}

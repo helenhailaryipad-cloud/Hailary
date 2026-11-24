@@ -247,6 +247,49 @@ User sent twelve photos of the reference's pet siege (no text). Home promo "Pet 
   `dayWin`; `Siege.roll` returns `daily` once when the day turns and `siegeState()` pays it). Personal tiers are
   1 / 2-3 / 4-10 / 11-999. No new save fields.
 
+## Blossom Vow event (2026-11-24)
+User sent photos of the reference's couple event (all tabs; "make it look close to the photos"). Own names and art.
+Home promo "Blossom Vow" (`cityGroups[1]`, icon `comp-vow-icon` with the event's time left, `vowLeftLabel`) opens
+screen `vow` (`src/vow.js`: rules `Vow`, pure, `node scripts/test-vow.mjs`; UI below `VOW_UI`; loaded by
+`scripts/test.mjs`). Full screen, the blossom-tree / red-carpet / rose-arch backdrop on every tab, big glossy title,
+ribbon, countdown pill, "My Point" chip, wallet (gold, prisms, heart crystals), bottom nav with five painted icons and
+the round back button. Tab in `vowTab`; the room's class is `vw-tab-<tab>` (do not reuse `vw-venue` etc. for it).
+- Rules: event = 7 UTC days from `Vow.anchor` (repeats). She bonds with ONE AI friend or guild member per event
+  (`Vow.bond`; Searching Partner pop-up `vowFindPop`: Friends / Nearby / Guild / Cross-Server, the AI accepts after a
+  moment, `vowInvite` -> `vowAccept`). Gifts (`Vow.gifts`): Red Rose 120, Blossom Ring 520, Heart Rosebox 1314
+  intimacy, Love Lock EXP 29 / 99 / 199. `Vow.send` (Send Oath pop-up `vowSendPop`: three cards, 20-char message,
+  recipient select, count; item card `vowItem`): intimacy goes into `S.social` hearts (`WonderGear.socialGiftHearts`),
+  Love Lock EXP into a lasting level (`lockLevel`, stats `lockStats` per level through `Vow.bonus` in `stats()`).
+  Bond Points (team score `Vow.score`) only from gifts inside the team and only when mutual: x2 of hers + the AI
+  partner's return gifts (deterministic: the first send of a day is always answered, later ones by `replyOdds`).
+  Gifts to other friends give no points. Points, Oath Goal and purchase limits reset at 00:00 UTC; the day's ranking
+  closes at 21:00 UTC (`closeHour`; the score freezes, `frozen`) and pays ONCE (`Vow.roll` returns `due`, `paid`):
+  `vowState()` mails the bag-item part ("Blossom Herald", `WonderGear.mailGift`) and puts roses / rings / boxes /
+  heart crystals straight into `S.vow`. Board (`Vow.board`): 20 couple slots, 1-3 need 10,000, 4-20 need 1,314,
+  20 simulated AI couples "Name ♥ Name" (AI), her couple "Reina ♥ <partner>"; "Reach 520 pts" pays participation.
+  A No.1 finish gives +15% XP the next UTC day (`Vow.buffOn`, added in `gain()`). +3 free roses a day.
+- Tabs: Blossom Vow (main: Reina on the carpet, ranking list with winged badges 1-3, Ranking Reward gift, Searching
+  Partner / Send Oath, sub-tabs Partner Bond `vowBond`, Bond Transfer (coming soon), Bond Gift shop `vowShop` (roses
+  for gold, rings / boxes for prisms or heart crystals), Bond Reward = `vowRewards`); Oath Goal (520 / 1314 / 5200 /
+  13140, Claim / Claimed / "Missed target" stamp after 21:00); Oath Ceremony (shrine, four prism packs with daily limits
+  and "N% off!" badges, `Vow.packs`, `vowBuy`); Oath Test (parchment, drop preview; dungeon guardian wins drop a rose
+  and sometimes a ring / box, up to 10 a day: `vowDrop()` from `endBattle` in `world.js`); Oath Witness (couple
+  picture, four cards, Enter the Venue: `vowVenueView` / `vowVenueStart`, 25 s of falling bouquets, a tap catches one
+  for a rose or heart crystals, 12 prizes a day, 24 during the 21:10-21:30 ceremony window). Rules pop-up `vowRules`
+  (five lines). "Oath sent" moment: `vowBurst` (heart, petals, numbers, the partner's return gift). Sending also counts
+  the daily "flower" quest (`trailTick('flower')`).
+- Optional save field `S.vow {period, day, partner, bond, pts, back, sends, frozen?, gifts{rose,ring,box}, crystal,
+  lock, goal[], buys{}, drops, venue, paid, last{day,rank,score}, buff, log[]}` (`Vow.valid` from `valid()`).
+  Nothing is sold for real money (prisms, gold and heart crystals only).
+- Art (image model): `art-source/vow/{bg,icons,badges,nav,shrine,couple}.webp` -> `comp-vow-bg`, `comp-vow-icons`
+  (4 x 2: rose, ring, box, lock, crystal, point token, badge, bouquet = `Vow.icons`), `comp-vow-icon`,
+  `comp-vow-badges`, `comp-vow-nav` (3 x 2), `comp-vow-shrine`, `comp-vow-couple` (Reina from `leaflight/master.png`
+  as reference + an original young man) by `scripts/build-vow-art.py` (+ AVIF copies). Atlases are CSS variables set
+  on the page root by `vowArtVars()` so pop-ups can use them. Hosted bundle 32,868,350 bytes (~686 KB spare).
+- Not done: Bond Transfer, a real parade with other couples, blessings / wishes in the venue, the reference's outfit
+  and weapon-skin rank prizes (rewards are gifts, crystals and bag items), Nearby / Cross-Server players (nobody there).
+  All numbers are placeholders.
+
 ## Mini game rotation (2026-11-23)
 User: "all these mini games except fishing take turns, each runs 2-3 days, then another; rankings go by them".
 `ARCADE` in `app.js` (next to `MINI_GAMES`): one featured game every `ARCADE.days` (3) UTC days from `Party.anchor`, in

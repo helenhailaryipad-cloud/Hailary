@@ -19,6 +19,7 @@ vm.runInContext(fs.readFileSync('src/minigame-engine.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/wardrobe-engine.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/party.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/siege.js','utf8'),context);
+vm.runInContext(fs.readFileSync('src/vow.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/rites.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/trail.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/app.js','utf8'),context);
@@ -1118,8 +1119,21 @@ vm.runInContext(`
  if(!siegeTeam.includes('d0'))throw Error('Quick deploy');const pts=S.siege.points;siegeGo();if(!(S.siege.points>pts)||!S.siege.used.includes('d0')||!valid(S))throw Error('Siege attack');
  siegeResult();siegeRules();siegeReport();siegePoints();siegeQuests();siegeQuest('attack');siegeRanks();siegePreview();if(!(S.bag.exp1>0))throw Error('Quest reward');
  if(valid({...S,siege:{...S.siege,points:-1}}))throw Error('Invalid siege save accepted');}
+{S=defaults();go('vow');let h=$('#main').innerHTML;if(!h.includes('Blossom Vow')||!h.includes('Searching Partner')||!S.vow||!valid(S))throw Error('Blossom Vow page');
+ vowFindPop('Friends');vowFindPop('Guild');vowFindPop('Nearby');vowAccept('kael');if(S.vow.partner!=='kael')throw Error('Vow partner');vowAccept('nyra');if(S.vow.partner!=='kael')throw Error('One partner per event');
+ vowSendPop();vowPick('rose');vowSel.to='kael';vowSend();if(S.vow.gifts.rose!==Vow.freeRoses-1||!(S.vow.lock>0)||!(WonderGear.socialState(S).hearts.kael>0)||!valid(S))throw Error('Vow send');
+ if(!Vow.closed(Date.now())&&!(Vow.score(S.vow)>0))throw Error('Mutual gifts score');
+ vowRewards();vowRules();vowItem('ring');for(const t of ['goal','ceremony','test','witness','bond','shop','venue','main'])vowGo(t);
+ S.scales=1000;vowBuy('p1');if(!(S.vow.crystal>=10)||S.scales!==1000-Vow.packs[0].price||!valid(S))throw Error('Vow pack');vowBuy('rose');
+ if(Vow.score(S.vow)>=Vow.goals[0].at){vowClaimGoal(0);if(!S.vow.goal.includes(0))throw Error('Oath Goal')}
+ if(!vowDrop()||!(S.vow.drops===1))throw Error('Vow dungeon drop');
+ const v0=S.vow;S.vow={...v0,last:null,paid:-1,day:v0.day-1,pts:3000,back:600};vowState();if(S.vow.paid!==S.vow.day-1&&S.vow.paid!==S.vow.day)throw Error('Vow day settle');
+ if(!WonderGear.socialState(S).mail.some(m=>m.title.startsWith('Blossom Vow')))throw Error('Vow reward mail');if(!valid(S))throw Error('Vow after settle');
+ S.vow={...S.vow,buff:Vow.day(Date.now())};if(Vow.buffOn(S.vow)!==Vow.expBuff)throw Error('Vow EXP buff');home();if(!$('#main').innerHTML.includes('Blossom Vow'))throw Error('Vow home icon');
+ if(valid({...S,vow:{...S.vow,pts:-1}}))throw Error('Invalid vow save accepted');}
 `,context);
 console.log('PASS: Pet Siege: map, city hall, lineup, formation, attack, result, rules, report, rewards, quests, rankings, validation.');
+console.log('PASS: Blossom Vow: page, partner search and one partner, send oath, intimacy and Love Lock, tabs, packs, goals, dungeon drop, day settle by mail, EXP buff, home icon, validation.');
 
 vm.runInContext(`
 {const r=WonderGear,R=r.supremeRules,T=R.saleStart+864e5,set=r.supremeSale(T).set;S=defaults();S.scales=1e5;
