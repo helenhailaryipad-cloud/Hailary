@@ -200,13 +200,15 @@ function vowSubTabs() {
   return `<div class="vw-subs">${[['bond', 'Partner Bond', 'vowGo(\'bond\')'], ['transfer', 'Bond Transfer', 'vowSoon(\'Bond Transfer\')'], ['shop', 'Bond Gift', 'vowGo(\'shop\')'], ['reward', 'Bond Reward', 'vowRewards()']]
     .map(([id, t, f]) => `<button class="${vowTab === id ? 'on' : ''}" onclick="${f}">${denPlain}${t}</button>`).join('')}</div>`;
 }
+function vowListScroll(el) { el.parentElement?.classList.toggle('end', el.scrollTop + el.clientHeight >= el.scrollHeight - 4); }
 function vowMain(v) {
   const me = Vow.score(v), mine = v.partner ? { me: true, names: [S.name || 'Reina', vwName(v.partner)], score: me } : null, rows = Vow.board(v.day, Date.now(), mine);
   const list = rows.map(r => { const c = r.couple, badge = r.no <= 3 ? `<i class="vw-badge" style="background-position:${(r.no - 1) * 50}% 0"><b>${r.no}</b></i>` : `<i class="vw-no">No.${r.no}</i>`;
     return `<div class="vw-row ${c?.me ? 'me' : ''} ${r.no <= 3 ? 'top' : ''}">${badge}<div><b>${c ? esc(c.names[0]) + ' <u>♥</u> ' + esc(c.names[1]) + (c.ai ? ' <small>AI</small>' : '') : 'Vacant'}</b><span>${c ? fmt(c.score) + ' pts' : 'Reach ' + fmt(r.need) + ' Points to get ranked'}</span></div></div>`; }).join('');
   const body = `<div class="vw-stage"><img class="vw-hero" src="${reinaLookPath(false)}" alt="Reina">${v.partner ? `<span class="vw-pair">${vwFace(v.partner)}<b>${esc(vwName(v.partner))} <small>AI</small></b></span>` : ''}</div>
    <button class="vw-gift" onclick="vowRewards()">${denPlain}${vwNav(5)}<small>Ranking Reward</small></button>
-   <div class="vw-list">${list}</div>
+   <div class="vw-board"><div class="vw-bhead"><b>Today's couples</b><small>Swipe to see all ${rows.length}</small></div><div class="vw-list" onscroll="vowListScroll(this)">${list}</div><i class="vw-more">▾</i>
+    <div class="vw-mine">${mine ? (() => { const r = rows.find(x => x.couple?.me); return r ? `<b>No.${r.no}</b> You ♥ ${esc(vwName(v.partner))} · ${fmt(me)} pts` : `Not ranked yet · ${fmt(me)} / ${fmt(Vow.rankNeed)} pts`; })() : 'Find a partner to join the ranking'}</div></div>
    <div class="vw-cta"><button class="vw-big" onclick="vowFindPop()">${denPlain}${v.partner ? 'Partner: ' + esc(vwName(v.partner)) : 'Searching Partner'}${v.partner ? '' : '<em></em>'}</button><button class="vw-big" onclick="vowSendPop()">${denPlain}Send Oath</button></div>${vowSubTabs()}`;
   $('#main').innerHTML = vowChrome('Blossom Vow', 'Petals bind two hearts', body);
 }
