@@ -782,6 +782,12 @@ matching the gown (image-model edit of `painted/th<id>.png`, only the rows below
 unchanged), and 15 mounted paintings where the foot shows in the stirrup (`mounted/dress-th<id>.webp`, merged through a
 local difference mask). Rebuilt with `build-fitting-v2.py` / `build-mounted.py`; their AVIF copies re-saved at quality
 32 (the builders write 72-80). When painting new gowns, ask for shoes in the prompt.
+Bow cards (user circled blurry Original / Frostglass cards and empty Aurora Arc ... cards on the iPad): the two old
+bows only had 21 x 128 icons, and on the iPad many separate bow pictures did not show in time. All 63 bow cards now come
+from ONE atlas `fashion-bows` (bow laid diagonally, 10 x 7 of 200 px, order `FX_BOW_IDS`, `fxBowArt`, CSS var
+`--fx-bows`), built by `scripts/build-fashion-bows.py`; Original bow (= the Leaflight bow, also Azure Laurel) and
+Frostglass got clean item paintings (`art-source/fashion-cards/bow-{original,frost}.webp`, image-model edits of the bow
+cut from a render). A new bow needs its number in `FX_BOW_IDS` and a rebuild.
 Found, not fixed: the Skin room (`citySkin`) layout is
 broken (overlapping title, blank square, cut labels) - it was like that before this pass.
 
