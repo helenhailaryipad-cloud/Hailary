@@ -61,3 +61,8 @@ def cells(src, cols, rows, T, pad=8):
 save(cells(SRC/'pad.webp', 4, 2, 192), 'cascade-pad')
 # Score / Level / Rows / Best icons: star, crown, crystal bars, trophy -> cascade-stats (160 px cells).
 save(cells(SRC/'stats.webp', 4, 1, 160, 12), 'cascade-stats')
+# Burst effects (image model, on black, drawn with additive blending): starburst, crystal blast, light streak, ring
+# -> cascade-fx (2 x 2 cells of 256 px, black background kept on purpose).
+fx = Image.open(SRC/'fx.webp').convert('RGB').resize((512, 512), Image.Resampling.LANCZOS)
+fx.save(OUT/'cascade-fx.webp', quality=84, method=6); fx.save(HOST/'cascade-fx.avif', quality=40)
+print('cascade-fx', fx.size, (OUT/'cascade-fx.webp').stat().st_size)

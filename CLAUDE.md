@@ -128,6 +128,15 @@ global `#main button` rules set position, borders and `::before`.
   painted ribbon, rotating light burst, stars that pop in, a score that counts up, prize tiles, painted gold / violet
   buttons, confetti on a win (art `ui-result-ribbon`, `ui-btn-gold`, `ui-btn-violet`, `ui-result-burst` from
   `art-source/ui/result-{sheet,burst}.webp`, `build-ui-icons.py`). Used by Crystal Cascade and Crownfall Vale.
+- Crystal Cascade fourth pass (2026-11-24, user: "the Drop caption falls off the screen; holding should keep moving;
+  buttons load only when I press pause; silly little balls, I want beautiful explosions; more rows, more points"):
+  smaller pad keys with captions on one line and room for the iPad's bottom edge; held pad buttons capture the finger
+  and repeat after `CASCADE_REPEAT_WAIT` 160 ms every `CASCADE_REPEAT_MS` 50 ms; a finger that drags sideways on the well
+  and then rests keeps the piece sliding (`slideOn`); every picture of the screen, pause card and result window is
+  preloaded and decoded on the lobby (`CASCADE_ART`, `cascadePreload`). Rows burst with painted effects (`cascade-fx`,
+  image model on black, `art-source/cascade/fx.webp`: starburst, crystal blast, light streak, ring; `cascadeBlast`,
+  `cascadeDrawFx`, `screen` blending - `lighter` turned four rows into a white blob); the glowing motes are gone.
+  `lineScore` is now 100 / 400 / 900 / 1600 x level and the pop-up shows the points.
 - Crownfall Vale (2026-11-24): the Upgrade button no longer appears / disappears (it pushed the field); it stays,
   greyed, "Choose your building to upgrade". Battle effects (`valeFx`, `drawValeFx`, render only): a ring when troops
   march out, glow under marching troops, flashes where they hit a building, a light pillar with rays, rings, sparks and
