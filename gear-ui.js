@@ -1950,20 +1950,13 @@ const cloudRideMs=1900;
 // The hall of a city: who is left, who is back by the round's end, which faction beat whom; tap a row to fight it.
 function cloudBossName(slot){const art=cloudPortalSlots[slot][3],same=cloudPortalSlots.slice(0,slot).filter(x=>x[3]===art).length;return (WonderGear.tierGuardians.find(g=>g.id==='guardian-t'+art)?.name||'Defender')+(same?' II':'')}
 const cloudNextTarget=index=>cloudPortalSlots.findIndex(([role],slot)=>cloudDamage(index,slot)<cloudEnemyHealth[role]);
-function cloudHallPick(index,slot){if(cloudPlayerDuel===index*10+slot&&!document.querySelector('.cloud-path'))return;if(cloudDamage(index,slot)>=cloudEnemyHealth[cloudPortalSlots[slot][0]]){toast('Defeated · returns in '+cloudClock());return}cloudRide(index,slot)}
-// Pathfinding: the current fight stops, Reina rides across the hall on her mount to the chosen defender, then fights it.
-// Used both for a defender she picks in the Boss List and for Auto next after a victory.
+function cloudHallPick(index,slot){if(cloudBattle&&!cloudBattle.done&&cloudBattle.index===index&&cloudBattle.slot===slot)return;if(cloudDamage(index,slot)>=cloudEnemyHealth[cloudPortalSlots[slot][0]]){toast('Defeated · returns in '+cloudClock());return}cloudRide(index,slot)}
+// Pathfinding: Reina rides across the hall on her mount to the chosen defender, then fights it (Boss List tap and
+// Auto next). The fight runs on the battle clock below, so the ride is just the start of the next timed fight.
 function cloudRide(index,slot){
- const canvas=document.querySelector('.cloud-encounter canvas');
- if(!canvas||screen!=='cloudWar'){cloudPlayerDuel=null;cloudStrike(index,slot);return}
- const token=String(Date.now()+Math.random());canvas.dataset.stop=token;
- canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
- const field=canvas.parentElement;field.querySelectorAll('.cloud-floating-loot,.cloud-path').forEach(n=>n.remove());
- field.insertAdjacentHTML('beforeend',`<div class="cloud-path" role="status"><img src="${reinaLookPath(true)}" alt="Reina riding"><strong>⚔ Pathfinding</strong><small>to ${cloudBossName(slot)}</small></div>`);
- const body=canvas.closest('.cloud-encounter'),status=body.querySelector('[data-status]');if(status)status.textContent='Pathfinding · '+cloudBossName(slot);
- body.querySelectorAll('.hall-row').forEach((row,i)=>row.classList.toggle('now',i===slot&&cloudHallTab==='Boss'));
- const burst=body.querySelector('[data-burst]');if(burst)burst.disabled=true;
- setTimeout(()=>{if(!canvas.isConnected||screen!=='cloudWar'||canvas.dataset.stop!==token)return;cloudPlayerDuel=null;cloudStrike(index,slot)},cloudRideMs);
+ if(cloudBattle&&!cloudBattle.done)cloudFightStop(true);
+ cloudFightStart(index,slot,cloudRideMs);
+ if(screen==='cloudWar')cloudBattleView();
 }
 function cloudHallTabs(tab,index,slot){cloudHallTab=tab;const hall=document.querySelector('.cloud-hall');if(hall)hall.outerHTML=cloudHall(index,slot)}
 function cloudHall(index,current){
@@ -1977,97 +1970,110 @@ function cloudHall(index,current){
   <div class="hall-tabs"><button aria-pressed="${cloudHallTab==='Boss'}" onclick="cloudHallTabs('Boss',${index},${current})">${denPlain}Boss List</button><button aria-pressed="${cloudHallTab==='Dmg'}" onclick="cloudHallTabs('Dmg',${index},${current})">${denPlain}DMG Rankings</button></div>
   <div class="hall-list">${cloudHallTab==='Boss'?rows:dmg}</div></div>`;
 }
+// Cloud War fights run on a clock (user: "each fight about a minute, auto, so you can see Reina fighting, and I can
+// still leave to the menus instead of only watching"). A fight lasts CLOUD_FIGHT seconds for a full defender (less if
+// it was already hurt); the result is settled by a one-second ticker whatever screen is open, Auto next rides on to the
+// next defender, and a small pill on other screens shows the fight and brings her back to it. The canvas only draws.
+const CLOUD_FIGHT={Guard:45,Elite:60,Boss:75},CLOUD_BURST={sec:4,cd:8},CLOUD_LOOT_MS=2400;
+let cloudBattle=null,cloudBattleTimer=0,cloudViewGen=0;
+function cloudFightStart(index,slot,delay=0){
+ const role=cloudPortalSlots[slot][0],limit=cloudEnemyHealth[role],left=Math.max(.05,1-cloudDamage(index,slot)/limit);
+ cloudBattle={index,slot,role,hp0:left,start:Date.now()+delay,dur:CLOUD_FIGHT[role]*left*1000,burstAt:0,done:false};
+ cloudPlayerDuel=index*10+slot;clearInterval(cloudBattleTimer);cloudBattleTimer=setInterval(cloudFightTick,1000);cloudFightTick();
+}
+const cloudFightP=(b,now=Date.now())=>Math.max(0,Math.min(1,(now-b.start)/b.dur));
+const cloudFightHp=(b,now)=>b.hp0*(1-cloudFightP(b,now));
+// Leaving for another defender keeps the damage done so far.
+function cloudFightStop(keep){
+ const b=cloudBattle;if(!b)return;
+ if(keep&&!b.done&&Date.now()>b.start){const lim=cloudEnemyHealth[b.role],hits=(S.cloudWarHits??={})[b.index]??=Array(10).fill(0);hits[b.slot]=Math.max(hits[b.slot]||0,Math.min(lim-1,Math.floor(lim*(1-cloudFightHp(b)))));save()}
+ cloudBattle=null;cloudPlayerDuel=null;clearInterval(cloudBattleTimer);cloudBattleTimer=0;cloudPill();
+}
+function cloudFightSettle(){
+ const b=cloudBattle,{index,slot,role}=b,limit=cloudEnemyHealth[role],hits=(S.cloudWarHits??={})[index]??=Array(10).fill(0);
+ let gain=0,loot=cloudLoot[role];
+ if(!(hits[slot]>=limit)){hits[slot]=limit;gain=WonderGear.cloudGain(S,cloudEnemyScore[role]);if(loot)WonderGear.bagAdd(S,loot.id,loot.n);save()}else loot=null;
+ b.done=true;b.result={gain,loot};b.doneAt=Date.now();
+ const next=cloudNextTarget(index),watching=document.querySelector('.cloud-encounter canvas');
+ if(!watching)toast('⚔ '+cloudBossName(slot)+' defeated · +'+cloudEnemyScore[role]+' territory points'+(gain?' · +'+gain+' Carnage':''));
+ b.next=cloudAutoNext&&next>=0?next:-1;
+}
+function cloudFightTick(){
+ const b=cloudBattle;if(!b){cloudFightStop(false);return}
+ const now=Date.now();
+ if(!b.done&&now>=b.start+b.dur)cloudFightSettle();
+ if(b.done&&now>=b.doneAt+CLOUD_LOOT_MS){
+  if(b.next>=0){const {index}=b,next=b.next;cloudBattle=null;cloudFightStart(index,next,cloudRideMs);if(document.querySelector('.cloud-encounter canvas'))cloudBattleView();return}
+  const back=!!document.querySelector('.cloud-encounter canvas'),{index}=b;cloudFightStop(false);
+  if(back&&screen==='cloudWar'){cityCloudWar();cloudTerritory(index)}return;
+ }
+ cloudPill();
+}
+// The pill on other screens: who she fights and how far; a tap brings the fight back.
+function cloudPill(){
+ if(typeof document.createElement!=='function'||typeof document.getElementById!=='function')return;
+ const stage=document.getElementById('stage')||document.body;let pill=document.getElementById('cloudPill');
+ const b=cloudBattle,showing=!!document.querySelector('.cloud-encounter canvas');
+ if(!b||showing){pill?.remove();return}
+ if(!pill){pill=document.createElement('button');pill.id='cloudPill';pill.className='cloud-pill';pill.onclick=()=>{if(screen!=='cloudWar')go('cloudWar');setTimeout(cloudBattleView,60)};stage.append(pill)}
+ const now=Date.now(),txt=b.done?'Victory · '+cloudBossName(b.slot):now<b.start?'Pathfinding · '+cloudBossName(b.slot):cloudBossName(b.slot)+' · '+Math.round(cloudFightHp(b,now)*100)+'% HP';
+ pill.innerHTML=`<img src="${reinaLookPath(false)}" alt=""><span><b>⚔ Cloud War</b><small>${txt}</small></span><i>Watch</i>`;
+}
 function cloudStrike(index,slot){
  const defender=cloudPortalSlots[slot],place=cloudTerritories()[index];
  if(screen!=='cloudWar'||cloudCount!==4||!defender||!place||Math.floor(index/6)!==cloudMine)return;
- const [role,,,art]=defender,limit=cloudEnemyHealth[role];
- const previous=cloudDamage(index,slot);
- if(previous>=limit)return;
- cloudPlayerDuel=index*10+slot;
- const field=$('.cloud-field.map-4');
- if(field)cloudMapOffset=[field.scrollLeft,field.scrollTop];
- const mapOffset=cloudMapOffset;
- $('#modal').close();
- const body=$('#main');
- const max=role==='Boss'?3000:role==='Elite'?2100:1500;
- let hp=Math.ceil(max*(1-previous/limit)),elapsed=0,nextShot=.15,burstReady=0,last=performance.now();
- const orbDamage=role==='Boss'?2:1;
- let heroHP=100,nextOrb=2,orbStart=null,lastHit=-2;
- const shots=[],actor={clock:0,heroShotAt:-1,spriteIdle:true};
- body.innerHTML=`<section class="cloud-encounter" style="${cloudArenaStyle(slot)}"><h2>${place.name} · ${cloudBossName(slot)}</h2><label>${role==='Boss'?'Golden Boss':role} HP <b data-enemy-hp></b><progress max="${max}" value="${hp}"></progress><small class="cloud-share">1. ${cloudFactions[cloudMine][0]}: 100%</small></label><div class="cloud-battlefield"><canvas width="640" height="420" aria-label="Reina fighting the ${role}"></canvas></div><p data-status>Reina · 100% HP · Auto-fighting</p><div class="cloud-hall-buttons"><button class="primary" data-burst>Celestial Arrow</button><button class="cloud-auto" aria-pressed="${cloudAutoNext}" onclick="cloudAutoNext=!cloudAutoNext;this.setAttribute('aria-pressed',cloudAutoNext)">${denPlain}Auto next</button><button data-exit>Leave battle</button></div>${cloudHall(index,slot)}</section>`;
- const canvas=body.querySelector('canvas'),ctx=canvas.getContext('2d'),burst=body.querySelector('[data-burst]');
- const bar=body.querySelector('progress'),number=body.querySelector('[data-enemy-hp]');
- function shoot(damage){
-  actor.heroShotAt=elapsed;
-  shots.push({at:elapsed,damage});
- }
- function strike(){
-  if(elapsed<burstReady||hp<=0)return;
-  shoot(90);burstReady=elapsed+6;
- }
- burst.onclick=strike;
- canvas.onclick=strike;
- function returnToTerritory(){
-  if(!canvas.isConnected||screen!=='cloudWar')return;
-  cloudPlayerDuel=null;
-  cityCloudWar();
-  const restored=$('.cloud-field.map-4');
-  restored.scrollLeft=mapOffset[0];restored.scrollTop=mapOffset[1];
-  cloudTerritory(index);
- }
- body.querySelector('[data-exit]').onclick=returnToTerritory;
+ if(cloudDamage(index,slot)>=cloudEnemyHealth[defender[0]])return;
+ const field=$('.cloud-field.map-4');if(field)cloudMapOffset=[field.scrollLeft,field.scrollTop];
+ if(!cloudBattle||cloudBattle.index!==index||cloudBattle.slot!==slot||cloudBattle.done){if(cloudBattle)cloudFightStop(true);cloudFightStart(index,slot)}
+ cloudBattleView();
+}
+// The battle view draws the running fight: Reina's volleys, her three pets' bolts, the defender's orbs, damage numbers.
+function cloudBattleView(){
+ const b=cloudBattle;if(!b||screen!=='cloudWar')return;
+ const {index,slot,role}=b,place=cloudTerritories()[index],art=cloudPortalSlots[slot][3],gen=++cloudViewGen,mapOffset=cloudMapOffset;
+ $('#modal').close();cloudPill();
+ const body=$('#main'),maxHp=role==='Boss'?3000000:role==='Elite'?2100000:1500000;
+ body.innerHTML=`<section class="cloud-encounter" style="${cloudArenaStyle(slot)}"><h2>${place.name} · ${cloudBossName(slot)}</h2><label>${role==='Boss'?'Golden Boss':role} HP <b data-enemy-hp></b><progress max="1000" value="1000"></progress><small class="cloud-share">1. ${cloudFactions[cloudMine][0]}: 100% · <span data-clock></span></small></label><div class="cloud-battlefield"><canvas width="640" height="420" aria-label="Reina fighting the ${role}"></canvas></div><p data-status>Auto-fighting</p><div class="cloud-hall-buttons"><button class="primary" data-burst>Celestial Arrow</button><button class="cloud-auto" aria-pressed="${cloudAutoNext}" onclick="cloudAutoNext=!cloudAutoNext;this.setAttribute('aria-pressed',cloudAutoNext);if(cloudBattle&&cloudBattle.done&&!cloudAutoNext)cloudBattle.next=-1">${denPlain}Auto next</button><button data-exit>Leave · keeps fighting</button><button data-stop>Stop</button></div>${cloudHall(index,slot)}</section>`;
+ if(typeof body.querySelector!=='function')return;   // test page without a DOM: the fight still runs on the clock
+ const canvas=body.querySelector('canvas'),ctx=canvas.getContext('2d'),burst=body.querySelector('[data-burst]'),bar=body.querySelector('progress'),number=body.querySelector('[data-enemy-hp]'),clock=body.querySelector('[data-clock]'),status=body.querySelector('[data-status]');
+ const pets=(WonderGear.petTeam(S)||[]).slice(0,3).filter(Boolean).map((id,i)=>({id,i,next:.8+i*.7,kick:0}));
+ const actor={clock:0,heroShotAt:-1,spriteIdle:true},g={hitFX:[]},shots=[],bolts=[],nums=[];
+ let t=0,last=performance.now(),nextShot=.2,nextOrb=2.2,orb=null,hurt=-9,shownDone=false;
+ const back=()=>{cloudPill();cityCloudWar();const r=$('.cloud-field.map-4');if(r){r.scrollLeft=mapOffset[0];r.scrollTop=mapOffset[1]}cloudTerritory(index)};
+ body.querySelector('[data-exit]').onclick=()=>{cloudViewGen++;back()};
+ body.querySelector('[data-stop]').onclick=()=>{cloudViewGen++;cloudFightStop(true);back()};
+ const hit=()=>{const c=cloudBattle;if(!c||c.done||Date.now()<c.start||Date.now()<c.burstAt)return;c.start-=CLOUD_BURST.sec*1000;c.burstAt=Date.now()+CLOUD_BURST.cd*1000;shots.push({at:t,big:true});actor.heroShotAt=t};
+ burst.onclick=hit;canvas.onclick=hit;
+ const dmg=big=>Math.round(maxHp/(CLOUD_FIGHT[role]*1.6)*(big?6:.8+Math.random()*.5));
  function frame(now){
-  if(!canvas.isConnected||screen!=='cloudWar'||canvas.dataset.stop)return;
-  elapsed+=Math.min(.1,(now-last)/1000);last=now;actor.clock=elapsed;
-  if(elapsed>=nextShot){shoot(100);nextShot=elapsed+.65;}
-  ctx.clearRect(0,0,640,420);
-  cloudArenaFloor(ctx);
+  if(gen!==cloudViewGen||!canvas.isConnected||screen!=='cloudWar')return;
+  const c=cloudBattle;if(!c){return}
+  const dt=Math.min(.1,(now-last)/1000);last=now;t+=dt;actor.clock=t;tickImpacts(g,dt);
+  const wall=Date.now(),riding=wall<c.start,hp=c.done?0:cloudFightHp(c,wall);
+  ctx.clearRect(0,0,640,420);cloudArenaFloor(ctx);
+  // Pathfinding overlay while she rides to this defender.
+  let path=canvas.parentElement.querySelector('.cloud-path');
+  if(riding&&!path){canvas.parentElement.insertAdjacentHTML('beforeend',`<div class="cloud-path" role="status"><img src="${reinaLookPath(true)}" alt="Reina riding"><strong>⚔ Pathfinding</strong><small>to ${cloudBossName(slot)}</small></div>`)}
+  if(!riding&&path)path.remove();
+  if(!riding){
+   if(!c.done&&t>=nextShot){shots.push({at:t,big:false});actor.heroShotAt=t;nextShot=t+.65}
+   for(const p of pets){p.kick=Math.max(0,p.kick-dt*3);if(!c.done&&t>=p.next){bolts.push({at:t,from:p.i});p.kick=1;p.next=t+2.4}}
+   if(!c.done&&t>=nextOrb){orb=t;nextOrb=t+3.2}
+  }
   drawReina(ctx,actor,140,368,155,220);
-  ctx.save();
-  if(role==='Boss'){ctx.shadowColor='#ffd361';ctx.shadowBlur=13;}
-  drawArtSprite(ctx,'guardian-t'+art,486,369,200,245);
-  ctx.restore();
-  if(elapsed>=nextOrb){orbStart=elapsed;nextOrb=elapsed+3.5;}
-  if(orbStart!==null){
-   const t=(elapsed-orbStart)/.8;
-   if(t>=1){
-    heroHP-=orbDamage;lastHit=elapsed;orbStart=null;
-    body.querySelector('[data-status]').textContent='Reina · '+heroHP+'% HP · Auto-fighting';
-   }else{
-    const x=458-314*t,y=226+28*t-26*Math.sin(Math.PI*t);
-    ctx.save();ctx.strokeStyle='#ba77ff';ctx.lineWidth=5;ctx.shadowColor='#b65fff';ctx.shadowBlur=14;
-    ctx.beginPath();ctx.moveTo(x+22,y-2);ctx.lineTo(x,y);ctx.stroke();
-    ctx.fillStyle='#ffdbff';ctx.beginPath();ctx.arc(x,y,8,0,2*Math.PI);ctx.fill();ctx.restore();
-   }
-  }
-  if(elapsed-lastHit<.65){
-   ctx.save();ctx.font='bold 21px system-ui';ctx.fillStyle='#fff2fb';ctx.strokeStyle='#772654';ctx.lineWidth=4;
-   const y=178-18*(elapsed-lastHit);ctx.strokeText('−'+orbDamage+'%',132,y);ctx.fillText('−'+orbDamage+'%',132,y);ctx.restore();
-  }
-  for(let i=shots.length-1;i>=0;i--){
-   const t=(elapsed-shots[i].at)/.3;
-   if(t>=1){hp=Math.max(0,hp-shots[i].damage);shots.splice(i,1);}
-   else drawGoldenArrow(ctx,170+290*t,234-18*t,54,-.06);
-  }
-  number.textContent=Math.ceil(100*hp/max)+'%';bar.value=hp;
-  burst.disabled=elapsed<burstReady;
-  burst.textContent=burst.disabled?'Celestial Arrow · '+Math.ceil(burstReady-elapsed)+'s':'Celestial Arrow';
-  if(hp>0){requestAnimationFrame(frame);return;}
-  S.cloudWarHits??={};
-  const hits=S.cloudWarHits[index]??=Array(10).fill(0);
-  let gain=0,loot=cloudLoot[role];
-  if(!(hits[slot]>=limit)){hits[slot]=limit;gain=WonderGear.cloudGain(S,cloudEnemyScore[role]);if(loot)WonderGear.bagAdd(S,loot.id,loot.n);save();}else loot=null;
-  burst.disabled=true;
-  canvas.onclick=null;
-  body.querySelector('[data-status]').textContent='Victory';
-  bagArtVars();canvas.parentElement.insertAdjacentHTML('beforeend',`<div class="cloud-floating-loot" role="status">${loot?'<div class="bag-gains">'+cloudItems({[loot.id]:loot.n})+'</div>':''}<strong>+${cloudEnemyScore[role]} territory points · ${gain?'+'+gain+' Carnage Points':'daily Carnage cap reached'}</strong></div>`);
-  const hall=body.querySelector('.cloud-hall');if(hall)hall.outerHTML=cloudHall(index,-1);
-  const next=cloudNextTarget(index);
-  // Auto next: after the loot she rides to the next standing defender ("Pathfinding"), then that fight starts.
-  setTimeout(()=>{
-   if(!canvas.isConnected||screen!=='cloudWar'||canvas.dataset.stop)return;
-   if(cloudAutoNext&&next>=0)cloudRide(index,next);else returnToTerritory();
-  },2400);
+  pets.forEach(p=>{const x=[70,205,110][p.i],y=[392,396,330][p.i],hop=Math.sin(t*3+p.i)*3+p.kick*6;ctx.save();ctx.globalAlpha=riding?.35:1;drawArtSprite(ctx,petArtId(p.id),x,y-hop,72,72);ctx.restore()});
+  if(!c.done||wall-c.doneAt<600){ctx.save();if(role==='Boss'){ctx.shadowColor='#ffd361';ctx.shadowBlur=13}if(t-hurt<.12)ctx.filter='brightness(1.8)';ctx.globalAlpha=c.done?Math.max(0,1-(wall-c.doneAt)/600):riding?.4:1;drawArtSprite(ctx,'guardian-t'+art,486,369,200,245);ctx.restore()}
+  for(let i=shots.length-1;i>=0;i--){const k=(t-shots[i].at)/.3;if(k>=1){const n=dmg(shots[i].big);nums.push({at:t,n,big:shots[i].big,x:470+Math.random()*40,y:200});addImpact(g,480,232,shots[i].big?'#ffe27a':'#fff0c0');hurt=t;shots.splice(i,1)}else drawGoldenArrow(ctx,170+290*k,234-18*k,shots[i].big?80:54,-.06)}
+  for(let i=bolts.length-1;i>=0;i--){const k=(t-bolts[i].at)/.45,sx=[90,225,130][bolts[i].from],sy=[350,354,290][bolts[i].from];if(k>=1){nums.push({at:t,n:Math.round(dmg(false)*.35),x:460+Math.random()*50,y:250,pet:true});addImpact(g,478,250,'#9ff0ff','fire');bolts.splice(i,1)}else{const x=sx+(470-sx)*k,y=sy+(250-sy)*k-40*Math.sin(Math.PI*k);softLight(ctx,x,y,12,'150,230,255',.9)}}
+  if(orb!==null){const k=(t-orb)/.8;if(k>=1){orb=null;nums.push({at:t,n:'−'+Math.round(dmg(false)*.2),x:120,y:170,foe:true});addImpact(g,150,240,'#d08aff')}else{const x=458-314*k,y=226+28*k-26*Math.sin(Math.PI*k);ctx.save();ctx.fillStyle='#ffdbff';ctx.shadowColor='#b65fff';ctx.shadowBlur=14;ctx.beginPath();ctx.arc(x,y,8,0,2*Math.PI);ctx.fill();ctx.restore()}}
+  paintImpacts(ctx,g);
+  for(let i=nums.length-1;i>=0;i--){const n=nums[i],a=(t-n.at)/.9;if(a>=1){nums.splice(i,1);continue}ctx.save();ctx.globalAlpha=1-a;ctx.font=`900 ${n.big?30:n.pet?16:20}px Georgia`;ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle=n.foe?'#5a1040':'#3a1a00';ctx.fillStyle=n.foe?'#ffb0e0':n.pet?'#bff4ff':n.big?'#ffe27a':'#fff4d0';const txt=typeof n.n==='number'?fmt(n.n):n.n;ctx.strokeText(txt,n.x,n.y-40*a);ctx.fillText(txt,n.x,n.y-40*a);ctx.restore()}
+  number.textContent=Math.ceil(hp*100)+'%';bar.value=Math.round(hp*1000);
+  const left=Math.max(0,Math.ceil((c.start+c.dur-wall)/1000));clock.textContent=riding?'riding…':c.done?'won':Math.floor(left/60)+':'+String(left%60).padStart(2,'0')+' left';
+  status.textContent=riding?'Pathfinding to '+cloudBossName(slot):c.done?'Victory':'Reina · '+Math.max(40,100-Math.round(cloudFightP(c,wall)*35))+'% HP · Auto-fighting · you can leave, the fight goes on';
+  const cd=Math.ceil((c.burstAt-wall)/1000);burst.disabled=riding||c.done||cd>0;burst.textContent=cd>0?'Celestial Arrow · '+cd+'s':'Celestial Arrow';
+  if(c.done&&!shownDone){shownDone=true;const {gain,loot}=c.result;bagArtVars();canvas.parentElement.insertAdjacentHTML('beforeend',`<div class="cloud-floating-loot" role="status">${loot?'<div class="bag-gains">'+cloudItems({[loot.id]:loot.n})+'</div>':''}<strong>+${cloudEnemyScore[role]} territory points · ${gain?'+'+gain+' Carnage Points':'daily Carnage cap reached'}</strong></div>`);const hall=body.querySelector('.cloud-hall');if(hall)hall.outerHTML=cloudHall(index,-1)}
+  requestAnimationFrame(frame);
  }
  requestAnimationFrame(frame);
 }

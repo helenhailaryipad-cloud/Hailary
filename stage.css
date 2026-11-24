@@ -8841,3 +8841,11 @@ body[data-screen=cityTrail] #stage .toast{top:7%!important;bottom:auto!important
 #stage #main .tq-ware small{color:#6a4a2a;opacity:1}.tq-ware small b{color:#6a4a2a}
 .tq-ware .art{height:clamp(64px,12vw,110px)}.tq-ware .art .bag-ico,.tq-ware .art .rt-vico{width:clamp(54px,10vw,92px);height:clamp(54px,10vw,92px)}.tq-ware .art .tq-ware-frame{width:clamp(62px,11vw,100px);height:clamp(62px,11vw,100px)}
 .tq-ware .art .pb{transform:none;width:clamp(96px,16vw,150px);font-size:12px}
+/* Cloud War fight running in the background: a pill on every other screen (tap = back to the fight) */
+#stage .cloud-pill{position:absolute;z-index:60;left:50%;top:calc(env(safe-area-inset-top) + 8px);transform:translateX(-50%);display:flex;align-items:center;gap:8px;min-height:0;padding:4px 12px 4px 4px;border-radius:99px;border:1.5px solid #ffd36b;background:linear-gradient(#2a3a6ae6,#14203ee6);color:#fff;box-shadow:0 4px 14px #0008;font:700 12px/1.15 Arial,sans-serif;cursor:pointer;animation:rtpulse 2s ease-in-out infinite}
+#stage .cloud-pill::before,#stage .cloud-pill::after{display:none}
+#stage .cloud-pill img{width:34px;height:34px;border-radius:50%;object-fit:cover;object-position:50% 12%;background:#ffffff22}
+#stage .cloud-pill span{display:grid;text-align:left}#stage .cloud-pill b{color:#ffe27a;font-size:12px}#stage .cloud-pill small{font-size:11px;opacity:.9;white-space:nowrap}
+#stage .cloud-pill i{font-style:normal;padding:3px 8px;border-radius:99px;background:#ffd36b;color:#3a2400;font-weight:900}
+#stage #main .cloud-encounter .cloud-hall-buttons{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+#stage #main .cloud-encounter .cloud-hall-buttons button{flex:1 1 auto;min-width:0;white-space:nowrap}
