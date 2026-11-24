@@ -9472,3 +9472,137 @@ body[data-screen=vow] #stage .toast{top:6%!important;bottom:auto!important;left:
 #stage #modal .vp .vp-pair p small{font:700 12px/1.25 Arial,sans-serif!important;color:#b0507a!important}
 #stage #modal .vp .vp-pair p b{font:900 15px/1.15 Georgia,serif!important}
 @media (min-width:800px){#stage #modal.den-pop:has(.vp){max-width:520px!important;width:520px!important}.vp{font-size:14px}.vp-face{width:60px;height:60px}}
+
+/* ===== Full-width screens (2026-11-24, user: "some sections are narrow, Blossom Vow opens to the full width and looks
+   much better; make ALL sections open to the full width"). Every room fills the window up to 86dvh (full width in the
+   chat pane 590 x 690 and on iPad portrait; no absurd stretching on a landscape desktop). Only the Mini Games hub stays a
+   deliberate narrow column (.mg-hub). Self-contained block: per-screen fixes for the wider rooms follow below. ===== */
+body:is([data-screen=home],[data-screen=character],[data-screen=fashion],[data-screen=isleArena],[data-screen=cityBag],[data-screen=cityCraft],[data-screen=cityVault],[data-screen=cityDevour],[data-screen=cityPet],[data-screen=cityCompanion],[data-screen=citySkin],[data-screen=cityForge],[data-screen=cityDaily],[data-screen=cityGameplay],[data-screen=cityExplore],[data-screen=cloudWar],[data-screen=eliteSale],[data-screen=cityBounty],[data-screen=cityHunting],[data-screen=citySummon],[data-screen=cityContest],[data-screen=citySocial],[data-screen=cityGuild],[data-screen=citySupreme]) #stage{width:min(100%,86dvh)!important;margin-inline:auto}
+
+/* Elite Sale: the figure row takes what is left (no figures over the title); painted gold / violet buttons. */
+#stage #main .elite-sale .el-title{font-size:min(8.4cqw,6.4cqh)}
+#stage #main .elite-sale .el-time{font-size:min(2.7cqw,2.1cqh)}
+#stage #main .elite-sale .el-cols{align-items:stretch;min-height:0}
+#stage #main .elite-sale .el-col{grid-template-rows:minmax(0,1fr) auto auto auto;align-content:stretch;min-height:0}
+html body #stage #main .elite-sale .el-fig{height:100%!important;width:100%;min-height:0;object-fit:contain;object-position:center bottom}
+html body #stage #main .elite-sale :is(.el-bow,.el-deco){height:100%!important;min-height:0;width:100%}
+html body #stage #main .elite-sale .el-bow img{height:min(62cqw,100%)!important}
+#stage #main .elite-sale .el-tag{margin-top:-3cqh}
+#stage #main .elite-sale .el-cp{font-size:min(5cqw,3.6cqh);margin:.4cqh 0}
+#stage #main .elite-sale .el-card h3{font-size:min(3.3cqw,2.5cqh)}
+#stage #main .elite-sale .el-items{padding:1cqh 0 .5cqh}
+#stage #main .elite-sale .el-old{font-size:min(3cqw,2.3cqh)}
+html body #stage #main .elite-sale button.el-buy{display:inline-flex;align-items:center;justify-content:center;gap:.3em;width:min(78%,15em);min-height:0;margin:.2cqh 0 1.2cqh;padding:.5em 1em .62em;border:0;outline:0!important;border-radius:2em;background:url(assets/generated/ui-btn-gold.webp) center/100% 100% no-repeat;box-shadow:none;color:#5a2a06;text-shadow:0 1px 0 #fff6c8;font:900 min(4.4cqw,3.3cqh)/1 Georgia,serif;cursor:pointer;transition:transform .08s,filter .08s}
+html body #stage #main .elite-sale button.el-buy:active{transform:scale(.96);filter:brightness(1.08)}
+html body #stage #main .elite-sale button.el-buy:disabled{filter:grayscale(.8);opacity:.6}
+html body #stage #main .elite-sale :is(.el-buy,.el-nav button)::before,html body #stage #main .elite-sale :is(.el-buy,.el-nav button)::after{display:none!important;content:none!important}
+html body #stage #main .elite-sale .el-nav{gap:1.4cqw;padding:1cqh 2cqw calc(1cqh + env(safe-area-inset-bottom,0px));background:linear-gradient(#2d2463ee,#1d1640)!important;border-top:1px solid #c9a8ff66}
+html body #stage #main .elite-sale .el-nav button:not([data-back]){flex:1;width:auto;min-height:min(10cqw,7cqh);margin:0!important;padding:0 .5em .2em!important;border:0!important;border-radius:2em!important;outline:0!important;background:url(assets/generated/ui-btn-violet.webp) center/100% 100% no-repeat!important;box-shadow:none!important;color:#fff!important;text-shadow:0 2px 0 #3a0a6a,0 0 6px #c07aff;font:800 min(2.7cqw,2cqh)/1.05 Georgia,serif!important;white-space:normal}
+html body #stage #main .elite-sale .el-nav button[aria-current]{background-image:url(assets/generated/ui-btn-gold.webp)!important;color:#5a2a06!important;text-shadow:0 1px 0 #fff6c8}
+
+/* Supreme Set room: piece tiles, Wear button and set cards are capped by the height so the stage keeps its room. */
+#stage #main .sup-room .sup-side .sup-tile{width:min(15cqw,8cqh)}
+#stage #main .sup-room .sup-side{gap:min(1.2cqh,2cqw);align-content:start;align-self:start;padding-top:.6cqh}
+#stage #main .sup-room .sup-stage{grid-template-rows:minmax(0,1fr)}
+#stage #main .sup-room .sup-center{grid-template-rows:minmax(0,100%)}
+#stage #main .sup-room .sup-center img{max-height:100%;min-height:0}
+#stage #main .sup-room h1{font-size:min(5cqw,4.4cqh)}
+#stage #main .sup-room .sup-stars{font-size:min(4.2cqw,3.4cqh)}
+#stage #main .sup-room .sup-rows>div{font-size:min(3cqw,2.3cqh)}
+#stage #main .sup-room .sup-wear{width:min(20cqw,12cqh);font-size:min(3.6cqw,2cqh);line-height:1.05;padding:0 .3em}
+#stage #main .sup-room .sup-sets button{flex:0 0 min(22cqw,14cqh)}
+#stage #main .sup-room .sup-sets b{font-size:min(2.4cqw,1.9cqh)}
+#stage #main .sup-room .sup-sets small{font-size:min(2.1cqw,1.6cqh)}
+#stage #main .sup-room .sup-ribbon{font-size:min(3.4cqw,2.6cqh)}
+#stage #main .sup-room .sup-center .sup-cp{font-size:min(5cqw,3.8cqh)}
+#stage #main .sup-room .sup-round{width:min(14cqw,10cqh);font-size:min(7cqw,5cqh);outline:0!important;box-shadow:none!important}
+#stage #main .sup-room .sup-round small{font-size:min(2.3cqw,1.8cqh)}
+html body #stage #main .sup-room .sup-nav{gap:1.4cqw;padding:1cqh 2cqw;background:linear-gradient(#1e2a6aee,#140c30)!important}
+html body #stage #main .sup-room .sup-nav button:not([data-back]){flex:1;width:auto;min-height:min(10cqw,7cqh);margin:0!important;padding:0 .5em .2em!important;border:0!important;border-radius:2em!important;outline:0!important;background:url(assets/generated/ui-btn-violet.webp) center/100% 100% no-repeat!important;box-shadow:none!important;color:#fff!important;text-shadow:0 2px 0 #3a0a6a,0 0 6px #c07aff;font:800 min(2.7cqw,2cqh)/1.05 Georgia,serif!important}
+html body #stage #main .sup-room .sup-nav button[aria-current]{background-image:url(assets/generated/ui-btn-gold.webp)!important;color:#5a2a06!important;text-shadow:0 1px 0 #fff6c8}
+html body #stage #main .sup-room .sup-nav button::before,html body #stage #main .sup-room .sup-nav button::after{display:none!important;content:none!important}
+
+/* City rooms (Bag family, Pets, Companion, Skin, Forge, Daily, Gameplay, Bounty, Hunting): their bottom bar is a <nav>,
+   and the global app-nav rules made it an absolute 94 px slab that covered the row above it. Keep it in its grid row
+   and size its captions by the height as well as the width. */
+html body #stage #main .spirit-room>nav.spirit-nav{position:relative;inset:auto;height:auto;min-height:0;padding:0;display:flex;grid-template-columns:none;grid-template-rows:none;box-shadow:none;backdrop-filter:none}
+html body #stage #main .spirit-room>nav.spirit-nav button:not([data-back]){font-size:min(2.8cqw,1.9cqh);white-space:nowrap;min-height:0;height:auto}
+html body #stage #main .spirit-room>nav.spirit-nav button[data-back]{flex:0 0 min(17%,12cqh)!important;min-height:0!important;height:auto}
+html body #stage #main .satchel-nav button:not([data-back]){font-size:min(2.7cqw,1.85cqh)!important;white-space:nowrap}
+/* Gear Crafting: input places and slot tiles stay tile-sized on a wide window. */
+#stage #main .loom .loom-row>*{width:min(17.5%,10.5cqh)}
+#stage #main .loom .loom-slots{width:min(100%,62cqh);margin-inline:auto}
+#stage #main .loom .loom-work :is(h2,p,.loom-rate){font-size:min(3.9cqw,2.7cqh)}
+#stage #main .loom .loom-work p{font-size:min(2.7cqw,1.95cqh)}
+#stage #main .loom .loom-orbit{width:min(60%,17cqh)}
+#stage #main .loom-body aside button{font-size:min(2.75cqw,1.9cqh)}
+#stage #main .loom-buttons button{font-size:min(3cqw,2.1cqh)}
+/* Forge: the item rail had 21%-wide cards with the full-size font of the global buttons. */
+html body #stage #main .smith-rail button{flex:0 0 min(21%,15cqh);font:700 min(2.5cqw,1.8cqh)/1.15 Arial,sans-serif;padding:.4em .2em;overflow:hidden}
+html body #stage #main .smith-rail button>small{font-size:1em;line-height:1.15}
+#stage #main .smith-room .smith-scene>.smith-item{width:min(17cqw,11cqh)}
+html body #stage #main .smith-rail .smith-item{width:min(13cqw,7.3cqh)}
+#stage #main .smith-room .smith-rune{width:min(55%,30cqh)}
+#stage #main .smith-room .smith-scene>strong{font-size:min(4.5cqw,3.2cqh)}
+#stage #main .smith-room .smith-panel h3{font-size:min(3.5cqw,2.5cqh)}
+
+/* Skin room (Wings, Soulforge ...): its title row is a <header>, which the global app-header rules took out of the grid
+   (absolute, 88 px), so every later row slid up one place and the wings covered the stats. Put it back in its row. */
+html body #stage #main .skin-room>header{position:relative;inset:auto;width:auto;height:auto;min-height:0;padding:0 2%;display:flex;align-items:center;justify-content:space-between;z-index:auto}
+#stage #main .skin-room>header h2{margin:0;font-size:min(4cqw,3.4cqh)}
+#stage #main .skin-room .spirit-value{font-size:min(4.5cqw,3.6cqh)}
+#stage #main .skin-room .companion-show{min-height:0;overflow:hidden;grid-template-rows:minmax(0,100%)}
+#stage #main .skin-room .companion-show label{display:flex;align-items:center;gap:.4em;font-size:min(2.8cqw,2cqh)}
+#stage #main .skin-room .skin-skills img{width:min(9%,7cqh)}
+#stage #main .skin-room .skin-scroll button{font-size:min(2.7cqw,1.9cqh)}
+#stage #main .skin-room .companion-stats{overflow:auto;min-height:0}
+#stage #main .skin-room .companion-stats :is(small,strong){font-size:min(2.6cqw,1.9cqh)}
+#stage #main .skin-room .companion-stats>div:first-child>div{font-size:min(2.75cqw,1.95cqh)}
+/* Skin room, Appearance mode (old wardrobe layout .fashion-showcase, capped at 600-800 px): fill the room as well. */
+html body[data-screen=citySkin] #stage #main .fashion-showcase{width:100%;max-width:none}
+
+#stage #main .skin-room .companion-show input{width:1.3em!important;height:1.3em!important;min-width:0!important;min-height:0!important;margin:0}
+/* Mode pills (Upgrade / Morphing / Appearance, Enhance / Upgrade / Identify ...): the stock icon was taller than the pill. */
+#stage #main .spirit-room .companion-modes button{display:flex;align-items:center;justify-content:center;gap:.35em;min-height:0}
+#stage #main .spirit-room .companion-modes button>.gpt-icon{flex:none;width:min(1.6em,3cqh);height:min(1.6em,3cqh)}
+
+/* Fashion room: the room is now full width, but every cqw size is capped at what it was on the old 58dvh-wide room
+   (X cqw -> min(X cqw, 0.58 X cqh)), so the top bar, panel, tabs and bottom bar keep their height and Reina keeps her
+   big stage; the card grid shows more columns instead of bigger cards. */
+html body #stage #main .fx-room .fx-top strong{font-size:min(4cqw,2.3cqh)}
+html body #stage #main .fx-room .fx-wallet{font-size:min(3cqw,1.75cqh)}
+html body #stage #main .fx-room .fx-stage{margin-top:max(-6cqw,-3.5cqh)}
+html body #stage #main .fx-room .fx-stage .fashion-model{inset:0 0 min(6.2cqw,3.6cqh)!important}
+html body #stage #main .fx-room .fx-stage .fashion-stage h2{top:min(7.5cqw,4.35cqh)!important;font-size:min(4cqw,2.3cqh)}
+html body #stage #main .fx-room .fx-cp{font-size:min(5cqw,2.9cqh)!important}
+html body #stage #main .fx-room .fx-round{width:min(13cqw,7.5cqh)!important;bottom:min(1cqw,.6cqh)!important}
+html body #stage #main .fx-room .fx-round i{width:min(8.5cqw,4.9cqh)!important;font-size:min(4cqw,2.3cqh)!important}
+html body #stage #main .fx-room .fx-round small{font-size:min(2.1cqw,1.25cqh)!important}
+html body #stage #main .fx-room .fx-stats>div{font-size:min(3.1cqw,1.8cqh)}
+html body #stage #main .fx-room .fx-pick .fx-ptile{width:min(13cqw,7.5cqh)}
+html body #stage #main .fx-room .fx-pick>b{font-size:min(3cqw,1.75cqh)}
+html body #stage #main .fx-room .fx-pick small{font-size:min(2.4cqw,1.4cqh)}
+html body #stage #main .fx-room .fx-btn{font-size:min(3.2cqw,1.86cqh)}
+html body #stage #main .fx-room .fx-tabs button{height:min(8.6cqw,5cqh);margin-top:min(1.2cqw,.7cqh)!important;font-size:min(2.15cqw,1.25cqh)!important}
+html body #stage #main .fx-room .fx-tabs button[aria-pressed=true]{height:min(9.8cqw,5.7cqh);margin-top:0!important}
+html body #stage #main .fx-room .fx-tabs img,html body #stage #main .fx-room .fx-tabs .fx-tabico{width:min(4.6cqw,2.7cqh);height:min(4.6cqw,2.7cqh)}
+html body #stage #main .fx-room .fx-tabs .fx-tabico{font-size:min(3.2cqw,1.86cqh)}
+html body #stage #main .fx-room .fx-grid{grid-template-columns:repeat(auto-fill,minmax(min(22%,13cqh),1fr))!important}
+html body #stage #main .fx-room.fashion-showcase{width:100%;max-width:none}
+html body #stage #main .fx-room .fx-card>span{font-size:min(2.2cqw,1.3cqh)}
+html body #stage #main .fx-room .fx-rar{font-size:min(3cqw,1.75cqh)}
+html body #stage #main .fx-room .fx-card.r-ssr .fx-rar{font-size:min(2.6cqw,1.5cqh)}
+html body #stage #main .fx-room .fx-tick{width:min(5cqw,2.9cqh);font-size:min(3cqw,1.75cqh)}
+html body #stage #main .fx-room .fx-lock{font-size:min(3.6cqw,2.1cqh)}
+html body #stage #main .fx-room .fx-nav button{font-size:min(2.8cqw,1.62cqh)}
+html body #stage #main .fx-room .fx-nav b{font-size:min(5.5cqw,3.2cqh)}
+html body #stage #main .fx-room .fx-theme>b,html body #stage #main .fx-room .fx-theme button{font-size:min(2.3cqw,1.33cqh)}
+html body #stage #main .fx-room .fx-bigdeco .sup-frame.pf{width:min(44cqw,25.5cqh)}
+html body #stage #main .fx-room .fx-bigdeco .pb{width:min(58cqw,33.6cqh);font-size:min(6.5cqw,3.77cqh)}
+
+/* Explore (chapter map): the right-hand tool buttons took the global 24 px button font and padding and stuck out of
+   their 15% column ("Clear Battle Pas", "Assignmen"); fit them to the column. */
+html body #stage #main .explore-map .trail-tools button{box-sizing:border-box;width:100%;min-width:0;min-height:0;padding:.35em .15em;font-size:min(2.5cqw,1.8cqh);line-height:1.1;overflow:hidden}
+html body #stage #main .explore-map .trail-tools button :is(img,.gpt-icon){max-width:70%}
+html body #stage #main .explore-map .trail-tools{bottom:max(11%,120px)}
+html body #stage #main .explore-map .trail-tools button>img{height:min(6.5cqw,4.6cqh);width:auto}
