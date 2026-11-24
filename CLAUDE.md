@@ -1102,6 +1102,23 @@ suns should fly out, nicer texts". Rules, scores (`defensePoints`, `DEFENSE_TARG
   "CASTLE DEFENSE UI" at the end of `stage.css`. The end window is `resultShow` (`defenseResult`, stars by
   `DEFENSE_STARS` 150 s). Hosted bundle after this: 32,554,965 bytes.
 
+## Full-width screens (2026-11-24)
+User: "some sections are narrow (Fashion Elite Sale), Blossom Vow opens to the full width and looks much better; make ALL
+sections open to the full width, professionally". RULE: every screen fills the window; never cap `#stage` at 55-72dvh
+again. One rule under "Full-width screens" at the end of `stage.css` sets `#stage{width:min(100%,86dvh)}` for home,
+character, fashion, isleArena and all city rooms (Bag, Craft, Vault, Devour, Pet, Companion, Skin, Forge, Daily,
+Gameplay, Explore, Cloud War, Elite Sale, Bounty, Hunting, Summon, Contest, Social, Guild, Supreme): full width at
+590 x 690 and iPad portrait, a centred column on a landscape desktop. Only the Mini Games hub (`.mg-hub`) stays a narrow
+column on purpose. A new screen must not add its own width cap.
+- The rooms size things in `cqw`, so a wider room grew everything and ran out of height. Fix pattern: cap by height,
+  `min(Xcqw, Ycqh)` (in rooms that are size containers, `.spirit-room` / `.satchel`, cqh is the room; elsewhere the
+  viewport). Fashion uses `min(Xcqw, 0.58·X cqh)` = exactly the old size, and its card grid gets more columns instead.
+- Found on the way: in-room `<nav>` / `<header>` elements pick up the global app-nav / app-header rules (absolute,
+  76-94 px): `.spirit-nav` is pinned back into its grid row and the Skin room's `<header>` back into the grid (that was
+  the "broken Skin room"). Use `div` for new bars, or reset them like that block does.
+- Elite Sale and Supreme Set buttons are the painted plates (`ui-btn-gold` for the price and the current tab,
+  `ui-btn-violet` for the other tabs). Sheets: `fw-sheet-590-*.png`, `fw-sheet-1024-*.png` (session scratch).
+
 ## In-chat playable preview (user requirement)
 The user wants to play the game inside the chat, and wants SHORT replies in Russian, no fluff.
 - Artifact: https://claude.ai/artifact/L9owNJPMaZjAsTmU3tDGs6 (private). After game changes, rebuild and republish:
