@@ -627,7 +627,7 @@ function styleFittingRoom(set){
   const name=n=>n===-1?set.legacy:n===0?set.classic:set.names[n-1];
   const img=n=>set.slot==='hair'?artPath('fit-icon-hair-'+n):n===11?leaflightIcon('bow'):artPath('weapon-style-'+n);
   const legacyIcons=set.slot==='hair'?['silver','lilac']:['gold','frost'];
-  const cards=[0,-1,...set.names.map((_,i)=>i+1).filter(n=>set.names[n-1])].map(n=>fashionCard(name(n),n>0?img(n):artPath('atelier-icon-'+legacyIcons[-n]),n===pick,`previewRegisteredEquipment('Weapons',${n})`)).join('');
+  const cards=[0,-1,...set.names.map((_,i)=>i+1).filter(n=>set.names[n-1]&&!(set.slot==='weapon'&&n===11&&worn!==11))].map(n=>fashionCard(name(n),n>0?img(n):artPath('atelier-icon-'+legacyIcons[-n]),n===pick,`previewRegisteredEquipment('Weapons',${n})`)).join('');
   const mask=(S.reinaFashion?.equipped||0)&~set.bit;
   const look={...S.atelier,[set.slot]:Math.max(0,pick)};
   const portrait=reinaLookPath(false,pick===-1?mask|set.bit:mask,currentDress(),look);
