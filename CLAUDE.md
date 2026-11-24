@@ -291,6 +291,13 @@ the round back button. Tab in `vowTab`; the room's class is `vw-tab-<tab>` (do n
   bouncing ▾ until the end, `vowListScroll`; her couple pinned in `.vw-mine`); one button family (gold painted plates
   for actions incl. pack prices, violet painted plates for the sub-tabs, gold-rimmed round discs for ? and Back); nav
   labels wrap to two lines; Reina has a soft light behind her, a white rim and a deeper shadow.
+- Pop-ups, second look (user: "the partner must be the opposite sex; make the pop-ups stylish and professional"):
+  `socialFolk` entries carry `sex` ('f' / 'm'); only men (`VOW_PARTNER_SEX`, `vowMen`) appear in Searching Partner
+  (Friends = male friends, Guild = male members, Nearby = every other male AI, Cross-Server empty) and as Send Oath
+  recipients; `vowInvite` refuses others. Both windows are `.vp` cards (CSS "Blossom Vow pop-ups, second look"): ribbon
+  head with petals, Reina ♥ partner portraits, cards with a portrait in a gold ring, intimacy hearts and a tagline
+  (`VOW_TAGS`), segmented tabs, painted gift cards with a tick, a lined note field, a stepper and a gold Send button that
+  names the points it earns.
 - Not done: Bond Transfer, a real parade with other couples, blessings / wishes in the venue, the reference's outfit
   and weapon-skin rank prizes (rewards are gifts, crystals and bag items), Nearby / Cross-Server players (nobody there).
   All numbers are placeholders.

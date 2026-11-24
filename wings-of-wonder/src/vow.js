@@ -272,42 +272,57 @@ function vowRewards() {
   popup(`<div class="vw-pop"><h2>Ranking Reward</h2><p class="vw-note">Rewards are sent by mail after 21:00 UTC · Current reward: <b>${rank ? 'No.' + rank : 'not ranked'}</b></p>
    <div class="vw-rlist">${rows.map(([t, g]) => `<div class="vw-rrow"><b>${t}</b><div class="vw-tiles">${vwTiles(g)}</div></div>`).join('')}</div>${v.last ? `<p class="vw-note">Last closed day: ${v.last.rank ? 'No.' + v.last.rank : 'not ranked'} · ${fmt(v.last.score)} pts</p>` : ''}</div>`);
 }
-// Searching Partner: friends, guild members (AI); Nearby / Cross-Server have nobody.
+// Searching Partner (user: "opposite sex; much better, stylish pop-ups"): only young men can bond with Reina
+// (`VOW_PARTNER_SEX`). Friends = her male friends, Guild = male guild members, Nearby = every other male AI
+// adventurer, Cross-Server = nobody. Each card: portrait in a gold ring, name, level, intimacy hearts, Invite.
+const VOW_PARTNER_SEX = 'm', VOW_TAGS = { kael: 'Gallant knight · loves red roses', pip: 'Cheerful tinkerer · loves sweet gifts', orin: 'Silver-haired sage · loves rings',
+  vesper: 'Mysterious ranger · loves moonlit walks', thane: 'Quiet wanderer · loves wild flowers' };
+function vowMen(ids) { return ids.filter(id => vwFolk()[id]?.sex === VOW_PARTNER_SEX); }
+function vowHearts(id) { const soc = WonderGear.socialState ? WonderGear.socialState(S) : { hearts: {} }, h = (soc.hearts?.[id] || 0) / 100; return Array.from({ length: 5 }, (_, i) => `<i class="${h >= i + 1 ? 'on' : h > i ? 'half' : ''}">♥</i>`).join(''); }
 function vowFindPop(tab = vowFind) {
   vowFind = tab; const v = S.vow, soc = WonderGear.socialState ? WonderGear.socialState(S) : { friends: [] }, g = WonderGear.guildState ? WonderGear.guildState(S) : null;
-  const ids = tab === 'Friends' ? soc.friends : tab === 'Guild' ? (g ? g.members : []) : [];
+  const all = Object.keys(vwFolk()), friends = vowMen(soc.friends), guild = vowMen(g ? g.members : []);
+  const ids = tab === 'Friends' ? friends : tab === 'Guild' ? guild : tab === 'Nearby' ? vowMen(all).filter(id => !friends.includes(id)) : [];
   const lv = id => Math.max(1, (typeof level === 'function' ? level() : 1) + (vwFolk()[id]?.lv || 0));
-  const list = ids.length ? ids.map(id => `<div class="vw-prow">${vwFace(id)}<div><b>${esc(vwName(id))} <small>AI</small></b><span>Lv. ${lv(id)}</span></div>${v.partner === id ? '<em class="vw-ok">Bonded</em>' : `<button ${v.partner ? 'disabled' : ''} onclick="vowInvite('${id}')">${denPlain}Invite</button>`}</div>`).join('')
-    : `<p class="vw-note">${tab === 'Guild' && !g ? 'Join a guild to invite its members.' : tab === 'Guild' ? 'No other members yet.' : 'Nobody here: everyone in Sky Garden is an AI adventurer. Try Friends or Guild.'}</p>`;
-  popup(`<div class="vw-pop"><h2>Recruit a partner</h2>${v.partner ? `<p class="vw-note">Your partner this event: <b>${esc(vwName(v.partner))}</b> (one partner per event).</p>` : '<p class="vw-note">Invite one AI friend to be your partner for this event week.</p>'}
-   <div class="vw-plist">${list}</div><div class="vw-ptabs">${['Friends', 'Nearby', 'Guild', 'Cross-Server'].map(t => `<button class="${t === tab ? 'on' : ''}" onclick="vowFindPop('${t}')">${denPlain}${t}</button>`).join('')}</div></div>`);
+  const empty = tab === 'Guild' && !g ? 'Join a guild to meet its members.' : tab === 'Cross-Server' ? 'Nobody from other realms yet — everyone in Sky Garden is an AI adventurer.' : 'No one here yet. Try another tab.';
+  const list = ids.length ? ids.map(id => `<div class="vp-card ${v.partner === id ? 'is' : ''}"><span class="vp-face">${vwFace(id)}</span><div class="vp-info"><b>${esc(vwName(id))}<small>AI</small><em>Lv. ${lv(id)}</em></b><span class="vp-hearts">${vowHearts(id)}</span><span class="vp-tag">${VOW_TAGS[id] || 'Brave adventurer'}</span></div>${v.partner === id ? '<span class="vp-bonded">♥ Bonded</span>' : `<button class="vp-invite" ${v.partner ? 'disabled' : ''} onclick="vowInvite('${id}')">${denPlain}Invite</button>`}</div>`).join('')
+    : `<p class="vp-empty">${empty}</p>`;
+  const head = v.partner ? `<div class="vp-pair"><span class="vp-face me">${portrait('reina')}</span><i>♥</i><span class="vp-face">${vwFace(v.partner)}</span><p><b>${esc(S.name || 'Reina')} &amp; ${esc(vwName(v.partner))}</b><small>Your vow for this event week</small></p></div>`
+    : `<p class="vp-lead">Choose a gentleman to share your vow with this week. Mutual gifts count double!</p>`;
+  popup(`<div class="vp vp-find"><div class="vp-head"><h2>Searching Partner</h2><span class="vp-petal l"></span><span class="vp-petal r"></span></div>${head}
+   <div class="vp-tabs">${['Friends', 'Nearby', 'Guild', 'Cross-Server'].map(t => `<button class="${t === tab ? 'on' : ''}" onclick="vowFindPop('${t}')">${denPlain}${t}</button>`).join('')}</div>
+   <div class="vp-list">${list}</div></div>`);
 }
-function vowInvite(id) { if (S.vow.partner) return; toast('Invitation sent to ' + vwName(id) + '…'); setTimeout(() => vowAccept(id), 1200); }
+function vowInvite(id) { if (S.vow.partner || vwFolk()[id]?.sex !== VOW_PARTNER_SEX) return; toast('Invitation sent to ' + vwName(id) + '…'); setTimeout(() => vowAccept(id), 1200); }
 function vowAccept(id) {
   if (!Vow.bond(S.vow, id)) return; if (WonderGear.socialNote) WonderGear.socialNote(S, vwName(id) + ' accepted your Blossom Vow.');
   save(); if (screen === 'vow') { document.querySelector('#modal')?.close?.(); showVow(); } toast(vwName(id) + ' (AI) accepted! You are a team now.');
 }
-// Send the Oath: three gift cards, message, recipient, count.
+// Send the Oath: Reina ♥ recipient at the top (tap a face to choose; the partner and her male friends), three gift
+// cards, a note, a stepper and a gold Send button that names what is sent and the points it earns.
 function vowSendPop() {
-  const v = S.vow, soc = WonderGear.socialState ? WonderGear.socialState(S) : { friends: [] }, who = [...new Set([v.partner, ...soc.friends].filter(Boolean))];
-  if (!who.includes(vowSel.to)) vowSel.to = v.partner || '';
-  const have = v.gifts[vowSel.gift] || 0; vowSel.n = Math.max(1, Math.min(vowSel.n, Math.max(1, have), Vow.sendMax));
-  const cards = Vow.giftIds.map(k => { const g = Vow.gifts[k]; return `<button class="vw-gcard c-${g.card} ${vowSel.gift === k ? 'on' : ''}" onclick="vowPick('${k}')">${denPlain}${vwIco(k)}<b>${g.name}</b><small>+${fmt(g.pts)} Intimacy</small><small>+${g.lock} Love Lock EXP</small><em>x${fmt(v.gifts[k])}</em><i class="vw-info" onclick="event.stopPropagation();vowItem('${k}')">i</i></button>`; }).join('');
-  popup(`<div class="vw-pop vw-send"><h2>Send the Oath</h2><div class="vw-gcards">${cards}</div>
-   <label class="vw-msg"><input id="vwMsg" maxlength="${Vow.msgMax}" placeholder="Write a few words…" value="${esc(vowSel.msg)}" oninput="vowSel.msg=this.value;const c=document.querySelector('#vwMsgN');if(c)c.textContent=this.value.length+'/${Vow.msgMax}'"><small id="vwMsgN">${vowSel.msg.length}/${Vow.msgMax}</small></label>
-   <div class="vw-srow">${vwIco(vowSel.gift)}<span>Owned: <b>${fmt(have)}</b></span><select id="vwTo" onchange="vowSel.to=this.value"><option value="">Please select a player to send</option>${who.map(id => `<option value="${id}" ${vowSel.to === id ? 'selected' : ''}>${esc(vwName(id))} (AI)${id === v.partner ? ' ♥ partner' : ''}</option>`).join('')}</select></div>
-   <div class="vw-qty"><button onclick="vowQty(-1)">${denPlain}−</button><b id="vwN">${vowSel.n}</b><button onclick="vowQty(1)">${denPlain}+</button></div>
-   <button class="vw-send-btn" onclick="vowSend()">${denPlain}Send</button>${v.partner ? '' : '<p class="vw-note">No partner yet: gifts to friends give intimacy and Love Lock EXP, but no Bond Points.</p>'}</div>`);
+  const v = S.vow, soc = WonderGear.socialState ? WonderGear.socialState(S) : { friends: [] }, who = [...new Set([v.partner, ...vowMen(soc.friends)].filter(Boolean))];
+  if (!who.includes(vowSel.to)) vowSel.to = v.partner || who[0] || '';
+  const k = vowSel.gift, g = Vow.gifts[k], have = v.gifts[k] || 0; vowSel.n = Math.max(1, Math.min(vowSel.n, Math.max(1, have), Vow.sendMax));
+  const cards = Vow.giftIds.map(id => { const x = Vow.gifts[id]; return `<button class="vp-gift c-${x.card} ${k === id ? 'on' : ''}" onclick="vowPick('${id}')">${denPlain}<em>×${fmt(v.gifts[id])}</em><i class="vp-i" onclick="event.stopPropagation();vowItem('${id}')">i</i>${vwIco(id, 'big')}<b>${x.name}</b><small>♥ +${fmt(x.pts)}</small><small>🔒 +${x.lock}</small></button>`; }).join('');
+  const toTeam = vowSel.to && vowSel.to === v.partner, pts = toTeam ? g.pts * vowSel.n * Vow.mutual : 0;
+  popup(`<div class="vp vp-send"><div class="vp-head"><h2>Send the Oath</h2><span class="vp-petal l"></span><span class="vp-petal r"></span></div>
+   <div class="vp-pair"><span class="vp-face me">${portrait('reina')}</span><i>♥</i><span class="vp-face">${vowSel.to ? vwFace(vowSel.to) : '<b class="vp-q">?</b>'}</span><p><b>${vowSel.to ? 'To ' + esc(vwName(vowSel.to)) : 'Choose who receives it'}</b><small>${vowSel.to ? (toTeam ? 'Your partner · Bond Points ×' + Vow.mutual : 'A friend · intimacy only') : 'Find a partner first'}</small></p></div>
+   ${who.length > 1 ? `<div class="vp-who">${who.map(id => `<button class="${id === vowSel.to ? 'on' : ''}" onclick="vowSel.to='${id}';vowSendPop()">${denPlain}${vwFace(id)}<small>${esc(vwName(id))}${id === v.partner ? ' ♥' : ''}</small></button>`).join('')}</div>` : ''}
+   <div class="vp-gifts">${cards}</div>
+   <label class="vp-note"><span>✎</span><input id="vwMsg" maxlength="${Vow.msgMax}" placeholder="Write a sweet note…" value="${esc(vowSel.msg)}" oninput="vowSel.msg=this.value;const c=document.querySelector('#vwMsgN');if(c)c.textContent=this.value.length+'/${Vow.msgMax}'"><small id="vwMsgN">${vowSel.msg.length}/${Vow.msgMax}</small></label>
+   <div class="vp-foot"><div class="vp-step"><button onclick="vowQty(-1)">${denPlain}−</button><b id="vwN">${vowSel.n}</b><button onclick="vowQty(1)">${denPlain}+</button></div>
+    <button class="vp-send" ${!vowSel.to || !have ? 'disabled' : ''} onclick="vowSend()">${denPlain}<span>Send</span><small>${have ? (pts ? '+' + fmt(pts) + ' Bond Points' : '+' + fmt(g.pts * vowSel.n) + ' Intimacy') : 'None left · Bond Gift'}</small></button></div></div>`);
 }
 function vowPick(k) { vowSel.gift = k; vowSel.n = 1; vowSendPop(); }
-function vowQty(d) { const have = S.vow.gifts[vowSel.gift] || 0; vowSel.n = Math.max(1, Math.min(Vow.sendMax, Math.max(1, have), vowSel.n + d)); const b = document.querySelector('#vwN'); if (b) b.textContent = vowSel.n; }
+function vowQty(d) { const have = S.vow.gifts[vowSel.gift] || 0, n = Math.max(1, Math.min(Vow.sendMax, Math.max(1, have), vowSel.n + d)); if (n !== vowSel.n) { vowSel.n = n; vowSendPop(); } }
 function vowItem(k) {
   const g = Vow.gifts[k];
   popup(`<div class="vw-pop"><div class="vw-icard"><div class="vw-ihead c-${g.card}">${vwIco(k, 'big')}<div><b>${g.name}</b><small>Usage Level: Unlimited · Type: Other</small></div></div><h3>Item Description</h3>
    <p class="vw-note">Giving it to your partner during the event earns ${fmt(g.pts)} Bond Points (x${Vow.mutual} when the gifting is mutual), ${fmt(g.pts)} Intimacy and ${g.lock} Love Lock EXP.</p><button class="vw-claim" onclick="vowSendPop()">${denPlain}Back</button></div></div>`);
 }
 function vowSend() {
-  const to = document.querySelector('#vwTo')?.value || vowSel.to, msg = document.querySelector('#vwMsg')?.value ?? vowSel.msg;
+  const to = vowSel.to, msg = document.querySelector('#vwMsg')?.value ?? vowSel.msg;
   if (!to) return toast('Please select a player to send');
   const r = Vow.send(S.vow, to, vowSel.gift, vowSel.n, msg);
   if (!r.ok) return toast({ few: 'Not enough ' + Vow.gifts[vowSel.gift].name + 's · buy more in Bond Gift', count: 'Choose how many', who: 'Please select a player to send' }[r.err] || 'Cannot send');

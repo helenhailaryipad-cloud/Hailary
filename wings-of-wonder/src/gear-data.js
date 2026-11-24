@@ -858,9 +858,9 @@ function validCloud(v){
 // There are no other players: everyone here is an AI adventurer and is labelled so. Optional save field `social`
 // {day, sent[], got, hearts{id:n}, friends[], requests[], blocked[], recent[], mail[], nextId, chat[]}. Placeholders.
 const socialFolk=[
- {id:'nyra',name:'Nyra',face:'nyra',lv:4},{id:'kael',name:'Kael',face:'kael',lv:9},{id:'pip',name:'Pip',face:'pip',lv:-3},
- {id:'vesper',name:'Vesper',face:'vesper',lv:6},{id:'briar',name:'Briar',face:'briar',lv:1},{id:'orin',name:'Orin',face:'orin',lv:12},
- {id:'wren',name:'Wren',face:'guest',lv:-1},{id:'juno',name:'Juno',face:'guest',lv:3},{id:'lumi',name:'Lumi',face:'guest',lv:7},{id:'thane',name:'Thane',face:'guest',lv:-5}
+ {id:'nyra',name:'Nyra',face:'nyra',lv:4,sex:'f'},{id:'kael',name:'Kael',face:'kael',lv:9,sex:'m'},{id:'pip',name:'Pip',face:'pip',lv:-3,sex:'m'},
+ {id:'vesper',name:'Vesper',face:'vesper',lv:6,sex:'m'},{id:'briar',name:'Briar',face:'briar',lv:1,sex:'f'},{id:'orin',name:'Orin',face:'orin',lv:12,sex:'m'},
+ {id:'wren',name:'Wren',face:'guest',lv:-1,sex:'f'},{id:'juno',name:'Juno',face:'guest',lv:3,sex:'f'},{id:'lumi',name:'Lumi',face:'guest',lv:7,sex:'f'},{id:'thane',name:'Thane',face:'guest',lv:-5,sex:'m'}
 ];
 const socialRules={friendsMax:20,giftsPerDay:10,flowerHeart:10,heartPoints:100,hearts:5,receiveGold:20,mailMax:30,chatKeep:30,chatEvery:25e3,liveDaily:30,liveMax:160};
 const socialById=Object.fromEntries(socialFolk.map(f=>[f.id,f]));
