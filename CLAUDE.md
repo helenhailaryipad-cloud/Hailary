@@ -120,6 +120,19 @@ global `#main button` rules set position, borders and `::before`.
   220 ms makes the piece fall fast (`CASCADE_HOLD_*`), the Fall-faster button repeats as fast; no text selection or
   callout on the screen (`user-select`, `touch-action:none` on well and pad). Bursts: a light beam along each row,
   rising motes, rays for 3+ rows, white flash. Sources `art-source/cascade/{pad,stats,tiles}.webp`.
+- Buttons and result windows (2026-11-24, user: "buttons don't work, I can't get back to the lobby, the result pop-up is
+  poor"): Back during a run used `confirm()`, which the chat preview's sandbox blocks, so it did nothing. Never use
+  `confirm()`/`alert()`; Cascade now has a card over the well (`cascadeMenu('pause'|'leave')`: Resume / Restart / Lobby,
+  Keep playing / Leave). Pad buttons carry captions (Left, Turn, Drop, Faster, Right). Shared result window
+  `resultShow({title,kicker,stars,score,body,buttons,win})` / `resultClose()` in `app.js` (`.wr-*` in `stage.css`):
+  painted ribbon, rotating light burst, stars that pop in, a score that counts up, prize tiles, painted gold / violet
+  buttons, confetti on a win (art `ui-result-ribbon`, `ui-btn-gold`, `ui-btn-violet`, `ui-result-burst` from
+  `art-source/ui/result-{sheet,burst}.webp`, `build-ui-icons.py`). Used by Crystal Cascade and Crownfall Vale.
+- Crownfall Vale (2026-11-24): the Upgrade button no longer appears / disappears (it pushed the field); it stays,
+  greyed, "Choose your building to upgrade". Battle effects (`valeFx`, `drawValeFx`, render only): a ring when troops
+  march out, glow under marching troops, flashes where they hit a building, a light pillar with rays, rings, sparks and
+  "Captured!" / "Lost!" when a building changes side, a rising ring and "Tier II!" on upgrade, violet zaps from
+  towers. Result window with 1-3 stars by time (`VALE_STARS` 90 / 150 s), crown, rewards, Next level / Replay.
 - Harvest Pairs third pass: new clean cover (basket on a soft garden) and lobby background (empty terrace, no painted
   person; the live Reina portrait stands on it); the 3-2-1 dial is a centred CSS dial (`.pairs-dial`); the field has
   soft light, a faint cell lattice and an inner frame instead of flat green.
