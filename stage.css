@@ -8934,3 +8934,17 @@ body[data-playing=vale] #stage #valeUpgrade{justify-content:center;text-align:ce
 body[data-playing=vale] #stage #valeUpgrade.idle{opacity:.55}
 @media (max-height:760px){.wr-card{gap:6px;padding-bottom:16px}.wr-body .wr-crown{width:76px}.wr-score b{font-size:44px}.wr-stars i{width:44px;height:44px}.wr-stars i:nth-child(2){width:56px;height:56px}
  html body #stage .wr-end button.wr-btn,html body .wr-end button.wr-btn{width:150px;height:60px;font-size:17px}.wr-buttons{gap:8px}.wr-prize{width:70px;padding:6px 3px 5px}.cas-rchest .cas-chest{width:58px}}
+/* Fashion room: a big figure like the reference (user 2026-11-24 photo "how it should be"). The stage takes the room
+   the card grid gave up, the figure fills it from under the top bar to the CP plate, feet stand on the plate. */
+.fx-room{grid-template-rows:auto minmax(0,1fr) auto auto minmax(0,21%) auto!important}
+.fx-stage{margin-top:-6cqw;z-index:0}
+.fx-room>:not(.fx-stage){position:relative;z-index:1}
+.fx-stage .fashion-model{inset:0 0 6.2cqw!important;height:auto!important;width:auto!important}
+.fx-stage .fashion-model img{object-position:50% 100%!important}
+.fx-cp{bottom:0!important;font-size:5cqw!important;z-index:2}
+#stage #main .fx-round{bottom:7cqw!important;width:15cqw!important;border:0!important;background:none!important;box-shadow:none!important;outline:0!important;border-radius:0!important}
+.fx-round i{width:10cqw!important;box-shadow:0 0 0 2px #ffe9a0,0 0 12px #ffd36b99,0 3px 6px #0007!important}
+.fx-round small{margin-top:.6cqw;font-size:2.4cqw!important}
+.fx-stage .fashion-stage h2,.fx-stage .fashion-stage:has(.fx-bigdeco) h2{top:7.5cqw!important;z-index:2}
+.fx-stage .fashion-stage:has(.fx-bigdeco) .fx-bigdeco{margin-top:6cqw}
+.fx-stage .fashion-stage:not(:has(.fx-bigdeco)) h2{display:none}
