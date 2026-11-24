@@ -775,6 +775,8 @@ wearing the dress, head to thighs, from ONE atlas `fashion-cards` (10 x 7 of 200
 not committed) + `python3 scripts/build-fashion-cards.py`. A new dress needs its id appended to `FX_CARD_IDS` and a
 rebuild, otherwise its card falls back to the fit-icon. The chat preview packs the atlas into `pack-icons.js` (the
 preview is at the 511-file limit). Hosted bundle 33,520,105 bytes: about 34 KB spare, compress older art first.
+Hairstyle tab (user photo of the reference): the stage shows a close bust, head to waist, about 2x
+(`.fx-room[data-category=Hair]`: scale from the top, mask fades the body out under a see-through stat panel).
 Found, not fixed: the Skin room (`citySkin`) layout is
 broken (overlapping title, blank square, cut labels) - it was like that before this pass.
 
