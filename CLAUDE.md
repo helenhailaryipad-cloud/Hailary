@@ -777,6 +777,11 @@ rebuild, otherwise its card falls back to the fit-icon. The chat preview packs t
 preview is at the 511-file limit). Hosted bundle 33,520,105 bytes: about 34 KB spare, compress older art first.
 Hairstyle tab (user photo of the reference): the stage shows a close bust, head to waist, about 2x
 (`.fx-room[data-category=Hair]`: scale from the top, mask fades the body out under a see-through stat panel).
+Shoes (user: "why are they barefoot"): 26 theme gowns had been painted with bare feet. Their paintings got shoes
+matching the gown (image-model edit of `painted/th<id>.png`, only the rows below y 1250 taken over, so the gown is
+unchanged), and 15 mounted paintings where the foot shows in the stirrup (`mounted/dress-th<id>.webp`, merged through a
+local difference mask). Rebuilt with `build-fitting-v2.py` / `build-mounted.py`; their AVIF copies re-saved at quality
+32 (the builders write 72-80). When painting new gowns, ask for shoes in the prompt.
 Found, not fixed: the Skin room (`citySkin`) layout is
 broken (overlapping title, blank square, cut labels) - it was like that before this pass.
 
