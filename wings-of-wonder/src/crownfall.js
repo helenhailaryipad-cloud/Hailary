@@ -4,7 +4,7 @@ const VALE_COLORS=['#554f46','#09645e','#9f3044'];
 const VALE_ROLES={castle:'Castle',village:'Village',tower:'Tower'};
 const VALE_MAPS=[
  {name:'Willow Meadow',grace:25,pace:13,enemyRecruit:.28,sites:[
- [100,285,1,44,'castle'],[230,405,1,12,'village'],[315,185,0,3,'tower'],[466,353,0,4,'village'],[620,235,2,9,'castle']]},
+ [100,285,1,44,'castle'],[230,405,1,12,'village'],[315,185,0,3,'tower'],[466,353,2,8,'village'],[620,235,2,30,'castle']]},
  {name:'Briar Crossing',grace:12,pace:7,enemyRecruit:.72,sites:[
  [85,300,1,32,'castle'],[205,145,0,5,'village'],[215,425,0,5,'tower'],[355,270,0,8,'village'],[490,140,2,6,'village'],[510,420,0,8,'tower'],[635,285,2,22,'castle']]},
  {name:'The Starwatch Pass',grace:6,pace:4,enemyRecruit:.93,sites:[
@@ -13,8 +13,13 @@ const VALE_MAPS=[
  [85,266,1,40,'castle'],[192,128,1,8,'tower'],[180,422,0,7,'village'],[330,245,0,8,'village'],[427,420,0,9,'tower'],[462,125,2,12,'village'],[551,284,2,9,'tower'],[641,412,2,36,'castle']]}
 ];
 let valeReplay=null;
+const VALE_FIRST_MARGIN=8;
 function createVale(stage=0){
  const level=VALE_MAPS[stage],keeps=level.sites.map(([x,y,side,n,type])=>({x,y,side,n,type,tier:1,recruit:0,pulse:0,hit:0,reload:0}));
+ // No first-move win (user: "I attacked once and won in a second"): the strongest enemy keep always holds more than
+ // half of the largest player garrison (an order sends half) plus VALE_FIRST_MARGIN.
+ const mine=Math.max(...keeps.filter(k=>k.side===1).map(k=>k.n)),foe=keeps.filter(k=>k.side===2).sort((a,b)=>b.n-a.n)[0];
+ if(foe)foe.n=Math.max(foe.n,Math.ceil(mine/2)+VALE_FIRST_MARGIN);
  return {kind:'vale',stage,running:true,ended:false,clock:0,keeps,units:[],shots:[],chips:[],selected:-1,aim:null,aiDelay:level.grace};
 }
 function upgradeVale(g,index,side){

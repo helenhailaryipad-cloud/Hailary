@@ -8994,3 +8994,72 @@ body[data-playing=vale] #stage #valeUpgrade.idle{opacity:.55}
 #stage #main .cas-pad button{width:clamp(46px,7.6cqh,84px)!important;height:clamp(46px,7.6cqh,84px)!important}
 #stage #main .cas-pad button.drop{width:clamp(52px,8.8cqh,96px)!important;height:clamp(52px,8.8cqh,96px)!important}
 .cas-screen{height:min(100%,100dvh)!important}
+/* Crystal Cascade lobby, short version (user: "a mountain of text; say it is a Tetris-like game, very easy") */
+.cas-lobby .cas-card{display:grid;gap:1.2cqh;padding:2cqh 4cqw 2.2cqh!important;background:linear-gradient(170deg,#3b2a86ee,#1e1650f2)!important;border:0!important;border-radius:22px!important;box-shadow:0 0 0 3px #d9a94a,0 0 0 6px #3a1a7a,0 0 30px #9a6aff88,0 14px 26px #000b!important}
+.cas-lobby .cas-sub{font:800 4cqw/1.2 Georgia,serif!important;color:#ffe9a0!important;text-shadow:0 0 10px #c07aff,0 2px 3px #000!important;margin-bottom:1.6cqh!important}
+.cas-how{display:grid;grid-template-columns:repeat(4,1fr);gap:2cqw;align-items:start}
+.cas-how span{display:grid;justify-items:center;gap:.8cqh;font:800 3cqw/1.15 Arial,sans-serif;color:#f1e8ff;text-align:center}
+.cas-hico{width:13cqw;aspect-ratio:1;background:var(--cas-pad) var(--bp,0 0)/400% 200% no-repeat;filter:drop-shadow(0 3px 5px #000a)}
+.cas-hrow{display:flex;height:13cqw;align-items:center}.cas-hrow .cas-gem{width:5.2cqw;height:5.2cqw;margin:0 -.3cqw;filter:drop-shadow(0 0 6px #ffe9a0)}
+.cas-lobby .cas-runs{margin:0!important;font:700 3cqw/1.3 Arial,sans-serif!important;color:#d8ccff}
+.cas-lobby .cas-chestrow .cas-chest{width:12cqw!important}
+#stage #main .cas-lobby .cas-play{background:url(assets/generated/ui-btn-gold.webp) center/100% 100% no-repeat!important;border:0!important;box-shadow:none!important;color:#5a2a06!important;text-shadow:0 1px 0 #fff6c8!important;width:46cqw;height:16cqw;padding:0 0 1cqw!important;font:900 6cqw/1 Georgia,serif!important}
+#stage #main .cas-lobby .cas-play{outline:0!important}
+/* Harvest Pairs fourth pass (user 2026-11-24: "a mountain of text again; 1-2-3 badly aligned; looks outdated") */
+.pairs-quick{padding:12px 14px 12px!important;display:grid;gap:10px;background:linear-gradient(170deg,#2f6a46f2,#1d4a33f5)!important;border:0!important;border-radius:20px!important;box-shadow:0 0 0 3px #e9c46a,0 0 0 6px #1e4a2e,0 12px 24px #0009!important}
+.pq-tag{margin:0;text-align:center;font:900 clamp(17px,4.4cqw,26px)/1.1 Georgia,serif;color:#ffe9a0;text-shadow:0 2px 0 #1e4a2e,0 0 10px #ffd36b88}
+.pq-how{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;align-items:start}
+.pq-how span{display:grid;justify-items:center;gap:6px;text-align:center;font:800 clamp(12px,2.9cqw,16px)/1.15 Arial,sans-serif;color:#eafbe0}
+.pq-how i{display:flex;align-items:center;justify-content:center;height:clamp(40px,11cqw,64px);font-style:normal}
+.pq-pair img{width:clamp(32px,8.5cqw,52px);height:auto;margin:0 -3px;filter:drop-shadow(0 0 6px #ffe9a0)}
+.pq-path svg{height:100%;width:auto}
+.pq-num{width:clamp(40px,11cqw,64px);border-radius:50%;background:radial-gradient(circle at 50% 38%,#ffd37a,#f08a3a 60%,#c4541e);box-shadow:0 0 0 3px #fff6dc;font:900 clamp(20px,5.6cqw,32px)/1 Arial,sans-serif!important;color:#fff;text-shadow:0 2px 0 #8a3a10}
+.pq-prize{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px;margin:0;font:800 clamp(12px,3cqw,16px)/1.2 Arial,sans-serif;color:#ffe9a8}
+.pq-prize .gpt-icon{width:22px;height:22px}
+/* the 3-2-1 dial: fixed square, number centred by absolute positioning with lining digits (Georgia's old-style
+   digits sat high or low, so 1, 2, 3 looked misaligned) */
+.pairs-dial{--d:clamp(112px,24svh,160px);width:var(--d)!important;height:var(--d)!important;aspect-ratio:auto!important;flex:none;display:block!important;box-sizing:border-box}
+.pairs-dial-ring{inset:-12px!important;transform-origin:50% 50%}
+.pairs-dial-n{position:absolute;inset:0;display:flex!important;align-items:center;justify-content:center;font:900 calc(var(--d)*.52)/1 'Arial Black',Arial,sans-serif!important;font-variant-numeric:lining-nums tabular-nums;color:#fff8e6;transform-origin:50% 50%}
+.pairs-dial-n span{display:block;line-height:1;transform:translateY(.02em)}
+.pairs-gate small{font:800 15px/1 Arial,sans-serif!important;letter-spacing:.14em!important;text-transform:uppercase;color:#ffe9a0!important;text-shadow:0 2px 3px #0008}
+/* top bar: two glossy chips instead of the brown plank */
+.pairs-bar{background:linear-gradient(#2f6a46,#1d4a33)!important;border-top:2px solid #e9c46a!important;border-bottom:2px solid #e9c46a!important;box-shadow:0 4px 10px #0006!important;padding:6px 12px!important}
+.pairs-bar span{display:inline-flex;align-items:center;gap:6px;padding:4px 14px;border-radius:99px;background:#0f2e1ecc;box-shadow:inset 0 0 0 1px #e9c46a88;font:800 15px/1.2 Arial,sans-serif!important;color:#eafbe0!important}
+.pairs-bar b{font:900 17px/1 Arial,sans-serif!important;color:#ffe27a!important}
+.pairs-rules.pairs-quick{max-height:none!important;overflow:visible!important;inset:auto 5% 23%!important}
+.pairs-lobby-host{height:46%!important}
+#main .pairs-screen .pairs-go{background:url(assets/generated/ui-btn-gold.webp) center/100% 100% no-repeat!important;border:0!important;box-shadow:none!important;outline:0!important;color:#5a2a06!important;text-shadow:0 1px 0 #fff6c8!important;min-width:min(15rem,56%)!important;min-height:4rem!important;font:900 clamp(1.2rem,3svh,1.6rem)/1 Georgia,serif!important}
+#main .pairs-screen .pairs-go::before,#main .pairs-screen .pairs-go::after{display:none!important}
+#main .pairs-screen .pairs-go>:is(.gpt-icon,img){display:none}
+/* ===== Dragon Merge polish (user 2026-11-24: "primitive, things overlap at the top; needs a polished look") =====
+   one themed screen: night-teal sky, centred title ribbon with the round back icon, three stat plaques, the nest in a
+   soft glow, a clean control card with painted buttons. */
+body[data-playing=merge] #main{background:radial-gradient(ellipse at 50% 30%,#1f6a5a 0,#0f3a36 55%,#0a2426 100%)!important;padding:10px 12px 12px!important;box-sizing:border-box}
+body[data-playing=merge] #main .topline{position:relative;display:flex!important;align-items:center;justify-content:center;min-height:52px;margin:0 0 8px!important;padding:0!important}
+body[data-playing=merge] #main .topline .eyebrow{display:none}
+body[data-playing=merge] #main .topline h1{margin:0!important;padding:6px 28px 8px;font:900 clamp(22px,4.6vw,34px)/1 Georgia,serif!important;color:#fff8e0!important;text-shadow:0 2px 0 #6a3a10,0 0 14px #ffcf6a!important;background:url(assets/generated/ui-result-ribbon.webp) center/100% 100% no-repeat;min-width:min(78%,420px);text-align:center;box-sizing:border-box}
+body[data-playing=merge] #main .topline .dungeon-back{position:absolute!important;left:0;top:50%;transform:translateY(-50%);width:50px!important;height:50px!important;min-height:0!important;padding:0!important;border:0!important;border-radius:50%!important;background:url(assets/generated/ui-back.webp) center/contain no-repeat!important;box-shadow:none!important;font-size:0!important;color:transparent!important;overflow:hidden}
+body[data-playing=merge] #main .topline .dungeon-back>*{display:none!important}
+body[data-playing=merge] #main .topline .dungeon-back::before,body[data-playing=merge] #main .topline .dungeon-back::after{display:none!important}
+body[data-playing=merge] #hud{display:grid!important;grid-template-columns:repeat(3,1fr);gap:8px!important;margin:0 0 8px!important;padding:0!important;background:none!important;border:0!important;box-shadow:none!important}
+body[data-playing=merge] #hud>*{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:14px;background:linear-gradient(160deg,#2a6a5aee,#14403aee);box-shadow:0 0 0 2px #d9a94a,0 4px 10px #0007,inset 0 1px 0 #ffffff33}
+body[data-playing=merge] #hud .gpt-icon,body[data-playing=merge] #hud img{width:30px;height:30px}
+body[data-playing=merge] #hud strong,body[data-playing=merge] #hud b{font:900 18px/1 Georgia,serif;color:#ffe9a0;text-shadow:0 1px 0 #3a2a06}
+body[data-playing=merge] #hud span,body[data-playing=merge] #hud small{font:800 12px/1.1 Arial,sans-serif!important;letter-spacing:.08em;color:#cff3e6}
+body[data-playing=merge] .canvas-wrap{border-radius:18px;box-shadow:0 0 0 3px #d9a94a,0 0 30px #6affd055,0 12px 24px #000a!important;overflow:hidden;background:none!important;border:0!important}
+body[data-playing=merge] .game-action-dock{margin-top:10px!important;padding:10px!important;border-radius:18px!important;background:linear-gradient(170deg,#1f5a4cf2,#123c34f5)!important;border:0!important;box-shadow:0 0 0 2px #d9a94a,0 10px 20px #0008!important}
+body[data-playing=merge] .next-egg-card{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 6px 8px;border-bottom:1px solid #d9a94a55}
+body[data-playing=merge] .next-egg-card .eyebrow{margin:0;font:800 12px/1 Arial,sans-serif;letter-spacing:.16em;color:#ffe9a0}
+body[data-playing=merge] #main .game-action-dock button{min-height:46px!important;border:0!important;border-radius:23px!important;background:url(assets/generated/ui-btn-violet.webp) center/100% 100% no-repeat!important;box-shadow:none!important;color:#fff!important;font:800 15px/1 Georgia,serif!important;text-shadow:0 2px 0 #3a0a6a!important;outline:0!important}
+body[data-playing=merge] #main .game-action-dock button#dropEgg{background-image:url(assets/generated/ui-btn-gold.webp)!important;color:#5a2a06!important;text-shadow:0 1px 0 #fff6c8!important;font-size:18px!important;min-height:54px!important}
+body[data-playing=merge] #main .game-action-dock button::before,body[data-playing=merge] #main .game-action-dock button::after{display:none!important}
+body[data-playing=merge] #main .game-action-dock button:active{transform:scale(.95);filter:brightness(1.15)}
+body[data-playing=merge] #main .game-action-dock button:disabled{filter:grayscale(.6) brightness(.85)}
+body[data-playing=merge] .canvas-wrap{box-shadow:none!important;overflow:visible;display:flex;justify-content:center}
+body[data-playing=merge] #game{border-radius:18px!important;box-shadow:0 0 0 3px #d9a94a,0 0 30px #6affd055,0 12px 24px #000a!important;border:0!important}
+body[data-playing=merge] #hud strong,body[data-playing=merge] #hud b{font-size:clamp(18px,2.8vw,30px)!important}
+body[data-playing=merge] #hud span,body[data-playing=merge] #hud small{font-size:clamp(12px,1.6vw,17px)!important}
+body[data-playing=merge] #hud .gpt-icon,body[data-playing=merge] #hud img{width:clamp(30px,4vw,44px);height:clamp(30px,4vw,44px)}
+body[data-playing=merge] #main .topline h1{font-size:clamp(22px,4.2vw,44px)!important;min-width:min(70%,520px)}
+body[data-playing=merge] #main .game-action-dock button{font-size:clamp(15px,2vw,22px)!important;min-height:clamp(46px,5.4vw,64px)!important}

@@ -101,19 +101,14 @@ const Cascade = {
 // CASCADE_UI ---------------------------------------------------------------------------------------------------------
 let cascadeLoop = 0;
 function cascadeTile(kind) { return '<i class="cas-gem" style="background-position:' + (kind % 4) / 3 * 100 + '% ' + Math.floor(kind / 4) * 100 + '%"></i>'; }
-function showCascade() { if (typeof screenChangedAt !== "undefined") screenChangedAt = Date.now(); cascadePreload();
+function showCascade() { if (typeof screenChangedAt !== "undefined") screenChangedAt = Date.now(); cascadePreload(); cascadeArtVars();
   cascadeStop();
   const left = Cascade.runsLeft(S);
   $('#main').innerHTML = `<section class="cas-lobby" style="background-image:url('${artPath('cascade-cover')}')">
-    <h1>Crystal Cascade</h1><p class="cas-sub">A magic falling-crystal puzzle</p>
-    <div class="cas-card"><ul>
-      <li>Figures of four magic crystals fall into the well. Move them, turn them, drop them.</li>
-      <li>Fill a whole row and it bursts into sparkling shards. More rows at once, bigger magic: ${Cascade.bursts.slice(1).join(' · ')}</li>
-      <li>Every ten rows the level rises and the crystals fall faster.</li>
-      <li>Score opens chests: ${Cascade.chests.map(c => fmt(c.at)).join(' · ')}.</li>
-      <li>Rewards for ${Cascade.dailyRuns} runs a day: gold (score ÷ 10, up to ${Cascade.goldCap}), XP and the chests you opened.</li>
-      <li>Swipe left or right to move, tap to turn, swipe down to drop. Or use the buttons.</li></ul>
-      <p class="cas-runs">Rewarded runs today: <b>${left} / ${Cascade.dailyRuns}</b> · Best score <b>${fmt(S.cascadeBest || 0)}</b></p>
+    <h1>Crystal Cascade</h1><p class="cas-sub">A Tetris-like crystal puzzle · very easy!</p>
+    <div class="cas-card">
+      <div class="cas-how">${[[0, 'Move'], [1, 'Turn'], [2, 'Drop']].map(([n, t]) => `<span><i class="cas-hico" style="--bp:${casBp(n)}"></i>${t}</span>`).join('')}<span><i class="cas-hrow">${[0, 1, 2, 3].map(cascadeTile).join('')}</i>Fill a row</span></div>
+      <p class="cas-runs">Rewarded runs today <b>${left} / ${Cascade.dailyRuns}</b> · Best <b>${fmt(S.cascadeBest || 0)}</b></p>
       <div class="cas-chestrow">${Cascade.chests.map((c, i) => `<span><i class="cas-chest c${i}"></i><small>${fmt(c.at)}</small></span>`).join('')}</div>
       <button class="cas-play" onclick="openCascade()">${denPlain}Play</button></div>
     <button class="cas-back" data-back onclick="go('games')" aria-label="Back to Mini Games">‹</button></section>`;
