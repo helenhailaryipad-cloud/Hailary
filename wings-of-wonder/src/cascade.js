@@ -119,23 +119,25 @@ function showCascade() { if (typeof screenChangedAt !== "undefined") screenChang
     <button class="cas-back" data-back onclick="go('games')" aria-label="Back to Mini Games">‹</button></section>`;
 }
 function cascadeStop() { if (cascadeLoop) cancelAnimationFrame(cascadeLoop); cascadeLoop = 0; if (game?.cascade) game.running = false; document.removeEventListener('keydown', cascadeKey); }
-function openCascade() { if (typeof screenChangedAt !== "undefined") screenChangedAt = Date.now();
+const casBp = n => `${(n % 4) * 100 / 3}% ${Math.floor(n / 4) * 100}%`;
+function cascadeArtVars() { const r = document.documentElement; if (!r?.style?.setProperty || r.style.getPropertyValue('--cas-pad')) return; r.style.setProperty('--cas-pad', 'url("' + artPath('cascade-pad') + '")'); r.style.setProperty('--cas-stats', 'url("' + artPath('cascade-stats') + '")'); }
+function openCascade() { if (typeof screenChangedAt !== "undefined") screenChangedAt = Date.now(); cascadeArtVars();
   cascadeStop();
-  const stat = (id, label, val) => `<div class="cas-stat"><small>${label}</small><b id="${id}">${val}</b></div>`;
+  const stat = (id, label, val, n) => `<div class="cas-stat"><i class="cas-sico" style="--n:${n}"></i><small>${label}</small><b id="${id}">${val}</b></div>`;
   $('#main').innerHTML = `<section class="cas-screen" style="--cover:url('${artPath('cascade-cover')}')"><div class="cas-motes"></div>
     <div class="cas-top"><button class="cas-back" data-back onclick="cascadeQuit()" aria-label="Back to the lobby">‹</button>
-      <h1>Crystal Cascade</h1><button class="cas-pause" id="casPause" onclick="cascadePause()" aria-label="Pause">${denPlain}❚❚</button></div>
+      <h1>Crystal Cascade</h1><button class="cas-pause" id="casPause" onclick="cascadePause()" style="--bp:${casBp(5)}" aria-label="Pause">${denPlain}</button></div>
     <div class="cas-main">
-      <div class="cas-col">${stat('casScore', 'Score', 0)}<div class="cas-stat"><small>Level</small><b id="casLevel">1</b><i class="cas-lvbar"><u id="casLvBar"></u></i></div>${stat('casLines', 'Rows', 0)}${stat('casBest', 'Best', fmt(S.cascadeBest || 0))}</div>
+      <div class="cas-col">${stat('casScore', 'Score', 0, 0)}<div class="cas-stat"><i class="cas-sico" style="--n:1"></i><small>Level</small><b id="casLevel">1</b><i class="cas-lvbar"><u id="casLvBar"></u></i></div>${stat('casLines', 'Rows', 0, 2)}${stat('casBest', 'Best', fmt(S.cascadeBest || 0), 3)}</div>
       <div class="cas-well" id="casWell"><div class="cas-frame"><canvas id="casCanvas"></canvas></div><div class="cas-pops" id="casPops"></div></div>
       <div class="cas-col"><div class="cas-stat cas-nextbox"><small>Next</small><canvas id="casNext"></canvas></div>
         <div class="cas-stat"><small>Chests</small><div class="cas-chests">${Cascade.chests.map((c, i) => `<span id="casChest${i}"><i class="cas-chest c${i}"></i><b>${fmt(c.at)}</b></span>`).join('')}</div></div></div>
     </div>
-    <div class="cas-pad"><button data-act="left" aria-label="Move left">${denPlain}◀</button><button data-act="rot" aria-label="Turn">${denPlain}⟳</button><button data-act="hard" class="drop" aria-label="Drop">${denPlain}⤓</button><button data-act="soft" aria-label="Fall faster">${denPlain}▼</button><button data-act="right" aria-label="Move right">${denPlain}▶</button></div>
+    <div class="cas-pad">${[['left', 0, 'Move left'], ['rot', 1, 'Turn'], ['hard', 2, 'Drop'], ['soft', 4, 'Fall faster'], ['right', 3, 'Move right']].map(([act, n, label]) => `<button data-act="${act}" class="${act === 'hard' ? 'drop' : ''}" style="--bp:${casBp(n)}" aria-label="${label}">${denPlain}</button>`).join('')}</div>
   </section>`;
   startCascade();
 }
-function cascadePause() { const g = game; if (!g?.cascade || g.state.over) return; g.paused = !g.paused; $('#casPause').textContent = g.paused ? '▶' : '❚❚'; $('#casWell')?.classList.toggle('paused', g.paused); }
+function cascadePause() { const g = game; if (!g?.cascade || g.state.over) return; g.paused = !g.paused; $('#casPause').style.setProperty('--bp', casBp(g.paused ? 6 : 5)); $('#casWell')?.classList.toggle('paused', g.paused); }
 function cascadeQuit() { const g = game; if (g?.cascade && !g.state.over && g.state.score > 0) { if (!confirm('Leave this run? It counts as finished.')) return; cascadeFinish(g, true); return; } cascadeStop(); showCascade(); }
 function cascadeKey(e) {
   const g = game; if (!g?.cascade || g.state.over) return; const k = e.key;
@@ -154,6 +156,8 @@ function cascadePop(text, cls = '') {
   const now = performance.now(), wait = Math.max(0, cascadePopAt - now); cascadePopAt = now + wait + 750;
   setTimeout(() => { const box = $('#casPops'); if (!box) return; for (const old of box.querySelectorAll('.cas-pop')) old.classList.add('leave'); const el = document.createElement('div'); el.className = 'cas-pop ' + cls; el.innerHTML = text; box.appendChild(el); setTimeout(() => el.remove(), 1700); }, wait);
 }
+// A finger held still on the well: wait, then one row every CASCADE_HOLD_MS.
+const CASCADE_HOLD_WAIT = 220, CASCADE_HOLD_MS = 38, CASCADE_SWEEP = 3.2;
 const CASCADE_HUES = ['#ff5a4a', '#4fa8ff', '#4fd87a', '#b77aff', '#ffcf3a', '#3fe0d8', '#ff8ac8'];
 // React to what the rules report: shards and rings for bursts, pop-ups, chests.
 function cascadeEvents(g) {
@@ -166,6 +170,10 @@ function cascadeEvents(g) {
         g.sparks.push({ x: x + .5, y: y + .5, life: .6, hue: CASCADE_HUES[kind] });
       }
       g.rings.push(...e.rows.map(y => ({ y: y + .5, life: .7 })));
+      g.beams.push(...e.rows.map((y, i) => ({ y: y + .5, life: .6 + i * .05, max: .6 + i * .05, big: e.count })));
+      for (const [n, y] of e.rows.entries()) for (let x = 0; x < Cascade.cols; x++) for (let m = 0; m < 4; m++) g.motes.push({ x: x + Math.random(), y: y + Math.random(), vx: (Math.random() - .5) * 3, vy: -2 - Math.random() * 5, life: .8 + Math.random() * .7, max: 1.5, hue: CASCADE_HUES[e.cells[n][x]] });
+      if (e.count >= 3) g.rays = { y: (e.rows[0] + e.rows[e.rows.length - 1]) / 2 + .5, life: 1.1, max: 1.1 };
+      g.whiteout = Math.max(g.whiteout || 0, e.count >= 4 ? .45 : e.count >= 2 ? .2 : .1);
       g.flashRows = e.rows.map(y => ({ y, life: .35 }));
       g.shake = Math.max(g.shake, e.count >= 3 ? .45 : .2);
       cascadePop('<b>' + e.name + '</b>', 'burst b' + e.count);
@@ -181,7 +189,7 @@ function cascadeEvents(g) {
   }
 }
 function startCascade() {
-  const g = game = { cascade: true, running: true, state: Cascade.create(), shards: [], sparks: [], rings: [], flashRows: [], shake: 0, countdown: 2.4, turnFx: 0 };
+  const g = game = { cascade: true, running: true, state: Cascade.create(), shards: [], sparks: [], rings: [], flashRows: [], beams: [], motes: [], rays: null, whiteout: 0, shake: 0, countdown: 2.4, turnFx: 0 };
   const canvas = $('#casCanvas'), next = $('#casNext'), well = $('#casWell'), frameBox = well, tiles = new Image(); tiles.src = artPath('cascade-tiles');
   const fit = () => {
     const box = well.getBoundingClientRect(), cell = Math.floor(Math.min((box.width - 18) / Cascade.cols, (box.height - 18) / Cascade.rows)), dpr = Math.min(2.5, devicePixelRatio || 1);
@@ -191,14 +199,21 @@ function startCascade() {
   fit(); g.fit = fit;
   // Touch: a tap turns, a sideways drag moves one cell per cell width, a quick swipe down drops, a slow drag down falls faster.
   let touch = null;
-  well.onpointerdown = e => { touch = { x: e.clientX, y: e.clientY, t: performance.now(), moved: 0, down: 0 }; well.setPointerCapture?.(e.pointerId); };
+  // Holding a finger still on the well (user: "when I hold, it should go down faster") makes the piece fall fast until
+  // the finger lifts; a hold never turns the piece.
+  const holdEnd = () => { if (touch) { clearTimeout(touch.hold); clearInterval(touch.rep); } };
+  well.onpointerdown = e => { e.preventDefault(); holdEnd(); touch = { x: e.clientX, y: e.clientY, t: performance.now(), moved: 0, down: 0, held: false };
+    touch.hold = setTimeout(() => { if (!touch || touch.moved) return; touch.held = true; touch.rep = setInterval(() => cascadeAct('soft'), CASCADE_HOLD_MS); }, CASCADE_HOLD_WAIT);
+    well.setPointerCapture?.(e.pointerId); };
   well.onpointermove = e => {
     if (!touch || !g.cell) return; const dx = e.clientX - touch.x, dy = e.clientY - touch.y;
+    if (Math.abs(dx) > 12 && !touch.held) clearTimeout(touch.hold);
     while (Math.abs(dx - touch.moved * g.cell) >= g.cell * .9) { const step = dx > touch.moved * g.cell ? 1 : -1; touch.moved += step; cascadeAct(step > 0 ? 'right' : 'left'); }
     while (dy - touch.down * g.cell >= g.cell && Math.abs(dy) > Math.abs(dx)) { touch.down++; cascadeAct('soft'); }
   };
+  well.onpointercancel = () => { holdEnd(); touch = null; };
   well.onpointerup = e => {
-    if (!touch) return; const dx = e.clientX - touch.x, dy = e.clientY - touch.y, ms = performance.now() - touch.t;
+    if (!touch) return; holdEnd(); if (touch.held) { touch = null; return; } const dx = e.clientX - touch.x, dy = e.clientY - touch.y, ms = performance.now() - touch.t;
     if (Math.abs(dx) < 10 && Math.abs(dy) < 10 && ms < 300) cascadeAct('rot');
     else if (dy > 60 && dy > Math.abs(dx) * 1.5 && ms < 260) cascadeAct('hard');
     touch = null;
@@ -206,8 +221,9 @@ function startCascade() {
   // Buttons: left / right / soft repeat while held.
   for (const b of document.querySelectorAll('.cas-pad button')) {
     const act = b.dataset.act; let rep = 0;
-    b.onpointerdown = e => { e.preventDefault(); cascadeAct(act); if (act === 'left' || act === 'right' || act === 'soft') { clearInterval(rep); let n = 0; rep = setInterval(() => { if (++n > 3) cascadeAct(act); }, 55); } };
-    b.onpointerup = b.onpointerleave = b.onpointercancel = () => clearInterval(rep);
+    b.onpointerdown = e => { e.preventDefault(); b.classList.add('held'); cascadeAct(act); if (act === 'left' || act === 'right' || act === 'soft') { clearInterval(rep); const ms = act === 'soft' ? CASCADE_HOLD_MS : 55, wait = Math.ceil(220 / ms); let n = 0; rep = setInterval(() => { if (++n > wait) cascadeAct(act); }, ms); } };
+    b.onpointerup = b.onpointerleave = b.onpointercancel = () => { clearInterval(rep); b.classList.remove('held'); };
+    b.oncontextmenu = e => e.preventDefault();
   }
   document.addEventListener('keydown', cascadeKey);
   cascadePop('Ready!', 'level');
@@ -243,8 +259,9 @@ function cascadeDraw(g, canvas, next, tiles, dt) {
   for (let i = 0; i < 12; i++) { c.rotate(Math.PI / 6); c.beginPath(); c.moveTo(W * .34, 0); c.lineTo(W * .42, 0); c.stroke(); } c.restore();
   c.fillStyle = 'rgba(255,255,255,.035)'; for (let y = 0; y < Cascade.rows; y++) for (let x = 0; x < Cascade.cols; x++) if ((x + y) % 2 === 0) c.fillRect(x * k, y * k, k, k);
   const high = s.grid.findIndex(r => r.some(v => v >= 0)); if (high >= 0 && high < 5 && !s.over) { const a = (5 - high) / 5 * (.35 + .25 * Math.sin(now * 6)); const dg = c.createLinearGradient(0, 0, 0, k * 4); dg.addColorStop(0, `rgba(255,70,90,${a})`); dg.addColorStop(1, 'rgba(255,70,90,0)'); c.fillStyle = dg; c.fillRect(0, 0, W, k * 4); }
-  // settled crystals
-  for (let y = 0; y < Cascade.rows; y++) for (let x = 0; x < Cascade.cols; x++) { const v = s.grid[y][x]; if (v >= 0) cascadeGem(c, tiles, v, x * k, y * k, k, s.over ? .55 : 1); }
+  // settled crystals (lit cells are collected for the light sweep below)
+  const lit = [];
+  for (let y = 0; y < Cascade.rows; y++) for (let x = 0; x < Cascade.cols; x++) { const v = s.grid[y][x]; if (v >= 0) { cascadeGem(c, tiles, v, x * k, y * k, k, s.over ? .55 : 1); lit.push([x * k, y * k]); } }
   // ghost and falling piece
   if (!s.over && s.piece) {
     const cells = Cascade.cells(s.piece.kind, s.piece.rot), gy = Cascade.ghost(s);
@@ -255,18 +272,44 @@ function cascadeDraw(g, canvas, next, tiles, dt) {
     c.fillStyle = lb; c.fillRect((s.piece.x + minX) * k, (s.piece.y + 1) * k, (maxX - minX + 1) * k, Math.max(0, gy - s.piece.y) * k);
     const glow = .5 + .5 * Math.sin(performance.now() / 160);
     c.save(); c.shadowColor = CASCADE_HUES[s.piece.kind]; c.shadowBlur = k * (.35 + glow * .35);
-    for (const [cx, cy] of cells) if (s.piece.y + cy >= 0) cascadeGem(c, tiles, s.piece.kind, (s.piece.x + cx) * k, (s.piece.y + cy) * k, k);
+    for (const [cx, cy] of cells) if (s.piece.y + cy >= 0) { cascadeGem(c, tiles, s.piece.kind, (s.piece.x + cx) * k, (s.piece.y + cy) * k, k); lit.push([(s.piece.x + cx) * k, (s.piece.y + cy) * k]); }
     c.restore();
   }
-  // burst effects: row flash, rings, sparks, flying shards
-  for (const f of g.flashRows) { f.life -= dt; c.fillStyle = `rgba(255,250,220,${Math.max(0, f.life / .35) * .85})`; c.fillRect(0, f.y * k, W, k); }
+  // Light sweeping across the crystals (user: "light should pass over them"): a bright diagonal band, clipped to the
+  // occupied cells, crosses the well every CASCADE_SWEEP seconds; a few crystals twinkle.
+  if (lit.length && !s.over) {
+    const ux = .876, uy = .482, D = W * ux + H * uy, bw = k * 1.6, pos = (now % CASCADE_SWEEP) / CASCADE_SWEEP * (D + bw * 4) - bw * 2;
+    const sg = c.createLinearGradient(ux * (pos - bw), uy * (pos - bw), ux * (pos + bw), uy * (pos + bw));
+    sg.addColorStop(0, 'rgba(255,255,255,0)'); sg.addColorStop(.42, 'rgba(255,250,230,.16)'); sg.addColorStop(.5, 'rgba(255,255,255,.55)'); sg.addColorStop(.58, 'rgba(255,250,230,.16)'); sg.addColorStop(1, 'rgba(255,255,255,0)');
+    c.save(); c.beginPath(); for (const [x, y] of lit) c.rect(x + k * .05, y + k * .05, k * .9, k * .9); c.clip(); c.globalCompositeOperation = 'lighter'; c.fillStyle = sg; c.fillRect(0, 0, W, H); c.restore();
+    g.twinkles = (g.twinkles || []).filter(t => (t.life -= dt) > 0);
+    if (Math.random() < dt * 3 && g.twinkles.length < 6) { const [x, y] = lit[Math.floor(Math.random() * lit.length)]; g.twinkles.push({ x: x + k * (.25 + Math.random() * .5), y: y + k * (.2 + Math.random() * .4), life: .7 }); }
+    c.save(); c.globalCompositeOperation = 'lighter';
+    for (const t of g.twinkles) { const a = Math.sin(t.life / .7 * Math.PI), r = k * .32 * a; c.fillStyle = `rgba(255,255,255,${a * .9})`; c.beginPath(); for (let i = 0; i < 8; i++) { const an = i * Math.PI / 4, rr = i % 2 ? r * .18 : r; c.lineTo(t.x + Math.cos(an) * rr, t.y + Math.sin(an) * rr); } c.fill(); }
+    c.restore();
+  }
+  // burst effects (user: "rows should burst with beautiful light"): a beam of light runs out from the middle of the
+  // row, the row glows white, glowing motes rise, rays fan out on three or more rows, the well flashes.
+  c.save(); c.globalCompositeOperation = 'lighter';
+  for (const b of g.beams) { b.life -= dt; const t = 1 - b.life / b.max, reach = Math.min(1, t * 3.2), a = Math.max(0, b.life / b.max), y = b.y * k, hh = k * (.55 + (b.big - 1) * .12) * (1 - t * .6);
+    const hg = c.createLinearGradient(W / 2 - W * .6 * reach, 0, W / 2 + W * .6 * reach, 0); hg.addColorStop(0, 'rgba(255,240,200,0)'); hg.addColorStop(.5, `rgba(255,255,255,${a})`); hg.addColorStop(1, 'rgba(255,240,200,0)');
+    const vg = c.createLinearGradient(0, y - hh * 2.4, 0, y + hh * 2.4); vg.addColorStop(0, 'rgba(255,200,255,0)'); vg.addColorStop(.5, `rgba(255,220,150,${a * .55})`); vg.addColorStop(1, 'rgba(160,200,255,0)');
+    c.fillStyle = vg; c.fillRect(0, y - hh * 2.4, W, hh * 4.8); c.fillStyle = hg; c.fillRect(0, y - hh / 2, W, hh);
+    c.fillStyle = `rgba(255,255,255,${a})`; c.fillRect(W / 2 - W * .55 * reach, y - k * .05, W * 1.1 * reach, k * .1); }
+  g.beams = g.beams.filter(b => b.life > 0);
+  if (g.rays) { const r = g.rays; r.life -= dt; const a = Math.max(0, r.life / r.max); c.save(); c.translate(W / 2, r.y * k); c.rotate(now * .9); for (let i = 0; i < 14; i++) { c.rotate(Math.PI / 7); const rg = c.createLinearGradient(0, 0, 0, -H); rg.addColorStop(0, `rgba(255,240,190,${a * .55})`); rg.addColorStop(1, 'rgba(255,240,190,0)'); c.fillStyle = rg; c.beginPath(); c.moveTo(-k * .35, 0); c.lineTo(0, -H); c.lineTo(k * .35, 0); c.fill(); } c.restore(); if (r.life <= 0) g.rays = null; }
+  for (const m of g.motes) { m.life -= dt; m.vy -= 1.5 * dt; m.x += m.vx * dt; m.y += m.vy * dt; const a = Math.max(0, Math.min(1, m.life / .5)), rr = k * .22 * (.6 + a * .6); const mg = c.createRadialGradient(m.x * k, m.y * k, 0, m.x * k, m.y * k, rr); mg.addColorStop(0, `rgba(255,255,255,${a})`); mg.addColorStop(.35, m.hue + 'cc'); mg.addColorStop(1, m.hue + '00'); c.fillStyle = mg; c.beginPath(); c.arc(m.x * k, m.y * k, rr, 0, Math.PI * 2); c.fill(); }
+  g.motes = g.motes.filter(m => m.life > 0);
+  c.restore();
+  for (const f of g.flashRows) { f.life -= dt; const a = Math.max(0, f.life / .35); const fg = c.createLinearGradient(0, f.y * k, 0, (f.y + 1) * k); fg.addColorStop(0, `rgba(255,255,255,${a * .5})`); fg.addColorStop(.5, `rgba(255,252,235,${a})`); fg.addColorStop(1, `rgba(255,255,255,${a * .5})`); c.fillStyle = fg; c.fillRect(0, f.y * k, W, k); }
   g.flashRows = g.flashRows.filter(f => f.life > 0);
   for (const r of g.rings) { r.life -= dt; const t = 1 - r.life / .7; c.strokeStyle = `rgba(255,236,160,${Math.max(0, r.life / .7)})`; c.lineWidth = k * .18 * (1 - t) + 1; c.beginPath(); c.ellipse(W / 2, r.y * k, W * (.2 + t * .7), k * (.4 + t * 1.6), 0, 0, Math.PI * 2); c.stroke(); }
   g.rings = g.rings.filter(r => r.life > 0);
   for (const p of g.sparks) { p.life -= dt; const t = 1 - p.life / .6; c.fillStyle = p.hue; c.globalAlpha = Math.max(0, p.life / .6); c.beginPath(); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, rr = (i % 2 ? .25 : .9) * k * (.4 + t); c.lineTo(p.x * k + Math.cos(a) * rr, p.y * k + Math.sin(a) * rr); } c.fill(); c.globalAlpha = 1; }
   g.sparks = g.sparks.filter(p => p.life > 0);
-  for (const p of g.shards) { p.life -= dt; p.vy += 22 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.vr * dt; const sz = p.size * k; c.save(); c.translate(p.x * k, p.y * k); c.rotate(p.rot); cascadeGem(c, tiles, p.kind, -sz / 2, -sz / 2, sz, Math.max(0, Math.min(1, p.life))); c.restore(); }
+  for (const p of g.shards) { p.life -= dt; p.vy += 22 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.vr * dt; const sz = p.size * k; c.save(); c.translate(p.x * k, p.y * k); c.rotate(p.rot); c.shadowColor = CASCADE_HUES[p.kind]; c.shadowBlur = k * .4; cascadeGem(c, tiles, p.kind, -sz / 2, -sz / 2, sz, Math.max(0, Math.min(1, p.life))); c.restore(); }
   g.shards = g.shards.filter(p => p.life > 0 && p.y < Cascade.rows + 4);
+  if (g.whiteout > 0) { g.whiteout = Math.max(0, g.whiteout - dt); c.fillStyle = `rgba(255,250,235,${g.whiteout * .9})`; c.fillRect(0, 0, W, H); }
   if (g.slam) { g.slam.life -= dt; c.fillStyle = `rgba(255,255,255,${Math.max(0, g.slam.life) * 1.2})`; c.fillRect(0, H - k * .2, W, k * .2); if (g.slam.life <= 0) g.slam = null; }
   if (g.countdown > 0) { c.fillStyle = 'rgba(10,6,30,.45)'; c.fillRect(0, 0, W, H); c.fillStyle = '#ffe9a0'; c.font = `900 ${k * 2.6}px Georgia,serif`; c.textAlign = 'center'; c.fillText(String(Math.ceil(g.countdown / .8)), W / 2, H / 2 + k); }
   // next three

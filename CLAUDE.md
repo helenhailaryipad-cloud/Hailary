@@ -113,6 +113,13 @@ global `#main button` rules set position, borders and `::before`.
   checker cells in the well, a landing beam and filled ghost, a red glow when the stack nears the top, drifting motes.
   Level 1 falls slower (1 s a row, `speed`) and deals only the simple shapes (`easyShapes`: beam, square, crown, two
   hooks); the zig-zag steps join from level 2.
+- Crystal Cascade third pass (2026-11-24, user: "ugly buttons, the page gets selected when I hold, boring squares, rows
+  do not burst"): painted pad buttons and pause / play (atlas `cascade-pad` 4 x 2, position set inline as `--bp` by
+  `casBp(n)`), stat plaques with painted icons (`cascade-stats`: star, crown, bars, trophy), new 3D tiles (old ones kept
+  as `art-source/cascade/tiles-v1.webp`); a light sweep runs across the stack. A finger held still on the well for
+  220 ms makes the piece fall fast (`CASCADE_HOLD_*`), the Fall-faster button repeats as fast; no text selection or
+  callout on the screen (`user-select`, `touch-action:none` on well and pad). Bursts: a light beam along each row,
+  rising motes, rays for 3+ rows, white flash. Sources `art-source/cascade/{pad,stats,tiles}.webp`.
 - Harvest Pairs third pass: new clean cover (basket on a soft garden) and lobby background (empty terrace, no painted
   person; the live Reina portrait stands on it); the 3-2-1 dial is a centred CSS dial (`.pairs-dial`); the field has
   soft light, a faint cell lattice and an inner frame instead of flat green.

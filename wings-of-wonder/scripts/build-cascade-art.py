@@ -49,3 +49,15 @@ jt = Image.open("scripts/art-source/trek/cover.webp").convert("RGB").resize((960
 # Fishing mini-game cover (art-source/fishing/cover.webp).
 fc = Image.open("scripts/art-source/fishing/cover.webp").convert("RGB").resize((960, 640), Image.Resampling.LANCZOS); save(fc, "cover-fishing", 80)
 el=Image.open("scripts/art-source/fashion/elite-hall.webp").convert("RGB").resize((720,1080),Image.Resampling.LANCZOS); save(el,"elite-hall",78)  # Fashion Elite Sale hall
+
+# Control buttons (user: "the buttons at the bottom are ugly, redraw them"): 4 x 2 sheet of round gem buttons:
+# left, turn, drop, right / fall faster, pause, play, star -> cascade-pad (192 px cells).
+def cells(src, cols, rows, T, pad=8):
+    sh = Image.open(src).convert('RGBA'); cw, ch = sh.width//cols, sh.height//rows; at = Image.new('RGBA', (cols*T, rows*T))
+    for n in range(cols*rows):
+        g = trimmed(sh.crop(((n % cols)*cw, (n//cols)*ch, (n % cols+1)*cw, (n//cols+1)*ch))); g.thumbnail((T-pad, T-pad), Image.Resampling.LANCZOS)
+        at.alpha_composite(g, ((n % cols)*T+(T-g.width)//2, (n//cols)*T+(T-g.height)//2))
+    return at
+save(cells(SRC/'pad.webp', 4, 2, 192), 'cascade-pad')
+# Score / Level / Rows / Best icons: star, crown, crystal bars, trophy -> cascade-stats (160 px cells).
+save(cells(SRC/'stats.webp', 4, 1, 160, 12), 'cascade-stats')
