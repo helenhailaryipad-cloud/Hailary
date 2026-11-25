@@ -177,6 +177,7 @@ function vowState() {
     else for (const [k, n] of Object.entries(rest)) WonderGear.bagAdd(S, k, n);
     if (WonderGear.socialNote) WonderGear.socialNote(S, 'Blossom Vow: ranking reward (' + label + ') sent by mail.');
     if (typeof toast === 'function') toast('Blossom Vow reward (' + label + ') sent by mail');
+    if (due.rank === 1 && typeof titleGrant === 'function') titleGrant('sweetheart');
   }
   S.vow = v; return v;
 }

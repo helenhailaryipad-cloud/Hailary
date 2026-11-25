@@ -434,6 +434,7 @@ function stats(save){const b=bonuses(save);
  for(const [key,n] of Object.entries(guildBonus(save)))b[key]=(b[key]||0)+n;
  for(const [key,n] of Object.entries(supremeBonus(save)))b[key]=(b[key]||0)+n;
  if(typeof Rites!=='undefined')for(const [key,n] of Object.entries(Rites.bonus(save)))b[key]=(b[key]||0)+n;
+ if(typeof Titles!=='undefined')for(const [key,n] of Object.entries(Titles.bonus(save)))b[key]=(b[key]||0)+n;
  if(typeof Vow!=='undefined')for(const [key,n] of Object.entries(Vow.bonus(save)))b[key]=(b[key]||0)+n;
  if(typeof Talents!=='undefined')for(const [key,n] of Object.entries(Talents.bonus(save)))b[key]=(b[key]||0)+n;
  const cards=globalThis.MoonwaterFish.totals(save.fishCards);
