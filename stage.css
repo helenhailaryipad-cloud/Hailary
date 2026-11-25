@@ -10495,3 +10495,5 @@ html body #stage #main .city-hud .city-left-events{top:12.2%}
 #stage .city-hud .city-gacha b{font-size:max(9px,1.75cqw);line-height:1}
 #stage .city-hud .city-gacha em{font-size:max(7.5px,1.35cqw)}
 #stage .city-hud .city-gacha .cg-free{top:3%;right:3%;padding:1px 5px;font-size:max(7px,1.25cqw)}
+/* Character page wings: the starter wing picture has its root at 70% of its height; lift it to the shoulder blades. */
+.reina-display .reina-sheet-wings{inset:-3% 9% 43%}
