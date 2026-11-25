@@ -426,6 +426,17 @@ pulls in today's"). Own name, art and wording. The home promo `snow` is now "Wis
   courier mascot) -> `wishwell-bg`, `wishwell-coin` by `scripts/build-wishwell-art.py`; chat preview packs `wishwell-*`.
   Hosted bundle 33,466,934 bytes (~87 KB spare). All numbers are placeholders.
 
+## Daily Blessings: sign-in calendar (2026-11-25)
+User photos of the reference's Daily Check-in behind its "benefits" home icon. The icon is now "Blessings" (screen
+`blessings`, `src/checkin.js`: rules `Blessings`, pure, `node scripts/test-checkin.mjs`; UI below `CHECKIN_UI`).
+- 30-day calendar (`Blessings.days`, cycle of 30 UTC days from `anchor`), one claim per UTC day (a missed day does not
+  lose anything, the calendar moves on one per sign-in); milestone chests at 2 / 7 / 14 / 21 / 28 sign-ins.
+- Blessing Pass (300 prisms, never real money; the reference's SVIP x2 marks): doubles the days marked "Pass ×2" for
+  the cycle, marked days already claimed are paid once more at purchase. Optional save field `S.blessings {cycle, n,
+  last, got[], pass}` (`Blessings.valid`). The reference's SVIP Pack tab is not built (no VIP system).
+- Art: `art-source/blessings/banner.webp` (cliff garden, blank signboard with the title over it, original baby-owl
+  mascot) -> `blessings-banner` by `scripts/build-blessings-art.py`; chat preview packs `blessings-*`.
+
 ## Wayfarer Quests: daily tasks (2026-11-23)
 User: "the core is grind + gacha: every day a set amount of everything, a small CP rise, and a bit of excitement",
 then three photos of the reference's Adventure Quest (task list paying adventure EXP and a few gacha tickets, chest
