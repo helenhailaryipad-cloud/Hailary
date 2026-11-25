@@ -34,6 +34,6 @@ save(Image.open(SRC/'banner.webp').convert('RGB').resize((900, 600), Image.Resam
 TILE = 160; atlas = Image.new('RGBA', (4*TILE, 3*TILE))
 for n in range(9):
     a = np.array(Image.open(SRC/f'icon-{n}.webp').convert('RGBA')); a[..., 3] = np.where(a[..., 3] < 24, 0, a[..., 3]); a[a[..., 3] == 0] = 0
-    cut = Image.fromarray(a); cut = cut.crop(cut.getbbox()); cut.thumbnail((TILE-14, TILE-14), Image.Resampling.LANCZOS)
+    cut = Image.fromarray(a); cut = cut.crop(cut.getbbox()); cut.thumbnail((TILE-36, TILE-36), Image.Resampling.LANCZOS)  # wide clear gutter: small icons never show a neighbour
     atlas.alpha_composite(cut, ((n % 4)*TILE+(TILE-cut.width)//2, (n//4)*TILE+(TILE-cut.height)//2))
 save(atlas, 'comp-social-icons', 88, 55)

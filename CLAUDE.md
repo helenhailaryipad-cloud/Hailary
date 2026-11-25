@@ -1064,7 +1064,8 @@ There are no other players: every person is an AI adventurer and is labelled "AI
 - Art (image model): `art-source/social/banner.webp` + one painting per icon `icon-0..8.webp` (user: "polish them,
   nothing cut off"; the old grid sheet `icons.webp` carried slivers of neighbours) -> `comp-social-banner`,
   `comp-social-icons` (4 x 3: flowers, heart, empty heart, letter, open letter, note, chat bubble, gift, friends ledger
-  for Management) by `scripts/build-social-art.py`. The Friends action bar shows them in gold-rimmed discs.
+  for Management) by `scripts/build-social-art.py`; every tile keeps an 18 px clear gutter so small icons (hearts) never
+  show a neighbour on the iPad. The Friends action bar shows them in gold-rimmed discs.
 - Chat sheet (second pass, four photos of the reference's chat): tapping the home strip slides a sheet up over the
   home screen (`chatSheetOpen`, `.chat-sheet.over`, ⌄ closes; the room's Chat page shows the same sheet `.in-room`).
   Channels in a column on the left: System (read-only; `socialNote(s,text)` adds her events: dungeon victories,

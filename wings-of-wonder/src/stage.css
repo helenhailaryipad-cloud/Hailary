@@ -9926,3 +9926,8 @@ body[data-screen=games] #stage #main .mg-grid>.mg-tile{width:calc((100% - 30px)/
 /* Friends action bar (user: "clearer icons, without bits of the others"): the atlas was painted over the padding ring
    too, so neighbouring icons showed at the edges; the atlas is now clipped to the content box, the disc is its own layer. */
 .soc-actions .soc-ico{width:min(12cqw,11cqh)!important;padding:1.5cqw!important;border-radius:50%;background-image:var(--soc-icons),radial-gradient(circle at 50% 35%,#3f6fae,#1c3a6e 70%,#14285a)!important;background-size:400% 300%,100% 100%!important;background-origin:content-box,border-box!important;background-clip:content-box,border-box!important;background-repeat:no-repeat!important;background-color:transparent!important;box-shadow:inset 0 0 0 2px #f3d27a,inset 0 0 0 4px #6b4a12,inset 0 3px 8px #ffffff33,0 3px 6px #0007}
+/* Social icons: the atlas has an 18 px clear gutter per tile, so the drawn icon is 77% of a tile; scale small ones up. */
+.soc-hearts .soc-ico,.soc-half{width:5.4cqw}
+.soc-round .soc-ico{width:86%}
+.soc-actions .soc-ico{padding:.7cqw!important}
+.soc-nav .soc-ico{width:8.4cqw}
