@@ -250,7 +250,8 @@ together with its screen.
 Star Rites on the home screen (user: "the gacha must be shown on the main screen"): instead of a small promo icon, a
 big card under the promotions on the left (`homeGacha()`, `.city-gacha`): the running rite's wings, its name, time
 left, a pulsing border in the rite's colour, a turning light, and a red "Free pull!" badge while today's free pull is
-unused. It opens `rites`.
+unused. It opens `rites`. Smaller since 2026-11-25 (user: "it must not cover the three pets and her footsteps"): 18% wide,
+ends before pet slot 1 (~20%), wings on top, name and "Nh left" under them.
 
 ## Home profile plate (2026-11-25)
 User circled the old top-left status (round avatar, bar, "2,579 / Lv. 1 · Peace"): "awful, draw it". One painted plate

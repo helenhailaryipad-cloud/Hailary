@@ -10486,3 +10486,12 @@ html body #stage .city-hud .city-rank{left:36%}
 html body #stage .city-hud button.city-status.pf2{width:30.5%;top:.8%}
 html body #stage .city-hud .city-rank{left:32.5%}
 html body #stage #main .city-hud .city-left-events{top:12.2%}
+/* Smaller gacha card (user: "it must not cover the three pets around her and her footsteps; make the gacha smaller"):
+   ends at 19% of the width (pet slot 1 starts at ~20%), wings on top, a short line under them. */
+#stage .city-hud .city-gacha{left:1%;top:49%;width:18%;aspect-ratio:1.08;border-radius:12px}
+#stage .city-hud .city-gacha img{left:0;top:-2%;width:100%;height:70%}
+#stage .city-hud .city-gacha>span{left:4%;right:4%;bottom:5%;align-items:center;text-align:center}
+#stage .city-hud .city-gacha small{display:none}
+#stage .city-hud .city-gacha b{font-size:max(9px,1.75cqw);line-height:1}
+#stage .city-hud .city-gacha em{font-size:max(7.5px,1.35cqw)}
+#stage .city-hud .city-gacha .cg-free{top:3%;right:3%;padding:1px 5px;font-size:max(7px,1.25cqw)}
