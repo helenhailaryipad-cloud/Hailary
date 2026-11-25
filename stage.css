@@ -10622,3 +10622,15 @@ html body #stage #main .cloud-war .cloud-carnage .cloud-open b{color:#1a8a3a}
 html body #stage .cloud-pill{background:linear-gradient(#fffdf6ee,#f3ead2ee)!important;color:#1d3358!important;box-shadow:0 2px 6px #1a4a8a33!important}
 html body #stage .cloud-pill b{color:#8a4a00!important}html body #stage .cloud-pill small{color:#1d3358!important}
 html body #stage #main .cloud-war .cloud-carnage .cloud-open b{color:#1a8a3a!important}
+/* Possible rewards as identical tiles (user: "the same, not motley"): same square, same gold rim, icon centred,
+   chance in the corner, no names. */
+#stage #modal .cloud-city .city-kill .bag-gains{gap:8px!important}
+#stage #modal .cloud-city .city-kill .bag-gain.loot-maybe{width:58px!important;height:58px!important;padding:0!important;display:grid!important;place-items:center;border-radius:10px!important;background:linear-gradient(#fffaf0,#ffe9bd)!important;border:2px solid #e2b04a!important}
+#stage #modal .cloud-city .city-kill .bag-gain.loot-maybe .bag-ico{width:42px!important;height:42px!important;margin:0!important}
+#stage #modal .cloud-city .city-kill .bag-gain.loot-maybe b{position:absolute!important;right:-4px!important;top:-6px!important;bottom:auto!important;left:auto!important;transform:none!important;font-size:10px!important}
+/* the foreign-city note was yellow on light blue */
+#modal .cloud-city .cloud-foreign{color:#7a2a10!important;background:#fff6e0cc!important;border-radius:8px;font-size:12px!important;padding:4px 8px!important;text-shadow:none!important}
+/* keep Go on screen on the iPad */
+#stage #modal .cloud-city .portal-defenders[data-terrain]{width:min(100%,52dvh,560px)!important}
+@media (max-height:820px){#stage #modal .cloud-city .portal-defenders[data-terrain]{width:min(100%,49dvh)!important}}
+#stage #modal .cloud-city .city-go:disabled{background:linear-gradient(#f1ece0,#d9d1bd)!important;border:2px solid #c9b98f!important;color:#8a7a5a!important;box-shadow:none!important;opacity:1!important}
