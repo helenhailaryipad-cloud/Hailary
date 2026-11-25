@@ -20,4 +20,12 @@ s.wishwell.coins = 1000; t(W.buy(s, 'next', T1).ok && W.left(s, W.wares[0], T1) 
 for (let i = 0; i < 20; i++) W.buy(s, 'next', T1); t(W.left(s, W.wares[0], T1) === 0 && !W.buy(s, 'next', T1).ok, 'sold out');
 t(W.buy(s, 'orb', T1).ok, 'orb ware');
 t(W.valid(s.wishwell) && W.valid(undefined) && !W.valid({ ...s.wishwell, coins: -1 }) && !W.valid({ ...s.wishwell, done: ['nope'] }) && R.valid(s.rites), 'validation');
+// Altar tiers, values, record, auto-purchase (Star Rites)
+const s2 = {}, T2 = R.anchor + 864e5; R.state(s2, T2); const rt = R.rite(R.period(T2)); s2.rites.t[rt.id] = 6000;
+for (let i = 0; i < 6; i++) R.pull(s2, 10, rng, T2);
+t(R.tierOpen(s2, 'ord', T2) === 1 && R.tierOpen(s2, 'rare', T2) === 0, 'a selection every 60 pulls');
+const got = R.tierTake(s2, 'ord', 0, rng, T2); t(got && R.tierOpen(s2, 'ord', T2) === 0 && R.tierLeft(s2, 'ord', 0, T2) === R.tiers[2].items[0][3] - 1 && R.tierTake(s2, 'ord', 0, rng, T2) === null, 'selection taken once, limit counted');
+t(s2.rites.log.length === 50 && R.value({ kind: 'wings' }) > R.value({ kind: 'item', id: 'exp1' }), 'record and values');
+s2.rites.t[rt.id] = 0; s2.scales = 600; s2.rites.auto = true; const pr = R.pull(s2, 10, rng, T2); t(pr.ok && s2.scales === 100 && pr.value > 0, 'auto-purchase with prisms');
+t(R.valid(s2.rites), 'rites still valid');
 console.log('Wishwell:', ok, 'checks passed');

@@ -421,7 +421,16 @@ that said "GodGacha" (a reference name) is now "Star Rites".
   50, 100 ... 450 prisms (once each, like the reference's Secret Shop) and a 1:1 prism exchange.
 - MONETIZATION RULE (user): gacha tickets are never sold for real money directly. Tickets are bought only with prisms
   (the player's choice); real-money packs (later) sell prisms, with tickets and items only as a bonus inside them. Welcome gift 1,000 tickets of the running rite.
-- Optional save field `S.rites {t, auras, aura, orbs, dust, ev{period,pulls,luck,got,picks,grand,packs,free}}`
+- Altar screen (2026-11-25, user photos of the reference's gacha "Priceless Treasures"): `showRites()` is now a full
+  altar: timer, wallet, title + Record (`riteRecord`, last `logMax` 50 prizes in `S.rites.log`), the three prizes on
+  show (aura, wings, orbs) in glowing bubbles, "Grand prize progress" % (`grandProgress`), three reward tiers
+  (`Rites.tiers`: Legendary every 500 pulls, Rare 240, Ordinary 60; each item has a per-event limit shown left/limit;
+  a ring around the tier chest fills toward the next selection; `tierOpen`, `tierLeft`, `tierTake`, pop-up `riteTier`),
+  Luck bar, Pull x1 (or Free Pull) / Pull x10 priced "tickets or prisms", "Use prisms when tickets run short"
+  (`S.rites.auto`: missing tickets bought 1:1 in `Rites.pull`), bottom tabs Altar / Shop / Collection / Rewards /
+  Rotation. Result window "Congratulations" with each prize's prism value (`Rites.values`, `value`) and a "This pull's
+  value" star, Confirm / Try Again. CSS under "Star Rites altar" (`.ra-*`). Tests in `test-wishwell.mjs`.
+- Optional save field `S.rites {t, auras, aura, orbs, dust, ev{period,pulls,luck,got,picks,grand,packs,free}}` + optional `auto`, `log`, `ev.sel`, `ev.taken`
   (`Rites.valid` from `valid()`). Art (image model): `art-source/rites/` + `art-source/wings/wing-28..31.webp`, built by
   `scripts/build-rites-art.py` (wings, auras, hall backgrounds `comp-rites-bg-<id>`, icon atlas `comp-rites-icons`:
   tickets, orbs, luck chest, stardust). Hosted bundle 33.03 MB (about 0.5 MB spare). All numbers are placeholders.

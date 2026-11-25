@@ -37,6 +37,17 @@ const Rites = {
   packs: [50, 100, 150, 200, 250, 300, 350, 400, 450], packTickets: 500,
   dust: { wings: 300, aura: 100, orb: 20, pull: 40, orbBuy: 300 },
   welcome: 1000,
+  // Altar tiers (user photos of the reference's gacha: three reward rows, each pays "a selection reward" every N pulls of
+  // the event; every item has its own limit per event, shown as left / limit). Items: [kind, id, n, limit].
+  tiers: [
+    { id: 'legend', name: 'Legendary', every: 500, items: [['wings', '', 1, 1], ['aura', '', 1, 2], ['orb', '', 1, 2], ['item', 'chest3', 2, 3], ['item', 'gembox', 3, 3]] },
+    { id: 'rare', name: 'Rare', every: 240, items: [['item', 'chest2', 2, 4], ['item', 'petegg', 1, 3], ['item', 'sealbag', 2, 4], ['item', 'wish', 5, 4], ['item', 'gembox', 1, 4], ['item', 'essence', 2, 4]] },
+    { id: 'ord', name: 'Ordinary', every: 60, items: [['item', 'exp1', 5, 12], ['item', 'gold1', 5, 12], ['item', 'shardbag', 2, 10], ['item', 'stonebag', 3, 10], ['item', 'chest1', 2, 10], ['item', 'stam', 3, 8]] }
+  ],
+  // Prism value of each prize, shown on the result card and as "This pull's value".
+  values: { wings: 3000, aura: 1200, orb: 300, chest3: 400, gembox: 240, petegg: 300, chest2: 160, sealbag: 120, wish: 60, essence: 90, exp1: 20, gold1: 30, shardbag: 60, stonebag: 40, chest1: 50, stam: 30, exp2: 120, gold2: 200, gearbox: 150 },
+  value(r) { return (this.values[r.kind === 'item' ? r.id : r.kind] || 20) * (r.n || 1); },
+  logMax: 50,
   auraStats: { attack: 150, health: 1500, attackPercent: 3, healthPercent: 3 },
   orbStats: { attack: 40, health: 400 },
   orbSets: [[4, { attackPercent: 2 }], [7, { attackPercent: 2, healthPercent: 3 }], [10, { damageBonus: 5 }]],
@@ -111,11 +122,38 @@ const Rites = {
   pull(s, count, rng = Math.random, now = Date.now(), free = false) {
     const v = this.state(s, now), rite = this.rite(v.ev.period);
     if (free) { if (count !== 1 || v.ev.free === this.day(now)) return { ok: false, err: 'free' }; v.ev.free = this.day(now); }
-    else { const need = this.cost * count; if (this.tickets(s, rite.id) < need) return { ok: false, err: 'tickets', need }; v.t[rite.id] -= need; }
+    else {
+      const need = this.cost * count, short = need - this.tickets(s, rite.id);
+      // Auto-purchase: the missing tickets are bought 1:1 with prisms when she turned it on.
+      if (short > 0 && v.auto && (s.scales || 0) >= short) { s.scales -= short; v.t[rite.id] = (v.t[rite.id] || 0) + short; }
+      if (this.tickets(s, rite.id) < need) return { ok: false, err: 'tickets', need };
+      v.t[rite.id] -= need;
+    }
     const results = []; for (let i = 0; i < count; i++) results.push(this.give(s, v, this.roll(v, rite, rng)));
     const paid = this.settle(s, v, rite, rng);
-    return { ok: true, results, paid, rite };
+    this.record(v, results, now);
+    return { ok: true, results, paid, rite, value: results.reduce((a, r) => a + this.value(r), 0) };
   },
+  record(v, results, now = Date.now()) { v.log = [...results.map(r => ({ t: now, kind: r.kind, id: r.id, n: r.n || 1, rarity: r.rarity })), ...(v.log || [])].slice(0, this.logMax); },
+  // Altar tiers: selections earned = pulls / every; each item has a per-event limit.
+  tierOpen(s, tid, now = Date.now()) { const v = this.state(s, now), t = this.tiers.find(x => x.id === tid); return Math.floor(v.ev.pulls / t.every) - ((v.ev.sel || {})[tid] || 0); },
+  tierLeft(s, tid, i, now = Date.now()) { const v = this.state(s, now), t = this.tiers.find(x => x.id === tid); return t.items[i][3] - ((v.ev.taken || {})[tid + ':' + i] || 0); },
+  // What an altar item means for this rite and save (wings of the running rite, its aura, an orb she lacks first).
+  tierPrize(s, tid, i, rng = Math.random) {
+    const v = s.rites, rite = this.rite(v.ev.period), [kind, id, n] = this.tiers.find(x => x.id === tid).items[i];
+    if (kind === 'wings') return { kind, id: rite.wings, name: rite.wingName, rarity: 'legend' };
+    if (kind === 'aura') return { kind, id: rite.id, name: this.auras[rite.id], rarity: 'mythic' };
+    if (kind === 'orb') { const missing = this.orbs.filter(o => !v.orbs[o[0]]), pool = missing.length ? missing : this.orbs, o = pool[Math.floor(rng() * pool.length)]; return { kind, id: o[0], name: o[1], rarity: 'epic' }; }
+    return { kind: 'item', id, n, rarity: tid === 'ord' ? 'common' : 'rare' };
+  },
+  tierTake(s, tid, i, rng = Math.random, now = Date.now()) {
+    const v = this.state(s, now), t = this.tiers.find(x => x.id === tid);
+    if (!t || !t.items[i] || this.tierOpen(s, tid, now) < 1 || this.tierLeft(s, tid, i, now) < 1) return null;
+    if (t.items[i][0] === 'wings' && (s.reinaFashion?.wingSkins || []).includes(this.rite(v.ev.period).wings)) return null;
+    v.ev.sel = { ...(v.ev.sel || {}), [tid]: ((v.ev.sel || {})[tid] || 0) + 1 }; v.ev.taken = { ...(v.ev.taken || {}), [tid + ':' + i]: ((v.ev.taken || {})[tid + ':' + i] || 0) + 1 };
+    const r = this.give(s, v, this.tierPrize(s, tid, i, rng)); this.record(v, [r], now); return r;
+  },
+  grandProgress(s, now = Date.now()) { const v = this.state(s, now); return v.ev.grand ? 100 : Math.min(100, v.ev.pulls / this.grandAt * 100); },
   // Starfall Vault picks: wings of any rite she lacks, an aura copy of any rite, or an orb of her choice.
   choose(s, kind, id) {
     if (this.picksOpen(s) <= 0) return null; const v = s.rites;
@@ -169,6 +207,7 @@ const Rites = {
     if (!Object.entries(v.auras).every(([k, n]) => Object.hasOwn(this.auras, k) && int(n) && n >= 1 && n <= this.auraTiers)) return false;
     if (!Object.entries(v.orbs).every(([k, n]) => this.orbs.some(o => o[0] === k) && int(n) && n >= 1)) return false;
     if (v.aura && !v.auras[v.aura]) return false;
+    if (!(v.auto === undefined || typeof v.auto === 'boolean') || !(v.log === undefined || Array.isArray(v.log) && v.log.length <= this.logMax)) return false;
     if (v.prev !== undefined && !(obj(v.prev) && Number.isSafeInteger(v.prev.period) && int(v.prev.pulls))) return false;
     const e = v.ev; if (e === null || e === undefined) return true;
     return obj(e) && Number.isSafeInteger(e.period) && int(e.pulls) && int(e.luck) && e.luck < this.luckMax && Array.isArray(e.got) && e.got.every(int)
@@ -191,33 +230,60 @@ function riteClock(ms) { const s = Math.max(0, Math.floor(ms / 1000)), d = Math.
 function riteWingArt(rite, cls = 'rt-wings') { return `<img class="${cls}" src="${artPath(rite.wings)}" alt="${rite.wingName}">`; }
 function riteAuraArt(id, cls = 'rt-aura') { return `<img class="${cls}" src="${artPath('comp-rites-aura-' + id)}" alt="${Rites.auras[id]}">`; }
 function riteStop() { clearInterval(ritesTimer); ritesTimer = 0; }
-function riteTick() { if (screen !== 'rites') return riteStop(); const t = document.querySelector('.rt-time b'); if (t) t.textContent = riteClock(Rites.ends(Rites.period()) - Date.now()); }
+function riteTick() { if (screen !== 'rites') return riteStop(); const t = document.querySelector('.rt-time b, .ra-time b'); if (t) t.textContent = riteClock(Rites.ends(Rites.period()) - Date.now()); }
 function riteWallet() {
   const v = Rites.state(S), rite = Rites.rite(v.ev.period);
   return `<span class="rt-chip" onclick="riteShop()">${riteTicket(rite)}<b>${fmt(Rites.tickets(S, rite.id))}</b><i>+</i></span><span class="rt-chip" onclick="riteVoucher()">${riteVoucherIcon()}<b>${fmt(Rites.vouchers(S))}</b></span><span class="rt-chip" onclick="riteShop()">${uiIcon('crystals')}<b>${fmt(S.scales || 0)}</b></span>`;
 }
+// The altar (user photos of the reference's gacha): three prizes on show, grand prize progress, three reward tiers with
+// a selection chest each, luck bar, Pull x1 / x10 with ticket-or-prism costs and auto-purchase, record, bottom tabs.
+function riteTierArt(tid, i) {
+  const rite = Rites.rite(Rites.period()), [kind, id] = Rites.tiers.find(t => t.id === tid).items[i];
+  return kind === 'wings' ? riteWingArt(rite, '') : kind === 'aura' ? riteAuraArt(rite.id, '') : kind === 'orb' ? riteIcon(4) : bagIcon(id);
+}
 function showRites() {
-  const v = Rites.state(S), rite = Rites.rite(v.ev.period), ev = v.ev, next = Rites.milestones(rite).find(m => !ev.got.includes(m.at));
-  const later = [1, 2, 3].map(k => Rites.rite(ev.period + k)), free = Rites.freeReady(S), picks = Rites.picksOpen(S);
-  const owned = (S.reinaFashion?.wingSkins || []).includes(rite.wings);
-  $('#main').innerHTML = `<section class="rt-room rt-${rite.id}" style="--rtbg:url('${artPath('comp-rites-bg-' + rite.id)}');--rthue:${rite.hue}">
-   <div class="rt-top"><button data-back aria-label="Back" onclick="go('home')">‹</button><div class="rt-title"><small>STAR RITES</small><h1>${rite.name}</h1><span class="rt-time">Ends in <b>${riteClock(Rites.ends(ev.period) - Date.now())}</b></span></div><div class="rt-wallet">${riteWallet()}</div></div>
-   <div class="rt-stage">${riteAuraArt(rite.id, 'rt-aura')}${riteWingArt(rite)}
-    <div class="rt-grand"><small>GRAND PRIZE</small><b>${rite.wingName} Wings</b><em>${owned ? 'Owned · a repeat gives ' + Rites.dust.wings + ' stardust' : ev.grand ? 'Won this rite' : 'Guaranteed by pull ' + Rites.grandAt + ' · ' + Math.max(0, Rites.grandAt - ev.pulls) + ' to go'}</em></div>
-    <div class="rt-side l"><button onclick="riteRates()">${denPlain}${uiIcon('help')}<span>Rates</span></button><button onclick="riteSteps()">${denPlain}${riteIcon(14)}<span>Rewards</span>${picks > 0 ? '<em></em>' : ''}</button><button onclick="riteRules()">${denPlain}${uiIcon('book')}<span>Rules</span></button></div>
-    <div class="rt-side r"><button onclick="riteShop()">${denPlain}${riteTicket(rite)}<span>Shop</span></button><button onclick="riteCollection()">${denPlain}${riteIcon(4)}<span>Collection</span></button><button onclick="riteSchedule()">${denPlain}${uiIcon('calendar')}<span>Rotation</span></button></div>
+  if (typeof bagArtVars === 'function') bagArtVars();
+  const v = Rites.state(S), rite = Rites.rite(v.ev.period), ev = v.ev, free = Rites.freeReady(S), picks = Rites.picksOpen(S);
+  const owned = (S.reinaFashion?.wingSkins || []).includes(rite.wings), prog = Rites.grandProgress(S);
+  const tierRow = t => {
+    const open = Rites.tierOpen(S, t.id), more = t.every - ev.pulls % t.every, pct = (ev.pulls % t.every) / t.every * 100;
+    const chest = { legend: 'chest3', rare: 'chest2', ord: 'chest1' }[t.id];
+    return `<div class="ra-tier t-${t.id}"><p><b>${t.name}</b><span>${open > 0 ? `<em>${open} selection reward${open > 1 ? 's' : ''} ready!</em>` : `Pull <em>${more}</em> more times for a selection reward`}</span></p>
+      <div class="ra-row"><div class="ra-items">${t.items.map((it, i) => { const left = Rites.tierLeft(S, t.id, i); return `<button class="ra-it ${left < 1 ? 'out' : ''}" onclick="riteTier('${t.id}')">${denPlain}<span class="ra-ico">${riteTierArt(t.id, i)}${it[2] > 1 ? `<b>${it[2]}</b>` : ''}</span><small>${left}/${it[3]}</small></button>`; }).join('')}</div>
+      <button class="ra-chest ${open > 0 ? 'ready' : ''}" style="--p:${open > 0 ? 100 : pct}" onclick="riteTier('${t.id}')" aria-label="${t.name} selection reward">${denPlain}${bagIcon(chest)}</button></div></div>`;
+  };
+  const prize = (art, label, cls) => `<div class="ra-orb ${cls}"><span>${art}</span><small>${label}</small></div>`;
+  $('#main').innerHTML = `<section class="ra-room rt-${rite.id}" style="--rtbg:url('${artPath('comp-rites-bg-' + rite.id)}');--rthue:${rite.hue}">
+   <div class="ra-top"><button class="ra-help" onclick="riteRates()">${denPlain}?</button><span class="ra-time">⏱ <b class="rt-time-b">${riteClock(Rites.ends(ev.period) - Date.now())}</b></span><div class="rt-wallet">${riteWallet()}</div></div>
+   <div class="ra-head"><h1><small>STAR RITES</small>${rite.name}</h1><button class="ra-rec" onclick="riteRecord()">${denPlain}${uiIcon('book')}<span>Record</span></button></div>
+   <div class="ra-show">${prize(riteAuraArt(rite.id, ''), Rites.auras[rite.id], 'side l')}${prize(riteWingArt(rite, ''), rite.wingName + ' Wings', 'mid')}${prize(riteIcon(4), 'Wish Orbs', 'side r')}</div>
+   <p class="ra-prog">${owned ? 'Grand prize owned · a repeat gives ' + Rites.dust.wings + ' stardust' : `Grand prize progress: <b>${prog.toFixed(2)}%</b>`}</p>
+   <div class="ra-tiers">${Rites.tiers.map(tierRow).join('')}</div>
+   <div class="ra-luck"><span>${bagIcon('chest3')}</span><b>Luck</b><i><s style="width:${ev.luck / Rites.luckMax * 100}%"></s><em>${ev.luck}/${Rites.luckMax}</em></i>${picks > 0 ? `<button class="ra-pick" onclick="ritePick()">${denPlain}✨ ${picks}</button>` : ''}</div>
+   <div class="ra-btns">
+    <div><small>${free ? 'Free today' : riteTicket(rite) + Rites.cost + ' or ' + uiIcon('crystals') + Rites.cost}</small><button class="ra-pull one" onclick="ritePull(1${free ? ',true' : ''})">${denPlain}${free ? 'Free Pull' : 'Pull ×1'}</button></div>
+    <div><small>${riteTicket(rite)}${Rites.cost * 10} or ${uiIcon('crystals')}${Rites.cost * 10}</small><button class="ra-pull ten" onclick="ritePull(10)">${denPlain}Pull ×10</button></div>
    </div>
-   <div class="rt-panel">
-    <div class="rt-luck"><span>${riteIcon(14)}<b>Luck ${ev.luck} / ${Rites.luckMax}</b></span><i><s style="width:${ev.luck / Rites.luckMax * 100}%"></s></i><small>An orb or better within ${Rites.luckMax - ev.luck} pull${Rites.luckMax - ev.luck === 1 ? '' : 's'}</small></div>
-    <div class="rt-prog"><span>Pulls this rite <b>${fmt(ev.pulls)}</b></span>${next ? `<span onclick="riteSteps()">Next reward at <b>${next.at}</b> ${riteStepText(next, rite)}</span>` : '<span>All rewards collected</span>'}</div>
-    ${picks > 0 ? `<button class="rt-pickbar" onclick="ritePick()">${denPlain}✨ Choose your Starfall prize (${picks})</button>` : ''}
-    <div class="rt-btns">
-     <button class="rt-pull one" onclick="ritePull(1${free ? ',true' : ''})">${denPlain}<b>${free ? 'Free pull' : 'Pull ×1'}</b><small>${free ? 'once a day' : riteTicket(rite) + Rites.cost}</small></button>
-     <button class="rt-pull ten" onclick="ritePull(10)">${denPlain}<b>Pull ×10</b><small>${riteTicket(rite)}${Rites.cost * 10}</small></button>
-    </div>
-    <p class="rt-next">Next: <b>${later[0].name}</b> in ${riteClock(Rites.ends(ev.period) - Date.now())}, then ${later[1].name} and ${later[2].name}. Tickets never expire.</p>
-   </div></section>`;
+   <label class="ra-auto"><input type="checkbox" ${v.auto ? 'checked' : ''} onchange="riteAuto(this.checked)"><span>Use prisms when tickets run short</span></label>
+   <div class="ra-nav"><button class="ra-back" data-back onclick="go('home')" aria-label="Back">‹</button>
+    <button class="on">${denPlain}${riteTicket(rite)}<span>Altar</span></button><button onclick="riteShop()">${denPlain}${uiIcon('crystals')}<span>Shop</span></button><button onclick="riteCollection()">${denPlain}${riteIcon(4)}<span>Collection</span></button><button onclick="riteSteps()">${denPlain}${riteIcon(14)}<span>Rewards</span>${picks > 0 ? '<em></em>' : ''}</button><button onclick="riteSchedule()">${denPlain}${uiIcon('calendar')}<span>Rotation</span></button></div>
+  </section>`;
   riteStop(); ritesTimer = setInterval(riteTick, 1000);
+}
+function riteAuto(on) { const v = Rites.state(S); v.auto = !!on; save(); toast(on ? 'Missing tickets will be bought with prisms' : 'Auto-purchase off'); }
+function riteTier(tid) {
+  const t = Rites.tiers.find(x => x.id === tid), open = Rites.tierOpen(S, tid), v = Rites.state(S), more = t.every - v.ev.pulls % t.every;
+  const own = (S.reinaFashion?.wingSkins || []).includes(Rites.rite(v.ev.period).wings);
+  popup(`<div class="rt-pop ra-tpop"><h2>${t.name} selection</h2><p>${open > 0 ? `Choose <b>${open}</b> reward${open > 1 ? 's' : ''}.` : `Every ${t.every} pulls of this rite open one choice. ${more} to go.`}</p>
+   <div class="ra-tgrid">${t.items.map((it, i) => { const left = Rites.tierLeft(S, tid, i), r = Rites.tierPrize(S, tid, i, () => 0), no = left < 1 || (it[0] === 'wings' && own);
+    const name = r.kind === 'item' ? WonderGear.bagItemById[r.id].name : r.kind === 'wings' ? r.name + ' Wings' : r.kind === 'orb' ? 'A Wish Orb' : r.name;
+    return `<button class="ra-tc ${no ? 'out' : ''}" ${open > 0 && !no ? `onclick="riteTake('${tid}',${i})"` : ''}>${denPlain}<span class="ra-ico">${riteTierArt(tid, i)}${it[2] > 1 ? `<b>${it[2]}</b>` : ''}</span><strong>${name}</strong><small>${no && it[0] === 'wings' && own ? 'Owned' : 'Left ' + left + '/' + it[3]}</small></button>`; }).join('')}</div></div>`);
+}
+function riteTake(tid, i) { const r = Rites.tierTake(S, tid, i); if (!r) return toast('Not available'); save(); $('#modal').close(); showRites(); riteShow({ results: [r], paid: [], rite: Rites.rite(Rites.period()), value: Rites.value(r), pick: true }); }
+function riteRecord() {
+  const v = Rites.state(S), log = v.log || [];
+  const name = r => r.kind === 'item' ? (WonderGear.bagItemById[r.id]?.name || r.id) + (r.n > 1 ? ' ×' + r.n : '') : r.kind === 'wings' ? (Rites.list.find(x => x.wings === r.id)?.wingName || '') + ' Wings' : r.kind === 'aura' ? Rites.auras[r.id] : Rites.orbName(r.id);
+  popup(`<div class="rt-pop"><h2>Pull Record</h2>${log.length ? `<div class="ra-log">${log.map(r => `<p class="r-${r.rarity}"><span>${new Date(r.t).toISOString().slice(5, 16).replace('T', ' ')}</span><b>${name(r)}</b><em>${RITE_RAR[r.rarity] || ''}</em></p>`).join('')}</div>` : '<p>No pulls yet.</p>'}<p><small>The last ${Rites.logMax} prizes.</small></p></div>`);
 }
 function riteStepText(m, rite) {
   const next = Rites.rite(Rites.period() + 1), bits = [];
@@ -250,10 +316,13 @@ function riteCard(r, i) {
 function riteShow(res) {
   if (typeof bagArtVars === 'function') bagArtVars();
   const big = res.results.find(r => r.rarity === 'legend') || res.results.find(r => r.rarity === 'mythic');
-  const paid = res.paid.length ? `<div class="rt-paid"><small>Rewards reached</small>${res.paid.map(p => `<span>${p.at} pulls: ${[p.next ? riteTicket(Rites.list.find(x => x.id === p.nextId)) + fmt(p.next) : '', p.cur ? riteTicket(res.rite) + fmt(p.cur) : '', p.prisms ? uiIcon('crystals') + fmt(p.prisms) : '', p.orb ? riteOrbIcon(p.orb.id) + p.orb.name : '', p.pick ? '✨ choose a prize' : ''].filter(Boolean).join(' ')}</span>`).join('')}</div>` : '';
-  popup(`<div class="rt-result ${big ? 'big r-' + big.rarity : ''}">${big ? `<div class="rt-burst"><i></i><b>${big.rarity === 'legend' ? 'GRAND PRIZE!' : 'MYTHIC AURA!'}</b></div>` : ''}<h2>${res.rite.name}</h2>
-   <div class="rt-cards n${res.results.length}">${res.results.map(riteCard).join('')}</div>${paid}
-   <div class="rt-row"><button onclick="$('#modal').close()">${denPlain}OK</button><button class="primary" onclick="$('#modal').close();ritePull(${res.results.length})">${denPlain}Pull ×${res.results.length} again</button></div></div>`);
+  const value = res.value ?? res.results.reduce((a, r) => a + Rites.value(r), 0), n = res.results.length, rite = res.rite, perfect = big || res.results.some(r => r.rarity === 'epic');
+  const paid = res.paid.length ? `<div class="rt-paid"><small>Rewards reached</small>${res.paid.map(p => `<span>${p.at} pulls: ${[p.next ? riteTicket(Rites.list.find(x => x.id === p.nextId)) + fmt(p.next) : '', p.cur ? riteTicket(rite) + fmt(p.cur) : '', p.prisms ? uiIcon('crystals') + fmt(p.prisms) : '', p.orb ? riteOrbIcon(p.orb.id) + p.orb.name : '', p.pick ? '✨ choose a prize' : ''].filter(Boolean).join(' ')}</span>`).join('')}</div>` : '';
+  popup(`<div class="rt-result ra-res ${big ? 'big r-' + big.rarity : ''}"><div class="ra-rhead"><i></i><h2>Congratulations</h2></div>${big ? `<div class="rt-burst"><i></i><b>${big.rarity === 'legend' ? 'GRAND PRIZE!' : 'MYTHIC AURA!'}</b></div>` : ''}
+   <p class="ra-kicker">${res.pick ? 'Selection reward' : perfect ? 'Splendid pull' : rite.name}</p>
+   <div class="rt-cards n${n}">${res.results.map((r, i) => riteCard(r, i).replace('</small></div>', `</small><em class="ra-val">${uiIcon('crystals')}${fmt(Rites.value(r))}</em></div>`)).join('')}</div>${paid}
+   <div class="ra-value"><small>This pull's value</small><b>${uiIcon('crystals')}${fmt(value)}</b></div>
+   <div class="rt-row ra-rbtn"><button class="ra-confirm" onclick="$('#modal').close()">${denPlain}Confirm</button>${res.pick ? '' : `<button class="ra-again" onclick="$('#modal').close();ritePull(${n})">${denPlain}<span>Try Again</span><small>${riteTicket(rite)}${Rites.cost * n} or ${uiIcon('crystals')}${Rites.cost * n}</small></button>`}</div></div>`);
 }
 function riteRates() {
   const o = Rites.odds, common = 1 - o.wings - o.aura - o.orb - o.rare, pct = x => (Math.round(x * 1000) / 10).toFixed(1) + '%', rite = Rites.rite(Rites.period());
