@@ -9921,3 +9921,5 @@ body[data-screen=games] #stage #main .mg-grid{display:flex!important;flex-wrap:w
 body[data-screen=games] #stage #main .mg-grid>.mg-tile{width:calc((100% - 30px)/4)}
 @media (max-aspect-ratio:3/4){body[data-screen=games] #stage #main .mg-grid>.mg-tile{width:calc((100% - 36px)/4)}}
 #stage #main .mg-tile .mg-badge{position:absolute;top:8px;left:8px;z-index:2;padding:3px 8px;border-radius:6px;background:linear-gradient(#7ae05a,#2a9a3a);color:#fff;font:900 10px/1 Arial,sans-serif;letter-spacing:.08em;font-style:normal;box-shadow:0 2px 4px #0006}
+/* A finger held on a button must not select its label (user circled a selected "Claim"). */
+#stage button{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}

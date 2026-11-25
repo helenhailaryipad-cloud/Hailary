@@ -1059,6 +1059,8 @@ There are no other players: every person is an AI adventurer and is labelled "AI
   - Mail and Thank-you Note: a welcome letter, a Daily Courier letter every UTC day and one or two thank-you notes
     from friends (`socialTick`), each with bag items; Claim (checked or all), Delete (only claimed), 30 letters max.
     Claim puts the items straight into the bag with a short toast, no "Items Obtained" window (user: no confirming).
+    Senders are our own ("Sky Garden Keeper", "Wingpost Courier"); old letters signed "Kiki" (a reference name) are
+    shown with these names (`mailFrom`). Buttons never select their label on a long press (`#stage button`).
 - Art (image model): `art-source/social/{banner,icons}.webp` -> `comp-social-banner`, `comp-social-icons` (flowers,
   hearts, letters, note, chat bubble, gift) by `scripts/build-social-art.py`.
 - Chat sheet (second pass, four photos of the reference's chat): tapping the home strip slides a sheet up over the

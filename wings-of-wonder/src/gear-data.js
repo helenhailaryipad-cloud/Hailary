@@ -895,8 +895,8 @@ function mailSend(v,m,now){v.mail.unshift({id:v.nextId++,kind:m.kind||'mail',tit
 function socialTick(s,now=Date.now(),rng=Math.random){
  const v=socialState(s,now);if(v.stamp===v.day){return 0}
  const first=!s.social;
- if(first)mailSend(v,{title:'Welcome to Sky Garden',from:'Kiki',text:'Letters, rewards and anything that did not fit in your bag arrive here. Claim them whenever you like.',items:{chest1:1}},now);
- mailSend(v,{title:'Daily Courier',from:'Kiki',text:'Here is today\'s little parcel from the courier guild.',items:{exp1:1,gold1:1}},now);
+ if(first)mailSend(v,{title:'Welcome to Sky Garden',from:'Sky Garden Keeper',text:'Letters, rewards and anything that did not fit in your bag arrive here. Claim them whenever you like.',items:{chest1:1}},now);
+ mailSend(v,{title:'Daily Courier',from:'Wingpost Courier',text:'Here is today\'s little parcel from the courier guild.',items:{exp1:1,gold1:1}},now);
  const notes=1+(rng()<.5?1:0);
  for(let i=0;i<notes&&v.friends.length;i++){const f=v.friends[Math.floor(rng()*v.friends.length)];mailSend(v,{kind:'note',title:'Thank-you Note',from:socialById[f].name,text:thankLines[Math.floor(rng()*thankLines.length)],items:{stonebag:1}},now)}
  v.stamp=v.day;s.social=socialPack(v);return 1+notes+(first?1:0);
