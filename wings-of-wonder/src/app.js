@@ -1104,7 +1104,7 @@ function cityDue(icon){try{switch(icon){
  case 'upgrade':{const eq=WonderGear.state(S),m=eq.materials||{};return Object.values(eq.equipped).some(uid=>{const e=eq.items.find(x=>x.uid===uid),c=e&&WonderGear.cost(e,'enhance');return c&&S.gold>=c.gold&&(m.stone||0)>=c.stone})}
  default:return false}}catch{return false}}
 function cityIcon([icon,label,target=''], artPrefix='hud-'){
- if(icon==='more')return '<button class="city-icon city-more" id="city-drawer-toggle" aria-label="More" aria-controls="city-drawer" aria-expanded="false" onclick="toggleCityDrawer()"><img class="city-four" src="assets/generated/drawer-more.webp" alt=""></button>';
+ if(icon==='more')return '<button class="city-icon city-more" id="city-drawer-toggle" aria-label="More" aria-controls="city-drawer" aria-expanded="false" onclick="toggleCityDrawer()"><img class="city-four" src="'+artPath('drawer-more')+'" alt=""></button>';
  const notice=cityDue(icon)?'<i class="city-notice" aria-hidden="true">!</i>':'';
  if(icon==='vow')return `<button class="city-icon city-vow" onclick="cityAction('${target}','${label}')" aria-label="${label}"><span class="city-glyph"><img src="${artPath('comp-vow-icon')}" alt=""><i class="city-left-time">${typeof vowLeftLabel==='function'?vowLeftLabel():''}</i></span><span class="city-caption">${label}</span></button>`;
  return `<button class="city-icon" onclick="cityAction('${target}','${label}')" aria-label="${label}"><span class="city-glyph"><img src="${artPath(icon==='cloud-war-citadel'?icon:artPrefix+icon)}${cityArtVersion?'?v='+cityArtVersion:''}" alt="">${notice}</span><span class="city-caption">${label}</span></button>`;
