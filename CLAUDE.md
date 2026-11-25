@@ -410,8 +410,7 @@ that said "GodGacha" (a reference name) is now "Star Rites".
 - 50 tickets a pull, 500 for ten (same odds), one free pull a UTC day. Odds (`Rites.odds`): exclusive wings 0.3%,
   aura 1.2%, Wish Orb 7%, rare bag item 25%, common the rest. Luck: an orb or better within 15 pulls. The rite's wings
   are certain by pull 300 of the event (`grandAt`).
-- Milestones by pulls in the event pay tickets of the NEXT rite (15/30/60/135/240 = 400/740/1240/1240/1240, plus an orb
-  at 240); Moonwell and Dragon Hoard return their own tickets at 120/250; Starfall Vault gives a free choice (wings,
+- Tickets of the NEXT rite for pulls are Wishwell goals (see Wishwell), not paid by the rite; Dragon Hoard returns its own tickets at 120/250; Starfall Vault gives a free choice (wings,
   aura copy or orb, `Rites.choose`) at 360/720/800; Celestial Bloom's Petal Path pays prisms at 50/100/200.
 - Prizes: exclusive wings `fashion-wing-28..31` (Moonwell Seraph, Dragonfire Crest, Starfall Comet, Celestial Bloom;
   in `PREMIUM_LOOKS`, never sold for gold, `RITE_WINGS` names the rite in the note); four auras (`comp-rites-aura-<id>`,
@@ -467,11 +466,14 @@ that said "GodGacha" (a reference name) is now "Star Rites".
 User sent photos of the reference's "Adventure Goals" behind its Snowland home icon ("tickets for the next gacha for
 pulls in today's"). Own name, art and wording. The home promo `snow` is now "Wishwell" (screen `wishwell`,
 `src/wishwell.js`: rules `Wishwell`, pure, `node scripts/test-wishwell.mjs`; UI below `WISHWELL_UI`; loaded by test.mjs).
-- Carry-over: `carryRate` 30% of the tickets spent in a rite come back as tickets of the NEXT rite, claimable on the
-  Wishwell once that rite has started (`claimable`, `claim`). Rites now keeps the finished event's pull count in
-  `S.rites.prev {period, pulls}` (`Rites.state`, validated).
-- Goals tab: the rite's pull milestones (`Rites.milestones`, still paid automatically by `Rites.settle`) as rows with
-  reward tiles, progress bars and Claimed stamps; "Carry-over in <time> · ×N" over the painted bubble ("30%").
+- Goals (user photo of the reference's Adventure Goals: "they are not returns, they are tickets for the next gacha"):
+  `Wishwell.goals` 15 / 30 / 60 / 135 pulls in the running rite = 400 / 740 / 1,240 / 1,240 tickets of the NEXT rite
+  (3,620, as in her ChatGPT notes), four tiles per row like the reference, claimed by hand (Claim per row, or tap the
+  well's bubble / Claim all, `claimGoal`, `claimAll`). Goals reached but unclaimed when the rite ends wait in the well
+  during the next rite (`leftover`, paid in its tickets). No percentage carry-over any more (`carryRate` is gone).
+  Star Rites no longer pays these automatically (`Rites.steps` is empty; the 240 + orb row is gone); its Rewards pop-up
+  shows only the rite's own extras (Dragon Hoard returns, Starfall choices, Petal Path) and the 1,800 wings, with a
+  Wishwell button. Optional save fields `S.wishwell.g` / `pg` {p, got[]} (`claimed` from older saves still validates).
 - Wish Coins: one per pull (counted from `Rites` pull totals, `seen`), plus five daily Tasks (free pull, pull 1 / 10 /
   30 / 60 times today); Wish Market (`wares`: next / current rite tickets, bag items, a Wish Orb; limits reset with each
   rite, `bp`). Optional save field `S.wishwell {day, dayPulls, done[], coins, seen{period,pulls}, claimed, bp, buys}`

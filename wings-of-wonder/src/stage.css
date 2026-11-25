@@ -10295,3 +10295,10 @@ html body #stage #main .ra-room button.ss-more{align-self:center;margin-top:4px;
 .ss-room .ra-nav{margin:0}
 .ra-prog small{font:700 .78em/1 Arial,sans-serif;color:#d8d0ff}
 html body #stage #main .ra-room button.ra-help>span{display:block;transform:rotate(-45deg);font:900 18px/1 Georgia,serif;color:#fff3c0;text-shadow:0 1px 2px #000}
+/* Wishwell goals like the reference's Adventure Goals: the well's bubble is a button (claim all), Claim on each row */
+html body #stage #main .ww-room button.ww-orb{pointer-events:auto;width:min(26cqw,19cqh);height:min(26cqw,19cqh);border-radius:50%;border:0;background:transparent;box-shadow:none;padding:0;justify-content:center;cursor:pointer;min-height:0}
+html body #stage #main .ww-room button.ww-orb::before,html body #stage #main .ww-room button.ww-orb::after{display:none}
+html body #stage #main .ww-room button.ww-orb>svg:first-child{display:none}
+html body #stage #main .ww-room button.ww-orb.due small{color:#fff6b0;animation:wwDue 1.1s ease-in-out infinite}
+@keyframes wwDue{50%{transform:scale(1.12)}}
+html body #stage #main .ww-room .ww-row .ww-gold{margin-left:auto}
