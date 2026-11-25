@@ -1205,6 +1205,9 @@ territory windows with ten defenders and the fight; defenders never came back an
   Big map labels (user: "the map is beautiful but laid out badly: small, lots of captions"): each place shows only its
   name on a gold ribbon (`#cloudRibbon`, larger text) and a small "Boss: N" pill above it; the faction text, the owner
   and the "under attack" line are gone from the map (owner is in the city window).
+  Where Reina goes (user: "unclear where Reina goes; highlight the chosen boss"): in the city window the chosen defender
+  is larger (16%), with a pulsing gold ring, a gold "Target" tag and Reina's face on it, the others dimmed; on the big
+  map a bouncing Reina face marker sits over the city of the running fight (`cloudBattle.index`, `.cloud-reina-mark`).
 - Timed background fights (2026-11-24, user: "each fight about a minute, auto, you can see Reina fighting, and I can
   leave to the menus instead of only watching"): a fight lasts `CLOUD_FIGHT` seconds (Guard 45, Elite 60, Boss 75; less
   for a hurt defender) on a wall clock (`cloudBattle {index,slot,role,hp0,start,dur}`); `cloudFightTick` (1 s interval,
