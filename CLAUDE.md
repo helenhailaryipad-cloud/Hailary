@@ -197,6 +197,10 @@ the `ARCADE` rotation, it has its own daily ranking) and the games sub-nav.
   `leaflight/master.png`) -> `burrow-critters` (4 x 2, cells 256 x 288, feet on the bottom), `burrow-bg`,
   `burrow-hole`, `burrow-frost`, `burrow-fx`, `burrow-cover` by `scripts/build-burrow-art.py` (+ AVIF). Chat preview
   packs `burrow-*` into pack-minis. Hosted bundle 33,186,666 bytes (about 360 KB spare). All numbers are placeholders.
+- Critters rise out of the opening (user: "they pop out of the middle of the pit and climb onto the score"): `.bb-pit`
+  is masked to the part above the opening's centre line plus the opening's lower half-ellipse (opening of burrow-hole
+  x 14.7-82.5 %, y 13.8-78.5 %, printed by the build), and `burrow-rim` (the front lip without the dark opening) is
+  drawn over the critter. The field starts at 31cqh so top-row critters stay clear of the HUD.
 - Not done: a Daily Must-Do list like the reference's (Wayfarer Quests has no Burrow task yet).
 
 ## Mini Games hub (2026-11-23)

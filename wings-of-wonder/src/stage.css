@@ -9740,20 +9740,22 @@ html body #stage #main .bb-room button.bb-sr{position:relative;padding:.6cqh 3cq
 .bb-top3{padding:.6cqh 2.6cqw;border-radius:10px;background:#18262ee6;box-shadow:inset 0 0 0 1px #ffffff22,0 3px 8px #0006}
 .bb-top3 p{display:flex;justify-content:space-between;gap:3cqw;margin:0;padding:.5cqh 0;border-bottom:1px solid #ffffff1f;font:700 min(3.5cqw,2.25cqh)/1.1 Arial,sans-serif}
 .bb-top3 p:last-child{border:0}.bb-top3 b{color:#7dff7a}
-.bb-field{position:absolute;z-index:1;left:2cqw;right:2cqw;top:27cqh;bottom:1cqh;container-type:size;touch-action:none}
+.bb-field{position:absolute;z-index:1;left:2cqw;right:2cqw;top:31cqh;bottom:.5cqh;container-type:size;touch-action:none}
 .bb-field.shake{animation:bbShake .38s}
 @keyframes bbShake{20%{transform:translate(-8px,3px)}40%{transform:translate(7px,-3px)}60%{transform:translate(-5px,2px)}80%{transform:translate(3px,-1px)}}
 .bb-hole{position:absolute;left:calc(var(--x)*1%);top:calc(var(--y)*1%);width:min(30cqw,26cqh);transform:translate(-50%,-50%);aspect-ratio:320/195;cursor:pointer}
 .bb-hole img{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;-webkit-user-drag:none}
 .bb-hole .bb-back{filter:drop-shadow(0 5px 4px #0003)}
-.bb-hole .bb-front{clip-path:inset(57% 0 0 0)}
-.bb-pit{position:absolute;left:9%;right:9%;bottom:40%;height:175%;overflow:hidden;border-radius:0 0 50% 50%/0 0 16% 16%}
-.bb-pit .bb-crit{position:absolute;left:4%;width:92%;bottom:0;transform:translateY(104%);transition:transform .14s ease-in;will-change:transform}
-.bb-pit .bb-crit.up{transform:translateY(9%);transition:transform .18s cubic-bezier(.3,1.6,.55,1)}
+.bb-hole .bb-front{z-index:2}
+/* The critter shows above the opening's centre line and inside the opening's lower half-ellipse (burrow-hole:
+   opening x 14.7-82.5 %, y 13.8-78.5 %); the front lip (burrow-rim) is drawn over it. */
+.bb-pit{position:absolute;left:-20%;width:140%;bottom:21.5%;height:300%;z-index:1;-webkit-mask:linear-gradient(#000,#000) top/100% 89.2% no-repeat,radial-gradient(closest-side,#000 97%,#0000) 48.1% 100%/48.4% 21.6% no-repeat;mask:linear-gradient(#000,#000) top/100% 89.2% no-repeat,radial-gradient(closest-side,#000 97%,#0000) 48.1% 100%/48.4% 21.6% no-repeat;pointer-events:none}
+.bb-pit .bb-crit{position:absolute;left:19.7%;width:58.6%;bottom:0;transform:translateY(104%);transition:transform .14s ease-in;will-change:transform}
+.bb-pit .bb-crit.up{transform:translateY(14%);transition:transform .18s cubic-bezier(.3,1.6,.55,1)}
 .bb-pit .bb-crit.tapped{animation:bbTap .3s ease-out forwards}
 .bb-pit .bb-crit.struck{animation:bbStruck .3s ease-out forwards}
-@keyframes bbTap{0%{transform:translateY(9%) scale(1.12,.86);filter:brightness(2.2)}60%{transform:translateY(12%) scale(.92,1.08);filter:brightness(1.3)}100%{transform:translateY(104%) scale(.9);filter:none}}
-@keyframes bbStruck{0%{transform:translateY(9%) scale(1.1);filter:brightness(2) hue-rotate(-30deg)}100%{transform:translateY(104%);filter:none}}
+@keyframes bbTap{0%{transform:translateY(14%) scale(1.12,.86);filter:brightness(2.2)}60%{transform:translateY(17%) scale(.92,1.08);filter:brightness(1.3)}100%{transform:translateY(104%) scale(.9);filter:none}}
+@keyframes bbStruck{0%{transform:translateY(14%) scale(1.1);filter:brightness(2) hue-rotate(-30deg)}100%{transform:translateY(104%);filter:none}}
 .bb-fx{position:absolute;left:50%;top:-30%;width:150%;aspect-ratio:1;transform:translate(-50%,-50%) scale(.3);background:var(--bb-fx) 0 0/200% 200% no-repeat;pointer-events:none;z-index:4;animation:bbFx .55s ease-out forwards}
 .bb-fx.f1{background-position:100% 0}.bb-fx.f2{background-position:0 100%}.bb-fx.f3{background-position:100% 100%}
 .bb-fx.big{width:230%;animation-duration:.75s}
@@ -9819,3 +9821,4 @@ html body #stage #main button.mg-daily>svg:first-child{display:none}
 .mg-dl-side em{display:block;padding:4px 10px;border-radius:99px;background:url(assets/generated/ui-btn-gold.webp) center/100% 100%;font:900 12px/1 Arial,sans-serif;color:#5a2a06;font-style:normal;white-space:nowrap}
 .mg-dl-side small{display:block;margin-top:4px;font:600 11px/1 Arial,sans-serif;color:#d8f0c8}
 @media(max-height:760px){body[data-screen=games] .mg-event{aspect-ratio:3.7!important}body[data-screen=games] .mg-art{aspect-ratio:1.8!important}html body #stage #main button.mg-daily{padding:4px 10px 4px 4px}.mg-dl-art{height:44px;width:76px}.mg-dl-text small{display:none}}
+.bb-pit .bb-crit{pointer-events:none}.bb-pit .bb-crit.up{pointer-events:auto}

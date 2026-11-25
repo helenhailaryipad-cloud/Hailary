@@ -31,6 +31,18 @@ for n in range(8):
 save(atlas, 'burrow-critters')
 save(Image.open(SRC/'bg.webp').convert('RGB').resize((720, 1080), Image.Resampling.LANCZOS), 'burrow-bg', 80, 32)
 h = trimmed(Image.open(SRC/'hole.webp')); h.thumbnail((320, 320), Image.Resampling.LANCZOS); save(h, 'burrow-hole')
+# Front lip (user: "they must come out of the pit itself, not the middle"): the rim below the opening's centre line,
+# without the dark opening, drawn over the critter. The opening = the dark area joined to the centre.
+from collections import deque
+a = np.array(h).astype(int); hh, ww = a.shape[:2]; dark = a[..., :3].mean(2) < 75; seen = np.zeros((hh, ww), bool); q = deque([(hh//2, ww//2)]); seen[hh//2, ww//2] = True
+while q:
+    y, x = q.popleft()
+    for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+        Y, X = y+dy, x+dx
+        if 0 <= Y < hh and 0 <= X < ww and dark[Y, X] and not seen[Y, X]: seen[Y, X] = True; q.append((Y, X))
+ys, xs = np.nonzero(seen); print('opening x %.3f-%.3f y %.3f-%.3f' % (xs.min()/ww, xs.max()/ww, ys.min()/hh, ys.max()/hh))
+rim = a.copy(); rim[seen] = 0; rim[:int((ys.min()+ys.max())/2), :] = 0
+save(Image.fromarray(rim.astype('uint8'), 'RGBA'), 'burrow-rim')
 save(Image.open(SRC/'frost.webp').convert('RGBA').resize((540, 810), Image.Resampling.LANCZOS), 'burrow-frost', 80, 32)
 if (SRC/'cover.webp').exists(): save(Image.open(SRC/'cover.webp').convert('RGB').resize((960, 640), Image.Resampling.LANCZOS), 'burrow-cover', 80, 32)
 # Hit sparks: the cascade-fx sheet (painted on black for additive drawing) with its brightness turned into alpha, so
