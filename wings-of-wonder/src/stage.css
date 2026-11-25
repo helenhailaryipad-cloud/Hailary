@@ -10527,3 +10527,28 @@ html body #stage #main .cloud-war .cloud-actions{background:none}
 html body #stage #main .cloud-war .cloud-actions button.cloud-tool{width:min(11cqw,64px);font-size:min(2.1cqw,11px)}
 html body #stage #main .cloud-war .cloud-ti{display:block;margin:0 auto 1px;width:min(8cqw,42px);height:min(8cqw,42px);background-size:500% 100%;background-repeat:no-repeat;filter:drop-shadow(0 1px 2px #0a2a4a99)}
 html body #stage #main .cloud-war .cloud-carnage{bottom:calc(min(11cqw,62px) + 10px)}
+/* City window, bigger (user: "on ours you can't see anything; make it bigger: where and which boss to hit"): wide card,
+   the map takes the space, defenders are big portraits with a role tag, HP bar and a gold ring on the chosen one. */
+#stage #modal[open]:has(.cloud-city){width:min(96vw,640px)!important;max-width:none!important;max-height:97dvh!important;padding:10px 12px!important}
+#stage #modal .cloud-city .portal-defenders[data-terrain]{width:min(100%,60dvh,600px)!important;margin:4px auto!important;border-radius:14px}
+#stage #modal .cloud-city .portal-defenders[data-terrain]>button.portal-strike{width:17%!important;transform:translate(-50%,-50%)}
+#stage #modal .cloud-city .portal-defenders[data-terrain]>button.portal-strike[data-role=Boss]{width:22%!important}
+#stage #modal .cloud-city .portal-strike img{border-width:3px;box-shadow:0 3px 6px #0008}
+#stage #modal .cloud-city .portal-strike[data-role=Elite] img{border-color:#c78aff}
+#stage #modal .cloud-city .portal-strike[data-role=Boss] img{border-color:#ffd24a;box-shadow:0 0 0 2px #a8701a,0 0 14px #ffd24aaa}
+#stage #modal .cloud-city .portal-strike small{font:800 clamp(9px,1.7vw,13px)/1 Arial,sans-serif!important;padding:2px 6px!important;border-radius:6px;background:#2b6fd0;color:#fff;margin-bottom:-4px;position:relative;z-index:1}
+#stage #modal .cloud-city .portal-strike[data-role=Elite] small{background:#8a3fd8}
+#stage #modal .cloud-city .portal-strike[data-role=Boss] small{background:#d8303a}
+#stage #modal .cloud-city .portal-hp{height:7px;border:1px solid #0008}
+#stage #modal .cloud-city .portal-clock{font-size:11px}
+#stage #modal .cloud-city .portal-strike.picked img{box-shadow:0 0 0 4px #ffe27a,0 0 20px #ffe27a}
+#stage #modal .cloud-city .portal-strike.picked::after{display:block!important;content:'▼';position:absolute;left:50%;top:-22%;transform:translateX(-50%);color:#ffe27a;font-size:clamp(14px,2.6vw,22px);text-shadow:0 1px 2px #000;animation:cityPick 1s ease-in-out infinite}
+@keyframes cityPick{50%{transform:translate(-50%,-4px)}}
+#modal .cloud-city h2{font-size:clamp(18px,3.4vw,26px)!important}
+#modal .cloud-city .city-kill{margin:4px 0}
+#stage #modal .cloud-city .portal-defenders[data-terrain]>button.portal-strike{width:14%!important;border:0!important;outline:0!important;background:none!important;box-shadow:none!important}
+#stage #modal .cloud-city .portal-defenders[data-terrain]>button.portal-strike[data-role=Boss]{width:19%!important}
+@media (max-height:820px){#stage #modal .cloud-city .portal-defenders[data-terrain]{width:min(100%,51dvh)!important}
+ #stage #modal .cloud-city .city-kill .bag-gain{width:52px!important;padding:2px!important}#stage #modal .cloud-city .city-kill .bag-gain .bag-ico{width:26px!important;height:26px!important}
+ #stage #modal .cloud-city .city-kill .bag-gain small,#stage #modal .cloud-city .city-kill .bag-gain span{display:none}#modal .cloud-city .city-kill p{font-size:11px}
+ #stage #modal .cloud-city .city-go{padding:5px 36px!important;font-size:16px!important}}

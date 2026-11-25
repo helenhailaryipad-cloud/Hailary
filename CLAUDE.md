@@ -1184,6 +1184,11 @@ territory windows with ten defenders and the fight; defenders never came back an
   Map bottom (user crossed out the dark Carnage bar and the boxed tool bar): the map runs to the bottom; Carnage Points
   is a small pill floating on it and the tools are small icons with outlined labels on a soft gradient, right of the
   back button (CSS "Cloud War bottom, third look" at the end of stage.css).
+  Tool icons are light painted emblems (user: "small, not black, not distracting"): atlas `comp-cloud-tools` (shop,
+  faction, points, rank, guide; `art-source/cloud/tool-*.webp`, `scripts/build-cloud-tools.py`), `cloudToolIcon(n)`.
+  City window bigger (user: "on ours you see nothing; where and which boss to hit"): card up to 640 px, the city map
+  up to 60dvh (51dvh on short screens), portraits 14% / boss 19% with coloured role tags (Guard blue, Elite violet,
+  Boss red), HP bars, a bouncing ▼ over the chosen one; `pads` spaced so portraits never overlap.
 - Timed background fights (2026-11-24, user: "each fight about a minute, auto, you can see Reina fighting, and I can
   leave to the menus instead of only watching"): a fight lasts `CLOUD_FIGHT` seconds (Guard 45, Elite 60, Boss 75; less
   for a hurt defender) on a wall clock (`cloudBattle {index,slot,role,hp0,start,dur}`); `cloudFightTick` (1 s interval,
