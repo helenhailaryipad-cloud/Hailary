@@ -1,28 +1,31 @@
 // Daily Blessings (user photos of the reference's "Daily Check-in" behind its benefits icon): a 30-day calendar of
 // rewards, one claim per UTC day; sign-ins in the cycle unlock five milestone chests (2 / 7 / 14 / 21 / 28 days);
 // a Blessing Pass (prisms, never real money) doubles the marked days, also the ones already claimed this cycle.
-// A cycle is 30 UTC days from Blessings.anchor. Own name, art and wording. Rules are pure
+// A cycle is one calendar month (UTC; user: "it is really a monthly calendar"): 28-31 days. Own name, art and wording. Rules are pure
 // (node scripts/test-checkin.mjs); the screen is below CHECKIN_UI. All numbers are placeholders.
 const Blessings = {
-  anchor: Date.UTC(2026, 10, 1), cycleDays: 30, passPrice: 300,
+  cycleDays: 31, passPrice: 300,
   // Day n (1-30): [kind, amount, doubled by the pass]. kind = gold | prisms | wishes | a bag item id.
   days: [
     ['stam', 2, 0], ['gold', 2000, 1], ['wish', 1, 0], ['prisms', 20, 0], ['exp1', 2, 1], ['gold', 3000, 1],
     ['stam', 2, 0], ['gold', 2000, 1], ['stonebag', 1, 0], ['prisms', 20, 0], ['exp1', 2, 1], ['gold', 3000, 1],
     ['stam', 2, 0], ['gold', 2000, 1], ['wish', 1, 0], ['prisms', 20, 0], ['shardbag', 1, 1], ['gold', 3000, 1],
     ['stam', 2, 0], ['gold', 2000, 1], ['sealbag', 1, 0], ['prisms', 20, 0], ['exp2', 1, 1], ['gold', 3000, 1],
-    ['stam', 2, 0], ['gold', 2000, 1], ['chest2', 1, 0], ['prisms', 30, 0], ['gembox', 1, 1], ['chest3', 1, 0]
+    ['stam', 2, 0], ['gold', 2000, 1], ['chest2', 1, 0], ['prisms', 30, 0], ['gembox', 1, 1], ['chest3', 1, 0], ['wish', 2, 1]
   ],
   milestones: [[2, 'wish', 2], [7, 'chest2', 1], [14, 'petegg', 1], [21, 'chest3', 1], [28, 'prisms', 200]],
   day(now = Date.now()) { return new Date(now).toISOString().slice(0, 10); },
-  cycle(now = Date.now()) { return Math.floor((now - this.anchor) / (this.cycleDays * 864e5)); },
-  ends(c) { return this.anchor + (c + 1) * this.cycleDays * 864e5; },
+  // Cycle = months since year 0 (UTC); length = days in that month.
+  cycle(now = Date.now()) { const d = new Date(now); return d.getUTCFullYear() * 12 + d.getUTCMonth(); },
+  ends(c) { return Date.UTC(Math.floor(c / 12), c % 12 + 1, 1); },
+  length(c) { return new Date(this.ends(c) - 1).getUTCDate(); },
+  monthName(c) { return new Date(Date.UTC(Math.floor(c / 12), c % 12, 1)).toLocaleString('en-GB', { month: 'long', timeZone: 'UTC' }); },
   state(s, now = Date.now()) {
     const c = this.cycle(now); let v = s.blessings;
     if (!v || v.cycle !== c) v = s.blessings = { cycle: c, n: 0, last: '', got: [], pass: false };
     return v;
   },
-  ready(s, now = Date.now()) { const v = this.state(s, now); return v.last !== this.day(now) && v.n < this.cycleDays; },
+  ready(s, now = Date.now()) { const v = this.state(s, now); return v.last !== this.day(now) && v.n < this.length(v.cycle); },
   // Today's claim: the next day of the calendar (missed days are not lost, the calendar just moves on one per day).
   claim(s, now = Date.now()) {
     if (!this.ready(s, now)) return null;
@@ -69,18 +72,18 @@ function showBlessings() {
   const leftTxt = Math.floor(left / 864e5) + 'd ' + Math.floor(left % 864e5 / 36e5) + 'h';
   let body;
   if (blessTab === 'daily') {
-    const grid = Blessings.days.map((d, i) => {
+    const grid = Blessings.days.slice(0, Blessings.length(v.cycle)).map((d, i) => {
       const got = i < v.n, today = i === v.n && ready, n = d[1] * (d[2] && v.pass ? 2 : 1);
       return `<button class="bl-cell ${got ? 'got' : ''} ${today ? 'today' : ''}" ${today ? 'onclick="blessClaim()"' : ''}>${denPlain}${blessTile(d[0], n, '', d[2] ? `<i class="bl-x2 ${v.pass ? 'on' : ''}">Pass ×2</i>` : '')}<small>Day ${i + 1}</small>${got ? '<i class="bl-tick">✓</i>' : ''}</button>`;
     }).join('');
     const track = Blessings.milestones.map(([at, k, n]) => { const has = v.n >= at, got = v.got.includes(at);
       return `<button class="bl-ms ${has ? 'has' : ''} ${got ? 'got' : ''}" onclick="blessMilestone(${at})">${denPlain}${blessTile(k, n)}${got ? '<i class="bl-tick">✓</i>' : ''}<small>${at} days</small></button>`; }).join('');
     body = `<div class="bl-sheet"><div class="bl-grid">${grid}</div></div>
-      <div class="bl-total"><p>Days signed in: <b>${v.n}</b> · new calendar in ${leftTxt}</p><div class="bl-track"><u style="width:${Math.min(100, v.n / 28 * 100)}%"></u>${track}</div></div>`;
+      <div class="bl-total"><p>${Blessings.monthName(v.cycle)} · signed in <b>${v.n}</b> of ${Blessings.length(v.cycle)} days · next month in ${leftTxt}</p><div class="bl-track"><u style="width:${Math.min(100, v.n / 28 * 100)}%"></u>${track}</div></div>`;
   } else {
-    const marked = Blessings.days.map((d, i) => d[2] ? blessTile(d[0], d[1], i < v.n ? 'dim' : '', `<small class="bl-dn">Day ${i + 1}</small>`) : '').join('');
-    body = `<div class="bl-sheet pass"><h2>Blessing Pass</h2><p>Doubles every day marked <i class="bl-x2 on">Pass ×2</i> for this whole calendar, including the marked days you have already claimed.</p><div class="bl-passgrid">${marked}</div>
-      ${v.pass ? '<p class="bl-active">Active until the calendar ends</p>' : `<button class="bl-buy" onclick="blessPass()">${denPlain}${uiIcon('crystals')}${Blessings.passPrice}</button>`}</div>`;
+    const marked = Blessings.days.slice(0, Blessings.length(v.cycle)).map((d, i) => d[2] ? blessTile(d[0], d[1], i < v.n ? 'dim' : '', `<small class="bl-dn">Day ${i + 1}</small>`) : '').join('');
+    body = `<div class="bl-sheet pass"><h2>Blessing Pass</h2><p>Doubles every day marked <i class="bl-x2 on">Pass ×2</i> for the whole month, including the marked days you have already claimed.</p><div class="bl-passgrid">${marked}</div>
+      ${v.pass ? '<p class="bl-active">Active until the end of ' + Blessings.monthName(v.cycle) + '</p>' : `<button class="bl-buy" onclick="blessPass()">${denPlain}${uiIcon('crystals')}${Blessings.passPrice}</button>`}</div>`;
   }
   $('#main').innerHTML = `<section class="bl-room" style="--bl-banner:url('${artPath('blessings-banner')}')">
     <div class="bl-head"><h1><span>Daily Blessings</span></h1></div>
