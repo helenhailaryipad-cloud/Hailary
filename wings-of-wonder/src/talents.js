@@ -3,7 +3,7 @@
 // prerequisites, branch-point gates) and our own names, art and effects. Rules in `Talents` (pure, tested by
 // scripts/test-talents.mjs); the screen is below the TALENTS_UI marker. All numbers are placeholders.
 const Talents = {
-  fromLevel: 30,          // 1 talent point per hero level above this (the reference starts at Lv.400)
+  fromLevel: 400,         // 1 talent point per hero level above this (as in the reference; user 2026-11-25)
   resetPrice: 100,        // prisms for a full reset (free while nothing is spent)
   branches: [
     { id: 'off', name: 'Offensive', sky: 'Falcon', art: 'talent-sky-off' },

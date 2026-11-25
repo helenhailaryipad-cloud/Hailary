@@ -216,7 +216,7 @@ User shared an iCloud folder (one PDF, "Huntopia_Full_Talent_Handout", 232 photo
   text). Effects are WonderGear stat bonuses (`Talents.bonus` in `stats()`) or battle procs (`Talents.procs`:
   stun / lash / boss / stunned / regen, `heroTalentHit` after Reina's hit in `updateBattle`, `heroTalentTick` in
   `petSupport`; cached on `g.heroProcs`).
-- Points: 1 per hero level above `Talents.fromLevel` (30, placeholder; the reference starts at Lv.400). Reset Talent
+- Points: 1 per hero level above `Talents.fromLevel` = 400 (as in the reference, user asked for it). Reset Talent
   returns everything for `resetPrice` 100 prisms. Optional save field `S.heroTalents {key: level}` (`Talents.valid`).
 - UI: overview with the four constellation discs (talents learned x/N, points spent, red dot when something can be
   learned), tree view (constellation background, lines lit when both ends are learned, nodes: learned = colour +
