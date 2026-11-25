@@ -2099,7 +2099,11 @@ function cloudPortalPreview(place,index){
  const rewards=cloudPortalRewards[place.rank];
  const paths='M50 31 L24 14 L9 31 L24 48 Z M50 31 L76 14 L91 31 L76 48 Z M50 31 V55 M50 55 H34 V69 L50 87 L66 69 V55 Z';
  // Each outer courtyard holds one elite and two guards around its central paving.
- const pads=[[50,37],[27,40],[73,40],[50,64],[13,20],[13,52],[87,20],[87,52],[32,82],[68,82]];// spaced so the big portraits never overlap
+ // Plazas of the simple city maps (art-source/cloud/interior-<rank>.webp), % of the map: boss, elites L / R / below,
+ // guards far-left up / down, far-right up / down, bottom-left, bottom-right.
+ const pads=({Island:[[50,39],[25,39],[76,39],[50,69],[10.5,24],[10.5,60],[88.5,24],[89,60],[26,85],[74,85]],
+  Fortress:[[50,37],[27,39],[72.5,39],[50,70],[15,25],[14.5,52],[85,25],[85,52],[27,81],[72.5,81]],
+  Capital:[[50,40],[24,44],[75,44],[50,69],[9.5,29],[9,60],[90.5,29],[91,60],[26,85],[75,85]]})[place.rank]||[[50,37],[27,40],[73,40],[50,64],[13,20],[13,52],[87,20],[87,52],[32,82],[68,82]];
  if(cloudCount!==4){
   const defenders=cloudPortalSlots.map(([role,x,y,art])=>`<div class="portal-defender" data-role="${role}" style="left:${x}%;top:${y}%"><small>${role==='Boss'?'Golden Boss':role}</small>${artImage('guardian-t'+art,role)}</div>`).join('');
   return `<section class="cloud-portal-preview"><h2>${place.name}</h2><p>${place.owner} · ${place.rank==='Capital'?'Holy City':place.rank}</p><div class="portal-defenders"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="${paths}"/></svg>${defenders}</div><p>Boss personal point pool <b>${rewards.personal}</b></p><div>${dailyTokens(['hud-prisms','hud-gems',rewards.armor])}</div></section>`;

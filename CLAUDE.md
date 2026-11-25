@@ -1197,6 +1197,11 @@ territory windows with ten defenders and the fight; defenders never came back an
   Then simpler (user photo of the reference's mini-map: "drawn simply, nothing outlined in black, all icons the same
   size"): every defender 12.5% (boss too), light disc with a thin coloured ring (blue / violet / gold), small tags, thin
   HP bar, red clock text without a box, no frame on the map picture; the card is light sky-blue.
+  Simple city maps (user: "worse"; chose a simple map, then "use the sample as a guide, not a copy"): the three city
+  interiors are new flat pastel schematics (image-model edit with her photo of the reference's mini-map as the STYLE
+  reference only; sources `art-source/cloud/interior-{island,fortress,capital}.webp` -> `cloud-interior-*` 720 px +
+  AVIF q34, much smaller than before). The ten defenders stand on the ten plazas: per-rank `pads` in
+  `cloudPortalPreview`.
 - Timed background fights (2026-11-24, user: "each fight about a minute, auto, you can see Reina fighting, and I can
   leave to the menus instead of only watching"): a fight lasts `CLOUD_FIGHT` seconds (Guard 45, Elite 60, Boss 75; less
   for a hurt defender) on a wall clock (`cloudBattle {index,slot,role,hp0,start,dur}`); `cloudFightTick` (1 s interval,
