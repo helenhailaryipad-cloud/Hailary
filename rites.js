@@ -4,13 +4,13 @@
 // NEVER guaranteed - user: "450 pulls in the reference gave one aura and small things"), the rite's AURA (a ring of light at her feet, real stats, copies raise its
 // tier), one of ten WISH ORBS (a collection with set bonuses at 4 / 7 / 10), then bag items. Luck: within 15 pulls an
 // orb is certain (never wings or an aura); it resets when one drops. Pull milestones of the event pay tickets of the NEXT rite (so
-// the circle feeds itself), two rites also return their own tickets, Starfall Vault lets her pick a prize at 360 / 720
+// the circle feeds itself), only Dragon Hoard returns some of its own tickets (Moonwell has no return, user), Starfall Vault lets her pick a prize at 360 / 720
 // / 800 instead, Celestial Bloom pays prisms on its Petal Path. Duplicates turn into stardust for the Dust Shop.
 // Every number here is a placeholder. Rules are pure (node scripts/test-rites.mjs); the UI is below RITES_UI.
 const Rites = {
   anchor: Date.UTC(2026, 10, 23), eventDays: 14, cost: 50,
   list: [
-    { id: 'moon', name: 'Moonwell Rite', ticket: 'Moon Sigil', wings: 'fashion-wing-28', wingName: 'Moonwell Seraph', icon: 0, extra: 'returns', hue: '#b9a6ff' },
+    { id: 'moon', name: 'Moonwell Rite', ticket: 'Moon Sigil', wings: 'fashion-wing-28', wingName: 'Moonwell Seraph', icon: 0, extra: '', hue: '#b9a6ff' },
     { id: 'ember', name: 'Dragon Hoard', ticket: 'Ember Scale', wings: 'fashion-wing-29', wingName: 'Dragonfire Crest', icon: 1, extra: 'returns', hue: '#ff8a4a' },
     { id: 'star', name: 'Starfall Vault', ticket: 'Star Key', wings: 'fashion-wing-30', wingName: 'Starfall Comet', icon: 2, extra: 'choice', hue: '#5fd6c0' },
     { id: 'bloom', name: 'Celestial Bloom', ticket: 'Bloom Charm', wings: 'fashion-wing-31', wingName: 'Celestial Bloom', icon: 3, extra: 'petals', hue: '#ff8ac8' }
@@ -468,7 +468,7 @@ function riteRules() {
    <li>A pull costs ${Rites.cost} tickets. Ten pulls cost ${Rites.cost * 10}; the odds are the same. One free pull a day.</li>
    <li>Luck rises with every pull: a full luck bar turns the next small prize into a Wish Orb.</li>
    <li>The rite's exclusive wings, its aura and the ultra prize are never guaranteed.</li>
-   <li>Pull rewards pay tickets of the next rite. Moonwell Rite and Dragon Hoard also return their own tickets; Starfall Vault lets you choose a prize at 360, 720 and 800 pulls; Celestial Bloom pays prisms on its Petal Path.</li>
+   <li>Pull rewards pay tickets of the next rite. Only Dragon Hoard returns some of its own tickets; Starfall Vault lets you choose a prize at 360, 720 and 800 pulls; Celestial Bloom pays prisms on its Petal Path.</li>
    <li>Auras and orbs give stats for good. Repeats become stardust for the Dust Shop.</li>
    <li>Tickets come from the free pull, rewards, the Rite Shop (prisms) and the welcome gift.</li></ol></div>`);
 }
