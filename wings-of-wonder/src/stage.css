@@ -10569,3 +10569,19 @@ html body #stage #main .cloud-war .cloud-carnage{bottom:calc(min(11cqw,62px) + 1
 #stage #modal .cloud-city .city-kill .bag-gain{background:linear-gradient(#fffaf0,#ffe9bd)!important;border:2px solid #e9c46f!important;box-shadow:0 2px 4px #1a4a8a44!important;color:#5a2a06!important}
 #stage #modal .cloud-city .city-kill .bag-gain b{color:#5a2a06!important;text-shadow:none!important}
 #stage #modal .cloud-city .city-kill .daily-token{background:linear-gradient(#fffaf0,#ffe9bd)!important;border:2px solid #e9c46f!important;border-radius:10px}
+/* City mini-map, simple like the reference (user: "drawn simply, nothing outlined ten times in black frames, all icons
+   the same size"): every defender the same size, a light disc with a thin coloured ring, no dark fills, no frame on
+   the map picture, small tags. */
+#stage #modal .cloud-city .portal-defenders[data-terrain]{box-shadow:none!important;border:0!important;border-radius:0!important}
+#stage #modal .cloud-city .portal-defenders[data-terrain]>button.portal-strike,#stage #modal .cloud-city .portal-defenders[data-terrain]>button.portal-strike[data-role=Boss]{width:12.5%!important;filter:none!important}
+#stage #modal .cloud-city .portal-strike img,#stage #modal .cloud-city .portal-strike[data-role=Boss] img{border:2px solid #9fd6ff!important;background:radial-gradient(#ffffff,#d8efff)!important;box-shadow:0 1px 3px #1a4a8a55!important}
+#stage #modal .cloud-city .portal-strike[data-role=Elite] img{border-color:#c79bff!important}
+#stage #modal .cloud-city .portal-strike[data-role=Boss] img{border-color:#ffcf4a!important}
+#stage #modal .cloud-city .portal-strike small{font-size:clamp(8px,1.4vw,11px)!important;padding:1px 5px!important;border-radius:4px;box-shadow:none}
+#stage #modal .cloud-city .portal-strike[data-role=Guard] small{background:#3d8fe0}
+#stage #modal .cloud-city .portal-hp{height:4px;border:0;background:#ffffff88;width:70%;margin:2px auto 0}
+#stage #modal .cloud-city .portal-hp u{background:#e8363f}
+#stage #modal .cloud-city .portal-clock{background:none;color:#d81f2a;font-weight:800;text-shadow:0 0 3px #fff,0 0 3px #fff}
+#stage #modal .cloud-city .portal-strike.down img{filter:grayscale(1) brightness(.85)!important}
+#stage #modal .cloud-city .portal-strike.picked img{box-shadow:0 0 0 3px #ffe27a,0 0 12px #ffe27a!important}
+#stage #modal .cloud-city .city-kill .bag-gain :is(small,span,i,em){color:#5a2a06!important;text-shadow:none!important}

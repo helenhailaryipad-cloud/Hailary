@@ -1194,6 +1194,9 @@ territory windows with ten defenders and the fight; defenders never came back an
   City window bigger (user: "on ours you see nothing; where and which boss to hit"): card up to 640 px, the city map
   up to 60dvh (51dvh on short screens), portraits 14% / boss 19% with coloured role tags (Guard blue, Elite violet,
   Boss red), HP bars, a bouncing ▼ over the chosen one; `pads` spaced so portraits never overlap.
+  Then simpler (user photo of the reference's mini-map: "drawn simply, nothing outlined in black, all icons the same
+  size"): every defender 12.5% (boss too), light disc with a thin coloured ring (blue / violet / gold), small tags, thin
+  HP bar, red clock text without a box, no frame on the map picture; the card is light sky-blue.
 - Timed background fights (2026-11-24, user: "each fight about a minute, auto, you can see Reina fighting, and I can
   leave to the menus instead of only watching"): a fight lasts `CLOUD_FIGHT` seconds (Guard 45, Elite 60, Boss 75; less
   for a hurt defender) on a wall clock (`cloudBattle {index,slot,role,hp0,start,dur}`); `cloudFightTick` (1 s interval,
