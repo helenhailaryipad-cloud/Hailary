@@ -175,6 +175,30 @@ global `#main button` rules set position, borders and `::before`.
   the dragon (`cover-jungle`, source `art-source/trek/cover.webp`). Hosted bundle: AVIF copies of crownfall-vale,
   cloud-war-twin-islands and cloud-war-realms-2 were re-saved at quality 34 (headroom ~180 KB).
 
+## Burrow Blitz daily challenge (2026-11-25)
+User sent photos of the reference's whack-a-critter "Max Combo" ("find the good ones fast, never tap the bad ones").
+Own name and art. `src/burrow.js` (rules `Burrow`, pure, `node scripts/test-burrow.mjs`; UI below `BURROW_UI`), screen
+`burrow`, opened from a "Daily challenge" strip on the Mini Games hub (`burrowStrip()`, under the featured game; not in
+the `ARCADE` rotation, it has its own daily ranking) and the games sub-nav.
+- Run: 60 s, twelve burrows in a zig-zag (`BB_SPOTS`). Friendly: Acorn Vole +2, Berry Hamster +4, Sunbloom Hamster
+  time +4 s, Lucky Gemkit +20; frost: Frost Imp, Icicle Bat, Hail Golem, Snow Wisp freeze taps for 3 s and break the
+  streak. Streak multiplier x2 from 8 ... x5 from 32 (`mult`); it breaks after 2 s without a friendly tap. Pace rises
+  over the run (`pace`). Taps act on pointerdown. 3-2-1 + "Challenge starts!", painted hit sparks (`burrow-fx` = the
+  cascade-fx sheet with brightness as alpha: blend modes do not reach through the field's stacking context), floating
+  numbers, streak banners, a frost frame while frozen, shared `resultShow` (stars at 400 / 600 / 700).
+- Attempts: 1 free a UTC day + 1 extra for 50 prisms (`burrowBuy`); later runs are practice (no reward, no rank).
+  Point Rewards by score bracket after every rewarded attempt (gold + bag items); the best rewarded score of the day
+  ranks against 40 simulated AI (`field`, they finish through the day) and Ranking Rewards are mailed once when the
+  day turns (`Burrow.roll` -> `burrowState()`, "Meadow Warden"). Optional save field `S.burrow {day, runs, extra, best,
+  all}` (`Burrow.valid`).
+- Lobby: title, critters popping from burrows + the live Reina portrait, Rankings board and short Rules side by side,
+  Attempts left (+), Challenge, round Scoring Rules / Ranking Rewards / Point Rewards pop-ups (`.bb-pop`).
+- Art (image model): `art-source/burrow/` (eight critters, meadow, burrow, frost frame, cover with Reina from
+  `leaflight/master.png`) -> `burrow-critters` (4 x 2, cells 256 x 288, feet on the bottom), `burrow-bg`,
+  `burrow-hole`, `burrow-frost`, `burrow-fx`, `burrow-cover` by `scripts/build-burrow-art.py` (+ AVIF). Chat preview
+  packs `burrow-*` into pack-minis. Hosted bundle 33,186,666 bytes (about 360 KB spare). All numbers are placeholders.
+- Not done: a Daily Must-Do list like the reference's (Wayfarer Quests has no Burrow task yet).
+
 ## Mini Games hub (2026-11-23)
 User: "all games in one place, names on the main field, not hunted through sub-tabs". The bottom-nav tab is called
 Mini Games; `games()` in `app.js` draws `.mg-hub`: one tile per game from `MINI_GAMES` (cover, name, line, best

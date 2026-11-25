@@ -18,6 +18,7 @@ vm.runInContext(fs.readFileSync('src/game-polish.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/minigame-engine.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/wardrobe-engine.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/party.js','utf8'),context);
+vm.runInContext(fs.readFileSync('src/burrow.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/siege.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/vow.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/rites.js','utf8'),context);
