@@ -347,7 +347,7 @@ screen `vow` (`src/vow.js`: rules `Vow`, pure, `node scripts/test-vow.mjs`; UI b
 `scripts/test.mjs`). Full screen, the blossom-tree / red-carpet / rose-arch backdrop on every tab, big glossy title,
 ribbon, countdown pill, "My Point" chip, wallet (gold, prisms, heart crystals), bottom nav with five painted icons and
 the round back button. Tab in `vowTab`; the room's class is `vw-tab-<tab>` (do not reuse `vw-venue` etc. for it).
-- Rules: event = 7 UTC days from `Vow.anchor` (repeats). She bonds with ONE AI friend or guild member per event
+- Rules: event = 2 UTC days from `Vow.anchor` (`eventDays`, user 2026-11-25: "Blossom Vow only 2 days"; repeats). She bonds with ONE AI friend or guild member per event
   (`Vow.bond`; Searching Partner pop-up `vowFindPop`: Friends / Nearby / Guild / Cross-Server, the AI accepts after a
   moment, `vowInvite` -> `vowAccept`). Gifts (`Vow.gifts`): Red Rose 120, Blossom Ring 520, Heart Rosebox 1314
   intimacy, Love Lock EXP 29 / 99 / 199. `Vow.send` (Send Oath pop-up `vowSendPop`: three cards, 20-char message,

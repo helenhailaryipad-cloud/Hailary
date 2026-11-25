@@ -1,12 +1,12 @@
 // Blossom Vow (user photos of the reference's couple event, no text; own names and art). Reina bonds with ONE AI
-// friend for the event week and they send each other Red Roses, Blossom Rings and Heart Roseboxes. A gift gives
+// friend for the event (2 days, user) and they send each other Red Roses, Blossom Rings and Heart Roseboxes. A gift gives
 // intimacy, Love Lock EXP (a lasting level with small stats) and, only between the two bonded partners when the
 // gifting is mutual, Bond Points x2 for the team. Bond Points, the daily Oath Goal and purchase counts reset at 00:00
 // UTC; each day's couple ranking (20 slots, simulated AI couples) closes at 21:00 UTC and pays once by mail. Oath Test:
 // dungeon guardians drop gifts; Oath Witness: a short bouquet-catching scene and +15% EXP the next day if her couple was
 // No.1. All numbers are placeholders. Rules first (pure, tested by scripts/test-vow.mjs), the screen below VOW_UI.
 const Vow = {
-  eventDays: 7, anchor: Date.UTC(2026, 10, 23), closeHour: 21, ceremony: [21 * 60 + 10, 21 * 60 + 30],
+  eventDays: 2, anchor: Date.UTC(2026, 10, 23), closeHour: 21, ceremony: [21 * 60 + 10, 21 * 60 + 30],
   gifts: { rose: { name: 'Red Rose', pts: 120, lock: 29, card: 'b' }, ring: { name: 'Blossom Ring', pts: 520, lock: 99, card: 'p' }, box: { name: 'Heart Rosebox', pts: 1314, lock: 199, card: 'o' } },
   giftIds: ['rose', 'ring', 'box'],
   // Own items kept in S.vow (everything else in a reward is a bag item or gold). Order = comp-vow-icons atlas.
@@ -70,7 +70,7 @@ const Vow = {
   rewardFor(rank, score) { const t = this.ranks.find(r => rank >= r.from && rank <= r.to); return t ? t.give : score >= this.partNeed ? this.part.give : null; },
   // ---- partner ----
   bond(v, id) { if (v.partner || !id) return false; v.partner = id; v.bond = 0; return true; },
-  // Bond Transfer: once per event week she may pass her vow to another partner for a fee (heart crystals or prisms).
+  // Bond Transfer: once per event she may pass her vow to another partner for a fee (heart crystals or prisms).
   // Today's Bond Points stay with her; the new partner starts with no bond and no return gifts yet.
   transferCost: { crystal: 30, prisms: 120 },
   transfer(v, id, pay, wallet) {
@@ -261,7 +261,7 @@ function vpHead(t) { return `<div class="vp-head"><h2>${t}</h2><span class="vp-p
 function vpPair(v, sub) { const p = v.partner; return `<div class="vp-pair"><span class="vp-face me">${portrait('reina')}</span><i>♥</i><span class="vp-face">${p ? vwFace(p) : '<b class="vp-q">?</b>'}</span><p><b>${p ? esc(S.name || 'Reina') + ' &amp; ' + esc(vwName(p)) : 'No partner yet'}</b><small>${sub}</small></p></div>`; }
 function vowBondPop() {
   const v = vowState(), p = v.partner, lk = Vow.lockLevel(v.lock), now = Vow.lockBonus(lk.lv), next = Vow.lockBonus(Math.min(Vow.lockMax, lk.lv + 1));
-  popup(`<div class="vp vp-bond">${vpHead('Partner Bond')}${vpPair(v, p ? 'Bond this event: ' + fmt(v.bond) + ' intimacy · team ' + fmt(Vow.score(v)) + ' pts' : 'One partner per event week')}
+  popup(`<div class="vp vp-bond">${vpHead('Partner Bond')}${vpPair(v, p ? 'Bond this event: ' + fmt(v.bond) + ' intimacy · team ' + fmt(Vow.score(v)) + ' pts' : 'One partner per event')}
    ${p ? `<div class="vp-row"><span>Intimacy</span><span class="vp-hearts big">${vowHearts(p)}</span></div>` : `<button class="vp-wide" onclick="vowFindPop()">${denPlain}Find a partner</button>`}
    <div class="vp-lock">${vwIco('lock', 'big')}<div><b>Love Lock Lv. ${lk.lv}</b><span class="vp-bar"><u style="width:${lk.need ? lk.into / lk.need * 100 : 100}%"></u></span><small>${lk.need ? fmt(lk.into) + ' / ' + fmt(lk.need) + ' EXP to Lv. ' + (lk.lv + 1) : 'Max level'}</small></div></div>
    <div class="vp-stats">${Object.keys(Vow.lockStats).map(k => `<span><small>${{ attack: 'ATK', health: 'HP', defense: 'DEF' }[k]}</small><b>+${fmt(now[k])}</b>${lk.lv < Vow.lockMax ? `<em>▲ ${fmt(next[k])}</em>` : ''}</span>`).join('')}</div>
@@ -274,7 +274,7 @@ function vowTransferPop() {
   if (!p) return popup(`<div class="vp">${vpHead('Bond Transfer')}${vpPair(v, 'Bond with someone first')}<p class="vp-lead">Bond Transfer passes your vow to another gentleman. Find a partner first.</p><button class="vp-wide" onclick="vowFindPop()">${denPlain}Find a partner</button></div>`);
   const men = vowMen(Object.keys(vwFolk())).filter(id => id !== p); if (!men.includes(vowMoveTo)) vowMoveTo = men.find(id => soc.friends.includes(id)) || men[0] || '';
   const c = Vow.transferCost;
-  popup(`<div class="vp vp-move">${vpHead('Bond Transfer')}${vpPair(v, v.moved ? 'Transfer already used this event' : 'Once per event week')}
+  popup(`<div class="vp vp-move">${vpHead('Bond Transfer')}${vpPair(v, v.moved ? 'Transfer already used this event' : 'Once per event')}
    <p class="vp-lead">Pass your vow to another gentleman. Today's Bond Points stay yours; the new bond starts fresh.</p>
    <div class="vp-who">${men.map(id => `<button class="${id === vowMoveTo ? 'on' : ''}" ${v.moved ? 'disabled' : ''} onclick="vowMoveTo='${id}';vowTransferPop()">${denPlain}${vwFace(id)}<small>${esc(vwName(id))}</small></button>`).join('')}</div>
    ${v.moved ? '<p class="vp-empty">You have already transferred your vow this event. A new event starts with a free choice.</p>' : `<div class="vp-two">
@@ -299,7 +299,7 @@ function vowBuyPop(id) {
 }
 function vowSoon(name) { popup(`<div class="vw-pop"><h2>${name}</h2><p class="vw-note">Coming soon.</p></div>`); }
 function vowRules() {
-  popup(`<div class="vw-pop"><h2>Blossom Vow</h2><ol class="vw-rules"><li>Bond with one AI friend for the event week; you two are a team.</li><li>Only mutual gifts inside the team count, and they count double for both.</li>
+  popup(`<div class="vw-pop"><h2>Blossom Vow</h2><ol class="vw-rules"><li>Bond with one AI friend for the event (${Vow.eventDays} days); you two are a team.</li><li>Only mutual gifts inside the team count, and they count double for both.</li>
    <li>Points, Oath Goals and purchase limits reset every day at 00:00 UTC.</li><li>The ranking closes at 21:00 UTC; rewards come by mail. ${fmt(Vow.rankNeed)} points to be listed.</li><li>Everyone else here is an AI adventurer.</li></ol></div>`);
 }
 function vowRewards() {
@@ -323,8 +323,8 @@ function vowFindPop(tab = vowFind) {
   const empty = tab === 'Guild' && !g ? 'Join a guild to meet its members.' : tab === 'Cross-Server' ? 'Nobody from other realms yet — everyone in Sky Garden is an AI adventurer.' : 'No one here yet. Try another tab.';
   const list = ids.length ? ids.map(id => `<div class="vp-card ${v.partner === id ? 'is' : ''}"><span class="vp-face">${vwFace(id)}</span><div class="vp-info"><b>${esc(vwName(id))}<small>AI</small><em>Lv. ${lv(id)}</em></b><span class="vp-hearts">${vowHearts(id)}</span><span class="vp-tag">${VOW_TAGS[id] || 'Brave adventurer'}</span></div>${v.partner === id ? '<span class="vp-bonded">♥ Bonded</span>' : `<button class="vp-invite" ${v.partner ? 'disabled' : ''} onclick="vowInvite('${id}')">${denPlain}Invite</button>`}</div>`).join('')
     : `<p class="vp-empty">${empty}</p>`;
-  const head = v.partner ? `<div class="vp-pair"><span class="vp-face me">${portrait('reina')}</span><i>♥</i><span class="vp-face">${vwFace(v.partner)}</span><p><b>${esc(S.name || 'Reina')} &amp; ${esc(vwName(v.partner))}</b><small>Your vow for this event week</small></p></div>`
-    : `<p class="vp-lead">Choose a gentleman to share your vow with this week. Mutual gifts count double!</p>`;
+  const head = v.partner ? `<div class="vp-pair"><span class="vp-face me">${portrait('reina')}</span><i>♥</i><span class="vp-face">${vwFace(v.partner)}</span><p><b>${esc(S.name || 'Reina')} &amp; ${esc(vwName(v.partner))}</b><small>Your vow for this event</small></p></div>`
+    : `<p class="vp-lead">Choose a gentleman to share your vow with in this event. Mutual gifts count double!</p>`;
   popup(`<div class="vp vp-find"><div class="vp-head"><h2>Searching Partner</h2><span class="vp-petal l"></span><span class="vp-petal r"></span></div>${head}
    <div class="vp-tabs">${['Friends', 'Nearby', 'Guild', 'Cross-Server'].map(t => `<button class="${t === tab ? 'on' : ''}" onclick="vowFindPop('${t}')">${denPlain}${t}</button>`).join('')}</div>
    <div class="vp-list">${list}</div></div>`);
