@@ -1204,7 +1204,8 @@ territory windows with ten defenders and the fight; defenders never came back an
   `cloudPortalPreview`.
   Big map labels (user: "the map is beautiful but laid out badly: small, lots of captions"): each place shows only its
   name on a gold ribbon (`#cloudRibbon`, larger text) and a small "Boss: N" pill above it; the faction text, the owner
-  and the "under attack" line are gone from the map (owner is in the city window).
+  and the "under attack" line are gone from the map (owner is in the city window). Then smaller (user: "the flags are huge,
+  the chests gigantic"): ribbon text 9.5 / 7.8, Boss pill 7, ownership chest 24 units beside the city's top right.
   Where Reina goes (user: "unclear where Reina goes; highlight the chosen boss"): in the city window the chosen defender
   is larger (16%), with a pulsing gold ring, a gold "Target" tag and Reina's face on it, the others dimmed; on the big
   map a bouncing Reina face marker sits over the city of the running fight (`cloudBattle.index`, `.cloud-reina-mark`).
