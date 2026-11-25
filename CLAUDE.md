@@ -80,9 +80,9 @@ render and LOOK at hand, neck, feet (`composeWardrobeCanvas` in the preview) bef
 - Wings are drawn about 1.5x larger from the shoulder blades; portraits with wings are wider and taller
   (`wardrobeWingPad`, `wardrobeWingTop`), `.winged-portrait` and `drawReina` compensate.
 - Wing root at the shoulder blades (2026-11-25, user: "the wings are on her bottom, they must come from the back"): the
-  wing fit box moved up (`fit:[-135,-172,720,600]`, root near y 185-200 of the 500 x 800 body); the square starter wings
-  w0-w3 have their root low in the picture and get a `rect` from `WING_ROOT` (root y 210, tips inside the padding); the
-  Character page's separate wing picture `.reina-sheet-wings` is lifted (`inset:-3% 9% 43%`).
+  wing fit box moved up (`fit:[-135,-140,720,600]`, root near y 215-230 of the 500 x 800 body; then user: "not from the neck"); the square starter wings
+  w0-w3 have their root low in the picture and get a `rect` from `WING_ROOT` (root y 232, tips inside the padding); the
+  Character page's separate wing picture `.reina-sheet-wings` is lifted (`inset:0 9% 40%`).
 
 ## Harvest Pairs mini-game (2026-11-18)
 Home screen icon "Harvest Pairs" (right side, next to Fishing) or Mini Games -> Harvest Pairs (`src/pairs.js`, screen id `pairs`): tap two identical ingredients that a line with at most
