@@ -247,6 +247,10 @@ Promotions block (user circled it: "too messy"): `cityGroups[1]` keeps only even
 Blossom Vow, DailyGift, Guild, Fashion Sale, Wishwell, Star Rites. ValuePass, GoldPass, SuperPack, DreamPass, FestEvent,
 SpendRank, Chain Buy (nothing behind them) and Rush Rank (repeated the Rank button) are gone; add an icon back only
 together with its screen.
+Star Rites on the home screen (user: "the gacha must be shown on the main screen"): instead of a small promo icon, a
+big card under the promotions on the left (`homeGacha()`, `.city-gacha`): the running rite's wings, its name, time
+left, a pulsing border in the rite's colour, a turning light, and a red "Free pull!" badge while today's free pull is
+unused. It opens `rites`.
 
 ## Mini Games hub (2026-11-23)
 User: "all games in one place, names on the main field, not hunted through sub-tabs". The bottom-nav tab is called
