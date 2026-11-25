@@ -37,7 +37,28 @@ const Rites = {
   // Ticket packs for prisms, once each per event, each step dearer (user photos of the reference's Secret Shop: 500
   // tickets for 50, 100 ... 450 crystals), all cheaper than the 1:1 exchange; and the Dust Shop. Tickets are NEVER sold
   // for real money directly (user): when payments come, money buys prism packs with tickets only as a bonus.
-  packs: [50, 100, 150, 200, 250, 300, 350, 400, 450], packTickets: 500,
+  packs: [50, 100, 150, 200, 250, 300, 350, 400, 450, 500], packTickets: 500,
+  // Secret Shop prism packs (user: "you can also buy prisms for euros, with tickets and a few shards of some pet that
+  // changes"): money buys PRISMS; tickets of the running rite and copies of the rite's featured pet come as a bonus.
+  // Once per rite each. Real payment is not connected (cashBuy refuses), the rows only show the offer.
+  cashPacks: [{ eur: 0.99, prisms: 60, tickets: 50, pet: 2 }, { eur: 4.99, prisms: 300, tickets: 150, pet: 4 }, { eur: 14.99, prisms: 980, tickets: 500, pet: 12 },
+    { eur: 19.99, prisms: 1280, tickets: 650, pet: 16 }, { eur: 29.99, prisms: 1980, tickets: 1000, pet: 30 }, { eur: 49.99, prisms: 3280, tickets: 1680, pet: 50 }],
+  // The featured pet of a rite: Super Rare familiars in turn (d34..d43), one per rite.
+  featuredPet(period) { const ids = ['d34', 'd35', 'd36', 'd37', 'd38', 'd39', 'd40', 'd41', 'd42', 'd43']; return ids[((period % ids.length) + ids.length) % ids.length]; },
+  // Pet copies: the first unlocks the pet if she lacks it, the rest are spare copies (Synthesize / star-up material).
+  givePet(s, id, n) {
+    if (!(n > 0)) return 0; let rest = n;
+    if (!(s.owned || []).includes(id)) { s.owned = [...(s.owned || []), id]; rest--; }
+    if (rest > 0) { if (typeof WonderGear !== 'undefined') WonderGear.addPetSpare(s, id, rest); else (s.petSpares ??= {})[id] = ((s.petSpares || {})[id] || 0) + rest; }
+    return n;
+  },
+  // What a paid pack would grant (used by the payment flow when it exists, and by tests).
+  cashGrant(s, i, now = Date.now()) {
+    const v = this.state(s, now), p = this.cashPacks[i], rite = this.rite(v.ev.period);
+    if (!p || (v.ev.cash || []).includes(i)) return null;
+    v.ev.cash = [...(v.ev.cash || []), i]; s.scales = (s.scales || 0) + p.prisms; v.t[rite.id] = (v.t[rite.id] || 0) + p.tickets;
+    this.givePet(s, this.featuredPet(v.ev.period), p.pet); return { prisms: p.prisms, tickets: p.tickets, pet: p.pet, rite };
+  },
   dust: { ultra: 1000, wings: 300, aura: 100, orb: 20, pull: 40, orbBuy: 300 },
   welcome: 1000,
   // Altar tiers (user photos of the reference's gacha: three reward rows, each pays "a selection reward" every N pulls of
@@ -219,7 +240,7 @@ const Rites = {
     if (v.prev !== undefined && !(obj(v.prev) && Number.isSafeInteger(v.prev.period) && int(v.prev.pulls))) return false;
     const e = v.ev; if (e === null || e === undefined) return true;
     return obj(e) && Number.isSafeInteger(e.period) && int(e.pulls) && int(e.luck) && e.luck < this.luckMax && Array.isArray(e.got) && e.got.every(int)
-      && int(e.picks) && typeof e.grand === 'boolean' && Array.isArray(e.packs) && e.packs.every(i => Number.isInteger(i) && i >= 0 && i < this.packs.length) && typeof e.free === 'string';
+      && int(e.picks) && typeof e.grand === 'boolean' && Array.isArray(e.packs) && e.packs.every(i => Number.isInteger(i) && i >= 0 && i < this.packs.length) && (e.cash === undefined || Array.isArray(e.cash) && e.cash.every(i => Number.isInteger(i) && i >= 0 && i < this.cashPacks.length)) && typeof e.free === 'string';
   }
 };
 
@@ -249,7 +270,39 @@ function riteTierArt(tid, i) {
   const rite = Rites.rite(Rites.period()), [kind, id] = Rites.tiers.find(t => t.id === tid).items[i];
   return kind === 'wings' ? riteWingArt(rite, '') : kind === 'aura' ? riteAuraArt(rite.id, '') : kind === 'orb' ? riteIcon(4) : bagIcon(id);
 }
+let riteView = 'altar';
+function riteGo(view) { riteView = view; showRites(); }
+function riteNav(here, picks) {
+  const rite = Rites.rite(Rites.period());
+  return `<div class="ra-nav"><button class="ra-back" data-back onclick="go('home')" aria-label="Back">‹</button>
+    <button class="${here === 'altar' ? 'on' : ''}" onclick="riteGo('altar')">${denPlain}${riteTicket(rite)}<span>Altar</span></button><button class="${here === 'shop' ? 'on' : ''}" onclick="riteGo('shop')">${denPlain}${uiIcon('crystals')}<span>Secret Shop</span></button><button onclick="riteCollection()">${denPlain}${riteIcon(4)}<span>Collection</span></button><button onclick="riteSteps()">${denPlain}${riteIcon(14)}<span>Rewards</span>${picks > 0 ? '<em></em>' : ''}</button><button onclick="riteSchedule()">${denPlain}${uiIcon('calendar')}<span>Rotation</span></button></div>`;
+}
+// Secret Shop (user photos): prism packs for money with rite tickets and featured-pet copies as a bonus, then the
+// ten 500-ticket packs for 50 ... 500 prisms (once each per rite, "Sold out" stamps), then exchange and stardust.
+function riteSecret() {
+  if (typeof bagArtVars === 'function') bagArtVars();
+  const v = Rites.state(S), rite = Rites.rite(v.ev.period), pet = WonderGear.familiarById?.[Rites.featuredPet(v.ev.period)] || WonderGear.familiars.find(f => f.id === Rites.featuredPet(v.ev.period));
+  const petTile = n => `<span class="ss-tile pet" title="${esc(pet.name)} copies"><img src="${pet.portrait}" alt=""><b>${n}</b></span>`;
+  const cash = Rites.cashPacks.map((p, i) => { const done = (v.ev.cash || []).includes(i); return `<div class="ss-row ${done ? 'out' : ''}"><div class="ss-tiles"><span class="ss-tile pr">${uiIcon('crystals')}<b>${fmt(p.prisms)}</b></span><span class="ss-tile tk">${riteTicket(rite)}<b>${fmt(p.tickets)}</b></span>${petTile(p.pet)}</div>
+    <div class="ss-buy">${done ? '<i class="ss-sold">Sold out</i>' : `<button class="ss-price" onclick="riteCash(${i})">${denPlain}€${p.eur.toFixed(2)}</button>`}<small>Limit ${done ? 1 : 0}/1</small></div></div>`; }).join('');
+  const tick = Rites.packs.map((p, i) => { const done = v.ev.packs.includes(i); return `<div class="ss-row ${done ? 'out' : ''}"><div class="ss-tiles"><span class="ss-tile tk">${riteTicket(rite)}<b>${fmt(Rites.packTickets)}</b></span><span class="ss-note">${Rites.packTickets / Rites.cost} pulls of ${rite.name}${p < Rites.packTickets ? ` · <em>-${Math.round((1 - p / Rites.packTickets) * 100)}%</em>` : ''}</span></div>
+    <div class="ss-buy">${done ? '<i class="ss-sold">Sold out</i>' : `<button class="ss-price pr" onclick="riteBuyPack(${i})">${denPlain}${uiIcon('crystals')}${p}</button>`}<small>Limit ${done ? 1 : 0}/1</small></div></div>`; }).join('');
+  $('#main').innerHTML = `<section class="ra-room ss-room rt-${rite.id}" style="--ssbg:url('${artPath('comp-secret-shop')}')">
+   <div class="ss-banner"><span class="ra-time">⏱ <b>${riteClock(Rites.ends(v.ev.period) - Date.now())}</b></span><div class="rt-wallet">${riteWallet()}</div><h1>Secret Shop</h1></div>
+   <div class="ss-list">
+    <p class="ss-head">Prism Packs <small>· bonus ${rite.ticket}s and ${esc(pet.name)} copies (featured pet of this rite)</small></p>${cash}
+    <p class="ss-head">Ticket Packs <small>· ${Rites.packTickets} ${rite.ticket}s each, once per rite</small></p>${tick}
+    <button class="ss-more" onclick="riteMore()">${denPlain}Exchange, vouchers and stardust ›</button>
+   </div>${riteNav('shop', Rites.picksOpen(S))}</section>`;
+  riteStop(); ritesTimer = setInterval(riteTick, 1000);
+}
+function riteCash(i) {
+  const p = Rites.cashPacks[i], rite = Rites.rite(Rites.period()), pet = WonderGear.familiars.find(f => f.id === Rites.featuredPet(Rites.period()));
+  popup(`<div class="rt-pop"><h2>Prism Pack · €${p.eur.toFixed(2)}</h2><p>${uiIcon('crystals')}<b>${fmt(p.prisms)}</b> prisms, with a bonus of ${riteTicket(rite)}<b>${fmt(p.tickets)}</b> ${rite.ticket}s and <b>${p.pet}</b> ${esc(pet.name)} copies (the first one unlocks the pet).</p>
+   <p class="rt-small">Real-money payments are not connected in this prototype yet. Prisms can still buy every ticket pack below.</p></div>`);
+}
 function showRites() {
+  if (riteView === 'shop') return riteSecret();
   if (typeof bagArtVars === 'function') bagArtVars();
   const v = Rites.state(S), rite = Rites.rite(v.ev.period), ev = v.ev, free = Rites.freeReady(S), picks = Rites.picksOpen(S);
   const owned = (S.reinaFashion?.wingSkins || []).includes(rite.wings), prog = Rites.grandProgress(S);
@@ -273,8 +326,7 @@ function showRites() {
     <div><small>${riteTicket(rite)}${Rites.cost * 10} or ${uiIcon('crystals')}${Rites.cost * 10}</small><button class="ra-pull ten" onclick="ritePull(10)">${denPlain}Pull ×10</button></div>
    </div>
    <label class="ra-auto"><input type="checkbox" ${v.auto ? 'checked' : ''} onchange="riteAuto(this.checked)"><span>Use prisms when tickets run short</span></label>
-   <div class="ra-nav"><button class="ra-back" data-back onclick="go('home')" aria-label="Back">‹</button>
-    <button class="on">${denPlain}${riteTicket(rite)}<span>Altar</span></button><button onclick="riteShop()">${denPlain}${uiIcon('crystals')}<span>Shop</span></button><button onclick="riteCollection()">${denPlain}${riteIcon(4)}<span>Collection</span></button><button onclick="riteSteps()">${denPlain}${riteIcon(14)}<span>Rewards</span>${picks > 0 ? '<em></em>' : ''}</button><button onclick="riteSchedule()">${denPlain}${uiIcon('calendar')}<span>Rotation</span></button></div>
+   ${riteNav('altar', picks)}
   </section>`;
   riteStop(); ritesTimer = setInterval(riteTick, 1000);
 }
@@ -370,7 +422,8 @@ function ritePick() {
    <h3>Wish Orbs</h3><div class="rt-pick orbs">${Rites.orbs.map(([id, name]) => `<button onclick="riteChoose('orb','${id}')">${denPlain}${riteOrbIcon(id)}<small>${name}${v.orbs[id] ? ' ✓' : ''}</small></button>`).join('')}</div></div>`);
 }
 function riteChoose(kind, id) { const r = Rites.choose(S, kind, id); if (!r) return toast('Not available'); save(); showRites(); riteShow({ results: [r], paid: [], rite: Rites.rite(Rites.period()) }); }
-function riteShop() {
+function riteShop() { if ($('#modal')?.open) $('#modal').close(); riteView = 'shop'; if (screen !== 'rites') go('rites'); else showRites(); }
+function riteMore() {
   const v = Rites.state(S), rite = Rites.rite(v.ev.period);
   popup(`<div class="rt-pop"><h2>Rite Shop</h2><p>Packs refresh with every rite. ${riteTicket(rite)} ${rite.ticket}: <b>${fmt(Rites.tickets(S, rite.id))}</b> · ${uiIcon('crystals')} <b>${fmt(S.scales || 0)}</b></p>
    <div class="rt-packs">${Rites.packs.map((p, i) => `<button ${v.ev.packs.includes(i) ? 'disabled' : ''} onclick="riteBuyPack(${i})">${denPlain}${riteTicket(rite)}<b>${fmt(Rites.packTickets)}</b><small>${v.ev.packs.includes(i) ? 'Bought' : uiIcon('crystals') + p}</small>${p < Rites.packTickets ? `<em>-${Math.round((1 - p / Rites.packTickets) * 100)}%</em>` : ''}</button>`).join('')}</div>
@@ -389,9 +442,9 @@ function riteVoucher() {
    <div class="rt-row"><button class="primary" ${n ? '' : 'disabled'} onclick="riteRedeem()">${denPlain}Swap ${fmt(n)} for ${rite.ticket}s</button></div></div>`);
 }
 function riteRedeem() { const r = Rites.redeem(S, Rites.vouchers(S)); if (!r) return toast('No Starlit Vouchers yet'); save(); $('#modal').close(); if (screen === 'rites') showRites(); toast('+' + fmt(r.n) + ' ' + r.rite.ticket + 's'); }
-function riteBuyPack(i) { if (!Rites.buyPack(S, i)) return toast('Not enough prisms'); save(); riteShop(); showRitesKeep(); toast('+' + Rites.packTickets + ' tickets'); }
-function riteExchangeOnly(n) { if (!Rites.exchange(S, n)) return toast('Not enough prisms'); save(); riteShop(); showRitesKeep(); toast('+' + n + ' tickets'); }
-function riteDust(what) { if (!Rites.dustBuy(S, what)) return toast('Not enough stardust'); save(); riteShop(); showRitesKeep(); }
+function riteBuyPack(i) { if (!Rites.buyPack(S, i)) return toast('Not enough prisms'); save(); if (screen === 'rites' && riteView === 'shop') riteSecret(); else riteMore(); showRitesKeep(); toast('+' + Rites.packTickets + ' tickets'); }
+function riteExchangeOnly(n) { if (!Rites.exchange(S, n)) return toast('Not enough prisms'); save(); riteMore(); showRitesKeep(); toast('+' + n + ' tickets'); }
+function riteDust(what) { if (!Rites.dustBuy(S, what)) return toast('Not enough stardust'); save(); riteMore(); showRitesKeep(); }
 function riteDustOrb() { popup(`<div class="rt-pop"><h2>Choose an orb</h2><div class="rt-pick orbs">${Rites.orbs.map(([id, name]) => `<button onclick="riteDustBuyOrb('${id}')">${denPlain}${riteOrbIcon(id)}<small>${name}${S.rites.orbs[id] ? ' ✓' : ''}</small></button>`).join('')}</div></div>`); }
 function riteDustBuyOrb(id) { const r = Rites.dustBuy(S, 'orb', id); if (!r) return toast('Not enough stardust'); save(); showRites(); riteShow({ results: [r], paid: [], rite: Rites.rite(Rites.period()) }); }
 // Keeps the room behind a pop-up current without closing the pop-up.

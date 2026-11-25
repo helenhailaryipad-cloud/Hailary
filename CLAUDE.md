@@ -438,6 +438,15 @@ that said "GodGacha" (a reference name) is now "Star Rites".
   the centre bubble of the altar (rite wings left, aura right) and the art of the home card (`homeGacha`, "ULTRA PRIZE
   0.05%"). Tapping a bubble opens a prize card (`riteInfo(kind)`: big art with rays, CP from `riteCP`, type, Activated
   CP, Activation Stats, Owned), like the reference's item preview. Hosted bundle 33,500,833 bytes (~54 KB spare).
+- Secret Shop (2026-11-25, user photos + "this is where tickets are bought for 50-100-...-500 prisms per 50 pulls, and
+  prisms for euros with tickets and a few shards of some pet that changes"): a page of the rites room (`riteView`
+  'shop', `riteSecret()`, nav `riteNav` Altar / Secret Shop / Collection / Rewards / Rotation; the wallet "+" opens it):
+  banner `comp-secret-shop` (original raccoon merchant, `art-source/rites/secret-shop.webp`), Prism Packs
+  (`Rites.cashPacks`: EUR 0.99 ... 49.99 = prisms + bonus rite tickets + copies of the rite's featured Super Rare pet
+  `featuredPet(period)`, once per rite, `ev.cash`; `cashGrant` / `givePet` hold the grant, the first copy unlocks the
+  pet, the rest are spare copies). Real payment is NOT connected: the price opens an info card (`riteCash`). Ticket
+  Packs: ten x 500 tickets for 50 ... 500 prisms (`Rites.packs`), once each per rite, Sold out stamps. The old pop-up
+  (exchange, vouchers, stardust) is `riteMore()`. Hosted bundle 33,537,051 bytes (~17 KB spare: compress old art first).
 - Optional save field `S.rites {t, auras, aura, orbs, dust, ev{period,pulls,luck,got,picks,grand,packs,free}}` + optional `auto`, `log`, `ev.sel`, `ev.taken`
   (`Rites.valid` from `valid()`). Art (image model): `art-source/rites/` + `art-source/wings/wing-28..31.webp`, built by
   `scripts/build-rites-art.py` (wings, auras, hall backgrounds `comp-rites-bg-<id>`, icon atlas `comp-rites-icons`:

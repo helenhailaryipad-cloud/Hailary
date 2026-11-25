@@ -49,3 +49,6 @@ c = Image.new('RGBA', (192, 192)); c.alpha_composite(v, ((192-v.width)//2, (192-
 # Wayfarer Coin (trail.js shop currency).
 c = Image.open(SRC/'trail'/'coin.png').convert('RGBA'); a = np.array(c); a[a[..., 3] < 24] = 0; c = Image.fromarray(a); c = c.crop(c.getbbox()); c.thumbnail((120, 120), Image.Resampling.LANCZOS)
 t = Image.new('RGBA', (128, 128)); t.alpha_composite(c, ((128-c.width)//2, (128-c.height)//2)); save('comp-trail-coin', t, 88, 50)
+# Secret Shop banner (raccoon merchant, title over the calm left side) -> comp-secret-shop 900 x 600.
+ss = Image.open(SRC/'rites'/'secret-shop.webp').convert('RGB').resize((900, 600), Image.Resampling.LANCZOS)
+ss.save(OUT/'comp-secret-shop.webp', quality=78, method=6); ss.save(HOST/'comp-secret-shop.avif', quality=28); print('comp-secret-shop', ss.size)

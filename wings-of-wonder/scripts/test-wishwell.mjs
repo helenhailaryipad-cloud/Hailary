@@ -28,4 +28,7 @@ const got = R.tierTake(s2, 'ord', 0, rng, T2); t(got && R.tierOpen(s2, 'ord', T2
 t(s2.rites.log.length === 50 && R.value({ kind: 'wings' }) > R.value({ kind: 'item', id: 'exp1' }), 'record and values');
 s2.rites.t[rt.id] = 0; s2.scales = 600; s2.rites.auto = true; const pr = R.pull(s2, 10, rng, T2); t(pr.ok && s2.scales === 100 && pr.value > 0, 'auto-purchase with prisms');
 t(R.valid(s2.rites), 'rites still valid');
+const s3 = { scales: 0, owned: [] }, T3 = R.anchor + 864e5; R.state(s3, T3); const pid = R.featuredPet(R.period(T3));
+const g3 = R.cashGrant(s3, 1, T3); t(g3 && s3.scales === 300 && s3.owned.includes(pid) && s3.petSpares[pid] === 3 && R.cashGrant(s3, 1, T3) === null, 'prism pack: prisms, tickets, pet copies, once per rite');
+t(R.packs.length === 10 && R.packs[9] === 500 && R.valid(s3.rites), 'ten ticket packs 50..500');
 console.log('Wishwell:', ok, 'checks passed');
