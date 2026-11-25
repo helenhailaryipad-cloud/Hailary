@@ -25,6 +25,7 @@ vm.runInContext(fs.readFileSync('src/vow.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/rites.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/wishwell.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/checkin.js','utf8'),context);
+vm.runInContext(fs.readFileSync('src/titles.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/trail.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/app.js','utf8'),context);
 vm.runInContext(`

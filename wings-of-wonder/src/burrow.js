@@ -113,6 +113,7 @@ function burrowState() {
     else for (const [k, n] of Object.entries(mail)) WonderGear.bagAdd(S, k, n);
     if (WonderGear.socialNote) WonderGear.socialNote(S, 'Burrow Blitz: ranking reward (' + label + ') sent by mail.');
     if (typeof toast === 'function') toast('Burrow Blitz reward (' + label + ') sent by mail');
+    if (due.rank === 1 && typeof titleGrant === 'function') titleGrant('meadow');
   }
   if (S.burrow !== v) { S.burrow = v; save(); }
   return v;

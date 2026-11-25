@@ -120,7 +120,7 @@ function sgOwned() { return S.owned.filter(id => sgItem(id)?.type === 'dragon').
 function sgBase() { return sgOwned().slice(0, Siege.teamSize).reduce((a, id) => a + sgAtk(id), 0); }
 function siegeState() {
   const { v, due, daily } = Siege.roll(S.siege, Date.now(), sgBase());
-  if (due && due.give) { siegePay(due.give); const txt = 'Pet Siege ended: ' + (due.rank ? 'rank ' + due.rank + ', ' : '') + Siege.factions[0] + ' placed ' + due.faction + '. Rewards sent to the bag.'; if (WonderGear.socialNote) WonderGear.socialNote(S, txt); toast(txt); }
+  if (due && due.give) { siegePay(due.give); const txt = 'Pet Siege ended: ' + (due.rank ? 'rank ' + due.rank + ', ' : '') + Siege.factions[0] + ' placed ' + due.faction + '. Rewards sent to the bag.'; if (WonderGear.socialNote) WonderGear.socialNote(S, txt); toast(txt); if (due.rank === 1 && typeof titleGrant === 'function') titleGrant('siege'); }
   if (daily) { siegePay(daily.give); toast('Pet Siege daily battle ' + (daily.win ? 'won' : 'lost') + ' · reward sent to the bag'); }
   S.siege = v; return v;
 }

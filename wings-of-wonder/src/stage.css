@@ -10372,3 +10372,65 @@ html body #stage #main .ra-room .ra-top .rt-wallet{margin-left:0;flex:none}
 #modal .rf-pop .rf-list .rf-meta{display:block;font-size:11px;color:#d6c8f0}
 html body #stage .city-hud .rite-feed.rf-home{font-size:clamp(11px,1.7vw,15px)}
 html body #stage .city-hud .rite-feed.rf-home .rf-art{width:clamp(24px,3.6vw,34px);height:clamp(24px,3.6vw,34px)}
+/* ---- Titles (user photo of the reference's Title screen) ---- */
+body[data-screen=titles] #stage{width:min(100%,86dvh)!important;max-width:none!important}
+body[data-screen=titles] #stage>:is(header,nav,footer),body[data-screen=titles] .return-to-menu{display:none!important}
+body[data-screen=titles] #stage>#main{inset:0!important;width:100%;height:100%;padding:0!important;display:block;overflow:hidden}
+.tt-room{position:absolute;inset:0;container-type:size;display:flex;flex-direction:column;background:radial-gradient(ellipse at 60% 30%,#2c7bbd 0,#13447a 45%,#0a2448 100%);color:#fff;font-family:Arial,sans-serif;overflow:hidden}
+.tt-room::before{content:'';position:absolute;inset:0;background:radial-gradient(1.5px 1.5px at 20% 30%,#fff9,transparent),radial-gradient(1.5px 1.5px at 70% 18%,#fff8,transparent),radial-gradient(1px 1px at 85% 60%,#fff8,transparent),radial-gradient(1.5px 1.5px at 40% 80%,#fff6,transparent),radial-gradient(1px 1px at 60% 50%,#fff7,transparent);pointer-events:none}
+.tt-head{position:relative;flex:none;display:flex;align-items:center;gap:10px;padding:8px 12px 4px}
+.tt-head h1{flex:1;margin:0;text-align:center;font:900 min(7cqw,30px)/1 Georgia,serif;color:#fff;text-shadow:0 2px 0 #0b3a6a,0 0 12px #6fd0ff}
+.tt-count{font:700 12px Arial,sans-serif;color:#bfe6ff;min-width:52px;text-align:right}
+html body #stage #main .tt-room button.tt-back{width:min(12cqw,52px);height:min(12cqw,52px);flex:none}
+.tt-body{position:relative;flex:1;min-height:0;display:grid;grid-template-columns:min(34cqw,200px) 1fr;gap:8px;padding:4px 10px 10px}
+.tt-side{overflow:auto;display:flex;flex-direction:column;gap:6px;padding:6px;border-radius:12px;background:#0b2c5acc;box-shadow:inset 0 0 0 1.5px #5fb0ee66}
+html body #stage #main .tt-room .tt-side button{position:relative;display:flex;align-items:center;justify-content:center;gap:4px;width:100%;min-height:0;height:auto;padding:9px 6px;border-radius:7px;border:1.5px solid #4ea3e8;background:linear-gradient(#1d5fa8,#123f7a);color:#eaf6ff;font:800 min(3.4cqw,14px)/1.15 Arial,sans-serif;text-align:center;box-shadow:inset 0 1px 0 #ffffff33;transform:none}
+html body #stage #main .tt-room .tt-side button::before,html body #stage #main .tt-room .tt-side button::after{display:none}
+html body #stage #main .tt-room .tt-side button>svg:first-child{display:none}
+html body #stage #main .tt-room .tt-side button.tt-cat{background:linear-gradient(#ffe47a,#f2b83a);border-color:#fff0b0;color:#5a3406}
+html body #stage #main .tt-room .tt-side button.tt-cat:not(.on){background:linear-gradient(#e9d6a0,#c9a35a);opacity:.9}
+html body #stage #main .tt-room .tt-side button.tt-item.on{background:linear-gradient(#3fa6ff,#1f6fd0);border-color:#bff0ff;box-shadow:0 0 10px #6fd0ff99}
+html body #stage #main .tt-room .tt-side button.s-locked{opacity:.62}
+html body #stage #main .tt-room .tt-side button em{position:absolute;right:4px;top:4px;width:9px;height:9px;border-radius:50%;background:#ff3b3b;box-shadow:0 0 0 1.5px #fff}
+html body #stage #main .tt-room .tt-side button small{position:absolute;right:3px;bottom:2px;font-size:9px;color:#9dffb0}
+.tt-main{position:relative;min-height:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 8px 6px;border-radius:14px;background:linear-gradient(#ffffff14,#ffffff05);box-shadow:inset 0 0 0 1.5px #7cc8ff55;overflow:hidden}
+.tt-hero{flex:1 1 0;min-height:0;width:100%;display:flex;justify-content:center;align-items:flex-end;position:relative}
+.tt-hero::after{content:'';position:absolute;left:20%;right:20%;bottom:0;height:12%;background:radial-gradient(ellipse,#9fe3ff88,transparent 70%)}
+.tt-hero img{height:100%;max-width:100%;object-fit:contain;filter:drop-shadow(0 6px 10px #0008);position:relative;z-index:1}
+.tt-main.s-locked .tt-hero img{filter:drop-shadow(0 6px 10px #0008) saturate(.6) brightness(.8)}
+.tt-cp{margin:0;font:900 min(6cqw,26px)/1 Georgia,serif;color:#fff;text-shadow:0 0 10px #6fd0ff,0 2px 2px #000;letter-spacing:1px}
+.tt-stats{list-style:none;margin:0;padding:4px 10px;width:min(100%,300px);display:grid;gap:2px}
+.tt-stats li{display:flex;justify-content:space-between;align-items:center;font:800 min(3.6cqw,15px)/1.3 Arial,sans-serif}
+.tt-stats li span{display:flex;align-items:center;gap:6px;color:#dff3ff}.tt-stats .tt-ico{width:18px;height:18px}
+.tt-anec{width:100%;text-align:center;border-top:1px solid #9fd8ff44;padding-top:4px}
+.tt-anec h3{margin:0;font:800 min(3.6cqw,15px) Arial,sans-serif;color:#fff}
+.tt-anec p{margin:2px 0 0;font:700 min(3.3cqw,13px)/1.3 Arial,sans-serif;color:#cfe9ff}
+html body #stage #main .tt-room button.tt-btn{width:min(46cqw,220px);height:min(11cqw,48px);min-height:0;padding:0 0 3px;border:0;background:url(assets/generated/ui-btn-gold.webp) center/100% 100% no-repeat;color:#5a2a06;font:900 min(4.6cqw,20px)/1 Georgia,serif;box-shadow:none;transform:none}
+html body #stage #main .tt-room button.tt-btn.alt{background-image:url(assets/generated/ui-btn-violet.webp);color:#fff}
+html body #stage #main .tt-room button.tt-btn::before,html body #stage #main .tt-room button.tt-btn::after{display:none}
+html body #stage #main .tt-room button.tt-btn>svg:first-child{display:none}
+.tt-state{margin:0;font:800 12px Arial,sans-serif;color:#7dff9a}.tt-state.off{color:#ffb4b4;font-size:14px;padding:8px 0}
+/* Title plates: lettering with a gradient, a dark outline and a motif above, colour by look. */
+.tt-plate{position:relative;display:inline-flex;flex-direction:column;align-items:center;line-height:1;pointer-events:none}
+.tt-plate i{font-style:normal;font-size:1.05em;margin-bottom:-.3em;filter:drop-shadow(0 2px 2px #0008)}
+.tt-plate b{position:relative;display:block;padding:.18em .55em .22em;border-radius:.5em;font:900 1em/1 Georgia,serif;white-space:nowrap;color:transparent;background:var(--tg);-webkit-background-clip:text;background-clip:text;-webkit-text-stroke:.09em #3a1406;paint-order:stroke fill;filter:drop-shadow(0 0 .25em var(--tglow)) drop-shadow(0 2px 1px #0009)}
+.tt-plate::before{content:'';position:absolute;left:4%;right:4%;bottom:-.05em;height:.62em;border-radius:50%;background:radial-gradient(ellipse,var(--tglow),transparent 70%);opacity:.7}
+.tt-plate.big{font-size:min(7.4cqw,34px);flex:none}
+.tt-flame{--tg:linear-gradient(#fff6b0,#ffc23a 45%,#ff6a1a);--tglow:#ff7a2a}
+.tt-rose{--tg:linear-gradient(#fff0f6,#ff9ccf 50%,#e0408a);--tglow:#ff6ab0}
+.tt-tide{--tg:linear-gradient(#f0ffff,#7fe6ff 50%,#1b9bd8);--tglow:#4fd0ff}
+.tt-gold{--tg:linear-gradient(#fffbe0,#ffe066 45%,#d99a1a);--tglow:#ffd24a}
+.tt-star{--tg:linear-gradient(#ffffff,#d8c4ff 45%,#8a5cff);--tglow:#a98bff}
+.tt-frost{--tg:linear-gradient(#ffffff,#bfe9ff 45%,#5aa8ff);--tglow:#7fc8ff}
+.tt-leaf{--tg:linear-gradient(#fbffe6,#bff27a 45%,#4fb43a);--tglow:#8fe36a}
+.tt-frost b,.tt-tide b,.tt-star b{-webkit-text-stroke-color:#0b2a5a}.tt-leaf b{-webkit-text-stroke-color:#1c3a0a}.tt-rose b{-webkit-text-stroke-color:#4a0a2a}
+/* Worn title over Reina on the home screen (replaces the aura plate) */
+html body #stage .city-hud button.city-title{position:absolute;left:30%;top:26%;width:40%;height:5%;z-index:3;padding:0;border:0;background:none;box-shadow:none;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,3.4vw,30px);min-height:0}
+html body #stage .city-hud button.city-title::before,html body #stage .city-hud button.city-title::after{display:none}
+html body #stage .city-hud button.city-title>svg:first-child{display:none}
+/* "Open Titles" in a title letter */
+html body #stage #main button.soc-title-go{padding:6px 14px;border-radius:999px;border:1.5px solid #e9c46f;background:linear-gradient(#ffe47a,#f2b83a);color:#5a3406;font:800 13px Arial,sans-serif;min-height:0;height:auto;width:auto}
+/* Title lettering: a dark outlined copy underneath, the gradient copy (data-t) on top. */
+.tt-plate b{color:#3a1406;background:none;-webkit-background-clip:border-box;background-clip:border-box;-webkit-text-stroke:.16em #3a1406}
+.tt-frost b,.tt-tide b,.tt-star b{color:#0b2a5a;-webkit-text-stroke-color:#0b2a5a}.tt-leaf b{color:#1c3a0a;-webkit-text-stroke-color:#1c3a0a}.tt-rose b{color:#4a0a2a;-webkit-text-stroke-color:#4a0a2a}
+.tt-plate b::after{content:attr(data-t);position:absolute;left:0;top:0;padding:inherit;color:transparent;-webkit-text-stroke:0;background:var(--tg);-webkit-background-clip:text;background-clip:text;white-space:nowrap}

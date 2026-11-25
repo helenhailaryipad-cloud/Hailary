@@ -184,7 +184,7 @@ function partyGifts(give) { if (typeof bagArtVars === 'function') bagArtVars(); 
 // State with the clock applied; pays the final result of a finished event week once.
 function partyState() {
   const { v, due } = Party.roll(S.party, Date.now());
-  if (due && due.give) { partyPay(due.give, v); if (WonderGear.socialNote) WonderGear.socialNote(S, `Lagoon Gala ended: rank ${due.rank}, rewards sent to the bag.`); toast('Lagoon Gala rewards: rank ' + due.rank); }
+  if (due && due.give) { partyPay(due.give, v); if (WonderGear.socialNote) WonderGear.socialNote(S, `Lagoon Gala ended: rank ${due.rank}, rewards sent to the bag.`); toast('Lagoon Gala rewards: rank ' + due.rank); if (due.rank === 1 && typeof titleGrant === 'function') titleGrant('lagoon'); }
   S.party = v; return v;
 }
 function partyPay(give, v = S.party) {

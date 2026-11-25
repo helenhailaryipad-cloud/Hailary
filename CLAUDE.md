@@ -470,6 +470,22 @@ that said "GodGacha" (a reference name) is now "Star Rites".
   `scripts/build-rites-art.py` (wings, auras, hall backgrounds `comp-rites-bg-<id>`, icon atlas `comp-rites-icons`:
   tickets, orbs, luck chest, stardust). Hosted bundle 33.03 MB (about 0.5 MB spare). All numbers are placeholders.
 
+## Titles (2026-11-25)
+User photo of the reference's Title screen (Celebrity Titles, title plate over the hero, CP and stats underlined,
+"Title Anecdote: 1st Place in ...", Activate / Activatable, opened from Mail). Own names; plates drawn in CSS (no new
+pictures). `src/titles.js` (rules `Titles`, pure, `node scripts/test-titles.mjs`; UI below `TITLES_UI`), screen
+`titles` (drawer item Titles, the worn plate on the home screen, "Open Titles" in a title letter).
+- Celebrity titles for a No.1 finish, granted where each ranking pays (`titleGrant`): Burrow Blitz day (`meadow`),
+  Blossom Vow day (`sweetheart`), Lagoon Gala (`lagoon`), featured mini game turn in `arcadeState` (`arcade`), Pet Siege
+  week (`siege`), Star Duel season (`duel`, after `duelSettle` in gear-ui). Achievement titles from the save
+  (`Titles.check` via `titlesCheck()` on home / Titles): 50 guardians, Pairs <= 1:30, Cascade 8,000, Burrow 700, ten
+  orbs, four auras, Aurelian Sunwings.
+- A new title arrives "Activatable" with a letter from "Hall of Wonders"; Activate turns its stats on for good (all
+  activated titles count, `Titles.bonus` in `stats()`); one activated title can be worn: its plate (`titleHome`,
+  `.city-title`) replaces the "Overlord's Aura" plate over Reina. Optional save field `S.titles {got{id:time}, on[], worn}`
+  (`Titles.valid`). Room `.tt-room`: category list left (Celebrity / Achievement), plate, Reina, CP, stats, Title Story,
+  Activate / Wear / Take off. Hosted bundle: comp-avatar-frames AVIF re-saved at q34 (-59 KB) -> 33,486,994 bytes.
+
 ## Wishwell: Star Rites carry-over (2026-11-25)
 User sent photos of the reference's "Adventure Goals" behind its Snowland home icon ("tickets for the next gacha for
 pulls in today's"). Own name, art and wording. The home promo `snow` is now "Wishwell" (screen `wishwell`,

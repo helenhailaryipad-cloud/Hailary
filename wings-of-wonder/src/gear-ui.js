@@ -783,7 +783,7 @@ function citySocial(){
   const kind=socialPage==='Mail'?'mail':'note',list=v.mail.filter(m=>m.kind===kind);
   if(!list.some(m=>m.id===mailPick))mailPick=list[0]?.id??null;
   const m=list.find(x=>x.id===mailPick),stamp=t=>new Date(t).toISOString().slice(2,19).replace('T',' ');
-  const letter=m?`<div class="soc-letter"><h3>${esc(m.title)}</h3><p>${m.kind==='note'?'A note for you:':'Dear Reina,'}</p><p>${esc(m.text)}</p><em>${esc(mailFrom(m))}${m.kind==='note'?' <small>AI</small>':''}</em><div class="soc-items">${Object.keys(m.items).length?cloudItems(m.items):'<small>No items</small>'}${m.claimed&&Object.keys(m.items).length?'<i class="soc-claimed">Claimed</i>':''}</div></div>`:`<div class="soc-letter"><p class="soc-empty">${kind==='mail'?'No mail.':'No thank-you notes yet.'}</p></div>`;
+  const letter=m?`<div class="soc-letter"><h3>${esc(m.title)}</h3><p>${m.kind==='note'?'A note for you:':'Dear Reina,'}</p><p>${esc(m.text)}</p><em>${esc(mailFrom(m))}${m.kind==='note'?' <small>AI</small>':''}</em><div class="soc-items">${/^Title earned:/.test(m.title)?`<button class="soc-title-go" onclick="go('titles')">${denPlain}Open Titles</button>`:Object.keys(m.items).length?cloudItems(m.items):'<small>No items</small>'}${m.claimed&&Object.keys(m.items).length?'<i class="soc-claimed">Claimed</i>':''}</div></div>`:`<div class="soc-letter"><p class="soc-empty">${kind==='mail'?'No mail.':'No thank-you notes yet.'}</p></div>`;
   body=`<div class="satchel-top"><strong>${kind==='mail'?'Mail':'Thank-you Note'}</strong></div>${letter}
   <div class="satchel-scroll soc-scroll">${list.map(x=>`<div class="soc-mail ${x.id===mailPick?'on':''} ${x.read?'':'new'}" onclick="mailOpen(${x.id})">${socIcon(kind==='mail'?(x.claimed?4:3):5)}<div><b>${kind==='mail'?esc(x.title):esc(x.from)+' <small>AI</small>'}</b><small>${stamp(x.t)}</small></div>${x.claimed?'':'<i class="soc-dot">!</i>'}<button class="soc-check" aria-pressed="${mailChecked.includes(x.id)}" onclick="event.stopPropagation();mailCheck(${x.id})">${denPlain}</button></div>`).join('')}</div>
   <div class="soc-mailbar"><button class="soc-check" aria-pressed="${list.length&&list.every(x=>mailChecked.includes(x.id))}" onclick="mailAll('${kind}')">${denPlain}</button><span>Select All <b>${list.length}/${r.socialRules.mailMax}</b></span><button onclick="mailDrop()">${denPlain}Delete</button><button class="den-gold" onclick="mailTake('${kind}')">${denPlain}Claim</button></div>`;
@@ -1049,7 +1049,7 @@ function duelBigTabs(pk,v,R){
 }
 function duelRoom(){
  const r=WonderGear,R=r.duelRules;warArtVars();bagArtVars();
- const paid=r.duelSettle(S);if(paid.gold||paid.mail){save();if(paid.mail)toast('Star Duel rewards are in your Mail.');else toast('Bets paid: +'+fmt(paid.gold)+' gold')}
+ const paid=r.duelSettle(S);if(paid.mail&&r.duelPlace(S)===1&&typeof titleGrant==='function')titleGrant('duel');if(paid.gold||paid.mail){save();if(paid.mail)toast('Star Duel rewards are in your Mail.');else toast('Bets paid: +'+fmt(paid.gold)+' gold')}
  const v=r.duelState(S),q=r.duelQualRank(S),st=stats(),place=r.duelPlace(S);
  if(!['Qualification','Group','Peak','Ultimate'].includes(duelTab))duelTab='Qualification';
  let panel='',canMatch=false,matchNote='';
