@@ -1041,7 +1041,10 @@ function buyFashionBow(id){
 let cityExpanded=true;
 const cityGroups=[
  [['top-up','Top-up'],['shop','Shop'],['benefits','Blessings','blessings'],['treasure','TresHunt'],['summon','Summon','citySummon'],['gear','Master of Gear','forge'],['discord','Discord']],
- [['pass','ValuePass'],['siege','Pet Siege','siege'],['vow','Blossom Vow','vow'],['goldpass','GoldPass'],['gift','DailyGift','quests'],['clan','Guild','cityGuild'],['superpack','SuperPack'],['fashion','Fashion Sale','sale'],['snow','Wishwell','wishwell'],['dream','DreamPass'],['fest','FestEvent'],['gacha','Star Rites','rites'],['spend','SpendRank'],['rush','Rush Rank','rankings'],['chain','Chain Buy']],
+// Promotions: only events with a working screen (user: "too messy"). ValuePass, GoldPass, SuperPack, DreamPass,
+ // FestEvent, SpendRank and Chain Buy had nothing behind them; Rush Rank only repeated the Rank button. Bring an icon
+ // back here when its screen exists.
+ [['siege','Pet Siege','siege'],['vow','Blossom Vow','vow'],['gift','DailyGift','quests'],['clan','Guild','cityGuild'],['fashion','Fashion Sale','sale'],['snow','Wishwell','wishwell'],['gacha','Star Rites','rites']],
  [['character','Character','character'],['bag','Bag','cityBag'],['pet','Pet','cityPet'],['companion','Companion','cityCompanion'],['skin','Skin','citySkin'],['forge','Forge','cityForge'],['more','More','more']]
 ];
 const cityDrawerItems=[
