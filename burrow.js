@@ -100,7 +100,7 @@ const Burrow = {
 if (typeof module !== 'undefined') module.exports = { Burrow };
 
 // BURROW_UI
-const BURROW_ART = ['burrow-bg', 'burrow-hole', 'burrow-critters', 'burrow-frost', 'burrow-fx', 'ui-btn-gold', 'ui-btn-violet', 'ui-result-ribbon', 'ui-result-burst'];
+const BURROW_ART = ['burrow-bg', 'burrow-hole', 'burrow-rim', 'burrow-critters', 'burrow-frost', 'burrow-fx', 'ui-btn-gold', 'ui-btn-violet', 'ui-result-ribbon', 'ui-result-burst'];
 let burrowArtCache = [];
 function burrowPreload() { if (burrowArtCache.length) return; burrowArtCache = BURROW_ART.map(id => { const i = new Image(); i.src = artPath(id); i.decode?.().catch(() => {}); return i; }); }
 function burrowNames() { return typeof Party !== 'undefined' ? Party.aiNames : ADVENTURERS.map(a => a.name); }
@@ -190,7 +190,7 @@ function burrowStrip() {
   return `<button class="mg-daily" onclick="go('burrow')" style="--bb-crit:url('${artPath('burrow-critters')}')">${denPlain}<span class="mg-dl-art">${artImage('burrow-cover', 'Burrow Blitz')}</span><span class="mg-dl-text"><i>DAILY CHALLENGE</i><b>Burrow Blitz</b><small>Tap the critters, dodge the frost</small></span><span class="mg-dl-side"><em>${left ? left + ' attempt' + (left > 1 ? 's' : '') + ' left' : 'Done today'}</em><small>Best today ${fmt(v.best)}</small></span></button>`;
 }
 // The run.
-const BB_SPOTS = [...Array(12).keys()].map(i => { const col = [0, 1, 2][i % 3], row = Math.floor(i / 3); return { x: [18, 50, 82][col], y: 8 + (row * 2 + (col === 1 ? 1 : 0)) * 12.2 }; });
+const BB_SPOTS = [...Array(12).keys()].map(i => { const col = [0, 1, 2][i % 3], row = Math.floor(i / 3); return { x: [18, 50, 82][col], y: 10 + (row * 2 + (col === 1 ? 1 : 0)) * 11.6 }; });
 let burrowGame = null;
 function openBurrowBoard() {
   if (typeof screenChangedAt !== 'undefined') screenChangedAt = Date.now();
@@ -205,7 +205,7 @@ function openBurrowBoard() {
         <div class="bb-srl">${Burrow.critters.slice(0, 5).map((c, n) => `<p class="${c.bad ? 'bad' : ''}">${bbCritter(n, 'mini')}<b>${c.bad ? 'Freeze ' + Burrow.freeze + 's' : c.time ? 'Time +' + c.time + 's' : 'Points +' + c.pts}</b></p>`).join('')}<p class="bad">${bbCritter(5, 'mini')}${bbCritter(6, 'mini')}${bbCritter(7, 'mini')}<b>Freeze</b></p></div></div>
       <span class="bb-combo" id="bbCombo"></span><div class="bb-top3">${['First', 'Second', 'Third'].map((t, i) => `<p><span>${t} Place</span><b>${top[i] ? fmt(top[i].score) : '—'}</b></p>`).join('')}</div>
     </div>
-    <div class="bb-field" id="bbField">${BB_SPOTS.map((p, i) => `<div class="bb-hole" data-h="${i}" style="--x:${p.x};--y:${p.y};z-index:${Math.round(p.y)}"><img class="bb-back" src="${artPath('burrow-hole')}" alt="" draggable="false"><span class="bb-pit"><i class="bb-crit"></i></span><img class="bb-front" src="${artPath('burrow-hole')}" alt="" draggable="false"></div>`).join('')}</div>
+    <div class="bb-field" id="bbField">${BB_SPOTS.map((p, i) => `<div class="bb-hole" data-h="${i}" style="--x:${p.x};--y:${p.y};z-index:${Math.round(p.y)}"><img class="bb-back" src="${artPath('burrow-hole')}" alt="" draggable="false"><span class="bb-pit"><i class="bb-crit"></i></span><img class="bb-front" src="${artPath('burrow-rim')}" alt="" draggable="false"></div>`).join('')}</div>
     <div class="bb-banner" id="bbBanner"></div>
     <div class="bb-frost" id="bbFrost" style="--bb-frost:url('${artPath('burrow-frost')}')"><b>Frozen!</b><small id="bbFrostT"></small></div>
     ${paid ? '' : '<p class="bb-practice">Practice</p>'}
