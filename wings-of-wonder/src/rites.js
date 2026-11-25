@@ -320,7 +320,7 @@ function showRites() {
   };
   const prize = (art, label, cls, kind) => `<button class="ra-orb ${cls}" onclick="riteInfo('${kind}')">${denPlain}<span>${art}</span><small>${label}</small>${kind === 'ultra' ? '<em>ULTRA · ' + Rites.pct(Rites.odds.ultra) + '</em>' : ''}</button>`;
   $('#main').innerHTML = `<section class="ra-room rt-${rite.id}" style="--rtbg:url('${artPath('comp-rites-bg-' + rite.id)}');--rthue:${rite.hue}">
-   <div class="ra-top"><button class="ra-help" onclick="riteRates()">${denPlain}?</button><span class="ra-time">⏱ <b class="rt-time-b">${riteClock(Rites.ends(ev.period) - Date.now())}</b></span><div class="rt-wallet">${riteWallet()}</div></div>
+   <div class="ra-top"><button class="ra-help" onclick="riteRates()" aria-label="Rates and rules">${denPlain}<span>?</span></button><span class="ra-time">⏱ <b class="rt-time-b">${riteClock(Rites.ends(ev.period) - Date.now())}</b></span><div class="rt-wallet">${riteWallet()}</div></div>
    <div class="ra-head"><h1><small>STAR RITES</small>${rite.name}</h1><button class="ra-rec" onclick="riteRecord()">${denPlain}${uiIcon('book')}<span>Record</span></button></div>
    <div class="ra-show">${prize(riteWingArt(rite, ''), rite.wingName, 'side l', 'wings')}${prize(`<img src="${artPath(Rites.ultra.id)}" alt="">`, Rites.ultra.name, 'mid ultra', 'ultra')}${prize(riteAuraArt(rite.id, ''), Rites.auras[rite.id], 'side r', 'aura')}</div>
    <p class="ra-prog">${v.ev.grand || owned ? 'Grand prize won · ' + Rites.pct(Rites.odds.wings) + ' a pull' : `Grand prize progress: <b>${Rites.grandProgress(S).toFixed(2)}%</b> <small>(${fmt(v.ev.pulls)}/${fmt(Rites.grandAt)})</small>`}</p>
