@@ -731,6 +731,7 @@ function wardrobeLeafPath(slot){
 }
 // Large wings reach past the 500-wide figure frame; portraits with wings are this much wider on each side.
 const wardrobeWingPad=140,wardrobeWingTop=100;
+const WING_ROOT={w0:[490,68],w1:[517,9],w2:[453,4],w3:[494,4]};// [root y, top of the art] in the 700 px starter wing pictures
 // Cloak, back accessory and tail worn behind Reina (Companion screen). The tag "cloak.back.tail"
 // travels inside portrait keys so cached portraits never show a stale accessory.
 const wardrobeExtraKinds=['cloak','back','tail'],wardrobeExtraSlots={cloak:'cloakBack',back:'backItem',tail:'tailBack'};
@@ -750,7 +751,11 @@ async function composeWardrobeCanvas(dress,hair,weapon=0,wings='',tag=wardrobeEx
   return key;
  }).filter(Boolean);
  const body='fit-control-body';
- if(wings&&!WonderWardrobe.get('wings:'+wings))WonderWardrobe.register({id:'wings:'+wings,kind:'wings',layers:[{slot:'wingsBack',asset:wings,fit:[-135,-115,720,600],minTop:2-wardrobeWingTop}]});
+ // Wings grow from the shoulder blades (user: "they are on her bottom, they must come from the back"): fashion wings are
+ // fitted so their root lands near y 185-200 of the 500 x 800 body; the square starter wings w0-w3 have their root low in
+ // the picture (WING_ROOT, y of 700) and are scaled so the root sits at y 210 and the tips stay inside the top padding.
+ if(wings&&!WonderWardrobe.get('wings:'+wings)){const r=WING_ROOT[wings];const layer=r?{slot:'wingsBack',asset:wings,rect:(k=>[228-350*k,210-r[0]*k,700*k,700*k])(Math.min(.75,(210+wardrobeWingTop-2)/(r[0]-r[1])))}:{slot:'wingsBack',asset:wings,fit:[-135,-172,720,600],minTop:2-wardrobeWingTop};
+  WonderWardrobe.register({id:'wings:'+wings,kind:'wings',layers:[layer]})}
  return WonderWardrobe.render({dress:'dress:'+fittedDressId(dress),hair:'hair:'+fittedHairId(hair),weapon:weapon?'weapon:'+weapon:null,wings:wings?'wings:'+wings:null,extras,body,only,pad:wings?wardrobeWingPad:0,padTop:wings?wardrobeWingTop:0,
   createCanvas:(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;},load:id=>styleImage(artPath(id))});
 }
