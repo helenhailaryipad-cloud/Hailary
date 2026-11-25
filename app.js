@@ -1044,7 +1044,7 @@ const cityGroups=[
 // Promotions: only events with a working screen (user: "too messy"). ValuePass, GoldPass, SuperPack, DreamPass,
  // FestEvent, SpendRank and Chain Buy had nothing behind them; Rush Rank only repeated the Rank button. Bring an icon
  // back here when its screen exists.
- [['siege','Pet Siege','siege'],['vow','Blossom Vow','vow'],['gift','DailyGift','quests'],['clan','Guild','cityGuild'],['fashion','Fashion Sale','sale'],['snow','Wishwell','wishwell'],['gacha','Star Rites','rites']],
+ [['siege','Pet Siege','siege'],['vow','Blossom Vow','vow'],['gift','DailyGift','quests'],['clan','Guild','cityGuild'],['fashion','Fashion Sale','sale'],['snow','Wishwell','wishwell']],
  [['character','Character','character'],['bag','Bag','cityBag'],['pet','Pet','cityPet'],['companion','Companion','cityCompanion'],['skin','Skin','citySkin'],['forge','Forge','cityForge'],['more','More','more']]
 ];
 const cityDrawerItems=[
@@ -1090,6 +1090,10 @@ function cityAction(target,label){
 const cityArtVersion = document.querySelector('meta[name="wonder-release"]')?.content;
 // A red "!" only when there is really something to take or upgrade there (user: "icons must be clean; the mark only
 // shows when there is something to upgrade"). Icons without a working screen never carry it.
+// Star Rites on the home screen (user: "the gacha must be shown on the main screen"): a big card with the running
+// rite's wings, its name, time left and a "Free pull" badge when today's free pull is unused.
+function homeGacha(){if(typeof Rites==='undefined')return '';try{const p=Rites.period(),r=Rites.rite(p),ms=Rites.ends(p)-Date.now(),d=Math.floor(ms/864e5),h=Math.floor(ms%864e5/36e5);
+ return `<button class="city-gacha" style="--rt-hue:${r.hue}" onclick="go('rites')" aria-label="Star Rites: ${r.name}"><i class="cg-glow"></i><img src="${artPath(r.wings)}" alt=""><span><small>STAR RITES</small><b>${r.name}</b><em>${d?d+'d ':''}${h}h left</em></span>${cityDue('gacha')?'<i class="cg-free">Free pull!</i>':''}</button>`}catch{return ''}}
 function cityDue(icon){try{switch(icon){
  case 'benefits':{const v=Blessings.state(S);return Blessings.ready(S)||Blessings.milestones.some(([at])=>v.n>=at&&!v.got.includes(at))}
  case 'gacha':return Rites.freeReady(S)||Rites.picksOpen(S)>0;
@@ -1127,6 +1131,7 @@ function home(){
  <div class="city-left-events"><div class="city-top">${cityGroups[0].map(item=>cityIcon(item,'left-')).join('')}</div><div class="city-top city-compact">${short.map(item=>cityIcon(item,'left-')).join('')}</div>
  <button class="city-fold" aria-label="${cityExpanded?'Hide events':'Show events'}" aria-expanded="${cityExpanded}" aria-controls="city-promotions" onclick="foldCityMenu(this)"><span class="city-fold-disc" aria-hidden="true"></span></button>
  <div id="city-promotions" class="city-promos">${cityGroups[1].map(item=>cityIcon(item,'left-')).join('')}</div></div>
+ ${homeGacha()}
  <button class="city-reinforce" onclick="go('forge')"><span>Reinforce<small>Gear upgrades</small></span><img src="${artPath('hud-reinforce')}"></button><div class="city-extra"><button class="city-icon city-minigames" onclick="go('games')" aria-label="Mini Games"><span class="city-glyph"><img src="${artPath('comp-minigames-icon')}" alt=""></span><span class="city-caption">Mini Games</span></button><button class="city-icon" onclick="go('fishing')" aria-label="Fishing"><span class="city-glyph"><img class="city-fish" src="assets/generated/fishing-crowned-goldfish.webp" alt=""></span><span class="city-caption">Fishing</span></button>${[['isle-skyship','Isle Expedition','isleArena'],['cloud-war-citadel','Cloud War','cloudWar']].map(item=>cityIcon(item)).join('')}</div>
  ${mount?`<div class="city-wings riding">${artImage(fashionWing().id,'Reina’s wings')}</div>`:''}<div class="city-aura"><img src="${artPath('hud-aura')}" alt="Overlord’s Aura"></div>${cityCompanionEffects(['footprint'])}${pets.map(pet=>`<div class="city-pet city-pet-${pet.slot}"><img src="${pet.portrait||artPath(pet.id)}" alt="${esc(pet.name)}" draggable="false"></div>`).join('')}<div class="city-hero${mount?' riding':''}">${S.rites?.aura&&!mount?`<img class="rite-aura" src="${artPath('comp-rites-aura-'+S.rites.aura)}" alt="${Rites.auras[S.rites.aura]}">`:''}<b>${esc(S.name)}</b><img${mount?'':' class="winged-portrait"'} src="${mount?reinaLookPath(true):reinaWorldLookPath()}" alt="Reina"></div>${cityCompanionEffects(['elf'])}
  <div class="city-jobs">${[['Daily','cityTrail'],['Gameplay','cityGameplay'],['Bounty','cityBounty'],['Hunting','cityHunting']].map(([name,id])=>`<button onclick="go('${id}')"><img src="${artPath('wing-menu-'+name.toLowerCase())}" alt="">${name}</button>`).join('')}</div>

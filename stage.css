@@ -10109,3 +10109,16 @@ html body #stage #main .bl-room button.bl-buy{display:inline-flex;align-items:ce
 body[data-screen=blessings] #stage .toast{top:auto!important;bottom:18%!important}
 #stage .city-tool{position:relative}#stage .city-tool .city-notice{font-size:inherit;right:-6%;top:-8%;width:1.1em;height:1.13em;font:italic 800 1.85cqw/1.13 Arial}
 #stage .city-promos .city-icon{overflow:visible}#stage .city-promos .city-vow .city-caption{overflow:visible;text-overflow:clip;font-size:.88em;letter-spacing:-.05em}
+/* Star Rites card on the home screen, under the promotions on the left. */
+#stage .city-hud .city-gacha{position:absolute;left:1.4%;top:50%;width:27%;aspect-ratio:1.55;z-index:3;padding:0;border:0;border-radius:14px;overflow:hidden;cursor:pointer;
+ background:radial-gradient(circle at 35% 30%,color-mix(in srgb,var(--rt-hue) 70%,#fff),color-mix(in srgb,var(--rt-hue) 55%,#1a1040) 55%,#120a30);box-shadow:inset 0 0 0 2px #ffe9a8,inset 0 0 0 4px #6a3a10,0 6px 14px #0007,0 0 18px color-mix(in srgb,var(--rt-hue) 60%,#0000);animation:cgPulse 2.6s ease-in-out infinite}
+#stage .city-hud .city-gacha::before,#stage .city-hud .city-gacha::after{display:none}
+@keyframes cgPulse{50%{box-shadow:inset 0 0 0 2px #fff3c0,inset 0 0 0 4px #6a3a10,0 6px 14px #0007,0 0 28px color-mix(in srgb,var(--rt-hue) 85%,#0000)}}
+.city-gacha .cg-glow{position:absolute;inset:-40%;background:conic-gradient(from 0deg,#fff0 0 20deg,#fff6 30deg,#fff0 40deg 110deg,#fff5 120deg,#fff0 130deg 200deg,#fff6 210deg,#fff0 220deg 290deg,#fff5 300deg,#fff0 310deg);animation:cgSpin 9s linear infinite;mix-blend-mode:screen}
+@keyframes cgSpin{to{transform:rotate(360deg)}}
+.city-gacha img{position:absolute;left:-6%;top:-8%;width:78%;height:116%;object-fit:contain;filter:drop-shadow(0 0 8px #fff8)}
+.city-gacha>span{position:absolute;right:5%;bottom:7%;left:42%;display:flex;flex-direction:column;align-items:flex-end;text-align:right;gap:1px}
+.city-gacha small{font:900 max(8px,1.5cqw)/1 Arial,sans-serif;letter-spacing:.1em;color:#ffe9a8;text-shadow:0 1px 2px #000}
+.city-gacha b{font:900 max(11px,2.5cqw)/1.05 Georgia,serif;color:#fff;text-shadow:0 2px 0 #2a0a4a,0 0 8px #000}
+.city-gacha em{font:800 max(8px,1.6cqw)/1.1 Arial,sans-serif;font-style:normal;color:#b8ff9a;text-shadow:0 1px 2px #000}
+.city-gacha .cg-free{position:absolute;top:6%;right:5%;padding:2px 7px;border-radius:99px;background:linear-gradient(#ff6a5a,#c8201a);color:#fff;font:900 max(8px,1.5cqw)/1.3 Arial,sans-serif;font-style:normal;box-shadow:0 0 0 1.5px #fff,0 2px 4px #0006;animation:bbPulse 1.4s ease-in-out infinite}
