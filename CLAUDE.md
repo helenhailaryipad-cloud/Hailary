@@ -260,6 +260,9 @@ dark-blue enamel nameplate band, level medallion, no text) `art-source/ui/profil
 `scripts/build-profile-plate.py` (prints hole / band / medallion positions). `.city-status.pf2` in `home()`: portrait in
 the ring, name + ⚔ power + XP bar on the band, level in the medallion; Rank moved right, the left event icons 1.7%
 lower. Hosted bundle 33,507,356 bytes.
+The old v301 profile page (`heroProfile`, blue card with party heroes, Fashion / Mount, Attributes; user: "what is
+this? my eyes rolled up") is retired: `go('profile')` and a saved `screen==='profile'` open `character` instead; the
+plate and the Character page no longer link to it; the city skill "Companion" opens `cityCompanion`.
 
 ## Mini Games hub (2026-11-23)
 User: "all games in one place, names on the main field, not hunted through sub-tabs". The bottom-nav tab is called
