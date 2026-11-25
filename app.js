@@ -1085,10 +1085,20 @@ function cityAction(target,label){
  else modal('<h2>'+esc(label)+'</h2><p>This activity is not available yet.</p>');
 }
 const cityArtVersion = document.querySelector('meta[name="wonder-release"]')?.content;
-const cityNotices=new Set(['shop','benefits','treasure','summon','gear','goldpass','clan','superpack','dream','rush']);
+// A red "!" only when there is really something to take or upgrade there (user: "icons must be clean; the mark only
+// shows when there is something to upgrade"). Icons without a working screen never carry it.
+function cityDue(icon){try{switch(icon){
+ case 'benefits':{const v=Blessings.state(S);return Blessings.ready(S)||Blessings.milestones.some(([at])=>v.n>=at&&!v.got.includes(at))}
+ case 'gacha':return Rites.freeReady(S)||Rites.picksOpen(S)>0;
+ case 'snow':{const v=Wishwell.state(S);return Wishwell.claimable(S)>0||Wishwell.tasks.some(t=>!v.done.includes(t.id)&&Wishwell.progress(S,t)>=t.goal)}
+ case 'clan':{const g=WonderGear.guildState(S);return !!g&&!g.signed}
+ case 'summon':return WonderGear.bagCount(S,'wish')>0||(WonderGear.summonState(S).orbs||0)>0;
+ case 'rewards':{const A=WonderAdventure,a=A.state(S),d=A.dailyForge(S);return A.quests.some(q=>!a.claimed.includes(q.id)&&A.progress(S,q)>=q.target)||d.wins>d.claimed||Math.floor((S.dungeonWins||0)/3)>a.contracts}
+ case 'upgrade':{const eq=WonderGear.state(S),m=eq.materials||{};return Object.values(eq.equipped).some(uid=>{const e=eq.items.find(x=>x.uid===uid),c=e&&WonderGear.cost(e,'enhance');return c&&S.gold>=c.gold&&(m.stone||0)>=c.stone})}
+ default:return false}}catch{return false}}
 function cityIcon([icon,label,target=''], artPrefix='hud-'){
  if(icon==='more')return '<button class="city-icon city-more" id="city-drawer-toggle" aria-label="More" aria-controls="city-drawer" aria-expanded="false" onclick="toggleCityDrawer()"><img class="city-four" src="assets/generated/drawer-more.webp" alt=""></button>';
- const notice=cityNotices.has(icon)?'<i class="city-notice" aria-hidden="true">!</i>':'';
+ const notice=cityDue(icon)?'<i class="city-notice" aria-hidden="true">!</i>':'';
  if(icon==='vow')return `<button class="city-icon city-vow" onclick="cityAction('${target}','${label}')" aria-label="${label}"><span class="city-glyph"><img src="${artPath('comp-vow-icon')}" alt=""><i class="city-left-time">${typeof vowLeftLabel==='function'?vowLeftLabel():''}</i></span><span class="city-caption">${label}</span></button>`;
  return `<button class="city-icon" onclick="cityAction('${target}','${label}')" aria-label="${label}"><span class="city-glyph"><img src="${artPath(icon==='cloud-war-citadel'?icon:artPrefix+icon)}${cityArtVersion?'?v='+cityArtVersion:''}" alt="">${notice}</span><span class="city-caption">${label}</span></button>`;
 }
@@ -1101,7 +1111,7 @@ function foldCityMenu(button){
  button.setAttribute('aria-label',cityExpanded?'Hide events':'Show events');
 }
 function cityTool(icon,label,action){
- return `<button class="city-tool" aria-label="${label}" title="${label}" onclick="${action}"><img src="${artPath('hud-'+icon)}" alt=""></button>`;
+ return `<button class="city-tool" aria-label="${label}" title="${label}" onclick="${action}"><img src="${artPath((['rewards','upgrade'].includes(icon)?'tool-':'hud-')+icon)}" alt="">${cityDue(label.toLowerCase())?'<i class="city-notice" aria-hidden="true">!</i>':''}</button>`;
 }
 function home(){
  const mount=currentMount(),st=stats();
@@ -1119,7 +1129,7 @@ function home(){
  <div class="city-jobs">${[['Daily','cityTrail'],['Gameplay','cityGameplay'],['Bounty','cityBounty'],['Hunting','cityHunting']].map(([name,id])=>`<button onclick="go('${id}')"><img src="${artPath('wing-menu-'+name.toLowerCase())}" alt="">${name}</button>`).join('')}</div>
  <div class="city-tools">${[['broadcast','Elf Broadcast']].map(item=>cityIcon(item)).join('')}</div>
  <div class="city-skills">${[['move','Realm',"go('world')"],['ally1','Pet',"chooseSectionPage('collection')"],['combat','Combat',"go('dungeons')"],['ally2','Companion',"go('profile')"],['ride','Ride','toggleMount()'],['ally3','Wardrobe',"go('fashion')"],['travel','Travel',"go('world')"]].map(a=>cityTool(...a)).join('')}</div>
- <div class="city-quick">${cityTool('chest','Rewards',"go('quests')")}${cityTool('upgrade','Upgrade',"go('forge')")}</div>
+ <div class="city-quick">${cityTool('rewards','Rewards',"go('quests')")}${cityTool('upgrade','Upgrade',"go('forge')")}</div>
  <button class="city-reward" aria-label="Challenge" onclick="go('cityExplore')"><img src="${artPath('left-explore')}" alt=""><small>Challenge</small></button><button class="city-quest" onclick="go('quests')"><img src="${artPath('hud-quest')}" alt=""> Quest Board</button>
  ${homeChat()}${cityDrawerMarkup()}<div class="city-dock">${cityGroups[2].map(item=>cityIcon(item)).join('')}</div></section>`;
 }
