@@ -1061,8 +1061,10 @@ There are no other players: every person is an AI adventurer and is labelled "AI
     Claim puts the items straight into the bag with a short toast, no "Items Obtained" window (user: no confirming).
     Own wording everywhere (user: "similar, never the reference's words verbatim"): letters from "Sky Garden Post",
     "Dear Reina,", Morning Parcel; older saved letters (Kiki / System / ...) show "Sky Garden Post" (`mailFrom`). Buttons never select their label on a long press (`#stage button`).
-- Art (image model): `art-source/social/{banner,icons}.webp` -> `comp-social-banner`, `comp-social-icons` (flowers,
-  hearts, letters, note, chat bubble, gift) by `scripts/build-social-art.py`.
+- Art (image model): `art-source/social/banner.webp` + one painting per icon `icon-0..8.webp` (user: "polish them,
+  nothing cut off"; the old grid sheet `icons.webp` carried slivers of neighbours) -> `comp-social-banner`,
+  `comp-social-icons` (4 x 3: flowers, heart, empty heart, letter, open letter, note, chat bubble, gift, friends ledger
+  for Management) by `scripts/build-social-art.py`. The Friends action bar shows them in gold-rimmed discs.
 - Chat sheet (second pass, four photos of the reference's chat): tapping the home strip slides a sheet up over the
   home screen (`chatSheetOpen`, `.chat-sheet.over`, ⌄ closes; the room's Chat page shows the same sheet `.in-room`).
   Channels in a column on the left: System (read-only; `socialNote(s,text)` adds her events: dungeon victories,
