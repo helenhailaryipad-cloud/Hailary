@@ -425,6 +425,9 @@ that said "GodGacha" (a reference name) is now "Star Rites".
   0.05%, aura 0.3%, orb 5%, rare 25% (`Rites.odds`, shown with `Rites.pct`); a 4,000-player sim of 450 pulls: about one
   aura each, wings for ~21%, ultra for ~2.5%. The altar line reads "Grand prize chance" instead of a progress %.
   `ev.grand` stays in saves (validated) but is no longer used. Old notes below about the 300-pull guarantee are outdated.
+  Then (user: "look, the wings are 'guaranteed' at 1,800 pulls, in another gacha, same principle"): `grandAt` = 1,800 -
+  the rite's wings are certain at pull 1,800 of the event; the altar shows "Grand prize progress: N% (pulls/1,800)"
+  (`grandProgress`, like the reference's 14.73%) and Rewards lists the 1,800 row. Aura and ultra stay unguaranteed.
   No ticket return in Moonwell Rite (user: "today's gacha does not even return tickets"): only Dragon Hoard keeps
   `extra: 'returns'`.
 - MONETIZATION RULE (user): gacha tickets are never sold for real money directly. Tickets are bought only with prisms

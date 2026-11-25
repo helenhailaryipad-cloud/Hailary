@@ -27,6 +27,9 @@ const Rites = {
   rare: ['chest2', 'gembox', 'petegg', 'sealbag', 'wish'],
   common: ['exp1', 'gold1', 'shardbag', 'stonebag', 'chest1'],
   luckMax: 15, auraTiers: 5,
+  // The rite's wings are certain only at pull 1,800 of the event (user: "wings are 'guaranteed' at 1,800 pulls"); the
+  // aura and the ultra prize are never guaranteed.
+  grandAt: 1800,
   // Milestones of one event, by pulls made in it. next = tickets of the next rite, cur = tickets of this rite back,
   // orb = a new orb, prisms, pick = choose a prize. The extra rows depend on the rite (Rites.list[].extra).
   steps: [{ at: 15, next: 400 }, { at: 30, next: 740 }, { at: 60, next: 1240 }, { at: 135, next: 1240 }, { at: 240, next: 1240, orb: 1 }],
@@ -100,9 +103,10 @@ const Rites = {
   // One prize. Luck is checked after chance.
   roll(v, rite, rng) {
     // No pity for the big prizes: full luck only turns a small prize into a Wish Orb.
-    const ev = v.ev, forceLuck = ev.luck + 1 >= this.luckMax;
+    const ev = v.ev, forceLuck = ev.luck + 1 >= this.luckMax, forceGrand = !ev.grand && ev.pulls + 1 >= this.grandAt;
     let tier;
-    {
+    if (forceGrand) tier = 'wings';
+    else {
       const r = rng(), o = this.odds;
       const u = o.ultra; tier = r < u ? 'ultra' : r < u + o.wings ? 'wings' : r < u + o.wings + o.aura ? 'aura' : r < u + o.wings + o.aura + o.orb ? 'orb' : r < u + o.wings + o.aura + o.orb + o.rare ? 'rare' : 'common';
       if (forceLuck && (tier === 'rare' || tier === 'common')) tier = 'orb';
@@ -165,6 +169,7 @@ const Rites = {
   },
   record(v, results, now = Date.now()) { v.log = [...results.map(r => ({ t: now, kind: r.kind, id: r.id, n: r.n || 1, rarity: r.rarity })), ...(v.log || [])].slice(0, this.logMax); },
   // Altar tiers: selections earned = pulls / every; each item has a per-event limit.
+  grandProgress(s, now = Date.now()) { const v = this.state(s, now); return v.ev.grand ? 100 : Math.min(100, v.ev.pulls / this.grandAt * 100); },
   tierOpen(s, tid, now = Date.now()) { const v = this.state(s, now), t = this.tiers.find(x => x.id === tid); return Math.floor(v.ev.pulls / t.every) - ((v.ev.sel || {})[tid] || 0); },
   tierLeft(s, tid, i, now = Date.now()) { const v = this.state(s, now), t = this.tiers.find(x => x.id === tid); return t.items[i][3] - ((v.ev.taken || {})[tid + ':' + i] || 0); },
   // What an altar item means for this rite and save (wings of the running rite, its aura, an orb she lacks first).
@@ -318,7 +323,7 @@ function showRites() {
    <div class="ra-top"><button class="ra-help" onclick="riteRates()">${denPlain}?</button><span class="ra-time">⏱ <b class="rt-time-b">${riteClock(Rites.ends(ev.period) - Date.now())}</b></span><div class="rt-wallet">${riteWallet()}</div></div>
    <div class="ra-head"><h1><small>STAR RITES</small>${rite.name}</h1><button class="ra-rec" onclick="riteRecord()">${denPlain}${uiIcon('book')}<span>Record</span></button></div>
    <div class="ra-show">${prize(riteWingArt(rite, ''), rite.wingName, 'side l', 'wings')}${prize(`<img src="${artPath(Rites.ultra.id)}" alt="">`, Rites.ultra.name, 'mid ultra', 'ultra')}${prize(riteAuraArt(rite.id, ''), Rites.auras[rite.id], 'side r', 'aura')}</div>
-   <p class="ra-prog">Grand prize chance: <b>${Rites.pct(Rites.odds.wings)}</b> a pull · Ultra <b>${Rites.pct(Rites.odds.ultra)}</b>${owned ? ' · wings owned' : ''}</p>
+   <p class="ra-prog">${v.ev.grand || owned ? 'Grand prize won · ' + Rites.pct(Rites.odds.wings) + ' a pull' : `Grand prize progress: <b>${Rites.grandProgress(S).toFixed(2)}%</b> <small>(${fmt(v.ev.pulls)}/${fmt(Rites.grandAt)})</small>`}</p>
    <div class="ra-tiers">${Rites.tiers.map(tierRow).join('')}</div>
    <div class="ra-luck"><span>${bagIcon('chest3')}</span><b>Luck</b><i><s style="width:${ev.luck / Rites.luckMax * 100}%"></s><em>${ev.luck}/${Rites.luckMax}</em></i>${picks > 0 ? `<button class="ra-pick" onclick="ritePick()">${denPlain}✨ ${picks}</button>` : ''}</div>
    <div class="ra-btns">
@@ -336,7 +341,7 @@ function riteCP(st) { return Math.round((st.attack || 0) * 5 + (st.defense || 0)
 function riteInfo(kind) {
   const rite = Rites.rite(Rites.period()), own = S.reinaFashion?.wingSkins || [];
   const it = kind === 'ultra' ? { art: `<img src="${artPath(Rites.ultra.id)}" alt="">`, name: Rites.ultra.name, type: 'Wings Skin · Ultra', stats: Rites.ultra.stats, note: `Every pull of every rite has a ${Rites.pct(Rites.odds.ultra)} chance. No pity, never sold.`, owned: own.includes(Rites.ultra.id) }
-    : kind === 'wings' ? { art: riteWingArt(rite, ''), name: rite.wingName + ' Wings', type: 'Wings Skin · Legendary', stats: null, note: `Exclusive to ${rite.name}. ${Rites.pct(Rites.odds.wings)} a pull. Never guaranteed.`, owned: own.includes(rite.wings) }
+    : kind === 'wings' ? { art: riteWingArt(rite, ''), name: rite.wingName + ' Wings', type: 'Wings Skin · Legendary', stats: null, note: `Exclusive to ${rite.name}. ${Rites.pct(Rites.odds.wings)} a pull, certain only at pull ${fmt(Rites.grandAt)} of this rite.`, owned: own.includes(rite.wings) }
     : { art: riteAuraArt(rite.id, ''), name: Rites.auras[rite.id], type: 'Aura · Mythic', stats: Rites.auraStats, note: `${Rites.pct(Rites.odds.aura)} a pull. Copies raise it up to T${Rites.auraTiers}.`, owned: Rites.auraTier(S, rite.id) > 0 };
   const st = it.stats ? Object.entries(it.stats).map(([k, n]) => `<p class="${/Percent/.test(k) ? 'pct' : ''}">${/Percent/.test(k) ? '★ ' : ''}${RITE_STAT[k] || k} +${/Percent/.test(k) ? n.toFixed(2) + '%' : fmt(n)}</p>`).join('') : '<p>Look only: shown on Reina in every scene.</p>';
   popup(`<div class="ri-card k-${kind}"><div class="ri-stage"><i class="ri-rays"></i>${it.art}${it.stats ? `<b class="ri-cp">⚔ ${fmt(riteCP(it.stats))}</b>` : ''}</div>
@@ -406,12 +411,12 @@ function riteRates() {
    <tr class="r-epic"><td>Epic</td><td>One of ten Wish Orbs</td><td>${pct(o.orb)}</td></tr>
    <tr class="r-rare"><td>Rare</td><td>${Rites.rare.map(id => WonderGear.bagItems.find(b => b.id === id)?.name).join(', ')}</td><td>${pct(o.rare)}</td></tr>
    <tr class="r-common"><td>Common</td><td>${Rites.common.map(id => WonderGear.bagItems.find(b => b.id === id)?.name).join(', ')}</td><td>${pct(common)}</td></tr></table>
-   <p>Luck: a full luck bar turns the next small prize into a Wish Orb. Wings, aura and the ultra prize are never guaranteed: only luck. One pull or ten, the odds are the same.</p></div>`);
+   <p>Luck: a full luck bar turns the next small prize into a Wish Orb. The rite's wings are certain only at pull ${fmt(Rites.grandAt)} of the rite; the aura and the ultra prize are never guaranteed. One pull or ten, the odds are the same.</p></div>`);
 }
 function riteSteps() {
   const v = Rites.state(S), rite = Rites.rite(v.ev.period);
   popup(`<div class="rt-pop"><h2>Rewards · ${rite.name}</h2><p>Paid automatically as you reach them. Tickets for <b>${Rites.rite(v.ev.period + 1).name}</b> (the next rite) keep the circle going.</p>
-   <ol class="rt-steps">${Rites.milestones(rite).map(m => `<li class="${v.ev.got.includes(m.at) ? 'done' : v.ev.pulls >= m.at ? 'due' : ''}"><b>${m.at}</b><span>${riteStepText(m, rite)}</span><i>${v.ev.got.includes(m.at) ? '✓' : fmt(Math.max(0, m.at - v.ev.pulls)) + ' to go'}</i></li>`).join('')}</ol>
+   <ol class="rt-steps">${Rites.milestones(rite).map(m => `<li class="${v.ev.got.includes(m.at) ? 'done' : v.ev.pulls >= m.at ? 'due' : ''}"><b>${m.at}</b><span>${riteStepText(m, rite)}</span><i>${v.ev.got.includes(m.at) ? '✓' : fmt(Math.max(0, m.at - v.ev.pulls)) + ' to go'}</i></li>`).join('')}<li class="${v.ev.grand ? 'done' : ''}"><b>${fmt(Rites.grandAt)}</b><span>${rite.wingName} Wings, certain (if they did not drop earlier)</span><i>${v.ev.grand ? '✓' : fmt(Math.max(0, Rites.grandAt - v.ev.pulls)) + ' to go'}</i></li></ol>
    ${Rites.picksOpen(S) > 0 ? `<button class="primary" onclick="ritePick()">${denPlain}Choose your prize</button>` : ''}</div>`);
 }
 function ritePick() {
@@ -467,7 +472,7 @@ function riteRules() {
   popup(`<div class="rt-pop"><h2>Star Rites</h2><ol class="rt-rules"><li>Four rites take turns, ${Rites.eventDays} days each. Each has its own ticket; tickets never expire.</li>
    <li>A pull costs ${Rites.cost} tickets. Ten pulls cost ${Rites.cost * 10}; the odds are the same. One free pull a day.</li>
    <li>Luck rises with every pull: a full luck bar turns the next small prize into a Wish Orb.</li>
-   <li>The rite's exclusive wings, its aura and the ultra prize are never guaranteed.</li>
+   <li>The rite's exclusive wings are certain only at pull ${fmt(Rites.grandAt)} of the rite; its aura and the ultra prize are never guaranteed.</li>
    <li>Pull rewards pay tickets of the next rite. Only Dragon Hoard returns some of its own tickets; Starfall Vault lets you choose a prize at 360, 720 and 800 pulls; Celestial Bloom pays prisms on its Petal Path.</li>
    <li>Auras and orbs give stats for good. Repeats become stardust for the Dust Shop.</li>
    <li>Tickets come from the free pull, rewards, the Rite Shop (prisms) and the welcome gift.</li></ol></div>`);
