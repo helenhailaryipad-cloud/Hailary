@@ -10585,3 +10585,13 @@ html body #stage #main .cloud-war .cloud-carnage{bottom:calc(min(11cqw,62px) + 1
 #stage #modal .cloud-city .portal-strike.down img{filter:grayscale(1) brightness(.85)!important}
 #stage #modal .cloud-city .portal-strike.picked img{box-shadow:0 0 0 3px #ffe27a,0 0 12px #ffe27a!important}
 #stage #modal .cloud-city .city-kill .bag-gain :is(small,span,i,em){color:#5a2a06!important;text-shadow:none!important}
+/* Chosen target in the city window (user: "it is unclear where Reina goes; highlight the chosen boss"): larger, a
+   pulsing gold ring, a gold "Target" tag, Reina's face on it; the others slightly dimmed. */
+#stage #modal .cloud-city .portal-defenders:has(.picked)>button.portal-strike:not(.picked){opacity:.72}
+#stage #modal .cloud-city .portal-defenders[data-terrain]>button.portal-strike.picked{width:16%!important;z-index:3;opacity:1}
+#stage #modal .cloud-city .portal-strike.picked img{border:3px solid #ffd24a!important;animation:cityTarget 1.1s ease-in-out infinite}
+@keyframes cityTarget{0%,100%{box-shadow:0 0 0 3px #fff6c8,0 0 10px 4px #ffd24a}50%{box-shadow:0 0 0 7px #ffd24a88,0 0 24px 10px #ffd24a}}
+#stage #modal .cloud-city .portal-strike.picked small{background:linear-gradient(#ffe47a,#f2a92a)!important;color:#5a2a06!important}
+#stage #modal .cloud-city .portal-strike.picked::after{display:none!important}
+.city-target{position:absolute;right:-14%;top:-6%;width:46%;aspect-ratio:1;border-radius:50%;border:2px solid #ffd24a;background:#fff;overflow:hidden;box-shadow:0 2px 4px #0006;z-index:2}
+.city-target img{width:100%!important;height:100%!important;object-fit:cover;border:0!important;border-radius:50%!important;background:none!important;box-shadow:none!important;animation:none!important}
