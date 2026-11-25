@@ -1,5 +1,5 @@
 // Star Rites: our gacha (user, after reading her notes on the reference's gachas: "our own names, our own great prizes").
-// Four rites take turns, two weeks each (Rites.list, from Rites.anchor). Each rite has its own ticket; tickets never
+// Four rites take turns, 4 days each (user: "each gacha lasts 3-4 days") (Rites.list, from Rites.anchor). Each rite has its own ticket; tickets never
 // expire. A pull costs 50 tickets (x10 = 500, same odds). Prizes, rarest first: the rite's exclusive WINGS (grand prize,
 // NEVER guaranteed - user: "450 pulls in the reference gave one aura and small things"), the rite's AURA (a ring of light at her feet, real stats, copies raise its
 // tier), one of ten WISH ORBS (a collection with set bonuses at 4 / 7 / 10), then bag items. Luck: within 15 pulls an
@@ -8,7 +8,7 @@
 // / 800 instead, Celestial Bloom pays prisms on its Petal Path. Duplicates turn into stardust for the Dust Shop.
 // Every number here is a placeholder. Rules are pure (node scripts/test-rites.mjs); the UI is below RITES_UI.
 const Rites = {
-  anchor: Date.UTC(2026, 10, 23), eventDays: 14, cost: 50,
+  anchor: Date.UTC(2026, 10, 23), eventDays: 4, cost: 50,
   list: [
     { id: 'moon', name: 'Moonwell Rite', ticket: 'Moon Sigil', wings: 'fashion-wing-28', wingName: 'Moonwell Seraph', icon: 0, extra: '', hue: '#b9a6ff' },
     { id: 'ember', name: 'Dragon Hoard', ticket: 'Ember Scale', wings: 'fashion-wing-29', wingName: 'Dragonfire Crest', icon: 1, extra: 'returns', hue: '#ff8a4a' },

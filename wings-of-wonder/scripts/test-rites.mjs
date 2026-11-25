@@ -2,8 +2,8 @@ import vm from 'node:vm';import fs from 'node:fs';import assert from 'node:asser
 const context=vm.createContext({Math,JSON,Date});vm.runInContext(fs.readFileSync('src/rites.js','utf8').split('\n// RITES_UI')[0]+';globalThis.R=Rites',context);const R=context.R;
 let seed=7;const rng=()=>(seed=(seed*1664525+1013904223)%4294967296)/4294967296;
 const T0=R.anchor+3600e3,day=864e5;
-// Rotation: four rites, 14 days each; the welcome gift is tickets of the running rite.
-assert.equal(R.rite(R.period(T0)).id,'moon');assert.equal(R.rite(1).id,'ember');assert.equal(R.rite(4).id,'moon');assert.equal(R.ends(0)-R.anchor,14*day);
+// Rotation: four rites, R.eventDays days each; the welcome gift is tickets of the running rite.
+assert.equal(R.rite(R.period(T0)).id,'moon');assert.equal(R.rite(1).id,'ember');assert.equal(R.rite(4).id,'moon');assert.equal(R.ends(0)-R.anchor,R.eventDays*day);
 let s={scales:0};R.state(s,T0);assert.equal(R.tickets(s,'moon'),R.welcome);assert.ok(R.valid(s.rites));
 // Costs: 50 a pull, 500 for ten; not enough tickets is refused; the free pull once a UTC day.
 assert.equal(R.pull(s,10,rng,T0).ok,true);assert.equal(R.tickets(s,'moon'),R.welcome-500);assert.equal(s.rites.ev.pulls,10);
@@ -21,11 +21,11 @@ const d0=g.rites.dust;R.give(g,g.rites,{kind:'wings',id:'fashion-wing-28',name:'
 // Milestones: tickets of the next rite (15 ... 240 = 4860), no own-ticket returns in Moonwell (user), a new orb at 240.
 assert.equal(g.rites.t.ember,400+740+1240+1240+1240);assert.ok(!g.rites.ev.got.includes(120)&&!g.rites.ev.got.includes(250));assert.ok(R.orbCount(g)>=1);
 // Starfall Vault: three choices at 360 / 720 / 800.
-const st={scales:0};const T2=R.anchor+2*14*day+1000;R.state(st,T2);assert.equal(R.rite(st.rites.ev.period).id,'star');st.rites.t.star=1e6;
+const st={scales:0};const T2=R.anchor+2*R.eventDays*day+1000;R.state(st,T2);assert.equal(R.rite(st.rites.ev.period).id,'star');st.rites.t.star=1e6;
 for(let i=0;i<36;i++)R.pull(st,10,never,T2);assert.equal(R.picksOpen(st),1);assert.equal(R.choose(st,'wings','fashion-wing-31'),null);assert.ok(R.choose(st,'aura','moon'));assert.equal(R.picksOpen(st),0);assert.equal(R.choose(st,'orb','sun'),null);
 assert.ok(!(st.reinaFashion?.wingSkins||[]).includes('fashion-wing-31'));
 // Celestial Bloom: Petal Path pays prisms.
-const b={scales:0};const T3=R.anchor+3*14*day+1000;R.state(b,T3);b.rites.t.bloom=1e6;R.pull(b,10,never,T3);for(let i=0;i<5;i++)R.pull(b,10,never,T3);assert.equal(b.scales,100);
+const b={scales:0};const T3=R.anchor+3*R.eventDays*day+1000;R.state(b,T3);b.rites.t.bloom=1e6;R.pull(b,10,never,T3);for(let i=0;i<5;i++)R.pull(b,10,never,T3);assert.equal(b.scales,100);
 // A new rite resets the counter, keeps tickets and collections.
 const keep=g.rites.t.ember,orbs=R.orbCount(g);R.state(g,R.ends(0)+1);assert.equal(g.rites.ev.pulls,0);assert.equal(g.rites.t.ember,keep);assert.equal(R.orbCount(g),orbs);
 // Shop: packs once per rite, 1:1 exchange, Dust Shop.

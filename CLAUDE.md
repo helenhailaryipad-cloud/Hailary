@@ -405,7 +405,7 @@ User: "can we make a gacha?" then shared her ChatGPT chat about the reference's 
 allowed in the environment) and said "our own names, great prizes". `src/rites.js` (rules `Rites`, pure,
 `node scripts/test-rites.mjs`; UI below `RITES_UI`; loaded by `scripts/test.mjs`), screen id `rites`; the home promo
 that said "GodGacha" (a reference name) is now "Star Rites".
-- Four rites take turns, 14 UTC days each from `Rites.anchor`: Moonwell Rite (Moon Sigil), Dragon Hoard (Ember Scale),
+- Four rites take turns, 4 UTC days each from `Rites.anchor` (`eventDays`; was 14, user: "each gacha lasts 3-4 days"): Moonwell Rite (Moon Sigil), Dragon Hoard (Ember Scale),
   Starfall Vault (Star Key), Celestial Bloom (Bloom Charm). Own ticket each, tickets never expire (`S.rites.t`).
 - 50 tickets a pull, 500 for ten (same odds), one free pull a UTC day. Odds (`Rites.odds`): exclusive wings 0.3%,
   aura 1.2%, Wish Orb 7%, rare bag item 25%, common the rest. Luck: an orb or better within 15 pulls. The rite's wings
