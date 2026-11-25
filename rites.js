@@ -3,8 +3,8 @@
 // expire. A pull costs 50 tickets (x10 = 500, same odds). Prizes, rarest first: the rite's exclusive WINGS (grand prize,
 // NEVER guaranteed - user: "450 pulls in the reference gave one aura and small things"), the rite's AURA (a ring of light at her feet, real stats, copies raise its
 // tier), one of ten WISH ORBS (a collection with set bonuses at 4 / 7 / 10), then bag items. Luck: within 15 pulls an
-// orb is certain (never wings or an aura); it resets when one drops. Pull milestones of the event pay tickets of the NEXT rite (so
-// the circle feeds itself), only Dragon Hoard returns some of its own tickets (Moonwell has no return, user), Starfall Vault lets her pick a prize at 360 / 720
+// orb is certain (never wings or an aura); it resets when one drops. Tickets of the NEXT rite for pulls here are the
+// Wishwell goals (src/wishwell.js); only Dragon Hoard returns some of its own tickets (Moonwell has no return, user), Starfall Vault lets her pick a prize at 360 / 720
 // / 800 instead, Celestial Bloom pays prisms on its Petal Path. Duplicates turn into stardust for the Dust Shop.
 // Every number here is a placeholder. Rules are pure (node scripts/test-rites.mjs); the UI is below RITES_UI.
 const Rites = {
@@ -30,9 +30,10 @@ const Rites = {
   // The rite's wings are certain only at pull 1,800 of the event (user: "wings are 'guaranteed' at 1,800 pulls"); the
   // aura and the ultra prize are never guaranteed.
   grandAt: 1800,
-  // Milestones of one event, by pulls made in it. next = tickets of the next rite, cur = tickets of this rite back,
-  // orb = a new orb, prisms, pick = choose a prize. The extra rows depend on the rite (Rites.list[].extra).
-  steps: [{ at: 15, next: 400 }, { at: 30, next: 740 }, { at: 60, next: 1240 }, { at: 135, next: 1240 }, { at: 240, next: 1240, orb: 1 }],
+  // Milestones of one event, by pulls made in it: cur = tickets of this rite back, prisms, pick = choose a prize. Only
+  // some rites have them (Rites.list[].extra). Tickets of the NEXT rite for pulls here are the Wishwell's Goals
+  // (src/wishwell.js, like the reference's Adventure Goals), claimed there by hand, not paid here.
+  steps: [],
   extras: {
     returns: [{ at: 120, cur: 750 }, { at: 250, cur: 1750 }],
     choice: [{ at: 360, pick: 1 }, { at: 720, pick: 1 }, { at: 800, pick: 1 }],
@@ -92,7 +93,7 @@ const Rites = {
     const p = this.period(now);
     let v = s.rites;
     if (!v) { v = s.rites = { t: {}, auras: {}, aura: '', orbs: {}, dust: 0, ev: null }; v.t[this.rite(p).id] = this.welcome; }
-    // The finished event's pull count stays in `prev` for the Wishwell carry-over (src/wishwell.js).
+    // The finished event's pull count stays in `prev` for the Wishwell (goals left unclaimed, coins; src/wishwell.js).
     if (v.ev && v.ev.period !== p && v.ev.pulls > 0) v.prev = { period: v.ev.period, pulls: v.ev.pulls };
     if (!v.ev || v.ev.period !== p) v.ev = { period: p, pulls: 0, luck: 0, got: [], picks: 0, grand: false, packs: [], free: '' };
     return v;
@@ -415,9 +416,9 @@ function riteRates() {
 }
 function riteSteps() {
   const v = Rites.state(S), rite = Rites.rite(v.ev.period);
-  popup(`<div class="rt-pop"><h2>Rewards · ${rite.name}</h2><p>Paid automatically as you reach them. Tickets for <b>${Rites.rite(v.ev.period + 1).name}</b> (the next rite) keep the circle going.</p>
+  popup(`<div class="rt-pop"><h2>Rewards · ${rite.name}</h2><p>${Rites.milestones(rite).length ? 'This rite\'s own rewards, paid automatically as you reach them.' : 'This rite has no pull rewards of its own.'} Tickets for <b>${Rites.rite(v.ev.period + 1).name}</b> (the next rite) are claimed on the Wishwell.</p>
    <ol class="rt-steps">${Rites.milestones(rite).map(m => `<li class="${v.ev.got.includes(m.at) ? 'done' : v.ev.pulls >= m.at ? 'due' : ''}"><b>${m.at}</b><span>${riteStepText(m, rite)}</span><i>${v.ev.got.includes(m.at) ? '✓' : fmt(Math.max(0, m.at - v.ev.pulls)) + ' to go'}</i></li>`).join('')}<li class="${v.ev.grand ? 'done' : ''}"><b>${fmt(Rites.grandAt)}</b><span>${rite.wingName} Wings, certain (if they did not drop earlier)</span><i>${v.ev.grand ? '✓' : fmt(Math.max(0, Rites.grandAt - v.ev.pulls)) + ' to go'}</i></li></ol>
-   ${Rites.picksOpen(S) > 0 ? `<button class="primary" onclick="ritePick()">${denPlain}Choose your prize</button>` : ''}</div>`);
+   ${Rites.picksOpen(S) > 0 ? `<button class="primary" onclick="ritePick()">${denPlain}Choose your prize</button>` : ''}<button class="primary" onclick="go('wishwell')">${denPlain}Wishwell goals</button></div>`);
 }
 function ritePick() {
   const v = Rites.state(S), own = S.reinaFashion?.wingSkins || [];
@@ -473,7 +474,7 @@ function riteRules() {
    <li>A pull costs ${Rites.cost} tickets. Ten pulls cost ${Rites.cost * 10}; the odds are the same. One free pull a day.</li>
    <li>Luck rises with every pull: a full luck bar turns the next small prize into a Wish Orb.</li>
    <li>The rite's exclusive wings are certain only at pull ${fmt(Rites.grandAt)} of the rite; its aura and the ultra prize are never guaranteed.</li>
-   <li>Pull rewards pay tickets of the next rite. Only Dragon Hoard returns some of its own tickets; Starfall Vault lets you choose a prize at 360, 720 and 800 pulls; Celestial Bloom pays prisms on its Petal Path.</li>
+   <li>Pull goals on the Wishwell give tickets of the next rite (15, 30, 60 and 135 pulls). Only Dragon Hoard returns some of its own tickets; Starfall Vault lets you choose a prize at 360, 720 and 800 pulls; Celestial Bloom pays prisms on its Petal Path.</li>
    <li>Auras and orbs give stats for good. Repeats become stardust for the Dust Shop.</li>
    <li>Tickets come from the free pull, rewards, the Rite Shop (prisms) and the welcome gift.</li></ol></div>`);
 }

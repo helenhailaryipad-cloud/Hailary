@@ -1097,7 +1097,7 @@ function homeGacha(){if(typeof Rites==='undefined')return '';try{const p=Rites.p
 function cityDue(icon){try{switch(icon){
  case 'benefits':{const v=Blessings.state(S);return Blessings.ready(S)||Blessings.milestones.some(([at])=>v.n>=at&&!v.got.includes(at))}
  case 'gacha':return Rites.freeReady(S)||Rites.picksOpen(S)>0;
- case 'snow':{const v=Wishwell.state(S);return Wishwell.claimable(S)>0||Wishwell.tasks.some(t=>!v.done.includes(t.id)&&Wishwell.progress(S,t)>=t.goal)}
+ case 'snow':{const v=Wishwell.state(S);return Wishwell.due(S)>0||Wishwell.tasks.some(t=>!v.done.includes(t.id)&&Wishwell.progress(S,t)>=t.goal)}
  case 'clan':{const g=WonderGear.guildState(S);return !!g&&!g.signed}
  case 'summon':return WonderGear.bagCount(S,'wish')>0||(WonderGear.summonState(S).orbs||0)>0;
  case 'rewards':{const A=WonderAdventure,a=A.state(S),d=A.dailyForge(S);return A.quests.some(q=>!a.claimed.includes(q.id)&&A.progress(S,q)>=q.target)||d.wins>d.claimed||Math.floor((S.dungeonWins||0)/3)>a.contracts}

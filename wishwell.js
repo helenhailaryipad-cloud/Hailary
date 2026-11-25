@@ -1,12 +1,15 @@
 // Wishwell (user sent photos of the reference's "Adventure Goals" behind its Snowland icon: pulls in today's gacha turn
 // into tickets for the NEXT one). Own name, art and wording. It sits on top of Star Rites (src/rites.js):
-// - Carry-over: CARRY_RATE of the tickets spent in a rite come back as tickets of the next rite, claimable here once the
-//   next rite has started (Rites keeps the finished event's pull count in `S.rites.prev`).
-// - Goals: the rite's pull milestones (Rites.milestones, paid automatically by Rites.settle) shown as a list.
+// - Goals (user photo of the reference's Adventure Goals): pulls in the running rite earn tickets of the NEXT rite at
+//   15 / 30 / 60 / 135 pulls (400 / 740 / 1,240 / 1,240 = 3,620), claimed by hand (Claim, or tap the well for all).
+//   Goals reached but not claimed when the rite ends can still be claimed from the well during the next rite (they then
+//   pay tickets of the rite that is running, which was the "next" one). There is no percentage carry-over (user: they
+//   are not returns, they are tickets for the next gacha). Rites keeps the finished event's pulls in `S.rites.prev`.
 // - Wish Coins: one per pull, plus daily Tasks; spent in the Wish Market (limits per rite).
 // Rules are pure (node scripts/test-wishwell.mjs); the screen is below WISHWELL_UI. All numbers are placeholders.
 const Wishwell = {
-  carryRate: .3, coinPerPull: 1,
+  coinPerPull: 1,
+  goals: [{ at: 15, n: 400 }, { at: 30, n: 740 }, { at: 60, n: 1240 }, { at: 135, n: 1240 }],
   tasks: [
     { id: 'free', name: 'Make today\'s free pull', goal: 1, coins: 10, kind: 'free' },
     { id: 'p1', name: 'Pull once today', goal: 1, coins: 10, kind: 'pulls' },
@@ -25,11 +28,10 @@ const Wishwell = {
     { id: 'orb', name: 'Wish Orb', n: 1, price: 150, limit: 1, kind: 'orb' }
   ],
   day(now = Date.now()) { return new Date(now).toISOString().slice(0, 10); },
-  carry(pulls) { return Math.floor(pulls * Rites.cost * this.carryRate); },
   // The save part with the clocks applied. New pulls since the last look are counted for coins and today's tasks.
   state(s, now = Date.now()) {
     const r = Rites.state(s, now), today = this.day(now);
-    const v = s.wishwell || (s.wishwell = { day: today, dayPulls: 0, done: [], coins: 0, seen: { period: r.ev.period, pulls: 0 }, claimed: -1, bp: r.ev.period, buys: {} });
+    const v = s.wishwell || (s.wishwell = { day: today, dayPulls: 0, done: [], coins: 0, seen: { period: r.ev.period, pulls: 0 }, bp: r.ev.period, buys: {} });
     if (v.day !== today) { v.day = today; v.dayPulls = 0; v.done = []; }
     let fresh = 0;
     if (r.prev && v.seen.period === r.prev.period) fresh += Math.max(0, r.prev.pulls - v.seen.pulls) + r.ev.pulls;
@@ -38,16 +40,38 @@ const Wishwell = {
     if (fresh) { v.coins += fresh * this.coinPerPull; v.dayPulls += fresh; }
     v.seen = { period: r.ev.period, pulls: r.ev.pulls };
     if (v.bp !== r.ev.period) { v.bp = r.ev.period; v.buys = {}; }
+    // Goal claims: `g` for the running rite, `pg` for the one before. Goals the old rules paid automatically (they are
+    // in the rite's `got`) count as claimed.
+    if (!v.g || v.g.p !== r.ev.period) {
+      v.pg = v.g && v.g.p === r.ev.period - 1 ? v.g : null;
+      v.g = { p: r.ev.period, got: (r.ev.got || []).filter(at => this.goals.some(x => x.at === at)) };
+    }
     return v;
   },
-  // Tickets of the current rite waiting from the previous one (0 when none or already claimed).
-  claimable(s, now = Date.now()) {
-    const r = Rites.state(s, now), v = this.state(s, now);
-    return r.prev && r.prev.period === r.ev.period - 1 && v.claimed !== r.prev.period ? this.carry(r.prev.pulls) : 0;
+  goalState(s, at, now = Date.now()) {
+    const v = this.state(s, now), r = Rites.state(s, now);
+    return v.g.got.includes(at) ? 'got' : r.ev.pulls >= at ? 'ready' : 'open';
   },
-  claim(s, now = Date.now()) {
-    const n = this.claimable(s, now); if (!n) return 0;
-    const r = Rites.state(s, now), rite = Rites.rite(r.ev.period); r.t[rite.id] = (r.t[rite.id] || 0) + n; s.wishwell.claimed = r.prev.period; return n;
+  claimGoal(s, at, now = Date.now()) {
+    const m = this.goals.find(x => x.at === at); if (!m || this.goalState(s, at, now) !== 'ready') return 0;
+    const v = this.state(s, now), r = Rites.state(s, now), next = Rites.rite(r.ev.period + 1);
+    v.g.got.push(at); r.t[next.id] = (r.t[next.id] || 0) + m.n; return m.n;
+  },
+  // Reached but unclaimed goals of the finished rite (paid in tickets of the running rite).
+  leftover(s, now = Date.now()) {
+    const v = this.state(s, now), r = Rites.state(s, now);
+    if (!v.pg || !r.prev || r.prev.period !== v.pg.p) return [];
+    return this.goals.filter(m => r.prev.pulls >= m.at && !v.pg.got.includes(m.at));
+  },
+  // Tickets waiting in the well: ready goals of this rite + leftovers of the last one.
+  due(s, now = Date.now()) {
+    return this.goals.filter(m => this.goalState(s, m.at, now) === 'ready').reduce((a, m) => a + m.n, 0) + this.leftover(s, now).reduce((a, m) => a + m.n, 0);
+  },
+  claimAll(s, now = Date.now()) {
+    const v = this.state(s, now), r = Rites.state(s, now), cur = Rites.rite(r.ev.period), out = { next: 0, cur: 0 };
+    for (const m of this.leftover(s, now)) { v.pg.got.push(m.at); r.t[cur.id] = (r.t[cur.id] || 0) + m.n; out.cur += m.n; }
+    for (const m of this.goals) out.next += this.claimGoal(s, m.at, now);
+    return out;
   },
   progress(s, t, now = Date.now()) { const v = this.state(s, now); return t.kind === 'free' ? (Rites.state(s, now).ev.free === this.day(now) ? 1 : 0) : v.dayPulls; },
   claimTask(s, id, now = Date.now()) {
@@ -71,8 +95,9 @@ const Wishwell = {
   valid(v) {
     if (v === undefined) return true;
     const int = n => Number.isSafeInteger(n) && n >= 0 && n <= 1e9;
+    const gl = g => g === undefined || g === null || !!g && typeof g === 'object' && Number.isSafeInteger(g.p) && Array.isArray(g.got) && g.got.length <= this.goals.length && g.got.every(at => this.goals.some(m => m.at === at));
     return !!v && typeof v === 'object' && /^\d{4}-\d{2}-\d{2}$/.test(v.day) && int(v.dayPulls) && Array.isArray(v.done) && v.done.every(id => this.tasks.some(t => t.id === id))
-      && int(v.coins) && !!v.seen && Number.isSafeInteger(v.seen.period) && int(v.seen.pulls) && Number.isSafeInteger(v.claimed) && Number.isSafeInteger(v.bp)
+      && int(v.coins) && !!v.seen && Number.isSafeInteger(v.seen.period) && int(v.seen.pulls) && (v.claimed === undefined || Number.isSafeInteger(v.claimed)) && Number.isSafeInteger(v.bp) && gl(v.g) && gl(v.pg)
       && !!v.buys && typeof v.buys === 'object' && Object.entries(v.buys).every(([k, n]) => this.wares.some(w => w.id === k) && int(n));
   }
 };
@@ -86,19 +111,20 @@ function wellTick() { if (screen !== 'wishwell') return wellStop(); const t = do
 function wellGo(tab) { wellTab = tab; showWishwell(); }
 function showWishwell() {
   const r = Rites.state(S), v = Wishwell.state(S), p = r.ev.period, rite = Rites.rite(p), next = Rites.rite(p + 1);
-  const due = Wishwell.claimable(S), coming = Wishwell.carry(r.ev.pulls);
+  const due = Wishwell.due(S), last = Wishwell.goals[Wishwell.goals.length - 1].at, round = ((p % 4) + 4) % 4 + 1;
   save(); bagArtVars?.();
   const wallet = `<div class="ww-wallet"><span onclick="go('rites')">${riteTicket(rite)}<b>${fmt(Rites.tickets(S, rite.id))}</b><i class="ww-plus">+</i></span><span>${riteTicket(next)}<b>${fmt(Rites.tickets(S, next.id))}</b></span><span onclick="wellGo('shop')">${wellCoin()}<b>${fmt(v.coins)}</b><i class="ww-plus">+</i></span></div>`;
   let body = '';
   if (wellTab === 'goals') {
-    const rows = Rites.milestones(rite).filter(m => m.next || m.cur || m.orb).map(m => {
-      const got = r.ev.got.includes(m.at), pct = Math.min(100, r.ev.pulls / m.at * 100);
-      const tiles = [m.next && [riteTicket(next), m.next, next.ticket], m.cur && [riteTicket(rite), m.cur, rite.ticket], m.orb && [riteIcon(4), m.orb, 'Wish Orb']].filter(Boolean)
-        .map(([ico, n, name]) => `<span class="ww-tile" title="${name}">${ico}<b>${fmt(n)}</b></span>`).join('');
-      return `<div class="ww-row ${got ? 'got' : ''}"><p>Pull ${m.at} times in ${rite.name} <em>(${Math.min(r.ev.pulls, m.at)}/${m.at})</em></p><div class="ww-rbody"><div class="ww-tiles">${tiles}</div>${got ? '<i class="ww-stamp">Claimed</i>' : `<span class="ww-bar"><u style="width:${pct}%"></u></span>`}</div></div>`;
+    const rows = Wishwell.goals.map(m => {
+      const st = Wishwell.goalState(S, m.at), pct = Math.min(100, r.ev.pulls / m.at * 100);
+      // Four tiles like the reference (4 x 100 = 400 ...).
+      const tile = `<span class="ww-tile" title="${next.ticket}">${riteTicket(next)}<b>${fmt(m.n / 4)}</b></span>`.repeat(4);
+      return `<div class="ww-row ${st === 'got' ? 'got' : ''}"><p>Pull ${m.at} times in ${rite.name} <em>(${fmt(r.ev.pulls)}/${m.at})</em></p><div class="ww-rbody"><div class="ww-tiles">${tile}</div>${st === 'got' ? '<i class="ww-stamp">Claimed</i>' : st === 'ready' ? `<button class="ww-gold" onclick="wellGoal(${m.at})">${denPlain}Claim</button>` : `<span class="ww-bar"><u style="width:${pct}%"></u></span>`}</div></div>`;
     }).join('');
-    body = `<div class="ww-claim">${due ? `<p>From ${Rites.rite(r.prev.period).name}: ${riteTicket(rite)}<b>×${fmt(due)}</b></p><button class="ww-gold" onclick="wellClaim()">${denPlain}Claim</button>` : `<p>Carry-over in <b data-ww-clock>${riteClock(Rites.ends(p) - Date.now())}</b></p><p class="ww-big">${riteTicket(next)}<b>×${fmt(coming)}</b></p>`}</div>
-      <div class="ww-board"><div class="ww-list">${rows}</div><p class="ww-foot">${rite.name} · ends in <b data-ww-clock>${riteClock(Rites.ends(p) - Date.now())}</b></p></div>`;
+    const left = Wishwell.leftover(S).reduce((a, m) => a + m.n, 0);
+    body = `<div class="ww-claim"><p>Claim countdown <b data-ww-clock>${riteClock(Rites.ends(p) - Date.now())}</b></p><p class="ww-big">${riteTicket(next)}<b>×${fmt(due - left)}</b>${left ? ` ${riteTicket(rite)}<b>×${fmt(left)}</b>` : ''}</p>${due ? `<button class="ww-gold" onclick="wellClaim()">${denPlain}Claim all</button>` : ''}</div>
+      <div class="ww-board"><div class="ww-list">${rows}</div><p class="ww-foot">Current round ${round}/4 · time remaining <b data-ww-clock>${riteClock(Rites.ends(p) - Date.now())}</b></p></div>`;
   } else if (wellTab === 'shop') {
     body = `<div class="ww-board shop"><p class="ww-head">Wish Market · ${wellCoin()}${fmt(v.coins)} · limits reset with every rite</p><div class="ww-grid">${Wishwell.wares.map(w => {
       const left = Wishwell.left(S, w), ico = w.kind === 'next' ? riteTicket(next) : w.kind === 'cur' ? riteTicket(rite) : w.kind === 'orb' ? riteIcon(4) : bagIcon(w.id);
@@ -115,13 +141,17 @@ function showWishwell() {
   $('#main').innerHTML = `<section class="ww-room ww-${wellTab}" style="--ww-bg:url('${artPath('wishwell-bg')}')">
     <div class="ww-top"><button class="ww-help" onclick="wellRules()">${denPlain}?</button>${wallet}</div>
     <h1 class="ww-title"><span>Wishwell</span></h1>
-    ${wellTab === 'goals' ? `<div class="ww-orb"><b>${Math.round(Wishwell.carryRate * 100)}%</b><small>carry-over</small></div>` : ''}
+    ${wellTab === 'goals' ? `<button class="ww-orb ${due ? 'due' : ''}" onclick="wellClaim()">${denPlain}<b>${Math.round(Math.min(1, r.ev.pulls / last) * 100)}%</b><small>${due ? 'Tap to claim' : 'goals'}</small></button>` : ''}
     ${body}
     <div class="ww-nav"><button class="ww-back" data-back onclick="go('home')" aria-label="Back">‹</button>${tabs.map(([id, n], i) => `<button class="${wellTab === id ? 'on' : ''}" onclick="wellGo('${id}')">${denPlain}<i class="ww-nico n${i}">${i === 0 ? riteTicket(next) : i === 1 ? wellCoin() : '✓'}</i><span>${n}</span>${id === 'tasks' && Wishwell.tasks.some(t => !v.done.includes(t.id) && Wishwell.progress(S, t) >= t.goal) || id === 'goals' && due ? '<em></em>' : ''}</button>`).join('')}</div>
   </section>`;
   wellStop(); wellTimer = setInterval(wellTick, 30000);
 }
-function wellClaim() { const n = Wishwell.claim(S); if (!n) return; save(); toast(n + ' ' + Rites.rite(Rites.period()).ticket + ' added'); showWishwell(); }
+function wellClaim() {
+  const r = Wishwell.claimAll(S), p = Rites.period(); if (!r.next && !r.cur) { toast('Pull in ' + Rites.rite(p).name + ' to reach the goals'); return; }
+  save(); toast([r.next && fmt(r.next) + ' ' + Rites.rite(p + 1).ticket, r.cur && fmt(r.cur) + ' ' + Rites.rite(p).ticket].filter(Boolean).join(' + ') + ' added'); showWishwell();
+}
+function wellGoal(at) { const n = Wishwell.claimGoal(S, at); if (!n) return; save(); toast(fmt(n) + ' ' + Rites.rite(Rites.period() + 1).ticket + ' added'); showWishwell(); }
 function wellTask(id) { const n = Wishwell.claimTask(S, id); if (!n) return; save(); toast('+' + n + ' Wish Coins'); showWishwell(); }
 function wellBuy(id) {
   const r = Wishwell.buy(S, id); if (!r.ok) { toast(r.why); return; }
@@ -129,7 +159,7 @@ function wellBuy(id) {
 }
 function wellRules() {
   popup(`<div class="ww-pop"><h2>Wishwell</h2><ol>
-    <li>Every pull in the running Star Rite fills the well: ${Math.round(Wishwell.carryRate * 100)}% of the tickets you spend there come back as tickets of the next rite. Claim them here once the next rite has begun.</li>
-    <li>Pull goals of the rite pay tickets of the next rite (and more) the moment you reach them.</li>
+    <li>Pull ${Wishwell.goals.map(m => m.at).join(', ')} times in the running Star Rite to earn tickets of the next rite (${Wishwell.goals.map(m => fmt(m.n)).join(' / ')}). Claim each goal, or tap the well to claim all.</li>
+    <li>Goals reached but not claimed before the rite ends wait in the well during the next rite.</li>
     <li>Each pull also gives a Wish Coin. Daily tasks give more. Spend them in the Wish Market; its limits refresh with every rite.</li></ol></div>`);
 }
