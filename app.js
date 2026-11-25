@@ -754,7 +754,7 @@ async function composeWardrobeCanvas(dress,hair,weapon=0,wings='',tag=wardrobeEx
  // Wings grow from the shoulder blades (user: "they are on her bottom, they must come from the back"): fashion wings are
  // fitted so their root lands near y 185-200 of the 500 x 800 body; the square starter wings w0-w3 have their root low in
  // the picture (WING_ROOT, y of 700) and are scaled so the root sits at y 210 and the tips stay inside the top padding.
- if(wings&&!WonderWardrobe.get('wings:'+wings)){const r=WING_ROOT[wings];const layer=r?{slot:'wingsBack',asset:wings,rect:(k=>[228-350*k,210-r[0]*k,700*k,700*k])(Math.min(.75,(210+wardrobeWingTop-2)/(r[0]-r[1])))}:{slot:'wingsBack',asset:wings,fit:[-135,-172,720,600],minTop:2-wardrobeWingTop};
+ if(wings&&!WonderWardrobe.get('wings:'+wings)){const r=WING_ROOT[wings];const layer=r?{slot:'wingsBack',asset:wings,rect:(k=>[228-350*k,232-r[0]*k,700*k,700*k])(Math.min(.75,(232+wardrobeWingTop-2)/(r[0]-r[1])))}:{slot:'wingsBack',asset:wings,fit:[-135,-140,720,600],minTop:2-wardrobeWingTop};
   WonderWardrobe.register({id:'wings:'+wings,kind:'wings',layers:[layer]})}
  return WonderWardrobe.render({dress:'dress:'+fittedDressId(dress),hair:'hair:'+fittedHairId(hair),weapon:weapon?'weapon:'+weapon:null,wings:wings?'wings:'+wings:null,extras,body,only,pad:wings?wardrobeWingPad:0,padTop:wings?wardrobeWingTop:0,
   createCanvas:(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;},load:id=>styleImage(artPath(id))});
