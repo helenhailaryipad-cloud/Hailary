@@ -479,8 +479,9 @@ that said "GodGacha" (a reference name) is now "Star Rites".
   server tag and the AI label) merged with her own orb / aura / wings / ultra prizes from `S.rites.log` ("You").
   UI (`riteFeedStrip`): a strip in the altar's top bar between the timer and the wallet (no extra row: the altar is
   full at 590 x 690) and over the home scene above Reina (`.rf-home`); one shared 3 s timer (`riteFeedTick`) slides the
-  newest win in; wings / ultra make the strip gold with a light sweep; a tap opens Lucky Winners (`riteFeedPop`, last
-  30, time ago, "Try your luck"). No save fields.
+  newest win in; wings / ultra make the strip gold with a light sweep. Since 2026-11-25 (user: "the record only inside the
+  gacha, not on the main field") the home strip is gone; the altar's Record button and the strip open one Record pop-up
+  (`riteRecord(tab)`) with Server Record (the feed, last 30) / Personal Record (her log) tabs. No save fields.
 - Optional save field `S.rites {t, auras, aura, orbs, dust, ev{period,pulls,luck,got,picks,grand,packs,free}}` + optional `auto`, `log`, `ev.sel`, `ev.taken`
   (`Rites.valid` from `valid()`). Art (image model): `art-source/rites/` + `art-source/wings/wing-28..31.webp`, built by
   `scripts/build-rites-art.py` (wings, auras, hall backgrounds `comp-rites-bg-<id>`, icon atlas `comp-rites-icons`:
