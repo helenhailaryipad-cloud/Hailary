@@ -425,6 +425,8 @@ that said "GodGacha" (a reference name) is now "Star Rites".
   0.05%, aura 0.3%, orb 5%, rare 25% (`Rites.odds`, shown with `Rites.pct`); a 4,000-player sim of 450 pulls: about one
   aura each, wings for ~21%, ultra for ~2.5%. The altar line reads "Grand prize chance" instead of a progress %.
   `ev.grand` stays in saves (validated) but is no longer used. Old notes below about the 300-pull guarantee are outdated.
+  No ticket return in Moonwell Rite (user: "today's gacha does not even return tickets"): only Dragon Hoard keeps
+  `extra: 'returns'`.
 - MONETIZATION RULE (user): gacha tickets are never sold for real money directly. Tickets are bought only with prisms
   (the player's choice); real-money packs (later) sell prisms, with tickets and items only as a bonus inside them. Welcome gift 1,000 tickets of the running rite.
 - Altar screen (2026-11-25, user photos of the reference's gacha "Priceless Treasures"): `showRites()` is now a full

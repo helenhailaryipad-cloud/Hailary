@@ -17,8 +17,8 @@ assert.ok(worst<R.luckMax,'luck guarantee, longest dry run '+worst);
 const g={scales:0};R.state(g,T0);g.rites.t.moon=1e6;const never=()=>.999;const kinds=new Set();for(let i=0;i<600;i++)for(const r of R.pull(g,1,never,T0).results)kinds.add(r.kind);
 assert.ok(!(g.reinaFashion?.wingSkins||[]).includes('fashion-wing-28')&&!kinds.has('aura')&&kinds.has('orb'));
 R.give(g,g.rites,{kind:'wings',id:'fashion-wing-28',name:'x',rarity:'legend'});const d0=g.rites.dust;R.give(g,g.rites,{kind:'wings',id:'fashion-wing-28',name:'x',rarity:'legend'});assert.equal(g.rites.dust-d0,R.dust.wings);
-// Milestones: tickets of the next rite (15 ... 240 = 4860), the moon rite's own returns, a new orb at 240.
-assert.equal(g.rites.t.ember,400+740+1240+1240+1240);assert.ok(g.rites.ev.got.includes(120)&&g.rites.ev.got.includes(250));assert.ok(R.orbCount(g)>=1);
+// Milestones: tickets of the next rite (15 ... 240 = 4860), no own-ticket returns in Moonwell (user), a new orb at 240.
+assert.equal(g.rites.t.ember,400+740+1240+1240+1240);assert.ok(!g.rites.ev.got.includes(120)&&!g.rites.ev.got.includes(250));assert.ok(R.orbCount(g)>=1);
 // Starfall Vault: three choices at 360 / 720 / 800.
 const st={scales:0};const T2=R.anchor+2*14*day+1000;R.state(st,T2);assert.equal(R.rite(st.rites.ev.period).id,'star');st.rites.t.star=1e6;
 for(let i=0;i<36;i++)R.pull(st,10,never,T2);assert.equal(R.picksOpen(st),1);assert.equal(R.choose(st,'wings','fashion-wing-31'),null);assert.ok(R.choose(st,'aura','moon'));assert.equal(R.picksOpen(st),0);assert.equal(R.choose(st,'orb','sun'),null);
