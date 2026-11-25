@@ -1094,7 +1094,7 @@ const cityArtVersion = document.querySelector('meta[name="wonder-release"]')?.co
 // Star Rites on the home screen (user: "the gacha must be shown on the main screen"): a big card with the running
 // rite's wings, its name, time left and a "Free pull" badge when today's free pull is unused.
 function homeGacha(){if(typeof Rites==='undefined')return '';try{const p=Rites.period(),r=Rites.rite(p),ms=Rites.ends(p)-Date.now(),d=Math.floor(ms/864e5),h=Math.floor(ms%864e5/36e5);
- return `<button class="city-gacha" style="--rt-hue:#ffc83a" onclick="go('rites')" aria-label="Star Rites: ${r.name}"><i class="cg-glow"></i><img src="${artPath(Rites.ultra.id)}" alt=""><span><small>ULTRA PRIZE · ${Rites.pct(Rites.odds.ultra)}</small><b>${Rites.ultra.name}</b><em>${r.name} · ${d?d+'d ':''}${h}h</em></span>${cityDue('gacha')?'<i class="cg-free">Free pull!</i>':''}</button>`}catch{return ''}}
+ return `<button class="city-gacha" style="--rt-hue:#ffc83a" onclick="go('rites')" aria-label="Star Rites: ${r.name}"><i class="cg-glow"></i><img src="${artPath(Rites.ultra.id)}" alt=""><span><small>ULTRA PRIZE · ${Rites.pct(Rites.odds.ultra)}</small><b>${Rites.ultra.name}</b><em>${d?d+'d ':''}${h}h left</em></span>${cityDue('gacha')?'<i class="cg-free">Free pull!</i>':''}</button>`}catch{return ''}}
 function cityDue(icon){try{switch(icon){
  case 'benefits':{const v=Blessings.state(S);return Blessings.ready(S)||Blessings.milestones.some(([at])=>v.n>=at&&!v.got.includes(at))}
  case 'gacha':return Rites.freeReady(S)||Rites.picksOpen(S)>0;
