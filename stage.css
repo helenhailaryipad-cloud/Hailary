@@ -10454,3 +10454,17 @@ html body #stage .city-hud button.city-title .tt-plate.painted{font-size:clamp(2
 .tt-plate.painted:is(.ink-warm,.ink-cool,.ink-rose) b{color:#fffdf4}
 html body #stage .tt-plate.painted{position:relative}
 html body #stage .tt-plate.painted b{position:absolute;left:50%;top:var(--band,55%);transform:translate(-50%,-50%);margin:0}
+/* Painted title emblems (atlas title-marks, 4 x 6 cells of 400 x 240) */
+.tt-mark{display:inline-block;width:10em;aspect-ratio:5/3;background:var(--marks) var(--mx) var(--my)/400% 600% no-repeat;filter:drop-shadow(0 3px 6px #0006);pointer-events:none}
+.tt-mark.big{font-size:min(5.4cqw,26px);flex:none;margin-bottom:-2%}
+html body #stage .city-hud button.city-title{top:21.4%;height:10.5%}
+html body #stage .city-hud button.city-title .tt-mark{font-size:clamp(14px,2.9vw,26px)}
+.tt-src{list-style:none;margin:4px auto 0;padding:0;width:min(100%,280px);display:grid;gap:3px}
+.tt-src li{display:flex;justify-content:space-between;font:700 min(3.4cqw,14px)/1.3 Arial,sans-serif;color:#dff3ff}
+.tt-src li b{color:#ffe7a6}
+.reina-dot{position:absolute;right:2px;top:2px;width:10px;height:10px;border-radius:50%;background:#ff3b3b;box-shadow:0 0 0 1.5px #fff}
+html body #stage .city-hud .rite-feed.rf-home{top:17%}
+html body #stage .city-hud button.city-title{top:23.2%;height:9.5%}
+html body #stage .city-hud button.city-title .tt-mark{font-size:clamp(13px,2.6vw,24px)}
+html body #stage #main .tt-room .tt-side button.tt-item{flex-direction:column;gap:1px}
+html body #stage #main .tt-room .tt-side button.tt-item small{position:static;font-size:10px;line-height:1}
