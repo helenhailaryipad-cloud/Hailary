@@ -1060,6 +1060,9 @@ from ONE atlas `fashion-bows` (bow laid diagonally, 10 x 7 of 200 px, order `FX_
 `--fx-bows`), built by `scripts/build-fashion-bows.py`; Original bow (= the Leaflight bow, also Azure Laurel) and
 Frostglass got clean item paintings (`art-source/fashion-cards/bow-{original,frost}.webp`, image-model edits of the bow
 cut from a render). A new bow needs its number in `FX_BOW_IDS` and a rebuild.
+Plain Leaflight bow hidden (2026-11-25, user crossed it out: "remove it, it is not like the others"): the Bow tab
+no longer lists weapon 0 (Original bow) or its copy 11 (Azure Laurel); `styleFittingRoom` opens on Frostglass when she
+still wears it. The bow itself still works (default look, mounted bow).
 Tabs like notebook index tabs (user): all seven in one fixed row (grid, no scrolling), short labels (Garment, Bow,
 Avatar, Bubble, Hair, Wings, Mounts), the chosen tab taller, in the colour of the card sheet and joined to it; the
 others lower and darker.
