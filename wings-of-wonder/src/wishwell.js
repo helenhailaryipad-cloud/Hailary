@@ -119,7 +119,7 @@ function showWishwell() {
     const rows = Wishwell.goals.map(m => {
       const st = Wishwell.goalState(S, m.at), pct = Math.min(100, r.ev.pulls / m.at * 100);
       // Four tiles like the reference (4 x 100 = 400 ...).
-      const tile = `<span class="ww-tile" title="${next.ticket}">${riteTicket(next)}<b>${fmt(m.n / 4)}</b></span>`.repeat(4);
+      const tile = `<span class="ww-tile tk" style="--tk:${next.hue}" title="${next.ticket}">${riteTicket(next)}<b>${fmt(m.n / 4)}</b></span>`.repeat(4);
       return `<div class="ww-row ${st === 'got' ? 'got' : ''}"><p>Pull ${m.at} times in ${rite.name} <em>(${fmt(r.ev.pulls)}/${m.at})</em></p><div class="ww-rbody"><div class="ww-tiles">${tile}</div>${st === 'got' ? '<i class="ww-stamp">Claimed</i>' : st === 'ready' ? `<button class="ww-gold" onclick="wellGoal(${m.at})">${denPlain}Claim</button>` : `<span class="ww-bar"><u style="width:${pct}%"></u></span>`}</div></div>`;
     }).join('');
     const left = Wishwell.leftover(S).reduce((a, m) => a + m.n, 0);
