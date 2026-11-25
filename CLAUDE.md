@@ -243,6 +243,10 @@ Tickets or Star Orbs to use), Rewards tool (a quest / forge / bounty claim ready
 that can be enhanced with the gold and crystals she has). Icons without a working screen never show it. The two round
 tools above the Quest Board and the Elf Broadcast icon had a "!" painted into the art: repainted clean
 (`tool-rewards`, `tool-upgrade`, `hud-broadcast`, sources `art-source/ui/tool-*.webp`, `scripts/build-home-tools.py`).
+Promotions block (user circled it: "too messy"): `cityGroups[1]` keeps only events with a working screen - Pet Siege,
+Blossom Vow, DailyGift, Guild, Fashion Sale, Wishwell, Star Rites. ValuePass, GoldPass, SuperPack, DreamPass, FestEvent,
+SpendRank, Chain Buy (nothing behind them) and Rush Rank (repeated the Rank button) are gone; add an icon back only
+together with its screen.
 
 ## Mini Games hub (2026-11-23)
 User: "all games in one place, names on the main field, not hunted through sub-tabs". The bottom-nav tab is called
