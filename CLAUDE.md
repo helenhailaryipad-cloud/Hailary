@@ -228,6 +228,13 @@ User shared an iCloud folder (one PDF, "Huntopia_Full_Talent_Handout", 232 photo
   `Talents.list`), `talent-sky-<branch>` by `scripts/build-talent-art.py`. Chat preview packs `talent-*` (and now
   `pairs-sprout` / `pairs-lobby`) into pack-minis (510 files). Hosted bundle 33,396,048 bytes (~158 KB spare).
 
+## Hall of Wonders clean room (2026-11-25)
+User (screenshot of the rankings: "too much of the wrong stuff"): `rankings()` in `arena.js` is one full-screen room
+(`.rk-room`, CSS at the end of `stage.css`): no app header / wallet / Menu pill / sub-tabs / bottom nav, no "Share my
+hero" button and no prototype notes. Back (home), title, four category tabs (Power, Dungeons, Castle, Merge), a podium
+for the top three, the rest as a scrolling list, her own place pinned at the bottom (not repeated in the list). The 5 s
+live refresh redraws quietly (`rankings(true)`) and keeps the scroll position. `publishProfile` still exists (Journal).
+
 ## Mini Games hub (2026-11-23)
 User: "all games in one place, names on the main field, not hunted through sub-tabs". The bottom-nav tab is called
 Mini Games; `games()` in `app.js` draws `.mg-hub`: one tile per game from `MINI_GAMES` (cover, name, line, best
