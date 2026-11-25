@@ -753,7 +753,7 @@ function friendNew(id){if(WonderGear.friendAdd(S,id)){save();citySocial();friend
 function friendManage(id){popup(`<h2>${folk(id).name} <small>AI</small></h2><p>Lv. ${folkLevel(id)} · ${folkStatus(id).text}</p><div class="den-actions"><button class="den-gold" onclick="$('#modal').close();friendChat('${id}')">${denPlain}Chat</button><button onclick="friendBan('${id}',true)">${denPlain}Blacklist</button></div>`)}
 function friendBan(id,on){WonderGear.friendBlock(S,id,on);save();$('#modal').close();citySocial();toast(on?folk(id).name+' is on the blacklist':folk(id).name+' removed from the blacklist')}
 // Letters in older saves are signed "Kiki" (a name copied from the reference); they show our own senders.
-function mailFrom(m){return m.from==='Kiki'?(/^Welcome/.test(m.title)?'Sky Garden Keeper':'Wingpost Courier'):m.from}
+function mailFrom(m){return m.from==='Kiki'?'System':m.from}
 function mailOpen(id){mailPick=id;if(WonderGear.mailRead(S,id))save();citySocial()}
 function mailCheck(id){mailChecked=mailChecked.includes(id)?mailChecked.filter(x=>x!==id):[...mailChecked,id];citySocial()}
 function mailAll(kind){const ids=WonderGear.socialState(S).mail.filter(m=>m.kind===kind).map(m=>m.id);mailChecked=ids.every(id=>mailChecked.includes(id))?[]:ids;citySocial()}
