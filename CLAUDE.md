@@ -419,6 +419,12 @@ that said "GodGacha" (a reference name) is now "Star Rites".
   `img.rite-aura`); ten Wish Orbs (collection, set bonuses at 4 / 7 / 10). Stats through `Rites.bonus` in `stats()`.
   Repeats become stardust (Dust Shop: tickets or an orb of choice). Rite Shop: nine 500-ticket packs per rite for
   50, 100 ... 450 prisms (once each, like the reference's Secret Shop) and a 1:1 prism exchange.
+- NO GUARANTEE (2026-11-25, user: "it is not a guaranteed win: I made 450 pulls in the reference and got one aura and
+  small stuff"): the pull-300 wings guarantee (`grandAt`) is gone, full luck only turns a small prize into a Wish Orb
+  (never an aura), Starfall Vault choices and the Legendary tier no longer offer wings. Odds now ultra 0.005%, wings
+  0.05%, aura 0.3%, orb 5%, rare 25% (`Rites.odds`, shown with `Rites.pct`); a 4,000-player sim of 450 pulls: about one
+  aura each, wings for ~21%, ultra for ~2.5%. The altar line reads "Grand prize chance" instead of a progress %.
+  `ev.grand` stays in saves (validated) but is no longer used. Old notes below about the 300-pull guarantee are outdated.
 - MONETIZATION RULE (user): gacha tickets are never sold for real money directly. Tickets are bought only with prisms
   (the player's choice); real-money packs (later) sell prisms, with tickets and items only as a bonus inside them. Welcome gift 1,000 tickets of the running rite.
 - Altar screen (2026-11-25, user photos of the reference's gacha "Priceless Treasures"): `showRites()` is now a full
