@@ -1211,6 +1211,8 @@ territory windows with ten defenders and the fight; defenders never came back an
   Possible drops (user: "the city window shows the POSSIBLE rewards, they are not guaranteed"): `cloudLoot[role]` is a
   list of [bag item, count, chance] rolled one by one when the defender falls (`cloudLootRoll`); the city window lists
   them as "Possible rewards" tiles with the chance on each (`cloudLootView`); the prisms / gems tokens are gone there.
+  No title bar (user crossed out the dark "Cloud War" header: "we know where we are"): the map fills the screen; the
+  round clock is a small pill at the top and "Level N" a light line beside it; the fight pill sits under them.
 - Timed background fights (2026-11-24, user: "each fight about a minute, auto, you can see Reina fighting, and I can
   leave to the menus instead of only watching"): a fight lasts `CLOUD_FIGHT` seconds (Guard 45, Elite 60, Boss 75; less
   for a hurt defender) on a wall clock (`cloudBattle {index,slot,role,hp0,start,dur}`); `cloudFightTick` (1 s interval,
