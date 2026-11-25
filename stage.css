@@ -10434,3 +10434,23 @@ html body #stage #main button.soc-title-go{padding:6px 14px;border-radius:999px;
 .tt-plate b{color:#3a1406;background:none;-webkit-background-clip:border-box;background-clip:border-box;-webkit-text-stroke:.16em #3a1406}
 .tt-frost b,.tt-tide b,.tt-star b{color:#0b2a5a;-webkit-text-stroke-color:#0b2a5a}.tt-leaf b{color:#1c3a0a;-webkit-text-stroke-color:#1c3a0a}.tt-rose b{color:#4a0a2a;-webkit-text-stroke-color:#4a0a2a}
 .tt-plate b::after{content:attr(data-t);position:absolute;left:0;top:0;padding:inherit;color:transparent;-webkit-text-stroke:0;background:var(--tg);-webkit-background-clip:text;background-clip:text;white-space:nowrap}
+/* Painted title plates (atlas title-plates 4 x 5, cells 400 x 150): the name is written over the plate's band. */
+.tt-plate.painted{display:grid;place-items:center;width:10.6em;aspect-ratio:8/3;background:var(--plate) var(--plx) var(--ply)/400% 500% no-repeat;filter:drop-shadow(0 3px 5px #0007)}
+.tt-plate.painted::before{display:none}
+.tt-plate.painted b{font-size:.5em;padding:0 .3em;margin-top:.15em;max-width:15em;overflow:visible;filter:drop-shadow(0 1px 1px #0008)}
+.tt-plate.painted b::after{padding:inherit}
+.tt-plate.big.painted{font-size:min(6.4cqw,32px)}
+html body #stage .city-hud button.city-title{top:24.6%;height:7%}
+html body #stage .city-hud button.city-title .tt-plate.painted{font-size:clamp(17px,3.6vw,30px)}
+.tt-plate.painted b{font-size:.6em;margin-top:.42em}
+html body #stage .city-hud button.city-title{top:22.8%;height:8.5%}
+html body #stage .city-hud button.city-title .tt-plate.painted{font-size:clamp(21px,4.4vw,38px)}
+/* Lettering on painted plates: gold on dark bands, dark ink with a white halo on light bands. */
+.tt-plate.painted.ink-gold b{color:#3a1406;-webkit-text-stroke:.16em #2a0e04}
+.tt-plate.painted.ink-gold b::after{background-image:linear-gradient(#fffbe0,#ffe27a 45%,#f0a92a);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tt-plate.painted:is(.ink-warm,.ink-cool,.ink-rose) b{-webkit-text-stroke:.14em #fffdf4;text-shadow:0 0 .25em #fff}
+.tt-plate.painted:is(.ink-warm,.ink-cool,.ink-rose) b::after{background:none;-webkit-background-clip:border-box;background-clip:border-box;text-shadow:none}
+.tt-plate.painted.ink-warm b::after{color:#5a2a06}.tt-plate.painted.ink-cool b::after{color:#123a78}.tt-plate.painted.ink-rose b::after{color:#8a1a52}
+.tt-plate.painted:is(.ink-warm,.ink-cool,.ink-rose) b{color:#fffdf4}
+html body #stage .tt-plate.painted{position:relative}
+html body #stage .tt-plate.painted b{position:absolute;left:50%;top:var(--band,55%);transform:translate(-50%,-50%);margin:0}

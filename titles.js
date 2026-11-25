@@ -20,8 +20,21 @@ const Titles = {
     { id: 'burrow', cat: 'feat', name: 'Burrow Ace', look: 'leaf', motif: '🐹', how: 'Score 700 in Burrow Blitz', stats: { attack: 100, health: 2000, defense: 50 }, check: s => (s.burrow?.all || 0) >= 700 },
     { id: 'orbs', cat: 'feat', name: 'Orb Sage', look: 'star', motif: '🔮', how: 'Collect all ten Wish Orbs', stats: { attack: 200, health: 4000, penetration: 100 }, check: s => Object.keys(s.rites?.orbs || {}).length >= 10 },
     { id: 'halo', cat: 'feat', name: 'Halo Keeper', look: 'rose', motif: '✨', how: 'Own all four Star Rites auras', stats: { attack: 250, health: 5000, defense: 100 }, check: s => Object.keys(s.rites?.auras || {}).length >= 4 },
-    { id: 'sunwing', cat: 'feat', name: 'Aurelian Bearer', look: 'gold', motif: '🪽', how: 'Own the Aurelian Sunwings', stats: { attack: 500, health: 10000, penetration: 200 }, check: s => (s.reinaFashion?.wingSkins || []).includes('fashion-wing-32') }
+    { id: 'sunwing', cat: 'feat', name: 'Aurelian Bearer', look: 'gold', motif: '🪽', how: 'Own the Aurelian Sunwings', stats: { attack: 500, health: 10000, penetration: 200 }, check: s => (s.reinaFashion?.wingSkins || []).includes('fashion-wing-32') },
+    { id: 'angler', cat: 'feat', name: 'Master Angler', look: 'tide', motif: '🎣', how: 'Catch 15 different kinds of fish', stats: { attack: 120, health: 2500, defense: 60 }, check: s => Object.keys(s.fishCards || {}).length >= 15 },
+    { id: 'winged', cat: 'feat', name: 'Sky Wingmaster', look: 'frost', motif: '🕊️', how: 'Own 15 pairs of wings', stats: { attack: 150, health: 3000, penetration: 60 }, check: s => (s.reinaFashion?.wingSkins || []).length >= 15 },
+    { id: 'beast', cat: 'feat', name: 'Beast Whisperer', look: 'leaf', motif: '🐾', how: 'Collect 20 pets', stats: { attack: 150, health: 3000, defense: 80 }, check: s => (s.owned || []).filter(id => /^d\d+$/.test(id)).length >= 20 },
+    { id: 'faithful', cat: 'feat', name: 'Faithful Wayfarer', look: 'star', motif: '🏮', how: 'Sign in on 28 days of one month', stats: { attack: 120, health: 2500, defense: 60 }, check: s => (s.blessings?.n || 0) >= 28 },
+    { id: 'patron', cat: 'feat', name: 'Golden Patron', look: 'gold', motif: '💰', how: 'Hold 500,000 gold at once', stats: { attack: 120, health: 2500, penetration: 60 }, check: s => (s.gold || 0) >= 500000 },
+    { id: 'cloud', cat: 'feat', name: 'Storm Conqueror', look: 'frost', motif: '⚡', how: 'Earn 1,200 Carnage Points in one Cloud War day', stats: { attack: 200, health: 4000, penetration: 80 }, check: s => (s.cloud?.carnage || 0) >= 1200 },
+    { id: 'dragonheart', cat: 'feat', name: 'Dragonheart', look: 'flame', motif: '🐉', how: 'Defeat 300 dungeon guardians', stats: { attack: 400, health: 8000, defense: 150 }, check: s => (s.dungeonWins || 0) >= 300 }
   ],
+  // Painted plates (scripts/build-title-art.py -> atlas title-plates, one cell per title in this order).
+  // Plates with a light band get dark lettering (warm or cool), the others gold lettering.
+  plateInk: { meadow: 'warm', sweetheart: 'rose', lagoon: 'cool', slayer: 'cool', harvester: 'warm', virtuoso: 'cool', burrow: 'warm', halo: 'rose', sunwing: 'warm', winged: 'cool', faithful: 'warm' },
+  // Centre of each plate's name band, % from the top of its cell (measured by build-title-art.py's smooth-band scan).
+  plateBand: { meadow: 59, sweetheart: 55, lagoon: 60.7, arcade: 54.3, siege: 52.7, duel: 47.3, slayer: 60.7, dragonheart: 59, harvester: 53, virtuoso: 59, burrow: 62.3, orbs: 60, halo: 62, sunwing: 63, angler: 56, winged: 63.3, beast: 57.3, faithful: 49.3, patron: 54, cloud: 59.7 },
+  plateOrder: ['meadow', 'sweetheart', 'lagoon', 'arcade', 'siege', 'duel', 'slayer', 'dragonheart', 'harvester', 'virtuoso', 'burrow', 'orbs', 'halo', 'sunwing', 'angler', 'winged', 'beast', 'faithful', 'patron', 'cloud'],
   byId(id) { return this.list.find(t => t.id === id); },
   state(s) { return s.titles || (s.titles = { got: {}, on: [], worn: '' }); },
   status(s, id) { const v = s.titles; return !v?.got?.[id] ? 'locked' : v.on.includes(id) ? (v.worn === id ? 'worn' : 'active') : 'ready'; },
@@ -55,7 +68,10 @@ function titleGrant(id) {
   return t;
 }
 function titlesCheck() { if (typeof S === 'undefined') return; let n = 0; for (const t of Titles.check(S)) { n++; if (WonderGear.mailGift) WonderGear.mailGift(S, { title: 'Title earned: ' + t.name, from: 'Hall of Wonders', text: t.how + '. Open your Titles to activate "' + t.name + '" and gain its stats for good.', items: {} }); if (typeof toast === 'function') setTimeout(() => toast('New title: ' + t.name), 600); } if (n) save(); }
-function titlePlate(t, cls = '') { return `<span class="tt-plate tt-${t.look} ${cls}"><i>${t.motif}</i><b data-t="${esc(t.name)}">${esc(t.name)}</b></span>`; }
+function titlePlate(t, cls = '') {
+  const n = Titles.plateOrder.indexOf(t.id), pos = n < 0 ? '' : `--plx:${(n % 4) / 3 * 100}%;--ply:${Math.floor(n / 4) / 4 * 100}%;--band:${Titles.plateBand[t.id] || 55}%;--plate:url('${artPath('title-plates')}')`;
+  return `<span class="tt-plate tt-${t.look} ${n < 0 ? '' : 'painted ink-' + (Titles.plateInk[t.id] || 'gold')} ${cls}" style="${pos}"><b data-t="${esc(t.name)}">${esc(t.name)}</b></span>`;
+}
 function titleStatRows(t) {
   const names = { attack: ['ATK', 'attack'], defense: ['DEF', 'defense'], health: ['HP', 'health'], penetration: ['ARP', 'accuracy'] };
   return Object.entries(t.stats).map(([k, n]) => `<li><span>${uiIcon(names[k]?.[1] || 'power', 'tt-ico')}${names[k]?.[0] || k}</span><b>${fmt(n)}</b></li>`).join('');
