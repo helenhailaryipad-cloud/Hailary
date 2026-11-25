@@ -178,8 +178,9 @@ global `#main button` rules set position, borders and `::before`.
 ## Burrow Blitz daily challenge (2026-11-25)
 User sent photos of the reference's whack-a-critter "Max Combo" ("find the good ones fast, never tap the bad ones").
 Own name and art. `src/burrow.js` (rules `Burrow`, pure, `node scripts/test-burrow.mjs`; UI below `BURROW_UI`), screen
-`burrow`, opened from a "Daily challenge" strip on the Mini Games hub (`burrowStrip()`, under the featured game; not in
-the `ARCADE` rotation, it has its own daily ranking) and the games sub-nav.
+`burrow`, a tile with a DAILY badge in the Mini Games hub (`MINI_GAMES` row; user did not notice the first version, a
+strip under the featured game, so the hub grid is now 4 + 3 centred tiles) and the games sub-nav. Not in the `ARCADE`
+rotation: it has its own daily ranking. `burrowStrip()` is unused.
 - Run: 60 s, twelve burrows in a zig-zag (`BB_SPOTS`). Friendly: Acorn Vole +2, Berry Hamster +4, Sunbloom Hamster
   time +4 s, Lucky Gemkit +20; frost: Frost Imp, Icicle Bat, Hail Golem, Snow Wisp freeze taps for 3 s and break the
   streak. Streak multiplier x2 from 8 ... x5 from 32 (`mult`); it breaks after 2 s without a friendly tap. Pace rises
