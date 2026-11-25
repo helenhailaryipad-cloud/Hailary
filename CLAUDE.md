@@ -430,6 +430,14 @@ that said "GodGacha" (a reference name) is now "Star Rites".
   (`S.rites.auto`: missing tickets bought 1:1 in `Rites.pull`), bottom tabs Altar / Shop / Collection / Rewards /
   Rotation. Result window "Congratulations" with each prize's prism value (`Rites.values`, `value`) and a "This pull's
   value" star, Confirm / Try Again. CSS under "Star Rites altar" (`.ra-*`). Tests in `test-wishwell.mjs`.
+- Ultra prize (2026-11-25, user: "golden wings on the main screen, something that will hardly ever drop but everyone
+  wants"): Aurelian Sunwings = `fashion-wing-32` (`Rites.ultra`, image-model edit with wing-31 as the layout reference,
+  `art-source/wings/wing-32.webp`, built by `build-rites-art.py`; AVIF of wings 28-32 at quality 40). 0.05% on every
+  pull of every rite (`odds.ultra`, carved before the other bands, no extra random call), no pity, never sold, never in
+  a selection, in `PREMIUM_LOOKS`; repeat = 1,000 stardust; owning it adds `ultra.stats` through `Rites.bonus`. It is
+  the centre bubble of the altar (rite wings left, aura right) and the art of the home card (`homeGacha`, "ULTRA PRIZE
+  0.05%"). Tapping a bubble opens a prize card (`riteInfo(kind)`: big art with rays, CP from `riteCP`, type, Activated
+  CP, Activation Stats, Owned), like the reference's item preview. Hosted bundle 33,500,833 bytes (~54 KB spare).
 - Optional save field `S.rites {t, auras, aura, orbs, dust, ev{period,pulls,luck,got,picks,grand,packs,free}}` + optional `auto`, `log`, `ev.sel`, `ev.taken`
   (`Rites.valid` from `valid()`). Art (image model): `art-source/rites/` + `art-source/wings/wing-28..31.webp`, built by
   `scripts/build-rites-art.py` (wings, auras, hall backgrounds `comp-rites-bg-<id>`, icon atlas `comp-rites-icons`:

@@ -22,11 +22,11 @@ def save(name, im, q=88, aq=50):
     im.save(OUT/(name+'.webp'), quality=q, method=6); im.save(HOST/(name+'.avif'), quality=aq, speed=4)
     print(name, im.size, (OUT/(name+'.webp')).stat().st_size, (HOST/(name+'.avif')).stat().st_size)
 
-for n in range(28, 32):   # exclusive wings: keep a WebP source like the others, then the same size as wing 11-27
+for n in range(28, 33):   # exclusive wings (32 = Aurelian Sunwings, the ultra prize): keep a WebP source like the others, then the same size as wing 11-27
     src = SRC/'wings'/f'wing-{n}.webp'
     if not src.exists(): Image.open(SRC/'wings'/f'wing-{n}.png').save(src, quality=95, method=6)
     w = trim(Image.open(src)); w = w.resize((860, round(w.height*860/w.width)), Image.Resampling.LANCZOS)
-    w.save(OUT/f'fashion-wing-{n}.webp', quality=92, method=6); w.save(HOST/f'fashion-wing-{n}.avif', quality=58, speed=4)
+    w.save(OUT/f'fashion-wing-{n}.webp', quality=92, method=6); w.save(HOST/f'fashion-wing-{n}.avif', quality=40, speed=4)
     print(f'fashion-wing-{n}', w.size)
 for k in ('moon', 'ember', 'star', 'bloom'):
     a = trim(Image.open(SRC/'rites'/f'aura-{k}.png'), 10); a = a.resize((640, round(a.height*640/a.width)), Image.Resampling.LANCZOS)
