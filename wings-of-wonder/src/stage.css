@@ -10552,3 +10552,20 @@ html body #stage #main .cloud-war .cloud-carnage{bottom:calc(min(11cqw,62px) + 1
  #stage #modal .cloud-city .city-kill .bag-gain{width:52px!important;padding:2px!important}#stage #modal .cloud-city .city-kill .bag-gain .bag-ico{width:26px!important;height:26px!important}
  #stage #modal .cloud-city .city-kill .bag-gain small,#stage #modal .cloud-city .city-kill .bag-gain span{display:none}#modal .cloud-city .city-kill p{font-size:11px}
  #stage #modal .cloud-city .city-go{padding:5px 36px!important;font-size:16px!important}}
+/* City window, light look (user: "try not to put everything into black frames"): sky-blue card like the reference,
+   no dark inner boxes; text dark navy, accents gold. */
+#stage #modal[open]:has(.cloud-city){background:linear-gradient(#bfe6ff,#7cc0f0 55%,#5aa5e0)!important;border:3px solid #fff6d8!important;box-shadow:0 0 0 2px #e9c46f,0 10px 30px #0006!important;color:#13305a}
+#modal .cloud-city h2{color:#fff!important;text-shadow:0 2px 0 #2a6ab0,0 0 8px #1a4a8a}
+#modal .cloud-city .city-owner,#modal .cloud-city .city-points,#modal .cloud-city .city-points b,#modal .cloud-city .city-points small{color:#13305a!important;text-shadow:none}
+#modal .cloud-city .city-points span{text-shadow:0 0 3px #fff}
+#modal .cloud-city .city-kill{background:none!important;border:0;border-top:1.5px solid #ffffff99;border-radius:0;padding:6px 0 0}
+#modal .cloud-city .city-kill h3{color:#6a3a06!important;text-shadow:0 1px 0 #fff8}
+#modal .cloud-city .city-kill p{color:#13305a!important}
+#modal .cloud-city .city-kill b{color:#0a6a2a}
+#stage #modal .cloud-city .portal-defenders[data-terrain]{box-shadow:0 0 0 3px #fff8,0 4px 10px #1a4a8a55}
+#stage #modal .cloud-city .city-go:not(:disabled){background:url(assets/generated/ui-btn-gold.webp) center/100% 100% no-repeat!important;border:0!important;color:#5a2a06!important;box-shadow:none!important}
+#modal .cloud-city .city-owner b,#modal .cloud-city .city-points span{color:#13305a!important;font-weight:900}
+#modal .cloud-city .city-points span::before{content:'';display:inline-block;width:.7em;height:.7em;margin-right:4px;border-radius:50%;background:currentColor;box-shadow:inset 0 0 0 20px var(--fc,#3aa0ff)}
+#stage #modal .cloud-city .city-kill .bag-gain{background:linear-gradient(#fffaf0,#ffe9bd)!important;border:2px solid #e9c46f!important;box-shadow:0 2px 4px #1a4a8a44!important;color:#5a2a06!important}
+#stage #modal .cloud-city .city-kill .bag-gain b{color:#5a2a06!important;text-shadow:none!important}
+#stage #modal .cloud-city .city-kill .daily-token{background:linear-gradient(#fffaf0,#ffe9bd)!important;border:2px solid #e9c46f!important;border-radius:10px}

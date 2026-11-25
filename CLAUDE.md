@@ -7,6 +7,11 @@ Read `docs/WINGS-OF-WONDER-HANDOVER.md` before any game work.
 - Preserve save compatibility (`wow-save-v1`, version 1), item instance IDs, existing art and project identity.
 - `mcp/gpt_image_mcp.py` is an image-generation MCP server (default model gpt-image-2.6-sunburst); the OpenAI key is injected by the session proxy, never committed.
 
+## Visual style rule (user, 2026-11-25)
+"Try not to put everything into black frames": no dark boxes, dark bars or dark framed panels around content by
+default. Prefer light, airy surfaces (sky-blue / ivory cards, soft gradients), content floating on the art, icons
+without dark discs, gold accents. Use a dark panel only where text would otherwise be unreadable, and keep it small.
+
 ## Current priority (user, 2026-11-20)
 Build the SKELETON of the game first: screens, systems and flows that exist and work. Prices, bonuses and all stat
 numbers will be tuned together later, so do not spend time balancing now and do not report balance caveats at length;
