@@ -10522,3 +10522,8 @@ html body #stage #main .cloud-war .cloud-actions button.cloud-tool{flex:0 0 auto
 html body #stage #main .cloud-war .cloud-actions button.cloud-tool img{width:min(10cqw,56px);height:min(10cqw,56px);filter:drop-shadow(0 2px 3px #0008)}
 html body #stage #main .cloud-war .cloud-actions button.cloud-tool>svg:first-child{display:none}
 html body #stage #main .cloud-war .cloud-actions{justify-content:flex-end;padding-left:calc(3% + min(12cqw,60px));gap:1%}
+/* Light Cloud War tool icons: small, no dark disc, no dark band (user: "small, not black, not distracting") */
+html body #stage #main .cloud-war .cloud-actions{background:none}
+html body #stage #main .cloud-war .cloud-actions button.cloud-tool{width:min(11cqw,64px);font-size:min(2.1cqw,11px)}
+html body #stage #main .cloud-war .cloud-ti{display:block;margin:0 auto 1px;width:min(8cqw,42px);height:min(8cqw,42px);background-size:500% 100%;background-repeat:no-repeat;filter:drop-shadow(0 1px 2px #0a2a4a99)}
+html body #stage #main .cloud-war .cloud-carnage{bottom:calc(min(11cqw,62px) + 10px)}
