@@ -25,5 +25,5 @@ for i, k in enumerate(IDS):
     im.thumbnail((CW - 6, CH - 6), Image.Resampling.LANCZOS)
     atlas.alpha_composite(im, ((i % 4)*CW + (CW - im.width)//2, (i//4)*CH + (CH - im.height)//2))
 atlas.save(OUT/'title-plates.webp', quality=86, method=6)
-atlas.save(HOST/'title-plates.avif', quality=34, speed=4)
+atlas.save(HOST/'title-plates.avif', quality=28, speed=4)
 print('title-plates', atlas.size, (OUT/'title-plates.webp').stat().st_size, (HOST/'title-plates.avif').stat().st_size)

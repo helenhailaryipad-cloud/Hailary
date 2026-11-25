@@ -10442,3 +10442,15 @@ html body #stage #main button.soc-title-go{padding:6px 14px;border-radius:999px;
 .tt-plate.big.painted{font-size:min(6.4cqw,32px)}
 html body #stage .city-hud button.city-title{top:24.6%;height:7%}
 html body #stage .city-hud button.city-title .tt-plate.painted{font-size:clamp(17px,3.6vw,30px)}
+.tt-plate.painted b{font-size:.6em;margin-top:.42em}
+html body #stage .city-hud button.city-title{top:22.8%;height:8.5%}
+html body #stage .city-hud button.city-title .tt-plate.painted{font-size:clamp(21px,4.4vw,38px)}
+/* Lettering on painted plates: gold on dark bands, dark ink with a white halo on light bands. */
+.tt-plate.painted.ink-gold b{color:#3a1406;-webkit-text-stroke:.16em #2a0e04}
+.tt-plate.painted.ink-gold b::after{background-image:linear-gradient(#fffbe0,#ffe27a 45%,#f0a92a);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tt-plate.painted:is(.ink-warm,.ink-cool,.ink-rose) b{-webkit-text-stroke:.14em #fffdf4;text-shadow:0 0 .25em #fff}
+.tt-plate.painted:is(.ink-warm,.ink-cool,.ink-rose) b::after{background:none;-webkit-background-clip:border-box;background-clip:border-box;text-shadow:none}
+.tt-plate.painted.ink-warm b::after{color:#5a2a06}.tt-plate.painted.ink-cool b::after{color:#123a78}.tt-plate.painted.ink-rose b::after{color:#8a1a52}
+.tt-plate.painted:is(.ink-warm,.ink-cool,.ink-rose) b{color:#fffdf4}
+html body #stage .tt-plate.painted{position:relative}
+html body #stage .tt-plate.painted b{position:absolute;left:50%;top:var(--band,55%);transform:translate(-50%,-50%);margin:0}

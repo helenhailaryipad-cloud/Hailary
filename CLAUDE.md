@@ -485,6 +485,14 @@ pictures). `src/titles.js` (rules `Titles`, pure, `node scripts/test-titles.mjs`
   `.city-title`) replaces the "Overlord's Aura" plate over Reina. Optional save field `S.titles {got{id:time}, on[], worn}`
   (`Titles.valid`). Room `.tt-room`: category list left (Celebrity / Achievement), plate, Reina, CP, stats, Title Story,
   Activate / Wear / Take off. Hosted bundle: comp-avatar-frames AVIF re-saved at q34 (-59 KB) -> 33,486,994 bytes.
+- Painted plates (user: "over the head these are titles; invent them yourself, they just must be beautiful and varied, for
+  some merits"): 20 titles (13 more achievements: 300 guardians, 15 fish kinds, 15 wings, 20 pets, 28 sign-ins in a
+  month, 500,000 gold, 1,200 Carnage in a day, ...). Each has its own ornate plate without text (image model,
+  `art-source/titles/plate-<id>.webp`; say "transparent" in lower case in the prompt or gen.py paints a checkerboard)
+  -> atlas `title-plates` 4 x 5 cells of 400 x 150 (`Titles.plateOrder`) by `scripts/build-title-art.py`; the name is
+  lettered over the plate's band in CSS (`.tt-plate.painted`, band height `Titles.plateBand`, ink `Titles.plateInk`:
+  dark on light bands, gold on dark ones). Chat preview packs `title-*` into pack-minis. Hosted bundle: title-plates,
+  fashion-bows (q28) and comp-chat-bubbles (q32) AVIF -> 33,536,697 bytes (~17 KB spare).
 
 ## Wishwell: Star Rites carry-over (2026-11-25)
 User sent photos of the reference's "Adventure Goals" behind its Snowland home icon ("tickets for the next gacha for

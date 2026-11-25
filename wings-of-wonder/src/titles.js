@@ -30,6 +30,10 @@ const Titles = {
     { id: 'dragonheart', cat: 'feat', name: 'Dragonheart', look: 'flame', motif: '🐉', how: 'Defeat 300 dungeon guardians', stats: { attack: 400, health: 8000, defense: 150 }, check: s => (s.dungeonWins || 0) >= 300 }
   ],
   // Painted plates (scripts/build-title-art.py -> atlas title-plates, one cell per title in this order).
+  // Plates with a light band get dark lettering (warm or cool), the others gold lettering.
+  plateInk: { meadow: 'warm', sweetheart: 'rose', lagoon: 'cool', slayer: 'cool', harvester: 'warm', virtuoso: 'cool', burrow: 'warm', halo: 'rose', sunwing: 'warm', winged: 'cool', faithful: 'warm' },
+  // Centre of each plate's name band, % from the top of its cell (measured by build-title-art.py's smooth-band scan).
+  plateBand: { meadow: 59, sweetheart: 55, lagoon: 60.7, arcade: 54.3, siege: 52.7, duel: 47.3, slayer: 60.7, dragonheart: 59, harvester: 53, virtuoso: 59, burrow: 62.3, orbs: 60, halo: 62, sunwing: 63, angler: 56, winged: 63.3, beast: 57.3, faithful: 49.3, patron: 54, cloud: 59.7 },
   plateOrder: ['meadow', 'sweetheart', 'lagoon', 'arcade', 'siege', 'duel', 'slayer', 'dragonheart', 'harvester', 'virtuoso', 'burrow', 'orbs', 'halo', 'sunwing', 'angler', 'winged', 'beast', 'faithful', 'patron', 'cloud'],
   byId(id) { return this.list.find(t => t.id === id); },
   state(s) { return s.titles || (s.titles = { got: {}, on: [], worn: '' }); },
@@ -65,8 +69,8 @@ function titleGrant(id) {
 }
 function titlesCheck() { if (typeof S === 'undefined') return; let n = 0; for (const t of Titles.check(S)) { n++; if (WonderGear.mailGift) WonderGear.mailGift(S, { title: 'Title earned: ' + t.name, from: 'Hall of Wonders', text: t.how + '. Open your Titles to activate "' + t.name + '" and gain its stats for good.', items: {} }); if (typeof toast === 'function') setTimeout(() => toast('New title: ' + t.name), 600); } if (n) save(); }
 function titlePlate(t, cls = '') {
-  const n = Titles.plateOrder.indexOf(t.id), pos = n < 0 ? '' : `--plx:${(n % 4) / 3 * 100}%;--ply:${Math.floor(n / 4) / 4 * 100}%;--plate:url('${artPath('title-plates')}')`;
-  return `<span class="tt-plate tt-${t.look} ${n < 0 ? '' : 'painted'} ${cls}" style="${pos}"><b data-t="${esc(t.name)}">${esc(t.name)}</b></span>`;
+  const n = Titles.plateOrder.indexOf(t.id), pos = n < 0 ? '' : `--plx:${(n % 4) / 3 * 100}%;--ply:${Math.floor(n / 4) / 4 * 100}%;--band:${Titles.plateBand[t.id] || 55}%;--plate:url('${artPath('title-plates')}')`;
+  return `<span class="tt-plate tt-${t.look} ${n < 0 ? '' : 'painted ink-' + (Titles.plateInk[t.id] || 'gold')} ${cls}" style="${pos}"><b data-t="${esc(t.name)}">${esc(t.name)}</b></span>`;
 }
 function titleStatRows(t) {
   const names = { attack: ['ATK', 'attack'], defense: ['DEF', 'defense'], health: ['HP', 'health'], penetration: ['ARP', 'accuracy'] };
