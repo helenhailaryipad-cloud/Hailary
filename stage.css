@@ -10122,3 +10122,117 @@ body[data-screen=blessings] #stage .toast{top:auto!important;bottom:18%!importan
 .city-gacha b{font:900 max(11px,2.5cqw)/1.05 Georgia,serif;color:#fff;text-shadow:0 2px 0 #2a0a4a,0 0 8px #000}
 .city-gacha em{font:800 max(8px,1.6cqw)/1.1 Arial,sans-serif;font-style:normal;color:#b8ff9a;text-shadow:0 1px 2px #000}
 .city-gacha .cg-free{position:absolute;top:6%;right:5%;padding:2px 7px;border-radius:99px;background:linear-gradient(#ff6a5a,#c8201a);color:#fff;font:900 max(8px,1.5cqw)/1.3 Arial,sans-serif;font-style:normal;box-shadow:0 0 0 1.5px #fff,0 2px 4px #0006;animation:bbPulse 1.4s ease-in-out infinite}
+
+/* ===== Star Rites altar (2026-11-25, user photos of the reference's gacha screen): three prizes on show, grand prize
+   progress, three reward tiers with selection chests, luck bar, Pull x1 / x10 (tickets or prisms), auto-purchase,
+   Record, bottom tabs. The room is a size container laid out as a flex column. ===== */
+body[data-screen=rites] #stage{width:min(100%,86dvh)!important;max-width:none!important}
+.ra-room{position:absolute;inset:0;overflow:hidden;container-type:size;display:flex;flex-direction:column;gap:min(.9cqh,6px);padding:max(6px,1cqh) 3cqw 0;box-sizing:border-box;background:linear-gradient(#0a082000,#0a0820 92%),var(--rtbg) center top/cover no-repeat,#120a30;color:#fff;font-family:Arial,sans-serif;user-select:none;-webkit-user-select:none}
+html body #stage #main .ra-room button{position:relative;min-height:0;margin:0;padding:0;border:0;background:none;box-shadow:none;color:#fff;outline:0;cursor:pointer;font:inherit;letter-spacing:0;text-transform:none}
+html body #stage #main .ra-room button::before,html body #stage #main .ra-room button::after{display:none!important}
+html body #stage #main .ra-room button>svg:first-child{display:none}
+.ra-top{flex:none;display:flex;align-items:flex-start;gap:2cqw}
+html body #stage #main .ra-room button.ra-help{width:30px;height:30px;flex:none;border-radius:8px;transform:rotate(45deg);background:linear-gradient(#5a4a8a,#2a1e5a);box-shadow:inset 0 0 0 1.5px #e8d8ff;font:900 16px/1 Georgia,serif}
+.ra-time{padding:4px 10px;border-radius:99px;background:#0d0a24c0;border:1px solid #ffffff40;font:700 13px/1.2 Arial,sans-serif}.ra-time b{color:#b8ff9a}
+.ra-top .rt-wallet{margin-left:auto;flex-direction:row;flex-wrap:wrap;justify-content:flex-end}
+.ra-head{flex:none;position:relative;text-align:center}
+.ra-head h1{margin:0;font:900 min(7.5cqw,4.8cqh)/1 Georgia,serif;font-style:italic;background:linear-gradient(#fffbe0,#ffd86a 50%,#ff9a3a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #4a1a06) drop-shadow(0 0 10px #ffd76a66)}
+.ra-head h1 small{display:block;font:900 min(2.6cqw,11px)/1.4 Arial,sans-serif;font-style:normal;letter-spacing:.18em;-webkit-text-fill-color:#e8d8ff;color:#e8d8ff}
+html body #stage #main .ra-room button.ra-rec{position:absolute;right:0;top:0;display:flex;flex-direction:column;align-items:center;font:800 11px/1.1 Arial,sans-serif;text-shadow:0 1px 2px #000}
+.ra-rec .gpt-icon{width:min(9cqw,38px)!important;height:min(9cqw,38px)!important;margin:0!important}
+.ra-show{flex:1 1 0;min-height:min(22cqh,170px);position:relative}
+.ra-orb{position:absolute;display:flex;flex-direction:column;align-items:center;transform:translate(-50%,-50%)}
+.ra-orb>span{display:grid;place-items:center;width:min(26cqw,16cqh);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 50% 40%,#ffffff40,color-mix(in srgb,var(--rthue) 40%,#0000) 60%,#0000 70%);box-shadow:0 0 0 2px #b8ffd888,0 0 22px #7affc0aa,inset 0 0 26px #b8ffe0aa;animation:raFloat 3.2s ease-in-out infinite}
+.ra-orb>span img{width:86%;height:86%;object-fit:contain;filter:drop-shadow(0 0 6px #fff9)}
+.ra-orb>span .rt-ico{width:62%;height:62%}
+.ra-orb small{margin-top:3px;padding:1px 8px;border-radius:99px;background:#0d0a24c0;font:800 min(2.8cqw,12px)/1.3 Arial,sans-serif;white-space:nowrap}
+.ra-orb.mid{left:50%;top:56%}.ra-orb.mid>span{width:min(34cqw,21cqh)}
+.ra-orb.l{left:20%;top:42%}.ra-orb.r{left:80%;top:42%}.ra-orb.r>span{animation-delay:-1.6s}.ra-orb.l>span{animation-delay:-.8s}
+@keyframes raFloat{50%{transform:translateY(-6px)}}
+.ra-prog{flex:none;align-self:center;margin:0;padding:4px 18px;border-radius:99px;background:#0d0a24cc;border:1px solid #ffffff33;font:800 min(3.4cqw,15px)/1.2 Arial,sans-serif}.ra-prog b{color:#7dff9a}
+.ra-tiers{flex:none;display:flex;flex-direction:column;gap:min(.8cqh,6px)}
+.ra-tier{padding:4px 6px 5px;border-radius:12px;background:linear-gradient(#e8efe0ee,#c8d4c0ee);box-shadow:inset 0 0 0 2px #fff8,0 3px 8px #0006;color:#3a3a2a}
+.ra-tier>p{display:flex;align-items:center;gap:8px;margin:0 0 3px;font:700 min(3cqw,13px)/1.2 Arial,sans-serif}
+.ra-tier>p b{padding:2px 12px 2px 8px;border-radius:6px 2px 2px 6px;clip-path:polygon(0 0,100% 0,90% 100%,0 100%);color:#fff;font:900 min(3.2cqw,14px)/1.3 Georgia,serif;text-shadow:0 1px 1px #0006}
+.ra-tier.t-legend>p b{background:linear-gradient(90deg,#e04aa8,#ff8ad0)}.ra-tier.t-rare>p b{background:linear-gradient(90deg,#d8902a,#ffc85a)}.ra-tier.t-ord>p b{background:linear-gradient(90deg,#3a8ad8,#7ac8ff)}
+.ra-tier>p em{font-style:normal;font-weight:900;color:#2a9a3a}
+.ra-row{display:flex;align-items:center;gap:6px}
+.ra-items{flex:1;min-width:0;display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding:1px}
+html body #stage #main .ra-room button.ra-it{flex:none;display:flex;flex-direction:column;align-items:center;gap:2px;width:min(13cqw,8cqh)}
+.ra-ico{position:relative;display:grid;place-items:center;width:100%;aspect-ratio:1;border-radius:8px;background:linear-gradient(#c84a6a,#6a1a3a);box-shadow:inset 0 0 0 2px #ffd0a0,0 2px 3px #0005;overflow:hidden}
+.t-rare .ra-ico{background:linear-gradient(#d8902a,#7a3a10)}.t-ord .ra-ico{background:linear-gradient(#a84ac8,#4a1a6a)}
+.ra-ico img{width:88%;height:88%;object-fit:contain}.ra-ico .bag-ico,.ra-ico .rt-ico{width:74%!important;height:74%!important}
+.ra-ico>b{position:absolute;right:3px;bottom:1px;font:900 11px/1 Arial,sans-serif;color:#fff;text-shadow:0 0 3px #000}
+.ra-it small{padding:0 6px;border-radius:99px;background:#5a5a4a;color:#fff;font:800 min(2.6cqw,11px)/1.4 Arial,sans-serif}
+.ra-it.out{filter:grayscale(.8);opacity:.6}
+html body #stage #main .ra-room button.ra-chest{flex:none;display:grid;place-items:center;width:min(14cqw,8.6cqh);aspect-ratio:1;border-radius:50%;background:radial-gradient(#3a3a5a 58%,#0000 60%),conic-gradient(#5adf6a calc(var(--p)*1%),#3a3a4a 0);box-shadow:0 2px 6px #0007}
+.ra-chest .bag-ico{width:70%!important;height:70%!important}
+.ra-chest.ready{animation:raReady 1.1s ease-in-out infinite;box-shadow:0 0 0 3px #ffe27a,0 0 18px #ffd76a}
+@keyframes raReady{50%{transform:scale(1.08)}}
+.ra-luck{flex:none;display:flex;align-items:center;gap:8px}
+.ra-luck>span .rt-ico{width:min(10cqw,40px);height:min(10cqw,40px)}
+.ra-luck>b{font:900 min(3.6cqw,15px)/1 Georgia,serif;text-shadow:0 1px 2px #000}
+.ra-luck>i{position:relative;flex:1;height:16px;border-radius:99px;background:#2a2a4a;box-shadow:inset 0 0 0 1.5px #ffffff33;overflow:hidden}
+.ra-luck>i s{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#6adf4a,#b8f86a)}
+.ra-luck>i em{position:absolute;inset:0;text-align:center;font:900 11px/16px Arial,sans-serif;font-style:normal;text-shadow:0 1px 2px #000}
+html body #stage #main .ra-room button.ra-pick{padding:4px 10px;border-radius:99px;background:linear-gradient(#ffe27a,#f0a830);color:#5a2a06;font:900 13px/1 Arial,sans-serif}
+.ra-btns{flex:none;display:grid;grid-template-columns:1fr 1fr;gap:4cqw;padding:0 3cqw}
+.ra-btns>div{display:flex;flex-direction:column;align-items:center;gap:3px}
+.ra-btns small{display:flex;align-items:center;gap:2px;font:800 min(3cqw,13px)/1 Arial,sans-serif;text-shadow:0 1px 2px #000}
+.ra-btns small .rt-ico,.ra-btns small .gpt-icon{width:18px!important;height:18px!important;margin:0!important}
+html body #stage #main .ra-room button.ra-pull{width:100%;height:min(12cqw,7.4cqh);padding-bottom:3px;background:url(assets/generated/ui-btn-gold.webp) center/100% 100% no-repeat;color:#5a2a06;font:900 min(5.4cqw,23px)/1 Georgia,serif;text-shadow:0 1px 0 #fff6}
+html body #stage #main .ra-room button.ra-pull.one{background-image:url(assets/generated/ui-btn-violet.webp);color:#fff;text-shadow:0 1px 2px #2a0a4a}
+.ra-auto{flex:none;align-self:center;display:flex;align-items:center;gap:6px;font:700 min(3cqw,13px)/1.2 Arial,sans-serif;text-shadow:0 1px 2px #000;cursor:pointer}
+.ra-auto input{width:18px;height:18px;margin:0;accent-color:#7adf5a}
+.ra-nav{flex:none;position:relative;display:flex;justify-content:flex-end;gap:1cqw;margin:0 -3cqw;padding:4px 3cqw max(4px,env(safe-area-inset-bottom));background:linear-gradient(#5a3410,#3a200a);box-shadow:inset 0 2px 0 #c8904a}
+html body #stage #main .ra-room .ra-nav>button:not(.ra-back){display:flex;flex-direction:column;align-items:center;gap:1px;width:min(15cqw,70px);padding:3px 0;border-radius:8px;font:800 min(2.8cqw,12px)/1.1 Arial,sans-serif;color:#f3e2c0}
+.ra-nav>button .rt-ico,.ra-nav>button .gpt-icon{width:min(7cqw,30px)!important;height:min(7cqw,30px)!important;margin:0!important}
+html body #stage #main .ra-room .ra-nav>button.on{background:linear-gradient(#e8a84a,#a8682a);color:#fff}
+.ra-nav em{position:absolute;top:2px;right:6px;width:9px;height:9px;border-radius:50%;background:#ff3a3a;box-shadow:0 0 0 2px #fff}
+html body #stage #main .ra-room button.ra-back{position:absolute;left:3cqw;top:50%;transform:translateY(-50%);width:min(12cqw,50px);height:min(12cqw,50px)}
+/* pop-ups */
+#modal .ra-tgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+#stage #modal.den-pop .ra-tgrid button.ra-tc{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 4px;min-height:0;border-radius:10px;background:#ffffff14;border:1.5px solid #ffffff33;box-shadow:none;color:#fff}
+#modal .ra-tc .ra-ico{width:64px}#modal .ra-tc strong{font:800 12px/1.2 Arial,sans-serif}#modal .ra-tc small{font:700 11px/1 Arial,sans-serif;color:#b8ff9a}
+#modal .ra-tc.out{filter:grayscale(.8);opacity:.55}
+#modal .ra-tpop .ra-ico{background:linear-gradient(#7a4fc8,#3a1a6a)}
+#modal .ra-log{max-height:52vh;overflow:auto;text-align:left}
+#modal .ra-log p{display:grid;grid-template-columns:auto 1fr auto;gap:8px;margin:0;padding:5px 2px;border-bottom:1px solid #ffffff1a;font:600 13px/1.3 Arial,sans-serif}
+#modal .ra-log span{color:#a8a0d0}#modal .ra-log em{font-style:normal;font-size:11px;color:#c8c0f0}
+#modal .ra-log .r-legend b{color:#ffd76a}#modal .ra-log .r-mythic b{color:#ff8ad0}#modal .ra-log .r-epic b{color:#c8a6ff}
+#modal .ra-res .ra-rhead{position:relative;margin:-4px 0 2px}
+#modal .ra-res .ra-rhead h2{margin:0;font:900 26px/1.2 Georgia,serif;background:linear-gradient(#fff6d0,#ffc85a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 10px #ffd76a88)}
+#modal .ra-kicker{margin:0 0 8px;font:800 14px/1.2 Arial,sans-serif;color:#fff3c0}
+#modal .ra-val{display:flex;align-items:center;justify-content:center;gap:2px;font:800 11px/1 Arial,sans-serif;font-style:normal;color:#ffd76a}
+#modal .ra-val .gpt-icon{width:14px!important;height:14px!important;margin:0!important}
+#modal .ra-value{display:inline-flex;flex-direction:column;align-items:center;margin:10px auto 4px;padding:8px 18px;background:radial-gradient(#ff6a3a,#c8201a);clip-path:polygon(50% 0,62% 14%,80% 6%,82% 26%,100% 30%,90% 50%,100% 70%,82% 74%,80% 94%,62% 86%,50% 100%,38% 86%,20% 94%,18% 74%,0 70%,10% 50%,0 30%,18% 26%,20% 6%,38% 14%)}
+#modal .ra-value small{font:800 11px/1.2 Arial,sans-serif;color:#ffe9a0}#modal .ra-value b{display:flex;align-items:center;gap:3px;font:900 20px/1.1 Georgia,serif;color:#fff}
+#modal .ra-value .gpt-icon{width:20px!important;height:20px!important;margin:0!important}
+#stage #modal.den-pop .ra-rbtn{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#stage #modal.den-pop .ra-rbtn button{height:56px;min-height:0;padding:0 0 3px;border:0;box-shadow:none;background:url(assets/generated/ui-btn-violet.webp) center/100% 100% no-repeat;color:#fff;font:900 17px/1.05 Georgia,serif}
+#stage #modal.den-pop .ra-rbtn button.ra-again{background-image:url(assets/generated/ui-btn-gold.webp);color:#5a2a06;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#stage #modal.den-pop .ra-rbtn button::before,#stage #modal.den-pop .ra-rbtn button::after{display:none}
+#modal .ra-again small{display:flex;align-items:center;gap:2px;font:800 10.5px/1 Arial,sans-serif}#modal .ra-again small .rt-ico,#modal .ra-again small .gpt-icon{width:14px!important;height:14px!important;margin:0!important}
+/* fit 590 x 690: everything below the showcase is sized by the room height too */
+.ra-show{min-height:0!important}
+.ra-orb>span{width:min(24cqw,13cqh)}.ra-orb.mid>span{width:min(32cqw,17cqh)}
+html body #stage #main .ra-room button.ra-it{width:min(12cqw,6.4cqh)}
+html body #stage #main .ra-room button.ra-chest{width:min(13cqw,7.4cqh)}
+.ra-tier{padding:3px 6px 4px}.ra-tier>p{margin-bottom:2px}
+.ra-it small{font-size:min(2.6cqw,1.5cqh,11px)}
+.ra-luck>span .bag-ico{width:min(9cqw,5cqh);height:min(9cqw,5cqh);display:block}
+html body #stage #main .ra-room button.ra-pull{height:min(12cqw,6.6cqh)}
+#modal .ra-value{padding:12px 34px}
+/* showcase: a size container; the three prizes stand in a row sized by its own height */
+.ra-show{container-type:size;display:flex;align-items:center;justify-content:center;gap:4cqw}
+.ra-orb{position:static!important;transform:none!important}
+.ra-orb>span{width:min(24cqw,62cqh)!important}.ra-orb.mid>span{width:min(32cqw,80cqh)!important}
+.ra-orb.side{margin-top:-10cqh}
+.ra-orb small{max-width:30cqw;overflow:hidden;text-overflow:ellipsis}
+#stage .ra-room label.ra-auto{min-height:0!important;height:auto!important;padding:0!important;margin:0!important;background:none!important;border:0!important;box-shadow:none!important}
+.ra-show{min-height:15cqh!important}
+#stage .ra-room .ra-auto input{width:18px!important;height:18px!important;min-height:0!important;min-width:0!important;padding:0!important;margin:0!important}
+.ra-show{min-height:12cqh!important}
+html body #stage #main .ra-room button.ra-it{width:min(12cqw,5.8cqh)}
+html body #stage #main .ra-room button.ra-chest{width:min(13cqw,7cqh)}
+html body #stage #main .ra-room button.ra-pull{height:min(12cqw,6cqh)}.ra-luck>span .bag-ico{width:min(9cqw,4.4cqh);height:min(9cqw,4.4cqh)}
