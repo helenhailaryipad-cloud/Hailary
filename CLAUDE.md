@@ -1211,9 +1211,12 @@ territory windows with ten defenders and the fight; defenders never came back an
   Possible drops (user: "the city window shows the POSSIBLE rewards, they are not guaranteed"): `cloudLoot[role]` is a
   list of [bag item, count, chance] rolled one by one when the defender falls (`cloudLootRoll`); the city window lists
   them as "Possible rewards" tiles with the chance on each (`cloudLootView`); the prisms / gems tokens are gone there.
+  Identical tiles (user: "the same, not motley"): 58 px cream squares with one gold rim, icon only, chance in the corner,
+  no names; one short line "Territory N · Carnage N · Possible rewards:". The map fits so Go stays on screen (52dvh /
+  49dvh); the foreign-city note is dark text on cream; a disabled Go is a light muted plate.
   No title bar (user crossed out the dark "Cloud War" header: "we know where we are"): the map fills the screen; the
-  round clock is a small pill at the top and "Level N" a light line beside it; the fight pill sits under them.
-  Pills are light cream glass with navy text (user: "again a black frame"). "Level N" is only Reina's level.
+  round clock is a small pill at the top; the fight pill sits under it. "Level N" (only Reina's level) was removed (user).
+  Pills are light cream glass with navy text (user: "again a black frame").
   Fog of war (user photo: cities under clouds; "hide other factions' cities and those that cannot be opened yet, unveil
   them with some magic when the city is won"): `cloudVeiled(i)` = another faction's city, or one of hers not reachable
   yet (`cloudReachable`: her entry island, or joined by a local road `cloudLocalRoads` to a city she holds); veiled
