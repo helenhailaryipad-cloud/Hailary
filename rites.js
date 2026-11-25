@@ -390,11 +390,18 @@ function riteTier(tid) {
     return `<button class="ra-tc ${no ? 'out' : ''}" ${open > 0 && !no ? `onclick="riteTake('${tid}',${i})"` : ''}>${denPlain}<span class="ra-ico">${riteTierArt(tid, i)}${it[2] > 1 ? `<b>${it[2]}</b>` : ''}</span><strong>${name}</strong><small>${no && it[0] === 'wings' && own ? 'Owned' : 'Left ' + left + '/' + it[3]}</small></button>`; }).join('')}</div></div>`);
 }
 function riteTake(tid, i) { const r = Rites.tierTake(S, tid, i); if (!r) return toast('Not available'); save(); $('#modal').close(); showRites(); riteShow({ results: [r], paid: [], rite: Rites.rite(Rites.period()), value: Rites.value(r), pick: true }); }
-function riteRecord() {
+// Record (user photo of the reference's "Lottery record": Server Record / Personal Record tabs, inside the gacha only).
+let riteRecTab = 'server';
+function riteRecord(tab = riteRecTab) {
+  riteRecTab = tab;
   const v = Rites.state(S), log = v.log || [];
-  const name = r => r.kind === 'item' ? (WonderGear.bagItemById[r.id]?.name || r.id) + (r.n > 1 ? ' ×' + r.n : '') : r.kind === 'wings' ? (Rites.list.find(x => x.wings === r.id)?.wingName || '') + ' Wings' : r.kind === 'aura' ? Rites.auras[r.id] : Rites.orbName(r.id);
-  popup(`<div class="rt-pop"><h2>Pull Record</h2>${log.length ? `<div class="ra-log">${log.map(r => `<p class="r-${r.rarity}"><span>${new Date(r.t).toISOString().slice(5, 16).replace('T', ' ')}</span><b>${name(r)}</b><em>${RITE_RAR[r.rarity] || ''}</em></p>`).join('')}</div>` : '<p>No pulls yet.</p>'}<p><small>The last ${Rites.logMax} prizes.</small></p></div>`);
+  const name = r => r.kind === 'item' ? (WonderGear.bagItemById[r.id]?.name || r.id) + (r.n > 1 ? ' ×' + r.n : '') : r.kind === 'wings' ? (Rites.list.find(x => x.wings === r.id)?.wingName || '') + ' Wings' : r.kind === 'aura' ? Rites.auras[r.id] : r.kind === 'ultra' ? Rites.ultra.name : Rites.orbName(r.id);
+  const body = tab === 'server'
+    ? `<ol class="rf-list">${Rites.feed(S, Date.now(), Rites.feedKeep).map(w => `<li class="k-${w.kind} ${w.me ? 'me' : ''}"><span class="rf-art">${riteFeedArt(w)}</span><span class="rf-txt"><span class="rf-who">Congratulations to ${riteFeedWho(w)}</span><em>${Rites.feedPrize(w)}</em><small class="rf-meta">${riteFeedAgo(w.t)}</small></span></li>`).join('')}</ol><p><small>Every other adventurer here is an AI.</small></p>`
+    : log.length ? `<div class="ra-log">${log.map(r => `<p class="r-${r.rarity}"><span>${new Date(r.t).toISOString().slice(5, 16).replace('T', ' ')}</span><b>${name(r)}</b><em>${RITE_RAR[r.rarity] || ''}</em></p>`).join('')}</div><p><small>The last ${Rites.logMax} prizes.</small></p>` : '<p>No pulls yet.</p>';
+  popup(`<div class="rt-pop rf-pop"><h2>Record</h2>${body}<div class="rf-tabs"><button class="${tab === 'server' ? 'on' : ''}" onclick="riteRecord('server')">${denPlain}Server Record</button><button class="${tab === 'me' ? 'on' : ''}" onclick="riteRecord('me')">${denPlain}Personal Record</button></div></div>`);
 }
+function riteFeedPop() { riteRecord('server'); }
 function riteStepText(m, rite) {
   const next = Rites.rite(Rites.period() + 1), bits = [];
   if (m.next) bits.push(riteTicket(next) + fmt(m.next));
@@ -540,8 +547,3 @@ function riteFeedTick() {
 }
 if (typeof setInterval !== 'undefined' && typeof document !== 'undefined') setInterval(riteFeedTick, 3000);
 function riteFeedAgo(t) { const m = Math.max(0, Math.floor((Date.now() - t) / 60000)); return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : Math.floor(m / 60) + ' h ago'; }
-function riteFeedPop() {
-  const rows = Rites.feed(S, Date.now(), Rites.feedKeep).map(w => `<li class="k-${w.kind} ${w.me ? 'me' : ''}"><span class="rf-art">${riteFeedArt(w)}</span><span class="rf-txt"><span class="rf-who">${riteFeedWho(w)}</span><em>${Rites.feedPrize(w)}</em><small class="rf-meta">${(Rites.list.find(r => r.id === w.rite) || {}).name || ''}${w.pulls ? ' · pull ' + w.pulls : ''}</small></span><time>${riteFeedAgo(w.t)}</time></li>`).join('');
-  popup(`<div class="rt-pop rf-pop"><h2>Lucky Winners</h2><p>Big prizes drawn at the Star Rites altars, newest first. Every other adventurer here is an AI.</p><ol class="rf-list">${rows}</ol>
-   <button class="primary" onclick="go('rites')">${denPlain}Try your luck</button></div>`);
-}
