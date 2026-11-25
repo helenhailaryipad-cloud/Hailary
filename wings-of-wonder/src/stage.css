@@ -10107,3 +10107,4 @@ html body #stage #main .bl-room button.bl-buy{display:inline-flex;align-items:ce
 .bl-active{font:900 16px/1.3 Georgia,serif;color:#2a9a3a}
 #stage .bl-sheet.pass>p{color:#4a3a2a!important}
 body[data-screen=blessings] #stage .toast{top:auto!important;bottom:18%!important}
+#stage .city-tool{position:relative}#stage .city-tool .city-notice{font-size:inherit;right:-6%;top:-8%;width:1.1em;height:1.13em;font:italic 800 1.85cqw/1.13 Arial}

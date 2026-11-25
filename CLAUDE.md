@@ -235,6 +235,15 @@ hero" button and no prototype notes. Back (home), title, four category tabs (Pow
 for the top three, the rest as a scrolling list, her own place pinned at the bottom (not repeated in the list). The 5 s
 live refresh redraws quietly (`rankings(true)`) and keeps the scroll position. `publishProfile` still exists (Journal).
 
+## Home icons: "!" only when something is due (2026-11-25)
+User: "all icons clean, no exclamation marks; the mark only when there is something to upgrade". The fixed set
+`cityNotices` is gone; `cityDue(icon)` in `app.js` decides: Blessings (today's sign-in or a reached milestone), Star
+Rites (free pull / open pick), Wishwell (carry-over or a finished task), Guild (not signed in today), Summon (Wish
+Tickets or Star Orbs to use), Rewards tool (a quest / forge / bounty claim ready), Upgrade tool (an equipped piece
+that can be enhanced with the gold and crystals she has). Icons without a working screen never show it. The two round
+tools above the Quest Board and the Elf Broadcast icon had a "!" painted into the art: repainted clean
+(`tool-rewards`, `tool-upgrade`, `hud-broadcast`, sources `art-source/ui/tool-*.webp`, `scripts/build-home-tools.py`).
+
 ## Mini Games hub (2026-11-23)
 User: "all games in one place, names on the main field, not hunted through sub-tabs". The bottom-nav tab is called
 Mini Games; `games()` in `app.js` draws `.mg-hub`: one tile per game from `MINI_GAMES` (cover, name, line, best
