@@ -252,6 +252,14 @@ big card under the promotions on the left (`homeGacha()`, `.city-gacha`): the ru
 left, a pulsing border in the rite's colour, a turning light, and a red "Free pull!" badge while today's free pull is
 unused. It opens `rites`.
 
+## Home profile plate (2026-11-25)
+User circled the old top-left status (round avatar, bar, "2,579 / Lv. 1 · Peace"): "awful, draw it". One painted plate
+(image-model edit with `logo-v2.webp` as the style reference: gold filigree, emerald and ruby gems, round portrait ring,
+dark-blue enamel nameplate band, level medallion, no text) `art-source/ui/profile-plate.webp` -> `hud-profile` by
+`scripts/build-profile-plate.py` (prints hole / band / medallion positions). `.city-status.pf2` in `home()`: portrait in
+the ring, name + ⚔ power + XP bar on the band, level in the medallion; Rank moved right, the left event icons 1.7%
+lower. Hosted bundle 33,500,6xx bytes.
+
 ## Mini Games hub (2026-11-23)
 User: "all games in one place, names on the main field, not hunted through sub-tabs". The bottom-nav tab is called
 Mini Games; `games()` in `app.js` draws `.mg-hub`: one tile per game from `MINI_GAMES` (cover, name, line, best
