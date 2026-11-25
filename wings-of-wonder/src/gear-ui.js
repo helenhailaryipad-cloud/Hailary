@@ -1856,7 +1856,12 @@ function cloudOwnClaim(i){
 // Light tool icons (atlas comp-cloud-tools 5 x 1: shop, faction, points, rank, guide).
 const cloudToolIcon=n=>'<i class="cloud-ti" style="background-image:url(\''+artPath('comp-cloud-tools')+'\');background-position:'+n*25+'% 0"></i>';
 const cloudClaimable=()=>{const v=WonderGear.cloudState(S);return WonderGear.cloudPointRewards.some((r,n)=>v.carnage>=r.at&&!v.claimed.includes(n))};
-const cloudLoot={Boss:{id:'chest2',n:1},Elite:{id:'chest1',n:1},Guard:null};
+// Possible drops of a defeated defender (user: "the city window shows the POSSIBLE rewards; they are not guaranteed"):
+// each row [bag item, count, chance] is rolled on its own when the defender falls. Placeholders.
+const cloudLoot={Boss:[['chest3',1,.12],['chest2',1,.45],['gembox',1,.25],['wish',1,.35]],Elite:[['chest2',1,.18],['chest1',1,.5],['shardbag',1,.3],['stonebag',1,.3]],
+ Guard:[['chest1',1,.25],['gold1',1,.35],['exp1',1,.35],['stonebag',1,.15]]};
+const cloudLootRoll=(role,rng=Math.random)=>{const got={};for(const [id,n,p] of cloudLoot[role]||[])if(rng()<p)got[id]=(got[id]||0)+n;return got};
+const cloudLootView=role=>{bagArtVars();return (cloudLoot[role]||[]).map(([id,n,p])=>'<span class="bag-gain loot-maybe" style="--rarity:'+bagHue(WonderGear.bagItemById[id].rarity)+'" title="'+WonderGear.bagItemById[id].name+'">'+bagIcon(id)+'<b>'+Math.round(p*100)+'%</b><small>'+WonderGear.bagItemById[id].name+'</small></span>').join('')};
 function cloudItems(items){bagArtVars();return Object.entries(items).map(([id,n])=>'<span class="bag-gain" style="--rarity:'+bagHue(WonderGear.bagItemById[id].rarity)+'">'+bagIcon(id)+'<b>×'+n+'</b><small>'+WonderGear.bagItemById[id].name+'</small></span>').join('')}
 function cloudPointsShow(){
  const r=WonderGear,v=r.cloudState(S);
@@ -1996,8 +2001,8 @@ function cloudFightStop(keep){
 }
 function cloudFightSettle(){
  const b=cloudBattle,{index,slot,role}=b,limit=cloudEnemyHealth[role],hits=(S.cloudWarHits??={})[index]??=Array(10).fill(0);
- let gain=0,loot=cloudLoot[role];
- if(!(hits[slot]>=limit)){hits[slot]=limit;gain=WonderGear.cloudGain(S,cloudEnemyScore[role]);if(loot)WonderGear.bagAdd(S,loot.id,loot.n);save()}else loot=null;
+ let gain=0,loot=null;
+ if(!(hits[slot]>=limit)){hits[slot]=limit;gain=WonderGear.cloudGain(S,cloudEnemyScore[role]);loot=cloudLootRoll(role);for(const [id,n] of Object.entries(loot))WonderGear.bagAdd(S,id,n);if(!Object.keys(loot).length)loot=null;save()}
  b.done=true;b.result={gain,loot};b.doneAt=Date.now();
  const next=cloudNextTarget(index),watching=document.querySelector('.cloud-encounter canvas');
  if(!watching)toast('⚔ '+cloudBossName(slot)+' defeated · +'+cloudEnemyScore[role]+' territory points'+(gain?' · +'+gain+' Carnage':''));
@@ -2077,7 +2082,7 @@ function cloudBattleView(){
   const left=Math.max(0,Math.ceil((c.start+c.dur-wall)/1000));clock.textContent=riding?'riding…':c.done?'won':Math.floor(left/60)+':'+String(left%60).padStart(2,'0')+' left';
   status.textContent=riding?'Pathfinding to '+cloudBossName(slot):c.done?'Victory':'Reina · '+Math.max(40,100-Math.round(cloudFightP(c,wall)*35))+'% HP · Auto-fighting · you can leave, the fight goes on';
   const cd=Math.ceil((c.burstAt-wall)/1000);burst.disabled=riding||c.done||cd>0;burst.textContent=cd>0?'Celestial Arrow · '+cd+'s':'Celestial Arrow';
-  if(c.done&&!shownDone){shownDone=true;const {gain,loot}=c.result;bagArtVars();canvas.parentElement.insertAdjacentHTML('beforeend',`<div class="cloud-floating-loot" role="status">${loot?'<div class="bag-gains">'+cloudItems({[loot.id]:loot.n})+'</div>':''}<strong>+${cloudEnemyScore[role]} territory points · ${gain?'+'+gain+' Carnage Points':'daily Carnage cap reached'}</strong></div>`);const hall=body.querySelector('.cloud-hall');if(hall)hall.outerHTML=cloudHall(index,-1)}
+  if(c.done&&!shownDone){shownDone=true;const {gain,loot}=c.result;bagArtVars();canvas.parentElement.insertAdjacentHTML('beforeend',`<div class="cloud-floating-loot" role="status">${loot?'<div class="bag-gains">'+cloudItems(loot)+'</div>':''}<strong>+${cloudEnemyScore[role]} territory points · ${gain?'+'+gain+' Carnage Points':'daily Carnage cap reached'}</strong></div>`);const hall=body.querySelector('.cloud-hall');if(hall)hall.outerHTML=cloudHall(index,-1)}
   requestAnimationFrame(frame);
  }
  requestAnimationFrame(frame);
@@ -2114,12 +2119,12 @@ function cloudPortalPreview(place,index){
  const defenders=cloudPortalSlots.map(([role,,,art],slot)=>{const lim=cloudEnemyHealth[role],left=lim-cloudDamage(index,slot),down=left<=0;
   return `<button class="portal-defender portal-strike ${slot===pick?'picked':''} ${down?'down':''}" aria-label="${cloudBossName(slot)}, ${role}${down?', defeated':''}" style="left:${pads[slot][0]}%;top:${pads[slot][1]}%" data-role="${role}" onclick="cloudChoose(${index},${slot})">${denPlain}<small>${slot===pick?'Target':role==='Boss'?'Boss':role}</small>${artImage('guardian-t'+art,role)}${slot===pick?`<i class="city-target"><img src="${artPath('reina-avatar')}" alt="Reina"></i>`:''}${down?`<em class="portal-clock">${cloudClock()}</em>`:`<i class="portal-hp"><u style="width:${left/lim*100}%"></u></i>`}</button>`}).join('');
  const rows=cloudFactions.map((f,i)=>[f,i,scores[i]||0]).filter(([,i,n])=>n>0||i===sector||i===cloudMine).sort((a,b)=>b[2]-a[2]);
- const role=pick>=0?cloudPortalSlots[pick][0]:'Boss',loot=cloudLoot[role];
+ const role=pick>=0?cloudPortalSlots[pick][0]:'Boss';
  return `<section class="cloud-portal-preview cloud-city"><h2>${place.name}</h2><p class="city-owner">Ownership: <b style="color:${owner>=0?cloudFactions[owner][3]:'#fff'}">${owner>=0?cloudFactions[owner][0]:'None'}</b> · ${place.rank==='Capital'?'Holy City':place.rank}</p>
   ${mine?'':'<p class="cloud-foreign">A city of '+place.owner+'. '+cloudFactions[cloudMine][0]+' opens only its own six cities; this one is left to its faction.</p>'}
   <div class="portal-defenders" data-terrain="${place.rank}">${defenders}</div>
   <div class="city-points"><b>Current points:</b>${rows.map(([f,i,n],k)=>`<span style="color:${f[3]}">${k+1}. ${f[0]}: ${n}</span>`).join('')}<small>80 points open the city</small></div>
-  <div class="city-kill"><h3>Killing Rewards${pick>=0?' · '+cloudBossName(pick):''}</h3><p>Territory Points: <b>${cloudEnemyScore[role]}</b> · Carnage Points: <b>${cloudEnemyScore[role]}</b></p><p>Personal point pool <b>${rewards.personal}</b>, shared by damage</p><div class="bag-gains">${loot?cloudItems({[loot.id]:loot.n}):''}${dailyTokens(['hud-prisms','hud-gems'])}</div></div>
+  <div class="city-kill"><h3>Killing Rewards${pick>=0?' · '+cloudBossName(pick):''}</h3><p>Territory Points: <b>${cloudEnemyScore[role]}</b> · Carnage Points: <b>${cloudEnemyScore[role]}</b></p><p>Personal point pool <b>${rewards.personal}</b>, shared by damage</p><p class="city-maybe">Possible rewards · each has its own chance</p><div class="bag-gains">${cloudLootView(role)}</div></div>
   <div class="den-actions">${cloudChestReady(index)?`<button class="den-gold city-own" onclick="cloudOwnClaim(${index})">${denPlain}Ownership Reward</button>`:''}<button class="den-gold city-go" onclick="cloudGo(${index})" ${mine&&pick>=0?'':'disabled'}>${denPlain}Go</button></div></section>`;
 }
 function cloudTerritory(index){

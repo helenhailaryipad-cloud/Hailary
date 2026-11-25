@@ -1208,6 +1208,9 @@ territory windows with ten defenders and the fight; defenders never came back an
   Where Reina goes (user: "unclear where Reina goes; highlight the chosen boss"): in the city window the chosen defender
   is larger (16%), with a pulsing gold ring, a gold "Target" tag and Reina's face on it, the others dimmed; on the big
   map a bouncing Reina face marker sits over the city of the running fight (`cloudBattle.index`, `.cloud-reina-mark`).
+  Possible drops (user: "the city window shows the POSSIBLE rewards, they are not guaranteed"): `cloudLoot[role]` is a
+  list of [bag item, count, chance] rolled one by one when the defender falls (`cloudLootRoll`); the city window lists
+  them as "Possible rewards" tiles with the chance on each (`cloudLootView`); the prisms / gems tokens are gone there.
 - Timed background fights (2026-11-24, user: "each fight about a minute, auto, you can see Reina fighting, and I can
   leave to the menus instead of only watching"): a fight lasts `CLOUD_FIGHT` seconds (Guard 45, Elite 60, Boss 75; less
   for a hurt defender) on a wall clock (`cloudBattle {index,slot,role,hp0,start,dur}`); `cloudFightTick` (1 s interval,

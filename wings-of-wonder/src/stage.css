@@ -10595,3 +10595,8 @@ html body #stage #main .cloud-war .cloud-carnage{bottom:calc(min(11cqw,62px) + 1
 #stage #modal .cloud-city .portal-strike.picked::after{display:none!important}
 .city-target{position:absolute;right:-14%;top:-6%;width:46%;aspect-ratio:1;border-radius:50%;border:2px solid #ffd24a;background:#fff;overflow:hidden;box-shadow:0 2px 4px #0006;z-index:2}
 .city-target img{width:100%!important;height:100%!important;object-fit:cover;border:0!important;border-radius:50%!important;background:none!important;box-shadow:none!important;animation:none!important}
+/* Possible drops (chance on the tile) */
+#modal .cloud-city .city-maybe{margin:4px 0 2px;font:700 11px Arial,sans-serif;color:#2a4a7a!important}
+#stage #modal .cloud-city .city-kill .bag-gain.loot-maybe b{position:absolute;right:3px;top:3px;padding:0 4px;border-radius:6px;background:#2a6ad0;color:#fff!important;font:800 10px/1.4 Arial,sans-serif}
+#stage #modal .cloud-city .city-kill .bag-gain.loot-maybe{position:relative}
+@media (max-height:820px){#stage #modal .cloud-city .city-kill .bag-gain.loot-maybe b{top:auto;bottom:-6px;right:50%;transform:translateX(50%);font-size:9px}#stage #modal .cloud-city .city-kill .bag-gains{margin-bottom:6px}}
