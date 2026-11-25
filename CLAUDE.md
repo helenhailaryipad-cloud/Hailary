@@ -1181,6 +1181,9 @@ territory windows with ten defenders and the fight; defenders never came back an
   chest is the Winged Chest cell at 46 units to the right of the city, with a pulsing gold glow (`#cloudChestGlow`) and
   two sparkles; a tap pays into the bag and opens the shared `resultShow` window (Congratulations!, prize tiles in a
   grid, Confirm). `cloudOwnReward` has more tiles now (Capital 6 kinds, Fortress 5, Island 4; placeholders).
+  Map bottom (user crossed out the dark Carnage bar and the boxed tool bar): the map runs to the bottom; Carnage Points
+  is a small pill floating on it and the tools are small icons with outlined labels on a soft gradient, right of the
+  back button (CSS "Cloud War bottom, third look" at the end of stage.css).
 - Timed background fights (2026-11-24, user: "each fight about a minute, auto, you can see Reina fighting, and I can
   leave to the menus instead of only watching"): a fight lasts `CLOUD_FIGHT` seconds (Guard 45, Elite 60, Boss 75; less
   for a hurt defender) on a wall clock (`cloudBattle {index,slot,role,hp0,start,dur}`); `cloudFightTick` (1 s interval,

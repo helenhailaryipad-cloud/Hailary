@@ -10507,3 +10507,18 @@ html body #modal .rf-pop .rf-tabs button>svg:first-child{display:none}
 #resultCard .wr-body .bag-gains{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;max-width:360px;margin:0 auto}
 #resultCard .wr-body .bag-gains .bag-gain{width:76px;flex:none}
 #resultCard .wr-body .wr-note{margin:10px 0 0;font:700 12px/1.3 Arial,sans-serif;color:#e8dcff;text-align:center}
+/* Cloud War bottom, third look (user crossed out the dark Carnage bar and the boxed tool bar; reference: the map runs to
+   the bottom, a small "Killing Points" pill floats on it, and a row of small icons with outlined labels, no boxes). */
+html body #stage #main .cloud-war{position:relative;grid-template-rows:auto minmax(0,1fr)!important}
+html body #stage #main .cloud-war .cloud-field{grid-row:2}
+html body #stage #main .cloud-war .cloud-carnage{position:absolute;left:3%;bottom:calc(min(15cqw,96px) + 8px);z-index:5;width:auto;padding:4px 12px 4px 6px;gap:6px;border-radius:999px;border:1.5px solid #e9c46f99;background:linear-gradient(90deg,#1a1430d9,#2a1f4ad9);box-shadow:0 2px 6px #0006;border-top:1.5px solid #e9c46f99}
+html body #stage #main .cloud-war .cloud-carnage img{width:min(6cqw,30px);height:min(6cqw,30px)}
+html body #stage #main .cloud-war .cloud-carnage span{font:700 min(2.6cqw,14px)/1 Arial,sans-serif;gap:.4em}
+html body #stage #main .cloud-war .cloud-carnage b{font-size:1.1em}
+html body #stage #main .cloud-war .cloud-carnage .cloud-open{padding-left:10px;border-left:1px solid #ffffff33}
+html body #stage #main .cloud-war .cloud-actions{position:absolute;left:0;right:0;bottom:0;z-index:5;display:flex;align-items:flex-end;justify-content:center;gap:2%;padding:4px 3% 6px;background:linear-gradient(transparent,#0a1a2a66 60%,#0a1a2a99);border:0;box-shadow:none;height:auto}
+html body #stage #main .cloud-war .cloud-actions>button[data-back]{position:absolute;left:3%;bottom:8px;margin:0}
+html body #stage #main .cloud-war .cloud-actions button.cloud-tool{flex:0 0 auto;width:min(13cqw,78px);padding:0;border:0!important;background:none!important;box-shadow:none!important;border-radius:0;outline:0;color:#fff;font:800 min(2.3cqw,12px)/1.05 Arial,sans-serif;text-shadow:0 0 3px #000,0 1px 2px #000,0 0 6px #0a1a2a;height:auto;min-height:0}
+html body #stage #main .cloud-war .cloud-actions button.cloud-tool img{width:min(10cqw,56px);height:min(10cqw,56px);filter:drop-shadow(0 2px 3px #0008)}
+html body #stage #main .cloud-war .cloud-actions button.cloud-tool>svg:first-child{display:none}
+html body #stage #main .cloud-war .cloud-actions{justify-content:flex-end;padding-left:calc(3% + min(12cqw,60px));gap:1%}
