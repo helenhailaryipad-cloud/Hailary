@@ -457,6 +457,14 @@ that said "GodGacha" (a reference name) is now "Star Rites".
   pet, the rest are spare copies). Real payment is NOT connected: the price opens an info card (`riteCash`). Ticket
   Packs: ten x 500 tickets for 50 ... 500 prisms (`Rites.packs`), once each per rite, Sold out stamps. The old pop-up
   (exchange, vouchers, stardust) is `riteMore()`. Hosted bundle 33,537,051 bytes (~17 KB spare: compress old art first).
+- Win feed (2026-11-25, user: "the feed of other people's wins is very important"): `Rites.feed(s,now,n)` = a
+  deterministic stream of AI adventurers' wins from the clock (`feedAt(slot)`, one slot per `feedSlot` 15 s, a win in
+  70% of slots: orb / aura / wings / ultra by `feedOdds`, about 9 ultra and 340 wings a day; names `feedNames` with a
+  server tag and the AI label) merged with her own orb / aura / wings / ultra prizes from `S.rites.log` ("You").
+  UI (`riteFeedStrip`): a strip in the altar's top bar between the timer and the wallet (no extra row: the altar is
+  full at 590 x 690) and over the home scene above Reina (`.rf-home`); one shared 3 s timer (`riteFeedTick`) slides the
+  newest win in; wings / ultra make the strip gold with a light sweep; a tap opens Lucky Winners (`riteFeedPop`, last
+  30, time ago, "Try your luck"). No save fields.
 - Optional save field `S.rites {t, auras, aura, orbs, dust, ev{period,pulls,luck,got,picks,grand,packs,free}}` + optional `auto`, `log`, `ev.sel`, `ev.taken`
   (`Rites.valid` from `valid()`). Art (image model): `art-source/rites/` + `art-source/wings/wing-28..31.webp`, built by
   `scripts/build-rites-art.py` (wings, auras, hall backgrounds `comp-rites-bg-<id>`, icon atlas `comp-rites-icons`:

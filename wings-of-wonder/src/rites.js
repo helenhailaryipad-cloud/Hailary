@@ -77,6 +77,14 @@ const Rites = {
   values: { ultra: 20000, wings: 3000, aura: 1200, orb: 300, chest3: 400, gembox: 240, petegg: 300, chest2: 160, sealbag: 120, wish: 60, essence: 90, exp1: 20, gold1: 30, shardbag: 60, stonebag: 40, chest1: 50, stam: 30, exp2: 120, gold2: 200, gearbox: 150 },
   value(r) { return (this.values[r.kind === 'item' ? r.id : r.kind] || 20) * (r.n || 1); },
   logMax: 50,
+  // Win feed (user: "a feed of other people's wins is very important"): a deterministic stream of AI adventurers'
+  // big prizes from the clock (same for everyone, same after a reload), one slot every feedSlot ms; a slot holds a
+  // win with feedOdds.any. Shares among the wins: ultra / wings / aura / orb. Her own big prizes (from her log) join
+  // the stream under her name. All placeholders; every other name is an AI adventurer and is labelled AI.
+  feedSlot: 15000, feedKeep: 30,
+  feedOdds: { any: .7, ultra: .002, wings: .08, aura: .35 },
+  feedNames: ['Lyra', 'Kaelen', 'Mirabel', 'Thorne', 'Seraphine', 'Orrin', 'Elowen', 'Bram', 'Isolde', 'Fennick', 'Rowan',
+    'Calla', 'Darian', 'Nimue', 'Perrin', 'Sylva', 'Tobiah', 'Wren', 'Aldric', 'Junie', 'Corwin', 'Maelis', 'Hollis', 'Aveline'],
   auraStats: { attack: 150, health: 1500, attackPercent: 3, healthPercent: 3 },
   orbStats: { attack: 40, health: 400 },
   orbSets: [[4, { attackPercent: 2 }], [7, { attackPercent: 2, healthPercent: 3 }], [10, { damageBonus: 5 }]],
@@ -167,6 +175,29 @@ const Rites = {
     const paid = this.settle(s, v, rite, rng);
     this.record(v, results, now);
     return { ok: true, results, paid, rite, value: results.reduce((a, r) => a + this.value(r), 0) };
+  },
+  feedRand(n, k) { let x = (Math.imul(n, 2654435761) ^ Math.imul(k + 1, 1597334677)) >>> 0; x ^= x >>> 15; x = Math.imul(x, 2246822519) >>> 0; x ^= x >>> 13; x = Math.imul(x, 3266489917) >>> 0; x ^= x >>> 16; return (x >>> 0) / 4294967296; },
+  // The AI win in slot n, or null.
+  feedAt(n) {
+    const r = k => this.feedRand(n, k), o = this.feedOdds;
+    if (r(0) >= o.any) return null;
+    const t = n * this.feedSlot + Math.floor(r(1) * this.feedSlot), rite = this.rite(this.period(t)), q = r(2);
+    const kind = q < o.ultra ? 'ultra' : q < o.ultra + o.wings ? 'wings' : q < o.ultra + o.wings + o.aura ? 'aura' : 'orb';
+    const id = kind === 'ultra' ? this.ultra.id : kind === 'wings' ? rite.wings : kind === 'aura' ? rite.id : this.orbs[Math.floor(r(3) * this.orbs.length)][0];
+    return { t, name: this.feedNames[Math.floor(r(4) * this.feedNames.length)], server: 1 + Math.floor(r(5) * 40), ai: true, kind, id, rite: rite.id, pulls: 1 + Math.floor(r(6) * 300) };
+  },
+  feedPrize(w) {
+    return w.kind === 'ultra' ? this.ultra.name : w.kind === 'wings' ? ((this.list.find(r => r.wings === w.id) || {}).wingName || 'Rite') + ' Wings'
+      : w.kind === 'aura' ? this.auras[w.id] : this.orbName(w.id);
+  },
+  // Newest first: AI wins up to `now` plus her own aura / wings / ultra / orb prizes from the log.
+  feed(s, now = Date.now(), count = this.feedKeep) {
+    const out = [];
+    for (let n = Math.floor(now / this.feedSlot), seen = 0; out.length < count && seen < count * 6; n--, seen++) { const w = this.feedAt(n); if (w && w.t <= now) out.push(w); }
+    for (const e of (s?.rites?.log || [])) if (['ultra', 'wings', 'aura', 'orb'].includes(e.kind) && e.t <= now) {
+      const rite = e.kind === 'aura' ? e.id : this.rite(this.period(e.t)).id; out.push({ t: e.t, name: s.name || 'Reina', me: true, kind: e.kind, id: e.id, rite });
+    }
+    return out.sort((a, b) => b.t - a.t).slice(0, count);
   },
   record(v, results, now = Date.now()) { v.log = [...results.map(r => ({ t: now, kind: r.kind, id: r.id, n: r.n || 1, rarity: r.rarity })), ...(v.log || [])].slice(0, this.logMax); },
   // Altar tiers: selections earned = pulls / every; each item has a per-event limit.
@@ -321,7 +352,7 @@ function showRites() {
   };
   const prize = (art, label, cls, kind) => `<button class="ra-orb ${cls}" onclick="riteInfo('${kind}')">${denPlain}<span>${art}</span><small>${label}</small>${kind === 'ultra' ? '<em>ULTRA · ' + Rites.pct(Rites.odds.ultra) + '</em>' : ''}</button>`;
   $('#main').innerHTML = `<section class="ra-room rt-${rite.id}" style="--rtbg:url('${artPath('comp-rites-bg-' + rite.id)}');--rthue:${rite.hue}">
-   <div class="ra-top"><button class="ra-help" onclick="riteRates()" aria-label="Rates and rules">${denPlain}<span>?</span></button><span class="ra-time">⏱ <b class="rt-time-b">${riteClock(Rites.ends(ev.period) - Date.now())}</b></span><div class="rt-wallet">${riteWallet()}</div></div>
+   <div class="ra-top"><button class="ra-help" onclick="riteRates()" aria-label="Rates and rules">${denPlain}<span>?</span></button><span class="ra-time">⏱ <b class="rt-time-b">${riteClock(Rites.ends(ev.period) - Date.now())}</b></span>${riteFeedStrip('altar')}<div class="rt-wallet">${riteWallet()}</div></div>
    <div class="ra-head"><h1><small>STAR RITES</small>${rite.name}</h1><button class="ra-rec" onclick="riteRecord()">${denPlain}${uiIcon('book')}<span>Record</span></button></div>
    <div class="ra-show">${prize(riteWingArt(rite, ''), rite.wingName, 'side l', 'wings')}${prize(`<img src="${artPath(Rites.ultra.id)}" alt="">`, Rites.ultra.name, 'mid ultra', 'ultra')}${prize(riteAuraArt(rite.id, ''), Rites.auras[rite.id], 'side r', 'aura')}</div>
    <p class="ra-prog">${v.ev.grand || owned ? 'Grand prize won · ' + Rites.pct(Rites.odds.wings) + ' a pull' : `Grand prize progress: <b>${Rites.grandProgress(S).toFixed(2)}%</b> <small>(${fmt(v.ev.pulls)}/${fmt(Rites.grandAt)})</small>`}</p>
@@ -477,4 +508,40 @@ function riteRules() {
    <li>Pull goals on the Wishwell give tickets of the next rite (15, 30, 60, 135 and 240 pulls). Only Dragon Hoard returns some of its own tickets; Starfall Vault lets you choose a prize at 360, 720 and 800 pulls; Celestial Bloom pays prisms on its Petal Path.</li>
    <li>Auras and orbs give stats for good. Repeats become stardust for the Dust Shop.</li>
    <li>Tickets come from the free pull, rewards, the Rite Shop (prisms) and the welcome gift.</li></ol></div>`);
+}
+
+// Win feed UI (user: "the feed of other people's wins is very important"): a strip on the altar and a line on the home
+// card show the newest win, sliding in when a new one arrives (one shared 3 s timer, riteFeedTick); tapping opens the
+// Lucky Winners list. Wings and the ultra prize get a gold strip with a light sweep.
+function riteFeedArt(w) {
+  return w.kind === 'ultra' || w.kind === 'wings' ? `<img src="${artPath(w.id)}" alt="">` : w.kind === 'aura' ? riteAuraArt(w.id, '') : riteOrbIcon(w.id);
+}
+function riteFeedWho(w) { return w.me ? '<b class="me">You</b>' : `<b>${esc(w.name)}</b><small>S-${w.server}</small><i class="ai">AI</i>`; }
+function riteFeedLine(w) {
+  if (!w) return '<span class="rf-line">The altar is waiting for its first winner…</span>';
+  const rite = Rites.list.find(r => r.id === w.rite) || Rites.rite(Rites.period(w.t));
+  return `<span class="rf-line k-${w.kind}"><span class="rf-art">${riteFeedArt(w)}</span><span class="rf-txt">${riteFeedWho(w)} ${w.me ? 'won' : 'won'} <em>${Rites.feedPrize(w)}</em> <small>in ${rite.name}</small></span></span>`;
+}
+function riteFeedKey(w) { return w ? w.t + ':' + w.name + ':' + w.kind : ''; }
+function riteFeedStrip(where) {
+  const w = Rites.feed(S, Date.now(), 1)[0];
+  const tag = where === 'altar' ? 'button' : 'div';
+  return `<${tag} class="rite-feed rf-${where} ${w && (w.kind === 'wings' || w.kind === 'ultra') ? 'big' : ''}" data-rite-feed="${riteFeedKey(w)}" onclick="event.stopPropagation();riteFeedPop()" role="button" aria-label="Lucky winners">${tag === 'button' ? denPlain : ''}<i class="rf-horn">📣</i><span class="rf-win">${riteFeedLine(w)}</span></${tag}>`;
+}
+function riteFeedTick() {
+  const els = document.querySelectorAll('[data-rite-feed]'); if (!els.length || typeof S === 'undefined') return;
+  const w = Rites.feed(S, Date.now(), 1)[0], k = riteFeedKey(w);
+  els.forEach(el => {
+    if (el.dataset.riteFeed === k) return;
+    el.dataset.riteFeed = k; el.classList.toggle('big', !!w && (w.kind === 'wings' || w.kind === 'ultra'));
+    const box = el.querySelector('.rf-win'); if (!box) return;
+    box.innerHTML = riteFeedLine(w); box.classList.remove('in'); void box.offsetWidth; box.classList.add('in');
+  });
+}
+if (typeof setInterval !== 'undefined' && typeof document !== 'undefined') setInterval(riteFeedTick, 3000);
+function riteFeedAgo(t) { const m = Math.max(0, Math.floor((Date.now() - t) / 60000)); return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : Math.floor(m / 60) + ' h ago'; }
+function riteFeedPop() {
+  const rows = Rites.feed(S, Date.now(), Rites.feedKeep).map(w => `<li class="k-${w.kind} ${w.me ? 'me' : ''}"><span class="rf-art">${riteFeedArt(w)}</span><span class="rf-txt"><span class="rf-who">${riteFeedWho(w)}</span><em>${Rites.feedPrize(w)}</em><small class="rf-meta">${(Rites.list.find(r => r.id === w.rite) || {}).name || ''}${w.pulls ? ' · pull ' + w.pulls : ''}</small></span><time>${riteFeedAgo(w.t)}</time></li>`).join('');
+  popup(`<div class="rt-pop rf-pop"><h2>Lucky Winners</h2><p>Big prizes drawn at the Star Rites altars, newest first. Every other adventurer here is an AI.</p><ol class="rf-list">${rows}</ol>
+   <button class="primary" onclick="go('rites')">${denPlain}Try your luck</button></div>`);
 }

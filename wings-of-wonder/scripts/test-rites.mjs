@@ -42,7 +42,12 @@ assert.ok(!R.valid({...a.rites,aura:'star'}));assert.ok(!R.valid({...a.rites,t:{
 // Rough rates over many pulls match the table.
 const m={scales:0};R.state(m,T0);m.rites.t.moon=1e8;const cnt={};for(let i=0;i<4000;i++)for(const r of R.pull(m,10,rng,T0).results)cnt[r.rarity]=(cnt[r.rarity]||0)+1;
 assert.ok(cnt.rare/40000>.22&&cnt.rare/40000<.28,'rare rate '+cnt.rare/40000);
-console.log('PASS Rites: rotation, welcome tickets, costs and the free pull, luck within 15, wings only at pull 1800, no auto next-rite tickets, returns, Starfall choices, Petal Path, new rite keeps tickets, shop and dust, auras and orb sets, validation, rates',JSON.stringify(cnt));
+console.log('PASS Rites: win feed, rotation, welcome tickets, costs and the free pull, luck within 15, wings only at pull 1800, no auto next-rite tickets, returns, Starfall choices, Petal Path, new rite keeps tickets, shop and dust, auras and orb sets, validation, rates',JSON.stringify(cnt));
 // Starlit Vouchers: universal, swapped 1:1 into the running rite.
 const u={};R.state(u,T0);assert.equal(R.addVouchers(u,75,T0),75);assert.equal(R.redeem(u,100,T0),null);const rr=R.redeem(u,75,T0);assert.equal(rr.n,75);assert.equal(R.tickets(u,'moon'),R.welcome+75);assert.equal(R.vouchers(u),0);
-assert.ok(R.valid(u.rites));assert.ok(!R.valid({...u.rites,v:-1}));console.log('PASS Rites vouchers');
+assert.ok(R.valid(u.rites));assert.ok(!R.valid({...u.rites,v:-1}));// Win feed: deterministic AI wins from the clock (labelled ai), her own big prizes join under her name, newest first.
+{const now=R.anchor+5*day,f1=R.feed({},now,20),f2=R.feed({},now,20);assert.equal(JSON.stringify(f1),JSON.stringify(f2));assert.equal(f1.length,20);assert.ok(f1.every(w=>w.ai&&w.t<=now&&R.feedNames.includes(w.name)));
+for(let i=1;i<f1.length;i++)assert.ok(f1[i-1].t>=f1[i].t);
+const me=R.feed({name:'Reina',rites:{log:[{t:now-1,kind:'wings',id:'fashion-wing-28'},{t:now-2,kind:'item',id:'exp1'}]}},now,40);assert.ok(me.some(w=>w.me&&w.kind==='wings'&&R.feedPrize(w)==='Moonwell Seraph Wings'));assert.ok(!me.some(w=>w.me&&w.kind==='item'));
+const c={};for(let n=0;n<5760;n++){const w=R.feedAt(Math.floor(now/R.feedSlot)-n);if(w)c[w.kind]=(c[w.kind]||0)+1}assert.ok(c.orb>c.aura&&c.aura>c.wings&&c.wings>(c.ultra||0));}
+console.log('PASS Rites vouchers');
