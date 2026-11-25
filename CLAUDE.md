@@ -203,6 +203,30 @@ the `ARCADE` rotation, it has its own daily ranking) and the games sub-nav.
   drawn over the critter. The field starts at 31cqh so top-row critters stay clear of the HUD.
 - Not done: a Daily Must-Do list like the reference's (Wayfarer Quests has no Burrow task yet).
 
+## Star Talents: Skill / Talents screen (2026-11-25)
+User shared an iCloud folder (one PDF, "Huntopia_Full_Talent_Handout", 232 photos of the reference's Talent screen):
+"make the same in the Skill tab; universal for all classes". The city drawer's "Skill" item opens screen `citySkill`
+(`src/talents.js`: rules `Talents`, pure, `node scripts/test-talents.mjs`; UI below `TALENTS_UI`; loaded by test.mjs).
+- Same structure as the reference (transcribed by four subagents, merged spec kept only in session scratch): four
+  constellations Offensive (Falcon, 9 talents, 87 points), Defensive (Turtle, 9, 92), Universal (World Tree, 11, 230),
+  Mastery (Dragon, 13, 210); max levels, links, prerequisite talents ("Name cur/req") and branch gates ("Offensive /
+  Defensive points invested", Universal left side counts Offensive, right side Defensive; Mastery has none) as in the
+  reference. Names, effects and art are ours (`Talents.list`: key, branch, name, max, x/y %, links, pre, gate, fx,
+  text). Effects are WonderGear stat bonuses (`Talents.bonus` in `stats()`) or battle procs (`Talents.procs`:
+  stun / lash / boss / stunned / regen, `heroTalentHit` after Reina's hit in `updateBattle`, `heroTalentTick` in
+  `petSupport`; cached on `g.heroProcs`).
+- Points: 1 per hero level above `Talents.fromLevel` (30, placeholder; the reference starts at Lv.400). Reset Talent
+  returns everything for `resetPrice` 100 prisms. Optional save field `S.heroTalents {key: level}` (`Talents.valid`).
+- UI: overview with the four constellation discs (talents learned x/N, points spent, red dot when something can be
+  learned), tree view (constellation background, lines lit when both ends are learned, nodes: learned = colour +
+  gold ring, learnable = grey + gold halo pulsing, locked = dark), tooltip card (Lv, prerequisite / gate lines green or
+  red, Level 1 + Full Level effect at 0, Current + Next Level, Distribute and +5, Max stamp), branch tabs, Skill /
+  Talents page tabs. Skill page = Reina's three skills (Leafwind Volley, Celestial Arrow, Windstep) + active procs.
+  UI globals are prefixed `star*` (the Pets room already owns talentIcon / talentGo / talentLearn).
+- Art (image model): `art-source/talents/{icons1..3,off,def,uni,mas}.webp` -> `talent-icons` (7 x 6, order of
+  `Talents.list`), `talent-sky-<branch>` by `scripts/build-talent-art.py`. Chat preview packs `talent-*` (and now
+  `pairs-sprout` / `pairs-lobby`) into pack-minis (510 files). Hosted bundle 33,396,048 bytes (~158 KB spare).
+
 ## Mini Games hub (2026-11-23)
 User: "all games in one place, names on the main field, not hunted through sub-tabs". The bottom-nav tab is called
 Mini Games; `games()` in `app.js` draws `.mg-hub`: one tile per game from `MINI_GAMES` (cover, name, line, best

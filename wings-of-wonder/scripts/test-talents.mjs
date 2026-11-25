@@ -1,0 +1,23 @@
+// Logic tests for Star Talents (src/talents.js): structure, points, prerequisites, gates, learn, reset, bonuses, validation.
+import fs from 'node:fs'; import vm from 'node:vm';
+const ctx = vm.createContext({}); vm.runInContext(fs.readFileSync('src/talents.js', 'utf8').split('// Battle hooks')[0] + ';globalThis.Talents=Talents', ctx);
+const T = ctx.Talents; let ok = 0; const t = (c, m) => { if (!c) throw Error('FAIL ' + m); ok++; };
+const count = b => T.list.filter(x => x.branch === b).length;
+t(count('off') === 9 && count('def') === 9 && count('uni') === 11 && count('mas') === 13, 'node counts 9/9/11/13 like the reference');
+t(T.maxPoints('off') === 87 && T.maxPoints('def') === 92 && T.maxPoints('uni') === 230 && T.maxPoints('mas') === 210, 'max points per branch');
+t(T.list.every(x => x.pre.every(([k]) => T.byKey[k]) && x.links.every(k => T.byKey[k]?.branch === x.branch)), 'prerequisites and links resolve inside their branch');
+t(T.list.every(x => x.fx.every(([s]) => x.text.includes('{' + s + '}'))), 'every effect appears in its text');
+const s = { xp: 0 }; s.level = 10; t(T.earned(s) === 0 && T.learn(s, 'dawn') === 0, 'no points below the start level');
+s.level = T.fromLevel + 100; t(T.left(s) === 100, 'one point per level above the start');
+t(T.learn(s, 'dawn', 3) === 3 && T.level(s, 'dawn') === 3 && T.left(s) === 97, 'learn spends points');
+t(T.blocks(s, 'sylph').includes('pre') && T.learn(s, 'sylph') === 0, 'prerequisite level needed');
+T.learn(s, 'dawn', 3); t(T.blocks(s, 'sylph').includes('gate'), 'Offensive points gate (11)');
+T.learn(s, 'talon', 5); t(T.spent(s, 'off') === 11 && T.learn(s, 'sylph') === 1, 'gate opens at 11 Offensive points');
+t(T.learn(s, 'dawn', 99) === 4 && T.level(s, 'dawn') === 10 && T.blocks(s, 'dawn').includes('max'), 'stops at max level');
+t(T.blocks(s, 'quake').length === 0 && T.blocks(s, 'leaves').includes('gate'), 'Universal left side needs Offensive points, right side Defensive');
+const b = T.bonus(s); t(b.attack === 80 && Math.abs(b.attackPercent - 2) < 1e-9 && b.penetration === 4, 'stat bonuses add up');
+t(T.procs(s).stun === 7.5, 'proc talents');
+t(T.describe(T.byKey.dawn, 10) === 'ATK +80, ATK +2%', 'effect text');
+s.scales = 50; t(!T.reset(s).ok && T.spent(s) > 0, 'reset needs prisms'); s.scales = 500; const r = T.reset(s); t(r.ok && r.back === 16 && T.spent(s) === 0 && s.scales === 400, 'reset returns every point');
+t(T.valid(undefined) && T.valid({ dawn: 10 }) && !T.valid({ dawn: 11 }) && !T.valid({ nope: 1 }) && !T.valid([]), 'validation');
+console.log('Star Talents:', ok, 'checks passed');

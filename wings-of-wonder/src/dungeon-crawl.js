@@ -54,6 +54,7 @@ function petCounter(g){
 function petSupport(g,dt){
  const a=g.crawl;if(!a||g.ended)return false;
  if(typeof WonderGear!=='undefined'&&typeof S!=='undefined')talentGuard(g,dt);
+ if(typeof heroTalentTick==='function')heroTalentTick(g,dt);
  if(a.exitReady||!a.engaged||g.enemy.hp<=0||g.transition>0){g.poison=null;return false}
  if(g.poison){if(g.clock>=g.poison.until)g.poison=null;else{g.poison.acc+=dt;if(g.poison.acc>=1){g.poison.acc-=1;
   g.particles.push({text:'POISON',x:a.enemy.x+30,y:a.enemy.y-120,color:'#b98cff',life:.8});battleDamage(Math.max(1,Math.round(g.enemy.maxhp*WonderGear.talentNums.poisonShare)));if(g.ended||a.exitReady||g.transition>0)return true}}}
