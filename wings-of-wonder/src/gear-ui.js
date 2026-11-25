@@ -758,7 +758,8 @@ function mailAll(kind){const ids=WonderGear.socialState(S).mail.filter(m=>m.kind
 function mailTake(kind){
  const v=WonderGear.socialState(S),ids=mailChecked.length?mailChecked:v.mail.filter(m=>m.kind===kind&&(m.id===mailPick||!mailPick)&&!m.claimed).map(m=>m.id);
  const r=WonderGear.mailClaim(S,ids);if(!r.n){toast('Nothing to claim.');return}
- save();mailChecked=[];citySocial();bagArtVars();popup('<h2>Items Obtained</h2><div class="bag-gains">'+cloudItems(r.got)+'</div>');
+ // No "Items Obtained" window to dismiss (user: "open them and put everything in the bag, no confirmation").
+ save();mailChecked=[];citySocial();const k=Object.values(r.got).reduce((a,b)=>a+b,0);toast(r.n+(r.n>1?' letters':' letter')+' claimed'+(k?' · '+k+' item'+(k>1?'s':'')+' sent to the bag':''));
 }
 function mailDrop(){const n=WonderGear.mailDelete(S,mailChecked);mailChecked=[];if(!n){toast('Claim the items first; only claimed letters can be deleted.');return}save();mailPick=null;citySocial();toast(n+' deleted')}
 function citySocial(){

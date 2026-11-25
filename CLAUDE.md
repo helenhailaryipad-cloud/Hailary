@@ -1058,6 +1058,7 @@ There are no other players: every person is an AI adventurer and is labelled "AI
     gold); hearts = intimacy / 100, up to five, half hearts shown. Apply (accept/decline), Add, Blacklist (via ⋯).
   - Mail and Thank-you Note: a welcome letter, a Daily Courier letter every UTC day and one or two thank-you notes
     from friends (`socialTick`), each with bag items; Claim (checked or all), Delete (only claimed), 30 letters max.
+    Claim puts the items straight into the bag with a short toast, no "Items Obtained" window (user: no confirming).
 - Art (image model): `art-source/social/{banner,icons}.webp` -> `comp-social-banner`, `comp-social-icons` (flowers,
   hearts, letters, note, chat bubble, gift) by `scripts/build-social-art.py`.
 - Chat sheet (second pass, four photos of the reference's chat): tapping the home strip slides a sheet up over the
