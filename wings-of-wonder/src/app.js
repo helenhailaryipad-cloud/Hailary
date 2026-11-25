@@ -44,7 +44,7 @@ function gain(g,t,x){const awardedXP=globalThis.WonderProgress.award(S,x,stats()
 function popup(html){modal(html);$('#modal').classList.add('den-pop')}
 // Result window of the mini games (Crystal Cascade, Crownfall Vale): painted ribbon, light burst, stars, a score that
 // counts up, prize tiles and painted buttons. o = {title, kicker, score, label, stars (0-3, null = none), win, body, buttons:[[label,'gold'|'violet',js]]}.
-function resultShow(o){if(typeof document.createElement!=='function')return;resultClose();const el=document.createElement('div');el.id='resultCard';el.className='wr-end'+(o.win?' win':' lose');
+function resultShow(o){if(typeof document.createElement!=='function'||typeof ($('#stage')||document.body)?.appendChild!=='function')return;resultClose();const el=document.createElement('div');el.id='resultCard';el.className='wr-end'+(o.win?' win':' lose');
  const stars=o.stars==null?'':`<div class="wr-stars">${[0,1,2].map(i=>`<i class="${i<o.stars?'on':''}" style="--d:${.55+i*.28}s"></i>`).join('')}</div>`;
  el.innerHTML=`<div class="wr-card"><i class="wr-burst"></i><div class="wr-ribbon"><b>${o.title}</b></div>${o.kicker?`<p class="wr-kicker">${o.kicker}</p>`:''}${stars}
  ${o.score!=null?`<div class="wr-score"><small>${o.label||'Score'}</small><b data-to="${o.score}">0</b></div>`:''}<div class="wr-body">${o.body||''}</div>

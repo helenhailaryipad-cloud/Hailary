@@ -807,7 +807,7 @@ vm.runInContext(`
  // A city her faction holds shows a chest above it; the ownership reward pays once a round, by the city's rank.
  S.cloudWarHits={0:[9,9,9,9,9,0,0,0,0,0],1:[9,9,9,9,9,0,0,0,0,0]};S.cloud.got=[];S.cloud.round=WonderGear.cloudRound(Date.now());
  board=cloudFourBoard(cloudTerritories());if((board.match(/cloud-own-chest/g)||[]).length!==2||!cloudChestReady(0)||cloudChestReady(7))throw Error('Chests over held cities');
- const moons=WonderGear.bagCount(S,'chest2');cloudOwnClaim(0);if(WonderGear.bagCount(S,'chest2')!==moons+1||cloudChestReady(0)||!$('#modalBody').innerHTML.includes('Ownership Reward'))throw Error('Holy City ownership reward');
+ const moons=WonderGear.bagCount(S,'chest2');cloudOwnClaim(0);if(WonderGear.bagCount(S,'chest2')!==moons+2||cloudChestReady(0))throw Error('Holy City ownership reward');
  if(WonderGear.cloudOwnTake(S,0,'Capital')||(cloudFourBoard(cloudTerritories()).match(/cloud-own-chest/g)||[]).length!==1)throw Error('Once a round');
  S.cloud.round='2026-01-01T00';cloudRoundCheck();if(!cloudChestReady(0)||S.cloud.got.length)throw Error('A held city pays again next round');
  cloudTerritory(1);if(!$('#modalBody').innerHTML.includes('cloudOwnClaim(1)'))throw Error('Ownership Reward in the city window');
