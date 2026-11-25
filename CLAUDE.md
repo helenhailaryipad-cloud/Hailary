@@ -402,6 +402,23 @@ that said "GodGacha" (a reference name) is now "Star Rites".
   `scripts/build-rites-art.py` (wings, auras, hall backgrounds `comp-rites-bg-<id>`, icon atlas `comp-rites-icons`:
   tickets, orbs, luck chest, stardust). Hosted bundle 33.03 MB (about 0.5 MB spare). All numbers are placeholders.
 
+## Wishwell: Star Rites carry-over (2026-11-25)
+User sent photos of the reference's "Adventure Goals" behind its Snowland home icon ("tickets for the next gacha for
+pulls in today's"). Own name, art and wording. The home promo `snow` is now "Wishwell" (screen `wishwell`,
+`src/wishwell.js`: rules `Wishwell`, pure, `node scripts/test-wishwell.mjs`; UI below `WISHWELL_UI`; loaded by test.mjs).
+- Carry-over: `carryRate` 30% of the tickets spent in a rite come back as tickets of the NEXT rite, claimable on the
+  Wishwell once that rite has started (`claimable`, `claim`). Rites now keeps the finished event's pull count in
+  `S.rites.prev {period, pulls}` (`Rites.state`, validated).
+- Goals tab: the rite's pull milestones (`Rites.milestones`, still paid automatically by `Rites.settle`) as rows with
+  reward tiles, progress bars and Claimed stamps; "Carry-over in <time> · ×N" over the painted bubble ("30%").
+- Wish Coins: one per pull (counted from `Rites` pull totals, `seen`), plus five daily Tasks (free pull, pull 1 / 10 /
+  30 / 60 times today); Wish Market (`wares`: next / current rite tickets, bag items, a Wish Orb; limits reset with each
+  rite, `bp`). Optional save field `S.wishwell {day, dayPulls, done[], coins, seen{period,pulls}, claimed, bp, buys}`
+  (`Wishwell.valid`).
+- Art (image model): `art-source/wishwell/{bg,coin}.webp` (glade, wishing well with a bubble, original arctic-fox
+  courier mascot) -> `wishwell-bg`, `wishwell-coin` by `scripts/build-wishwell-art.py`; chat preview packs `wishwell-*`.
+  Hosted bundle 33,466,934 bytes (~87 KB spare). All numbers are placeholders.
+
 ## Wayfarer Quests: daily tasks (2026-11-23)
 User: "the core is grind + gacha: every day a set amount of everything, a small CP rise, and a bit of excitement",
 then three photos of the reference's Adventure Quest (task list paying adventure EXP and a few gacha tickets, chest

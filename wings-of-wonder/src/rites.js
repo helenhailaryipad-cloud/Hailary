@@ -53,6 +53,8 @@ const Rites = {
     const p = this.period(now);
     let v = s.rites;
     if (!v) { v = s.rites = { t: {}, auras: {}, aura: '', orbs: {}, dust: 0, ev: null }; v.t[this.rite(p).id] = this.welcome; }
+    // The finished event's pull count stays in `prev` for the Wishwell carry-over (src/wishwell.js).
+    if (v.ev && v.ev.period !== p && v.ev.pulls > 0) v.prev = { period: v.ev.period, pulls: v.ev.pulls };
     if (!v.ev || v.ev.period !== p) v.ev = { period: p, pulls: 0, luck: 0, got: [], picks: 0, grand: false, packs: [], free: '' };
     return v;
   },
@@ -167,6 +169,7 @@ const Rites = {
     if (!Object.entries(v.auras).every(([k, n]) => Object.hasOwn(this.auras, k) && int(n) && n >= 1 && n <= this.auraTiers)) return false;
     if (!Object.entries(v.orbs).every(([k, n]) => this.orbs.some(o => o[0] === k) && int(n) && n >= 1)) return false;
     if (v.aura && !v.auras[v.aura]) return false;
+    if (v.prev !== undefined && !(obj(v.prev) && Number.isSafeInteger(v.prev.period) && int(v.prev.pulls))) return false;
     const e = v.ev; if (e === null || e === undefined) return true;
     return obj(e) && Number.isSafeInteger(e.period) && int(e.pulls) && int(e.luck) && e.luck < this.luckMax && Array.isArray(e.got) && e.got.every(int)
       && int(e.picks) && typeof e.grand === 'boolean' && Array.isArray(e.packs) && e.packs.every(i => Number.isInteger(i) && i >= 0 && i < this.packs.length) && typeof e.free === 'string';
