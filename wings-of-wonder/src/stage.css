@@ -10503,3 +10503,7 @@ html body #modal .rf-pop .rf-tabs button.on{background:linear-gradient(#ffe47a,#
 html body #modal .rf-pop .rf-tabs button::before,html body #modal .rf-pop .rf-tabs button::after{display:none}
 html body #modal .rf-pop .rf-tabs button>svg:first-child{display:none}
 #modal .rf-pop>p small{font-size:11px;font-weight:600;color:#d6c8f0}#modal .rf-pop>p{margin:4px 0 0;text-align:center;line-height:1}
+/* Cloud War ownership reward in the shared result window: prize tiles in a grid like the reference */
+#resultCard .wr-body .bag-gains{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;max-width:360px;margin:0 auto}
+#resultCard .wr-body .bag-gains .bag-gain{width:76px;flex:none}
+#resultCard .wr-body .wr-note{margin:10px 0 0;font:700 12px/1.3 Arial,sans-serif;color:#e8dcff;text-align:center}

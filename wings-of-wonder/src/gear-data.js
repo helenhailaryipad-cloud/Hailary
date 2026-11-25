@@ -820,7 +820,7 @@ const cloudRules={roundMs:36e5,carnageCap:1200,territories:24,factions:4};
 const cloudPointRewards=[{at:150,items:{chest1:1}},{at:300,items:{wish:1}},{at:600,items:{chest2:1}},{at:900,items:{gembox:1}},{at:1200,items:{chest3:1}}];
 const cloudShop=[{id:'stonebag',price:60},{id:'wish',price:80},{id:'exp2',price:120},{id:'shardbag',price:150},{id:'gearbox',price:260},{id:'chest2',price:300},{id:'petegg',price:400},{id:'chest3',price:900}];
 // Ownership reward: once a round for every city her faction holds, by the city's rank; shown as a chest on the map.
-const cloudOwnReward={Capital:{chest2:1,wish:1},Fortress:{chest1:1,shardbag:1},Island:{chest1:1}};
+const cloudOwnReward={Capital:{chest3:1,chest2:2,wish:2,gembox:1,gold2:2,stonebag:2},Fortress:{chest2:1,chest1:2,shardbag:2,stonebag:1,gold1:2},Island:{chest1:2,gold1:1,exp1:2,shardbag:1}};// placeholders; more tiles like the reference's ownership chest
 const cloudRound=now=>new Date(now).toISOString().slice(0,13);
 const cloudRoundEnds=now=>(Math.floor(now/cloudRules.roundMs)+1)*cloudRules.roundMs;
 function cloudState(s,now=Date.now()){

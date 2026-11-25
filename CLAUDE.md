@@ -1177,6 +1177,10 @@ territory windows with ten defenders and the fight; defenders never came back an
   `cloudNewRound`). Until taken, a SMALL (20 px, user: "it is small and shows the city is taken") bobbing chest (cut from `comp-bag-items` with the SVG clip `#cloudChestClip`)
   floats above the city on the map; tapping it (`cloudOwnClaim`) or the city window's "Ownership Reward" button pays
   into the bag. Nested `<svg viewBox>` did not clip there, use the clip path.
+  Second look (2026-11-25, user photos: big glowing chests beside each held city, "Congratulations on Obtaining"): the
+  chest is the Winged Chest cell at 46 units to the right of the city, with a pulsing gold glow (`#cloudChestGlow`) and
+  two sparkles; a tap pays into the bag and opens the shared `resultShow` window (Congratulations!, prize tiles in a
+  grid, Confirm). `cloudOwnReward` has more tiles now (Capital 6 kinds, Fortress 5, Island 4; placeholders).
 - Timed background fights (2026-11-24, user: "each fight about a minute, auto, you can see Reina fighting, and I can
   leave to the menus instead of only watching"): a fight lasts `CLOUD_FIGHT` seconds (Guard 45, Elite 60, Boss 75; less
   for a hurt defender) on a wall clock (`cloudBattle {index,slot,role,hp0,start,dur}`); `cloudFightTick` (1 s interval,
