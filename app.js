@@ -217,8 +217,8 @@ const THEME_GOWNS={rose:'Rose Balloon Gala',dragonling:'Dragonling Festival',pum
  gem:'Crystal Gems',honey:'Honey Bee',rainbow:'Rainbow Sky',gothic:'Gothic Rose',lotus:'Lotus Pond'};
 const THEME_GOLD={sr:2500,ssr:5000};
 for(const f of WonderGear.avatarFrames)reinaDresses.push({id:f.dress,outfit:THEME_GOWNS[f.id],gold:THEME_GOLD[f.rar],reinaOnly:true,theme:f.id});
-const PREMIUM_LOOKS=new Set(['phoenix','snowqueen','peacock','galaxy','fashion-wing-21','fashion-wing-22','fashion-wing-23','fashion-wing-24','mermaid','icequeen','sweetheart','fashion-wing-25','fashion-wing-26','fashion-wing-27','fashion-wing-28','fashion-wing-29','fashion-wing-30','fashion-wing-31']);
-const RITE_WINGS={'fashion-wing-28':'Moonwell Rite','fashion-wing-29':'Dragon Hoard','fashion-wing-30':'Starfall Vault','fashion-wing-31':'Celestial Bloom'};
+const PREMIUM_LOOKS=new Set(['phoenix','snowqueen','peacock','galaxy','fashion-wing-21','fashion-wing-22','fashion-wing-23','fashion-wing-24','mermaid','icequeen','sweetheart','fashion-wing-25','fashion-wing-26','fashion-wing-27','fashion-wing-28','fashion-wing-29','fashion-wing-30','fashion-wing-31','fashion-wing-32']);
+const RITE_WINGS={'fashion-wing-32':'any Star Rite (ultra prize, 0.05%)','fashion-wing-28':'Moonwell Rite','fashion-wing-29':'Dragon Hoard','fashion-wing-30':'Starfall Vault','fashion-wing-31':'Celestial Bloom'};
 const premiumLocked=id=>PREMIUM_LOOKS.has(id)&&!(ownsOutfit(id)||S.reinaFashion?.wingSkins?.includes(id)||S.reinaFashion?.wingSkin===id);
 function premiumNote(id){if(RITE_WINGS[id])return toast('Star Rites exclusive · win it in '+RITE_WINGS[id]);toast('Supreme Set exclusive · find it in the Fashion Elite Sale')}
 for(const dress of reinaDresses)outfitCatalog[dress.id]=dress;
@@ -381,7 +381,7 @@ const reinaPieces = [
 ];
 let reinaPreview=0,wingPreview='',fashionCategory='Dresses';
 const fashionWingNames=['Verdant Veins','Amber Monarch','Swanlight','Scarlet Phoenix','Glacier Shards','Violet Nocturne','Opal Skimmer','Clockwork Halo','Cherry Petals','Midnight Moth',
-  'Aurora Veil','Rose Thorn','Seashell Pearl','Raven Night','Sunflower Gold','Frost Crystal','Autumn Maple','Starmap','Coral Reef','Jade Phoenix','Phoenix Flame','Crystal Frost','Peacock Jade','Starlit Galaxy','Mermaid Fins','Ice Queen','Sweetheart','Moonwell Seraph','Dragonfire Crest','Starfall Comet','Celestial Bloom'];
+  'Aurora Veil','Rose Thorn','Seashell Pearl','Raven Night','Sunflower Gold','Frost Crystal','Autumn Maple','Starmap','Coral Reef','Jade Phoenix','Phoenix Flame','Crystal Frost','Peacock Jade','Starlit Galaxy','Mermaid Fins','Ice Queen','Sweetheart','Moonwell Seraph','Dragonfire Crest','Starfall Comet','Celestial Bloom','Aurelian Sunwings'];
 const fashionWings=fashionWingNames.map((name,i)=>({name,id:'fashion-wing-'+(i+1),cost:1000}));
 
 const wingLights=['#7ad996','#ffb34e','#cce9ff','#ff7039','#87d9ff','#bf7df1','#7be8e0','#e9b35e','#ff9ec2','#a89bff','#6fe3c4','#e0455f','#9fe6e0','#7f8fc9','#ffd24a','#bfe8ff','#ff8a3c','#8fa0ff','#ff8f7a','#58d6a0','#ff7a3a','#9fdcff','#3fd0b8','#9a7aff','#5fe0e0','#4f8aff','#ff7aa8','#c9b8ff','#ff7a3a','#5fe0d0','#ff9ad0'];
@@ -1093,7 +1093,7 @@ const cityArtVersion = document.querySelector('meta[name="wonder-release"]')?.co
 // Star Rites on the home screen (user: "the gacha must be shown on the main screen"): a big card with the running
 // rite's wings, its name, time left and a "Free pull" badge when today's free pull is unused.
 function homeGacha(){if(typeof Rites==='undefined')return '';try{const p=Rites.period(),r=Rites.rite(p),ms=Rites.ends(p)-Date.now(),d=Math.floor(ms/864e5),h=Math.floor(ms%864e5/36e5);
- return `<button class="city-gacha" style="--rt-hue:${r.hue}" onclick="go('rites')" aria-label="Star Rites: ${r.name}"><i class="cg-glow"></i><img src="${artPath(r.wings)}" alt=""><span><small>STAR RITES</small><b>${r.name}</b><em>${d?d+'d ':''}${h}h left</em></span>${cityDue('gacha')?'<i class="cg-free">Free pull!</i>':''}</button>`}catch{return ''}}
+ return `<button class="city-gacha" style="--rt-hue:#ffc83a" onclick="go('rites')" aria-label="Star Rites: ${r.name}"><i class="cg-glow"></i><img src="${artPath(Rites.ultra.id)}" alt=""><span><small>ULTRA PRIZE · ${(Rites.odds.ultra*100).toFixed(2)}%</small><b>${Rites.ultra.name}</b><em>${r.name} · ${d?d+'d ':''}${h}h</em></span>${cityDue('gacha')?'<i class="cg-free">Free pull!</i>':''}</button>`}catch{return ''}}
 function cityDue(icon){try{switch(icon){
  case 'benefits':{const v=Blessings.state(S);return Blessings.ready(S)||Blessings.milestones.some(([at])=>v.n>=at&&!v.got.includes(at))}
  case 'gacha':return Rites.freeReady(S)||Rites.picksOpen(S)>0;
