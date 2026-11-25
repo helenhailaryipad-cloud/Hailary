@@ -1217,7 +1217,7 @@ territory windows with ten defenders and the fight; defenders never came back an
   Fog of war (user photo: cities under clouds; "hide other factions' cities and those that cannot be opened yet, unveil
   them with some magic when the city is won"): `cloudVeiled(i)` = another faction's city, or one of hers not reachable
   yet (`cloudReachable`: her entry island, or joined by a local road `cloudLocalRoads` to a city she holds); veiled
-  cities are drawn under blurred drifting cloud puffs (`#cloudVeilBlur`), and `cloudGo` refuses them. A city her faction
+  cities are drawn under soft blue-grey drifting cloud puffs (fill #e4ecf7, opacity .72, user: "less white"; `#cloudVeilBlur`), and `cloudGo` refuses them. A city her faction
   has just won bursts out once on the next map render (`cloudSeenOpen` set, `.cloud-reveal`: gold ring, puffs flying
   apart, sparkles).
 - Timed background fights (2026-11-24, user: "each fight about a minute, auto, you can see Reina fighting, and I can
