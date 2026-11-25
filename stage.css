@@ -9916,3 +9916,8 @@ html body #stage #main .tl-room .tl-pages button.on{background:linear-gradient(#
 #stage #modal.den-pop .tl-pop button.tl-pbtn{width:140px;height:52px;min-height:0;padding:0 0 3px;border:0;background:url(assets/generated/ui-btn-gold.webp) center/100% 100% no-repeat;box-shadow:none;color:#5a2a06;font:900 17px/1 Georgia,serif}
 #stage #modal.den-pop .tl-pop button.tl-pbtn.violet{background-image:url(assets/generated/ui-btn-violet.webp);color:#fff}
 #stage #modal.den-pop .tl-pop button.tl-pbtn::before,#stage #modal.den-pop .tl-pop button.tl-pbtn::after{display:none}
+/* Mini Games hub with seven games (Burrow Blitz joined, user: "I can't see it among the mini games"): 4 + 3 centred tiles. */
+body[data-screen=games] #stage #main .mg-grid{display:flex!important;flex-wrap:wrap;justify-content:center}
+body[data-screen=games] #stage #main .mg-grid>.mg-tile{width:calc((100% - 30px)/4)}
+@media (max-aspect-ratio:3/4){body[data-screen=games] #stage #main .mg-grid>.mg-tile{width:calc((100% - 36px)/4)}}
+#stage #main .mg-tile .mg-badge{position:absolute;top:8px;left:8px;z-index:2;padding:3px 8px;border-radius:6px;background:linear-gradient(#7ae05a,#2a9a3a);color:#fff;font:900 10px/1 Arial,sans-serif;letter-spacing:.08em;font-style:normal;box-shadow:0 2px 4px #0006}
