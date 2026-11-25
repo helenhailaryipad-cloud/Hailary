@@ -10003,3 +10003,48 @@ html body #stage #main .ww-room .ww-nav>button.on{background:linear-gradient(#e8
 .ww-nav em{position:absolute;top:4px;right:10px;width:10px;height:10px;border-radius:50%;background:#ff3a3a;box-shadow:0 0 0 2px #fff}
 .ww-pop ol{text-align:left;padding-left:20px;font:500 14px/1.45 Arial,sans-serif}.ww-pop li{margin:6px 0}
 .ww-rbody{padding:6px 12px}.ww-tile{width:min(12cqw,58px)}
+
+/* ===== Hall of Wonders, clean room (2026-11-25, user: "too much of the wrong stuff"): no app header, sub-tabs, Menu
+   pill or prototype notes; title, four category tabs, a podium for the top three, a list, her own place pinned. ===== */
+body[data-screen=rankings] #stage{width:min(100%,86dvh)!important;max-width:none!important}
+body[data-screen=rankings] #stage>:is(header,nav,footer),body[data-screen=rankings] .return-to-menu,body[data-screen=rankings] .section-tabs,body[data-screen=rankings] .subnav{display:none!important}
+body[data-screen=rankings] #stage>#main{inset:0!important;width:100%;height:100%;padding:0!important;display:block;overflow:hidden}
+.rk-room{position:absolute;inset:0;overflow:hidden;container-type:size;display:flex;flex-direction:column;gap:min(1.4cqh,10px);padding:max(8px,1.2cqh) 3cqw max(10px,1.4cqh);box-sizing:border-box;background:linear-gradient(#1a2a5acc,#0e1638f2 55%,#0a0f28),var(--rk-bg) center top/cover no-repeat,#0e1638;color:#fff;font-family:Arial,sans-serif}
+html body #stage #main .rk-room button{position:relative;min-height:0;margin:0;padding:0;border:0;background:none;box-shadow:none;color:#fff;outline:0;cursor:pointer;font:inherit;letter-spacing:0;text-transform:none}
+html body #stage #main .rk-room button::before,html body #stage #main .rk-room button::after{display:none!important}
+.rk-top{flex:none;display:flex;align-items:center;gap:3cqw}
+html body #stage #main .rk-room button.rk-back{width:min(12cqw,54px);height:min(12cqw,54px);flex:none}
+.rk-top h1{margin:0;flex:1;text-align:center;padding-right:min(12cqw,54px);font:900 min(8cqw,5.5cqh)/1 Georgia,serif;font-style:italic;background:linear-gradient(#fff6d0,#ffd36a 50%,#e8962a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 2px 0 #6a3a06) drop-shadow(0 0 12px #ffd76a66)}
+.rk-tabs{flex:none;display:grid;grid-template-columns:repeat(4,1fr);gap:2cqw}
+html body #stage #main .rk-room .rk-tabs button{display:flex;align-items:center;justify-content:center;gap:4px;height:min(10cqw,44px);border-radius:10px;background:linear-gradient(#2a3a7a,#18245a);box-shadow:inset 0 0 0 1.5px #8fa8ff55;font:800 min(3.4cqw,15px)/1 Georgia,serif;color:#c8d4ff}
+html body #stage #main .rk-room .rk-tabs button.on{background:linear-gradient(#ffe27a,#e8a830);color:#5a2a06;box-shadow:inset 0 0 0 1.5px #fff3c0,0 0 12px #ffd76a77}
+.rk-tabs .gpt-icon{width:22px!important;height:22px!important;margin:0!important}
+.rk-podium{flex:none;display:grid;grid-template-columns:1fr 1.15fr 1fr;align-items:end;gap:2cqw;height:min(52cqw,31cqh)}
+.rk-pod{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
+.rk-pod .rk-face{width:min(18cqw,11cqh)!important;height:min(18cqw,11cqh)!important;border-radius:50%;box-shadow:0 0 0 3px #c8d4ff,0 4px 10px #0008;filter:none}
+.rk-pod.p1 .rk-face{width:min(22cqw,13.5cqh)!important;height:min(22cqw,13.5cqh)!important;box-shadow:0 0 0 4px #ffd76a,0 0 18px #ffd76a99}
+.rk-pod.p3 .rk-face{box-shadow:0 0 0 3px #e8a07a,0 4px 10px #0008}
+.rk-medal{position:absolute;top:min(14cqw,8.5cqh);display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:radial-gradient(#fff3c0,#e8a830);color:#5a2a06;font:900 14px/1 Georgia,serif;font-style:normal;box-shadow:0 2px 4px #0008}
+.rk-pod.p1 .rk-medal{top:min(17cqw,10.5cqh)}
+.rk-pod.p2 .rk-medal{background:radial-gradient(#ffffff,#a8b8d8)}.rk-pod.p3 .rk-medal{background:radial-gradient(#ffe0c8,#c87a4a)}
+.rk-pod b{margin-top:8px;font:800 min(3.5cqw,15px)/1.15 Georgia,serif;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rk-pod>span{font:900 min(3.8cqw,17px)/1 Arial,sans-serif;color:#ffd76a}
+.rk-pod u{display:block;width:100%;margin-top:4px;border-radius:8px 8px 0 0;background:linear-gradient(#5a6ac8,#2a3478);box-shadow:inset 0 2px 0 #8fa8ff}
+.rk-pod.p1 u{height:min(9cqw,5.5cqh);background:linear-gradient(#ffd76a,#b07a1a);box-shadow:inset 0 2px 0 #fff3c0}
+.rk-pod.p2 u{height:min(6cqw,3.6cqh)}.rk-pod.p3 u{height:min(4cqw,2.4cqh);background:linear-gradient(#e8a07a,#8a4a2a)}
+.rk-pod.me b{color:#7dff7a}
+.rk-tag{margin-left:4px;padding:1px 5px;border-radius:4px;background:#ffffff22;font:800 10px/1.4 Arial,sans-serif;color:#c8d4ff;vertical-align:2px}
+.rk-board{flex:1;min-height:0;display:flex;flex-direction:column;border-radius:14px;background:#0a1230cc;box-shadow:inset 0 0 0 1.5px #8fa8ff44}
+.rk-head{flex:none;display:grid;grid-template-columns:3em 1fr auto;margin:0;padding:8px 14px 6px;font:800 11px/1 Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#8fa0d8;border-bottom:1px solid #ffffff1a}
+.rk-list{flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#8fa8ff #0000}
+.rk-row{display:grid;grid-template-columns:2.4em auto 1fr auto;align-items:center;gap:10px;padding:7px 14px;border-bottom:1px solid #ffffff12}
+.rk-row em{font:900 min(4cqw,18px)/1 Georgia,serif;font-style:normal;color:#c8d4ff;text-align:center}
+.rk-row .rk-face{width:min(11cqw,46px)!important;height:min(11cqw,46px)!important;border-radius:50%;filter:none;box-shadow:0 0 0 2px #8fa8ff88}
+.rk-row b{display:block;font:800 min(3.8cqw,16px)/1.2 Georgia,serif}
+.rk-row small{display:block;font:600 min(3cqw,13px)/1.2 Arial,sans-serif;color:#a8b8e8}
+.rk-row strong{font:900 min(4cqw,18px)/1 Arial,sans-serif;color:#ffd76a}
+.rk-mine{flex:none;border-top:2px solid #ffd76a66;background:linear-gradient(90deg,#3a2a6acc,#1a2a5acc);border-radius:0 0 14px 14px}
+.rk-mine .rk-row{border:0}.rk-row.me b{color:#7dff7a}
+.rk-room .rk-tag{display:inline-block!important;width:auto!important}
+.rk-pod .rk-tag{margin:2px 0 0}
+.rk-head{grid-template-columns:2.4em 1fr auto;gap:10px}
