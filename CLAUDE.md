@@ -467,8 +467,8 @@ User sent photos of the reference's "Adventure Goals" behind its Snowland home i
 pulls in today's"). Own name, art and wording. The home promo `snow` is now "Wishwell" (screen `wishwell`,
 `src/wishwell.js`: rules `Wishwell`, pure, `node scripts/test-wishwell.mjs`; UI below `WISHWELL_UI`; loaded by test.mjs).
 - Goals (user photo of the reference's Adventure Goals: "they are not returns, they are tickets for the next gacha"):
-  `Wishwell.goals` 15 / 30 / 60 / 135 pulls in the running rite = 400 / 740 / 1,240 / 1,240 tickets of the NEXT rite
-  (3,620, as in her ChatGPT notes), four tiles per row like the reference, claimed by hand (Claim per row, or tap the
+  `Wishwell.goals` 15 / 30 / 60 / 135 / 240 pulls in the running rite = 400 / 740 / 1,240 / 1,240 / 1,240 tickets of the NEXT rite
+  (4,860; 3,620 up to 135 as in her ChatGPT notes, 240 added by the user), four tiles per row like the reference, claimed by hand (Claim per row, or tap the
   well's bubble / Claim all, `claimGoal`, `claimAll`). Goals reached but unclaimed when the rite ends wait in the well
   during the next rite (`leftover`, paid in its tickets). No percentage carry-over any more (`carryRate` is gone).
   Star Rites no longer pays these automatically (`Rites.steps` is empty; the 240 + orb row is gone); its Rewards pop-up

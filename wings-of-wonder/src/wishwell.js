@@ -1,7 +1,7 @@
 // Wishwell (user sent photos of the reference's "Adventure Goals" behind its Snowland icon: pulls in today's gacha turn
 // into tickets for the NEXT one). Own name, art and wording. It sits on top of Star Rites (src/rites.js):
 // - Goals (user photo of the reference's Adventure Goals): pulls in the running rite earn tickets of the NEXT rite at
-//   15 / 30 / 60 / 135 pulls (400 / 740 / 1,240 / 1,240 = 3,620), claimed by hand (Claim, or tap the well for all).
+//   15 / 30 / 60 / 135 / 240 pulls (400 / 740 / 1,240 / 1,240 / 1,240 = 4,860; user: "and 240 too"), claimed by hand (Claim, or tap the well for all).
 //   Goals reached but not claimed when the rite ends can still be claimed from the well during the next rite (they then
 //   pay tickets of the rite that is running, which was the "next" one). There is no percentage carry-over (user: they
 //   are not returns, they are tickets for the next gacha). Rites keeps the finished event's pulls in `S.rites.prev`.
@@ -9,7 +9,7 @@
 // Rules are pure (node scripts/test-wishwell.mjs); the screen is below WISHWELL_UI. All numbers are placeholders.
 const Wishwell = {
   coinPerPull: 1,
-  goals: [{ at: 15, n: 400 }, { at: 30, n: 740 }, { at: 60, n: 1240 }, { at: 135, n: 1240 }],
+  goals: [{ at: 15, n: 400 }, { at: 30, n: 740 }, { at: 60, n: 1240 }, { at: 135, n: 1240 }, { at: 240, n: 1240 }],
   tasks: [
     { id: 'free', name: 'Make today\'s free pull', goal: 1, coins: 10, kind: 'free' },
     { id: 'p1', name: 'Pull once today', goal: 1, coins: 10, kind: 'pulls' },

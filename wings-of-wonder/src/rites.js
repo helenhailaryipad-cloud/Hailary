@@ -474,7 +474,7 @@ function riteRules() {
    <li>A pull costs ${Rites.cost} tickets. Ten pulls cost ${Rites.cost * 10}; the odds are the same. One free pull a day.</li>
    <li>Luck rises with every pull: a full luck bar turns the next small prize into a Wish Orb.</li>
    <li>The rite's exclusive wings are certain only at pull ${fmt(Rites.grandAt)} of the rite; its aura and the ultra prize are never guaranteed.</li>
-   <li>Pull goals on the Wishwell give tickets of the next rite (15, 30, 60 and 135 pulls). Only Dragon Hoard returns some of its own tickets; Starfall Vault lets you choose a prize at 360, 720 and 800 pulls; Celestial Bloom pays prisms on its Petal Path.</li>
+   <li>Pull goals on the Wishwell give tickets of the next rite (15, 30, 60, 135 and 240 pulls). Only Dragon Hoard returns some of its own tickets; Starfall Vault lets you choose a prize at 360, 720 and 800 pulls; Celestial Bloom pays prisms on its Petal Path.</li>
    <li>Auras and orbs give stats for good. Repeats become stardust for the Dust Shop.</li>
    <li>Tickets come from the free pull, rewards, the Rite Shop (prisms) and the welcome gift.</li></ol></div>`);
 }
