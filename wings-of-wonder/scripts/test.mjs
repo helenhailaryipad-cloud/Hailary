@@ -826,7 +826,7 @@ vm.runInContext(`
  let v=r.socialState(S,T0);if(!v.mail.some(m=>m.kind==='note')||!v.mail.some(m=>m.title==='Welcome to Sky Garden')||v.friends.length!==4||v.requests.length!==2)throw Error('Starting mail and friends');
  const n=v.mail.length;r.socialTick(S,T0+day,rng);if(r.socialState(S,T0+day).mail.length<=n)throw Error('Next day mail');
  // Mail: claim puts items in the bag; only claimed letters can be deleted; the box keeps at most 30.
- const letter=r.socialState(S).mail.find(m=>m.title==='Daily Courier'),exp=r.bagCount(S,'exp1');
+ const letter=r.socialState(S).mail.find(m=>m.title==='Morning Parcel'),exp=r.bagCount(S,'exp1');
  if(r.mailDelete(S,[letter.id]))throw Error('Unclaimed letter deleted');
  const got=r.mailClaim(S,[letter.id]);if(got.n!==1||r.bagCount(S,'exp1')!==exp+1||r.mailClaim(S,[letter.id]).n||r.mailDelete(S,[letter.id])!==1)throw Error('Claim and delete');
  for(let d=2;d<40;d++)r.socialTick(S,T0+d*day,rng);if(r.socialState(S).mail.length>r.socialRules.mailMax||!valid(S))throw Error('Mail cap');
