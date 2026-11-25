@@ -786,7 +786,7 @@ vm.runInContext(`
  for(const bad of [{carnage:1201},{tokens:-1},{round:'x'},{claimed:[0,0]},{claimed:[7]},{held:{30:1}},{held:{3:4}}])if(valid({...S,cloud:{...S.cloud,...bad}}))throw Error('Invalid cloud accepted '+JSON.stringify(bad));
  // The map: round clock, Carnage Points, owners and bosses left on every territory, the tool bar and its windows.
  S=defaults();cloudCount=4;openScreen('cloudWar');let html=$('#main').innerHTML;
- if(!html.includes('This round ends in')||!html.includes('Carnage Points')||!html.includes('Boss: 10')||!html.includes('cloudShopShow()')||!html.includes('cloudPointsShow()'))throw Error('Cloud War map');
+ if(!html.includes('This round ends in')||!html.includes('Carnage Points')||!html.includes('>10</tspan>')||!html.includes('cloudShopShow()')||!html.includes('cloudPointsShow()'))throw Error('Cloud War map');
  S.cloudWarHits={6:[0,0,0,0,9,9,9,9,9,9]};if(cloudAlive(6)!==4)throw Error('Bosses left');
  S.cloudWarHits={6:[9,9,9,9,9,0,0,0,0,0]};if(cloudOwner(6)!==0)throw Error('80 points take a territory');
  S.cloud.round='2026-01-01T00';cloudRoundCheck();if(S.cloudWarHits||S.cloud.held[6]!==0||cloudOwner(6)!==0||cloudAlive(6)!==10)throw Error('Round refresh');

@@ -1202,6 +1202,9 @@ territory windows with ten defenders and the fight; defenders never came back an
   reference only; sources `art-source/cloud/interior-{island,fortress,capital}.webp` -> `cloud-interior-*` 720 px +
   AVIF q34, much smaller than before). The ten defenders stand on the ten plazas: per-rank `pads` in
   `cloudPortalPreview`.
+  Big map labels (user: "the map is beautiful but laid out badly: small, lots of captions"): each place shows only its
+  name on a gold ribbon (`#cloudRibbon`, larger text) and a small "Boss: N" pill above it; the faction text, the owner
+  and the "under attack" line are gone from the map (owner is in the city window).
 - Timed background fights (2026-11-24, user: "each fight about a minute, auto, you can see Reina fighting, and I can
   leave to the menus instead of only watching"): a fight lasts `CLOUD_FIGHT` seconds (Guard 45, Elite 60, Boss 75; less
   for a hurt defender) on a wall clock (`cloudBattle {index,slot,role,hp0,start,dur}`); `cloudFightTick` (1 s interval,
