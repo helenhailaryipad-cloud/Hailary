@@ -429,7 +429,8 @@ pulls in today's"). Own name, art and wording. The home promo `snow` is now "Wis
 ## Daily Blessings: sign-in calendar (2026-11-25)
 User photos of the reference's Daily Check-in behind its "benefits" home icon. The icon is now "Blessings" (screen
 `blessings`, `src/checkin.js`: rules `Blessings`, pure, `node scripts/test-checkin.mjs`; UI below `CHECKIN_UI`).
-- 30-day calendar (`Blessings.days`, cycle of 30 UTC days from `anchor`), one claim per UTC day (a missed day does not
+- Monthly calendar (user: "it is a calendar for the month"): one UTC calendar month, 28-31 cells (`Blessings.days`
+  has 31, `length(cycle)`), month name shown; one claim per UTC day (a missed day does not
   lose anything, the calendar moves on one per sign-in); milestone chests at 2 / 7 / 14 / 21 / 28 sign-ins.
 - Blessing Pass (300 prisms, never real money; the reference's SVIP x2 marks): doubles the days marked "Pass ×2" for
   the cycle, marked days already claimed are paid once more at purchase. Optional save field `S.blessings {cycle, n,
