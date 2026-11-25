@@ -7489,7 +7489,7 @@ body:is([data-screen=citySummon],[data-screen=cityContest],[data-screen=citySoci
 #stage #modal .cloud-city .city-own{padding:8px 18px;font-size:15px;background:linear-gradient(#b8ff9a,#4fc24c);color:#0f3a12}
 
 /* Social room (citySocial, 2026-11-21): Chat / Friends / Mail / Thank-you Note */
-.soc-ico{display:inline-block;width:1.5em;aspect-ratio:1;background:var(--soc-icons) no-repeat;background-size:400% 200%;font-style:normal;flex:none;vertical-align:middle}
+.soc-ico{display:inline-block;width:1.5em;aspect-ratio:1;background:var(--soc-icons) no-repeat;background-size:400% 300%;font-style:normal;flex:none;vertical-align:middle}
 .satchel.soc{grid-template-rows:auto auto auto minmax(0,1fr) auto auto 8%;background:linear-gradient(#2a5f9a,#1c3f6e 40%,#163256)}
 .satchel.soc-p-friends{grid-template-rows:22% minmax(0,1fr) auto auto 8%}
 .satchel.soc-p-mail,.satchel.soc-p-notes{grid-template-rows:auto minmax(0,40%) minmax(0,1fr) auto 8%}
@@ -9925,4 +9925,4 @@ body[data-screen=games] #stage #main .mg-grid>.mg-tile{width:calc((100% - 30px)/
 #stage button{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 /* Friends action bar (user: "clearer icons, without bits of the others"): the atlas was painted over the padding ring
    too, so neighbouring icons showed at the edges; the atlas is now clipped to the content box, the disc is its own layer. */
-.soc-actions .soc-ico{background-image:var(--soc-icons),linear-gradient(#ffffff26,#ffffff26)!important;background-size:400% 200%,100% 100%!important;background-origin:content-box,border-box!important;background-clip:content-box,border-box!important;background-repeat:no-repeat!important;background-color:transparent!important;padding:1.4cqw!important}
+.soc-actions .soc-ico{width:min(12cqw,11cqh)!important;padding:1.5cqw!important;border-radius:50%;background-image:var(--soc-icons),radial-gradient(circle at 50% 35%,#3f6fae,#1c3a6e 70%,#14285a)!important;background-size:400% 300%,100% 100%!important;background-origin:content-box,border-box!important;background-clip:content-box,border-box!important;background-repeat:no-repeat!important;background-color:transparent!important;box-shadow:inset 0 0 0 2px #f3d27a,inset 0 0 0 4px #6b4a12,inset 0 3px 8px #ffffff33,0 3px 6px #0007}

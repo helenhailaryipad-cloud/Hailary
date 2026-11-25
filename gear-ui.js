@@ -661,7 +661,7 @@ function cityContest(){
 let socialPage='Chat',chatChannel='Globe',chatWith=null,chatTimer=0,chatEmoji=false,friendTab='Friends',mailPick=null,mailChecked=[],socialTimer=0;
 function socialArtVars(){const root=document.documentElement;if(!root?.style?.setProperty||root.style.getPropertyValue('--soc-icons'))return;root.style.setProperty('--soc-icons','url("'+artPath('comp-social-icons')+'")')}
 // 0 flowers, 1 heart, 2 empty heart, 3 letter, 4 open letter, 5 thank-you scroll, 6 chat bubble, 7 gift
-const socIcon=n=>'<i class="soc-ico" style="background-position:'+(n%4)/3*100+'% '+Math.floor(n/4)*100+'%"></i>';
+const socIcon=n=>'<i class="soc-ico" style="background-position:'+(n%4)/3*100+'% '+Math.floor(n/4)/2*100+'%"></i>';
 const folk=id=>WonderGear.socialById[id];
 const folkFace=id=>portrait(folk(id)?.face||'guest');
 const folkLevel=id=>Math.max(1,level()+(folk(id)?.lv||0));
@@ -777,7 +777,7 @@ function citySocial(){
   const card=id=>{const st=folkStatus(id),black=friendTab==='Blacklist';return `<div class="soc-card">${folkFace(id)}<div><b>${folk(id).name} <small>AI</small> <em class="${st.on?'on':''}">${st.text}</em></b><span>Lv. ${folkLevel(id)}</span><span class="soc-hearts">${hearts(id)}</span></div>${black?`<button class="den-gold" onclick="friendBan('${id}',false)">${denPlain}Remove</button>`:`<button class="soc-round" aria-label="Send flowers" onclick="friendFlower('${id}')" ${v.sent.includes(id)?'disabled':''}>${denPlain}${socIcon(0)}</button><button class="soc-round" aria-label="Chat" onclick="friendChat('${id}')">${denPlain}${socIcon(6)}</button><button class="soc-round soc-more" aria-label="More" onclick="friendManage('${id}')">${denPlain}⋯</button>`}</div>`};
   body=`<div class="soc-banner" style="background-image:url('${artPath('comp-social-banner')}')"><strong>Friends</strong><p>Giftable: <b>${r.socialRules.giftsPerDay-v.sent.length}/${r.socialRules.giftsPerDay}</b></p><p>Receivable: <b>${Math.max(0,Math.min(r.socialRules.giftsPerDay,v.friends.length)-v.got)}/${r.socialRules.giftsPerDay}</b></p><span class="soc-count">${v.friends.length}/${r.socialRules.friendsMax}</span></div>
   <div class="satchel-scroll soc-scroll">${list.map(card).join('')||'<p class="soc-empty">Nobody here yet.</p>'}</div>
-  <div class="soc-actions">${[['Management',7,"toast('Tap ⋯ on a friend to chat or blacklist.')"],['Send Flowers',0,'friendPickFlower()'],['Apply',2,'friendRequests()',due.requests],['Add',1,'friendSuggest()'],['Gift All',7,'friendGiftAll()']].map(([n,i,a,c])=>`<button onclick="${a}">${denPlain}${socIcon(i)}${n}${dot(c||0)}</button>`).join('')}</div>
+  <div class="soc-actions">${[['Management',8,"toast('Tap ⋯ on a friend to chat or blacklist.')"],['Send Flowers',0,'friendPickFlower()'],['Apply',2,'friendRequests()',due.requests],['Add',1,'friendSuggest()'],['Gift All',7,'friendGiftAll()']].map(([n,i,a,c])=>`<button onclick="${a}">${denPlain}${socIcon(i)}${n}${dot(c||0)}</button>`).join('')}</div>
   <div class="soc-tabs">${['Recent Contacts','Friends','Blacklist'].map(t=>`<button aria-pressed="${t===friendTab}" onclick="friendTab='${t}';citySocial()">${denPlain}${t}</button>`).join('')}</div>`;
  }else{
   const kind=socialPage==='Mail'?'mail':'note',list=v.mail.filter(m=>m.kind===kind);
