@@ -40,8 +40,8 @@ atlas = Image.new('RGBA', (T*4, T*4))
 for i in range(16):
     c = sheet.crop(((i % 4)*cw, (i//4)*ch, (i % 4+1)*cw, (i//4+1)*ch)); a = np.array(c); a[a[..., 3] < 24] = 0; c = Image.fromarray(a); c = c.crop(c.getbbox())
     # Cells 0-3 (tickets) were repainted lighter and cleaner (user: "ugly, very red icons"): ticket-<rite>.png.
-    if i < 4 and (SRC/'rites'/f'ticket-{RITE_IDS[i]}.png').exists():
-        c = Image.open(SRC/'rites'/f'ticket-{RITE_IDS[i]}.png').convert('RGBA'); a = np.array(c); a[a[..., 3] < 24] = 0; c = Image.fromarray(a); c = c.crop(c.getbbox())
+    if i < 4 and (SRC/'rites'/f'ticket-{RITE_IDS[i]}.webp').exists():
+        c = Image.open(SRC/'rites'/f'ticket-{RITE_IDS[i]}.webp').convert('RGBA'); a = np.array(c); a[a[..., 3] < 24] = 0; c = Image.fromarray(a); c = c.crop(c.getbbox())
     c.thumbnail((T-14, T-14), Image.Resampling.LANCZOS); atlas.alpha_composite(c, ((i % 4)*T+(T-c.width)//2, (i//4)*T+(T-c.height)//2))
 save('comp-rites-icons', atlas, 88, 50)
 # Wayfarer Quests banner (trail.js): a camp with a treasure chest, no characters.
