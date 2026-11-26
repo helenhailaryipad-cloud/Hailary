@@ -273,14 +273,21 @@ The old v301 profile page (`heroProfile`, blue card with party heroes, Fashion /
 this? my eyes rolled up") is retired: `go('profile')` and a saved `screen==='profile'` open `character` instead; the
 plate and the Character page no longer link to it; the city skill "Companion" opens `cityCompanion`.
 
-## Wheel of Wonder prisms (2026-11-26)
-User: "prisms also come from the roulette: 88, three times a day, if all fields are open". The boss wheel
-(`openBossWheel` in `adventure-ui.js`, a free spin per dungeon guardian) is a board now: a spin lands only on a field
-not opened yet (`WonderAdventure.spin`, optional `S.adventure.wheelOpen` [indices]); opening the 12th pays
-`WHEEL_PRISMS` 88 into `S.scales`, up to `WHEEL_DAILY` 3 times a UTC day (`S.adventure.wheelBonus {day,n}`,
-`wheelBonus(s)`), then the board starts again (also after the daily limit, without prisms). The window is a light
-pop-up (`.wh-pop`: ivory card, ticks on opened fields, 12 gold pips, prism line, gold Spin / violet Dungeons plates;
-no dark frame, no Menu pill).
+## Boss Roulette (2026-11-26)
+User: "prisms also come from the roulette: 88, three times a day, if all fields are open", then five photos of the
+reference's boss roulette. The boss wheel is a full-screen light room, screen `bossWheel` (`showBossWheel` in
+`adventure-ui.js`; `openBossWheel()` opens it from the Adventure hub and the dungeon lobby's Treasure button, Back
+returns there). Rules in `WonderAdventure` (`adventure-data.js`):
+- 12 fields (`wheel`): three of 88 prisms, Starlit Vouchers 10/10/15/30, Wish Tickets 2/2/3 (bag), 20 crystals, 700 gold.
+  A spin never lands on a field claimed today (`spin`, `wheelToday`), so the whole wheel = 264 prisms a day.
+- Spins come from daily boss-kill milestones `WHEEL_STEPS` 1,2,3,4,5,6,8,10,12,15,20,30 (Obtain per row, `stepClaim`).
+  Boss kills today (`bossKills`, `addBossKill`) = dungeon guardians (`victory`, which no longer gives a spin by itself)
+  + Cloud War defenders (`cloudFightSettle`). Bosses, milestones and the wheel reset at 00:00 UTC; unused spins stay.
+- Optional save fields in `S.adventure`: `wheelDay`, `wheelOpen`, `wheelGot`, `bossDay {day,n}`, `wheelSkip`
+  (Skip = no spin animation); `wheelBonus` from one earlier build still validates.
+- Room: title, wheel (`wheel-emerald` frame masked round, "Claimed" ribbons, tap a field = item card `bossField`),
+  Attempts, gold Spin with a red dot, Skip, "Spin Chances" rows, rules `bossWheelRules`. Prism icon `ui-prism`
+  (image model, `art-source/ui/prism.webp`, `scripts/build-prism-icon.py`). Hosted bundle 33,503,190 bytes.
 
 ## Mini Games hub (2026-11-23)
 User: "all games in one place, names on the main field, not hunted through sub-tabs". The bottom-nav tab is called
