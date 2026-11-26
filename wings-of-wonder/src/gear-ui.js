@@ -297,7 +297,7 @@ function bagGain(g){
  if(g.kind==='xp')return cell(uiIcon('exp'),g.n,'XP');
  if(g.kind==='tickets')return cell(uiIcon('wishes'),g.n,'Wishes',bagHue('p'));
  if(g.kind==='seals')return cell(denIcon('misc',0,4,1),g.n,'Talent seals',bagHue('p'));
- if(g.kind==='stamina')return cell(bagIcon('stam'),g.n,'Boss stamina');
+ if(g.kind==='stamina')return cell(bagIcon('stam'),g.n,'Boss energy');
  if(g.kind==='material'){const m=r.materialDefs.find(m=>m.id===g.id);return cell(equipmentIcon(m.icon),g.n,m.name,m.color)}
  if(g.kind==='item'){const i=r.bagItemById[g.id];return cell(bagIcon(g.id),g.n,i.name,bagHue(i.rarity))}
  if(g.kind==='gear'){const t=r.catalog[g.template];return cell(gearArt(t),0,'T'+t.tier+' '+t.name,t.color)}
@@ -1665,9 +1665,9 @@ function cityHunting(){
  const modes=huntModes.slice(0,3).map((name,i)=>button(name,huntMode===i,'huntMode='+i+';cityHunting()')).join('');
  const floors=Array.from(new Set(DUNGEONS.map(d=>d.tier))).map(t=>button(t+'F',huntFloor===t,'huntFloor='+t+';huntSlot=0;cityHunting()')).join('');
  const cards=bosses.map((d,i)=>button(artImage(d.art,'')+'<strong>'+d.boss+'</strong><small>Lv. '+d.recommended+'</small>',huntSlot===i,'huntSlot='+i+';cityHunting()')).join('');
- const stamina=WonderAdventure.staminaLimit-WonderAdventure.dailyDungeon(S).spent;
+ const stamina=WonderAdventure.energyLeft(S);
  const preview='<div class="hunt-title"><b>T'+boss.tier+' · '+boss.boss+'</b><small>Recommended level: '+boss.recommended+'</small></div>'+artImage(boss.art,boss.boss,'hunt-hero')+'<button class="hunt-stats" onclick="inspectBoss(\''+boss.id+'\')">'+artImage('hud-quest','')+'Boss Stats</button><aside><strong>Rewards</strong>'+[uiIcon('gold'),uiIcon('wishes'),uiIcon('equipment')].map(x=>'<span>'+x+'</span>').join('')+'</aside>';
- const entry='<div class="hunt-energy">Energy: '+stamina+' / '+WonderAdventure.staminaLimit+'</div><button class="spirit-gold" '+(level()<boss.recommended||stamina<=0?'disabled':'')+' onclick="launchBattle(\'dungeon\',\''+boss.id+'\')">Proceed Now</button>';
+ const entry='<div class="hunt-energy">'+energyChip()+'</div><button class="spirit-gold" '+(level()<boss.recommended||stamina<WonderAdventure.ENERGY_BOSS?'disabled':'')+' onclick="launchBattle(\'dungeon\',\''+boss.id+'\')">Proceed Now</button>';
  $('#main').innerHTML='<section class="companion-room spirit-room hunt-room"><div class="satchel-top"><strong>'+mode+'</strong>'+wallet+'</div><div class="hunt-scene">'+(world?preview:'<div class="hunt-title">'+mode+'</div>'+artImage(huntMode===3?'hud-clan':'hud-hunting','','hunt-emblem'))+'</div><section class="hunt-picker">'+(world?'<div class="hunt-floors">'+floors+'</div><div class="hunt-cards">'+cards+'</div>'+entry:'')+'</section><div class="companion-modes">'+(huntMode!==3?modes:'')+'</div><nav class="spirit-nav"><button data-back aria-label="Back to city" onclick="go(\'home\')">‹</button>'+button('Boss',huntMode!==3,'huntMode=0;cityHunting()')+button('X-server',huntMode===3,'huntMode=3;cityHunting()')+'</nav></section>';
  if(world)for(const rail of document.querySelectorAll('.hunt-floors,.hunt-cards')){
   const selected=rail.querySelector('[aria-pressed=true]');
@@ -2023,7 +2023,7 @@ function cloudFightStop(keep){
 function cloudFightSettle(){
  const b=cloudBattle,{index,slot,role}=b,limit=cloudEnemyHealth[role],hits=(S.cloudWarHits??={})[index]??=Array(10).fill(0);
  let gain=0,loot=null;
- if(!(hits[slot]>=limit)){hits[slot]=limit;WonderAdventure.addBossKill(S);gain=WonderGear.cloudGain(S,cloudCarnageCost[role]);loot=gain?cloudLootRoll(role):{};for(const [id,n] of Object.entries(loot))WonderGear.bagAdd(S,id,n);if(!Object.keys(loot).length)loot=null;save()}
+ if(!(hits[slot]>=limit)){hits[slot]=limit;gain=WonderGear.cloudGain(S,cloudCarnageCost[role]);loot=gain?cloudLootRoll(role):{};for(const [id,n] of Object.entries(loot))WonderGear.bagAdd(S,id,n);if(!Object.keys(loot).length)loot=null;save()}
  b.done=true;b.result={gain,loot};b.doneAt=Date.now();
  const next=cloudNextTarget(index),watching=document.querySelector('.cloud-encounter canvas');
  if(!watching)toast('⚔ '+cloudBossName(slot)+' defeated · +'+cloudEnemyScore[role]+' territory points'+(gain?' · −'+gain+' Carnage':' · no Carnage left, no rewards'));

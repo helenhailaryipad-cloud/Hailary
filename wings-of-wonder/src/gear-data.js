@@ -557,7 +557,7 @@ const bagItems=[
  {id:'chest2',name:'Moon Chest',kind:'Chest',rarity:'p',text:'Gold, crystals, star shards, one piece of equipment and a surprise.',give:{gold:800,stone:20,shard:5,gear:0},pick:['exp1','wish','sealbag']},
  {id:'chest3',name:'Winged Chest',kind:'Chest',rarity:'r',text:'A rich haul: gold, gems, forge essence, fine equipment, a Star of Wisdom and a rare surprise.',give:{gold:2000,gem:3,essence:5,gear:1,item:{exp2:1}},pick:['petegg','wish','gembox']},
  {id:'gearbox',name:"Armourer's Crate",kind:'Chest',rarity:'o',text:'One piece of equipment of the tier Reina can wear.',give:{gear:0}},
- {id:'stam',name:'Vigor Tonic',kind:'Tonic',rarity:'b',text:'Restores 1 boss stamina spent today.',give:{stamina:1}},
+ {id:'stam',name:'Vigor Tonic',kind:'Tonic',rarity:'b',text:'Restores 20 boss energy spent today.',give:{stamina:1}},
  {id:'wish',name:'Wish Ticket',kind:'Ticket',rarity:'p',text:'Worth 50 wishes: one pet summon.',give:{tickets:50}},
  {id:'petegg',name:'Pet Egg',kind:'Pet',rarity:'o',pet:true,text:'Hatches into one random pet. A pet she already has becomes a spare copy.',give:{pet:1}},
  {id:'sealbag',name:'Seal Satchel',kind:'Pet',rarity:'p',pet:true,text:'Holds 50 talent seals for the Pet Talent room.',give:{seals:50}},
@@ -598,7 +598,7 @@ function useBagItem(s,id,count=1,rng=Math.random){
  const eq=state(s),sum={},note=(key,n)=>{if(n)sum[key]=(sum[key]||0)+n},gains=[];let used=0;
  for(;used<count;used++){
   const g=item.give||{};
-  if(g.stamina){const a=globalThis.WonderAdventure,day=a.dailyDungeon(s);if(!day.spent)break;a.state(s).dungeonDay={...day,spent:day.spent-1};note('stamina',1)}
+  if(g.stamina){const a=globalThis.WonderAdventure,day=a.dailyDungeon(s);if(!day.spent)break;const back=Math.min(day.spent,a.ENERGY_BOSS);a.state(s).dungeonDay={...day,spent:day.spent-back};note('stamina',back)}
   if(g.xp)note('xp',globalThis.WonderProgress.award(s,g.xp));
   if(g.gold){s.gold+=g.gold;note('gold',g.gold)}
   if(g.tickets){s.tickets+=g.tickets;note('tickets',g.tickets)}

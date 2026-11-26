@@ -10815,3 +10815,26 @@ body[data-screen=bossWheel] #stage>#main{inset:0!important;width:100%;height:100
 #stage #modal.bw-pop .bw-item p{font:500 14px/1.4 Arial,sans-serif!important}
 #stage #modal.bw-pop .bw-item b{color:#2e7a3a!important;font-weight:800}
 #stage #modal.bw-pop .bw-item h2{font-size:20px!important}
+/* Boss energy chip and shop */
+.en-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 4px 2px 8px;border-radius:999px;background:#fffbefd9;border:1px solid #e2c47a;font:700 13px/1 Arial,sans-serif;color:#5a4320;white-space:nowrap}
+.en-chip :is(img,.gpt-icon){width:18px;height:18px}
+.en-chip b{color:#2e7a3a}.en-chip i{font-style:normal;color:#8a3fc0}
+#stage .en-chip button.en-plus{display:grid;place-items:center;width:22px;height:22px;min-width:0;min-height:0;margin:0;padding:0;border-radius:50%;border:0!important;background:linear-gradient(#7ad07f,#3fa556)!important;color:#fff!important;font:900 16px/1 Arial,sans-serif;box-shadow:0 1px 2px #0003!important;text-shadow:none!important}
+#stage .en-chip button.en-plus::before,#stage .en-chip button.en-plus::after{content:none!important}
+#stage #modal.bw-pop .en-shop{font:500 14px/1.4 Arial,sans-serif;text-align:left}
+#stage #modal.bw-pop .en-shop h2{margin:0 36px 6px 0;color:#7a4a0e;font:900 20px/1.1 Georgia,serif}
+#stage #modal.bw-pop .en-shop p{font:500 13px/1.4 Arial,sans-serif!important;color:#4a4030!important;margin:4px 0 8px}
+#stage #modal.bw-pop .en-shop b{color:#2e7a3a}
+#stage #modal.bw-pop .en-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:6px 0;padding:6px 8px 6px 10px;border-radius:12px;background:#fffdf6;border:1px solid #ecd9a6}
+#stage #modal.bw-pop .en-row.deal{background:#fff3c8;border-color:#f0c85a}
+#stage #modal.bw-pop .en-row span{display:flex;align-items:center;gap:6px}
+#stage #modal.bw-pop .en-row span :is(img,.gpt-icon){width:24px;height:24px}
+#stage #modal.bw-pop .en-row span b{font:900 17px/1 Georgia,serif;color:#2e7a3a}
+#stage #modal.bw-pop .en-row small{color:#7a6a50;font-size:12px}
+#stage #modal.bw-pop button.en-buy{display:flex;align-items:center;gap:4px;min-height:0;height:36px;margin:0;padding:0 14px;border-radius:12px;border:1px solid #6aa8e0!important;background:linear-gradient(#e6f4ff,#a9d6ff)!important;color:#1f4f88!important;font:800 15px/1 Arial,sans-serif;box-shadow:0 2px 4px #4a80b040!important;text-shadow:none!important}
+#stage #modal.bw-pop button.en-buy::before,#stage #modal.bw-pop button.en-buy::after{content:none!important}
+#stage #modal.bw-pop button.en-buy img{width:20px;height:20px}
+#stage #modal.bw-pop button.en-buy:disabled{opacity:.5}
+#stage #modal.bw-pop .en-have{display:flex;align-items:center;gap:4px;justify-content:flex-end}
+#stage #modal.bw-pop .en-have img{width:20px;height:20px}
+.ss-deal .ss-off{color:#e2374a}.ss-deal s{opacity:.6}

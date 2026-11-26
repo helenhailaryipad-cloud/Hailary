@@ -281,13 +281,24 @@ returns there). Rules in `WonderAdventure` (`adventure-data.js`):
 - 12 fields (`wheel`): three of 88 prisms, Starlit Vouchers 10/10/15/30, Wish Tickets 2/2/3 (bag), 20 crystals, 700 gold.
   A spin never lands on a field claimed today (`spin`, `wheelToday`), so the whole wheel = 264 prisms a day.
 - Spins come from daily boss-kill milestones `WHEEL_STEPS` 1,2,3,4,5,6,8,10,12,15,20,30 (Obtain per row, `stepClaim`).
-  Boss kills today (`bossKills`, `addBossKill`) = dungeon guardians (`victory`, which no longer gives a spin by itself)
-  + Cloud War defenders (`cloudFightSettle`). Bosses, milestones and the wheel reset at 00:00 UTC; unused spins stay.
+  Boss kills today (`bossKills`, `addBossKill`) = dungeon guardians only (`victory`, which no longer gives a spin by
+  itself; Cloud War defenders do not count). Bosses, milestones and the wheel reset at 00:00 UTC; unused spins stay.
 - Optional save fields in `S.adventure`: `wheelDay`, `wheelOpen`, `wheelGot`, `bossDay {day,n}`, `wheelSkip`
   (Skip = no spin animation); `wheelBonus` from one earlier build still validates.
 - Room: title, wheel (`wheel-emerald` frame masked round, "Claimed" ribbons, tap a field = item card `bossField`),
   Attempts, gold Spin with a red dot, Skip, "Spin Chances" rows, rules `bossWheelRules`. Prism icon `ui-prism`
   (image model, `art-source/ui/prism.webp`, `scripts/build-prism-icon.py`). Hosted bundle 33,503,190 bytes.
+
+## Boss energy (2026-11-26)
+User: "300 energy free a day for 15 bosses; to open the whole roulette you must kill 30, so you buy 300 more; sometimes the
+Secret Shop has it for 28 prisms at 90% off, otherwise 60 prisms per 10 energy". Dungeon stamina is now energy
+(`adventure-data.js`): `staminaLimit` 300 free a UTC day (`dungeonDay.spent` counts it), `ENERGY_BOSS` 20 per guardian
+entry (`spendStamina`), bought energy in optional `S.adventure.energyExtra` (kept across days, used after the free part),
+`buyEnergy(s,packs)` = `ENERGY_BUY` 10 energy for 60 prisms, `energyLeft`, `energyFree`. Secret Shop "Today's Deal"
+(`riteSecret` in rites.js) on some UTC days (`dealOn`, about one day in three): `ENERGY_DEAL` 50 energy for 28 prisms
+(struck 300, -90%), once a day (`buyDeal`, optional `S.adventure.energyDeal` = day). UI: `energyChip()` (free/300, +bought,
+green +) in the dungeon lobby, Hunting and the Boss Roulette; `energyShop()` light pop-up (+10 / +20 / +100 / +300 and the
+deal link); a dungeon Enter without energy opens it. Vigor Tonic gives back 20 energy. Placeholders.
 
 ## Mini Games hub (2026-11-23)
 User: "all games in one place, names on the main field, not hunted through sub-tabs". The bottom-nav tab is called
