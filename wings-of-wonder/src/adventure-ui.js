@@ -5,7 +5,9 @@ function claimForgeQuest(){const n=WonderAdventure.claimForge(S);if(n){save();qu
 function claimQuest(id){const gold=globalThis.WonderAdventure.claim(S,id);if(!gold)return;save();questBoard();toast('+'+fmt(gold)+' gold · Quest complete');}
 function claimContract(){if(!globalThis.WonderAdventure.contract(S))return;save();questBoard();toast('+900 gold · Guild bounty complete');}
 let bossWheelSequence=0;
-function openBossWheel(){const W=globalThis.WonderAdventure,a=S.adventure||W.fresh();bossWheelSequence++;modal(`<div class="boss-wheel-panel"><p class="eyebrow">BOSS TREASURE · FREE REWARDS</p><h2>Wheel of Wonder</h2><div class="boss-wheel-wrap"><canvas class="wheel-sparks" aria-hidden="true"></canvas><div class="wheel-pointer" aria-hidden="true"></div><div class="boss-wheel" id="bossWheel" style="--sector:${360/W.wheel.length}deg" aria-hidden="true">${W.wheel.map((r,i)=>`<span style="--slice:${i}">${r.voucher&&typeof riteVoucherIcon==='function'?riteVoucherIcon('wheel-reward-icon'):uiIcon(r.gold?'gold':r.tickets?'wishes':r.gem?'gem':'crystals','wheel-reward-icon')}${r.gold||r.tickets||r.synthesis||r.stone||r.gem||r.voucher}</span>`).join('')}<div class="wheel-center" aria-hidden="true"></div></div></div><p id="bossWheelResult" class="wheel-result" role="status">${a.pending?a.pending+(a.pending===1?' free spin ready':' free spins ready'):'Defeat a dungeon boss to earn a spin.'}</p><button id="bossSpin" class="primary" ${a.pending<1?'disabled':''} onclick="spinBossWheel()">Spin for free</button><button onclick="$('#modal').close();go('dungeons')">Explore dungeons</button><details class="wheel-odds"><summary>Reward chances</summary><p>All ${W.wheel.length} sectors have an equal chance. No entry cost or paid spins. Rewards save immediately.</p><div>${W.wheel.map(r=>`<span>${r.label} · 1/${W.wheel.length}</span>`).join('')}</div></details></div>`);}
+function bossWheelBoard(){const W=globalThis.WonderAdventure,a=S.adventure||W.fresh(),open=a.wheelOpen||[],n=W.wheelBonus(S),left=W.WHEEL_DAILY-n;
+ return `<div class="wh-board"><div class="wh-pips">${W.wheel.map((r,i)=>`<i class="${open.includes(i)?'on':''}"></i>`).join('')}</div><p><b>${open.length}/${W.wheel.length}</b> fields open · every spin opens a new one</p><p class="wh-prize"><img src="${artPath('hud-prisms')}" alt="">Open all ${W.wheel.length}: <b>${W.WHEEL_PRISMS} prisms</b> <small>${left>0?left+' of '+W.WHEEL_DAILY+' left today':'all '+W.WHEEL_DAILY+' taken today'}</small></p></div>`;}
+function openBossWheel(){const W=globalThis.WonderAdventure,a=S.adventure||W.fresh(),open=a.wheelOpen||[];bossWheelSequence++;popup(`<div class="boss-wheel-panel wh2"><h2>Wheel of Wonder</h2><div class="boss-wheel-wrap"><canvas class="wheel-sparks" aria-hidden="true"></canvas><div class="wheel-pointer" aria-hidden="true"></div><div class="boss-wheel" id="bossWheel" style="--sector:${360/W.wheel.length}deg" aria-hidden="true">${W.wheel.map((r,i)=>`<span class="${open.includes(i)?'opened':''}" style="--slice:${i}">${r.voucher&&typeof riteVoucherIcon==='function'?riteVoucherIcon('wheel-reward-icon'):uiIcon(r.gold?'gold':r.tickets?'wishes':r.gem?'gem':'crystals','wheel-reward-icon')}${r.gold||r.tickets||r.synthesis||r.stone||r.gem||r.voucher}</span>`).join('')}<div class="wheel-center" aria-hidden="true"></div></div></div><div id="bossWheelBoard">${bossWheelBoard()}</div><p id="bossWheelResult" class="wheel-result" role="status">${a.pending?a.pending+(a.pending===1?' free spin ready':' free spins ready'):'Defeat a dungeon boss to earn a spin.'}</p><div class="wh-btns"><button id="bossSpin" class="wh-spin" ${a.pending<1?'disabled':''} onclick="spinBossWheel()">${denPlain}Spin${a.pending?' · '+a.pending:''}</button><button class="wh-go" onclick="$('#modal').close();go('dungeons')">${denPlain}Dungeons</button></div><details class="wheel-odds"><summary>How it works</summary><p>One free spin for every dungeon boss. A spin lands only on a field you have not opened yet. When all ${W.wheel.length} are open you get ${W.WHEEL_PRISMS} prisms (up to ${W.WHEEL_DAILY} times a UTC day) and the wheel starts again.</p></details></div>`);$('#modal').classList.add('wh-pop');}
 function trailWheelSparks(wheel, sequence) {
   const canvas = wheel.parentElement.querySelector('.wheel-sparks');
   const ctx = canvas.getContext('2d');
@@ -71,12 +73,16 @@ function spinBossWheel() {
     finished = true;
     wheel.removeEventListener('transitionend', reveal);
     if (seq !== bossWheelSequence || !wheel.isConnected || !$('#modal').open) return;
-    wheel.children[prize.index].classList.add('wheel-winner');
-    result.textContent = 'You won ' + prize.label + '!';
+    wheel.children[prize.index].classList.add('wheel-winner', 'opened');
+    result.textContent = 'You won ' + prize.label + '!' + (prize.prisms ? ' All fields open: +' + prize.prisms + ' prisms!' : prize.full ? ' All fields open (no prisms left today).' : '');
+    const board = $('#bossWheelBoard');
+    if (board) board.innerHTML = bossWheelBoard();
+    if (prize.full) setTimeout(() => { if (wheel.isConnected) for (const el of wheel.children) if (el !== wheel.children[prize.index]) el.classList.remove('opened'); }, 1600);
+    if (prize.prisms && typeof wallet === 'function') wallet();
     result.classList.add('wheel-reveal');
     const remaining = S.adventure.pending;
     button.disabled = remaining === 0;
-    button.innerHTML = uiIcon('gift') + (remaining ? 'Next free spin · ' + remaining : 'All rewards collected');
+    button.innerHTML = denPlain + (remaining ? 'Spin · ' + remaining : 'No spins left');
   }
   wheel.style.setProperty('--wheel-angle', angle + 'deg');
   if (reduced) reveal();

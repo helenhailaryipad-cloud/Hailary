@@ -273,6 +273,15 @@ The old v301 profile page (`heroProfile`, blue card with party heroes, Fashion /
 this? my eyes rolled up") is retired: `go('profile')` and a saved `screen==='profile'` open `character` instead; the
 plate and the Character page no longer link to it; the city skill "Companion" opens `cityCompanion`.
 
+## Wheel of Wonder prisms (2026-11-26)
+User: "prisms also come from the roulette: 88, three times a day, if all fields are open". The boss wheel
+(`openBossWheel` in `adventure-ui.js`, a free spin per dungeon guardian) is a board now: a spin lands only on a field
+not opened yet (`WonderAdventure.spin`, optional `S.adventure.wheelOpen` [indices]); opening the 12th pays
+`WHEEL_PRISMS` 88 into `S.scales`, up to `WHEEL_DAILY` 3 times a UTC day (`S.adventure.wheelBonus {day,n}`,
+`wheelBonus(s)`), then the board starts again (also after the daily limit, without prisms). The window is a light
+pop-up (`.wh-pop`: ivory card, ticks on opened fields, 12 gold pips, prism line, gold Spin / violet Dungeons plates;
+no dark frame, no Menu pill).
+
 ## Mini Games hub (2026-11-23)
 User: "all games in one place, names on the main field, not hunted through sub-tabs". The bottom-nav tab is called
 Mini Games; `games()` in `app.js` draws `.mg-hub`: one tile per game from `MINI_GAMES` (cover, name, line, best
