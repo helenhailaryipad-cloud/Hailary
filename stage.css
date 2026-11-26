@@ -10752,3 +10752,66 @@ body #stage .cloud-encounter.cf2 .cf-top h2{margin:0;font:900 clamp(17px,4.4cqw,
 #stage #modal.wh-pop .wheel-odds summary{cursor:pointer;color:#7a4a0e;font-weight:700}
 #stage #modal.wh-pop .wheel-odds p{color:#5a4a30!important;font-size:12px!important}
 #stage #modal.wh-pop .wheel-result{background:none!important;border:0!important;box-shadow:none!important;padding:0!important}
+/* Boss Roulette room (2026-11-26, user photos of the reference's boss roulette); light, no dark frames */
+body[data-screen=bossWheel] #stage{width:min(100%,86dvh)!important;max-width:none!important}
+body[data-screen=bossWheel] #stage>:is(header,nav,footer),body[data-screen=bossWheel] .return-to-menu{display:none!important}
+body[data-screen=bossWheel] #stage>#main{inset:0!important;width:100%;height:100%;padding:0!important;display:block;overflow:auto}
+#stage .bw-room{min-height:100%;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 3% 14px;color:#3a3020;text-align:center;container-type:inline-size;
+  background:linear-gradient(180deg,#fff8ecd0,#f3f8ffd9 45%,#fffaf0f0),url(assets/sunny-garden.webp) center top/cover}
+#stage .bw-top{width:100%;display:grid;grid-template-columns:56px 1fr 56px;align-items:center}
+#stage .bw-top h1{margin:0;font:900 clamp(22px,6.4cqw,36px)/1.05 Georgia,serif;color:#8a3fc0;text-shadow:0 2px 0 #fff,0 0 10px #fff}
+#stage .bw-top h1 small{display:block;font-size:.62em;color:#b0611b}
+#stage #main .bw-help{width:38px;height:38px;min-height:0;margin:0 auto;padding:0;border-radius:50%;border:2px solid #e2c47a!important;background:radial-gradient(#fffdf2,#f6e6bf)!important;color:#8a5a12!important;font:900 18px/1 Georgia,serif;box-shadow:0 2px 6px #b0802a40!important}
+#stage #main .bw-help::before,#stage #main .bw-help::after{content:none!important}
+#stage .bw-room .boss-wheel-wrap{width:min(92%,48dvh*622/592);margin:0 auto;background-color:transparent;border-radius:0}
+#stage .bw-room .boss-wheel.skip{transition:none}
+#stage .bw-room .boss-wheel > span{cursor:pointer;pointer-events:auto}
+#stage .bw-room .boss-wheel > span .bw-ic{width:15cqw;height:15cqw;object-fit:contain}
+#stage .bw-room .boss-wheel > span b{font:900 clamp(11px,5.2cqw,19px)/1 Georgia,serif;color:#42311c}
+#stage .bw-room .boss-wheel > span.k-prism b{color:#8a3fc0}
+#stage .bw-room .boss-wheel > span.k-prism .bw-ic{filter:drop-shadow(0 0 5px #d9a8ff)}
+#stage .bw-room .boss-wheel > span.opened .bw-ic{filter:saturate(.25) brightness(.95);opacity:.65}
+#stage .bw-room .boss-wheel > span.opened b{opacity:.5}
+#stage .bw-room .boss-wheel > span.opened::after{content:'Claimed';position:absolute;left:50%;top:44%;transform:translate(-50%,-50%) rotate(-24deg);padding:1px 6px;border-radius:4px;background:#3fae5a;color:#fff;font:900 clamp(7px,3.4cqw,11px)/1.3 Arial,sans-serif;text-shadow:none;box-shadow:0 1px 3px #0003;white-space:nowrap}
+#stage .bw-spinbar{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;width:100%}
+#stage .bw-att{justify-self:end;padding:4px 12px;border-radius:999px;background:#ffffffc8;border:1px solid #e2c47a;font:700 14px/1.2 Arial,sans-serif;color:#5a4320}
+#stage .bw-att b{color:#2e7a3a}
+#stage #main .bw-spin{position:relative;width:min(190px,40cqw);height:58px;min-height:0;margin:0;padding:0 0 3px;border:0!important;border-radius:30px;box-shadow:none!important;background:url(assets/generated/ui-btn-gold.webp) center/100% 100% no-repeat!important;color:#5a2a06!important;text-shadow:0 1px 0 #fff6c8!important;font:900 21px/1 Georgia,serif;cursor:pointer}
+#stage #main .bw-spin::before{content:none!important}
+#stage #main .bw-spin.due::after{content:'!';position:absolute;top:2px;right:16px;width:18px;height:18px;border-radius:50%;background:#e2374a;color:#fff;font:900 13px/18px Arial,sans-serif;text-shadow:none}
+#stage #main .bw-spin:disabled{filter:saturate(.3) brightness(1.05);opacity:.8}
+#stage .bw-skip{justify-self:start;display:flex;align-items:center;gap:5px;font:700 14px/1 Arial,sans-serif;color:#5a4320}
+#stage .bw-skip input{width:20px;height:20px;accent-color:#3fae5a}
+#stage .bw-result{margin:0;min-height:1.3em;font:800 15px/1.3 Arial,sans-serif;color:#7a4a0e}
+#stage .bw-head{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;margin-top:4px;font:900 18px/1 Georgia,serif;color:#b0611b}
+#stage .bw-head::before,#stage .bw-head::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,#e2c47a00,#e2c47a)}
+#stage .bw-head::after{background:linear-gradient(90deg,#e2c47a,#e2c47a00)}
+#stage .bw-head small{font:700 13px/1 Arial,sans-serif;color:#5a4a30}
+#stage .bw-head b{color:#2e7a3a}
+#stage .bw-list{width:100%;display:grid;gap:6px}
+#stage .bw-row{display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:10px;padding:6px 12px 6px 6px;border-radius:14px;background:#fffdf6;border:1px solid #ecd9a6;box-shadow:0 2px 6px #b0905020;text-align:left;font:600 15px/1.2 Arial,sans-serif;color:#4a4030}
+#stage .bw-row b{color:#c0464f}
+#stage .bw-row.ready{background:#fff8dc;border-color:#f0c85a}
+#stage .bw-row.ready b,#stage .bw-row.got b{color:#2e8a3a}
+#stage .bw-row.got{opacity:.75}
+#stage .bw-skull{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;background:radial-gradient(#fff,#f3e6c6)}
+#stage .bw-skull :is(img,.gpt-icon){width:30px;height:30px}
+#stage .bw-row em{font:800 15px/1 Arial,sans-serif;font-style:normal;color:#2e8a3a}
+#stage .bw-row em.no{color:#9a8a6a;font-size:13px}
+#stage #main .bw-obtain{min-height:0;height:36px;margin:0;padding:0 16px;border-radius:12px;border:1px solid #6aa8e0!important;background:linear-gradient(#e6f4ff,#a9d6ff)!important;color:#1f4f88!important;font:800 15px/1 Arial,sans-serif;box-shadow:0 2px 4px #4a80b040!important;text-shadow:none!important}
+#stage #main .bw-obtain::before,#stage #main .bw-obtain::after{content:none!important}
+#stage .bw-note{margin:2px 0 0;font:600 12.5px/1.3 Arial,sans-serif;color:#6a5a40}
+#stage #modal.bw-pop{background:linear-gradient(#fffdf5,#f6eedb)!important;border:0!important;box-shadow:0 14px 50px #1d3a5a55!important;color:#3a3020}
+#stage #modal.bw-pop::backdrop{background:#2a4a6a44}
+#stage #modal.bw-pop #modalBody{background:none!important;border:0!important;box-shadow:none!important;color:#3a3020}
+#stage #modal.bw-pop .bw-item{text-align:left;font:500 14px/1.4 Arial,sans-serif}
+#stage #modal.bw-pop .bw-item h2{margin:0 36px 4px 0;color:#7a4a0e;font:900 20px/1.1 Georgia,serif}
+#stage #modal.bw-pop .bw-item p{color:#4a4030!important;margin:4px 0}
+#stage #modal.bw-pop .bw-item-head{display:flex;gap:12px;align-items:center;padding-bottom:8px;border-bottom:1px solid #ead7a0}
+#stage #modal.bw-pop .bw-item-head .bw-ic{width:64px;height:64px;object-fit:contain;padding:6px;border-radius:14px;background:radial-gradient(#fff,#f3e3bd)}
+#stage #modal.bw-pop .bw-claimed{color:#2e8a3a!important;font-weight:800}
+#stage .bw-room .boss-wheel-wrap{-webkit-mask:radial-gradient(ellipse 50% 52.5% at 50.8% 50.5%,#000 90%,#0000 100%);mask:radial-gradient(ellipse 50% 52.5% at 50.8% 50.5%,#000 90%,#0000 100%)}
+#stage .bw-room .boss-wheel > span.k-prism .bw-ic{filter:drop-shadow(0 0 4px #f0b8ff)}
+#stage #modal.bw-pop .bw-item p{font:500 14px/1.4 Arial,sans-serif!important}
+#stage #modal.bw-pop .bw-item b{color:#2e7a3a!important;font-weight:800}
+#stage #modal.bw-pop .bw-item h2{font-size:20px!important}

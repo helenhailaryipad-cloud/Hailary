@@ -2023,7 +2023,7 @@ function cloudFightStop(keep){
 function cloudFightSettle(){
  const b=cloudBattle,{index,slot,role}=b,limit=cloudEnemyHealth[role],hits=(S.cloudWarHits??={})[index]??=Array(10).fill(0);
  let gain=0,loot=null;
- if(!(hits[slot]>=limit)){hits[slot]=limit;gain=WonderGear.cloudGain(S,cloudCarnageCost[role]);loot=gain?cloudLootRoll(role):{};for(const [id,n] of Object.entries(loot))WonderGear.bagAdd(S,id,n);if(!Object.keys(loot).length)loot=null;save()}
+ if(!(hits[slot]>=limit)){hits[slot]=limit;WonderAdventure.addBossKill(S);gain=WonderGear.cloudGain(S,cloudCarnageCost[role]);loot=gain?cloudLootRoll(role):{};for(const [id,n] of Object.entries(loot))WonderGear.bagAdd(S,id,n);if(!Object.keys(loot).length)loot=null;save()}
  b.done=true;b.result={gain,loot};b.doneAt=Date.now();
  const next=cloudNextTarget(index),watching=document.querySelector('.cloud-encounter canvas');
  if(!watching)toast('⚔ '+cloudBossName(slot)+' defeated · +'+cloudEnemyScore[role]+' territory points'+(gain?' · −'+gain+' Carnage':' · no Carnage left, no rewards'));
