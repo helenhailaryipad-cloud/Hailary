@@ -10634,3 +10634,16 @@ html body #stage #main .cloud-war .cloud-carnage .cloud-open b{color:#1a8a3a!imp
 #stage #modal .cloud-city .portal-defenders[data-terrain]{width:min(100%,52dvh,560px)!important}
 @media (max-height:820px){#stage #modal .cloud-city .portal-defenders[data-terrain]{width:min(100%,49dvh)!important}}
 #stage #modal .cloud-city .city-go:disabled{background:linear-gradient(#f1ece0,#d9d1bd)!important;border:2px solid #c9b98f!important;color:#8a7a5a!important;box-shadow:none!important;opacity:1!important}
+/* Carnage Flask: "+" on the Carnage pill, a row in the Cloud Shop, a small card */
+html body #stage #main .cloud-war .cloud-carnage button.cloud-plus{width:22px;height:22px;min-height:0;margin-left:6px;padding:0;border-radius:50%;border:1.5px solid #e9c46f;background:linear-gradient(#ffe47a,#f2b83a);color:#5a3406;font:900 15px/1 Arial,sans-serif;box-shadow:none;display:inline-grid;place-items:center;flex:none}
+html body #stage #main .cloud-war .cloud-carnage button.cloud-plus::before,html body #stage #main .cloud-war .cloud-carnage button.cloud-plus::after{display:none}
+html body #stage #main .cloud-war .cloud-carnage button.cloud-plus>svg:first-child{display:none}
+#modal button.cloud-flask-row{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;gap:0 8px;align-items:center;width:100%;margin:6px 0 10px;padding:8px 12px;border-radius:12px;border:2px solid #e9c46f;background:linear-gradient(#fffaf0,#ffe9bd);color:#5a3406;text-align:left;min-height:0;height:auto;box-shadow:none}
+#modal button.cloud-flask-row::before,#modal button.cloud-flask-row::after{display:none}
+#modal button.cloud-flask-row>svg:first-child{display:none}
+#modal .cloud-flask-row span{grid-row:span 2;font-size:28px}
+#modal .cloud-flask-row b{font:800 15px Arial,sans-serif;color:#5a3406}
+#modal .cloud-flask-row small{font:600 12px Arial,sans-serif;color:#6a4a20}
+#modal .cloud-flask{text-align:center}#modal .cloud-flask .cf-art{font-size:54px;line-height:1.2}
+#modal .cloud-flask p{margin:4px 0}
+#modal .cloud-flask p{font-size:14px!important;line-height:1.35}#modal .cloud-flask .cf-art{font-size:46px}
