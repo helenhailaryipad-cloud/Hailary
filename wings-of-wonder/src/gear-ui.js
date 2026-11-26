@@ -1806,7 +1806,8 @@ const cloudPortalSlots=[
  ['Guard',24,14,7],['Guard',24,48,8],['Guard',76,14,9],['Guard',76,48,10],
  ['Guard',34,69,8],['Guard',66,69,7]
 ];
-const cloudEnemyScore={Guard:10,Elite:20,Boss:30};
+const cloudEnemyScore={Guard:10,Elite:20,Boss:30};// territory points
+const cloudCarnageCost={Guard:30,Elite:60,Boss:90};// Carnage Points a defeat spends from the daily 1200 (user)
 const cloudEnemyHealth={Guard:2,Elite:3,Boss:4};
 function cloudScore(index){
  const damage=S.cloudWarHits?.[index]||[];
@@ -2018,7 +2019,7 @@ function cloudFightStop(keep){
 function cloudFightSettle(){
  const b=cloudBattle,{index,slot,role}=b,limit=cloudEnemyHealth[role],hits=(S.cloudWarHits??={})[index]??=Array(10).fill(0);
  let gain=0,loot=null;
- if(!(hits[slot]>=limit)){hits[slot]=limit;gain=WonderGear.cloudGain(S,cloudEnemyScore[role]);loot=gain?cloudLootRoll(role):{};for(const [id,n] of Object.entries(loot))WonderGear.bagAdd(S,id,n);if(!Object.keys(loot).length)loot=null;save()}
+ if(!(hits[slot]>=limit)){hits[slot]=limit;gain=WonderGear.cloudGain(S,cloudCarnageCost[role]);loot=gain?cloudLootRoll(role):{};for(const [id,n] of Object.entries(loot))WonderGear.bagAdd(S,id,n);if(!Object.keys(loot).length)loot=null;save()}
  b.done=true;b.result={gain,loot};b.doneAt=Date.now();
  const next=cloudNextTarget(index),watching=document.querySelector('.cloud-encounter canvas');
  if(!watching)toast('⚔ '+cloudBossName(slot)+' defeated · +'+cloudEnemyScore[role]+' territory points'+(gain?' · −'+gain+' Carnage':' · no Carnage left, no rewards'));
@@ -2141,7 +2142,7 @@ function cloudPortalPreview(place,index){
   ${mine?'':'<p class="cloud-foreign">A city of '+place.owner+'. '+cloudFactions[cloudMine][0]+' opens only its own six cities; this one is left to its faction.</p>'}
   <div class="portal-defenders" data-terrain="${place.rank}">${defenders}</div>
   <div class="city-points"><b>Current points:</b>${rows.map(([f,i,n],k)=>`<span style="color:${f[3]}">${k+1}. ${f[0]}: ${n}</span>`).join('')}<small>80 points open the city</small></div>
-  <div class="city-kill"><h3>Killing Rewards${pick>=0?' · '+cloudBossName(pick):''}</h3><p>Territory <b>+${cloudEnemyScore[role]}</b> · Carnage <b>−${cloudEnemyScore[role]}</b> (${cloudCarnageLeft()} left) · Possible rewards:</p><div class="bag-gains">${cloudLootView(role)}</div></div>
+  <div class="city-kill"><h3>Killing Rewards${pick>=0?' · '+cloudBossName(pick):''}</h3><p>Territory <b>+${cloudEnemyScore[role]}</b> · Carnage <b>−${cloudCarnageCost[role]}</b> (${cloudCarnageLeft()} left) · Possible rewards:</p><div class="bag-gains">${cloudLootView(role)}</div></div>
   <div class="den-actions">${cloudChestReady(index)?`<button class="den-gold city-own" onclick="cloudOwnClaim(${index})">${denPlain}Ownership Reward</button>`:''}<button class="den-gold city-go" onclick="cloudGo(${index})" ${mine&&pick>=0?'':'disabled'}>${denPlain}Go</button></div></section>`;
 }
 function cloudTerritory(index){
