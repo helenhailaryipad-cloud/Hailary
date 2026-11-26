@@ -1867,6 +1867,10 @@ function cloudOwnClaim(i){
 }
 // Light tool icons (atlas comp-cloud-tools 5 x 1: shop, faction, points, rank, guide).
 const cloudToolIcon=n=>'<i class="cloud-ti" style="background-image:url(\''+artPath('comp-cloud-tools')+'\');background-position:'+n*25+'% 0"></i>';
+// Carnage Points are a daily budget (user: "at the reset there are 1200 and they are spent as bosses fall"): the save
+// keeps what was spent today (`S.cloud.carnage`); the map shows what is left. A defeat spends 10 / 20 / 30 and pays
+// its drops only while points are left.
+const cloudCarnageLeft=()=>{const v=WonderGear.cloudState(S);return Math.max(0,WonderGear.cloudRules.carnageCap-v.carnage)};
 const cloudClaimable=()=>{const v=WonderGear.cloudState(S);return WonderGear.cloudPointRewards.some((r,n)=>v.carnage>=r.at&&!v.claimed.includes(n))};
 // Possible drops of a defeated defender (user: "the city window shows the POSSIBLE rewards; they are not guaranteed"):
 // each row [bag item, count, chance] is rolled on its own when the defender falls. Placeholders.
@@ -1877,7 +1881,7 @@ const cloudLootView=role=>{bagArtVars();return (cloudLoot[role]||[]).map(([id,n,
 function cloudItems(items){bagArtVars();return Object.entries(items).map(([id,n])=>'<span class="bag-gain" style="--rarity:'+bagHue(WonderGear.bagItemById[id].rarity)+'">'+bagIcon(id)+'<b>×'+n+'</b><small>'+WonderGear.bagItemById[id].name+'</small></span>').join('')}
 function cloudPointsShow(){
  const r=WonderGear,v=r.cloudState(S);
- popup('<h2>Point Rewards</h2><p>Carnage Points today: <b>'+v.carnage+' / '+r.cloudRules.carnageCap+'</b>. Defeat defenders to earn them; rewards go to the bag.</p><div class="cloud-steps">'+r.cloudPointRewards.map((x,n)=>{const got=v.claimed.includes(n),ok=v.carnage>=x.at;
+ popup('<h2>Point Rewards</h2><p>Carnage Points left today: <b>'+(r.cloudRules.carnageCap-v.carnage)+' / '+r.cloudRules.carnageCap+'</b> (spent '+v.carnage+'). Every defeated defender spends some; spending them fills these rewards.</p><div class="cloud-steps">'+r.cloudPointRewards.map((x,n)=>{const got=v.claimed.includes(n),ok=v.carnage>=x.at;
   return '<div class="'+(got?'got':ok?'ready':'')+'"><b>'+x.at+'</b><span class="bag-gains">'+cloudItems(x.items)+'</span>'+(got?'<em>Claimed</em>':ok?'<button class="den-gold" onclick="cloudTake('+n+')">'+denPlain+'Claim</button>':'<em>'+v.carnage+'/'+x.at+'</em>')+'</div>'}).join('')+'</div><p>Resets at 00:00 UTC.</p>');
 }
 function cloudTake(n){if(WonderGear.cloudClaim(S,n)){save();cloudPointsShow();cloudHud()}}
@@ -1900,7 +1904,7 @@ function cloudRankShow(){
 // Refreshes the clock and the counters at the top of the map without drawing the board again.
 function cloudHud(){
  const v=WonderGear.cloudState(S),clock=document.querySelector('[data-round]'),pts=document.querySelector('[data-carnage]'),dot=document.querySelector('.cloud-dot');
- if(clock)clock.textContent=cloudClock();if(pts)pts.textContent=v.carnage+' / '+WonderGear.cloudRules.carnageCap;if(dot)dot.hidden=!cloudClaimable();
+ if(clock)clock.textContent=cloudClock();if(pts)pts.textContent=cloudCarnageLeft()+' / '+WonderGear.cloudRules.carnageCap;if(dot)dot.hidden=!cloudClaimable();
 }
 function cloudBotTarget(faction){
  for(const position of cloudPatrol){
@@ -1988,7 +1992,7 @@ function cloudHall(index,current){
   return `<button class="hall-row role-${role.toLowerCase()} ${now?'now':''}" onclick="cloudHallPick(${index},${slot})">${denPlain}<b>${cloudBossName(slot)}</b><em class="${down?'':'up'}">${now?'Fighting':down?cloudClock():'Refreshed'}</em><span style="color:${by>=0?cloudFactions[by][3]:'#9fb0d8'}">${by>=0?cloudFactions[by][0]:'None'}</span></button>`}).join('');
  const killers=[[esc(S.name),cloudMine,mine.filter((n,slot)=>n>=cloudEnemyHealth[cloudPortalSlots[slot][0]]).length],...(sector===cloudMine?cloudSquads[cloudMine].map((n,i)=>[n+' <small>AI</small>',cloudMine,bots.filter((h,slot)=>h>0&&slot%2===i).length]):[])].sort((a,b)=>b[2]-a[2]);
  const dmg=killers.map(([n,f,k],i)=>`<div class="hall-row"><b>${i+1}. ${n}</b><em class="up">${k} defeated</em><span style="color:${cloudFactions[f][3]}">${cloudFactions[f][0]}</span></div>`).join('');
- return `<div class="cloud-hall"><div class="hall-info"><span>Carnage Points <b>${v.carnage}/${WonderGear.cloudRules.carnageCap}</b></span><span>Current Territory Point: <b>${pts}</b> <i class="${owner===cloudMine?'ok':''}">${owner===cloudMine?'Occupied':'Not occupied'}</i></span><span>Current Holy Land Owner: <b style="color:${holy>=0?cloudFactions[holy][3]:'#fff'}">${holy>=0?cloudFactions[holy][0]:'None'}</b></span></div>
+ return `<div class="cloud-hall"><div class="hall-info"><span>Carnage Points <b>${cloudCarnageLeft()}/${WonderGear.cloudRules.carnageCap}</b></span><span>Current Territory Point: <b>${pts}</b> <i class="${owner===cloudMine?'ok':''}">${owner===cloudMine?'Occupied':'Not occupied'}</i></span><span>Current Holy Land Owner: <b style="color:${holy>=0?cloudFactions[holy][3]:'#fff'}">${holy>=0?cloudFactions[holy][0]:'None'}</b></span></div>
   <div class="hall-tabs"><button aria-pressed="${cloudHallTab==='Boss'}" onclick="cloudHallTabs('Boss',${index},${current})">${denPlain}Boss List</button><button aria-pressed="${cloudHallTab==='Dmg'}" onclick="cloudHallTabs('Dmg',${index},${current})">${denPlain}DMG Rankings</button></div>
   <div class="hall-list">${cloudHallTab==='Boss'?rows:dmg}</div></div>`;
 }
@@ -2014,10 +2018,10 @@ function cloudFightStop(keep){
 function cloudFightSettle(){
  const b=cloudBattle,{index,slot,role}=b,limit=cloudEnemyHealth[role],hits=(S.cloudWarHits??={})[index]??=Array(10).fill(0);
  let gain=0,loot=null;
- if(!(hits[slot]>=limit)){hits[slot]=limit;gain=WonderGear.cloudGain(S,cloudEnemyScore[role]);loot=cloudLootRoll(role);for(const [id,n] of Object.entries(loot))WonderGear.bagAdd(S,id,n);if(!Object.keys(loot).length)loot=null;save()}
+ if(!(hits[slot]>=limit)){hits[slot]=limit;gain=WonderGear.cloudGain(S,cloudEnemyScore[role]);loot=gain?cloudLootRoll(role):{};for(const [id,n] of Object.entries(loot))WonderGear.bagAdd(S,id,n);if(!Object.keys(loot).length)loot=null;save()}
  b.done=true;b.result={gain,loot};b.doneAt=Date.now();
  const next=cloudNextTarget(index),watching=document.querySelector('.cloud-encounter canvas');
- if(!watching)toast('⚔ '+cloudBossName(slot)+' defeated · +'+cloudEnemyScore[role]+' territory points'+(gain?' · +'+gain+' Carnage':''));
+ if(!watching)toast('⚔ '+cloudBossName(slot)+' defeated · +'+cloudEnemyScore[role]+' territory points'+(gain?' · −'+gain+' Carnage':' · no Carnage left, no rewards'));
  b.next=cloudAutoNext&&next>=0?next:-1;
 }
 function cloudFightTick(){
@@ -2094,7 +2098,7 @@ function cloudBattleView(){
   const left=Math.max(0,Math.ceil((c.start+c.dur-wall)/1000));clock.textContent=riding?'riding…':c.done?'won':Math.floor(left/60)+':'+String(left%60).padStart(2,'0')+' left';
   status.textContent=riding?'Pathfinding to '+cloudBossName(slot):c.done?'Victory':'Reina · '+Math.max(40,100-Math.round(cloudFightP(c,wall)*35))+'% HP · Auto-fighting · you can leave, the fight goes on';
   const cd=Math.ceil((c.burstAt-wall)/1000);burst.disabled=riding||c.done||cd>0;burst.textContent=cd>0?'Celestial Arrow · '+cd+'s':'Celestial Arrow';
-  if(c.done&&!shownDone){shownDone=true;const {gain,loot}=c.result;bagArtVars();canvas.parentElement.insertAdjacentHTML('beforeend',`<div class="cloud-floating-loot" role="status">${loot?'<div class="bag-gains">'+cloudItems(loot)+'</div>':''}<strong>+${cloudEnemyScore[role]} territory points · ${gain?'+'+gain+' Carnage Points':'daily Carnage cap reached'}</strong></div>`);const hall=body.querySelector('.cloud-hall');if(hall)hall.outerHTML=cloudHall(index,-1)}
+  if(c.done&&!shownDone){shownDone=true;const {gain,loot}=c.result;bagArtVars();canvas.parentElement.insertAdjacentHTML('beforeend',`<div class="cloud-floating-loot" role="status">${loot?'<div class="bag-gains">'+cloudItems(loot)+'</div>':''}<strong>+${cloudEnemyScore[role]} territory points · ${gain?'−'+gain+' Carnage Points':'no Carnage Points left today: no rewards'}</strong></div>`);const hall=body.querySelector('.cloud-hall');if(hall)hall.outerHTML=cloudHall(index,-1)}
   requestAnimationFrame(frame);
  }
  requestAnimationFrame(frame);
@@ -2137,7 +2141,7 @@ function cloudPortalPreview(place,index){
   ${mine?'':'<p class="cloud-foreign">A city of '+place.owner+'. '+cloudFactions[cloudMine][0]+' opens only its own six cities; this one is left to its faction.</p>'}
   <div class="portal-defenders" data-terrain="${place.rank}">${defenders}</div>
   <div class="city-points"><b>Current points:</b>${rows.map(([f,i,n],k)=>`<span style="color:${f[3]}">${k+1}. ${f[0]}: ${n}</span>`).join('')}<small>80 points open the city</small></div>
-  <div class="city-kill"><h3>Killing Rewards${pick>=0?' · '+cloudBossName(pick):''}</h3><p>Territory <b>${cloudEnemyScore[role]}</b> · Carnage <b>${cloudEnemyScore[role]}</b> · Possible rewards:</p><div class="bag-gains">${cloudLootView(role)}</div></div>
+  <div class="city-kill"><h3>Killing Rewards${pick>=0?' · '+cloudBossName(pick):''}</h3><p>Territory <b>+${cloudEnemyScore[role]}</b> · Carnage <b>−${cloudEnemyScore[role]}</b> (${cloudCarnageLeft()} left) · Possible rewards:</p><div class="bag-gains">${cloudLootView(role)}</div></div>
   <div class="den-actions">${cloudChestReady(index)?`<button class="den-gold city-own" onclick="cloudOwnClaim(${index})">${denPlain}Ownership Reward</button>`:''}<button class="den-gold city-go" onclick="cloudGo(${index})" ${mine&&pick>=0?'':'disabled'}>${denPlain}Go</button></div></section>`;
 }
 function cloudTerritory(index){
@@ -2245,7 +2249,7 @@ function cityCloudWar(){
  const markers=nodes.map((p,i)=>`<button class="cloud-place" data-rank="${p.rank}" aria-label="${p.owner}: ${p.name}, ${p.rank}" title="${p.name} · ${p.rank}" style="left:${p.x}%;top:${p.y}%;--banner:${p.color}" onclick="cloudTerritory(${i})"><span class="map-token" aria-hidden="true">${symbols[p.rank]}</span></button>`).join('');
  if(cloudCount===4)cloudRoundCheck();
  const cv=WonderGear.cloudState(S);
- $('#main').innerHTML='<section class="cloud-war"><div class="cloud-heading"><strong>Cloud War</strong>'+(cloudCount===4?'<span class="cloud-round">This round ends in <b data-round>'+cloudClock()+'</b></span>':'<small>Battle starts at 19:30</small>')+'</div><div class="cloud-field map-'+cloudCount+'"><div class="cloud-map-plane">'+(cloudCount===4?cloudFourBoard(nodes):cloudCount===2?cloudLinkedMap(nodes):markers)+'</div></div>'+(cloudCount===4?'<div class="cloud-carnage">'+artImage('hud-rush','')+'<span>Carnage Points<b data-carnage>'+cv.carnage+' / '+WonderGear.cloudRules.carnageCap+'</b></span><span class="cloud-open">'+cloudFactions[cloudMine][0]+' cities open <b>'+cloudOpen(cloudMine)+' / 6</b></span></div>':'')+'<div class="cloud-actions"><button data-back aria-label="Back to city" onclick="go(\'home\')">‹</button>'+(cloudCount===4?[[0,'Cloud Shop','cloudShopShow()'],[1,'Faction Status','cloudStatusShow()'],[2,'Point Rewards','cloudPointsShow()'],[3,'Rankings','cloudRankShow()']].map(([icon,name,act])=>'<button class="cloud-tool" onclick="'+act+'">'+denPlain+cloudToolIcon(icon)+name+(name==='Point Rewards'?'<i class="cloud-dot"'+(cloudClaimable()?'':' hidden')+'></i>':'')+'</button>').join(''):'')+'<button class="cloud-tool" onclick="cloudBrief('+[3,2,4].indexOf(cloudCount)+')">'+denPlain+cloudToolIcon(4)+'Guide</button></div></section>';
+ $('#main').innerHTML='<section class="cloud-war"><div class="cloud-heading"><strong>Cloud War</strong>'+(cloudCount===4?'<span class="cloud-round">This round ends in <b data-round>'+cloudClock()+'</b></span>':'<small>Battle starts at 19:30</small>')+'</div><div class="cloud-field map-'+cloudCount+'"><div class="cloud-map-plane">'+(cloudCount===4?cloudFourBoard(nodes):cloudCount===2?cloudLinkedMap(nodes):markers)+'</div></div>'+(cloudCount===4?'<div class="cloud-carnage">'+artImage('hud-rush','')+'<span>Carnage Points<b data-carnage>'+cloudCarnageLeft()+' / '+WonderGear.cloudRules.carnageCap+'</b></span><span class="cloud-open">'+cloudFactions[cloudMine][0]+' cities open <b>'+cloudOpen(cloudMine)+' / 6</b></span></div>':'')+'<div class="cloud-actions"><button data-back aria-label="Back to city" onclick="go(\'home\')">‹</button>'+(cloudCount===4?[[0,'Cloud Shop','cloudShopShow()'],[1,'Faction Status','cloudStatusShow()'],[2,'Point Rewards','cloudPointsShow()'],[3,'Rankings','cloudRankShow()']].map(([icon,name,act])=>'<button class="cloud-tool" onclick="'+act+'">'+denPlain+cloudToolIcon(icon)+name+(name==='Point Rewards'?'<i class="cloud-dot"'+(cloudClaimable()?'':' hidden')+'></i>':'')+'</button>').join(''):'')+'<button class="cloud-tool" onclick="cloudBrief('+[3,2,4].indexOf(cloudCount)+')">'+denPlain+cloudToolIcon(4)+'Guide</button></div></section>';
  if(cloudCount===4){
   cloudPlayerDuel=null;
   startCloudPatrol();
