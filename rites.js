@@ -327,6 +327,7 @@ function riteSecret() {
   $('#main').innerHTML = `<section class="ra-room ss-room rt-${rite.id}" style="--ssbg:url('${artPath('comp-secret-shop')}')">
    <div class="ss-banner"><span class="ra-time">⏱ <b>${riteClock(Rites.ends(v.ev.period) - Date.now())}</b></span><div class="rt-wallet">${riteWallet()}</div><h1>Secret Shop</h1></div>
    <div class="ss-list">
+    ${WonderAdventure.dealOn() ? (() => { const d = WonderAdventure.ENERGY_DEAL, done = S.adventure?.energyDeal === WonderProgress.day(); return `<p class="ss-head">Today's Deal <small>· shows up on some days only</small></p><div class="ss-row ss-deal ${done ? 'out' : ''}"><div class="ss-tiles"><span class="ss-tile en">${uiIcon('exp')}<b>${d.n}</b></span><span class="ss-note">Boss energy · <s>${d.was}</s> <b class="ss-off">−90%</b></span></div><div class="ss-buy">${done ? '<i class="ss-sold">Sold out</i>' : `<button class="ss-price pr" onclick="energyDeal()">${denPlain}${uiIcon('crystals')}${d.price}</button>`}<small>Limit ${done ? 1 : 0}/1</small></div></div>`; })() : ''}
     <p class="ss-head">Prism Packs <small>· bonus ${rite.ticket}s and ${esc(pet.name)} copies (featured pet of this rite)</small></p>${cash}
     <p class="ss-head">Ticket Packs <small>· ${Rites.packTickets} ${rite.ticket}s each, once per rite</small></p>${tick}
     <button class="ss-more" onclick="riteMore()">${denPlain}Exchange, vouchers and stardust ›</button>
