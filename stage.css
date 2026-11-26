@@ -10718,3 +10718,37 @@ body #stage .cloud-encounter.cf2 .cf-top h2{margin:0;font:900 clamp(17px,4.4cqw,
 #stage .cf2 .cloud-floating-loot>strong{display:inline-block;margin-top:4px;padding:4px 12px;color:#5a3a12!important;text-shadow:none!important;font:800 14px/1.2 Arial,sans-serif}
 #stage .cf2 .cloud-floating-loot .bag-gain{background:linear-gradient(#fffdf4,#f6e7c4)!important;border:2px solid #e8c771!important;color:#5a3a12!important;text-shadow:none!important;box-shadow:0 3px 10px #a07a3040!important}
 #stage .cf2 .cloud-floating-loot .bag-gain *{color:#5a3a12!important;text-shadow:none!important}
+/* Wheel of Wonder, light pop-up (user: "fewer black frames, they feel confining"; prisms when all fields are open) */
+#stage #modal.wh-pop{width:min(460px,calc(100vw - 32px));max-height:94dvh;padding:10px 12px 12px;border:0!important;border-image:none!important;
+  background:radial-gradient(ellipse at 50% 0,#fffdf3,#f2f8ea 60%,#e6f2ea)!important;box-shadow:0 14px 50px #1d3a5a55!important;color:#3a3020}
+#stage #modal.wh-pop::backdrop{background:#2a4a6a55;backdrop-filter:blur(2px)}
+#stage #modal.wh-pop #modalBody{background:none!important;border:0!important;box-shadow:none!important;padding:0!important;color:#3a3020}
+#stage #modal.wh-pop #modalBody::before,#stage #modal.wh-pop #modalBody::after{content:none!important}
+#stage #modal.wh-pop .dialog-dismiss{filter:drop-shadow(0 1px 2px #0003)}
+#stage #modal.wh-pop .wh2 h2{margin:2px 40px 2px;font:900 clamp(22px,6vw,28px)/1.1 Georgia,serif;color:#7a4a0e;text-shadow:0 1px 0 #fff}
+#stage #modal.wh-pop .wh2 .boss-wheel-wrap{width:min(100%,46dvh*622/592);margin:4px auto;border-radius:0;background-color:transparent}
+#stage #modal.wh-pop .boss-wheel > span.opened::after{content:'✓';position:absolute;right:4%;top:0;width:1.3em;height:1.3em;border-radius:50%;
+  background:#3fae5a;color:#fff;font:900 clamp(9px,3.8cqw,14px)/1.3em Arial,sans-serif;text-shadow:none;box-shadow:0 0 0 2px #fff}
+#stage #modal.wh-pop .boss-wheel > span.opened .wheel-reward-icon{filter:drop-shadow(0 0 6px #ffd75a) brightness(1.08)}
+#stage #modal.wh-pop .wh-board{display:grid;gap:3px;justify-items:center;margin:2px 0}
+#stage #modal.wh-pop .wh-pips{display:flex;gap:4px}
+#stage #modal.wh-pop .wh-pips i{width:16px;height:16px;border-radius:50%;background:#e9e2cf;box-shadow:inset 0 1px 2px #0002}
+#stage #modal.wh-pop .wh-pips i.on{background:radial-gradient(circle at 35% 30%,#fff6c0,#f0b53a 60%,#c98a1a);box-shadow:0 0 6px #f6c84c}
+#stage #modal.wh-pop .wh-board p{margin:0;font:600 13px/1.3 Arial,sans-serif;color:#5a4a30}
+#stage #modal.wh-pop .wh-board b{color:#2e7a3a}
+#stage #modal.wh-pop .wh-prize{display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:center;padding:3px 12px;border-radius:999px;background:#ffffffc0;border:1px solid #ead7a0}
+#stage #modal.wh-pop .wh-prize img{width:22px;height:22px}
+#stage #modal.wh-pop .wh-prize b{color:#8a3fc0!important}
+#stage #modal.wh-pop .wh-prize small{color:#7a6a50;font-size:12px}
+#stage #modal.wh-pop .wheel-result{min-height:0;margin:4px 0;font:800 15px/1.3 Arial,sans-serif;color:#7a4a0e;text-shadow:none}
+#stage #modal.wh-pop .wh-btns{display:flex;justify-content:center;gap:10px}
+#stage #modal.wh-pop .wh-btns button{display:block;margin:0;min-height:0;height:54px;padding:0 10px 3px;border:0!important;border-radius:28px;box-shadow:none!important;font:900 18px/1 Georgia,serif;cursor:pointer}
+#stage #modal.wh-pop .wh-btns button::before,#stage #modal.wh-pop .wh-btns button::after{content:none!important}
+#stage #modal.wh-pop .wh-btns button>:is(img,.gpt-icon){display:none}
+#stage #modal.wh-pop .wh-spin{width:190px;background:url(assets/generated/ui-btn-gold.webp) center/100% 100% no-repeat!important;color:#5a2a06!important;text-shadow:0 1px 0 #fff6c8!important}
+#stage #modal.wh-pop .wh-spin:disabled{filter:saturate(.3) brightness(1.05);opacity:.8}
+#stage #modal.wh-pop .wh-go{width:140px;background:url(assets/generated/ui-btn-violet.webp) center/100% 100% no-repeat!important;color:#fff!important;text-shadow:0 1px 2px #3a1460!important;font-size:16px!important}
+#stage #modal.wh-pop .wheel-odds{margin-top:6px;font:500 12px/1.35 Arial,sans-serif;color:#5a4a30}
+#stage #modal.wh-pop .wheel-odds summary{cursor:pointer;color:#7a4a0e;font-weight:700}
+#stage #modal.wh-pop .wheel-odds p{color:#5a4a30!important;font-size:12px!important}
+#stage #modal.wh-pop .wheel-result{background:none!important;border:0!important;box-shadow:none!important;padding:0!important}
