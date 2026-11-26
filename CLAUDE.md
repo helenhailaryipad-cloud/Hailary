@@ -1147,7 +1147,11 @@ territory windows with ten defenders and the fight; defenders never came back an
   The map shows what is left (`cloudCarnageLeft()` = 1200 - `S.cloud.carnage`, which still stores the amount spent);
   a defeated defender spends Guard 30 / Elite 60 / Boss 90 (`cloudCarnageCost`, user; territory points stay
   10 / 20 / 30 in `cloudEnemyScore`) through `cloudGain` and gives as many Cloud Tokens; its drops
-  roll only while points were left (`loot=gain?cloudLootRoll(role):{}`); Point Rewards milestones count points spent; a Golden Boss also gives a Moon Chest, an Elite an Oak Chest (`cloudLoot`), straight into the
+  roll only while points were left (`loot=gain?cloudLootRoll(role):{}`); Point Rewards milestones count points spent;
+  Carnage Flask (user): 10 prisms for +50 points, 80 a week (Monday 00:00 UTC, `cloudWeek`), `cloudFlask`; bought
+  points wait in `S.cloud.extra` (spent after the free daily 1200, kept across days) and the weekly count in
+  `S.cloud.fw {week,n}` (both optional, validated). A row in the Cloud Shop and a gold "+" on the Carnage pill open
+  `cloudFlaskShow` (Buy 1 / Buy 10). a Golden Boss also gives a Moon Chest, an Elite an Oak Chest (`cloudLoot`), straight into the
   bag. Optional save field `S.cloud {round, held, day, carnage, claimed, tokens}` (`validCloud`).
 - Map: round clock and Level at the top, every territory says owner and "Boss: N" (`cloudAlive`), Carnage bar, tool
   bar Cloud Shop / Faction Status / Point Rewards (red dot when claimable) / Rankings (AI rivals, simulated) / Guide;
