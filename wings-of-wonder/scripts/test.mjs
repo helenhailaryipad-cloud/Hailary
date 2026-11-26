@@ -1109,7 +1109,7 @@ vm.runInContext(`
 `,context);
 console.log('PASS: Wayfarer Quests: tasks, Silver / Gold / Diamond free tabs, claims, spending and wheel counters, chest track, vouchers, Daily button.');
 vm.runInContext(`
-{S=defaults();go('cloudWar');const idx=cloudMine*6+1;cloudStrike(idx,0);if(!cloudBattle||cloudBattle.index!==idx||!$('#main').innerHTML.includes('Leave · keeps fighting'))throw Error('Cloud fight view');
+{S=defaults();go('cloudWar');const idx=cloudMine*6+1;cloudStrike(idx,0);if(!cloudBattle||cloudBattle.index!==idx||!$('#main').innerHTML.includes('data-exit'))throw Error('Cloud fight view');
  const role0=cloudPortalSlots[0][0];if(Math.abs(cloudBattle.dur-CLOUD_FIGHT[role0]*1000)>1)throw Error('A full fight lasts CLOUD_FIGHT[role]');
  go('home');cloudPill();if(!cloudBattle||cloudBattle.done)throw Error('The fight keeps running on other screens');
  cloudBattle.start-=cloudBattle.dur+10;cloudFightTick();if(!cloudBattle.done||cloudDamage(idx,0)<cloudEnemyHealth[role0]||!(WonderGear.cloudState(S).carnage>0))throw Error('Fight settles in the background');

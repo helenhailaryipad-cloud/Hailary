@@ -1239,6 +1239,12 @@ territory windows with ten defenders and the fight; defenders never came back an
   bolts, the defender's orbs, damage numbers, HP and time left; Celestial Arrow takes 4 s off (8 s cooldown). Buttons:
   Leave · keeps fighting (back to the city, fight goes on), Stop (`cloudFightStop(true)` keeps the damage done). On other
   screens a pill (`#cloudPill`, `cloudPill`) shows the fight; tapping it returns to the view. Not saved across a reload.
+- Fight view, second look (2026-11-26, user: "the fight is very small again and everything in black frames"): the
+  `.cloud-encounter.cf2` screen is full width, the arena art under a light ivory veil; top row = round back button
+  (`data-back data-exit`, leaves, the fight goes on), title, clock pill; the canvas spans the width (drawn at 2x:
+  1280 x 840 with `setTransform(2,...)`), HP pill and status float on the picture; painted gold Celestial Arrow, a light
+  Auto next toggle with a tick, violet Stop; the hall is an ivory card (chips Carnage / Territory / Holy Land, segmented
+  tabs, light rows) that fills the rest and scrolls. The Menu pill is hidden. CSS "Cloud War fight, second look".
 - Not done: Cloud Hunt, buying extra Carnage, Bizarre Lands, other players' damage shares on the boss bar.
 
 ## Social room: chat, friends, mail (2026-11-21)
