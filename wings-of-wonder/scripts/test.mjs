@@ -154,7 +154,7 @@ if(S.reinaLayers.hair!==2||S.reinaLayers.dress!=='frostlace'||S.gold!==afterHair
 S.reinaLayers.hair=0;if(registeredLook().hair!==1)throw Error('Legacy bald appearance must use a hairstyle');
 if(fittingHairs.some(([id])=>id===0))throw Error('No bald option in Fashion');
 S=defaults();
-const namedLegacy={...defaults(),name:'Reyna',gold:1234,xp:456};const legacyBefore=JSON.stringify({...namedLegacy,name:'REINA'});normalizeAdventure(namedLegacy);if(JSON.stringify(namedLegacy)!==legacyBefore)throw Error('Name correction must preserve progress');if(normalizeAdventure({...defaults(),name:'Nyra'}).name!=='Nyra')throw Error('Keep custom hero names');if(comparable({...defaults(),name:'REINA'})!==comparable(normalizeAdventure({...defaults(),name:'Reyna'})))throw Error('Name correction must not create cloud conflict');
+const namedLegacy={...defaults(),name:'Reyna',gold:1234,xp:456};const legacyBefore=JSON.stringify(retireLeaflightBow(JSON.parse(JSON.stringify({...namedLegacy,name:'REINA'}))));normalizeAdventure(namedLegacy);if(JSON.stringify(namedLegacy)!==legacyBefore)throw Error('Name correction must preserve progress');if(normalizeAdventure({...defaults(),name:'Nyra'}).name!=='Nyra')throw Error('Keep custom hero names');if(comparable(retireLeaflightBow({...defaults(),name:'REINA'}))!==comparable(normalizeAdventure({...defaults(),name:'Reyna'})))throw Error('Name correction must not create cloud conflict');
 S=defaults();home();const progressBeforeIntro=JSON.stringify(S);const introPrefs=new Map(),originalGet=localStorage.getItem,originalSet=localStorage.setItem;localStorage.getItem=k=>introPrefs.get(k)||null;localStorage.setItem=(k,v)=>introPrefs.set(k,String(v));chooseIntro('2d');if(storedIntroStyle()!=='2d'||screen!=='home'||document.querySelector('#main').innerHTML.includes('id="intro3d"')||JSON.stringify(S)!==progressBeforeIntro)throw Error('2D return preserves adventure');openScreen('intro');chooseIntro('3d');if(storedIntroStyle()!=='2d'||screen!=='home'||document.querySelector('#main').innerHTML.includes('id="intro3d"')||JSON.stringify(S)!==progressBeforeIntro)throw Error('Retired 3D preference must return to 2D and preserve adventure');localStorage.getItem=originalGet;localStorage.setItem=originalSet;
 S=defaults();S.tickets=100000;const initial=S.tickets;
 for(let i=0;i<30;i++)roll(10);
@@ -467,7 +467,7 @@ console.log('PASS: current hairstyle stays visible during loading, rapid selecti
 
 vm.runInContext(`
  S=defaults();screen='fashion';const leafGold=S.gold;wearLeaflightSet();
- if(currentDress()!=='leaflight'||registeredLook().hair!==11||S.atelier.weapon!==11)throw Error('Leaflight equip incomplete');
+ if(currentDress()!=='leaflight'||registeredLook().hair!==11||S.atelier.weapon===11||!(S.reinaFashion.equipped&4))throw Error('Leaflight equip incomplete (the plain Leaflight bow is retired: Frostglass)');
  if(S.gold!==leafGold)throw Error('Free Leaflight charged gold');
  if(!reinaLookPath(true).includes('#mounted-leaflight-11'))throw Error('Mounted Leaflight reverted');
  if(!reinaLookPath(false).includes('leaflight'))throw Error('Standing Leaflight reverted');

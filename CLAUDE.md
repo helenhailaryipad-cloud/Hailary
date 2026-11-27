@@ -1368,6 +1368,10 @@ cut from a render). A new bow needs its number in `FX_BOW_IDS` and a rebuild.
 Plain Leaflight bow hidden (2026-11-25, user crossed it out: "remove it, it is not like the others"): the Bow tab
 no longer lists weapon 0 (Original bow) or its copy 11 (Azure Laurel); `styleFittingRoom` opens on Frostglass when she
 still wears it. The bow itself still works (default look, mounted bow).
+Retired for good (2026-11-27, user: "this bow is with her again, remove it"): `retireLeaflightBow(s)` (in
+`normalizeAdventure` and on the default save) moves anyone wearing weapon 0 / 11 to the Frostglass bow (legacy, bit 4,
+owned for free); the Leaflight Set button keeps Frostglass. The mounted pose still shows the Leafwind bow.
+Cloud War fight: her arrows leave from the bow (`drawGoldenArrow` from x 196, y 236), not from her right hand.
 Tabs like notebook index tabs (user): all seven in one fixed row (grid, no scrolling), short labels (Garment, Bow,
 Avatar, Bubble, Hair, Wings, Mounts), the chosen tab taller, in the colour of the card sheet and joined to it; the
 others lower and darker.
