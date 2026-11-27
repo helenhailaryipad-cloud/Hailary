@@ -388,18 +388,33 @@ Claim menu). Optional save field `S.garden {open, plots[6]{seed,at,set,w}, exp, 
   384-512 px q95). Chat preview packs `garden-*` into pack-minis. Tests in `scripts/test.mjs`.
 
 ## Resource Realms (2026-11-27)
-User: "in that game there are very many different dungeons that each give something". Own design: `src/realms.js`
-(rules `Realms`, UI below `REALMS_UI`), screen `realms`; opened from Gameplay -> Material (the old placeholder Mount
-Dungeon / Wings / Soulforge / Elf tabs are replaced by `realmsList()`) and from the home Power Up menu.
-- Eight realms (`Realms.list`), each pays ONE resource: Gold Vault (gold), Crystal Mine (crystals), Gem Grotto (gems),
-  Essence Spring (essence + synthesis from floor 5), Starfall Ruins (star shards), Seal Sanctum (pet talent seals), Beast
-  Lair (Pet Eggs + gold), Wish Garden (wishes). Ten floors (`need` = base x 1.25^(f-1)); a floor opens after the one
-  below; first clear pays double; Sweep repeats the best floor. 2 free entries per realm a UTC day + up to 3 for 30
-  prisms (`buy`). A lost fight (power under the need) keeps the entry. Optional `S.realms {day, used, bought, best}`.
-- Room: realm banner as background, the floor's guardian, a light card with floors 1-10, power line, "First clear x2",
-  reward tiles, entries with +, violet Sweep, gold Challenge; a short fight (HP bar, numbers), then `resultShow`.
+User: "in that game there are very many different dungeons that each give something", then twelve photos of the
+reference's boss halls (World Boss, Personal Boss, Eternal Abyss, Starfall Maze, Archaic Wonder, Genesis Ruins, the
+in-dungeon boss list with Anger Point). Own names and art: `src/realms.js` (rules `Realms`, UI below `REALMS_UI`), screen
+`realms`; opened from Gameplay -> Material (`realmsList()`), the home Power Up menu, the Dungeons sub-tab "Realms" and
+the mode strip at the bottom of every boss hall.
+- Eight realms (`Realms.list`), each pays ONE resource: Gold Vault, Crystal Mine, Gem Grotto, Essence Spring (+ synthesis
+  from 5F), Starfall Ruins, Seal Sanctum, Beast Lair (Pet Egg from the 4th boss), Wish Garden. Ten floors, FOUR bosses a
+  floor (`Realms.boss`: pictures and names drawn in turn from the game's 34 boss paintings `Realms.pool`; need = base x
+  1.25^(f-1) x (1 + .1 b)); each boss pays its `share` of the floor reward (`part`).
+- Proceed Now (`Realms.run`) spends an entry (or `merge` entries for that many times the loot): Reina fights the chosen
+  boss, then focused ones (`toggleFocus`, "Focused" tag), then the rest; bosses above her power are skipped; each defeat
+  +`rage` 25, at 100 she leaves. A defeated boss respawns after `respawnMs` 10 min (card timer). First defeat of every boss
+  x2; all four once -> next floor (`beat` masks, `best`). A run that defeats nobody keeps its entries. Sweep (`sweep`)
+  repeats the best cleared floor. 2 free entries a realm a UTC day, up to 3 more for 30 prisms (Notice pop-up).
+- Optional save `S.realms {day, used, bought, best, beat{id:{f:mask}}, dead{id:{"f.b":time}}, focus[], log[]}`.
+- Hall (`showRealm`, `.rl-v2`, light): ribbon + wallet, boss on the realm picture, name + Recommended Power, left icons
+  Boss Stats / Loot Records / Killing Log (AI kills `aiLog` + hers), right Rewards column ("First ×2" / "Per defeat"),
+  Focus, floor tabs 1F-10F, four diamond boss cards (Ready / respawn timer / Too strong / Locked, ×2 mark), Adventurers
+  here (AI, `crowd`), Entries +, Merge stepper, gold Proceed Now, Sweep, ?, and the mode strip (`rlStrip`: Guardian Hunt
+  + eight realms, red tag = what it gives). The run (`realmRunView`): light Boss List with Rage bar, Reina vs boss, HP
+  bar, numbers, "Obtain ... ×n" pills, "Rage is full · leaving", then `resultShow`.
+- Guardian Hunt: `dungeonLobby()` (world.js) uses the same hall layout (`.rl-dg`, full screen): tiers as tabs, the five
+  guardians of a tier as diamond cards, Boss Info / Boss Roulette / Quests / Party / EXP Trial on the left, rewards column,
+  energy chip, Proceed Now (`launchBattle`). Rules unchanged.
 - Art (image model): `art-source/realms/` -> `realm-<id>` banners 1536 x 1024 and `realm-hub` by
-  `scripts/build-realm-art.py`; chat preview packs `realm-*` into pack-realms. Placeholders throughout.
+  `scripts/build-realm-art.py`; chat preview packs `realm-*` into pack-realms. Not built: Home Chest (VIP-bound in the
+  reference), cross-server tab, shared rewards. Placeholders throughout.
 
 ## Mini Games hub (2026-11-23)
 User: "all games in one place, names on the main field, not hunted through sub-tabs". The bottom-nav tab is called

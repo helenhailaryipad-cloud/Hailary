@@ -70,26 +70,29 @@ function dungeonLobby(){clearInterval(worldTimer);
  const ready=A.quests.filter(q=>!a.claimed.includes(q.id)&&A.progress(S,q)>=q.target).length,exp=WonderProgress.daily(S);
  const loot=WonderGear.bossLootTables[d.id]||{},first=a.clears[d.id]?0:500+A.ids.indexOf(d.id)*150;
  const mechanic=d.mechanic==='heal'?'Restores health once':d.mechanic==='shield'?'Armored against burst':d.mechanic==='fast'?'Fast power strikes':'Power strike';
- const side=(icon,label,action,badge='')=>`<button class="lobby-side" onclick="${action}"><i class="lobby-disc">${icon}</i><span>${label}</span>${badge?`<b>${badge}</b>`:''}</button>`;
- const prize=(icon,amount,label)=>amount?`<li title="${label}">${icon}<b>${amount}</b><small>${label}</small></li>`:'';
- const status=x=>level()<x.recommended?`<em class="locked">${uiIcon('lock')}Locked</em>`:a.clears[x.id]?`<em class="cleared">Cleared ×${a.clears[x.id]}</em>`:'<em class="open">Open</em>';
- $('#main').innerHTML=`<section class="dungeon-lobby" style="--boss-glow:${d.color}">
-  <div class="lobby-title">${uiIcon('dungeons')}<h1>Dungeons</h1><span class="lobby-stamina">${energyChip()}</span></div>
-  <div class="lobby-stage">
-   <div class="lobby-left">${side(uiIcon('quests'),'Boss info',`inspectBoss('${d.id}')`)}${side(uiIcon('gold'),'Treasure','openBossWheel()',a.pending?a.pending:'')}${side(uiIcon('check'),'Quests',"go('quests')",ready?ready:'')}${side(ally?portrait(ally.id):uiIcon('party'),ally?ally.name.split(' ')[0]:'Party',"go('world')")}${side(uiIcon('exp'),'EXP trial',"go('expLobby')",level()>=1500?'':2-exp.used)}</div>
-   <div class="lobby-boss"><h2>T${d.tier} ${d.boss}</h2><p class="lobby-need ${locked?'short':'met'}">Recommended level: <b>${d.recommended}</b>${locked?` · you are Lv. ${level()}`:''}</p>
-    <button class="lobby-art" aria-label="Inspect ${d.boss}" onclick="inspectBoss('${d.id}')">${bossArtMarkup(d.id)}</button>
-    <p class="lobby-place">${d.name} · ${mechanic}</p></div>
-   <aside class="lobby-rewards"><h3>Rewards</h3><ul>${prize(uiIcon('gold'),fmt(d.gold),'Gold')}${prize(uiIcon('equipment'),WonderGear.bossGearLabel(S),'Gear ×'+WonderGear.bossDropRanks.length)}${prize(uiIcon('enhance'),loot.stone,'Crystals')}${prize(uiIcon('star'),loot.shard,'Star shards')}${prize(uiIcon('gem'),loot.gem,'Gems')}${prize(uiIcon('craft'),loot.essence,'Essence')}${prize(uiIcon('exp'),fmt(d.xp),'XP')}</ul><button class="lobby-rare" onclick="dungeonLoot()">${denPlain}Rare drops ›</button>${first?`<p class="lobby-first">First clear<br><b>+${fmt(first)} gold</b></p>`:''}</aside>
+ const art=x=>artPath(x.art||x.id),need=x=>level()>=x.recommended;
+ const side=(icon,label,action,badge='')=>`<button class="rl-ic" onclick="${action}">${denPlain}<i>${icon}</i><span>${label}</span>${badge?`<b class="rl-badge">${badge}</b>`:''}</button>`;
+ const tile=(icon,n,label,hue='#f0c060')=>n?`<span class="rl-rt" style="--rarity:${hue}" title="${label}">${icon}<b>${n}</b></span>`:'';
+ const tag=x=>!need(x)?`<em class="lk">Lv. ${x.recommended} needed</em>`:a.clears[x.id]?`<em class="ready">Cleared ×${a.clears[x.id]}</em>`:'<em class="ready">Ready</em>';
+ const enter=locked?`<button class="rl-go" disabled>${denPlain}Reach Lv. ${d.recommended}</button>`:stamina<A.ENERGY_BOSS?`<button class="rl-go" onclick="energyShop()">${denPlain}Get energy</button>`:`<button class="rl-go" onclick="launchBattle('dungeon','${d.id}')">${denPlain}Proceed Now</button>`;
+ $('#main').innerHTML=`<section class="rl-room rl-v2 rl-dg" style="--rlbg:url('${artPath('realm-hub')}');--boss-glow:${d.color}">
+  <div class="rl-top"><button data-back aria-label="Back" onclick="go('home')">‹</button><div class="rl-ribbon">Guardian Hunt</div><span class="rl-chip">${uiIcon('gold')}${fmt(S.gold)}</span>${energyChip()}</div>
+  <div class="rl-stage">
+   <img class="rl-boss" src="${art(d)}" alt="${d.boss}" onclick="inspectBoss('${d.id}')">
+   <div class="rl-head"><h2>T${d.tier} ${d.boss}</h2><p>Recommended level: <b class="${locked?'low':'ok'}">${d.recommended}</b>${locked?` · you are Lv. ${level()}`:''}</p></div>
+   <div class="rl-side">${side(uiIcon('quests'),'Boss Info',`inspectBoss('${d.id}')`)}${side(uiIcon('gold'),'Boss Roulette','openBossWheel()',a.pending||'')}${side(uiIcon('check'),'Quests',"go('quests')",ready||'')}${side(ally?portrait(ally.id):uiIcon('party'),ally?ally.name.split(' ')[0]:'Party',"go('world')")}${side(uiIcon('exp'),'EXP Trial',"go('expLobby')",level()>=1500?'':Math.max(0,2-exp.used)||'')}</div>
+   <aside class="rl-rew">${first?'<i class="rl-shared x2">First clear</i>':'<i class="rl-shared">Drops</i>'}<h3>Rewards</h3><div class="rl-rscroll">${tile(uiIcon('equipment'),WonderGear.bossGearLabel(S),'Gear ×'+WonderGear.bossDropRanks.length,'#e08a40')}${tile(uiIcon('gold'),fmt(d.gold+first),'Gold')}${tile(uiIcon('enhance'),loot.stone,'Crystals','#5ac8c0')}${tile(uiIcon('star'),loot.shard,'Star shards','#6a8ef0')}${tile(uiIcon('gem'),loot.gem,'Gems','#e05a8a')}${tile(uiIcon('craft'),loot.essence,'Essence','#8a6af0')}${tile(uiIcon('exp'),fmt(d.xp),'XP','#5ab84a')}</div><button class="rl-rare" onclick="dungeonLoot()">${denPlain}Rare ›</button></aside>
+   <p class="rl-place">${d.name} · ${mechanic}</p>
   </div>
-  <div class="lobby-tiers" role="group" aria-label="Tiers">${tiers.map(t=>`<button aria-pressed="${t===lobbyTier}" class="${t>open?'ahead':''}" onclick="lobbyTierPick(${t})">T${t}</button>`).join('')}</div>
-  <div class="lobby-row">${row.map(x=>`<button class="lobby-card" aria-pressed="${x.id===d.id}" style="--portal-color:${x.color}" onclick="lobbyPick('${x.id}')"><span class="lobby-card-art">${bossArtMarkup(x.id)}</span><i>T${x.tier}</i><strong>${x.boss}</strong><small>Lv. ${x.recommended}</small>${status(x)}</button>`).join('')}</div>
-  <div class="lobby-go">
-   <button class="primary lobby-enter" ${locked?'disabled':stamina<A.ENERGY_BOSS?'onclick="energyShop()"':`onclick="launchBattle('dungeon','${d.id}')"`}>${locked?uiIcon('lock')+'Reach Lv. '+d.recommended:stamina<A.ENERGY_BOSS?'Get energy':uiIcon('play')+'Enter · '+A.ENERGY_BOSS+' energy'}</button>
-   <button class="lobby-help" aria-label="How dungeons work" onclick="dungeonRules()">?</button>
-   <small>${A.ENERGY_BOSS} energy per guardian · ${A.staminaLimit} free a day (00:00 UTC) · cleared today: ${daily.wins}</small>
-  </div></section>`;
- const strip=document.querySelector('.lobby-tiers'),on=strip?.querySelector?.('[aria-pressed="true"]');if(on)strip.scrollLeft=on.offsetLeft-strip.clientWidth/2+on.offsetWidth/2;
+  <div class="rl-panel">
+   <div class="rl-floors">${tiers.map(t=>`<button class="rl-ft ${t===lobbyTier?'on':''} ${t>open?'lock':''}" onclick="lobbyTierPick(${t})">${denPlain}T${t}</button>`).join('')}</div>
+   <div class="rl-cards five">${row.map(x=>`<button class="rl-bc ${x.id===d.id?'on':''} ${need(x)?'':'lock'}" onclick="lobbyPick('${x.id}')">${denPlain}${need(x)?'':'<i class="rl-tag red">Locked</i>'}<span class="rl-dia"><img src="${art(x)}" alt=""></span><i class="rl-lv">T${x.tier}</i><b>${x.boss}</b><small>Lv. ${x.recommended}</small>${tag(x)}</button>`).join('')}</div>
+   <div class="rl-line"><span>${uiIcon('exp')} ${A.ENERGY_BOSS} energy per guardian</span><span>Cleared today: <b>${daily.wins}</b></span><span>Free energy at 00:00 UTC</span></div>
+   <div class="rl-act"><span></span>${enter}<span></span><button class="rl-help" onclick="dungeonRules()" aria-label="How dungeons work">${denPlain}?</button></div>
+  </div>
+  <div class="rl-strip">${typeof rlStrip==='function'?rlStrip('guardian'):''}</div>
+ </section>`;
+ for(const sel of ['.rl-floors','.rl-strip']){const st=document.querySelector(sel),on=st?.querySelector?.('.on');if(st&&on)st.scrollLeft=on.offsetLeft-st.clientWidth/2+on.offsetWidth/2}
 }
 
 function launchBattle(kind,id){if(!['dungeon','spar'].includes(kind))return;if(game?.running&&!game.ended){toast('Finish or leave your current adventure first.');return}if(kind==='dungeon'&&!DUNGEONS.some(d=>d.id===id&&level()>=d.recommended)||kind==='spar'&&!ADVENTURERS.some(b=>b.id===id))return;if(kind==='dungeon'){if(!WonderAdventure.spendStamina(S)){energyShop();return}save()}stopGame();screen='dungeon';document.body.dataset.screen=screen;nav();$('#main').scrollTop=0;startBattle(kind,id)}

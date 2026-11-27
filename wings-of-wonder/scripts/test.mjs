@@ -33,14 +33,19 @@ vm.runInContext(fs.readFileSync('src/app.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/garden.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/realms.js','utf8'),context);
 vm.runInContext(`{const R=Realms,s=defaults(),t=Date.UTC(2026,10,27,10);
- if(R.fight(s,'gold',2,99999,t))throw Error('Realm floor 2 before 1');
- if(R.fight(s,'gold',1,10,t).win!==false||R.left(s,'gold',t)!==2)throw Error('Realm loss keeps the entry');
- const g0=s.gold,a=R.fight(s,'gold',1,99999,t);if(!a.win||!a.first||s.gold!==g0+4400||R.left(s,'gold',t)!==1)throw Error('Realm first clear x2');
- const g1=s.gold,w=R.sweep(s,'gold',t);if(!w||s.gold!==g1+2200||R.left(s,'gold',t)!==0||R.sweep(s,'gold',t))throw Error('Realm sweep and entries');
+ if(R.run(s,'gold',2,0,99999,1,t))throw Error('Realm floor 2 before 1');
+ if(R.run(s,'gold',1,0,10,1,t).win!==false||R.left(s,'gold',t)!==2)throw Error('Realm loss keeps the entry');
+ let g=s.gold,a=R.run(s,'gold',1,0,1300,1,t);if(!a.win||a.kills.length!==1||!a.kills[0].first||s.gold!==g+880||a.strong.length!==3||R.left(s,'gold',t)!==1||a.cleared)throw Error('Realm first defeat x2, strong skipped');
+ if(R.alive(s,'gold',1,0,t+1000)||R.respawn(s,'gold',1,0,t+1000)!==t+R.respawnMs)throw Error('Realm respawn');
+ g=s.gold;a=R.run(s,'gold',1,2,99999,1,t+1000);if(a.kills.map(k=>k.b).join()!=='2,1,3'||s.gold!==g+3520||!a.cleared||s.realms.best.gold!==1||a.rage!==75||R.left(s,'gold',t)!==0)throw Error('Realm pick first, floor cleared');
+ if(R.run(s,'gold',2,0,99999,1,t)||R.sweep(s,'gold',1,t))throw Error('Realm no entries');
  s.scales=100;if(!R.buy(s,'gold',t)||s.scales!==70||R.left(s,'gold',t)!==1)throw Error('Realm buy entry');
- if(R.left(s,'gold',t+864e5)!==2)throw Error('Realm daily reset');
- const st=WonderGear.state(s).materials.stone;R.fight(s,'crystal',1,99999,t);if(WonderGear.state(s).materials.stone!==st+60)throw Error('Crystal realm');
- if(!R.valid(s.realms)||R.valid({...s.realms,best:{gold:11}})||!valid(JSON.parse(JSON.stringify(s))))throw Error('Realm save');}`,context);
+ g=s.gold;if(!R.sweep(s,'gold',1,t)||s.gold!==g+2200)throw Error('Realm sweep');
+ const t2=t+864e5;if(R.left(s,'gold',t2)!==2)throw Error('Realm daily reset');
+ g=s.gold;a=R.run(s,'gold',2,0,99999,2,t2);if(s.gold!==g+11600||R.left(s,'gold',t2)!==0||a.merge!==2)throw Error('Realm merge');
+ R.toggleFocus(s,'gem',1,3);if(R.order(s,'gem',1,1,t2).join()!=='1,3,0,2'||!R.focused(s,'gem',1,3))throw Error('Realm focus order');
+ const st=WonderGear.state(s).materials.stone;R.run(s,'crystal',1,0,99999,1,t2);if(WonderGear.state(s).materials.stone!==st+62)throw Error('Crystal realm');
+ if(!R.valid(s.realms)||R.valid({...s.realms,best:{gold:11}})||R.valid({...s.realms,dead:{gold:{'x':1}}})||!valid(JSON.parse(JSON.stringify(s))))throw Error('Realm save');}`,context);
 
 
 vm.runInContext(`{const G=Garden,s=defaults(),t=Date.UTC(2026,10,27,8);s.gold=1000;
