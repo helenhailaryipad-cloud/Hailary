@@ -229,9 +229,9 @@ function startJungle(){
   canvas.onkeydown=e=>{if(['ArrowLeft','ArrowRight','a','d'].includes(e.key)){e.preventDefault();g.target=Trek.clamp(g.target+(['ArrowLeft','a'].includes(e.key)?-.3:.3),-1.25,1.25)}else if(e.key==='Escape'){e.preventDefault();pauseJungle()}};
   // Rewards are paid the moment the run ends (leaving during the outro loses nothing); the window comes after the outro.
   function finish(){if(g.rewarded)return;g.rewarded=true;const record=g.score>0&&g.score>(S.jungleBest||0);S.jungleBest=Math.max(S.jungleBest||0,g.score);if(typeof arcadeScore==='function')arcadeScore('jungle',g.score);
-    const barrels=Math.min(800,g.kills*12),gold=barrels+g.loot.gold,wishes=g.loot.wishes,seals=g.loot.chests*10;let xp=Math.min(80,g.kills*2);const got=gain(gold,wishes,xp);if(Number.isFinite(got?.xp))xp=got.xp;
-    if(seals&&typeof WonderGear!=='undefined')WonderGear.addSeals(S,seals);if(g.bossDown&&typeof WonderGear!=='undefined')WonderGear.bagAdd(S,'chest2',1);save();
-    g.summary={record,gold,wishes,xp,seals,rank:Trek.standing(rivals,g.score,Trek.length).rank};
+    const paid=typeof runTake!=='function'||runTake('trek'),barrels=Math.min(800,g.kills*12),gold=paid?barrels+g.loot.gold:0,wishes=paid?g.loot.wishes:0,seals=paid?g.loot.chests*10:0;let xp=paid?Math.min(80,g.kills*2):0;const got=gain(gold,wishes,xp);if(Number.isFinite(got?.xp))xp=got.xp;
+    if(seals&&typeof WonderGear!=='undefined')WonderGear.addSeals(S,seals);if(paid&&g.bossDown&&typeof WonderGear!=='undefined')WonderGear.bagAdd(S,'chest2',1);save();
+    g.summary={record,gold,wishes,xp,seals,practice:!paid,rank:Trek.standing(rivals,g.score,Trek.length).rank};
     $('#trekField')?.parentNode.classList.add('trek-ending');
     if(g.bossDown)trekBanner(true,'Victory!','The dragon is beaten');else trekBanner(false,g.hp?'Time\'s up!':'Out of hearts',g.bossSpawned?'The dragon escaped':'The trail goes on')}
   function result(){const r=g.summary,banner=$('#trekBanner');if(banner)banner.hidden=true;
@@ -239,11 +239,11 @@ function startJungle(){
     const tile=(icon,n,name,hue,i)=>`<span class="wr-prize" style="--rarity:${hue};--d:${1.4+i*.15}s">${icon}<b>${n}</b><small>${name}</small></span>`,tiles=[tile(uiIcon('gold'),'+'+fmt(r.gold),'Gold','#ffcf5a',0)];
     if(r.wishes)tiles.push(tile(uiIcon('wishes'),'+'+fmt(r.wishes),'Wishes','#ff9ad8',tiles.length));tiles.push(tile(uiIcon('exp'),'+'+fmt(r.xp),'XP','#8fd0ff',tiles.length));
     if(r.seals&&typeof denIcon==='function')tiles.push(tile(denIcon('misc',0,4,1),'+'+r.seals,'Seals','#9dffb0',tiles.length));
-    if(g.bossDown&&typeof bagIcon==='function')tiles.push(tile(bagIcon('chest2'),'×1','Moon Chest','#b8a4ff',tiles.length));
+    if(g.bossDown&&!r.practice&&typeof bagIcon==='function')tiles.push(tile(bagIcon('chest2'),'×1','Moon Chest','#b8a4ff',tiles.length));
     const chests=[0,1,2,3,4].map(n=>`<img src="${artPath(n<g.loot.chests?'trek-chest-open':'trek-chest')}" class="${n<g.loot.chests?'won':'shut'}" style="--d:${.9+n*.12}s" alt="">`).join('');
     resultShow({win:g.bossDown,title:g.bossDown?'Victory!':g.hp?'Time\'s Up':'Out of Hearts',kicker:r.record?'New personal best':g.bossDown?'Dragon defeated':g.bossSpawned?'The dragon escaped':'Keep going next time',
       stars:g.bossDown?3:Math.min(2,g.loot.chests),score:g.score,label:'Points',
-      body:`<div class="wr-chests trek-rchests" aria-label="${g.loot.chests} of 5 chests">${chests}</div><p class="wr-line">Rank ${r.rank} of ${rivals.length+1} · Best ${fmt(S.jungleBest||0)}</p><div class="wr-prizes trek-wrprizes">${tiles.join('')}</div>`,
+      body:`<div class="wr-chests trek-rchests" aria-label="${g.loot.chests} of 5 chests">${chests}</div><p class="wr-line">Rank ${r.rank} of ${rivals.length+1} · Best ${fmt(S.jungleBest||0)}</p>${r.practice&&typeof PRACTICE_NOTE==='string'?PRACTICE_NOTE:`<div class="wr-prizes trek-wrprizes">${tiles.join('')}</div>`}`,
       buttons:[['Play again','gold','startJungle()'],['Mini Games','violet',"openScreen('games')"]]})}
   function buffs(){for(const el of $('#trekBuffs')?.children||[]){const k=el.dataset.k,max=TREK_BUFFS.find(b=>b[0]===k)[3],v=k==='arrows'?g.arrows-1:k==='power'?g.power:Math.max(0,g[k]),on=v>0&&!g.finale;
       if(el.hidden===on){el.hidden=!on;if(on){el.classList.remove('fresh');void el.offsetWidth;el.classList.add('fresh')}}
