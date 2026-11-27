@@ -463,6 +463,9 @@ below `TOPUP_UI`), screen `topup`, opened by the home "Top-up" promo icon.
   `S.topup.spent` still validate for saves from that build. The pearls -> rite tickets swap sits at the bottom of the
   Prisms tab; the store has three tabs.
 - Optional save `S.topup {week, bought{id:n}, first[], rebate}` (`Topup.valid`).
+- Weekly Packs tab is a staircase (user: "лесенкой"): all five packs side by side, bottoms on one line, each a step
+  taller (`.tp-wk1..5` min-height in cqh) with a growing prism pile (`topup-pile-2..6`); price buttons are light gold
+  pills, not the painted plate (user: "rusty").
 - Art (image model): `art-source/topup/` (pearl, seven prism piles, three caches, banner with an original arctic-fox
   shopkeeper girl) -> `ui-pearl`, `topup-pile-1..7`, `topup-cache-*`, `topup-banner` by `scripts/build-topup-art.py`;
   the chat preview packs `topup-*` into pack-realms. All numbers are placeholders.
