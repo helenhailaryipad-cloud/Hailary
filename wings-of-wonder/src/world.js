@@ -86,7 +86,7 @@ function dungeonLobby(){clearInterval(worldTimer);
   </div>
   <div class="rl-panel">
    <div class="rl-floors">${tiers.map(t=>`<button class="rl-ft ${t===lobbyTier?'on':''} ${t>open?'lock':''}" onclick="lobbyTierPick(${t})">${denPlain}T${t}</button>`).join('')}</div>
-   <div class="rl-cards five">${row.map(x=>`<button class="rl-bc ${x.id===d.id?'on':''} ${need(x)?'':'lock'}" onclick="lobbyPick('${x.id}')">${denPlain}${need(x)?'':'<i class="rl-tag red">Locked</i>'}<span class="rl-dia"><img src="${art(x)}" alt=""></span><i class="rl-lv">T${x.tier}</i><b>${x.boss}</b><small>Lv. ${x.recommended}</small>${tag(x)}</button>`).join('')}</div>
+   <div class="rl-cards five">${row.map(x=>`<button class="rl-bc ${x.id===d.id?'on':''} ${need(x)?'':'lock'}" onclick="lobbyPick('${x.id}')">${denPlain}${need(x)?'':'<i class="rl-tag red">Locked</i>'}${WonderGear.bossTryout(x.id)?'<i class="rl-tag try">Try-out</i>':''}<span class="rl-dia"><img src="${art(x)}" alt=""></span><i class="rl-lv">T${x.tier}</i><b>${x.boss}</b><small>Lv. ${x.recommended}</small>${tag(x)}</button>`).join('')}</div>
    <div class="rl-line"><span>${uiIcon('exp')} ${A.ENERGY_BOSS} energy per guardian</span><span>Cleared today: <b>${daily.wins}</b></span><span>Free energy at 00:00 UTC</span></div>
    <div class="rl-act"><span></span>${enter}<span></span><button class="rl-help" onclick="dungeonRules()" aria-label="How dungeons work">${denPlain}?</button></div>
   </div>
