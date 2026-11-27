@@ -45,6 +45,7 @@ vm.runInContext(`{const R=Realms,s=defaults(),t=Date.UTC(2026,10,27,10);
  g=s.gold;a=R.run(s,'gold',2,0,99999,2,t2);if(s.gold!==g+11600||R.left(s,'gold',t2)!==0||a.merge!==2)throw Error('Realm merge');
  R.toggleFocus(s,'gem',1,3);if(R.order(s,'gem',1,1,t2).join()!=='1,3,0,2'||!R.focused(s,'gem',1,3))throw Error('Realm focus order');
  const st=WonderGear.state(s).materials.stone;R.run(s,'crystal',1,0,99999,1,t2);if(WonderGear.state(s).materials.stone!==st+62)throw Error('Crystal realm');
+ {const w=defaults();w.gold=1e6;if(R.left(w,'wish',t)!==0||R.price(w,'wish',t)!==4000||!R.buy(w,'wish',t)||w.gold!==996000||R.price(w,'wish',t)!==8000||!R.buy(w,'wish',t)||R.price(w,'wish',t)!==16000||R.left(w,'wish',t)!==2||R.price(w,'wish',t+864e5)!==4000)throw Error('Last realm doubling gold price');}
  if(!R.valid(s.realms)||R.valid({...s.realms,best:{gold:11}})||R.valid({...s.realms,dead:{gold:{'x':1}}})||!valid(JSON.parse(JSON.stringify(s))))throw Error('Realm save');}`,context);
 
 
