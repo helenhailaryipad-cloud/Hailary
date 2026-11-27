@@ -30,6 +30,15 @@ sheet = np.array(Image.open(SRC/'result-sheet.webp').convert('RGBA')); sheet[she
 for (name, top, bot, w) in (('ui-result-ribbon', 0, .36, 1024), ('ui-btn-gold', .36, .68, 720), ('ui-btn-violet', .68, 1, 720)):
     part = Image.fromarray(sheet[int(top*H):int(bot*H)]); part = part.crop(part.getbbox())
     part = part.resize((w, round(part.height*w/part.width)), Image.Resampling.LANCZOS)
+    if name == 'ui-btn-gold':  # user 2026-11-27: "a bit more yellow and lighter" - orange tones only, purple gems kept
+        a_ = np.array(part).astype(np.float32); rgb = a_[..., :3] / 255
+        hsv = np.array(Image.fromarray((rgb * 255).astype(np.uint8)).convert('HSV')).astype(np.float32)
+        orange = (hsv[..., 0] > 8) & (hsv[..., 0] < 45) & (hsv[..., 1] > 60)
+        hsv[..., 0] = np.where(orange, hsv[..., 0] + 7, hsv[..., 0])
+        hsv[..., 1] = np.where(orange, hsv[..., 1] * .82, hsv[..., 1])
+        hsv[..., 2] = np.where(orange, np.minimum(255, hsv[..., 2] * 1.1 + 14), hsv[..., 2])
+        out = np.array(Image.fromarray(hsv.clip(0, 255).astype(np.uint8), 'HSV').convert('RGB'))
+        part = Image.fromarray(np.dstack([out, a_[..., 3].astype(np.uint8)]), 'RGBA')
     part.save(OUT/f'{name}.webp', quality=95, method=6); part.save(Path('scripts/hosting-art')/f'{name}.avif', quality=40)
     print(name, part.size, (OUT/f'{name}.webp').stat().st_size)
 b = np.array(Image.open(SRC/'result-burst.webp').convert('RGBA')); b[b[..., 3] < 16] = 0
