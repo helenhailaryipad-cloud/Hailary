@@ -21,7 +21,7 @@ shutil.rmtree(out, ignore_errors=True); files.mkdir(parents=True)
 UNUSED = re.compile(r'^assets/generated/(?:fitting-|atelier-(?!icon-)|parts-|fit-mask-|skin2-|leaflight-(?:master|riding)|fit-control-hand\.)')
 PACKS = {'gear': re.compile(r'^assets/generated/gear-'), 'familiar': re.compile(r'^assets/generated/familiar-'),
          'guardian': re.compile(r'^assets/generated/guardian-t'), 'fish': re.compile(r'^assets/moonwater/'),
-         'icons': re.compile(r'^assets/generated/(?:fit-icon-|atelier-icon-|mount-icon-|fashion-cards\.|fashion-bows\.)'), 'bows': re.compile(r'^assets/generated/weapon-style-'), 'wings': re.compile(r'^assets/generated/fashion-wing-'), 'comp': re.compile(r'^assets/generated/(?:comp-|explore-marker-)'),
+         'icons': re.compile(r'^assets/generated/(?:fit-icon-|atelier-icon-|mount-icon-|fashion-cards\.|fashion-bows\.)'), 'bows': re.compile(r'^assets/generated/weapon-style-'), 'wings': re.compile(r'^assets/generated/fashion-wing-'), 'rites': re.compile(r'^assets/generated/comp-(?:rites-|secret-|trail-)'), 'comp': re.compile(r'^assets/generated/(?:comp-|explore-marker-)'),
          'erase': re.compile(r'^assets/generated/fit-control-[a-z]+-erase\.'), 'minis': re.compile(r'^assets/generated/(?:trek-pickup-|pairs-tile-|pairs-sprout\.|pairs-lobby\.|cascade-fx\.|cascade-pad\.|cascade-cover\.|td-|burrow-|talent-|wishwell-|blessings-|scene-ranking\.|tool-|drawer-|title-)'),
          'hairs': re.compile(r'^assets/generated/fit-control-(?:mount)?hair-')}
 packed = {k: {} for k in PACKS}
