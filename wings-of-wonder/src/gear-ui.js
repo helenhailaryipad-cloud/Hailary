@@ -1624,14 +1624,14 @@ let playSection=0,playMaterial=0,playTier=3;
 function cityGameplay(){
  const name=playSections[playSection],material=playMaterials[playMaterial];
  const mount=playSection===0 && playMaterial===0;
- const title=playSection===0?material:name;
+ const title=playSection===0?'Resource Realms':name;
  const nav=(names,current,state)=>names.map((n,i)=>`<button aria-pressed="${current===i}" onclick="${state}=${i};cityGameplay()">${n}</button>`).join('');
  const tiers=mountTiers.map(([tier,level],i)=>`<button class="gp-tier" aria-pressed="${playTier===i}" onclick="playTier=${i};cityGameplay()">${artImage('hud-combat','')}<span><b>Mount Dungeon (${tier})</b><small>Unlocks at Lv. ${level}</small></span><i aria-label="Three star slots">☆☆☆</i></button>`).join('');
  const mountPanel=`<div class="gp-tiers">${tiers}</div><div class="gp-rewards"><b>Recommended Level: ${mountTiers[playTier][1]}</b><small>Clear with 3 stars to unlock 2× Sweep.</small><div>${dailyTokens(['hud-pet','hud-gift','hud-prisms','hud-pass'])}</div></div><div class="gp-actions"><button onclick="go('cityDaily');dailyOpen(4)">Auto Sweep</button><button disabled>Dungeon Raid<br><small>Free</small></button><button disabled>Double Sweep<br><small>500 crystals</small></button></div>`;
  const destinations=[null,['Mini Games','games'],['EXP Forest','expLobby'],null,null];
  const dest=destinations[playSection];
- const scene=mount?mountPanel:playSection===4?contestList():`<div class="gp-empty">${artImage(['hud-pet','hud-combat','hud-gear','hud-combat','hud-rank'][playSection],'')}${dest?`<button class="spirit-gold" onclick="go('${dest[1]}')">${dest[0]}</button>`:''}</div>`;
- $('#main').innerHTML=`<section class="companion-room spirit-room gp-room"><div class="satchel-top"><strong>${name}</strong>${[['gold',S.gold],['wishes',S.tickets],['crystals',S.scales]].map(([id,n])=>'<span>'+uiIcon(id)+fmt(n)+'</span>').join('')}</div><div class="gp-banner"><h2>${title}</h2>${mount?'<small>Mount development materials</small>':''}</div><div class="gp-content">${scene}</div><div class="companion-modes">${playSection===0?nav(playMaterials,playMaterial,'playMaterial'):''}</div><nav class="spirit-nav"><button data-back aria-label="Back to city" onclick="go('home')">‹</button>${nav(playSections,playSection,'playSection')}</nav></section>`;
+ const scene=playSection===0?realmsList():playSection===4?contestList():`<div class="gp-empty">${artImage(['hud-pet','hud-combat','hud-gear','hud-combat','hud-rank'][playSection],'')}${dest?`<button class="spirit-gold" onclick="go('${dest[1]}')">${dest[0]}</button>`:''}</div>`;
+ $('#main').innerHTML=`<section class="companion-room spirit-room gp-room"><div class="satchel-top"><strong>${name}</strong>${[['gold',S.gold],['wishes',S.tickets],['crystals',S.scales]].map(([id,n])=>'<span>'+uiIcon(id)+fmt(n)+'</span>').join('')}</div><div class="gp-banner"><h2>${title}</h2>${playSection===0?'<small>Eight daily dungeons, each gives its own treasure</small>':''}</div><div class="gp-content">${scene}</div><div class="companion-modes"></div><nav class="spirit-nav"><button data-back aria-label="Back to city" onclick="go('home')">‹</button>${nav(playSections,playSection,'playSection')}</nav></section>`;
 }
 
 const bountyPages=['AdvQuest','Adventure Shop','Pet Pass'];

@@ -387,6 +387,20 @@ Claim menu). Optional save field `S.garden {open, plots[6]{seed,at,set,w}, exp, 
 - Art (image model): `art-source/garden/` -> `garden-*` by `scripts/build-garden-art.py` (bg 1024 x 1536 q92, the rest
   384-512 px q95). Chat preview packs `garden-*` into pack-minis. Tests in `scripts/test.mjs`.
 
+## Resource Realms (2026-11-27)
+User: "in that game there are very many different dungeons that each give something". Own design: `src/realms.js`
+(rules `Realms`, UI below `REALMS_UI`), screen `realms`; opened from Gameplay -> Material (the old placeholder Mount
+Dungeon / Wings / Soulforge / Elf tabs are replaced by `realmsList()`) and from the home Power Up menu.
+- Eight realms (`Realms.list`), each pays ONE resource: Gold Vault (gold), Crystal Mine (crystals), Gem Grotto (gems),
+  Essence Spring (essence + synthesis from floor 5), Starfall Ruins (star shards), Seal Sanctum (pet talent seals), Beast
+  Lair (Pet Eggs + gold), Wish Garden (wishes). Ten floors (`need` = base x 1.25^(f-1)); a floor opens after the one
+  below; first clear pays double; Sweep repeats the best floor. 2 free entries per realm a UTC day + up to 3 for 30
+  prisms (`buy`). A lost fight (power under the need) keeps the entry. Optional `S.realms {day, used, bought, best}`.
+- Room: realm banner as background, the floor's guardian, a light card with floors 1-10, power line, "First clear x2",
+  reward tiles, entries with +, violet Sweep, gold Challenge; a short fight (HP bar, numbers), then `resultShow`.
+- Art (image model): `art-source/realms/` -> `realm-<id>` banners 1536 x 1024 and `realm-hub` by
+  `scripts/build-realm-art.py`; chat preview packs `realm-*` into pack-minis. Placeholders throughout.
+
 ## Mini Games hub (2026-11-23)
 User: "all games in one place, names on the main field, not hunted through sub-tabs". The bottom-nav tab is called
 Mini Games; `games()` in `app.js` draws `.mg-hub`: one tile per game from `MINI_GAMES` (cover, name, line, best

@@ -31,6 +31,18 @@ vm.runInContext(fs.readFileSync('src/challenge.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/trail.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/app.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/garden.js','utf8'),context);
+vm.runInContext(fs.readFileSync('src/realms.js','utf8'),context);
+vm.runInContext(`{const R=Realms,s=defaults(),t=Date.UTC(2026,10,27,10);
+ if(R.fight(s,'gold',2,99999,t))throw Error('Realm floor 2 before 1');
+ if(R.fight(s,'gold',1,10,t).win!==false||R.left(s,'gold',t)!==2)throw Error('Realm loss keeps the entry');
+ const g0=s.gold,a=R.fight(s,'gold',1,99999,t);if(!a.win||!a.first||s.gold!==g0+4400||R.left(s,'gold',t)!==1)throw Error('Realm first clear x2');
+ const g1=s.gold,w=R.sweep(s,'gold',t);if(!w||s.gold!==g1+2200||R.left(s,'gold',t)!==0||R.sweep(s,'gold',t))throw Error('Realm sweep and entries');
+ s.scales=100;if(!R.buy(s,'gold',t)||s.scales!==70||R.left(s,'gold',t)!==1)throw Error('Realm buy entry');
+ if(R.left(s,'gold',t+864e5)!==2)throw Error('Realm daily reset');
+ const st=WonderGear.state(s).materials.stone;R.fight(s,'crystal',1,99999,t);if(WonderGear.state(s).materials.stone!==st+60)throw Error('Crystal realm');
+ if(!R.valid(s.realms)||R.valid({...s.realms,best:{gold:11}})||!valid(JSON.parse(JSON.stringify(s))))throw Error('Realm save');}`,context);
+
+
 vm.runInContext(`{const G=Garden,s=defaults(),t=Date.UTC(2026,10,27,8);s.gold=1000;
  if(G.plant(s,3,'sunpetal',t)||G.plant(s,0,'dewleaf',t))throw Error('Garden: locked bed or seed planted');
  if(!G.plant(s,0,'sunpetal',t)||s.gold!==950||G.plant(s,0,'sunpetal',t))throw Error('Garden plant');
