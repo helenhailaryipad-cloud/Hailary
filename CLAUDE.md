@@ -486,7 +486,13 @@ below `TOPUP_UI`), screen `topup`, opened by the home "Top-up" promo icon.
   Multi-Day (festival total 20.99 ... 255.99) and Daily Top-up (today's total 1.09 ... 345.99, 00:00 UTC) rows of pearls,
   set stones, awakening crystals and chests (`Topup.festSingle/festMulti/festDaily`, `festRecord` from `grant`, `festClaim`,
   `festDue` = the promo's red dot). Festival `festDays` 6 UTC days. Optional `S.fest {p,sn,sg,m,mg,d,dc,dg}` (cents,
-  `festValid`). Payment is NOT connected, so progress stays at EUR 0. A Patron (VIP) level system was offered, not built.
+  `festValid`). Payment is NOT connected, so progress stays at EUR 0. Second part (user photos the same day): sub-tabs MegaPack
+  (any top-up: exclusive avatar frame + materials, `megaClaim`), Fortune (days with >= EUR 1.09, 1-5 days, `fortuneClaim`),
+  Double Fortune (two tracks EUR 6.59 / 15.99, a reward per day 1-6 + an end row, `doubleClaim`), Top-up Meow (festival total
+  steps `meowSteps` give paws; a paw draws a random share of a 9,683-prism pool, the 17th draw empties it, `pawDraw`), Lucky
+  Kitten (single top-up >= EUR 10.99 gives a paw, 3,888 pool, 9 draws), Lucky Roulette (a single top-up of a tier gives a
+  spin, `wheelSpin`: tier prisms x 1.1-2.1, odds `wheelOdds`; Lucky Star news = AI lines + her spins). Extra optional
+  fields in `S.fest` (`festFill`, validated). Rebate prisms are a bonus on real-money prism packs (allowed by the rule). A Patron (VIP) level system was offered, not built.
 - Weekly Packs tab is a staircase (user: "лесенкой"): all five packs side by side, bottoms on one line, each a step
   taller (`.tp-wk1..5` min-height in cqh) with a growing prism pile (`topup-pile-2..6`); price buttons are light gold
   pills, not the painted plate (user: "rusty").
