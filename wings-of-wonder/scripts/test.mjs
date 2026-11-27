@@ -32,10 +32,17 @@ vm.runInContext(fs.readFileSync('src/trail.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/app.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/garden.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/realms.js','utf8'),context);
+vm.runInContext(fs.readFileSync('src/topup.js','utf8'),context);
 vm.runInContext(`{const r=WonderGear,G=defaults();r.bagAdd(G,'gearbox',1);const out=r.useBagItem(G,'gearbox',1,()=>.5),g=out.gains.find(x=>x.kind==='gear'),e=r.state(G).items.find(x=>x.uid===g.uid);if(r.gearRank(e)!==2)throw Error('Crate gives Orange');}`,context);
 vm.runInContext(`{const E=defaults(),id=DUNGEONS[0].id;WonderAdventure.victory(E,id);if(E.emberShards!==10)throw Error('Ember shards');E.emberStars=6;const sh=WonderGear.state(E).materials.shard;WonderAdventure.victory(E,id);if(E.emberShards!==10||WonderGear.state(E).materials.shard!==sh+5)throw Error('Ember at max gives star shards');}`,context);
 vm.runInContext(`{const r=WonderGear,T=defaults();if(r.markToOrb(T,'r'))throw Error('Marks needed');const v=r.summonState(T);v.marks.r=25;T.summon=v;if(!r.markToOrb(T,'r')||!r.markToOrb(T,'r')||r.markToOrb(T,'r')||r.summonState(T).orbs!==2||r.summonState(T).marks.r!==5)throw Error('Marks to Star Orb');if(r.craftRecipe(3).mats.stone!==30)throw Error('Craft takes crystals');}`,context);
 vm.runInContext(`{S=defaults();const t=Date.UTC(2026,10,27,10);if(!runTake('defense',t)||!runTake('defense',t)||runTake('defense',t)||runsLeft('merge',t)!==2||!runTake('defense',t+864e5))throw Error('Daily rewarded runs');if(!valid(JSON.parse(JSON.stringify(S)))||validRuns({day:'x',n:{}})||validRuns({day:'2026-11-27',n:{nope:1}}))throw Error('Runs save');}`,context);
+vm.runInContext(`{const T=Topup,s=defaults(),t=Date.UTC(2026,10,27,10);s.scales=0;
+ let o=T.grant(s,'p1',Math.random,t);if(s.scales!==120||s.pearls!==6000)throw Error('First prism pack x2 + pearls');T.grant(s,'p1',Math.random,t);if(s.scales!==180)throw Error('Second prism pack');
+ for(let n=0;n<4;n++)if(!T.grant(s,'w1',Math.random,t))throw Error('Weekly pack');if(T.grant(s,'w1',Math.random,t)||T.left(s,'w1',t)!==0||T.left(s,'w1',t+7*864e5)!==4)throw Error('Weekly limit');
+ const bag0=WonderGear.bagCount(s,'chest3');T.grant(s,'bubble',()=>.1,t);T.grant(s,'frame',()=>.1,t);o=T.grant(s,'mount',()=>.1,t);if(!o.rebate||WonderGear.bagCount(s,'chest3')!==bag0+1||!(s.mountsOwned||[]).length||T.grant(s,'all',Math.random,t))throw Error('Caches and Grand Rebate');
+ const tk=Rites.tickets(s,Rites.rite(Rites.period(t)).id),p0=s.pearls;if(!T.pearlSwap(s,3,t)||s.pearls!==p0-300||Rites.tickets(s,Rites.rite(Rites.period(t)).id)!==tk+3)throw Error('Pearls to tickets');
+ if(!T.valid(s.topup)||!valid(JSON.parse(JSON.stringify(s)))||T.valid({week:1,bought:{nope:1}}))throw Error('Topup save');}`,context);
 vm.runInContext(`{const R=Realms,s=defaults(),t=Date.UTC(2026,10,27,10);
  if(R.run(s,'gold',2,0,99999,1,t))throw Error('Realm floor 2 before 1');
  if(R.run(s,'gold',1,0,10,1,t).win!==false||R.left(s,'gold',t)!==2)throw Error('Realm loss keeps the entry');
@@ -49,7 +56,7 @@ vm.runInContext(`{const R=Realms,s=defaults(),t=Date.UTC(2026,10,27,10);
  g=s.gold;a=R.run(s,'gold',2,0,99999,2,t2);if(s.gold!==g+11600||R.left(s,'gold',t2)!==0||a.merge!==2)throw Error('Realm merge');
  R.toggleFocus(s,'gem',1,3);if(R.order(s,'gem',1,1,t2).join()!=='1,3,0,2'||!R.focused(s,'gem',1,3))throw Error('Realm focus order');
  const st=WonderGear.state(s).materials.stone;R.run(s,'crystal',1,0,99999,1,t2);if(WonderGear.state(s).materials.stone!==st+62)throw Error('Crystal realm');
- {const w=defaults();w.gold=1e6;if(R.left(w,'wish',t)!==0||R.price(w,'wish',t)!==2000||!R.buy(w,'wish',t)||w.gold!==998000||R.price(w,'wish',t)!==4000||!R.buy(w,'wish',t)||R.price(w,'wish',t)!==8000||R.left(w,'wish',t)!==2||R.price(w,'wish',t+864e5)!==2000)throw Error('Last realm doubling gold price');}
+ {const w=defaults();w.pearls=1e6;if(R.left(w,'wish',t)!==0||R.price(w,'wish',t)!==2000||!R.buy(w,'wish',t)||w.pearls!==998000||R.price(w,'wish',t)!==4000||!R.buy(w,'wish',t)||R.price(w,'wish',t)!==8000||R.left(w,'wish',t)!==2||R.price(w,'wish',t+864e5)!==2000)throw Error('Last realm doubling gold price');}
  if(!R.valid(s.realms)||R.valid({...s.realms,best:{gold:11}})||R.valid({...s.realms,dead:{gold:{'x':1}}})||!valid(JSON.parse(JSON.stringify(s))))throw Error('Realm save');}`,context);
 
 

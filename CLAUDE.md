@@ -403,8 +403,8 @@ the mode strip at the bottom of every boss hall.
   x2; all four once -> next floor (`beat` masks, `best`). A run that defeats nobody keeps its entries. Sweep (`sweep`)
   repeats the best cleared floor. 2 free entries a realm a UTC day, up to 3 more for 30 prisms (Notice pop-up).
   The LAST realm of the progression (Wish Garden, `paid: 4000`) has no free entries (user): each entry of the UTC day
-  costs gold, doubling 2,000 / 4,000 / 8,000 / 16,000 / 32,000 / 64,000 (`price`, `freeOf`, `maxBuy` = `paidMax` 6 a day, user). Gold stands in
-  for the reference's diamonds.
+  costs Moon Pearls (the middle currency, see Prism Bazaar), doubling 2,000 / 4,000 / 8,000 / 16,000 / 32,000 / 64,000
+  (`price`, `freeOf`, `maxBuy` = `paidMax` 6 a day, user).
 - Optional save `S.realms {day, used, bought, best, beat{id:{f:mask}}, dead{id:{"f.b":time}}, focus[], log[]}`.
 - Hall (`showRealm`, `.rl-v2`, light): ribbon + wallet, boss on the realm picture, name + Recommended Power, left icons
   Boss Stats / Loot Records / Killing Log (AI kills `aiLog` + hers), right Rewards column ("First ×2" / "Per defeat"),
@@ -442,6 +442,26 @@ gaps) is published as https://claude.ai/artifact/EjJqhiY7XAFDo6CbmJowst (page so
   `validShopWeek`). The Cloud Shop pop-up is a light card now (`bw-pop cl-shop`).
 - Still open: festival tokens / Garden EXP / Lagoon points only open thresholds; prices are not compared across shops.
 - `scripts/test-trail.mjs` was already failing before these changes (welcome tickets assertion); not investigated.
+
+## Prism Bazaar and Moon Pearls (2026-11-27)
+User photos of the reference's top-up store (Top-up, Daily Pack, Double Rebate / MegaPack, Ticket tabs) and its three
+currencies (gold, blue diamonds, purple premium); user agreed to a middle currency. `src/topup.js` (rules `Topup`, UI
+below `TOPUP_UI`), screen `topup`, opened by the home "Top-up" promo icon.
+- Moon Pearls (`S.pearls`, optional, validated in `valid()`; header wallet chip `#pearls`, icon `ui-pearl`): the middle
+  currency like the reference's blue diamonds. Sources: gift with every prism pack (x`pearlsPerPrism` 100), Wayfarer task
+  claims (Silver 300 / Gold 500 / Diamond 800, `Trail.tiers[].give.pearls`), every dungeon guardian (`guardianPearls`
+  200, `endBattle`), weekly packs and caches. Sinks: the last realm's entries (Wish Garden), rite tickets
+  (`pearlSwap`, `pearlTicket` 100 pearls a ticket, Tickets tab).
+- Real money buys PRISMS only; packs carry tickets only as a bonus. Payment is NOT connected: every price opens an info
+  card (`topupAsk`); `Topup.grant(s,id)` pays a pack for the day it is. Tabs: Prisms (7 packs 60 ... 6,480 for
+  EUR 1.09 ... 104.99 + pearl gift, first buy of each x2), Weekly Packs (`weekly`: 5 packs with value, struck price and
+  weekly limits 4/4/2/1/1, Monday 00:00 UTC), Triple Treat (`caches`: Bubble / Frame / Mount Cache with a random chat
+  bubble, avatar frame or a mount she lacks, "Rebate 1000%", once a week each; all three = Grand Rebate items;
+  "all three" bundle `cacheAll`), Tickets (pearls -> rite tickets, link to the Secret Shop ticket packs).
+- Optional save `S.topup {week, bought{id:n}, first[], rebate}` (`Topup.valid`).
+- Art (image model): `art-source/topup/` (pearl, seven prism piles, three caches, banner with an original arctic-fox
+  shopkeeper girl) -> `ui-pearl`, `topup-pile-1..7`, `topup-cache-*`, `topup-banner` by `scripts/build-topup-art.py`;
+  the chat preview packs `topup-*` into pack-realms. All numbers are placeholders.
 
 ## Mini Games hub (2026-11-23)
 User: "all games in one place, names on the main field, not hunted through sub-tabs". The bottom-nav tab is called
