@@ -401,7 +401,7 @@ const craftPlain=(a,b)=>a.enhance-b.enhance||a.gems-b.gems||a.uid-b.uid;
 const craftSource=()=>craftRank===WonderGear.gearCraftFrom?'Orange pieces drop from dungeon guardians.':'Make them one step higher in the list on the left.';
 // No uid: fill the empty places with the plainest spare pieces. A uid toggles that piece.
 function craftAdd(uid){
- const r=WonderGear,pool=craftPool(),need=r.craftRecipe(craftRank).need;
+ const r=WonderGear,pool=craftPool(),need=r.craftRecipe(craftRank,craftTier).need;
  if(uid===undefined){craftInputs=[...craftInputs,...pool.filter(e=>!craftInputs.includes(e.uid)).sort(craftPlain).map(e=>e.uid)].slice(0,need);if(!craftInputs.length)toast('No spare '+r.gearRanks[craftRank-1].name+' pieces of T'+craftTier+'. '+craftSource())}
  else if(craftInputs.includes(uid))craftInputs=craftInputs.filter(x=>x!==uid);
  else if(pool.some(e=>e.uid===uid)&&craftInputs.length<need)craftInputs.push(uid);
@@ -425,12 +425,12 @@ function craftCommit(){
 }
 // Batch: every full recipe the spare pieces allow, for the chosen slot.
 function craftBatch(){
- const r=WonderGear,need=r.craftRecipe(craftRank).need,count=Math.floor(craftPool().length/need),t=r.catalog[craftSlot+'-t'+craftTier];
+ const r=WonderGear,need=r.craftRecipe(craftRank,craftTier).need,count=Math.floor(craftPool().length/need),t=r.catalog[craftSlot+'-t'+craftTier];
  if(!count){toast('Not enough spare pieces for one full recipe.');return}
  popup('<h2>Batch</h2><p>Make <b>'+count+' × '+r.gearRanks[craftRank].name+' '+t.name+'</b> from '+count*need+' '+r.gearRanks[craftRank-1].name+' pieces of T'+craftTier+'?</p><div class="den-actions"><button class="den-gold" onclick="craftBatchRun()">'+denPlain+'Synthesize all</button></div>');
 }
 function craftBatchRun(){
- const r=WonderGear,need=r.craftRecipe(craftRank).need,made=[];
+ const r=WonderGear,need=r.craftRecipe(craftRank,craftTier).need,made=[];
  for(let guard=0;guard<60;guard++){
   const pool=craftPool().sort(craftPlain);if(pool.length<need)break;
   const result=r.craftGear(S,craftSlot,craftTier,craftRank,pool.slice(0,need).map(e=>e.uid));
@@ -441,23 +441,24 @@ function craftBatchRun(){
 }
 function craftInfo(){
  const r=WonderGear,line=(q,n)=>{const c=r.craftRecipe(n);return '<p><b style="color:'+q.color+'">'+q.name+'</b> · '+(c?c.need+' × '+r.gearRanks[n-1].name+Object.entries(c.mats).map(([id,x])=>' + '+x+' '+r.materialDefs.find(m=>m.id===id).name).join(''):'dungeon guardians')+'</p>'};
- popup('<h2>Gear Crafting</h2><p>Dungeon guardians drop Blue, Purple and Orange pieces. Orange is where crafting starts; Blue and Purple feed the Glimmer Maw.</p><p>A recipe takes spare pieces of one tier and one family (any slot) and gives the piece you chose. It keeps the highest enhancement and gems of the pieces put in.</p><div class="den-tlist loom-ladder">'+r.gearRanks.map(line).join('')+'</div><p>A 2-Star Red takes three Orange pieces; it can be tried with fewer at a lower success rate; a failed try loses the pieces.</p>');
+ popup('<h2>Gear Crafting</h2><p>Dungeon guardians drop Blue, Purple and Orange pieces. Orange is where crafting starts; Blue and Purple feed the Glimmer Maw.</p><p>A recipe takes spare pieces of one tier and one family (any slot) and gives the piece you chose. It keeps the highest enhancement and gems of the pieces put in.</p><div class="den-tlist loom-ladder">'+r.gearRanks.map(line).join('')+'</div><p>A 2-Star Red takes three Orange pieces up to T5; higher tiers open four (T6-T10) or five (T11+) places and work from three pieces at a lower success rate at a lower success rate; a failed try loses the pieces.</p>');
 }
 function cityCraft(){
  const r=eqRules(),eq=r.state(S);
  if(!r.craftRecipe(craftRank))craftRank=r.gearCraftFrom;
- const rank=r.gearRanks[craftRank],prev=r.gearRanks[craftRank-1],recipe=r.craftRecipe(craftRank);
+ const rank=r.gearRanks[craftRank],prev=r.gearRanks[craftRank-1];
  const slots=r.slots.filter(s=>r.gearGroup(s.id+'-t1')===craftGroup);
  if(!slots.some(s=>s.id===craftSlot))craftSlot=slots[0].id;
  const open=Math.min(r.maxTier,r.unlockedTier(S)),mine=eq.items.filter(e=>!e.stored&&!e.starter&&r.gearGroup(e.template)===craftGroup&&[craftRank-1,craftRank].includes(r.gearRank(e)));
  const tiers=[...new Set([open,...mine.map(e=>r.catalog[e.template].tier)])].sort((a,b)=>b-a);
  if(!tiers.includes(craftTier))craftTier=[...new Set(mine.filter(e=>r.gearRank(e)===craftRank-1).map(e=>r.catalog[e.template].tier))].sort((a,b)=>b-a)[0]??open;
+ const recipe=r.craftRecipe(craftRank,craftTier);
  const pool=craftPool();craftInputs=craftInputs.filter(id=>pool.some(e=>e.uid===id));
- const target=r.catalog[craftSlot+'-t'+craftTier],count=craftInputs.length,chance=r.craftChance(craftRank,count),least=recipe.flex?1:recipe.need;
+ const target=r.catalog[craftSlot+'-t'+craftTier],count=craftInputs.length,chance=r.craftChance(craftRank,count,craftTier),least=recipe.min;
  const mats=Object.entries(recipe.mats),ready=chance>0&&mats.every(([id,n])=>eq.materials[id]>=n);
  const pips=q=>q.stars?'<small>'+'★'.repeat(q.stars)+'</small>':'';
  const face=(t,q)=>`<span class="loom-face q-${q.id}" style="--rarity:${q.color}">${gearArt(t)}<b>T${t.tier}</b>${pips(q)}</span>`;
- const places=Array.from({length:recipe.need},(_,i)=>{const e=pool.find(x=>x.uid===craftInputs[i]);return e?equipmentCell(e,{act:'craftAdd('+e.uid+')',pressed:true}):`<button class="loom-plus" aria-label="Add a piece" onclick="craftPick()">${denPlain}+</button>`}).join('');
+ const places=Array.from({length:recipe.need},(_,i)=>{const e=pool.find(x=>x.uid===craftInputs[i]);return e?equipmentCell(e,{act:'craftAdd('+e.uid+')',pressed:true}):`<button class="loom-plus" aria-label="Add a piece" onclick="craftPick()">${denPlain}+</button>`}).join('')+Array.from({length:recipe.places-recipe.need},()=>`<span class="loom-lock" title="Opens at a higher tier">🔒</span>`).join('');
  const stuff=mats.map(([id,n])=>{const m=r.materialDefs.find(m=>m.id===id),have=eq.materials[id];return `<button class="satchel-stack bag-tile" style="--rarity:${m.color}" aria-label="${m.name}, ${have} of ${n}" onclick="materialInfo('${id}')">${denPlain}${equipmentIcon(m.icon)}<b class="${have<n?'low':''}">${bagNum(have)}/${n}</b></button>`}).join('');
  $('#main').innerHTML=`<section class="satchel loom"><div class="satchel-top"><strong>Gear Crafting</strong>${satchelWallet()}</div>
  <div class="loom-body"><aside>${r.gearRanks.map((q,n)=>r.craftRecipe(n)?`<button aria-pressed="${craftRank===n}" onclick="craftFilter(${n},null,craftGroup)">${denPlain}${q.name}</button>${craftRank===n?tiers.map(t=>`<button class="loom-tier" aria-pressed="${t===craftTier}" onclick="craftFilter(craftRank,${t},craftGroup)">${denPlain}T${t} Gear</button>`).join(''):''}`:'').join('')}</aside>
