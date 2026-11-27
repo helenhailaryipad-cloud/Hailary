@@ -33,6 +33,8 @@ pick sensible placeholder numbers, keep them in named constants, and move on.
   (ours is about 2 h, and our dungeon fights are manual; auto-fight was offered).
 - Power growth: at ~7 billion power she gains ~50 million a day WITH spending (~0.7% of power a day); without spending
   it is slower. Use this as the target daily growth when numbers are tuned.
+- Another player after a month of play has gained only ~100 million power in total (newcomer pace, vs her ~50 million a
+  day at 7 billion): growth scales with how far a player already is. Her own estimates; nothing about them is shown in game.
 
 ## Layout
 - `wings-of-wonder/` — the game (imported from backup v301 with full Git history, commit 1468d48). Run commands from there: `npm ci`, `node scripts/test.mjs`, `node scripts/test-jungle.mjs`, `node scripts/preview.mjs --port 4173`.
