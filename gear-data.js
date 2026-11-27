@@ -39,7 +39,7 @@ const materialDefs=[{id:'stone',name:'Enhancement Crystal',icon:9,color:'#69dfff
 const round=n=>Math.round(n*100)/100;
 // ---- Quality ladder ----------------------------------------------------------------------------------------------
 // Dungeon guardians drop Blue, Purple and Orange pieces. Orange (2 stars) is the first quality that is crafted on:
-// five Orange pieces of one tier and family make a 2-Star Red, and so on up the ladder (`need` pieces of the quality
+// three Orange pieces of one tier and family make a 2-Star Red, and so on up the ladder (`need` pieces of the quality
 // below, plus `mats`; every craft also takes enhancement crystals, their main sink besides enhancing, economy map 2026-11-27). Blue and Purple are food for the Glimmer Maw. `bonus` is the share of base stats a quality adds.
 // A piece stores its place as the optional field `rank`; pieces from before the ladder are read from their stars.
 const gearRanks=[
@@ -896,10 +896,10 @@ const factionLines=['Galewing, gather at Larkspire for the next round!','Two Hol
  'Who holds Kitewatch? The chest is up.','Ride with me to the Golden Boss.','Remember: 80 points open a city.','Our roads are almost lit, one more island!'];
 const guildLines=['Guild boss in ten minutes, do not forget.','Thanks for the donation!','Who needs a Star Shard Pouch?','Welcome to our new member!'];
 const quizBook=[{q:'Which colour is the Holy City of Galewing?',a:'gold'},{q:'How many cities does one faction hold?',a:'six'},{q:'What does a Pet Egg hatch into?',a:'a pet'},
- {q:'Which quality comes after Orange?',a:'red'},{q:'How many pieces make a 2-Star Red?',a:'five'},{q:'What eats Blue and Purple gear?',a:'the maw'}];
+ {q:'Which quality comes after Orange?',a:'red'},{q:'How many pieces make a 2-Star Red?',a:'three'},{q:'What eats Blue and Purple gear?',a:'the maw'}];
 const chatLines=['Anyone up for the Moonfall guardian?','Just hatched a Pet Egg, it was an Epic!','Cloud War round starts soon, Galewing gather at Larkspire!',
  'Tip: Blue and Purple gear is great food for the Glimmer Maw.','Who has a spare Star Shard Pouch to trade?','The Jungle Trek dragon finally fell, three chests!',
- 'Good luck on your summons today!','Five Orange pieces make a 2-Star Red, do not devour them.','Harvest Pairs under a minute, new record!',
+ 'Good luck on your summons today!','Three Orange pieces make a 2-Star Red, do not devour them.','Harvest Pairs under a minute, new record!',
  'Totem War tip: hold two totems and your points grow.','Thanks for the flowers, friend!','Mind the Golden Boss, it hits hard.',
  'Is the Summon Festival worth it? Star Orbs are nice.','Fishing at dawn gives the rarest catches, I think.','Let us clear the EXP trial together.'];
 const chatReplies=['Hello! Nice to meet you.','Good luck out there!','Haha, same here.','See you in the dungeon!','Sounds good to me.','Thank you, friend!','On my way!'];
