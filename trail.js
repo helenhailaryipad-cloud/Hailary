@@ -33,9 +33,9 @@ const Trail = {
   },
   // Reward of one task in each tab. rite = tickets of the running Star Rite.
   tiers: [
-    { id: 's', name: 'Silver', give: { exp: 100, coins: 20, rite: 30, prisms: 10, gold: 1000 } },
-    { id: 'g', name: 'Gold', give: { exp: 150, coins: 30, rite: 50, prisms: 20, gold: 1500 } },
-    { id: 'd', name: 'Diamond', give: { exp: 200, coins: 40, rite: 80, prisms: 40, gold: 2000, items: { stonebag: 1 } } }
+    { id: 's', name: 'Silver', give: { exp: 100, coins: 20, rite: 30, prisms: 10, gold: 1000, pearls: 300 } },
+    { id: 'g', name: 'Gold', give: { exp: 150, coins: 30, rite: 50, prisms: 20, gold: 1500, pearls: 500 } },
+    { id: 'd', name: 'Diamond', give: { exp: 200, coins: 40, rite: 80, prisms: 40, gold: 2000, pearls: 800, items: { stonebag: 1 } } }
   ],
   // Daily Wayfarer EXP chests (Silver alone is 1,500 a day; every task of all three tabs = 5,500, the last chest).
   track: [[300, { voucher: 20 }], [600, { items: { chest1: 1 } }], [1000, { gold: 2000 }], [1500, { rite: 60 }], [2000, { items: { stonebag: 1 } }],
@@ -104,6 +104,7 @@ const Trail = {
     if (give.coins) { const v = s.trail || this.state(s); v.coins = (v.coins || 0) + give.coins; out.coins = give.coins; }
     if (give.gold) { s.gold = (s.gold || 0) + give.gold; out.gold = give.gold; }
     if (give.prisms) { s.scales = (s.scales || 0) + give.prisms; out.prisms = give.prisms; }
+    if (give.pearls) { s.pearls = (s.pearls || 0) + give.pearls; out.pearls = give.pearls; }
     if (give.voucher && typeof Rites !== 'undefined') { Rites.addVouchers(s, give.voucher); out.voucher = give.voucher; }
     if (give.rite && typeof Rites !== 'undefined') { const v = Rites.state(s), id = Rites.rite(v.ev.period).id; v.t[id] = (v.t[id] || 0) + give.rite; out.rite = give.rite; out.riteId = id; }
     for (const [k, n] of Object.entries(give.items || {})) { s.bag ??= {}; s.bag[k] = (s.bag[k] || 0) + n; (out.items ??= {})[k] = n; }
@@ -186,6 +187,7 @@ function trailGive(out) {
   if (out.coins) bits.push(`<span class="tq-r">${trailCoin()}<small>${fmt(out.coins)}</small></span>`);
   if (out.prisms) bits.push(`<span class="tq-r">${uiIcon('crystals')}<small>${fmt(out.prisms)}</small></span>`);
   if (out.gold) bits.push(`<span class="tq-r">${uiIcon('gold')}<small>${fmt(out.gold)}</small></span>`);
+  if (out.pearls && typeof pearlIcon === 'function') bits.push(`<span class="tq-r">${pearlIcon()}<small>${fmt(out.pearls)}</small></span>`);
   for (const [k, n] of Object.entries(out.items || {})) bits.push(`<span class="tq-r">${typeof bagIcon === 'function' ? bagIcon(k) : k}<small>${n}</small></span>`);
   return bits.join('');
 }
