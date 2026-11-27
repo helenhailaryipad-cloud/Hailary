@@ -39,6 +39,10 @@ vm.runInContext(`{const G=Garden,s=defaults(),t=Date.UTC(2026,10,27,8);s.gold=10
  const g0=s.gold,r=G.harvest(s,0,t+20*60e3);if(!r||s.gold!==g0+180||s.garden.plots[0]||s.garden.harvests!==1)throw Error('Garden harvest');
  s.gold=1500;if(G.buyBed(s))throw Error('Garden bed without gold');s.gold=2500;if(!G.buyBed(s)||s.garden.open!==4)throw Error('Garden bed');
  for(const id of ['nyra','kael','pip','vesper','briar'])G.friendWater(s,id,t);if(G.friendWater(s,'orin',t)||G.friendWater(s,'nyra',t))throw Error('Garden friend limit');
+ s.gold=10**7;for(let i=0;i<6;i++)if(!G.buyAnimal(s,t)||s.garden.farm[i].k!=='hen')throw Error('Farm hens first');if(G.nextAnimal(s).k!=='cow')throw Error('Farm cows after six hens');
+ if(G.collect(s,0,t+30*60e3))throw Error('Farm collect early');const g1=s.gold;if(!G.collect(s,0,t+61*60e3)||s.gold!==g1+80||G.collect(s,0,t+62*60e3))throw Error('Farm collect');
+ for(let i=0;i<12;i++)G.buyAnimal(s,t);if(s.garden.farm.length!==18||G.nextAnimal(s)||G.buyAnimal(s,t))throw Error('Farm 6+6+6');
+ if(!G.valid(s.garden)||G.valid({...s.garden,farm:[{k:'cow',at:1}]}))throw Error('Farm save order');
  if(!G.valid(s.garden)||G.valid({...s.garden,open:9})||!valid(JSON.parse(JSON.stringify(s))))throw Error('Garden save');}`,context);
 
 vm.runInContext(`{const C=Challenge,s=defaults(),t0=Date.UTC(2026,10,27,8);s.exploreCleared=0;C.state(s,t0);

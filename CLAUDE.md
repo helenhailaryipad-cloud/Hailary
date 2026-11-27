@@ -358,6 +358,11 @@ Claim menu). Optional save field `S.garden {open, plots[6]{seed,at,set,w}, exp, 
   items (+ a rare item chance) and Garden EXP; Garden level (`level`, 60 x lv) opens seeds (`seedLevel`).
 - Watering (`water`): once per planting, 25% of the time left (at least 10 min), 5 a UTC day. Friends' gardens
   (`friendWater`): water up to 5 AI friends a day for 60 gold + Garden EXP. Harvest chests at 5 / 15 / 30 / 60 / 100.
+- Farm tab (user: "like the simple pretty garden in two other games: hens 1-6 open first, then cows, sheep"; own art):
+  Garden / Farm switch (`gardenTab`); painted farm with three terraces (`garden-farm-bg`), one pen each with a fence.
+  Animals are bought strictly in order (`nextAnimal`, `buyAnimal`): 6 hens (500 ... 3,000 gold), then 6 cows, then 6
+  sheep; each brings its goods on its own clock (`animals`: egg basket 1 h, milk 3 h, wool 6 h; `collect`, Collect all
+  `collectAll`), the ready good floats over the animal. Save `S.garden.farm [{k,at}]` in buying order (validated), `goods`.
 - Art (image model): `art-source/garden/` -> `garden-*` by `scripts/build-garden-art.py` (bg 1024 x 1536 q92, the rest
   384-512 px q95). Chat preview packs `garden-*` into pack-minis. Tests in `scripts/test.mjs`.
 
