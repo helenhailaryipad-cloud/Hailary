@@ -10962,3 +10962,13 @@ body[data-screen=cityExplore] #stage>#main{inset:0!important;width:100%;height:1
 #stage #modal.bw-pop .ch-cell .bag-gain b{font-size:11px}
 #stage #modal.bw-pop .ch-cell{flex-wrap:nowrap;gap:3px}
 #stage #modal.bw-pop .ch-phead,#stage #modal.bw-pop .ch-prow{grid-template-columns:62px auto 1fr}
+/* no white band at the bottom of the Challenge map (user: "why this white field") */
+#stage .ch-foot{background:none;padding-top:10px}
+#stage .ch-go small{padding:3px 12px;border-radius:999px;background:#fffbf0d9;border:1px solid #e8cf94;box-shadow:0 2px 6px #0002}
+#stage .ch-skip{padding:4px 10px;border-radius:999px;background:#fffbf0d9;border:1px solid #e8cf94}
+#stage .ch-right .ch-tool small,#stage .ch-left .ch-tool small{text-shadow:0 1px 2px #3a2a50,0 0 3px #3a2a50,0 0 1px #000}
+#stage .ch-scroll{padding-bottom:0}
+#stage label.ch-skip{width:auto;height:auto;min-width:0;min-height:0;padding:5px 12px;border-radius:999px;aspect-ratio:auto}
+#stage .ch-scroll{padding-bottom:15cqh}
+#stage .ch-map::after{content:'';position:absolute;top:100%;left:0;right:0;height:15cqh;background:var(--chbg) center bottom/100% calc(100cqw * 1.5) no-repeat;transform:scaleY(-1);pointer-events:none}
+#stage #main .ch-skip input{width:18px!important;height:18px!important;min-height:0!important;padding:0!important;margin:0!important;background:#fff!important;border:1px solid #b8a070!important;appearance:auto;-webkit-appearance:checkbox;flex:none}
