@@ -61,7 +61,7 @@ const Topup = {
     else { v.bought[id] = (v.bought[id] || 0) + 1; if (id.startsWith('p') && !v.first.includes(id)) v.first.push(id); }
     if (Topup.caches.some(x => x.id === id) && Topup.allBought(s, now) && !v.rebate) { for (const [i, n] of Object.entries(Topup.grandRebate.items)) if (globalThis.WonderGear?.bagAdd) WonderGear.bagAdd(s, i, n); v.rebate = true; out.rebate = true; }
     if (id === 'all') v.rebate = true;
-    Topup.festRecord(s, p.eur, now);
+    Topup.festRecord(s, p.eur, now, c.prisms || 0);
     return out;
   },
   allBought(s, now) { return Topup.caches.every(c => Topup.left(s, c.id, now) < 1); },
@@ -130,6 +130,86 @@ Object.assign(Topup, {
     return f === undefined || !!f && Number.isSafeInteger(f.p) && map(f.sn) && map(f.sg) && n(f.m, 1e9) && idx(f.mg, Topup.festMulti.length) && Number.isSafeInteger(f.d) && n(f.dc, 1e9) && idx(f.dg, Topup.festDaily.length);
   }
 });
+
+// Top-up Fest, second part (user photos 2026-11-27): MegaPack (any top-up during the festival), Fortune (days with at
+// least `fortuneEur`), Double Fortune (days with at least 6.59 / 15.99, a reward per day + a final row), and three
+// rebates: Top-up Meow (cumulative thresholds give paws; a paw draws a random share of a prism pool, the last draw
+// empties it), Lucky Kitten (each single top-up of at least `kittenEur` gives a paw, smaller pool) and Lucky Roulette
+// (a single top-up of a tier gives a spin; the spin multiplies that tier's prisms as a rebate). Placeholders.
+Object.assign(Topup, {
+  mega: { give: { pearls: 1300, items: { chest2: 5, setAurora: 10, awakenCore: 5 } }, frame: true },
+  fortuneEur: 1.09,
+  fortune: [1, 2, 3, 4, 5].map(d => ({ days: d, give: { pearls: 2000 * d, items: { setAurora: 4 + 2 * d, awakenCore: 4 + 2 * d } }, cache: d === 5 ? ['frame', 'bubble'] : null })),
+  double: [
+    { eur: 6.59, day: { pearls: 3000, items: { awakenCore: 6 } }, end: { items: { gearbox: 1, setStar: 5, chest3: 2 } } },
+    { eur: 15.99, day: { pearls: 8000, items: { setStar: 2, awakenCore: 10 } }, end: { items: { gearbox: 3, setMoon: 4, setSun: 1 } } }],
+  doubleDays: 6,
+  meowSteps: [3.18, 5.49, 10.99, 20.99, 31.99, 47.99, 54.99, 69.99, 78.99, 104.99, 130.99, 173.09, 209.99, 255.99, 299.99, 345.99, 399.99],
+  meowPool: 9683, kittenPool: 3888, kittenEur: 10.99, kittenMax: 9,
+  wheel: [1.1, 1.3, 1.5, 1.7, 1.8, 1.9, 2, 2.1], wheelOdds: [30, 25, 16, 11, 7, 5, 4, 2],
+  wheelTiers: [{ eur: 1.09, n: 3 }, { eur: 5.49, n: 3 }, { eur: 10.99, n: 3 }, { eur: 20.99, n: 3 }, { eur: 31.99, n: 1 }, { eur: 54.99, n: 1 }, { eur: 104.99, n: 1 }],
+  festDay(now = Date.now()) { return Math.floor((now - Topup.festAnchor) / 864e5) - Topup.festPeriod(now) * Topup.festDays; },
+  festFill(f) {
+    f.dm ??= {}; f.a ??= false; f.mg1 ??= false; f.fg ??= []; f.wg ??= [[], []]; f.we ??= [false, false];
+    f.mp ??= 0; f.mu ??= 0; f.mpool ??= Topup.meowPool; f.kp ??= 0; f.ku ??= 0; f.kpool ??= Topup.kittenPool;
+    f.rc ??= {}; f.ru ??= {}; f.rl ??= []; return f;
+  },
+  festRecordMore(s, eur, now, prisms) {
+    const f = Topup.festFill(Topup.festState(s, now)), c = Math.round(eur * 100), d = Topup.festDay(now);
+    f.a = true; f.dm[d] = (f.dm[d] || 0) + c;
+    f.mp = Topup.meowSteps.filter(x => f.m >= Math.round(x * 100)).length;
+    if (c >= Math.round(Topup.kittenEur * 100) && f.kp < Topup.kittenMax) f.kp++;
+    let t = -1; Topup.wheelTiers.forEach((x, i) => { if (c >= Math.round(x.eur * 100)) t = i; });
+    if (t >= 0 && (f.rc[t] || 0) < Topup.wheelTiers[t].n) f.rc[t] = (f.rc[t] || 0) + 1;
+  },
+  daysAt(f, eur) { return Object.values(f.dm || {}).filter(v => v >= Math.round(eur * 100)).length; },
+  festGrant(s, give, cache) {
+    Topup.festPay(s, give);
+    const got = []; for (const k of cache || []) got.push(Topup.openCache(s, k)); return got;
+  },
+  megaClaim(s, now) { const f = Topup.festFill(Topup.festState(s, now)); if (!f.a || f.mg1) return false; f.mg1 = true; Topup.festGrant(s, Topup.mega.give, ['frame']); return true; },
+  fortuneClaim(s, i, now) { const f = Topup.festFill(Topup.festState(s, now)), r = Topup.fortune[i]; if (!r || f.fg.includes(i) || Topup.daysAt(f, Topup.fortuneEur) < r.days) return false; f.fg.push(i); Topup.festGrant(s, r.give, r.cache); return true; },
+  doubleClaim(s, k, day, now) {
+    const f = Topup.festFill(Topup.festState(s, now)), t = Topup.double[k]; if (!t) return false; const have = Topup.daysAt(f, t.eur);
+    if (day === 'end') { if (f.we[k] || have < Topup.doubleDays) return false; f.we[k] = true; Topup.festPay(s, t.end); return true; }
+    if (!Number.isInteger(day) || day < 0 || day >= Topup.doubleDays || f.wg[k].includes(day) || have < day + 1) return false;
+    f.wg[k].push(day); Topup.festPay(s, t.day); return true;
+  },
+  // A paw draws a random share of what is left; the paw that is the last one the pool allows takes everything.
+  pawDraw(s, kind, rng = Math.random, now) {
+    const f = Topup.festFill(Topup.festState(s, now)), meow = kind === 'meow', max = meow ? Topup.meowSteps.length : Topup.kittenMax;
+    const have = meow ? f.mp - f.mu : f.kp - f.ku, pool = meow ? f.mpool : f.kpool, used = meow ? f.mu : f.ku;
+    if (have < 1 || pool < 1) return 0;
+    const left = max - used, n = left <= 1 ? pool : Math.max(1, Math.min(pool, Math.floor(pool / left * (.3 + 1.4 * rng()))));
+    if (meow) { f.mu++; f.mpool -= n; } else { f.ku++; f.kpool -= n; }
+    s.scales = (s.scales || 0) + n; return n;
+  },
+  wheelSpin(s, t, rng = Math.random, now) {
+    const f = Topup.festFill(Topup.festState(s, now)), tier = Topup.wheelTiers[t]; if (!tier || (f.ru[t] || 0) >= (f.rc[t] || 0)) return null;
+    let roll = rng() * Topup.wheelOdds.reduce((a, b) => a + b, 0), i = 0; while (roll >= Topup.wheelOdds[i]) { roll -= Topup.wheelOdds[i]; i++; }
+    const pack = Topup.prismPacks.find(p => p.eur === tier.eur), base = pack ? pack.prisms : Math.round(tier.eur * 60), got = Math.round(base * Topup.wheel[i]);
+    f.ru[t] = (f.ru[t] || 0) + 1; s.scales = (s.scales || 0) + got; f.rl.unshift([base, Topup.wheel[i], got]); f.rl.length = Math.min(f.rl.length, 10);
+    return { index: i, mult: Topup.wheel[i], base, got };
+  }
+});
+{
+  const rec = Topup.festRecord, due = Topup.festDue, val = Topup.festValid;
+  Topup.festRecord = (s, eur, now = Date.now(), prisms = 0) => { rec(s, eur, now); Topup.festRecordMore(s, eur, now, prisms); };
+  Topup.festDue = (s, now = Date.now()) => {
+    if (due(s, now)) return true; const f = s.fest; if (!f || f.p !== Topup.festPeriod(now)) return false; Topup.festFill(f);
+    return (f.a && !f.mg1) || Topup.fortune.some((r, i) => !f.fg.includes(i) && Topup.daysAt(f, Topup.fortuneEur) >= r.days) || f.mp > f.mu || f.kp > f.ku || Object.keys(f.rc).some(t => (f.ru[t] || 0) < f.rc[t])
+      || Topup.double.some((t, k) => Array.from({ length: Topup.doubleDays }, (_, d) => d).some(d => !f.wg[k].includes(d) && Topup.daysAt(f, t.eur) > d));
+  };
+  Topup.festValid = f => {
+    if (!val(f) || f === undefined) return f === undefined;
+    const n = (v, max) => v === undefined || Number.isSafeInteger(v) && v >= 0 && v <= max, ix = (a, len) => a === undefined || Array.isArray(a) && a.length <= len && a.every(i => Number.isInteger(i) && i >= 0 && i < len);
+    const map = (o, keyMax, vMax) => o === undefined || !!o && typeof o === 'object' && Object.entries(o).every(([k, v]) => /^\d+$/.test(k) && +k <= keyMax && Number.isSafeInteger(v) && v >= 0 && v <= vMax);
+    return map(f.dm, Topup.festDays, 1e9) && (f.a === undefined || typeof f.a === 'boolean') && (f.mg1 === undefined || typeof f.mg1 === 'boolean') && ix(f.fg, Topup.fortune.length)
+      && (f.wg === undefined || Array.isArray(f.wg) && f.wg.length === 2 && f.wg.every(a => ix(a, Topup.doubleDays))) && (f.we === undefined || Array.isArray(f.we) && f.we.length === 2 && f.we.every(b => typeof b === 'boolean'))
+      && n(f.mp, Topup.meowSteps.length) && n(f.mu, Topup.meowSteps.length) && n(f.mpool, Topup.meowPool) && n(f.kp, Topup.kittenMax) && n(f.ku, Topup.kittenMax) && n(f.kpool, Topup.kittenPool)
+      && map(f.rc, 9, 9) && map(f.ru, 9, 9) && (f.rl === undefined || Array.isArray(f.rl) && f.rl.length <= 10 && f.rl.every(r => Array.isArray(r) && r.length === 3 && r.every(v => typeof v === 'number' && v >= 0 && v < 1e7)));
+  };
+}
 globalThis.Topup = Topup;
 
 // TOPUP_UI
@@ -169,9 +249,10 @@ function showTopup() {
     const ends = festTab === 'd' ? (Math.floor(Date.now() / 864e5) + 1) * 864e5 : Topup.festEnds();
     let list = '';
     if (festTab === 's') list = Topup.festSingle.map((r, i) => row(`Top up <b>${euro(r.eur)}</b> in a single purchase to claim`, r.give, cl('s', i, (f.sg[i] || 0) < (f.sn[i] || 0), (f.sg[i] || 0) >= r.limit), `<small>Limit: ${f.sg[i] || 0}/${r.limit}</small>`)).join('');
-    else { const items = festTab === 'm' ? Topup.festMulti : Topup.festDaily, have = festTab === 'm' ? f.m : f.dc, got = festTab === 'm' ? f.mg : f.dg;
+    else if (['s', 'm', 'd'].includes(festTab)) { const items = festTab === 'm' ? Topup.festMulti : Topup.festDaily, have = festTab === 'm' ? f.m : f.dc, got = festTab === 'm' ? f.mg : f.dg;
       list = items.map((r, i) => row(`${festTab === 'm' ? 'Top up during the festival' : 'Top up today'} <b class="${have >= Math.round(r.eur * 100) ? 'ok' : 'low'}">${eu(have)}</b>/${euro(r.eur)}`, r.give, cl(festTab, i, have >= Math.round(r.eur * 100), got.includes(i)))).join(''); }
-    body = `<div class="tp-fsub">${[['s', 'Single Top-up'], ['m', 'Multi-Day'], ['d', 'Daily Top-up']].map(([k, n]) => `<button class="${k === festTab ? 'on' : ''}" onclick="festTab='${k}';showTopup()">${denPlain}${n}</button>`).join('')}</div>
+    if (['mega', 'fortune', 'double', 'meow', 'kitten', 'wheel'].includes(festTab)) { list = festMore(f); }
+    body = `<div class="tp-fsub">${[['s', 'Single Top-up'], ['m', 'Multi-Day'], ['d', 'Daily Top-up'], ['mega', 'MegaPack'], ['fortune', 'Fortune'], ['double', 'Double Fortune'], ['meow', 'Top-up Meow'], ['kitten', 'Lucky Kitten'], ['wheel', 'Lucky Roulette']].map(([k, n]) => `<button class="${k === festTab ? 'on' : ''}" onclick="festTab='${k}';showTopup()">${denPlain}${n}</button>`).join('')}</div>
      <p class="tp-note">Rewards on top of every prism pack · ${festTab === 'd' ? 'resets' : 'ends'} in <b>${tpClock(ends)}</b>. Real-money payments are not connected yet, so progress stays at ${euro(0)} for now.</p><div class="tp-flist">${list}</div>`;
   }
   if (topupTab === 'prisms') body += `<div class="tp-swap"><h3>Spend Moon Pearls</h3><p>Swap pearls for tickets of the running rite, ${Rites.rite(Rites.period()).name}: ${pearlIcon()} ${fmt(Topup.pearlTicket)} = 1 ticket.</p><div class="tp-swaprow">${[1, 10, 50].map(n => `<button class="tp-buy" ${(S.pearls || 0) < n * Topup.pearlTicket ? 'disabled' : ''} onclick="topupSwap(${n})">${denPlain}${pearlIcon()}${fmt(n * Topup.pearlTicket)} → ${n}</button>`).join('')}</div></div>`;
@@ -182,7 +263,8 @@ function showTopup() {
    <div class="tp-body">${body}</div>
    <div class="tp-nav">${tabs.map(([id, name, icon]) => `<button class="${id === topupTab ? 'on' : ''}" onclick="topupTab='${id}';showTopup()">${denPlain}${id === 'cache' ? '<i class="tp-badge">2×</i>' : ''}${uiIcon(icon)}<span>${name}</span></button>`).join('')}</div>
   </section>`;
-  topupTimer = setInterval(() => { if (screen !== 'topup') return clearInterval(topupTimer); document.querySelectorAll('[data-tpclock]').forEach(e => e.textContent = tpLeftClock()); }, 30000);
+  { const row = document.querySelector('.tp-fsub'), on = row?.querySelector?.('.on'); if (row && on) row.scrollLeft = on.offsetLeft - row.clientWidth / 2 + on.offsetWidth / 2; }
+  topupTimer = setInterval(() => { if (screen !== 'topup' && screen !== 'festTop') return clearInterval(topupTimer); document.querySelectorAll('[data-tpclock]').forEach(e => e.textContent = tpLeftClock()); }, 30000);
 }
 function topupAsk(id) {
   const p = Topup.pack(id), c = Topup.contents(S, id);
@@ -193,3 +275,40 @@ function topupAsk(id) {
   $('#modal').classList.add('bw-pop');
 }
 function topupSwap(n) { if (!Topup.pearlSwap(S, n)) { toast('Not enough Moon Pearls'); return; } save(); wallet(); showTopup(); toast('+' + n + ' rite tickets'); }
+
+// Top-up Fest second part: MegaPack, Fortune, Double Fortune, Top-up Meow, Lucky Kitten, Lucky Roulette (light cards)
+function festMore(f) {
+  const T = Topup; T.festFill(f);
+  const btn = (ok, done, act, label = 'Claim') => done ? `<button class="tp-fclaim done" disabled>${denPlain}Claimed</button>` : ok ? `<button class="tp-fclaim on" onclick="${act}">${denPlain}${label}</button>` : `<button class="tp-fclaim" onclick="topupTab='prisms';showTopup()">${denPlain}Top-up</button>`;
+  const row = (head, give, b, extra = '') => `<div class="tp-frow"><p class="tp-fhead">${head}</p><div class="tp-fbody"><div class="tp-ctiles">${tpTiles(give)}${extra}</div><div class="tp-fact">${b}</div></div></div>`;
+  const frame = n => `<span class="tp-tile tp-fx">✦<b>${n}</b></span>`;
+  if (festTab === 'mega') return `<div class="tp-mega"><h3>MegaPack</h3><p>Top up any amount during the festival to claim an exclusive avatar frame and a chest of forge materials.</p><div class="tp-ctiles">${frame('Frame')}${tpTiles(T.mega.give)}</div>${btn(f.a, f.mg1, 'festGo(()=>Topup.megaClaim(S))')}</div>`;
+  if (festTab === 'fortune') { const days = T.daysAt(f, T.fortuneEur); return T.fortune.map((r, i) => row(`Top up at least ${euro(T.fortuneEur)} on <b class="${days >= r.days ? 'ok' : 'low'}">${days}</b>/${r.days} days`, r.give, btn(days >= r.days, f.fg.includes(i), `festGo(()=>Topup.fortuneClaim(S,${i}))`), r.cache ? frame('Frame') + frame('Bubble') : '')).join(''); }
+  if (festTab === 'double') return T.double.map((t, k) => { const days = T.daysAt(f, t.eur), today = f.dm[T.festDay()] || 0;
+    return `<div class="tp-dbl tp-dbl${k}"><div class="tp-dhead"><b>${euro(t.eur)}</b><span>Topped up ${euro(today / 100)}/${euro(t.eur)} today · ${days}/${T.doubleDays} days</span></div>
+     <div class="tp-ddays">${Array.from({ length: T.doubleDays }, (_, d) => `<button class="tp-dday ${f.wg[k].includes(d) ? 'got' : days > d ? 'ok' : ''}" onclick="festGo(()=>Topup.doubleClaim(S,${k},${d}))" ${days > d && !f.wg[k].includes(d) ? '' : 'disabled'}>${denPlain}<span class="tp-ctiles">${tpTiles(t.day)}</span><small>${d + 1} Day${f.wg[k].includes(d) ? ' ✓' : ''}</small></button>`).join('')}</div>
+     <div class="tp-dend"><div class="tp-ctiles">${tpTiles(t.end)}</div>${btn(days >= T.doubleDays, f.we[k], `festGo(()=>Topup.doubleClaim(S,${k},'end'))`)}</div></div>`; }).join('');
+  if (festTab === 'meow' || festTab === 'kitten') { const meow = festTab === 'meow', pool = meow ? f.mpool : f.kpool, have = meow ? f.mp - f.mu : f.kp - f.ku, max = meow ? T.meowSteps.length : T.kittenMax, used = meow ? f.mu : f.ku;
+    const next = meow ? T.meowSteps.find(x => f.m < Math.round(x * 100)) : null;
+    return `<div class="tp-cat"><h3>${meow ? 'Top-up Meow' : 'Lucky Kitten'}</h3><p class="tp-catrule">${meow ? 'Each festival top-up total step gives a Lucky Paw' + (next ? ` (next at ${euro(next)}, now ${euro(f.m / 100)})` : '') : `Every single top-up of at least ${euro(T.kittenEur)} gives a Lucky Paw (up to ${T.kittenMax})`}. A paw draws a random share of the prism pool; the last of ${max} draws takes all that is left.</p>
+     <p class="tp-catlbl">Prisms left in the pool</p><div class="tp-catnum">${String(pool).padStart(4, '0').split('').map(d => `<b>${d}</b>`).join('')}</div>
+     <p class="tp-catlbl">${max - used} draws left to empty the pool</p><button class="tp-fclaim ${have > 0 && pool > 0 ? 'on' : ''}" ${have > 0 && pool > 0 ? '' : 'disabled'} onclick="festPaw('${festTab}')">${denPlain}🐾 ${have}/${Math.max(1, have)} Draw</button></div>`; }
+  if (festTab === 'wheel') { const spins = T.wheelTiers.map((t, i) => [t, i, (f.rc[i] || 0) - (f.ru[i] || 0), t.n - (f.rc[i] || 0)]);
+    return `<div class="tp-wheelbox"><div class="tp-wheel" id="tpWheel">${T.wheel.map((m, i) => `<i style="--a:${i * 45 + 22.5}deg">${m}</i>`).join('')}<span class="tp-whub">${prismIcon()}</span></div><span class="tp-wptr">▼</span>
+      <button class="tp-fclaim" onclick="festNews()">${denPlain}★ Lucky Star</button><p class="tp-catrule">The more you top up, the more the rebate: a single top-up of a tier gives a spin; the spin pays that tier's prisms × the multiplier.</p></div>
+      ${spins.map(([t, i, ready, left]) => `<div class="tp-frow"><div class="tp-fbody"><div class="tp-wtier"><b>Top-up ${euro(t.eur)} tier</b><small>${left} rebate chances left${ready > 0 ? ` · ${ready} ready` : ''}</small></div><div class="tp-fact">${ready > 0 ? `<button class="tp-fclaim on" onclick="festSpin(${i})">${denPlain}Spin</button>` : `<button class="tp-fclaim" onclick="topupTab='prisms';showTopup()">${denPlain}Top up</button>`}</div></div></div>`).join('')}`; }
+  return '';
+}
+function festGo(fn) { if (fn()) { save(); toast('Top-up Fest reward claimed.'); } showTopup(); }
+function festPaw(kind) { const n = Topup.pawDraw(S, kind); if (n) { save(); toast('Lucky Paw: +' + fmt(n) + ' prisms!'); } showTopup(); }
+function festSpin(t) {
+  const r = Topup.wheelSpin(S, t); if (!r) return; save();
+  const w = document.getElementById('tpWheel'); if (w) { w.style.transition = 'transform 2.4s cubic-bezier(.15,.8,.2,1)'; w.style.transform = `rotate(${1440 - (r.index * 45 + 22.5)}deg)`; }
+  setTimeout(() => { showTopup(); resultShow({ title: 'Lucky Roulette', kicker: r.mult + '× rebate', win: true, body: `<div class="bag-gains">${tpTiles({ prisms: r.got })}</div><p class="wr-note">Top-up of ${fmt(r.base)} prisms × ${r.mult} = ${fmt(r.got)} prisms.</p>`, buttons: [['Confirm', 'gold', '']] }); }, 2600);
+}
+function festNews() {
+  const f = Topup.festFill(Topup.festState(S)), names = ['Mawi', 'Orrin', 'Sela', 'Brisk', 'Lumi', 'Tavi', 'Corin', 'Fen'], base = [60, 300, 680, 1280], seed = Topup.festPeriod() * 97 + Math.floor(Date.now() / 36e5);
+  const ai = Array.from({ length: 8 }, (_, i) => { const k = (seed * 31 + i * 17) % 997, b = base[k % 4], m = Topup.wheel[k % 8]; return `<p><b>${names[k % names.length]}</b> <i>AI</i> topped up ${fmt(b)} prisms and spun ${m}× for <b>${fmt(Math.round(b * m))}</b> prisms!</p>`; }).join('');
+  const mine = f.rl.map(([b, m, g]) => `<p><b>Reina</b> topped up ${fmt(b)} prisms and spun ${m}× for <b>${fmt(g)}</b> prisms!</p>`).join('') || '<p>No spins yet.</p>';
+  popup(`<div class="tp-news"><h2>Lucky Star</h2><h3>Server news</h3>${ai}<h3>Your spins</h3>${mine}</div>`); $('#modal').classList.add('bw-pop');
+}
