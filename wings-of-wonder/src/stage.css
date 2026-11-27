@@ -11154,3 +11154,9 @@ html body #stage .city-hud button.city-garden img{position:static!important;widt
 #stage .gd-ani .gd-tag.feed{background:linear-gradient(#a8e08a,#5ab84a);border-color:#fff;color:#fff;text-shadow:0 1px 1px #2a6a1a}
 #stage .gd-ani .gd-tag.need{background:#fff0e8;border-color:#e8a080;color:#c0462a}
 #stage .gd-ani.hungry .gd-good{opacity:.9;animation:gd-bob2 1.6s ease-in-out infinite}
+#stage .gd-farm{grid-template-rows:repeat(4,1fr) auto}
+#stage .gd-beast{height:min(8.6cqh,15cqw)}
+#stage .gd-good{width:min(8cqw,5.4cqh)}
+#stage .gd-good{position:absolute!important;order:0;right:-8%;left:auto;top:auto;bottom:38%;margin:0;width:min(7cqw,4.6cqh);z-index:3}
+#stage .gd-pen-head{z-index:4}
+@media (max-width:700px){#stage .gd-pen-head small{font-size:10px}}

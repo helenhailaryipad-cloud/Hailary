@@ -11,7 +11,7 @@ import numpy as np
 from PIL import Image
 ROOT = Path(__file__).resolve().parents[1]; SRC = ROOT/'scripts/art-source/garden'; OUT = ROOT/'src/assets/generated'
 for b in ('bg', 'farm-bg'): Image.open(SRC/f'{b}.webp').convert('RGB').save(OUT/f'garden-{b}.webp', quality=92, method=6)
-for n in ['plot', 'sprout', 'young', 'sunpetal', 'moonbell', 'dewleaf', 'starberry', 'emberroot', 'lotus', 'wishblossom', 'goldmelon', 'can', 'icon', 'hen', 'cow', 'sheep', 'egg', 'milk', 'wool', 'farm-fence', 'wheat', 'carrot', 'potato', 'i-wheat', 'i-carrot', 'i-potato']:
+for n in ['plot', 'sprout', 'young', 'sunpetal', 'moonbell', 'dewleaf', 'starberry', 'emberroot', 'lotus', 'wishblossom', 'goldmelon', 'can', 'icon', 'hen', 'cow', 'sheep', 'egg', 'milk', 'wool', 'farm-fence', 'wheat', 'carrot', 'potato', 'i-wheat', 'i-carrot', 'i-potato', 'pig', 'truffle', 'corn', 'i-corn']:
     a = np.array(Image.open(SRC/f'{n}.webp').convert('RGBA')); a[a[..., 3] < 16] = 0; im = Image.fromarray(a); im = im.crop(im.getbbox())
     side = 1024 if n == 'farm-fence' else 512 if n == 'plot' else 384; f = side/max(im.size); im = im.resize((round(im.width*f), round(im.height*f)), Image.Resampling.LANCZOS)
     im.save(OUT/f'garden-{n}.webp', quality=95, method=6); print(n, im.size)
