@@ -225,14 +225,15 @@ for(const id of DUNGEONS.map(d=>d.id)){const sample=defaults(),r=globalThis.Wond
  hero.xp=49*WonderProgress.xpPerLevel;r.state(hero).materials.stone=99999;const orange=Array.from({length:3},(_,i)=>r.addDrop(hero,2,['boots','armor','bracers'][i],2));orange[1].enhance=6;orange[2].gems=2;
  const ids=orange.map(e=>e.uid),ring=r.addDrop(hero,2,'spiritluck',2).uid,purple=r.addDrop(hero,2,'bow',1).uid,low=r.addDrop(hero,1,'bow',2).uid,before=JSON.stringify(hero);
  for(const bad of [[...ids.slice(1),ring],[...ids.slice(1),purple],[...ids.slice(1),low],[...ids.slice(1),ids[1]],[...ids,ids[0]],[],[hero.equipment.equipped.bow]])if(r.craftGear(hero,'bow',2,3,bad).ok||JSON.stringify(hero)!==before)throw Error('Invalid craft spent pieces '+bad);
- if(r.craftGear(hero,'bow',2,2,ids).ok||r.craftGear(hero,'nope',2,3,ids).ok||r.craftChance(3,5)!==1||Math.abs(r.craftChance(3,2)-2/3)>1e-9||r.craftChance(3,3)!==1||r.craftChance(4,2)!==0||r.craftChance(4,3)!==1||r.perform(hero,ids[0],'star').ok)throw Error('Recipe rules');
+ if(r.craftGear(hero,'bow',2,2,ids).ok||r.craftGear(hero,'nope',2,3,ids).ok||r.craftChance(3,5)!==1||r.craftChance(3,2)!==0||r.craftChance(3,3)!==1||r.craftChance(3,3,13)!==.6||r.craftChance(3,4,8)!==1||r.craftChance(3,2,13)!==0||r.craftRecipe(3,13).places!==6||r.craftChance(4,2)!==0||r.craftChance(4,3)!==1||r.perform(hero,ids[0],'star').ok)throw Error('Recipe rules');
  const made=r.craftGear(hero,'bow',2,3,ids);
  if(!made.ok||!made.success||made.entry.template!=='bow-t2'||made.entry.rank!==3||made.entry.stars!==2||made.entry.enhance!==6||made.entry.gems!==2||hero.equipment.items.some(i=>ids.includes(i.uid))||!valid(JSON.parse(JSON.stringify(hero))))throw Error('2-Star Red crafting failed');
  if(r.detail(made.entry).star.attack!==Math.round(r.detail(made.entry).base.attack*r.gearRanks[3].bonus*100)/100)throw Error('Quality bonus');
  // Fewer pieces lower the chance; a failed try loses them.
- const few=[r.addDrop(hero,2,'boots',2).uid,r.addDrop(hero,2,'boots',2).uid],count=hero.equipment.items.length,fail=r.craftGear(hero,'boots',2,3,few,()=>.9);
- if(!fail.ok||fail.success||Math.abs(fail.chance-2/3)>1e-9||hero.equipment.items.length!==count-2)throw Error('Failed craft');
- const lucky=[r.addDrop(hero,2,'boots',2).uid],win=r.craftGear(hero,'boots',2,3,lucky,()=>.1);if(!win.success||win.entry.template!=='boots-t2')throw Error('Lucky craft');
+ if(r.craftGear(hero,'boots',2,3,[r.addDrop(hero,2,'boots',2).uid,r.addDrop(hero,2,'boots',2).uid]).ok)throw Error('At least three pieces');
+ const few=[0,1,2].map(()=>r.addDrop(hero,13,'boots',2).uid),count=hero.equipment.items.length,fail=r.craftGear(hero,'boots',13,3,few,()=>.9);
+ if(!fail.ok||fail.success||fail.chance!==.6||hero.equipment.items.length!==count-3)throw Error('Failed craft');
+ const lucky=[0,1,2].map(()=>r.addDrop(hero,13,'boots',2).uid),win=r.craftGear(hero,'boots',13,3,lucky,()=>.1);if(!win.success||win.entry.template!=='boots-t13')throw Error('Lucky craft');
  // Higher steps need exact counts and materials; pieces from before the ladder keep their stars and their bonus.
  const reds=Array.from({length:3},()=>{const e=r.addDrop(hero,2,'armor',2);e.rank=3;return e.uid});
  if(r.craftGear(hero,'armor',2,4,reds.slice(0,2)).ok)throw Error('3-Star Red needs three');const red3=r.craftGear(hero,'armor',2,4,reds).entry;if(red3.stars!==3||red3.rank!==4)throw Error('3-Star Red');
@@ -724,9 +725,9 @@ vm.runInContext(`
   if(r.gearGroups.length!==3||r.craftInputs(T,'Equipment',1,3).map(e=>e.uid).join()!==armour.join()||r.craftInputs(T,'Rings',1,3).length!==2||r.craftInputs(T,'Equipment',1,4).length)throw Error('Craft pool by family');
   if(r.craftGear(T,'bow',1,3,[...armour.slice(0,2),neck[0]]).ok||r.craftGear(T,'necklace',1,3,armour).ok)throw Error('Families must not mix');
   const keep=S;S=T;craftRank=3;
-  for(const g of r.gearGroups){craftFilter(3,null,g);const html=document.querySelector('#main').innerHTML;if(!html.includes('loom-kinds')||!html.includes('2-Star Red')||!html.includes('At least 1 piece'))throw Error('Crafting screen '+g)}
+  for(const g of r.gearGroups){craftFilter(3,null,g);const html=document.querySelector('#main').innerHTML;if(!html.includes('loom-kinds')||!html.includes('2-Star Red')||!html.includes('At least 3 pieces'))throw Error('Crafting screen '+g)}
   craftFilter(3,null,'Equipment');craftSelect('boots');craftAdd();if(craftInputs.length!==3||!document.querySelector('#main').innerHTML.includes('Success rate: 100%'))throw Error('Add fills the recipe');
-  craftAdd(craftInputs[0]);if(craftInputs.length!==2||!document.querySelector('#main').innerHTML.includes('Success rate: 67%'))throw Error('Tap removes a piece');
+  craftAdd(craftInputs[0]);if(craftInputs.length!==2||!document.querySelector('#main').innerHTML.includes('At least 3 pieces'))throw Error('Tap removes a piece');
   craftAdd();craftCommit();const boots=r.state(S).items.find(e=>e.template==='boots-t1'&&e.rank===3);if(!boots||r.craftInputs(S,'Equipment',1,3).length||!document.querySelector('#modalBody').innerHTML.includes('Crafted'))throw Error('Synthesize');
   craftFilter(3,null,'Necklace & Amulet');craftBatchRun();if(!r.state(S).items.some(e=>e.template==='necklace-t1'&&e.rank===3)||r.craftInputs(S,'Necklace & Amulet',1,3).length)throw Error('Batch');
   craftFilter(5,null,'Equipment');if(!document.querySelector('#main').innerHTML.includes('4-Star Dark Gold')||!document.querySelector('#main').innerHTML.includes('At least 2 pieces'))throw Error('Dark Gold page');
