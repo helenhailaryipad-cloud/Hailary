@@ -11686,3 +11686,24 @@ html body #stage #main .fg-room .fg-nav button{border:0 none transparent!importa
 #stage #main .fg-room button.fg-card{flex-basis:min(17cqw,15cqh,96px)}
 #stage .fg-card .fg-tile{width:70%}
 #stage #main .fg-room button.fg-go{padding:8px 40px}
+/* Top-up Fest tab (light rows like the reference's FestEvent Top-up) */
+body[data-screen=festTop] #stage{width:min(100%,86dvh)!important;max-width:none!important}
+body[data-screen=festTop] #stage>:is(header,nav,footer),body[data-screen=festTop] .return-to-menu{display:none!important}
+body[data-screen=festTop] #stage>#main{inset:0!important;width:100%;height:100%;padding:0!important;display:block;overflow:hidden}
+#stage .tp-nav{grid-template-columns:repeat(4,1fr)!important}
+#stage .tp-fsub{display:flex;gap:6px;margin:0 0 6px}
+#stage #main .tp-room .tp-fsub button{flex:1;padding:8px 4px;border-radius:999px;border:1.5px solid #ecd9a6!important;background:#ffffffcc!important;box-shadow:none!important;color:#7a5a2a;font:800 min(3.2cqw,14px)/1 Arial,sans-serif;min-height:0}
+#stage #main .tp-room .tp-fsub button.on{background:linear-gradient(#fffbe0,#ffe27a 48%,#ffcc3d)!important;border-color:#ffd860!important;color:#6a3a06}
+#stage .tp-flist{display:grid;gap:8px}
+#stage .tp-frow{border-radius:14px;overflow:hidden;background:#fffdf6;border:1.5px solid #f0d290;box-shadow:0 2px 8px #c0903022}
+#stage .tp-fhead{margin:0;padding:6px 12px;background:linear-gradient(90deg,#fff1c8,#ffe49a);font:800 min(3.3cqw,14px)/1.2 Arial,sans-serif;color:#7a4a10}
+#stage .tp-fhead b{color:#c0442a}
+#stage .tp-fhead b.ok{color:#2e8a3a}
+#stage .tp-fbody{display:flex;align-items:center;gap:8px;padding:8px 10px}
+#stage .tp-fbody .tp-ctiles{flex:1;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+#stage .tp-fbody .tp-tile{flex:0 0 min(13cqw,58px)}
+#stage .tp-fact{display:grid;justify-items:center;gap:3px;flex:none}
+#stage .tp-fact small{font:700 11px Arial,sans-serif;color:#9a6a3a}
+#stage #main .tp-room button.tp-fclaim{padding:8px 16px;border-radius:999px;border:1.5px solid #9fc8f0!important;background:linear-gradient(#ffffff,#d8ecff)!important;box-shadow:none!important;color:#2a5a9a;font:900 13px/1 Arial,sans-serif;min-height:0}
+#stage #main .tp-room button.tp-fclaim.on{border-color:#ffd860!important;background:linear-gradient(#fffbe0,#ffe27a 48%,#ffcc3d)!important;color:#6a3a06}
+#stage #main .tp-room button.tp-fclaim.done{opacity:.55}
