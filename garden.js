@@ -18,6 +18,7 @@ const Garden = {
     { id: 'wheat', name: 'Wheat', min: 5, price: 10, give: { feed: { wheat: 3 } }, gexp: 1, lv: 1 },
     { id: 'carrot', name: 'Carrot', min: 20, price: 30, give: { feed: { carrot: 3 } }, gexp: 2, lv: 1 },
     { id: 'potato', name: 'Potato', min: 45, price: 50, give: { feed: { potato: 3 } }, gexp: 3, lv: 2 },
+    { id: 'corn', name: 'Corn', min: 90, price: 80, give: { feed: { corn: 3 } }, gexp: 5, lv: 3 },
     { id: 'sunpetal', name: 'Sunpetal', min: 30, price: 50, give: { gold: 180, xp: 20 }, gexp: 5 },
     { id: 'moonbell', name: 'Moonbell', min: 60, price: 90, give: { gold: 220, xp: 45, stone: 6 }, gexp: 8 },
     { id: 'dewleaf', name: 'Dewleaf', min: 120, price: 140, give: { xp: 80, stone: 15, items: { exp1: 1 } }, gexp: 12 },
@@ -29,7 +30,7 @@ const Garden = {
   ],
   // the shop shows a seed once the garden reaches its level (index 0..7 -> garden level)
   seedLevel: [1, 1, 2, 3, 4, 5, 6, 6],
-  feeds: [{ id: 'wheat', name: 'Wheat', eats: 'hen' }, { id: 'carrot', name: 'Carrot', eats: 'cow' }, { id: 'potato', name: 'Potato', eats: 'sheep' }],
+  feeds: [{ id: 'wheat', name: 'Wheat', eats: 'hen' }, { id: 'carrot', name: 'Carrot', eats: 'cow' }, { id: 'potato', name: 'Potato', eats: 'sheep' }, { id: 'corn', name: 'Corn', eats: 'pig' }],
   levelExp(lv) { return 60 * lv; },
   chests: [{ at: 5, id: 'chest1' }, { at: 15, id: 'chest2' }, { at: 30, id: 'chest2' }, { at: 60, id: 'chest3' }, { at: 100, id: 'chest3' }],
   // Farm (user: "a simple pretty farm where they open in turn: hens 1-6, then cows, then sheep"): animals are bought one
@@ -38,6 +39,7 @@ const Garden = {
     { k: 'hen', eat: 'wheat', name: 'Hen', good: 'Egg basket', min: 60, price: i => 500 * (i + 1), give: { gold: 80, xp: 15 }, gexp: 2 },
     { k: 'cow', eat: 'carrot', name: 'Cow', good: 'Fresh milk', min: 180, price: i => 4000 + 1500 * i, give: { gold: 260, stone: 6, xp: 30 }, gexp: 5 },
     { k: 'sheep', eat: 'potato', name: 'Sheep', good: 'Soft wool', min: 360, price: i => 9000 + 3000 * i, give: { gold: 420, essence: 3, xp: 50 }, gexp: 8 },
+    { k: 'pig', eat: 'corn', name: 'Piglet', good: 'Truffle basket', min: 480, price: i => 16000 + 4000 * i, give: { gold: 650, gem: 2, xp: 70 }, gexp: 12 },
   ],
   perKind: 6,
   nextAnimal(s) { const n = (Garden.state(s).farm || []).length; if (n >= Garden.animals.length * Garden.perKind) return null; const a = Garden.animals[Math.floor(n / Garden.perKind)], i = n % Garden.perKind; return { ...a, i, cost: a.price(i) }; },
@@ -205,11 +207,11 @@ function gdFarm(v, now) {
     const slots = Array.from({ length: Garden.perKind }, (_, i) => {
       const idx = base + i, f = v.farm[idx];
       if (f && Garden.hungry(f)) { const has = v.feed[a.eat] > 0; return `<button class="gd-ani hungry" onclick="gardenFeed(${idx})">${denPlain}<img class="gd-good" src="${gdArt('i-' + a.eat)}" alt=""><img class="gd-beast" src="${gdArt(a.k)}" alt="${a.name}" style="--d:${(idx * .37) % 2}s"><small class="gd-tag ${has ? 'feed' : 'need'}">${has ? 'Feed' : 'Hungry'}</small></button>`; }
-      if (f) { const ok = now >= f.at; return `<button class="gd-ani ${ok ? 'ready' : ''}" onclick="gardenCollect(${idx})">${denPlain}<img class="gd-beast" src="${gdArt(a.k)}" alt="${a.name}" style="--d:${(idx * .37) % 2}s">${ok ? `<img class="gd-good" src="${gdArt(a.k === 'hen' ? 'egg' : a.k === 'cow' ? 'milk' : 'wool')}" alt="">` : `<small class="gd-tag" data-farm="${idx}">${gdClock(f.at - now)}</small>`}</button>`; }
+      if (f) { const ok = now >= f.at; return `<button class="gd-ani ${ok ? 'ready' : ''}" onclick="gardenCollect(${idx})">${denPlain}<img class="gd-beast" src="${gdArt(a.k)}" alt="${a.name}" style="--d:${(idx * .37) % 2}s">${ok ? `<img class="gd-good" src="${gdArt({ hen: 'egg', cow: 'milk', sheep: 'wool', pig: 'truffle' }[a.k])}" alt="">` : `<small class="gd-tag" data-farm="${idx}">${gdClock(f.at - now)}</small>`}</button>`; }
       if (next && idx === v.farm.length) return `<button class="gd-ani buy" onclick="gardenBuyAnimal()">${denPlain}<img class="gd-beast ghost" src="${gdArt(a.k)}" alt=""><small class="gd-tag">+ ${fmt(next.cost)}</small></button>`;
       return `<span class="gd-ani empty"></span>`;
     }).join('');
-    return `<div class="gd-pen ${open ? '' : 'shut'}"><div class="gd-pen-head"><b>${a.k === 'sheep' ? 'Sheep' : a.name + 's'}</b><small>${have.length}/${Garden.perKind} · eats ${a.eat} · ${a.good} every ${a.min >= 60 ? a.min / 60 + ' h' : a.min + ' min'}</small></div><div class="gd-pen-row">${slots}</div>${open ? '' : `<p class="gd-shut">🔒 Opens after 6 ${Garden.animals[ai - 1].name.toLowerCase()}s</p>`}</div>`;
+    return `<div class="gd-pen ${open ? '' : 'shut'}"><div class="gd-pen-head"><b>${a.k === 'sheep' ? 'Sheep' : a.name + 's'}</b><small>${have.length}/${Garden.perKind} · eats ${a.eat} · ${a.good} every ${a.min >= 60 ? a.min / 60 + ' h' : a.min + ' min'}</small></div><div class="gd-pen-row">${slots}</div>${open ? '' : `<p class="gd-shut">🔒 Opens after 6 ${Garden.animals[ai - 1].k === 'sheep' ? 'sheep' : Garden.animals[ai - 1].name.toLowerCase() + 's'}</p>`}</div>`;
   }).join('');
   const barn = `<div class="gd-barn">${Garden.feeds.map(x => `<button class="gd-feedchip" onclick="gardenTab='beds';showGarden()" title="Grow ${x.name} in the Garden">${denPlain}<img src="${gdArt('i-' + x.id)}" alt="">${v.feed[x.id] || 0}</button>`).join('')}</div>`;
   return `${barn}<div class="gd-farm">${pens}${ready ? `<button class="gd-collect" onclick="gardenCollectAll()">${denPlain}Collect all · ${ready}</button>` : ''}</div>`;
