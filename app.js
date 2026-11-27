@@ -1107,9 +1107,52 @@ function cityDue(icon){try{switch(icon){
  case 'snow':{const v=Wishwell.state(S);return Wishwell.due(S)>0||Wishwell.tasks.some(t=>!v.done.includes(t.id)&&Wishwell.progress(S,t)>=t.goal)}
  case 'clan':{const g=WonderGear.guildState(S);return !!g&&!g.signed}
  case 'summon':return WonderGear.bagCount(S,'wish')>0||(WonderGear.summonState(S).orbs||0)>0;
- case 'rewards':{const A=WonderAdventure,a=A.state(S),d=A.dailyForge(S);return A.quests.some(q=>!a.claimed.includes(q.id)&&A.progress(S,q)>=q.target)||d.wins>d.claimed||Math.floor((S.dungeonWins||0)/3)>a.contracts}
+ case 'rewards':return homeClaims().length>0;
+ case 'rewards-old':{const A=WonderAdventure,a=A.state(S),d=A.dailyForge(S);return A.quests.some(q=>!a.claimed.includes(q.id)&&A.progress(S,q)>=q.target)||d.wins>d.claimed||Math.floor((S.dungeonWins||0)/3)>a.contracts}
  case 'upgrade':{const eq=WonderGear.state(S),m=eq.materials||{};return Object.values(eq.equipped).some(uid=>{const e=eq.items.find(x=>x.uid===uid),c=e&&WonderGear.cost(e,'enhance');return c&&S.gold>=c.gold&&(m.stone||0)>=c.stone})}
  default:return false}}catch{return false}}
+// The two round tools above the Quest Board (user photos of the reference, 2026-11-27): Claim lists every reward that
+// is waiting right now and jumps there; Power Up lists the ways to grow stronger (red dot where something can be done
+// now) and a big Guardian Hunt button. Light pop-over cards above the icons.
+function homeTry(f){try{return !!f()}catch{return false}}
+function homeClaims(){
+ const A=globalThis.WonderAdventure,list=[
+  ['Daily Blessings',"go('blessings')",()=>cityDue('benefits')],
+  ['Wayfarer Quests',"go('cityTrail')",()=>Trail.ready(S)>0],
+  ['Quest Journal',"go('quests')",()=>{const a=A.state(S),d=A.dailyForge(S);return A.quests.some(q=>!a.claimed.includes(q.id)&&A.progress(S,q)>=q.target)||d.wins>d.claimed||Math.floor((S.dungeonWins||0)/3)>a.contracts}],
+  ['Challenge rewards',"go('cityExplore')",()=>{const d=Challenge.due(S);return d.idle||d.pass||d.obj||d.task}],
+  ['Boss Roulette',"openBossWheel()",()=>{const W=A,a=W.wheelToday(S),k=W.bossKills(S);return a.pending>0&&a.wheelOpen.length<W.wheel.length||W.WHEEL_STEPS.some((n,i)=>k>=n&&!a.wheelGot.includes(i))}],
+  ['Wishwell',"go('wishwell')",()=>cityDue('snow')],
+  ['Star Rites free pull',"go('rites')",()=>cityDue('gacha')],
+  ['Mail',"socialOpen('Mail')",()=>socialDue().mail>0],
+  ['Guild sign-in',"go('cityGuild')",()=>cityDue('clan')],
+  ['Titles',"openTitles('home')",()=>titleDue()],
+ ];
+ return list.filter(([,,f])=>homeTry(f));
+}
+function homePowers(){
+ const r=WonderGear;
+ return [
+  ['Enhance Equipment',"go('forge')",()=>cityDue('upgrade')],
+  ['Gear Crafting',"go('cityCraft')",()=>false],
+  ['Star Talents',"go('citySkill')",()=>Talents.left(S)>0],
+  ['Pet Feeding',"go('cityPet')",()=>false],
+  ['Devour Spare Gear',"go('cityDevour')",()=>r.devourable(S).length>0],
+  ['Guild Academy',"go('cityGuild')",()=>false],
+  ['Upgrade Frame',"fashionCategory='Avatar';go('fashion')",()=>false],
+  ['Upgrade Bubble',"fashionCategory='Bubble';go('fashion')",()=>false],
+  ['Companions',"go('cityCompanion')",()=>false],
+ ].map(([n,a,f])=>[n,a,homeTry(f)]);
+}
+function homeMenu(kind,btn){
+ const old=document.querySelector('.hm-pop');if(old){const same=old.dataset.kind===kind;old.remove();if(same)return}
+ const rows=kind==='claim'?homeClaims().map(([n,a])=>[n,a,true]):homePowers();
+ const el=document.createElement('div');el.className='hm-pop';el.dataset.kind=kind;
+ el.innerHTML=`<b class="hm-head">${kind==='claim'?'Claim':'Power Up'}</b><div class="hm-list">${rows.length?rows.map(([n,a,dot])=>`<button class="hm-row" onclick="document.querySelector('.hm-pop')?.remove();${a.replace(/"/g,'&quot;')}">${denPlain}${n}${dot&&kind!=='claim'?'<i></i>':''}</button>`).join(''):'<p class="hm-none">Nothing to claim right now.</p>'}</div>${kind==='power'?`<button class="hm-boss" onclick="document.querySelector('.hm-pop')?.remove();go('dungeons')">${denPlain}<span>Guardian Hunt</span><img src="${artPath('guardian-t21')}" alt=""></button>`:''}`;
+ (btn.closest('.city-hud')||document.body).append(el);
+ const r=btn.getBoundingClientRect(),h=el.parentElement.getBoundingClientRect();el.style.left=Math.max(4,Math.min(h.width-el.offsetWidth-4,r.left-h.left+r.width/2-el.offsetWidth/2))+'px';el.style.top=Math.max(4,r.top-h.top-el.offsetHeight-8)+'px';
+ setTimeout(()=>document.addEventListener('pointerdown',function off(e){if(!el.contains(e.target)&&!btn.contains(e.target)){el.remove();document.removeEventListener('pointerdown',off,true)}},true),0);
+}
 function cityIcon([icon,label,target=''], artPrefix='hud-'){
  if(icon==='more')return '<button class="city-icon city-more" id="city-drawer-toggle" aria-label="More" aria-controls="city-drawer" aria-expanded="false" onclick="toggleCityDrawer()"><img class="city-four" src="'+artPath('drawer-more')+'" alt=""></button>';
  const notice=cityDue(icon)?'<i class="city-notice" aria-hidden="true">!</i>':'';
@@ -1125,7 +1168,7 @@ function foldCityMenu(button){
  button.setAttribute('aria-label',cityExpanded?'Hide events':'Show events');
 }
 function cityTool(icon,label,action){
- return `<button class="city-tool" aria-label="${label}" title="${label}" onclick="${action}"><img src="${artPath((['rewards','upgrade'].includes(icon)?'tool-':'hud-')+icon)}" alt="">${cityDue(label.toLowerCase())?'<i class="city-notice" aria-hidden="true">!</i>':''}</button>`;
+ return `<button class="city-tool" aria-label="${label}" title="${label}" onclick="${action.replace(/"/g,'&quot;')}"><img src="${artPath((['rewards','upgrade'].includes(icon)?'tool-':'hud-')+icon)}" alt="">${cityDue(label.toLowerCase())?'<i class="city-notice" aria-hidden="true">!</i>':''}</button>`;
 }
 function home(){
  if(typeof titlesCheck==='function')titlesCheck();
@@ -1145,7 +1188,7 @@ function home(){
  <div class="city-jobs">${[['Daily','cityTrail'],['Gameplay','cityGameplay'],['Bounty','cityBounty'],['Hunting','cityHunting']].map(([name,id])=>`<button onclick="go('${id}')"><img src="${artPath('wing-menu-'+name.toLowerCase())}" alt="">${name}</button>`).join('')}</div>
  <div class="city-tools">${[['broadcast','Elf Broadcast']].map(item=>cityIcon(item)).join('')}</div>
  <div class="city-skills">${[['move','Realm',"go('world')"],['ally1','Pet',"chooseSectionPage('collection')"],['combat','Combat',"go('dungeons')"],['ally2','Companion',"go('cityCompanion')"],['ride','Ride','toggleMount()'],['ally3','Wardrobe',"go('fashion')"],['travel','Travel',"go('world')"]].map(a=>cityTool(...a)).join('')}</div>
- <div class="city-quick">${cityTool('rewards','Rewards',"go('quests')")}${cityTool('upgrade','Upgrade',"go('forge')")}</div>
+ <div class="city-quick">${cityTool('rewards','Rewards',"homeMenu('claim',this)")}${cityTool('upgrade','Upgrade',"homeMenu('power',this)")}</div>
  <button class="city-reward" aria-label="Challenge" onclick="go('cityExplore')"><img src="${artPath('left-explore')}" alt=""><small>Challenge</small></button><button class="city-quest" onclick="go('quests')"><img src="${artPath('hud-quest')}" alt=""> Quest Board</button>
  ${homeChat()}${cityDrawerMarkup()}<div class="city-dock">${cityGroups[2].map(item=>cityIcon(item)).join('')}</div></section>`;
 }
