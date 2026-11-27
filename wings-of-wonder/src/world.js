@@ -61,7 +61,7 @@ function lobbyPick(id){const d=DUNGEONS.find(d=>d.id===id);if(!d)return;lobbyDun
 function lobbyTierPick(tier){const list=DUNGEONS.filter(d=>d.tier===tier);if(!list.length)return;lobbyTier=tier;
  // Land on the hardest guardian of that tier Reina can already enter, or its first one.
  lobbyDungeon=([...list].reverse().find(d=>level()>=d.recommended)||list[0]).id;dungeonLobby()}
-function dungeonRules(){modal(`<p class="eyebrow">DUNGEONS</p><h2>How it works</h2><p>Each tier has five guardians. A guardian opens when Reina reaches its level.</p><p>An entry costs energy by tier: T1-3 3, T4 6, T5 10, T6 12, T7 16, T8 18, T9 and up 20. The Try-out guardian (first of each tier) is free once a day. Boss Sweep wins at once over a guardian you have beaten: ${WonderAdventure.SWEEP_DAILY} a day, its energy + ${WonderAdventure.SWEEP_PRISMS} prisms. ${WonderAdventure.staminaLimit} energy is free each day (refills at 00:00 UTC); more can be bought for prisms.</p><p>A victory always gives gold, one piece of equipment and forge materials, and counts for the Boss Roulette. The first victory over each guardian adds bonus gold.</p><p>Tap Boss info to see a guardian's mechanic and exact loot.</p>`)}
+function dungeonRules(){modal(`<p class="eyebrow">DUNGEONS</p><h2>How it works</h2><p>Each tier has five guardians. A guardian opens when Reina reaches its level.</p><p>An entry costs energy by tier: T1-3 3, T4 6, T5 10, T6 12, T7 16, T8 18, T9 and up 20. The Try-out guardian (first of each tier) is free once a day. Boss Sweep wins at once over a guardian you have beaten: 2 a day (the first for energy only, then Moon Pearls, doubling); the Sweep Privilege gives 10 a day for energy + ${WonderAdventure.SWEEP_PRISMS} prisms each. ${WonderAdventure.staminaLimit} energy is free each day (refills at 00:00 UTC); more can be bought for prisms.</p><p>A victory always gives gold, one piece of equipment and forge materials, and counts for the Boss Roulette. The first victory over each guardian adds bonus gold.</p><p>Tap Boss info to see a guardian's mechanic and exact loot.</p>`)}
 function dungeonLobby(){clearInterval(worldTimer);
  const tiers=[...new Set(DUNGEONS.map(d=>d.tier))],open=WonderGear.unlockedTier(S);
  if(!DUNGEONS.some(d=>d.id===lobbyDungeon)){const list=DUNGEONS.filter(d=>d.tier===open);lobbyDungeon=([...list].reverse().find(d=>level()>=d.recommended)||list[0]||DUNGEONS[0]).id;lobbyTier=DUNGEONS.find(d=>d.id===lobbyDungeon).tier}
@@ -96,18 +96,27 @@ function dungeonLobby(){clearInterval(worldTimer);
  for(const sel of ['.rl-floors','.rl-strip']){const st=document.querySelector(sel),on=st?.querySelector?.('.on');if(st&&on)st.scrollLeft=on.offsetLeft-st.clientWidth/2+on.offsetWidth/2}
 }
 
-// Boss Sweep (user photos 2026-11-27): an instant win over a guardian cleared before, SWEEP_DAILY a UTC day, for its
-// energy + SWEEP_PRISMS prisms. Pays what a won fight pays (gold, wishes, XP, gear, seals, pearls, chest, vouchers).
+// Boss Sweep (user photos 2026-11-27): an instant win over a guardian cleared before. Without the Sweep Privilege 2 a
+// UTC day (first energy only, then Moon Pearls on a doubling ladder, "+" adds a sweep); with it 10 a day for energy +
+// 10 prisms. Pays what a won fight pays (gold, wishes, XP, gear, seals, pearls, chest, vouchers).
 function sweepPop(){
  const A=WonderAdventure,d=DUNGEONS.find(d=>d.id===lobbyDungeon);if(!d)return;
- const tryout=WonderGear.bossTryout(d.id),cleared=(S.adventure?.clears||{})[d.id]>0,cost=A.bossEnergy(d.tier),left=A.sweepLeft(S);
- const why=tryout?'The Try-out guardian cannot be swept.':!cleared?'Defeat this guardian once to sweep it.':!left?'No sweeps left today.':(S.scales||0)<A.SWEEP_PRISMS?'Not enough prisms.':A.energyLeft(S)<cost?'Not enough energy.':'';
- popup(`<div class="sw-card"><h2>Boss Sweep</h2><p class="sw-en">⚡ Current Energy: <b>${A.energyLeft(S)}</b> <button class="sw-plus" onclick="energyShop()" aria-label="Get energy">${denPlain}+</button></p><h3>Sweep Boss - <b>T${d.tier}·${d.boss}</b></h3><p>Sweep Count: <b>${left}</b>/${A.SWEEP_DAILY}</p><p>Sweep Cost: ⚡ ${cost} + ${typeof prismIcon==='function'?prismIcon():'◆'} ${A.SWEEP_PRISMS}</p>${why?`<p class="sw-why">${why}</p>`:''}<button class="sw-go" onclick="sweepGo()" ${why?'disabled':''}>${denPlain}Sweep 1 time</button></div>`);
+ const tryout=WonderGear.bossTryout(d.id),cleared=(S.adventure?.clears||{})[d.id]>0,cost=A.bossEnergy(d.tier),left=A.sweepLeft(S),p=A.sweepPrice(S),vip=!!S.adventure?.sweepVip;
+ const canMore=!vip&&!left&&((A.sweepLimit(S)-A.SWEEP_BASE)<A.SWEEP_EXTRA);
+ const why=tryout?'The Try-out guardian cannot be swept.':!cleared?'Defeat this guardian once to sweep it.':!left?(canMore?'Tap + for one more sweep today.':'No sweeps left today.'):(S.scales||0)<p.prisms?'Not enough prisms.':(S.pearls||0)<p.pearls?'Not enough Moon Pearls.':A.energyLeft(S)<cost?'Not enough energy.':'';
+ const price=p.prisms?` + ${typeof prismIcon==='function'?prismIcon():'◆'} ${p.prisms}`:p.pearls?` + ${typeof pearlIcon==='function'?pearlIcon():'○'} ${fmt(p.pearls)}`:'';
+ popup(`<div class="sw-card"><h2>Boss Sweep</h2><p class="sw-en">⚡ Current Energy: <b>${A.energyLeft(S)}</b> <button class="sw-plus" onclick="energyShop()" aria-label="Get energy">${denPlain}+</button></p><h3>Sweep Boss - <b>T${d.tier}·${d.boss}</b></h3><p>Sweep Count: <b>${left}</b>/${A.sweepLimit(S)}${canMore?` <button class="sw-plus" onclick="sweepAdd()" aria-label="One more sweep">${denPlain}+</button>`:''}</p><p>Sweep Cost: ⚡ ${cost}${price}</p>${why?`<p class="sw-why">${why}</p>`:''}<div class="sw-row"><button class="sw-go" onclick="sweepGo()" ${why?'disabled':''}>${denPlain}Sweep 1 time</button><button class="sw-vip" onclick="sweepVipPop()">${denPlain}<i>✦</i><span>Sweep Privilege${vip?' ✓':''}</span></button></div></div>`);
+ $('#modal')?.classList.add('sw-pop');
+}
+function sweepAdd(){if(WonderAdventure.sweepMore(S)){save();sweepPop()}}
+function sweepVipPop(){
+ const V=WonderAdventure.SWEEP_VIP,own=!!S.adventure?.sweepVip;
+ popup(`<div class="sw-card sw-vipcard"><h2>Sweep Privilege</h2><p class="sw-perm">Permanent</p><div class="sw-perk"><b>Privilege 1</b><span>Daily Sweep Limit +${V.plus} (${WonderAdventure.SWEEP_BASE+V.plus} a day)</span></div><div class="sw-perk"><b>Privilege 2</b><span>Every sweep costs only ${WonderAdventure.SWEEP_PRISMS} prisms instead of Moon Pearls</span></div><div class="sw-perk"><b>Privilege 3</b><span>Instant ${V.rebate} prisms</span></div>${own?'<p class="sw-own">Activated</p>':`<p class="sw-why">Price ${euro(V.eur)}. Real-money payments are not connected in this prototype yet, so nothing is charged and nothing is given.</p>`}<div class="sw-row"><button class="sw-go" onclick="sweepPop()">${denPlain}Back</button></div></div>`);
  $('#modal')?.classList.add('sw-pop');
 }
 function sweepGo(){
  const A=WonderAdventure,d=DUNGEONS.find(d=>d.id===lobbyDungeon);if(!d||WonderGear.bossTryout(d.id)||!((S.adventure?.clears||{})[d.id]>0))return;
- if(!A.sweepTake(S,A.bossEnergy(d.tier))){toast('Not enough energy, prisms or sweeps.');return}
+ if(!A.sweepTake(S,A.bossEnergy(d.tier))){toast('Not enough energy, pearls or sweeps.');return}
  S.dungeonWins=(S.dungeonWins||0)+1;const loot=WonderGear.bossLoot(S,d.id),bonus=A.victory(S,d.id),earned=gain(d.gold+bonus,d.wishes,d.xp);
  WonderGear.addSeals(S,30);if(typeof Topup!=='undefined')S.pearls=(S.pearls||0)+Topup.guardianPearls;WonderGear.bagAdd(S,'chest1',1);
  if(typeof vowDrop==='function')vowDrop();let v=0;if(typeof Trail!=='undefined'){trailTick('dungeon');v=Trail.pay(S,{voucher:Trail.dungeonTickets}).voucher||0}

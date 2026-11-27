@@ -330,8 +330,12 @@ deal link); a dungeon Enter without energy opens it. Vigor Tonic gives back 20 e
 Energy by tier (user photos 2026-11-27): a guardian entry costs `bossEnergy(tier)` (`ENERGY_TIER`: T1-3 3, T4 6, T5 10,
 T6 12, T7 16, T8 18, T9+ 20; ⚡ chip on each card); the Try-out guardian is free, once per tier per UTC day
 (`tryoutDone`/`tryoutMark`, optional `S.adventure.tryDay {day,t[]}`, "Defeated" stamp). Boss Sweep (`sweepPop`, `sweepGo`
-in world.js, light `.sw-pop`): instant win over a guardian beaten before, `SWEEP_DAILY` 10 a UTC day, its energy +
-`SWEEP_PRISMS` 10 prisms (`sweepTake`, optional `S.adventure.sweepDay {day,n}`), pays like a won fight, `resultShow`.
+in world.js, light `.sw-pop`): instant win over a guardian beaten before, pays like a won fight, `resultShow`. User
+2026-11-27 (photos): WITHOUT the privilege 2 a UTC day (`SWEEP_BASE`), the first for energy only, the second energy +
+2,000 Moon Pearls; "+" adds a sweep (up to `SWEEP_EXTRA` 4) on the doubling ladder 4,000, 8,000 ... (`sweepPrice`,
+`sweepMore`). Sweep Privilege (`SWEEP_VIP`, permanent, EUR 10.99, payment NOT connected, pop-up `sweepVipPop`; grant via
+`sweepVipGrant`): 10 a day for energy + `SWEEP_PRISMS` 10 prisms each, 680 prisms at once (the reference's title and
+"5 Global Bosses" are not built). Optional `S.adventure.sweepDay {day,n,x}`, `sweepVip`.
 
 ## Challenge chapter map (2026-11-27)
 User circled the home "Challenge" icon and sent a photo of the reference's stage map ("redo this section"). Screen
