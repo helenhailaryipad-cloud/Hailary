@@ -94,7 +94,7 @@ function showBlessings() {
   </section>`;
 }
 function blessClaim() {
-  const r = Blessings.claim(S); if (!r) return; blessPay(r.give); save();
+  const r = Blessings.claim(S); if (!r) return; { const m = typeof Patron !== 'undefined' ? Patron.perk(S, 'checkin') : 1; for (const k in r.give) r.give[k] *= m; } blessPay(r.give); save();
   const [k, n] = Object.entries(r.give)[0]; toast('Day ' + r.day + ': ' + fmt(n) + ' ' + blessName(k)); showBlessings();
   document.querySelectorAll('.bl-cell.got')[r.day - 1]?.classList.add('pop');
 }

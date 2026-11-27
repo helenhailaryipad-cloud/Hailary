@@ -50,13 +50,13 @@ const Realms = {
   },
   // the last realm of the progression has no free entries: each entry of the day costs Moon Pearls, doubling (2,000, 4,000,
   // 16,000, 32,000 ...; user 2026-11-27); the others have `free` entries + `buyMax` bought for `buyPrice` prisms
-  freeOf(id) { return Realms.get(id)?.paid ? 0 : Realms.free; },
-  maxBuy(id) { return Realms.get(id)?.paid ? Realms.paidMax : Realms.buyMax; },
+  freeOf(id, s) { return Realms.get(id)?.paid ? 0 : Realms.free + (s && typeof Patron !== 'undefined' ? Patron.perk(s, 'realmFree') : 0); },
+  maxBuy(id, s) { return Realms.get(id)?.paid ? Realms.paidMax : Realms.buyMax + (s && typeof Patron !== 'undefined' ? Patron.perk(s, 'realmBuy') : 0); },
   price(s, id, now) { const R = Realms.get(id), n = Realms.state(s, now).bought[id] || 0; return R?.paid ? R.paid * 2 ** n : Realms.buyPrice; },
-  left(s, id, now) { const v = Realms.state(s, now); return Realms.freeOf(id) + (v.bought[id] || 0) - (v.used[id] || 0); },
-  total(s, id, now) { return Realms.freeOf(id) + (Realms.state(s, now).bought[id] || 0); },
+  left(s, id, now) { const v = Realms.state(s, now); return Realms.freeOf(id, s) + (v.bought[id] || 0) - (v.used[id] || 0); },
+  total(s, id, now) { return Realms.freeOf(id, s) + (Realms.state(s, now).bought[id] || 0); },
   buy(s, id, now) {
-    const v = Realms.state(s, now), R = Realms.get(id); if (!R || (v.bought[id] || 0) >= Realms.maxBuy(id)) return false;
+    const v = Realms.state(s, now), R = Realms.get(id); if (!R || (v.bought[id] || 0) >= Realms.maxBuy(id, s)) return false;
     const p = Realms.price(s, id, now), k = R.paid ? 'pearls' : 'scales'; if ((s[k] || 0) < p) return false;
     s[k] -= p; v.bought[id] = (v.bought[id] || 0) + 1; return true;
   },
@@ -209,7 +209,7 @@ function realmFocus(id) { Realms.toggleFocus(S, id, realmFloor, realmBoss); save
 function realmMergeStep(d) { realmMerge = Math.max(1, Math.min(Realms.left(S, realmPick), realmMerge + d)); showRealm(realmPick); }
 function rlPop(html) { popup(`<div class="gd-pop rl-pop">${html}</div>`); $('#modal').classList.add('bw-pop'); }
 function realmNotice(id) {
-  const R = Realms.get(id), v = Realms.state(S), max = Realms.maxBuy(id), can = max - (v.bought[id] || 0), left = Realms.left(S, id), p = Realms.price(S, id);
+  const R = Realms.get(id), v = Realms.state(S), max = Realms.maxBuy(id, S), can = max - (v.bought[id] || 0), left = Realms.left(S, id), p = Realms.price(S, id);
   const cur = R.paid ? `<img src="${artPath('ui-pearl')}" alt="">` : `<img src="${artPath('ui-prism')}" alt="">`, curName = R.paid ? 'Moon Pearls' : 'prisms';
   rlPop(`<h2>Notice</h2><div class="rl-key" style="--art:url('${rlArt(id)}')"><b>${R.name}</b></div>
    <p>${left ? `You have <b>${left}</b> ${left === 1 ? 'entry' : 'entries'} left today.` : 'Today’s free entries are used.'}</p>

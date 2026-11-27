@@ -62,6 +62,7 @@ const Topup = {
     if (Topup.caches.some(x => x.id === id) && Topup.allBought(s, now) && !v.rebate) { for (const [i, n] of Object.entries(Topup.grandRebate.items)) if (globalThis.WonderGear?.bagAdd) WonderGear.bagAdd(s, i, n); v.rebate = true; out.rebate = true; }
     if (id === 'all') v.rebate = true;
     Topup.festRecord(s, p.eur, now, c.prisms || 0);
+    if (typeof Patron !== 'undefined') Patron.addEur(s, p.eur);
     return out;
   },
   allBought(s, now) { return Topup.caches.every(c => Topup.left(s, c.id, now) < 1); },
