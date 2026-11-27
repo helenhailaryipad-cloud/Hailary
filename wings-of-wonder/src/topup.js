@@ -61,6 +61,7 @@ const Topup = {
     else { v.bought[id] = (v.bought[id] || 0) + 1; if (id.startsWith('p') && !v.first.includes(id)) v.first.push(id); }
     if (Topup.caches.some(x => x.id === id) && Topup.allBought(s, now) && !v.rebate) { for (const [i, n] of Object.entries(Topup.grandRebate.items)) if (globalThis.WonderGear?.bagAdd) WonderGear.bagAdd(s, i, n); v.rebate = true; out.rebate = true; }
     if (id === 'all') v.rebate = true;
+    Topup.festRecord(s, p.eur, now);
     return out;
   },
   allBought(s, now) { return Topup.caches.every(c => Topup.left(s, c.id, now) < 1); },
@@ -84,10 +85,58 @@ const Topup = {
       && (v.spent === undefined || Number.isSafeInteger(v.spent) && v.spent >= 0));
   },
 };
+
+// Top-up Fest (user photos of the reference's FestEvent Top-up tab, 2026-11-27): rewards for paying players on top of
+// what they buy. Single Top-up: one transaction of at least a price pays that row (highest row it reaches, up to
+// `limit` times a festival). Multi-Day: the festival's total opens rows. Daily: today's total opens rows (00:00 UTC).
+// Festival = `festDays` UTC days from `festAnchor`. Counted only from `Topup.grant` (real payment NOT connected), so
+// nothing moves until payments exist. Optional save field S.fest {p, sn{i:n}, sg{i:n}, m, mg[], d, dc, dg[]} (cents).
+Object.assign(Topup, {
+  festDays: 6, festAnchor: Date.UTC(2026, 10, 27),
+  festSingle: [
+    { eur: 1.09, limit: 3, give: { pearls: 3000, items: { chest2: 5, setAurora: 2 } } },
+    { eur: 5.49, limit: 3, give: { pearls: 8000, items: { chest2: 5, setAurora: 4, awakenCore: 4 } } },
+    { eur: 10.99, limit: 3, give: { pearls: 15000, items: { gearbox: 1, chest3: 3, setStar: 3 } } }],
+  festMulti: [20.99, 31.99, 47.99, 54.99, 69.99, 78.99, 104.99, 173.09, 255.99].map((eur, i) => ({ eur, give: { pearls: 10000 * (i + 1), items: { chest3: 2 + i, awakenCore: 5 + 3 * i, ...(i > 2 ? { setStar: i } : {}), ...(i > 4 ? { setMoon: i - 3 } : {}), ...(i > 6 ? { setSun: i - 5 } : {}) } } })),
+  festDaily: [1.09, 3.18, 5.49, 10.99, 20.99, 46.19, 54.99, 104.99, 173.09, 255.99, 345.99].map((eur, i) => ({ eur, give: { pearls: 2000 * (i + 1), items: { chest2: 1 + i, setAurora: 2 + i, ...(i > 2 ? { awakenCore: 2 * i } : {}), ...(i > 5 ? { gearbox: i - 4 } : {}), ...(i > 7 ? { setSun: 1 } : {}) } } })),
+  festPeriod(now = Date.now()) { return Math.floor((now - Topup.festAnchor) / (Topup.festDays * 864e5)); },
+  festEnds(now = Date.now()) { return Topup.festAnchor + (Topup.festPeriod(now) + 1) * Topup.festDays * 864e5; },
+  festState(s, now = Date.now()) {
+    const p = Topup.festPeriod(now), d = Math.floor(now / 864e5); let f = s.fest;
+    if (!f || f.p !== p) f = s.fest = { p, sn: {}, sg: {}, m: 0, mg: [], d, dc: 0, dg: [] };
+    if (f.d !== d) { f.d = d; f.dc = 0; f.dg = []; }
+    return f;
+  },
+  festRecord(s, eur, now = Date.now()) {
+    const f = Topup.festState(s, now), c = Math.round(eur * 100);
+    f.m += c; f.dc += c;
+    let i = -1; Topup.festSingle.forEach((r, k) => { if (c >= Math.round(r.eur * 100)) i = k; });
+    if (i >= 0 && (f.sn[i] || 0) < Topup.festSingle[i].limit) f.sn[i] = (f.sn[i] || 0) + 1;
+  },
+  festPay(s, give) { s.pearls = (s.pearls || 0) + (give.pearls || 0); for (const [i, n] of Object.entries(give.items || {})) globalThis.WonderGear?.bagAdd?.(s, i, n); },
+  festClaim(s, kind, i, now = Date.now()) {
+    const f = Topup.festState(s, now);
+    if (kind === 's') { const r = Topup.festSingle[i]; if (!r || (f.sg[i] || 0) >= (f.sn[i] || 0)) return false; f.sg[i] = (f.sg[i] || 0) + 1; Topup.festPay(s, r.give); return true; }
+    const list = kind === 'm' ? Topup.festMulti : Topup.festDaily, got = kind === 'm' ? f.mg : f.dg, have = kind === 'm' ? f.m : f.dc, r = list[i];
+    if (!r || got.includes(i) || have < Math.round(r.eur * 100)) return false; got.push(i); Topup.festPay(s, r.give); return true;
+  },
+  festDue(s, now = Date.now()) {
+    const f = s.fest; if (!f || f.p !== Topup.festPeriod(now)) return false;
+    return Topup.festSingle.some((r, i) => (f.sg[i] || 0) < (f.sn[i] || 0)) || Topup.festMulti.some((r, i) => !f.mg.includes(i) && f.m >= Math.round(r.eur * 100)) || (f.d === Math.floor(now / 864e5) && Topup.festDaily.some((r, i) => !f.dg.includes(i) && f.dc >= Math.round(r.eur * 100)));
+  },
+  festValid(f) {
+    const n = (v, max) => Number.isSafeInteger(v) && v >= 0 && v <= max, map = o => !!o && typeof o === 'object' && Object.entries(o).every(([k, v]) => /^\d$/.test(k) && n(v, 3));
+    const idx = (a, len) => Array.isArray(a) && a.length <= len && a.every(i => Number.isInteger(i) && i >= 0 && i < len);
+    return f === undefined || !!f && Number.isSafeInteger(f.p) && map(f.sn) && map(f.sg) && n(f.m, 1e9) && idx(f.mg, Topup.festMulti.length) && Number.isSafeInteger(f.d) && n(f.dc, 1e9) && idx(f.dg, Topup.festDaily.length);
+  }
+});
 globalThis.Topup = Topup;
 
 // TOPUP_UI
 let topupTab = 'prisms', topupTimer = 0;
+let festTab = 's';
+function tpClock(end) { const t = Math.max(0, end - Date.now()), d = Math.floor(t / 864e5), h = Math.floor(t % 864e5 / 36e5), m = Math.floor(t % 36e5 / 6e4); return (d ? d + 'd ' : '') + h + 'h ' + m + 'm'; }
+function festClaimGo(kind, i) { if (Topup.festClaim(S, kind, i)) { save(); toast('Top-up Fest reward claimed.'); } showTopup(); }
 const pearlIcon = (cls = '') => `<img class="pearl-ico ${cls}" src="${artPath('ui-pearl')}" alt="">`;
 const prismIcon = (cls = '') => `<img class="prism-ico ${cls}" src="${artPath('ui-prism')}" alt="">`;
 const euro = n => '€' + n.toFixed(2);
@@ -102,8 +151,8 @@ function tpTiles(c) {
 }
 function showTopup() {
   clearInterval(topupTimer); bagArtVars();
-  if (!['cache', 'weekly', 'prisms'].includes(topupTab)) topupTab = 'prisms';
-  const tabs = [['cache', 'Triple Treat', 'gift'], ['weekly', 'Weekly Packs', 'chest'], ['prisms', 'Prisms', 'crystals']];
+  if (!['fest', 'cache', 'weekly', 'prisms'].includes(topupTab)) topupTab = 'prisms';
+  const tabs = [['fest', 'Top-up Fest', 'quests'], ['cache', 'Triple Treat', 'gift'], ['weekly', 'Weekly Packs', 'chest'], ['prisms', 'Prisms', 'crystals']];
   let body = '';
   if (topupTab === 'prisms') body = `<div class="tp-grid">${Topup.prismPacks.map((p, i) => { const first = !Topup.state(S).first.includes(p.id);
     return `<button class="tp-card" onclick="topupAsk('${p.id}')">${denPlain}${first ? '<i class="tp-x2">First buy ×2</i>' : ''}<b class="tp-amt">${prismIcon()}${fmt(p.prisms)}</b><img class="tp-pile" src="${artPath('topup-pile-' + (i + 1))}" alt=""><small class="tp-gift">Gift: ${pearlIcon()} × ${fmt(p.prisms * Topup.pearlsPerPrism)}</small><span class="tp-price">${euro(p.eur)}</span></button>`; }).join('')}</div>`;
@@ -114,11 +163,22 @@ function showTopup() {
       return `<div class="tp-cache tp-c${i + 1} ${left ? '' : 'out'}"><div class="tp-cbox"><img src="${artPath('topup-cache-' + c.id)}" alt=""><b>${c.name}</b><small>${c.what}</small></div><div class="tp-cright"><div class="tp-ctiles">${tpTiles({ prisms: c.prisms * 2, pearls: c.pearls, items: c.items })}</div><p><s>Usual price ${euro(c.was)}</s></p><button class="tp-buy" ${left ? '' : 'disabled'} onclick="topupAsk('${c.id}')">${denPlain}${left ? euro(c.eur) : 'Bought'}</button><i class="tp-rebate">Rebate<br>1000%</i></div></div>`; }).join('')}
      <div class="tp-grand"><div><b>Buy all three caches</b><small>and claim the Grand Rebate</small></div><div class="tp-ctiles">${tpTiles({ items: Topup.grandRebate.items })}</div></div>
      <button class="tp-all" ${Topup.allLeft(S) ? '' : 'disabled'} onclick="topupAsk('all')">${denPlain}${allBought ? 'All bought this week' : euro(Topup.cacheAll.eur) + ' · all three'}<i>${Topup.cacheAll.off}% off</i></button>`; }
+  if (topupTab === 'fest') {
+    const f = Topup.festState(S), eu = c => euro(c / 100), cl = (kind, i, ok, done) => done ? `<button class="tp-fclaim done" disabled>${denPlain}Claimed</button>` : ok ? `<button class="tp-fclaim on" onclick="festClaimGo('${kind}',${i})">${denPlain}Claim</button>` : `<button class="tp-fclaim" onclick="topupTab='prisms';showTopup()">${denPlain}Top-up</button>`;
+    const row = (head, give, btn, note = '') => `<div class="tp-frow"><p class="tp-fhead">${head}</p><div class="tp-fbody"><div class="tp-ctiles">${tpTiles(give)}</div><div class="tp-fact">${btn}${note}</div></div></div>`;
+    const ends = festTab === 'd' ? (Math.floor(Date.now() / 864e5) + 1) * 864e5 : Topup.festEnds();
+    let list = '';
+    if (festTab === 's') list = Topup.festSingle.map((r, i) => row(`Top up <b>${euro(r.eur)}</b> in a single purchase to claim`, r.give, cl('s', i, (f.sg[i] || 0) < (f.sn[i] || 0), (f.sg[i] || 0) >= r.limit), `<small>Limit: ${f.sg[i] || 0}/${r.limit}</small>`)).join('');
+    else { const items = festTab === 'm' ? Topup.festMulti : Topup.festDaily, have = festTab === 'm' ? f.m : f.dc, got = festTab === 'm' ? f.mg : f.dg;
+      list = items.map((r, i) => row(`${festTab === 'm' ? 'Top up during the festival' : 'Top up today'} <b class="${have >= Math.round(r.eur * 100) ? 'ok' : 'low'}">${eu(have)}</b>/${euro(r.eur)}`, r.give, cl(festTab, i, have >= Math.round(r.eur * 100), got.includes(i)))).join(''); }
+    body = `<div class="tp-fsub">${[['s', 'Single Top-up'], ['m', 'Multi-Day'], ['d', 'Daily Top-up']].map(([k, n]) => `<button class="${k === festTab ? 'on' : ''}" onclick="festTab='${k}';showTopup()">${denPlain}${n}</button>`).join('')}</div>
+     <p class="tp-note">Rewards on top of every prism pack · ${festTab === 'd' ? 'resets' : 'ends'} in <b>${tpClock(ends)}</b>. Real-money payments are not connected yet, so progress stays at ${euro(0)} for now.</p><div class="tp-flist">${list}</div>`;
+  }
   if (topupTab === 'prisms') body += `<div class="tp-swap"><h3>Spend Moon Pearls</h3><p>Swap pearls for tickets of the running rite, ${Rites.rite(Rites.period()).name}: ${pearlIcon()} ${fmt(Topup.pearlTicket)} = 1 ticket.</p><div class="tp-swaprow">${[1, 10, 50].map(n => `<button class="tp-buy" ${(S.pearls || 0) < n * Topup.pearlTicket ? 'disabled' : ''} onclick="topupSwap(${n})">${denPlain}${pearlIcon()}${fmt(n * Topup.pearlTicket)} → ${n}</button>`).join('')}</div></div>`;
   $('#main').innerHTML = `<section class="tp-room" data-tab="${topupTab}">
    <div class="tp-top"><button data-back aria-label="Back" onclick="go('home')">‹</button><div class="tp-ribbon">Prism Bazaar</div>
     <span class="tp-chip">${uiIcon('gold') + fmt(S.gold)}</span><span class="tp-chip">${pearlIcon()}${fmt(S.pearls || 0)}</span><span class="tp-chip">${prismIcon()}${fmt(S.scales || 0)}</span></div>
-   <div class="tp-banner" style="--tpb:url('${artPath('topup-banner')}')"><h1>${topupTab === 'prisms' ? 'Prism Top-up' : topupTab === 'weekly' ? 'Weekly Packs' : 'Triple Treat'}</h1></div>
+   <div class="tp-banner" style="--tpb:url('${artPath('topup-banner')}')"><h1>${topupTab === 'prisms' ? 'Prism Top-up' : topupTab === 'weekly' ? 'Weekly Packs' : topupTab === 'fest' ? 'Top-up Fest' : 'Triple Treat'}</h1></div>
    <div class="tp-body">${body}</div>
    <div class="tp-nav">${tabs.map(([id, name, icon]) => `<button class="${id === topupTab ? 'on' : ''}" onclick="topupTab='${id}';showTopup()">${denPlain}${id === 'cache' ? '<i class="tp-badge">2×</i>' : ''}${uiIcon(icon)}<span>${name}</span></button>`).join('')}</div>
   </section>`;

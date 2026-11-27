@@ -481,6 +481,12 @@ below `TOPUP_UI`), screen `topup`, opened by the home "Top-up" promo icon.
   `S.topup.spent` still validate for saves from that build. The pearls -> rite tickets swap sits at the bottom of the
   Prisms tab; the store has three tabs.
 - Optional save `S.topup {week, bought{id:n}, first[], rebate}` (`Topup.valid`).
+- Top-up Fest (user photos of the reference's FestEvent Top-up, 2026-11-27: "reward those who pay, not only with extras"): first
+  tab of the store and its own home promo `festTop`. Single Top-up (one purchase of at least EUR 1.09 / 5.49 / 10.99, 3 times each),
+  Multi-Day (festival total 20.99 ... 255.99) and Daily Top-up (today's total 1.09 ... 345.99, 00:00 UTC) rows of pearls,
+  set stones, awakening crystals and chests (`Topup.festSingle/festMulti/festDaily`, `festRecord` from `grant`, `festClaim`,
+  `festDue` = the promo's red dot). Festival `festDays` 6 UTC days. Optional `S.fest {p,sn,sg,m,mg,d,dc,dg}` (cents,
+  `festValid`). Payment is NOT connected, so progress stays at EUR 0. A Patron (VIP) level system was offered, not built.
 - Weekly Packs tab is a staircase (user: "лесенкой"): all five packs side by side, bottoms on one line, each a step
   taller (`.tp-wk1..5` min-height in cqh) with a growing prism pile (`topup-pile-2..6`); price buttons are light gold
   pills, not the painted plate (user: "rusty").
