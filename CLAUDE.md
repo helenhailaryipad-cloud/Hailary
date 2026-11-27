@@ -363,6 +363,9 @@ Claim menu). Optional save field `S.garden {open, plots[6]{seed,at,set,w}, exp, 
   Animals are bought strictly in order (`nextAnimal`, `buyAnimal`): 6 hens (500 ... 3,000 gold), then 6 cows, then 6
   sheep; each brings its goods on its own clock (`animals`: egg basket 1 h, milk 3 h, wool 6 h; `collect`, Collect all
   `collectAll`), the ready good floats over the animal.
+  Scrolling farm (user: "not all on one page, let it scroll"): the four-terrace picture is a tall map (`.gd-farmmap`,
+  2:3 at full width) in a scroll box; pens sit on the painted terraces (`GD_PENS` top/height %), animals larger;
+  Collect all floats at the bottom; the scroll position survives redraws.
   Piglets (user: "what about piglets?"): a fourth pen after the sheep, 6 piglets (16,000+ gold), eat corn (fourth
   feed crop, 90 min, Garden Lv. 3), bring a truffle basket every 8 h; the farm picture has four terraces now
   (`farm-bg`, the three-terrace one kept as `farm-bg-v1.webp`). Feed crops grow wheat 5 < carrot 20 < potato 45 < corn 90 min.
