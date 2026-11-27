@@ -446,9 +446,9 @@ function equipped(eq,uid){return Object.values(eq.equipped).includes(uid)}
 // Crafting keeps three families apart: a piece is only made from spare pieces of its own family and tier.
 const gearGroups=['Equipment','Necklace & Amulet','Rings'];
 function gearGroup(template){const slot=catalog[template]?.slot||'';return ['necklace','amulet'].includes(slot)?gearGroups[1]:slot.startsWith('spirit')?gearGroups[2]:gearGroups[0]}
-// 2-Star Red (user photos 2026-11-27): T1-5 three Orange pieces = 100%; higher tiers open more places (T6-10 four,
-// T11+ five) and still work from three pieces, at count / places. `places` = shown places, the rest locked.
-const craftWide=tier=>tier>=11?5:tier>=6?4:3;
+// 2-Star Red (user 2026-11-27): T1-4 three Orange pieces = 100%, T5-12 four, T13-20 five, T21+ six; always works from
+// three pieces, at count / places. `places` = shown places, the rest locked.
+const craftWide=tier=>tier>=21?6:tier>=13?5:tier>=5?4:3;
 function craftRecipe(rank,tier=1){const r=gearRanks[rank];if(!r?.need)return null;const need=r.flex?craftWide(tier):r.need;return {need,min:r.min||need,flex:!!r.flex&&need>(r.min||need),places:Math.max(need,r.places||need),mats:r.mats||{}}}
 // Spare pieces that can go into a craft of quality `rank` at `tier` in the family `group`: any slot of that family.
 function craftInputs(save,group,tier,rank){const eq=state(save);return eq.items.filter(e=>!e.starter&&!e.stored&&!equipped(eq,e.uid)&&catalog[e.template].tier===tier&&gearGroup(e.template)===group&&gearRank(e)===rank-1)}
