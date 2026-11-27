@@ -46,7 +46,7 @@ const gearRanks=[
  {id:'blue',name:'Blue',stars:0,color:'#58b7ff',bonus:0},
  {id:'purple',name:'Purple',stars:1,color:'#b784ff',bonus:.12},
  {id:'orange',name:'Orange',stars:2,color:'#ffa94a',bonus:.24},
- {id:'red2',name:'2-Star Red',stars:2,color:'#ff5d6c',bonus:.3,need:5,flex:true,mats:{stone:30}},
+ {id:'red2',name:'2-Star Red',stars:2,color:'#ff5d6c',bonus:.3,need:3,flex:true,mats:{stone:30}},
  {id:'red3',name:'3-Star Red',stars:3,color:'#ff5d6c',bonus:.36,need:5,mats:{stone:60}},
  {id:'gold4',name:'4-Star Dark Gold',stars:4,color:'#e0a02c',bonus:.48,need:2,mats:{essence:20,stone:100}},
  {id:'pink5',name:'5-Star Pink',stars:5,color:'#ff7ac8',bonus:.6,need:1,mats:{gem:10,stone:150}},
