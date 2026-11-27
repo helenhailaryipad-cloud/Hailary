@@ -286,7 +286,8 @@ along the top of the blue banner, an XP groove; built at 1024 px q95. Reina's RE
 `reinaFaceUrl()` crops the head of the worn look without wings (`registeredCombatBitmap(true)`, alpha scan, cached per
 dress/hair; the old `reina-avatar` elf shows only until it is ready). Big gold-gradient power, small name (hidden under
 700 px), green XP bar in the groove, level in the medallion, a flickering flame glow `.pf2-flame` and a light sweep
-`.pf2-shine`. Positions in CSS "Profile plate, festive look".
+`.pf2-shine`. Positions in CSS "Profile plate, festive look". No name on the plate (user circled the clipped name):
+only the centred power and the XP bar.
 The old v301 profile page (`heroProfile`, blue card with party heroes, Fashion / Mount, Attributes; user: "what is
 this? my eyes rolled up") is retired: `go('profile')` and a saved `screen==='profile'` open `character` instead; the
 plate and the Character page no longer link to it; the city skill "Companion" opens `cityCompanion`.
