@@ -11505,3 +11505,22 @@ body[data-screen=topup] #stage>#main{inset:0!important;width:100%;height:100%;pa
 #stage #main .tp-room button.tp-buy:active,#stage #modal .tp-pop .tp-buy:active{transform:translateY(1px);box-shadow:inset 0 1px 0 #fff,0 1px 0 #e9a92a!important}
 #stage .tp-price{background:linear-gradient(#fffbe0,#ffe27a 50%,#ffcc3d);color:#6a3a06;font-family:Arial,sans-serif;font-weight:900;text-shadow:0 1px 0 #fff8}
 #stage .tp-week{align-items:flex-start}
+/* Weekly Packs as a staircase (user: "лесенкой"): all five side by side, bottoms on one line, each pack a step taller */
+#stage .tp-room:has(.tp-week) .tp-banner{height:min(22cqh,40cqw);padding-top:min(5cqh,40px)}
+#stage .tp-week{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));align-items:end!important;gap:min(1.6cqw,8px);overflow:visible;padding:2px 0 6px}
+#stage .tp-wk{flex:none;display:flex;flex-direction:column;align-items:center;gap:min(.9cqw,5px);padding:min(1.4cqw,8px) min(1cqw,5px) min(1.4cqw,8px);border-radius:16px 16px 14px 14px}
+#stage .tp-wk1{min-height:42cqh}#stage .tp-wk2{min-height:46cqh}#stage .tp-wk3{min-height:50cqh}#stage .tp-wk4{min-height:54cqh}#stage .tp-wk5{min-height:58cqh}
+#stage .tp-wk .tp-val{display:grid;justify-items:center;gap:2px;padding:3px 4px;width:100%;box-sizing:border-box;font-size:min(2.6cqw,14px);white-space:nowrap;line-height:1}
+#stage .tp-wk .tp-val small{font:800 min(1.9cqw,10px)/1 Arial,sans-serif;color:#7a6aa8}
+#stage .tp-wk .tp-val :is(img,i,svg,span){display:inline-block;width:1em;height:1em;vertical-align:-2px;margin-right:1px}
+#stage .tp-wk .tp-x2{top:-6px;left:auto;right:-5px;transform:rotate(8deg);z-index:2}
+#stage .tp-wpile{flex:0 1 auto;min-height:0;aspect-ratio:1;object-fit:contain;margin:auto 0;filter:drop-shadow(0 3px 4px #6a4aa033)}
+#stage .tp-wk1 .tp-wpile{width:52%}#stage .tp-wk2 .tp-wpile{width:62%}#stage .tp-wk3 .tp-wpile{width:72%}#stage .tp-wk4 .tp-wpile{width:84%}#stage .tp-wk5 .tp-wpile{width:96%}
+#stage .tp-wk .tp-wtiles{grid-template-columns:1fr 1fr;gap:min(.8cqw,4px);width:100%}
+#stage .tp-wk .tp-tile{width:100%;border-radius:9px;border-width:1.5px}
+#stage .tp-wk .tp-tile b{font-size:min(2.1cqw,11px)}
+#stage .tp-wk s{font-size:min(2.2cqw,12px)}
+#stage #main .tp-room .tp-wk button.tp-buy{width:100%;padding:min(1.5cqw,8px) 2px;font-size:min(3cqw,16px);display:block;text-align:center}
+#stage #main .tp-room .tp-wk button.tp-buy svg{display:none}
+#stage .tp-wk>small{font-size:min(2.2cqw,12px);line-height:1}
+@container (max-aspect-ratio:3/4){#stage .tp-wk1{min-height:46cqh}#stage .tp-wk2{min-height:51cqh}#stage .tp-wk3{min-height:56cqh}#stage .tp-wk4{min-height:61cqh}#stage .tp-wk5{min-height:66cqh}}
