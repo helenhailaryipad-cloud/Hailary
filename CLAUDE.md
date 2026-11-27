@@ -11,6 +11,8 @@ Read `docs/WINGS-OF-WONDER-HANDOVER.md` before any game work.
 "What is this vibration ... the bottom icons flicker": the running light around every button (`button-edge-light`) and the
 sheen across it (`button-face-light`) read as shaking on the iPad. Both keyframes are redefined at the end of `stage.css`
 to stay invisible. Do not add looping shimmer, pulsing scale or bobbing to buttons and icons again.
+The gold button plate `ui-btn-gold` is lighter and more yellow since 2026-11-27 (user: "I don't like this colour anywhere"):
+`build-ui-icons.py` shifts its orange tones (purple gems untouched).
 
 ## Visual style rule (user, 2026-11-25)
 "Try not to put everything into black frames": no dark boxes, dark bars or dark framed panels around content by
