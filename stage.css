@@ -11613,3 +11613,76 @@ body[data-screen=topup] #stage>#main{inset:0!important;width:100%;height:100%;pa
 #modal.sw-pop .sw-row button.sw-vip::before,#modal.sw-pop .sw-row button.sw-vip::after{content:none!important}
 #modal.sw-pop .sw-row button.sw-vip span{font:800 11px/1.1 Arial,sans-serif;color:#7a4ab8}
 html body #modal.sw-pop.sw-pop .sw-row button.sw-vip{border:0 none transparent!important;outline:0!important;background:transparent none!important;box-shadow:none!important}
+/* ===== Forge: Set and Awaken (light room, user photos 2026-11-27) ===== */
+body[data-screen=cityForge]:has(.fg-room) :is(.app-header,.app-nav,footer,.return-to-menu,.section-tabs){display:none!important}
+body[data-screen=cityForge]:has(.fg-room) #main{padding:0!important;overflow:hidden}
+#stage .fg-room{position:relative;height:100%;container-type:size;display:flex;flex-direction:column;align-items:center;gap:min(1.2cqh,8px);padding:8px 10px 0;box-sizing:border-box;background:radial-gradient(ellipse at 50% 20%,#ffffff 0,#e4f2ff 40%,#cfe6fb 100%);font-family:Arial,sans-serif;color:#2a3a52;overflow:hidden}
+#stage .fg-top{width:100%;display:flex;align-items:center;gap:8px}
+#stage #main .fg-top button[data-back]{flex:none}
+#stage .fg-title{font:900 min(5cqw,24px)/1 Georgia,serif;color:#2a5a9a;margin-right:auto}
+#stage .fg-chip{display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;background:#ffffffcc;border:1px solid #c8dcf0;font:800 13px Arial,sans-serif;color:#2a3a52}
+#stage .fg-chip :is(img,i,svg,span){width:18px;height:18px}
+#stage .fg-orbit{position:relative;display:grid;place-items:center;width:min(38cqw,24cqh);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#ffffff 0 34%,#bfe0ff 35% 37%,#e8f4ff 38% 58%,#a9d2f8 59% 61%,transparent 62%),conic-gradient(from 0deg,#fff0 0 10%,#9fd0ff55 10% 15%,#fff0 15% 35%,#9fd0ff55 35% 40%,#fff0 40% 60%,#9fd0ff55 60% 65%,#fff0 65% 85%,#9fd0ff55 85% 90%,#fff0 90%);filter:drop-shadow(0 4px 12px #5a8ac033);flex:none}
+#stage .fg-big,#stage .fg-tile{position:relative;display:grid;place-items:center;aspect-ratio:1;border-radius:14px;background:linear-gradient(160deg,color-mix(in srgb,var(--q) 35%,#fff),color-mix(in srgb,var(--q) 75%,#fff));border:3px solid var(--q);box-shadow:0 3px 10px #0002}
+#stage .fg-big{width:46%}
+#stage :is(.fg-big,.fg-tile) :is(img,svg){width:84%;height:84%;object-fit:contain}
+#stage :is(.fg-big,.fg-tile) b{position:absolute;right:4px;top:2px;font:900 12px/1 Arial,sans-serif;color:#fff;text-shadow:0 1px 2px #000a}
+#stage :is(.fg-big,.fg-tile) i{position:absolute;left:3px;top:2px;font-size:10px;font-style:normal;color:#ffe25a;letter-spacing:-1px;text-shadow:0 1px 2px #000a}
+#stage :is(.fg-big,.fg-tile) em{font:700 12px Arial,sans-serif;color:#567;font-style:normal}
+#stage .fg-awlv{position:absolute;bottom:-4px;padding:3px 14px;border-radius:999px;background:linear-gradient(#ffffff,#e0efff);border:1.5px solid #9fc8f0;font:800 13px Arial,sans-serif;color:#2a4a7a}
+#stage .fg-awlv b{color:#2e9a3a}
+#stage .fg-stones{display:flex;gap:10px;justify-content:center}
+#stage .fg-stone{position:relative;display:grid;place-items:center;width:min(13cqw,8.5cqh,62px);aspect-ratio:1;border-radius:12px;background:linear-gradient(#fff,#f1e6ff);border:2px solid #c8a8f0;box-shadow:0 2px 6px #6a4aa022}
+#stage .fg-stone :is(img,i){width:82%;height:82%;object-fit:contain}
+#stage .fg-stone b{position:absolute;bottom:1px;right:3px;font:900 11px/1 Arial,sans-serif;color:#2e8a3a;-webkit-text-stroke:2.5px #fff;paint-order:stroke}
+#stage .fg-stone b.low{color:#d0402a}
+#stage .fg-stone.lock{background:#e6eef8;border-color:#c0d0e4;font-size:22px;filter:grayscale(.6);opacity:.8}
+#stage .fg-name{margin:0;font:900 min(4.2cqw,19px)/1.1 Georgia,serif;color:#8a5a12;text-align:center}
+#stage .fg-name small{font:800 13px Arial,sans-serif;color:#5a6a82}
+#stage .fg-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;width:100%}
+#stage .fg-col{padding:6px 8px;border-radius:12px;background:#ffffffb0;border:1px solid #d4e4f4;opacity:.75}
+#stage .fg-col.act{opacity:1;background:linear-gradient(#fffbe8,#fff2c8);border-color:#f0d290}
+#stage .fg-col h4{margin:0 0 4px;font:900 12px Arial,sans-serif;color:#5a6a82;text-align:center}
+#stage :is(.fg-col,.fg-aw) p{display:flex;justify-content:space-between;gap:4px;margin:2px 0;font:700 min(2.8cqw,12.5px)/1.25 Arial,sans-serif}
+#stage :is(.fg-col,.fg-aw) p span{color:#4a5a72}
+#stage :is(.fg-col,.fg-aw) p b{color:#2a3a52}
+#stage .fg-aw{width:min(80%,340px);padding:8px 14px;border-radius:12px;background:#ffffffb0;border:1px solid #d4e4f4}
+#stage .fg-aw p i{color:#e0a020;font-style:normal}
+#stage .fg-aw p b.up{color:#2e9a3a}
+#stage #main .fg-room button.fg-go{flex:none;padding:10px 40px;border-radius:999px;border:1.5px solid #ffd860!important;background:linear-gradient(#fffbe0,#ffe27a 48%,#ffcc3d)!important;box-shadow:inset 0 1px 0 #fff,0 2px 0 #e9a92a!important;color:#6a3a06!important;font:900 min(4cqw,17px)/1 Arial,sans-serif;min-height:0}
+#stage #main .fg-room button.fg-go:is(.off,.done){background:linear-gradient(#ffffff,#f0e8e0)!important;border-color:#e0d0c0!important;color:#9a6a4a!important;box-shadow:0 1px 0 #d8c8b8!important}
+#stage .fg-why{margin:-2px 0 0;font:700 12px Arial,sans-serif;color:#c0442a}
+#stage .fg-note{margin:0;font:700 min(2.8cqw,12px)/1.3 Arial,sans-serif;color:#4a6a92;text-align:center}
+#stage .fg-rail{display:flex;gap:6px;width:100%;overflow-x:auto;scrollbar-width:none;padding:2px 0;flex:none}
+#stage .fg-rail::-webkit-scrollbar{display:none}
+#stage #main .fg-room button.fg-card{flex:0 0 min(19cqw,96px);display:grid;justify-items:center;gap:3px;padding:5px 4px;border-radius:12px;background:#ffffffc8!important;border:1.5px solid #d4e4f4!important;box-shadow:none!important;color:#2a3a52;min-height:0}
+#stage #main .fg-room button.fg-card.on{border-color:#f0b040!important;background:linear-gradient(#fffbe8,#fff0c0)!important}
+#stage .fg-card small{font:800 10.5px/1.15 Arial,sans-serif;color:#4a5a72;text-align:center;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#stage .fg-card small.ok{color:#2e8a3a;white-space:normal}
+#stage .fg-card small.bad{color:#c0442a;white-space:normal}
+#stage .fg-card small.warn{color:#b07010;white-space:normal}
+#stage .fg-card .fg-tile{width:78%}
+#stage :is(.fg-sets,.fg-modes){display:flex;width:100%;gap:4px;flex:none}
+#stage #main .fg-room :is(.fg-sets,.fg-modes) button{flex:1;padding:8px 4px;border-radius:10px 10px 4px 4px;background:#ffffff99!important;border:1px solid #c8dcf0!important;box-shadow:none!important;color:#4a6a92;font:800 min(3.2cqw,14px)/1 Arial,sans-serif;min-height:0}
+#stage #main .fg-room :is(.fg-sets,.fg-modes) button.on{background:linear-gradient(#ffffff,#d8ecff)!important;border-color:#7ab0e8!important;color:#1a4a8a}
+#stage .fg-modes{margin-top:auto}
+#stage .fg-nav{display:flex;width:calc(100% + 20px);gap:2px;padding:4px 6px 6px;background:linear-gradient(#ffffffd8,#e8f2ff);border-top:1px solid #c8dcf0;flex:none}
+#stage #main .fg-room .fg-nav button{flex:1;display:grid;justify-items:center;gap:1px;padding:2px!important;background:none!important;border:0!important;box-shadow:none!important;color:#5a6a82;min-height:0}
+#stage #main .fg-room .fg-nav button img{width:min(8cqw,36px);height:min(8cqw,36px);object-fit:contain}
+#stage #main .fg-room .fg-nav button span{font:800 11px Arial,sans-serif}
+#stage #main .fg-room .fg-nav button.on span{color:#c07010}
+#stage #main .fg-room button::before,#stage #main .fg-room button::after{content:none!important}
+#stage img.bag-ico.bag-art{background:none!important;object-fit:contain}
+#stage :is(.fg-aw) p{display:grid!important;grid-template-columns:1fr 5em 1.5em 5em;align-items:center}
+#stage .fg-aw p b{text-align:right}
+#stage .fg-aw p i{text-align:center}
+#stage .fg-orbit{width:min(34cqw,20cqh)}
+#stage #main .fg-room .fg-nav button{border:0 none!important;background:transparent!important;outline:0!important}
+html body #stage #main .fg-room .fg-nav button{border:0 none transparent!important;box-shadow:none!important;background:transparent none!important}
+#stage .fg-room{gap:min(.8cqh,7px)}
+#stage .fg-orbit{width:min(32cqw,15cqh)}
+#stage .fg-stone{width:min(12cqw,7cqh,62px)}
+#stage .fg-col{padding:4px 7px}
+#stage #main .fg-room button.fg-card{flex-basis:min(17cqw,15cqh,96px)}
+#stage .fg-card .fg-tile{width:70%}
+#stage #main .fg-room button.fg-go{padding:8px 40px}
