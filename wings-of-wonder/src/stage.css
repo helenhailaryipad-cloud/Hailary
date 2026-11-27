@@ -10972,3 +10972,7 @@ body[data-screen=cityExplore] #stage>#main{inset:0!important;width:100%;height:1
 #stage .ch-scroll{padding-bottom:15cqh}
 #stage .ch-map::after{content:'';position:absolute;top:100%;left:0;right:0;height:15cqh;background:var(--chbg) center bottom/100% calc(100cqw * 1.5) no-repeat;transform:scaleY(-1);pointer-events:none}
 #stage #main .ch-skip input{width:18px!important;height:18px!important;min-height:0!important;padding:0!important;margin:0!important;background:#fff!important;border:1px solid #b8a070!important;appearance:auto;-webkit-appearance:checkbox;flex:none}
+/* the map ends at its own bottom edge: no extra strip under it (user: "this field") */
+#stage .ch-scroll{padding-bottom:0!important}
+#stage .ch-map::after{content:none!important}
+#stage .ch-room{background:none}
