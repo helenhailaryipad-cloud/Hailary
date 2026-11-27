@@ -11,6 +11,8 @@ Read `docs/WINGS-OF-WONDER-HANDOVER.md` before any game work.
 "Try not to put everything into black frames": no dark boxes, dark bars or dark framed panels around content by
 default. Prefer light, airy surfaces (sky-blue / ivory cards, soft gradients), content floating on the art, icons
 without dark discs, gold accents. Use a dark panel only where text would otherwise be unreadable, and keep it small.
+Prize tiles (`.bag-gain`, everywhere) and the shared result window (`resultShow`, `.wr-card`) are light since
+2026-11-27 (user circled a dark reward tile: "no black frames").
 
 ## Image quality rule (user, 2026-11-27)
 "Everything is squeezed and muddy; add anti-aliasing and higher quality; you have no limits, do not invent them."
