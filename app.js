@@ -872,6 +872,25 @@ document.addEventListener('load',async event=>{
 const registeredCombatCache=new WardrobeCache(8);
 let lastRegisteredCombatImage=null;
 // noWings: the same portrait without wings, for games that draw the wings themselves so they can beat.
+// Reina's real face for the home profile ring: the worn look without wings, cropped to the head (alpha scan), cached
+// per look. Until it is ready the painted avatar shows; img.pf2-face is swapped when the crop is done.
+const reinaFaceCache=new Map();
+function reinaFaceUrl(){
+ if(typeof document==='undefined'||typeof document.createElement!=='function')return '';
+ const {dress,hair}=registeredLook(),key=dress+'/'+hair;if(reinaFaceCache.has(key))return reinaFaceCache.get(key)||'';
+ const img=registeredCombatBitmap(true);
+ if(!img){setTimeout(()=>{if(reinaFaceUrl()){const f=document.querySelector('.pf2-face');if(f)f.src=reinaFaceUrl()}},400);return ''}
+ try{
+  const W=img.naturalWidth||img.width,H=img.naturalHeight||img.height,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0);
+  const d=x.getImageData(0,0,W,H).data,op=(i,j)=>d[(j*W+i)*4+3]>60;
+  let top=0;for(let j=0;j<H&&!top;j+=2)for(let i=Math.floor(W*.3);i<W*.7;i+=2)if(op(i,j)){top=j;break}
+  let bot=H-1;for(let j=H-1;j>top;j-=4){let hit=false;for(let i=0;i<W;i+=4)if(op(i,j)){hit=true;break}if(hit){bot=j;break}}
+  const fh=bot-top,band=top+fh*.15;let sx=0,n=0;for(let j=Math.floor(top+fh*.1);j<band;j+=2)for(let i=Math.floor(W*.25);i<W*.75;i+=2)if(op(i,j)){sx+=i;n++}
+  const cx=n?sx/n:W/2,side=fh*.16,cy=top+fh*.095,o=document.createElement('canvas');o.width=o.height=256;
+  const g=o.getContext('2d');g.imageSmoothingQuality='high';g.drawImage(img,cx-side/2,cy-side/2,side,side,0,0,256,256);
+  const url=o.toDataURL('image/png');reinaFaceCache.set(key,url);return url;
+ }catch{reinaFaceCache.set(key,'');return ''}
+}
 function registeredCombatBitmap(noWings){
  if(typeof Image==='undefined')return null;
  const {dress,hair}=registeredLook(),weapon=S.atelier?.weapon||((S.reinaFashion?.equipped&4)?12:13);
@@ -1176,7 +1195,7 @@ function home(){
  // Beside Reina stand exactly the pets placed in the three Primary Pet slots (Pet -> Formation), each in its own spot.
  const pets=WonderGear.petTeam(S).slice(0,3).map((id,slot)=>id?{...item(id),slot}:null).filter(Boolean);
  const short=[cityGroups[0][0],cityGroups[1].find(i=>i[0]==='gift')];
- $('#main').innerHTML=`<section class="city-hud" data-expanded="${cityExpanded}"><button class="city-status pf2" onclick="go('profile')" aria-label="Profile: ${esc(S.name)}, level ${level()}, power ${fmt(st.power)}"><img class="pf2-face" src="${artPath('reina-avatar')}" alt=""><img class="pf2-plate" src="${artPath('hud-profile')}" alt="">${S.supreme?.frame&&typeof frameArt==='function'?frameArt(S.supreme.frame,false,'pf-city'):''}<span class="pf2-band"><b>${esc(S.name)}</b><span><i>⚔&#xFE0E;</i>${fmt(st.power)}</span><i class="pf2-xp"><u style="width:${Math.min(100,(S.xp%WonderProgress.xpPerLevel)/WonderProgress.xpPerLevel*100)}%"></u></i></span><span class="pf2-lv">${level()}</span></button>
+ $('#main').innerHTML=`<section class="city-hud" data-expanded="${cityExpanded}"><button class="city-status pf2" onclick="go('profile')" aria-label="Profile: ${esc(S.name)}, level ${level()}, power ${fmt(st.power)}"><img class="pf2-face" src="${reinaFaceUrl()||artPath('reina-avatar')}" alt=""><img class="pf2-plate" src="${artPath('hud-profile')}" alt="">${S.supreme?.frame&&typeof frameArt==='function'?frameArt(S.supreme.frame,false,'pf-city'):''}<span class="pf2-band"><b>${esc(S.name)}</b><span><i>⚔&#xFE0E;</i>${fmt(st.power)}</span></span><i class="pf2-xp"><u style="width:${Math.min(100,(S.xp%WonderProgress.xpPerLevel)/WonderProgress.xpPerLevel*100)}%"></u></i><i class="pf2-flame"></i><i class="pf2-shine"></i><span class="pf2-lv">${level()}</span></button>
  <button class="city-rank" onclick="go('rankings')"><img src="${artPath('hud-rank')}" alt="">Rank</button><div class="city-wallet"><span><img src="${artPath('hud-gems')}">${fmt(S.tickets)}</span><span><img src="${artPath('hud-prisms')}">${fmt(S.scales)}</span></div><div class="city-place">Sky Garden</div>
  <button class="city-event" onclick="go('rankings')"><img src="${artPath('hud-event')}" alt=""><small>Hall of Wonders</small><strong>${esc(S.name)}</strong></button>
  <div class="city-left-events"><div class="city-top">${cityGroups[0].map(item=>cityIcon(item,'left-')).join('')}</div><div class="city-top city-compact">${short.map(item=>cityIcon(item,'left-')).join('')}</div>
