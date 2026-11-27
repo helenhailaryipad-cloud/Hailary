@@ -1103,7 +1103,7 @@ unchanged), Warehouse (`cityVault`), Devour (`cityDevour`). Rules in `gear-data.
     (`gearGroups` = Equipment / Necklace & Amulet / Rings, any slot inside the family; `craftInputs`), plus `mats`
     for Dark Gold and finer (existing materials: essence, gems, synthesis stones). It makes a NEW piece of the chosen
     slot that keeps the highest enhancement and gems of the inputs. 2-Star Red depends on the tier (user photos 2026-11-27):
-    T1-5 three Orange pieces = 100%, T6-10 four places, T11+ five places (`craftWide`), always at least three pieces,
+    T1-4 three Orange pieces = 100%, T5-12 four, T13-20 five, T21+ six (user guessed six) places (`craftWide`), always at least three pieces,
     chance = pieces / places; six places are drawn, the unused ones locked (`places`, `.loom-lock`); 3-Star Red needs exactly three 2-Star Red pieces of the same tier (`craftChance`); a failed try loses them. The old "add a star to this piece" action is gone
     (`perform(...,'star')` refuses; the item dialog and the old Forge page point to Gear Crafting).
   - Screen `cityCraft`: quality list with tiers on the left, result tile, success rate / "At least N pieces",
