@@ -11847,3 +11847,8 @@ html body #stage .city-hud .city-rank.pt-home{display:grid;justify-items:center;
 #stage .pt-hemb b{position:absolute;inset:0;display:grid;place-items:center;font:900 min(4.4cqw,22px)/1 Georgia,serif;color:#fff6c8;text-shadow:0 1px 0 #6a3aa0,0 0 6px #ffe9a0}
 #stage .city-rank.pt-home.zero .pt-hemb{filter:grayscale(.35) drop-shadow(0 2px 4px #0005)}
 #stage .city-rank.pt-home .tp-dot{top:0;right:0}
+/* No running light / shimmer on the buttons of the VIP room and the Prism Bazaar (user: "what is this vibration") */
+#stage #main :is(.pt-room,.tp-room) button::before,#stage #main :is(.pt-room,.tp-room) button::after{content:none!important;animation:none!important}
+#stage .pt-daily.on i{animation:none!important;box-shadow:0 0 0 2px #ffd860,0 0 10px #ffd86099}
+#stage #main .pt-room .pt-strip button.on{transform:none}
+html body #stage .city-hud .city-rank.pt-home::before,html body #stage .city-hud .city-rank.pt-home::after{content:none!important;animation:none!important}
