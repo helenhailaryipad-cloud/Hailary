@@ -43,8 +43,8 @@ vm.runInContext(`{const G=Garden,s=defaults(),t=Date.UTC(2026,10,27,8);s.gold=10
  if(G.collect(s,0,t+30*60e3))throw Error('Farm collect early');const g1=s.gold;if(!G.collect(s,0,t+61*60e3)||s.gold!==g1+80||G.collect(s,0,t+62*60e3))throw Error('Farm collect');
  for(let i=0;i<12;i++)G.buyAnimal(s,t);if(s.garden.farm.length!==18||G.nextAnimal(s).k!=='pig')throw Error('Farm 6+6+6 then piglets');for(let i=0;i<6;i++)G.buyAnimal(s,t);if(s.garden.farm.length!==24||G.nextAnimal(s)||G.buyAnimal(s,t))throw Error('Farm 24');
  const v=s.garden,h=v.farm[0];if(!G.hungry(h)||G.feed(s,0,t))throw Error('Farm hungry without wheat');
- v.plots[1]=null;s.gold+=100;if(!G.plant(s,1,'wheat',t)||G.harvest(s,1,t+60e3))throw Error('Wheat plant');G.harvest(s,1,t+6*60e3);if(v.feed.wheat!==3)throw Error('Wheat to barn');
- if(!G.feed(s,0,t+7*60e3)||v.feed.wheat!==2||h.at!==t+67*60e3)throw Error('Feed hen');
+ v.plots[1]=null;s.gold+=100;if(!G.plant(s,1,'wheat',t)||G.harvest(s,1,t+60e3))throw Error('Wheat plant');G.harvest(s,1,t+6*60e3);if(v.feed.wheat!==3)throw Error('Wheat to barn');if(!v.plots[1]||v.plots[1].seed!=='wheat'||v.plots[1].at!==t+11*60e3)throw Error('Wheat regrows by itself');G.harvest(s,1,t+12*60e3);if(v.feed.wheat!==6)throw Error('Wheat second crop');
+ if(!G.feed(s,0,t+13*60e3)||v.feed.wheat!==5||h.at!==t+73*60e3)throw Error('Feed hen');
  if(!G.valid(s.garden)||G.valid({...s.garden,farm:[{k:'cow',at:1}]}))throw Error('Farm save order');
  if(!G.valid(s.garden)||G.valid({...s.garden,open:9})||!valid(JSON.parse(JSON.stringify(s))))throw Error('Garden save');}`,context);
 
