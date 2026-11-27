@@ -58,9 +58,9 @@ const gearRanks=[
  {id:'orange1',name:'1-Star Orange',stars:1,color:'#ffa94a',bonus:.18,food:true,order:1.5}
 ];
 const legacyRanks=[0,1,2,4,5,6],gearCraftFrom=3,gearNoDevour=7;
-// Guardian gear (user 2026-11-27): each of `bossDropCount` pieces rolls its quality: Purple 80%, 1-Star Orange 9.5%,
-// Orange (2★) 9.5%, 2-Star Red 1%. No Blue from guardians; never a 3-Star Red (that is crafted only).
-const bossDropCount=3,bossDropTable=[[1,.8],[10,.095],[2,.095],[3,.01]],bossDropRanks=bossDropTable.map(x=>x[0]);
+// Guardian gear (user 2026-11-27): each of `bossDropCount` pieces rolls its quality: Purple 70%, Blue 10% (the 80% of
+// Maw food), 1-Star Orange 9.5%, Orange (2★) 9.5%, 2-Star Red 1%; never a 3-Star Red (that is crafted only).
+const bossDropCount=3,bossDropTable=[[1,.7],[0,.1],[10,.095],[2,.095],[3,.01]],bossDropRanks=bossDropTable.map(x=>x[0]);
 function bossDropRank(roll){let acc=0;for(const [rank,p]of bossDropTable){acc+=p;if(roll<acc)return rank}return bossDropTable[0][0]}
 // Maw food: Blue, Purple and 1-Star Orange. `gearOrder` = place on the ladder (1-Star Orange sits at 1.5).
 const gearFood=rank=>rank<2||!!gearRanks[rank]?.food,gearOrder=rank=>gearRanks[rank]?.order??rank;
