@@ -1109,6 +1109,10 @@ unchanged), Warehouse (`cityVault`), Devour (`cityDevour`). Rules in `gear-data.
   - Screen `cityCraft`: quality list with tiers on the left, result tile, success rate / "At least N pieces",
     material tiles, input places (tap + to pick, tap a piece to remove), Batch (2-Star Red only) / Add / Synthesize,
     then one tile per slot of the family with the number of usable pieces; family tabs at the bottom; `?` = ladder.
+  - 1-Star Orange (user 2026-11-27, photo of the reference's Devour Gear window): `gearRanks[10]` `orange1` (appended so
+    saved rank numbers stay; `order` 1.5, `food`), drops from every guardian (`bossDropRanks` = Orange, 1-Star Orange,
+    Purple, Blue), never a crafting input, Maw food (`gearFood`, `gearOrder`). Devour Gear pop-up `devourPop(tier)`
+    (`.dv-pop`): tier select, every spare piece, food ticked at first, Devour EXP, Start to Devour (`devourGo`).
   - Devour: the quick button picks only Blue and Purple; Relic and finer cannot be devoured (`gearNoDevour`);
     Auto devour (optional `S.autoDevour`) feeds Blue and Purple drops to the Maw as they drop.
   - Item card of the result (user photos 2026-11-27): tapping a slot tile (or the piece in the orbit) selects it and
