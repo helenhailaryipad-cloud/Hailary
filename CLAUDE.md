@@ -1110,6 +1110,10 @@ unchanged), Warehouse (`cityVault`), Devour (`cityDevour`). Rules in `gear-data.
     then one tile per slot of the family with the number of usable pieces; family tabs at the bottom; `?` = ladder.
   - Devour: the quick button picks only Blue and Purple; Relic and finer cannot be devoured (`gearNoDevour`);
     Auto devour (optional `S.autoDevour`) feeds Blue and Purple drops to the Maw as they drop.
+  - Item card of the result (user photos 2026-11-27): tapping a slot tile (or the piece in the orbit) selects it and
+    opens `craftPreview(slot)`, a light card (`#modal.gc-pop`, head in the quality colour): Gear Power, Gear Level,
+    Base Stats (base + quality bonus), Perfect Stat, three empty gem sockets, the power of the input quality, footer
+    "Reina · N Tier <slot>". The reference's male/female classes and "Unusable" weapons do not apply (one hero).
   - Not done from the photos: Tier-up and alternative input tabs (Red 3-Star / Dark Gold gear / Pink Gear), locked
     extra places, the Devour pop-up with a tier filter and the Maw's Upgrade button, Male Gear.
 - Equipment art is ONE design per slot in eight tier colourways (user 2026-11-21, with photos of the reference where
