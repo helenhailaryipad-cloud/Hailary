@@ -399,7 +399,7 @@ Dungeon / Wings / Soulforge / Elf tabs are replaced by `realmsList()`) and from 
 - Room: realm banner as background, the floor's guardian, a light card with floors 1-10, power line, "First clear x2",
   reward tiles, entries with +, violet Sweep, gold Challenge; a short fight (HP bar, numbers), then `resultShow`.
 - Art (image model): `art-source/realms/` -> `realm-<id>` banners 1536 x 1024 and `realm-hub` by
-  `scripts/build-realm-art.py`; chat preview packs `realm-*` into pack-minis. Placeholders throughout.
+  `scripts/build-realm-art.py`; chat preview packs `realm-*` into pack-realms. Placeholders throughout.
 
 ## Mini Games hub (2026-11-23)
 User: "all games in one place, names on the main field, not hunted through sub-tabs". The bottom-nav tab is called
