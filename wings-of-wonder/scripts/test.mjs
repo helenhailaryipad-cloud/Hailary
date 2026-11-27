@@ -35,15 +35,15 @@ vm.runInContext(`{const G=Garden,s=defaults(),t=Date.UTC(2026,10,27,8);s.gold=10
  if(G.plant(s,3,'sunpetal',t)||G.plant(s,0,'dewleaf',t))throw Error('Garden: locked bed or seed planted');
  if(!G.plant(s,0,'sunpetal',t)||s.gold!==950||G.plant(s,0,'sunpetal',t))throw Error('Garden plant');
  if(G.harvest(s,0,t+60e3))throw Error('Garden harvest before ripe');
- const cut=G.water(s,0,t);if(cut!==10*60e3||G.water(s,0,t))throw Error('Garden water once, at least 10 min');
- const g0=s.gold,r=G.harvest(s,0,t+20*60e3);if(!r||s.gold!==g0+180||s.garden.plots[0]||s.garden.harvests!==1)throw Error('Garden harvest');
+ const cut=G.water(s,0,t);if(cut!==7.5*60e3||G.water(s,0,t))throw Error('Garden water once, a quarter');
+ const g0=s.gold,r=G.harvest(s,0,t+23*60e3);if(!r||s.gold!==g0+180||s.garden.plots[0]||s.garden.harvests!==1)throw Error('Garden harvest');
  s.gold=1500;if(G.buyBed(s))throw Error('Garden bed without gold');s.gold=2500;if(!G.buyBed(s)||s.garden.open!==4)throw Error('Garden bed');
  for(const id of ['nyra','kael','pip','vesper','briar'])G.friendWater(s,id,t);if(G.friendWater(s,'orin',t)||G.friendWater(s,'nyra',t))throw Error('Garden friend limit');
  s.gold=10**7;for(let i=0;i<6;i++)if(!G.buyAnimal(s,t)||s.garden.farm[i].k!=='hen')throw Error('Farm hens first');if(G.nextAnimal(s).k!=='cow')throw Error('Farm cows after six hens');
  if(G.collect(s,0,t+30*60e3))throw Error('Farm collect early');const g1=s.gold;if(!G.collect(s,0,t+61*60e3)||s.gold!==g1+80||G.collect(s,0,t+62*60e3))throw Error('Farm collect');
  for(let i=0;i<12;i++)G.buyAnimal(s,t);if(s.garden.farm.length!==18||G.nextAnimal(s).k!=='pig')throw Error('Farm 6+6+6 then piglets');for(let i=0;i<6;i++)G.buyAnimal(s,t);if(s.garden.farm.length!==24||G.nextAnimal(s)||G.buyAnimal(s,t))throw Error('Farm 24');
  const v=s.garden,h=v.farm[0];if(!G.hungry(h)||G.feed(s,0,t))throw Error('Farm hungry without wheat');
- v.plots[1]=null;s.gold+=100;if(!G.plant(s,1,'wheat',t)||G.harvest(s,1,t+60e3))throw Error('Wheat plant');G.harvest(s,1,t+6*60e3);if(v.feed.wheat!==3)throw Error('Wheat to barn');if(!v.plots[1]||v.plots[1].seed!=='wheat'||v.plots[1].at!==t+11*60e3)throw Error('Wheat regrows by itself');G.harvest(s,1,t+12*60e3);if(v.feed.wheat!==6)throw Error('Wheat second crop');
+ v.plots[1]=null;s.gold+=100;if(!G.plant(s,1,'wheat',t)||G.harvest(s,1,t+30e3))throw Error('Wheat plant');G.harvest(s,1,t+6*60e3);if(v.feed.wheat!==3)throw Error('Wheat to barn');if(!v.plots[1]||v.plots[1].seed!=='wheat'||v.plots[1].at!==t+7*60e3)throw Error('Wheat regrows by itself');G.harvest(s,1,t+12*60e3);if(v.feed.wheat!==6)throw Error('Wheat second crop');
  if(!G.feed(s,0,t+13*60e3)||v.feed.wheat!==5||h.at!==t+73*60e3)throw Error('Feed hen');
  if(!G.valid(s.garden)||G.valid({...s.garden,farm:[{k:'cow',at:1}]}))throw Error('Farm save order');
  if(!G.valid(s.garden)||G.valid({...s.garden,open:9})||!valid(JSON.parse(JSON.stringify(s))))throw Error('Garden save');}`,context);

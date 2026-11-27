@@ -9,15 +9,15 @@ const Garden = {
   bedPrice: [0, 0, 0, 2000, 5000, 10000],
   waterDaily: 5,
   waterCut: 0.25,          // a watering takes 25% of the time left (at least 10 minutes), once per planting
-  waterMin: 10 * 60e3,
+  waterMin: 30e3,             // at least 30 s sooner
   friendDaily: 5,          // friend gardens watered a day
   friendGift: { gold: 60, gexp: 5 },
   // seeds: id, name, minutes, price (gold), harvest
   // feed crops (user: "carrot, potato ... wheat the simplest and fastest, for hens"): harvest goes to the barn as feed
   seeds: [
-    { id: 'wheat', name: 'Wheat', min: 5, price: 10, give: { feed: { wheat: 3 } }, gexp: 1, lv: 1, regrow: true },   // planted once, grows again by itself (user)
-    { id: 'carrot', name: 'Carrot', min: 20, price: 30, give: { feed: { carrot: 3 } }, gexp: 2, lv: 1 },
-    { id: 'potato', name: 'Potato', min: 45, price: 50, give: { feed: { potato: 3 } }, gexp: 3, lv: 2 },
+    { id: 'wheat', name: 'Wheat', min: 1, price: 10, give: { feed: { wheat: 3 } }, gexp: 1, lv: 1, regrow: true },   // planted once, grows again by itself (user)
+    { id: 'carrot', name: 'Carrot', min: 5, price: 30, give: { feed: { carrot: 3 } }, gexp: 2, lv: 1 },
+    { id: 'potato', name: 'Potato', min: 15, price: 50, give: { feed: { potato: 3 } }, gexp: 3, lv: 2 },
     { id: 'corn', name: 'Corn', min: 90, price: 80, give: { feed: { corn: 3 } }, gexp: 5, lv: 3 },
     { id: 'sunpetal', name: 'Sunpetal', min: 30, price: 50, give: { gold: 180, xp: 20 }, gexp: 5 },
     { id: 'moonbell', name: 'Moonbell', min: 60, price: 90, give: { gold: 220, xp: 45, stone: 6 }, gexp: 8 },
@@ -196,7 +196,7 @@ function gardenChest(i) {
   popup(`<div class="gd-pop"><h2>Harvest chests</h2>${Garden.chests.map((x, j) => `<div class="gd-friend"><span class="gd-ci">${bagIcon(x.id)}</span><span><b>${x.at} harvests</b><small>${WonderGear.bagItemById[x.id].name}</small></span><em>${v.got.includes(j) ? '✓' : Math.min(v.harvests, x.at) + '/' + x.at}</em></div>`).join('')}</div>`); $('#modal').classList.add('bw-pop');
 }
 function gardenRules() {
-  popup(`<div class="gd-pop"><h2>Sky Garden</h2><p>Tap an empty bed and plant a seed bought with gold. Wheat is planted once and grows again by itself every 5 minutes. Seeds grow on the real clock, even while you play elsewhere or are away.</p><p>Water a growing plant once to make it ripen 25% sooner (at least 10 minutes). You have ${Garden.waterDaily} waterings a day; they refill at 00:00 UTC.</p><p>Harvest gives gold, XP, crystals, gems and bag items, and raises your Garden level, which opens new seeds. Every few harvests a chest waits for you.</p><p>Water up to ${Garden.friendDaily} friends' gardens a day for a small gift.</p></div>`); $('#modal').classList.add('bw-pop');
+  popup(`<div class="gd-pop"><h2>Sky Garden</h2><p>Tap an empty bed and plant a seed bought with gold. Wheat is planted once and grows again by itself every minute. Seeds grow on the real clock, even while you play elsewhere or are away.</p><p>Water a growing plant once to make it ripen 25% sooner (at least 10 minutes). You have ${Garden.waterDaily} waterings a day; they refill at 00:00 UTC.</p><p>Harvest gives gold, XP, crystals, gems and bag items, and raises your Garden level, which opens new seeds. Every few harvests a chest waits for you.</p><p>Water up to ${Garden.friendDaily} friends' gardens a day for a small gift.</p></div>`); $('#modal').classList.add('bw-pop');
 }
 
 // Farm view: pens on the painted terraces of a tall map that scrolls (user: "not all on one page, let it scroll").
