@@ -1740,7 +1740,7 @@ function exploreTool(name,art,destination){
  const action=destination?"go('"+destination+"')":"exploreDetail('"+name+"')";
  return '<button onclick="'+action+'">'+artImage(art,'')+'<small>'+name+'</small></button>';
 }
-function cityExplore(){
+function cityExploreOld(){
  if(exploreFight){showExploreFight(exploreFight);return;}
  const cleared=S.exploreCleared||0, chapter=Math.floor(cleared/9)+1, next=cleared%9;
  const power=stats().power, required=exploreRequiredPower(cleared);
