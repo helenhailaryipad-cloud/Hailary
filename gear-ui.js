@@ -166,7 +166,7 @@ function dungeonLoot(){
 }
 function bossDropMarkup(reward){
  const rare=(reward.rare||[]).map(x=>x.kind==='gear'?eqRules().gearRanks[x.rank].name+' piece':eqRules().bagItemById[x.id].name);
- const fed=(rare.length?`<p class="boss-rare">Rare drop: ${rare.join(', ')}!</p>`:'')+(reward.devoured?`<p>The Glimmer Maw ate the Blue and Purple pieces: +${fmt(reward.devoured)} Maw EXP.</p>`:'');
+ const fed=(rare.length?`<p class="boss-rare">Rare drop: ${rare.join(', ')}!</p>`:'')+(reward.devoured?`<p>The Glimmer Maw ate the Blue, Purple and 1-Star Orange pieces: +${fmt(reward.devoured)} Maw EXP.</p>`:'');
  if(!reward.entry)return fed;
  const r=eqRules(),eq=r.state(S),e=reward.entry,t=r.catalog[e.template],q=r.gearRanks[r.gearRank(e)],power=stats().power,next=r.stats({...S,equipment:{...eq,equipped:{...eq.equipped,[t.slot]:e.uid}}}).power,diff=next-power;
  return `<section class="boss-drop-card" style="--loot-color:${q.color}"><p class="eyebrow">BOSS EQUIPMENT FOUND</p><div class="boss-drop-row">${(reward.entries||[e]).map(x=>equipmentCell(x,{compact:true})).join('')}</div><div class="boss-drop-heading"><div><h3>${t.name}</h3><strong>${q.name} · T${t.tier}</strong><p class="loot-power">${diff>0?'+'+fmt(diff)+' hero power if equipped':diff<0?'Your equipped item is stronger.':'Same hero power. Compare its attributes.'}</p></div></div>${fed}<div class="row"><button class="primary" onclick="openEquipment(${e.uid})">Compare / Equip / Enhance</button><button onclick="$('#modal').close();openScreen('cityCraft')">Gear Crafting</button></div><small>Five Orange pieces make a 2-Star Red · Blue and Purple feed the Glimmer Maw</small></section>`;
@@ -352,17 +352,32 @@ function cityVault(){
 }
 // ---- Devour: spare equipment feeds the Glimmer Maw ------------------------------------------------------------------
 function devourToggle(uid){devourPicks=devourPicks.includes(uid)?devourPicks.filter(x=>x!==uid):[...devourPicks,uid];cityDevour()}
-// The quick button only picks Blue and Purple pieces: Orange and finer are crafting stock.
-const devourFood=()=>WonderGear.devourable(S).filter(e=>WonderGear.gearRank(e)<2).map(e=>e.uid);
+// Maw food = Blue, Purple and 1-Star Orange; Orange (2★) and finer are crafting stock.
+const devourFood=()=>WonderGear.devourable(S).filter(e=>WonderGear.gearFood(WonderGear.gearRank(e))).map(e=>e.uid);
+// Devour Gear pop-up (user photo 2026-11-27): tier filter, every spare piece, food ticked at first, total EXP, Start.
+let devourTier=0,devourSel=null;
+function devourPop(tier){
+ const r=WonderGear;if(tier!==undefined){devourTier=+tier;devourSel=null}
+ const all=r.devourable(S),tiers=[...new Set(all.map(e=>r.catalog[e.template].tier))].sort((a,b)=>b-a);if(!tiers.includes(devourTier))devourTier=0;
+ const list=all.filter(e=>!devourTier||r.catalog[e.template].tier===devourTier).sort((a,b)=>r.catalog[b.template].tier-r.catalog[a.template].tier||r.gearOrder(r.gearRank(b))-r.gearOrder(r.gearRank(a))||a.uid-b.uid);
+ if(devourSel===null)devourSel=list.filter(e=>r.gearFood(r.gearRank(e))).map(e=>e.uid);devourSel=devourSel.filter(id=>list.some(e=>e.uid===id));
+ const exp=list.filter(e=>devourSel.includes(e.uid)).reduce((n,e)=>n+r.devourWorth(e),0);
+ popup(`<div class="dv-card"><h2>Devour Gear</h2><div class="dv-top"><select aria-label="Tier" onchange="devourPop(this.value)"><option value="0">Any tier</option>${tiers.map(t=>`<option value="${t}" ${t===devourTier?'selected':''}>T${t}</option>`).join('')}</select><small>Ticked: Blue, Purple and 1-Star Orange. Orange (2★) and finer are crafting stock; Relic and above cannot be devoured.</small></div>`
+  +(list.length?`<div class="dv-grid">${list.map(e=>equipmentCell(e,{act:'devourTick('+e.uid+')',pressed:devourSel.includes(e.uid)})).join('')}</div>`:'<p class="dv-none">No spare equipment of this tier.</p>')
+  +`<p class="dv-exp">Devour EXP: <b>${fmt(exp)}</b> · ${devourSel.length} chosen</p><button class="dv-go" onclick="devourGo()" ${devourSel.length?'':'disabled'}>${denPlain}Start to Devour</button></div>`);
+ $('#modal')?.classList.add('dv-pop');
+}
+function devourTick(uid){devourSel=devourSel.includes(uid)?devourSel.filter(x=>x!==uid):[...devourSel,uid];const sc=document.querySelector('#modal .dv-grid')?.scrollTop||0;devourPop();const g=document.querySelector('#modal .dv-grid');if(g)g.scrollTop=sc}
+function devourGo(){const r=WonderGear,result=r.devourGear(S,devourSel);if(!result.ok){toast(result.error);return}devourSel=null;devourPicks=[];save();if($('#modal').open)$('#modal').close();cityDevour();document.querySelector('.maw-pic')?.classList.add('chomp');toast('+'+fmt(result.gained)+' Maw EXP'+(result.levels?' · Glimmer Maw is now Lv. '+r.devourState(S).level:''))}
 function devourAll(){const food=devourFood();devourPicks=food.length===devourPicks.length&&food.every(id=>devourPicks.includes(id))?[]:food;cityDevour()}
-function devourAuto(){if(S.autoDevour)delete S.autoDevour;else S.autoDevour=true;save();cityDevour();toast(S.autoDevour?'Blue and Purple drops will go straight to the Maw.':'Auto devour is off.')}
+function devourAuto(){if(S.autoDevour)delete S.autoDevour;else S.autoDevour=true;save();cityDevour();toast(S.autoDevour?'Blue, Purple and 1-Star Orange drops will go straight to the Maw.':'Auto devour is off.')}
 function devourFeed(){
  const r=WonderGear,result=r.devourGear(S,devourPicks);
  if(!result.ok){toast(result.error);return}
  devourPicks=[];save();cityDevour();document.querySelector('.maw-pic')?.classList.add('chomp');
  toast('+'+fmt(result.gained)+' Maw EXP'+(result.levels?' · Glimmer Maw is now Lv. '+r.devourState(S).level:''));
 }
-function devourInfo(){const r=WonderGear;popup('<h2>Devour</h2><p>The Glimmer Maw eats spare equipment from the bag. Every piece gives Maw EXP: more for a higher tier, rarity, stars and enhancement.</p><p>Each Maw level gives Reina +'+r.devourStep.attack+' ATK, +'+r.devourStep.health+' HP and +'+r.devourStep.defense+' DEF for good. Stars and gems on a devoured piece come back as star shards and sky gems.</p><p>Blue and Purple pieces are its usual food: the quick button picks only those, and with Auto devour on they are eaten as soon as a guardian drops them. Orange and finer pieces are crafting stock; Relic and above cannot be devoured.</p><p>Equipped pieces, the basic set and pieces in the warehouse are never eaten.</p>')}
+function devourInfo(){const r=WonderGear;popup('<h2>Devour</h2><p>The Glimmer Maw eats spare equipment from the bag. Every piece gives Maw EXP: more for a higher tier, rarity, stars and enhancement.</p><p>Each Maw level gives Reina +'+r.devourStep.attack+' ATK, +'+r.devourStep.health+' HP and +'+r.devourStep.defense+' DEF for good. Stars and gems on a devoured piece come back as star shards and sky gems.</p><p>Blue, Purple and 1-Star Orange pieces are its usual food: Devour Gear ticks only those, and with Auto devour on they are eaten as soon as a guardian drops them. Orange (2★) and finer pieces are crafting stock; Relic and above cannot be devoured.</p><p>Equipped pieces, the basic set and pieces in the warehouse are never eaten.</p>')}
 function cityDevour(){
  const r=WonderGear,st=r.devourState(S),bonus=r.devourBonus(S),spare=r.devourable(S),food=devourFood();
  devourPicks=devourPicks.filter(id=>spare.some(e=>e.uid===id));
@@ -371,7 +386,7 @@ function cityDevour(){
  $('#main').innerHTML=`<section class="satchel maw-room"><div class="satchel-top"><strong>Devour</strong>${satchelWallet()}</div>
  <div class="maw-stage"><button class="maw-help" aria-label="How Devour works" onclick="devourInfo()">${denPlain}?</button><img class="maw-pic" src="${artPath('comp-bag-maw')}" alt="Glimmer Maw"><div class="maw-info"><h2>Glimmer Maw <b>Lv. ${st.level}${after>st.level?' → '+after:''}</b></h2><div class="maw-bar"><i style="width:${st.need?Math.min(100,st.into/st.need*100):100}%"></i>${gain&&st.need?`<u style="width:${Math.min(100,(st.into+gain)/st.need*100)}%"></u>`:''}<span>${st.need?fmt(st.into)+(gain?' + '+fmt(gain):'')+' / '+fmt(st.need):'Highest level'}</span></div><div class="maw-stats">${stat('attack','ATK',bonus.attack,r.devourStep.attack)}${stat('health','HP',bonus.health,r.devourStep.health)}${stat('defense','DEF',bonus.defense,r.devourStep.defense)}</div><button class="maw-auto" aria-pressed="${!!S.autoDevour}" onclick="devourAuto()">${denPlain}<i></i>Auto devour</button></div></div>
  <div class="satchel-scroll">${spare.length?`<div class="satchel-grid">${bagPad(spare.map(e=>equipmentCell(e,{act:'devourToggle('+e.uid+')',pressed:devourPicks.includes(e.uid)})),12)}</div>`:'<p class="maw-none">No spare equipment in the bag. Dungeon guardians and chests drop more.</p>'}</div>
- <div class="satchel-foot"><span>Chosen: ${devourPicks.length} · +${fmt(gain)} Maw EXP</span><button onclick="devourAll()" ${food.length?'':'disabled'}>${food.length&&food.length===devourPicks.length&&food.every(id=>devourPicks.includes(id))?'Clear':'Blue & Purple'}</button><button onclick="devourFeed()" ${devourPicks.length?'':'disabled'}>Devour</button></div>
+ <div class="satchel-foot"><span>Chosen: ${devourPicks.length} · +${fmt(gain)} Maw EXP</span><button onclick="devourPop(0)" ${spare.length?'':'disabled'}>Devour Gear</button><button onclick="devourFeed()" ${devourPicks.length?'':'disabled'}>Devour</button></div>
  ${satchelNav('Devour')}</section>`;
 }
 
@@ -441,7 +456,7 @@ function craftBatchRun(){
 }
 function craftInfo(){
  const r=WonderGear,line=(q,n)=>{const c=r.craftRecipe(n);return '<p><b style="color:'+q.color+'">'+q.name+'</b> · '+(c?c.need+' × '+r.gearRanks[n-1].name+Object.entries(c.mats).map(([id,x])=>' + '+x+' '+r.materialDefs.find(m=>m.id===id).name).join(''):'dungeon guardians')+'</p>'};
- popup('<h2>Gear Crafting</h2><p>Dungeon guardians drop Blue, Purple and Orange pieces. Orange is where crafting starts; Blue and Purple feed the Glimmer Maw.</p><p>A recipe takes spare pieces of one tier and one family (any slot) and gives the piece you chose. It keeps the highest enhancement and gems of the pieces put in.</p><div class="den-tlist loom-ladder">'+r.gearRanks.map(line).join('')+'</div><p>A 2-Star Red takes three Orange pieces at T1-T4, four at T5-T12, five at T13-T20 and six from T21 and work from three pieces at a lower success rate at a lower success rate; a failed try loses the pieces.</p>');
+ popup('<h2>Gear Crafting</h2><p>Dungeon guardians drop Orange, 1-Star Orange, Purple and Blue pieces. Orange (2★) is where crafting starts; Blue, Purple and 1-Star Orange feed the Glimmer Maw.</p><p>A recipe takes spare pieces of one tier and one family (any slot) and gives the piece you chose. It keeps the highest enhancement and gems of the pieces put in.</p><div class="den-tlist loom-ladder">'+r.gearRanks.map(line).join('')+'</div><p>A 2-Star Red takes three Orange pieces at T1-T4, four at T5-T12, five at T13-T20 and six from T21 and work from three pieces at a lower success rate at a lower success rate; a failed try loses the pieces.</p>');
 }
 function cityCraft(){
  const r=eqRules(),eq=r.state(S);
