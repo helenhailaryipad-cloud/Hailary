@@ -11144,3 +11144,13 @@ html body #stage .city-hud button.city-garden img{position:static!important;widt
 #stage .gd-good{top:auto;bottom:calc(18% + min(9cqh,12cqw));width:min(10cqw,7cqh)}
 #stage .gd-good{position:relative;top:auto;bottom:auto;left:auto;order:-1;width:min(9cqw,6.5cqh);margin-bottom:-14%;transform:none;z-index:2;animation:gd-bob2 1s ease-in-out infinite}
 @keyframes gd-bob2{50%{transform:translateY(-14%)}}
+/* farm feed: barn chips and hungry animals */
+#stage .gd-barn{justify-self:center;display:flex;gap:6px;margin-top:4px}
+#stage #main button.gd-feedchip{display:flex;align-items:center;gap:4px;min-height:0;height:34px;margin:0;padding:0 12px 0 4px;border-radius:999px;border:1.5px solid #e2c47a!important;background:#fffbf0eb!important;box-shadow:0 2px 6px #0002!important;color:#5a4320!important;text-shadow:none!important;font:900 15px/1 Arial,sans-serif}
+#stage #main button.gd-feedchip::before,#stage #main button.gd-feedchip::after{content:none!important}
+#stage .gd-feedchip img{width:28px;height:28px;object-fit:contain}
+#stage .gd-room.farm{grid-template-rows:auto auto auto 1fr auto}
+#stage .gd-ani.hungry .gd-beast{filter:saturate(.7) drop-shadow(0 4px 3px #0003)}
+#stage .gd-ani .gd-tag.feed{background:linear-gradient(#a8e08a,#5ab84a);border-color:#fff;color:#fff;text-shadow:0 1px 1px #2a6a1a}
+#stage .gd-ani .gd-tag.need{background:#fff0e8;border-color:#e8a080;color:#c0462a}
+#stage .gd-ani.hungry .gd-good{opacity:.9;animation:gd-bob2 1.6s ease-in-out infinite}

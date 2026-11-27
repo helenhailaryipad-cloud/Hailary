@@ -362,7 +362,12 @@ Claim menu). Optional save field `S.garden {open, plots[6]{seed,at,set,w}, exp, 
   Garden / Farm switch (`gardenTab`); painted farm with three terraces (`garden-farm-bg`), one pen each with a fence.
   Animals are bought strictly in order (`nextAnimal`, `buyAnimal`): 6 hens (500 ... 3,000 gold), then 6 cows, then 6
   sheep; each brings its goods on its own clock (`animals`: egg basket 1 h, milk 3 h, wool 6 h; `collect`, Collect all
-  `collectAll`), the ready good floats over the animal. Save `S.garden.farm [{k,at}]` in buying order (validated), `goods`.
+  `collectAll`), the ready good floats over the animal.
+  Feed (user: "carrot, potato ... wheat the simplest and fastest, for hens"): three feed crops at the top of the seed
+  list (`Garden.feeds`; Wheat 5 min, Carrot 20 min, Potato 45 min, 3 portions each into the barn `S.garden.feed`).
+  Hens eat wheat, cows carrots, sheep potatoes (`animals[].eat`). After a collect an animal is hungry (`at` 0) until
+  fed one portion (`feed`, tap "Feed", or Collect all feeds automatically); a new animal's first meal is free. Barn
+  chips over the pens; hungry animals show their food and a Feed / Hungry tag. Save `S.garden.farm [{k,at}]` in buying order (validated), `goods`.
 - Art (image model): `art-source/garden/` -> `garden-*` by `scripts/build-garden-art.py` (bg 1024 x 1536 q92, the rest
   384-512 px q95). Chat preview packs `garden-*` into pack-minis. Tests in `scripts/test.mjs`.
 
