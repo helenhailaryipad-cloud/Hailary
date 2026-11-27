@@ -11840,3 +11840,10 @@ body[data-screen=patron] #stage>#main{inset:0!important;width:100%;height:100%;p
 #stage .pt-lvl.vip{background:linear-gradient(#5aa0e8,#2a6ab8)}
 #stage .pt-card li.up{color:#6a3aa0}
 #stage .pt-card li em{margin-left:6px;padding:0 5px;border-radius:4px;background:#e2443a;color:#fff;font:900 9px/1.5 Arial,sans-serif;font-style:normal;vertical-align:2px}
+/* SVIP emblem in the Rank spot of the home screen */
+html body #stage .city-hud .city-rank.pt-home{display:grid;justify-items:center;gap:0;font:900 min(2.6cqw,13px)/1.1 Arial,sans-serif;color:#fff;text-shadow:0 1px 2px #4a2a7a,0 0 4px #4a2a7a}
+#stage .pt-hemb{position:relative;display:block;width:min(11cqw,54px);aspect-ratio:1;filter:drop-shadow(0 2px 4px #0005)}
+#stage .pt-hemb img{width:100%!important;height:100%!important;object-fit:contain}
+#stage .pt-hemb b{position:absolute;inset:0;display:grid;place-items:center;font:900 min(4.4cqw,22px)/1 Georgia,serif;color:#fff6c8;text-shadow:0 1px 0 #6a3aa0,0 0 6px #ffe9a0}
+#stage .city-rank.pt-home.zero .pt-hemb{filter:grayscale(.35) drop-shadow(0 2px 4px #0005)}
+#stage .city-rank.pt-home .tp-dot{top:0;right:0}

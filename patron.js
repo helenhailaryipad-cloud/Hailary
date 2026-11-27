@@ -96,6 +96,12 @@ function patronBadge(cls = '') {
 }
 // Level strip 1-10: which level the card shows, the player's own level (crown) and what is done (tick).
 function ptStrip(view, mine, label, done) { return `<div class="pt-strip">${Array.from({ length: 10 }, (_, i) => i + 1).map(i => `<button class="${i === view ? 'on' : ''} ${i <= mine ? 'got' : ''}" onclick="patronView=${i};showPatron()">${denPlain}${i === mine ? '<i>♛</i>' : done(i) ? '<i>✓</i>' : ''}<small>${label}</small><b>${i}</b></button>`).join('')}</div>`; }
+// Home: the SVIP emblem sits where the Rank icon was, right of the power plate (user circled the spot). Rankings stay
+// in the city drawer and the More menu. With "Hide SVIP badge" the number is not shown.
+function patronHome() {
+  const lv = Patron.level(S), hide = S.patron?.hide;
+  return `<button class="city-rank pt-home ${lv ? '' : 'zero'}" onclick="go('patron')" aria-label="SVIP ${hide ? '' : lv}"><span class="pt-hemb"><img src="${artPath('patron-badge')}" alt="">${hide ? '' : `<b>${lv}</b>`}</span>${hide ? 'VIP' : 'SVIP' + lv}${Patron.due(S) ? '<i class="tp-dot"></i>' : ''}</button>`;
+}
 function ptTiles(g) { let h = ''; if (g.gold) h += `<span class="tp-tile">${uiIcon('gold')}<b>${fmt(g.gold)}</b></span>`; if (g.pearls) h += `<span class="tp-tile">${pearlIcon()}<b>${fmt(g.pearls)}</b></span>`; for (const [i, n] of Object.entries(g.items || {})) h += `<span class="tp-tile">${bagIcon(i)}<b>${n}</b></span>`; return h; }
 function showPatron() {
   if (typeof bagArtVars === 'function') bagArtVars();
