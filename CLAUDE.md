@@ -309,6 +309,25 @@ entry (`spendStamina`), bought energy in optional `S.adventure.energyExtra` (kep
 green +) in the dungeon lobby, Hunting and the Boss Roulette; `energyShop()` light pop-up (+10 / +20 / +100 / +300 and the
 deal link); a dungeon Enter without energy opens it. Vigor Tonic gives back 20 energy. Placeholders.
 
+## Challenge chapter map (2026-11-27)
+User circled the home "Challenge" icon and sent a photo of the reference's stage map ("redo this section"). Screen
+`cityExplore` is now `src/challenge.js` (rules `Challenge`, UI below `CHALLENGE_UI`; the old `cityExplore` in gear-ui.js
+is `cityExploreOld`, unused). Stages cleared stay in `S.exploreCleared`; optional `S.challenge {idleAt, pf[], pp[], pass,
+obj[], day{d,clears,idles,got[]}, skip}` (`Challenge.valid` in `valid()`). Placeholders throughout.
+- Map: a painted 2:3 chapter picture per theme (`Challenge.themes` blossom / frost / amber / moon, one per chapter in
+  turn) that scrolls; nine markers ON the painted path (`CH_TRAILS` per theme: flags, a boss card at 5, a crystal gate at
+  9, plates "1-3" with ✓ / current gold), the chibi Reina beside the current stage. Light HUD: chapter pill, Benefit
+  card (idle gold / XP per hour, rises each chapter), Training Bonus + EXP % left, right column idle chest with its
+  timer (up to 24:00:00) + Clear Battle Pass + Assignment + Clearance Objective + Training (red dots from `Challenge.due`),
+  bottom gold Explore (green "Easy Clear" at 1.3x power), power line, Power Up, Skip.
+- Rules: power need `power(i)` (old formula), stage loot `stageLoot` (boss stage Oak Chest, gate Moon Chest + Wish
+  Ticket), idle loot `rate` x hours (cap `idleCapH` 24, `claimIdle`), Training Bonus +2% idle XP per chapter (max 50),
+  Battle Pass rows per cleared chapter (free + Pass column for `passPrice` 300 prisms), daily `tasks`, `objectives`.
+  Explore runs a short light fight (Reina vs the stage boss, HP bar, numbers) or wins at once with Skip, then
+  `resultShow`.
+- Art (image model): `art-source/challenge/` -> `challenge-*` by `scripts/build-challenge-art.py` (backgrounds
+  1024 x 1536 q92, icons 320-512 px q95). Chat preview packs `challenge-*` into pack-minis.
+
 ## Mini Games hub (2026-11-23)
 User: "all games in one place, names on the main field, not hunted through sub-tabs". The bottom-nav tab is called
 Mini Games; `games()` in `app.js` draws `.mg-hub`: one tile per game from `MINI_GAMES` (cover, name, line, best
@@ -1437,8 +1456,6 @@ The user wants to play the game inside the chat, and wants SHORT replies in Russ
   `<scratchpad>/chat-published.json`; copy `files-now.json` over that file after each publish.
 
 Still to do:
-- Home promo "Challenge" was removed (2026-11-23, user: it duplicated Dungeons, Hunting is the way in); bring the
-  slot back only when a real Challenge feature exists (user: "maybe something will come later").
 - Mounted hair: small redraw specks can remain along the jaw at high zoom (hairs 2, 10); hair 8 has a dark spot in
   the left tail that is in the painting itself.
 - User has not yet approved the nine repainted designs (details differ slightly from the old art).
