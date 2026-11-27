@@ -327,6 +327,11 @@ entry (`spendStamina`), bought energy in optional `S.adventure.energyExtra` (kep
 (struck 300, -90%), once a day (`buyDeal`, optional `S.adventure.energyDeal` = day). UI: `energyChip()` (free/300, +bought,
 green +) in the dungeon lobby, Hunting and the Boss Roulette; `energyShop()` light pop-up (+10 / +20 / +100 / +300 and the
 deal link); a dungeon Enter without energy opens it. Vigor Tonic gives back 20 energy. Placeholders.
+Energy by tier (user photos 2026-11-27): a guardian entry costs `bossEnergy(tier)` (`ENERGY_TIER`: T1-3 3, T4 6, T5 10,
+T6 12, T7 16, T8 18, T9+ 20; ⚡ chip on each card); the Try-out guardian is free, once per tier per UTC day
+(`tryoutDone`/`tryoutMark`, optional `S.adventure.tryDay {day,t[]}`, "Defeated" stamp). Boss Sweep (`sweepPop`, `sweepGo`
+in world.js, light `.sw-pop`): instant win over a guardian beaten before, `SWEEP_DAILY` 10 a UTC day, its energy +
+`SWEEP_PRISMS` 10 prisms (`sweepTake`, optional `S.adventure.sweepDay {day,n}`), pays like a won fight, `resultShow`.
 
 ## Challenge chapter map (2026-11-27)
 User circled the home "Challenge" icon and sent a photo of the reference's stage map ("redo this section"). Screen
