@@ -62,8 +62,9 @@ const legacyRanks=[0,1,2,4,5,6],gearCraftFrom=3,gearNoDevour=7;
 // Orange (2★) 9.5%, 2-Star Red 1%. Blue only on the Try-out guardian (the first of each tier, slot 0): there Purple 70%,
 // Blue 10%. Never a 3-Star Red (that is crafted only).
 // Per guardian (user photo of one reference boss's loot, 2026-11-27): six pieces (one Orange, five Purple there), a
-// material pouch, a pet egg, small XP items and a gold coffer; `bossBag` is paid on every win. Placeholders.
-const bossBag=[['stonebag',1],['petegg',1],['exp1',3],['gold2',1]];
+// material pouch, small XP items and a gold coffer; `bossBag` is paid on every win. The red oval in that photo was a
+// SET STONE (set material), not a pet egg; sets are not built yet. Placeholders.
+const bossBag=[['stonebag',1],['exp1',3],['gold2',1]];
 const bossDropCount=6,bossDropTable=[[1,.8],[10,.095],[2,.095],[3,.01]],bossTryoutTable=[[1,.7],[0,.1],[10,.095],[2,.095],[3,.01]],bossDropRanks=bossTryoutTable.map(x=>x[0]);
 const bossTryout=id=>encounters.some(e=>e.id===id&&e.slot===0),bossDropsOf=id=>bossTryout(id)?bossTryoutTable:bossDropTable;
 function bossDropRank(roll,table=bossDropTable){let acc=0;for(const [rank,p]of table){acc+=p;if(roll<acc)return rank}return table[0][0]}
@@ -71,7 +72,7 @@ function bossDropRank(roll,table=bossDropTable){let acc=0;for(const [rank,p]of t
 const gearFood=rank=>rank<2||!!gearRanks[rank]?.food,gearOrder=rank=>gearRanks[rank]?.order??rank;
 // Rare guardian drops, each rolled on its own after the three sure pieces. The chances are real and shown in the lobby.
 // Rare extras rolled on their own after the gear (the 2-Star Red chance is in `bossDropTable`).
-const bossRare=[{kind:'item',id:'gembox',chance:.1},{kind:'item',id:'chest3',chance:.02}];
+const bossRare=[{kind:'item',id:'gembox',chance:.1},{kind:'item',id:'petegg',chance:.05},{kind:'item',id:'chest3',chance:.02}];
 function gearRank(entry){return Number.isInteger(entry.rank)?entry.rank:legacyRanks[entry.stars]??0}
 function fresh(save){const eq={version:1,nextId:15,items:[],equipped:{},materials:{stone:60,shard:12,gem:4,essence:8,synthesis:0}};for(let i=0;i<slots.length;i++){const slot=slots[i],legacy={bow:'bow',crown:'crown',armor:'armor',boots:'boots',spiritluck:'ring',amulet:'charm'}[slot.id];const entry={uid:i+1,template:slot.id+'-t1',enhance:legacy?(save.upgrades?.[legacy]||0):0,stars:0,gems:0};eq.items.push(entry);eq.equipped[slot.id]=entry.uid}for(const [j,id]of ['bow-t3','boots-t3','spiritguard-t3','spiritluck-t1'].entries())eq.items.push({uid:11+j,template:id,enhance:0,stars:0,gems:0});return eq}
 function valid(eq){if(eq===undefined)return true;return !!eq&&eq.version===1&&Number.isSafeInteger(eq.nextId)&&eq.nextId>0&&eq.nextId<1e9&&Array.isArray(eq.items)&&eq.items.length<=80+slots.length&&new Set(eq.items.map(i=>i?.uid)).size===eq.items.length&&eq.items.every(i=>i&&(i.stored===undefined||typeof i.stored==='boolean')&&Number.isSafeInteger(i.uid)&&i.uid>0&&i.uid<eq.nextId&&typeof i.template==='string'&&Object.hasOwn(catalog,i.template)&&Number.isInteger(i.enhance)&&i.enhance>=0&&i.enhance<=20&&Number.isInteger(i.stars)&&i.stars>=0&&i.stars<=5&&Number.isInteger(i.gems)&&i.gems>=0&&i.gems<=3&&(i.rank===undefined||Number.isInteger(i.rank)&&i.rank>=0&&i.rank<gearRanks.length&&gearRanks[i.rank].stars===i.stars))&&!!eq.equipped&&Object.keys(eq.equipped).length===10&&slots.every(slot=>eq.equipped[slot.id]===null||eq.items.some(i=>!i.stored&&i.uid===eq.equipped[slot.id]&&catalog[i.template].slot===slot.id))&&!!eq.materials&&materialDefs.every(m=>(m.id==='synthesis'&&eq.materials.synthesis===undefined)||Number.isSafeInteger(eq.materials[m.id])&&eq.materials[m.id]>=0&&eq.materials[m.id]<=1e9)}
