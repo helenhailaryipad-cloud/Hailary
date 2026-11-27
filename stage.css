@@ -11524,3 +11524,33 @@ body[data-screen=topup] #stage>#main{inset:0!important;width:100%;height:100%;pa
 #stage #main .tp-room .tp-wk button.tp-buy svg{display:none}
 #stage .tp-wk>small{font-size:min(2.2cqw,12px);line-height:1}
 @container (max-aspect-ratio:3/4){#stage .tp-wk1{min-height:46cqh}#stage .tp-wk2{min-height:51cqh}#stage .tp-wk3{min-height:56cqh}#stage .tp-wk4{min-height:61cqh}#stage .tp-wk5{min-height:66cqh}}
+/* Gear Crafting: the orbit piece is a button; item card of the piece a recipe makes (light, quality-coloured head) */
+#stage #main .loom button.loom-orbit{border:0!important;padding:0!important;box-shadow:none!important;min-height:0;color:inherit;cursor:pointer}
+#stage #main .loom button.loom-orbit::before,#stage #main .loom button.loom-orbit::after{content:none!important}
+#modal.gc-pop{padding:0!important;overflow:hidden auto;background:#fffaf0!important;border:2px solid #f0d290!important;border-radius:18px!important}
+#modal.gc-pop .gc-card{font-family:Arial,sans-serif;color:#3a2f22;text-align:left}
+#modal.gc-pop .gc-head{display:flex;gap:12px;align-items:center;padding:14px 16px;background:linear-gradient(135deg,color-mix(in srgb,var(--q) 85%,#fff),color-mix(in srgb,var(--q) 55%,#fff));color:#fff;text-shadow:0 1px 2px #0005}
+#modal.gc-pop .gc-head .loom-face{flex:0 0 72px;width:72px;aspect-ratio:1;position:relative;display:grid;place-items:center;border-radius:12px;background:linear-gradient(#fff,color-mix(in srgb,var(--q) 25%,#fff));border:2.5px solid #fff;box-shadow:0 2px 8px #0002}
+#modal.gc-pop .gc-head .loom-face img,#modal.gc-pop .gc-head .loom-face svg{width:88%;height:88%;object-fit:contain}
+#modal.gc-pop .gc-head .loom-face b{position:absolute;right:4px;top:2px;font:900 12px/1 Arial,sans-serif;color:#fff;text-shadow:0 1px 2px #0008}
+#modal.gc-pop .gc-head .loom-face small{position:absolute;left:4px;top:2px;font-size:11px;color:#ffe25a;text-shadow:0 1px 2px #0008;letter-spacing:-1px}
+#modal.gc-pop .gc-head h2{margin:0 0 4px;font:900 19px/1.15 Arial,sans-serif;color:#fff}
+#modal.gc-pop .gc-head p{margin:2px 0;font:700 13px/1.2 Arial,sans-serif;color:#fff}
+#modal.gc-pop .gc-head p b{color:#fff6a8}
+#modal.gc-pop h3{margin:12px 16px 4px;font:900 14px/1 Arial,sans-serif;color:#8a5a12}
+#modal.gc-pop h3::before{content:'◆ ';color:#e0a02c}
+#modal.gc-pop .gc-rows{margin:0 16px;padding:0 0 10px;border-bottom:1px solid #efe0bf}
+#modal.gc-pop .gc-rows p{display:flex;gap:6px;align-items:baseline;margin:3px 0 3px 12px;font:700 13.5px/1.25 Arial,sans-serif}
+#modal.gc-pop .gc-rows b{color:#2e9a3a}
+#modal.gc-pop .gc-perf i{font-style:normal;color:#e8a800}
+#modal.gc-pop .gc-perf b,#modal.gc-pop .gc-perf span{color:#a04ad8}
+#modal.gc-pop .gc-gem p{color:#8a7a66;font-weight:600}
+#modal.gc-pop .gc-note{margin:10px 16px;font:600 12px/1.35 Arial,sans-serif;color:#7a6a55}
+#modal.gc-pop .gc-foot{display:flex;justify-content:space-between;padding:10px 16px;background:linear-gradient(#fff3d6,#ffe8b0);font:900 14px/1 Arial,sans-serif;color:#6a3a06}
+#modal.gc-pop .gc-foot span{color:#2e8a5a}
+#modal.gc-pop .gc-rows span{color:#4a3a28!important;text-shadow:none}
+#modal.gc-pop .gc-gem span{color:#9a8a76!important}
+#modal.gc-pop .gc-head h2,#modal.gc-pop .gc-head p{text-align:left!important}
+#modal.gc-pop .gc-head>div{flex:1;min-width:0;padding-right:34px}
+#stage #modal.gc-pop .gc-head h2,#modal.gc-pop #modalBody .gc-head h2{text-align:left!important;margin-left:0!important}#modal.gc-pop .gc-perf span{color:#8a3ac8!important}
+#modal.gc-pop .gc-foot b{color:#8a4a06!important;text-shadow:none}

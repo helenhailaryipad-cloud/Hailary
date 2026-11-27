@@ -379,7 +379,23 @@ function satchelNav(here=''){return ` <div class="satchel-nav"><button data-back
 // ---- Gear Crafting: pieces of one quality make one piece of the next (WonderGear.gearRanks) --------------------------
 let craftRank=3,craftTier=null,craftGroup='Equipment',craftSlot=null,craftInputs=[];
 function craftFilter(rank,tier,group){craftRank=rank;craftTier=tier;craftGroup=group;craftInputs=[];cityCraft()}
-function craftSelect(slot){craftSlot=slot;cityCraft()}
+function craftSelect(slot){craftSlot=slot;cityCraft();craftPreview(slot)}
+// Item card of the piece a recipe makes (user photos of the reference: tap a slot tile -> what you will get).
+function craftPreview(slot){
+ const r=WonderGear,q=r.gearRanks[craftRank],from=r.gearRanks[craftRank-1],id=slot+'-t'+craftTier,t=r.catalog[id];if(!t)return;
+ const card=rank=>r.detail({uid:0,template:id,enhance:0,gems:0,stars:r.gearRanks[rank].stars,rank}),d=card(craftRank),before=card(craftRank-1);
+ const lab=k=>r.labels[k]||k,val=(k,n)=>'+'+(Number.isInteger(n)?fmt(n):n.toFixed(2))+(r.percentKeys.has(k)?'%':'');
+ const base={};for(const sec of [d.base,d.star])for(const [k,n]of Object.entries(sec))base[k]=Math.round((base[k]||0)+n);
+ const rows=(o,star)=>Object.entries(o).filter(([,n])=>n).map(([k,n])=>`<p>${star?'<i>★</i>':''}<span>${lab(k)}</span><b>${val(k,n)}</b></p>`).join('');
+ const gemKey=t.offense?'ATK / ARP':'HP / DEF',pieces=r.slots.find(x=>x.id===slot)?.name||slot;
+ popup(`<div class="gc-card" style="--q:${q.color}"><div class="gc-head"><span class="loom-face q-${q.id}" style="--rarity:${q.color}">${gearArt(t)}<b>T${t.tier}</b>${q.stars?'<small>'+'★'.repeat(q.stars)+'</small>':''}</span><div><h2>T${t.tier} · ${t.name}</h2><p>Gear Power: <b>${fmt(d.power)}</b></p><p>Gear Level <b>${Math.max(1,r.requiredLevel(t.tier))}</b> · ${q.name}</p></div></div>
+ <h3>Base Stats</h3><div class="gc-rows">${rows(base)}</div>
+ ${Object.keys(d.perfect).length?`<h3>Perfect Stat</h3><div class="gc-rows gc-perf">${rows(d.perfect,true)}</div>`:''}
+ <h3>Gem Stat</h3><div class="gc-rows gc-gem"><p>◇ <span>Empty socket (${gemKey})</span></p><p>◇ <span>Empty socket (${gemKey})</span></p><p>◇ <span>Empty socket (${gemKey})</span></p></div>
+ <p class="gc-note">Made from ${from.name} pieces (Gear Power ${fmt(before.power)}). It keeps the highest enhancement and gems of the pieces you put in.</p>
+ <div class="gc-foot"><span>Reina</span><b>${t.tier} Tier ${pieces}</b></div></div>`);
+ $('#modal')?.classList.add('gc-pop');
+}
 const craftPool=()=>WonderGear.craftInputs(S,craftGroup,craftTier,craftRank);
 const craftPlain=(a,b)=>a.enhance-b.enhance||a.gems-b.gems||a.uid-b.uid;
 const craftSource=()=>craftRank===WonderGear.gearCraftFrom?'Orange pieces drop from dungeon guardians.':'Make them one step higher in the list on the left.';
@@ -446,7 +462,7 @@ function cityCraft(){
  $('#main').innerHTML=`<section class="satchel loom"><div class="satchel-top"><strong>Gear Crafting</strong>${satchelWallet()}</div>
  <div class="loom-body"><aside>${r.gearRanks.map((q,n)=>r.craftRecipe(n)?`<button aria-pressed="${craftRank===n}" onclick="craftFilter(${n},null,craftGroup)">${denPlain}${q.name}</button>${craftRank===n?tiers.map(t=>`<button class="loom-tier" aria-pressed="${t===craftTier}" onclick="craftFilter(craftRank,${t},craftGroup)">${denPlain}T${t} Gear</button>`).join(''):''}`:'').join('')}</aside>
  <div class="loom-work"><button class="maw-help" aria-label="How crafting works" onclick="craftInfo()">${denPlain}?</button>
- <div class="loom-orbit">${face(target,rank)}</div><h2>${rank.name} · ${target.name}</h2>
+ <button class="loom-orbit" aria-label="Show the piece" onclick="craftPreview(craftSlot)">${denPlain}${face(target,rank)}</button><h2>${rank.name} · ${target.name}</h2>
  ${chance>0?`<b class="loom-rate">Success rate: ${Math.round(chance*100)}%</b>`:`<b class="loom-rate low">At least ${least} ${least===1?'piece':'pieces'}</b>`}
  ${stuff?`<div class="loom-row">${stuff}</div>`:''}
  <div class="loom-row">${places}</div>
