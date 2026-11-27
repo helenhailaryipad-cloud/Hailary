@@ -620,12 +620,12 @@ function warPaint(){
  const fast=q('.tw-fast');if(fast)fast.setAttribute('aria-pressed',warFast);
 }
 function contestBuy(id){
- const r=WonderGear;if(!r.buyContest(S,id)){toast('Not enough contest medals.');return}
+ const r=WonderGear;if(!r.buyContest(S,id)){const w=r.contestShop.find(x=>x.id===id);toast(w&&r.wareLeft(S,'contest',w)<1?'Sold out this week.':'Not enough contest medals.');return}
  save();$('#modal').close();cityContest();toast(r.bagItemById[id].name+' sent to the bag');
 }
 function contestAsk(id){
  const r=WonderGear,i=r.bagItemById[id],ware=r.contestShop.find(w=>w.id===id),v=r.contestState(S);
- popup('<div class="den-item"><div class="den-item-head bag-head" style="--rarity:'+bagHue(i.rarity)+'">'+bagIcon(id)+'<div><b>'+i.name+'</b><small>Type: <u>'+i.kind+'</u></small><small>In the bag: '+r.bagCount(S,id)+'</small></div></div><h3>◆ Item Description</h3><p>'+i.text+'</p>'+(v.medals<ware.price?'<p class="den-why">Not enough contest medals.</p>':'')+'<div class="den-actions"><button class="den-gold" onclick="contestBuy(\''+id+'\')" '+(v.medals<ware.price?'disabled':'')+'>'+denPlain+'Buy · '+warIcon(3)+ware.price+'</button></div></div>');
+ popup('<div class="den-item"><div class="den-item-head bag-head" style="--rarity:'+bagHue(i.rarity)+'">'+bagIcon(id)+'<div><b>'+i.name+'</b><small>Type: <u>'+i.kind+'</u></small><small>In the bag: '+r.bagCount(S,id)+'</small></div></div><h3>◆ Item Description</h3><p>'+i.text+'</p>'+(r.wareLeft(S,'contest',ware)<1?'<p class="den-why">Sold out this week (restock Monday 00:00 UTC).</p>':v.medals<ware.price?'<p class="den-why">Not enough contest medals.</p>':'')+'<div class="den-actions"><button class="den-gold" onclick="contestBuy(\''+id+'\')" '+(v.medals<ware.price||r.wareLeft(S,'contest',ware)<1?'disabled':'')+'>'+denPlain+'Buy · '+warIcon(3)+ware.price+'</button></div></div>');
 }
 function cityContest(){
  const r=WonderGear,v=r.contestState(S),w=r.warRules;warArtVars();bagArtVars();
@@ -644,7 +644,7 @@ function cityContest(){
  if(contestPage==='Shop'){
   $('#main').innerHTML=`<section class="satchel well well-mart"><div class="satchel-top"><strong>Contest Shop</strong>${medals}</div>
   <div class="mart-banner" style="background-image:url('${artPath('comp-summon-stall')}')"><h2>Contest Shop</h2><p>Contest medals come from Totem War quests and rankings</p></div>
-  <div class="satchel-scroll"><div class="mart-grid">${r.contestShop.map(ware=>{const i=r.bagItemById[ware.id];return `<button class="shop-card ${v.medals<ware.price?'shut':''}" style="--edge:${bagHue(i.rarity)};--bg:${bagHue(i.rarity)}" aria-label="${i.name}" onclick="contestAsk('${ware.id}')">${denPlain}<small>Unlimited</small>${bagIcon(ware.id)}<b>${i.name}</b><em>${i.kind}</em><span>${warIcon(3)}${ware.price}</span></button>`}).join('')}</div></div>
+  <div class="satchel-scroll"><div class="mart-grid">${r.contestShop.map(ware=>{const i=r.bagItemById[ware.id],left=r.wareLeft(S,'contest',ware);return `<button class="shop-card ${v.medals<ware.price||left<1?'shut':''} ${ware.sig?'sig':''}" style="--edge:${bagHue(i.rarity)};--bg:${bagHue(i.rarity)}" aria-label="${i.name}" onclick="contestAsk('${ware.id}')">${denPlain}<small>${ware.sig?'★ ':''}${left}/${ware.limit} this week</small>${bagIcon(ware.id)}<b>${i.name}</b><em>${i.kind}</em><span>${warIcon(3)}${ware.price}</span></button>`}).join('')}</div></div>
   <div class="satchel-nav well-nav"><button data-back aria-label="Back" onclick="contestLeave()">‹</button></div></section>`;
   return;
  }
@@ -1893,9 +1893,9 @@ function cloudPointsShow(){
 function cloudTake(n){if(WonderGear.cloudClaim(S,n)){save();cloudPointsShow();cloudHud()}}
 function cloudShopShow(){
  const r=WonderGear,v=r.cloudState(S);bagArtVars();
- popup('<h2>Cloud Shop</h2><p class="cloud-wallet">'+cloudTokenIcon()+'<b>'+fmt(v.tokens)+'</b> Cloud Tokens · one for each Carnage Point</p><button class="cloud-flask-row" onclick="cloudFlaskShow()">'+denPlain+'<span>⚗️</span><b>Carnage Flask</b><small>+'+r.cloudRules.flaskPoints+' Carnage · '+r.cloudRules.flaskPrice+' prisms · '+(r.cloudRules.flaskWeek-v.fw.n)+'/'+r.cloudRules.flaskWeek+' this week</small></button><div class="cloud-wares">'+r.cloudShop.map(w=>{const i=r.bagItemById[w.id];return '<button class="'+(v.tokens<w.price?'shut':'')+'" style="--rarity:'+bagHue(i.rarity)+'" onclick="cloudBuy(\''+w.id+'\')">'+denPlain+bagIcon(w.id)+'<b>'+i.name+'</b><span>'+cloudTokenIcon()+w.price+'</span></button>'}).join('')+'</div>');
+ popup('<h2>Cloud Shop</h2><p class="cloud-wallet">'+cloudTokenIcon()+'<b>'+fmt(v.tokens)+'</b> Cloud Tokens · one for each Carnage Point</p><button class="cloud-flask-row" onclick="cloudFlaskShow()">'+denPlain+'<span>⚗️</span><b>Carnage Flask</b><small>+'+r.cloudRules.flaskPoints+' Carnage · '+r.cloudRules.flaskPrice+' prisms · '+(r.cloudRules.flaskWeek-v.fw.n)+'/'+r.cloudRules.flaskWeek+' this week</small></button><div class="cloud-wares">'+r.cloudShop.map(w=>{const i=r.bagItemById[w.id],left=r.wareLeft(S,'cloud',w);return '<button class="'+(v.tokens<w.price||left<1?'shut':'')+(w.sig?' sig':'')+'" style="--rarity:'+bagHue(i.rarity)+'" onclick="cloudBuy(\''+w.id+'\')">'+denPlain+bagIcon(w.id)+'<b>'+i.name+'</b><small class="cloud-left">'+(w.sig?'★ ':'')+left+'/'+w.limit+' this week</small><span>'+cloudTokenIcon()+w.price+'</span></button>'}).join('')+'</div>');$('#modal').classList.add('bw-pop','cl-shop');
 }
-function cloudBuy(id){const r=WonderGear;if(!r.buyCloud(S,id)){toast('Not enough Cloud Tokens.');return}save();cloudShopShow();toast(r.bagItemById[id].name+' sent to the bag')}
+function cloudBuy(id){const r=WonderGear;if(!r.buyCloud(S,id)){const w=r.cloudShop.find(x=>x.id===id);toast(w&&r.wareLeft(S,'cloud',w)<1?'Sold out this week.':'Not enough Cloud Tokens.');return}save();cloudShopShow();toast(r.bagItemById[id].name+' sent to the bag')}
 function cloudStatusShow(){
  const rows=cloudFactions.map((f,i)=>{let held=0,pts=0;for(let t=0;t<WonderGear.cloudRules.territories;t++){if(cloudOwner(t)===i)held++;pts+=cloudFactionScores(t)[i]||0}return {f,i,held,pts}}).sort((a,b)=>b.held-a.held||b.pts-a.pts);
  popup('<h2>Faction Battle Status</h2><p>Round ends in <b>'+cloudClock()+'</b>. A territory goes to the first faction with 80 points in it this round, and stays with it after the round.</p><div class="cloud-table"><div><b>Faction</b><b>Territories</b><b>Points this round</b></div>'+rows.map(x=>'<div class="'+(x.i===cloudMine?'me':'')+'"><span style="color:'+x.f[3]+'">'+x.f[0]+(x.i===cloudMine?' (you)':'')+'</span><b>'+x.held+'</b><b>'+x.pts+'</b></div>').join('')+'</div>');

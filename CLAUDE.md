@@ -394,7 +394,7 @@ in-dungeon boss list with Anger Point). Own names and art: `src/realms.js` (rule
 `realms`; opened from Gameplay -> Material (`realmsList()`), the home Power Up menu, the Dungeons sub-tab "Realms" and
 the mode strip at the bottom of every boss hall.
 - Eight realms (`Realms.list`), each pays ONE resource: Gold Vault, Crystal Mine, Gem Grotto, Essence Spring (+ synthesis
-  from 5F), Starfall Ruins, Seal Sanctum, Beast Lair (Pet Egg from the 4th boss), Wish Garden. Ten floors, FOUR bosses a
+  from 3F: 1 / 2 / 3 at 3F / 6F / 9F), Starfall Ruins, Seal Sanctum, Beast Lair (Pet Egg from the 4th boss), Wish Garden. Ten floors, FOUR bosses a
   floor (`Realms.boss`: pictures and names drawn in turn from the game's 34 boss paintings `Realms.pool`; need = base x
   1.25^(f-1) x (1 + .1 b)); each boss pays its `share` of the floor reward (`part`).
 - Proceed Now (`Realms.run`) spends an entry (or `merge` entries for that many times the loot): Reina fights the chosen
@@ -433,8 +433,14 @@ gaps) is published as https://claude.ai/artifact/EjJqhiY7XAFDo6CbmJowst (page so
 - Sinks: every Gear Crafting step also takes enhancement crystals (`gearRanks[].mats.stone` 30 ... 500); a guardian win
   pays `EMBER_TO_STAR` 5 star shards instead of 10 ember shards once the Ember Drake has 6 stars (`victory`); spare
   Spirit Marks trade for Star Orbs in the Mark Shop (`markOrbRate` r 10 / e 4 / s 2, `markToOrb`, `markTrade`).
-- Still open from the map (step 4-5): synthesis stones and Orange pieces are scarce, five shop currencies sell the same
-  wares at very different prices, festival tokens / Garden EXP / Lagoon points only open thresholds.
+- Step 4 (sources): Moon Chest gear is Purple, Winged Chest gear Orange (+1 tier), Armourer's Crate Orange (`give.rank`
+  read by `useBagItem`); Essence Spring pays synthesis from 3F (1 / 2 / 3 at 3F / 6F / 9F, per boss share).
+- Step 5 (shops): each shop has a speciality (`sig`, cheaper, bigger weekly limit, "★" on the card): Contest medals =
+  Armourer's Crates + Seal Satchels, Cloud tokens = Moon / Winged Chests; Wayfarer (frames, bubbles, vouchers), Wish
+  Market (rite tickets, orbs) and Guild (materials, level-gated) already had their own. Contest and Cloud shops now have
+  weekly limits (Monday 00:00 UTC; `wareLeft`, `wareTake`, optional save `S.shopWeek {week, b{"contest|cloud:id":n}}`,
+  `validShopWeek`). The Cloud Shop pop-up is a light card now (`bw-pop cl-shop`).
+- Still open: festival tokens / Garden EXP / Lagoon points only open thresholds; prices are not compared across shops.
 - `scripts/test-trail.mjs` was already failing before these changes (welcome tickets assertion); not investigated.
 
 ## Mini Games hub (2026-11-23)

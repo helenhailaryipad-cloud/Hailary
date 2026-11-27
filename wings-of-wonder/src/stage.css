@@ -11401,3 +11401,17 @@ body[data-screen=dungeons] #stage>#main{inset:0!important;width:100%;height:100%
 #stage #main .mart-trade button:disabled{opacity:.5}
 #stage .mart-trade :is(i,span,img){max-width:22px;max-height:22px}
 #stage .mart-trade>span{max-width:none;max-height:none}
+/* Shop specialities and weekly limits (2026-11-27) */
+#stage .shop-card.sig{box-shadow:0 0 0 2px #ffd56a,0 4px 12px #c08a2033}
+#stage .shop-card.sig small{color:#a85a06;font-weight:900}
+#modal .cloud-wares button .cloud-left{display:block;font:800 10.5px/1.2 Arial,sans-serif;color:#6a7a9a}
+#modal .cloud-wares button.sig{box-shadow:0 0 0 2px #ffd56a}
+#modal .cloud-wares button.sig .cloud-left{color:#a85a06}
+/* Cloud Shop: light card (no dark frames) */
+#stage #modal.cl-shop h2{color:#7a4a0e;font:900 22px/1.1 Georgia,serif}
+#stage #modal.cl-shop .cloud-wallet{color:#5a4320}
+#stage #modal.den-pop.cl-shop .cloud-wares button{background:linear-gradient(#ffffff,color-mix(in srgb,var(--rarity) 14%,#fff8ec));color:#3a2a10;border:2px solid color-mix(in srgb,var(--rarity) 70%,#fff)}
+#stage #modal.cl-shop .cloud-wares span{color:#8a5a10}
+#stage #modal.cl-shop .cloud-wares .shut{filter:saturate(.5);opacity:.7}
+#stage #modal.cl-shop .cloud-wares .cloud-left{color:#7a8aa0}
+#stage #modal.cl-shop .cloud-wares b,#stage #modal.cl-shop .cloud-wallet b{color:#3a2a10!important;-webkit-text-fill-color:currentColor;text-shadow:none}

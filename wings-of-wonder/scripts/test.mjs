@@ -32,6 +32,7 @@ vm.runInContext(fs.readFileSync('src/trail.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/app.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/garden.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/realms.js','utf8'),context);
+vm.runInContext(`{const r=WonderGear,G=defaults();r.bagAdd(G,'gearbox',1);const out=r.useBagItem(G,'gearbox',1,()=>.5),g=out.gains.find(x=>x.kind==='gear'),e=r.state(G).items.find(x=>x.uid===g.uid);if(r.gearRank(e)!==2)throw Error('Crate gives Orange');}`,context);
 vm.runInContext(`{const E=defaults(),id=DUNGEONS[0].id;WonderAdventure.victory(E,id);if(E.emberShards!==10)throw Error('Ember shards');E.emberStars=6;const sh=WonderGear.state(E).materials.shard;WonderAdventure.victory(E,id);if(E.emberShards!==10||WonderGear.state(E).materials.shard!==sh+5)throw Error('Ember at max gives star shards');}`,context);
 vm.runInContext(`{const r=WonderGear,T=defaults();if(r.markToOrb(T,'r'))throw Error('Marks needed');const v=r.summonState(T);v.marks.r=25;T.summon=v;if(!r.markToOrb(T,'r')||!r.markToOrb(T,'r')||r.markToOrb(T,'r')||r.summonState(T).orbs!==2||r.summonState(T).marks.r!==5)throw Error('Marks to Star Orb');if(r.craftRecipe(3).mats.stone!==30)throw Error('Craft takes crystals');}`,context);
 vm.runInContext(`{S=defaults();const t=Date.UTC(2026,10,27,10);if(!runTake('defense',t)||!runTake('defense',t)||runTake('defense',t)||runsLeft('merge',t)!==2||!runTake('defense',t+864e5))throw Error('Daily rewarded runs');if(!valid(JSON.parse(JSON.stringify(S)))||validRuns({day:'x',n:{}})||validRuns({day:'2026-11-27',n:{nope:1}}))throw Error('Runs save');}`,context);
@@ -841,7 +842,7 @@ vm.runInContext(`
  const oak=r.bagCount(S,'chest1');if(!r.cloudClaim(S,0,T0)||r.cloudClaim(S,0,T0)||r.bagCount(S,'chest1')!==oak+1||r.cloudClaim(S,9,T0))throw Error('Point reward');
  const T=defaults();r.cloudGain(T,200,T0);if(r.cloudClaim(T,2,T0)||!r.cloudClaim(T,0,T0))throw Error('Reward before its points');
  // Cloud Shop takes tokens.
- const tokens=r.cloudState(S).tokens;if(!r.buyCloud(S,'chest3')||r.cloudState(S).tokens!==tokens-900||r.bagCount(S,'chest3')!==1||r.buyCloud(S,'nope'))throw Error('Cloud Shop');
+ const tokens=r.cloudState(S).tokens;if(!r.buyCloud(S,'chest3')||r.cloudState(S).tokens!==tokens-700||r.bagCount(S,'chest3')!==1||r.buyCloud(S,'nope'))throw Error('Cloud Shop');{const T=JSON.parse(JSON.stringify(S));const c=r.cloudState(T);c.tokens=99999;T.cloud=c;let n=0;while(r.buyCloud(T,'chest3'))n++;if(n!==1||!valid(T))throw Error('Cloud Shop weekly limit')}
  S.cloud.tokens=10;if(r.buyCloud(S,'wish'))throw Error('Shop without tokens');
  // A new round keeps territories taken in the old one.
  const C=defaults();if(!r.cloudNewRound(C,{},T0)||r.cloudNewRound(C,{},T0+60000))throw Error('First round');

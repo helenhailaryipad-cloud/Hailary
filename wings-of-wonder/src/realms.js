@@ -16,7 +16,7 @@ const Realms = {
     { id: 'gold', name: 'Gold Vault', gives: 'Gold', base: 1200, art: 'guardian-t9', reward: f => ({ gold: 1500 + 700 * f }) },
     { id: 'crystal', name: 'Crystal Mine', gives: 'Crystals', base: 1300, art: 'guardian-t12', reward: f => ({ stone: 20 + 10 * f }) },
     { id: 'gem', name: 'Gem Grotto', gives: 'Gems', base: 1500, art: 'guardian-t15', reward: f => ({ gem: 2 + f }) },
-    { id: 'essence', name: 'Essence Spring', gives: 'Essence', base: 1600, art: 'guardian-t18', reward: f => ({ essence: 4 + 2 * f, synthesis: f >= 5 ? 1 : 0 }) },
+    { id: 'essence', name: 'Essence Spring', gives: 'Essence', base: 1600, art: 'guardian-t18', reward: f => ({ essence: 4 + 2 * f, synthesis: f >= 3 ? Math.ceil((f - 2) / 3) : 0 }) },
     { id: 'shard', name: 'Starfall Ruins', gives: 'Star shards', base: 1700, art: 'guardian-t21', reward: f => ({ shard: 3 + 2 * f }) },
     { id: 'seal', name: 'Seal Sanctum', gives: 'Talent seals', base: 1800, art: 'guardian-t24', reward: f => ({ seals: 40 + 20 * f }) },
     { id: 'beast', name: 'Beast Lair', gives: 'Pet eggs', base: 2000, art: 'guardian-t27', reward: f => ({ gold: 300 * f, items: { petegg: f >= 6 ? 2 : 1 } }) },
