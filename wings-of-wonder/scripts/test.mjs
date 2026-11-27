@@ -244,7 +244,7 @@ for(const id of DUNGEONS.map(d=>d.id)){const sample=defaults(),r=globalThis.Wond
  // Auto devour: the Maw eats Blue and Purple drops at once, Orange stays; Relic and finer are never food.
  const auto=defaults();auto.autoDevour=true;const seq=[.9];const fed=r.bossLoot(auto,'mistwood',()=>seq.length?seq.shift():.5);if(fed.entries.length!==1||r.gearRank(fed.entry)!==2||!(fed.devoured>0)||auto.devour!==fed.devoured||!valid(auto)||valid({...auto,autoDevour:1}))throw Error('Auto devour');
  // Rare drops are rolled after the sure ones: a 2-Star Red piece and bag items, each with its own chance.
- {const seen={};for(let i=0;i<1000;i++){const k=r.bossDropRank(i/1000);seen[k]=(seen[k]||0)+1}if(seen[1]!==800||seen[10]!==95||seen[2]!==95||seen[3]!==10||seen[0]||seen[4])throw Error('Guardian quality odds 80 / 9.5 / 9.5 / 1')}
+ {const seen={};for(let i=0;i<1000;i++){const k=r.bossDropRank(i/1000);seen[k]=(seen[k]||0)+1}if(seen[1]!==700||seen[0]!==100||seen[10]!==95||seen[2]!==95||seen[3]!==10||seen[4])throw Error('Guardian quality odds 70 / 10 / 9.5 / 9.5 / 1')}
  if(Math.max(...r.bossDropRanks.map(r.gearOrder))!==3||r.bossRare.some(x=>x.kind==='gear'&&(x.rank>3||x.chance>.05)))throw Error('Dungeons never drop 3-Star Red; 2-Star Red is rare');
  const lucky2=defaults(),eggs=r.bagCount(lucky2,'petegg'),luck=[.995],all=r.bossLoot(lucky2,'mistwood',()=>luck.length?luck.shift():0);if(all.rare.length!==r.bossRare.length+1||r.gearRank(all.entry)!==3||all.entries.length!==3||r.bagCount(lucky2,'petegg')!==eggs+1||r.bagCount(lucky2,'chest3')!==1||!valid(lucky2))throw Error('Rare drops');
  if(r.bossLoot(defaults(),'mistwood',()=>.5).rare.length)throw Error('Rare drops must be rare');

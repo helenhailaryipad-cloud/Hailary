@@ -1094,8 +1094,8 @@ unchanged), Warehouse (`cityVault`), Devour (`cityDevour`). Rules in `gear-data.
     Relic, Rainbow, Divine Rainbow. A piece keeps its place in the optional field `rank` (validated against `stars`);
     pieces from before the ladder are read from their stars (`gearRank`, `legacyRanks`) and keep the same stat bonus
     (`bonus`, used in `detail()`). Tile frame and plate colour = quality (`--rarity`, class `q-<id>`), not tier.
-  - Guardian gear odds (user 2026-11-27): `bossDropCount` 3 pieces, each rolls `bossDropTable`: Purple 80%, 1-Star
-    Orange 9.5%, Orange 9.5%, 2-Star Red 1% (`bossDropRank`); no Blue, never 3-Star Red. The notes below about fixed
+  - Guardian gear odds (user 2026-11-27): `bossDropCount` 3 pieces, each rolls `bossDropTable`: Purple 70%, Blue 10%,
+    1-Star Orange 9.5%, Orange 9.5%, 2-Star Red 1% (`bossDropRank`); never 3-Star Red. The notes below about fixed
     Orange / Purple / Blue drops and a separate 2-Star Red roll are outdated.
   - Guardians drop three pieces of one tier (`bossDropRanks` = Orange, Purple, Blue; `bossLoot` returns `entries`).
     Rare drops on top (user: "dungeons sometimes also give 2-star red, and promise all sorts of things but never
