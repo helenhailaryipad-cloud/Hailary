@@ -11008,3 +11008,27 @@ html body #stage .hm-pop button.hm-row:active{filter:brightness(.95);transform:s
 html body #stage .hm-pop button.hm-boss{position:relative;display:flex;align-items:center;justify-content:space-between;width:100%;height:min(12cqw,58px);min-height:0;margin:8px 0 0;padding:0 6px 0 14px;border-radius:12px;border:1.5px solid #fff!important;background:linear-gradient(90deg,#5a8ef0,#8ec4ff)!important;box-shadow:0 3px 8px #2a5ab055!important;color:#fff!important;font:900 min(4cqw,19px)/1 Georgia,serif;text-shadow:0 1px 2px #1a3a80!important;overflow:hidden;cursor:pointer}
 html body #stage .hm-pop button.hm-boss::before,html body #stage .hm-pop button.hm-boss::after{content:none!important}
 .hm-boss img{height:140%;width:auto;margin-right:-4px;filter:drop-shadow(0 2px 3px #0004)}
+/* Profile plate, festive look (2026-11-27, user: "ours is somehow boring"): painted ring with wings and blossoms, a
+   flame along the banner, Reina's real face, big gold power, live glow and shine. Positions from build-profile-plate.py */
+html body #stage .city-hud button.city-status.pf2{width:34%;top:.4%;left:.6%;aspect-ratio:1024/494}
+html body #stage .city-hud .pf2 .pf2-face{left:7.3%;top:29.4%;width:22.4%;transform:none;background:radial-gradient(#ffe8f2,#c9a6e8)}
+html body #stage .city-hud .pf2 .pf-city{left:18.5%;top:52.5%;height:58%}
+html body #stage .city-hud .pf2 .pf2-band{left:35.5%;top:39.5%;width:55%;height:20.5%;padding:0 3%;gap:0;justify-content:center}
+html body #stage .city-hud .pf2 .pf2-band b{font:900 clamp(8px,1.6cqw,14px)/1 Georgia,serif;letter-spacing:1px;color:#ffe9b8;opacity:.95}
+html body #stage .city-hud .pf2 .pf2-band>span{gap:4px;font:900 clamp(12px,2.9cqw,26px)/1 Georgia,serif;color:transparent;background:linear-gradient(#fffbe0,#ffd25a 50%,#ff9a2a);-webkit-background-clip:text;background-clip:text;text-shadow:none;filter:drop-shadow(0 1px 0 #6a2a00) drop-shadow(0 0 6px #ff8a2a99)}
+html body #stage .city-hud .pf2 .pf2-band>span i{font-size:.8em;color:#ffd24a;-webkit-text-fill-color:#ffd24a;filter:none}
+html body #stage .city-hud .pf2 .pf2-xp{position:absolute;display:block;left:37.6%;width:49.6%;top:61.6%;height:2.6%;margin:0;border-radius:6px;background:#06143a;box-shadow:none;overflow:hidden}
+html body #stage .city-hud .pf2 .pf2-xp u{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#5ad04a,#c6ff7a);box-shadow:0 0 6px #9aff6a}
+html body #stage .city-hud .pf2 .pf2-lv{left:18.6%;top:83.4%;font:900 clamp(9px,2cqw,18px)/1 Georgia,serif;color:#fff;text-shadow:0 1px 2px #000,0 0 6px #6aa8ff}
+html body #stage .city-hud .pf2 .pf2-flame{position:absolute;left:40%;top:12%;width:58%;height:30%;border-radius:50%;background:radial-gradient(ellipse at 70% 60%,#ffb24a88,#ff6a1a33 45%,transparent 70%);mix-blend-mode:screen;pointer-events:none;animation:pf2-flame 1.6s ease-in-out infinite alternate}
+@keyframes pf2-flame{from{opacity:.45;transform:scaleY(.9)}to{opacity:1;transform:scaleY(1.08) translateY(-4%)}}
+html body #stage .city-hud .pf2 .pf2-shine{position:absolute;left:34%;top:39%;width:58%;height:29%;border-radius:40px;overflow:hidden;pointer-events:none}
+html body #stage .city-hud .pf2 .pf2-shine::after{content:'';position:absolute;top:0;bottom:0;left:-30%;width:22%;background:linear-gradient(100deg,transparent,#ffffff55,transparent);animation:pf2-shine 4.5s ease-in-out infinite}
+@keyframes pf2-shine{0%,55%{left:-30%}100%{left:120%}}
+html body #stage .city-hud button.city-status.pf2{width:33%;top:.3%}
+html body #stage .city-hud .city-rank{left:34.5%}
+html body #stage .city-hud .pf2 .pf2-band b{font-size:min(1.6cqw,14px)}
+html body #stage .city-hud .pf2 .pf2-band>span{font-size:min(2.9cqw,26px)}
+html body #stage .city-hud .pf2 .pf2-lv{font-size:min(2cqw,18px)}
+html body #stage #main .city-hud .city-left-events{top:14%}
+@media (max-width:700px){html body #stage .city-hud .pf2 .pf2-band b{display:none}}

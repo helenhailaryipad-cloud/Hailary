@@ -280,6 +280,13 @@ dark-blue enamel nameplate band, level medallion, no text) `art-source/ui/profil
 `scripts/build-profile-plate.py` (prints hole / band / medallion positions). `.city-status.pf2` in `home()`: portrait in
 the ring, name + ⚔ power + XP bar on the band, level in the medallion; Rank moved right, the left event icons 1.7%
 lower. Hosted bundle 33,507,356 bytes.
+Festive plate (2026-11-27, user: "ours is somehow boring", photo of the reference's flame power banner): new painting
+(image-model edit, the v1 plate kept as `profile-plate-v1.webp`): ring with small gold wings, blossoms and gems, a flame
+along the top of the blue banner, an XP groove; built at 1024 px q95. Reina's REAL face sits in the ring:
+`reinaFaceUrl()` crops the head of the worn look without wings (`registeredCombatBitmap(true)`, alpha scan, cached per
+dress/hair; the old `reina-avatar` elf shows only until it is ready). Big gold-gradient power, small name (hidden under
+700 px), green XP bar in the groove, level in the medallion, a flickering flame glow `.pf2-flame` and a light sweep
+`.pf2-shine`. Positions in CSS "Profile plate, festive look".
 The old v301 profile page (`heroProfile`, blue card with party heroes, Fashion / Mount, Attributes; user: "what is
 this? my eyes rolled up") is retired: `go('profile')` and a saved `screen==='profile'` open `character` instead; the
 plate and the Character page no longer link to it; the city skill "Companion" opens `cityCompanion`.

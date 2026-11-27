@@ -24,9 +24,9 @@ def label(mask):
 ROOT = Path(__file__).resolve().parents[1]
 im = Image.open(ROOT/'scripts/art-source/ui/profile-plate.webp').convert('RGBA'); a = np.array(im)
 a[a[..., 3] < 20] = 0; a[a[..., 3] == 0, :3] = 0
-im = Image.fromarray(a); im = im.crop(im.getbbox()); W = 640; im = im.resize((W, round(im.height*W/im.width)), Image.Resampling.LANCZOS)
-im.save(ROOT/'src/assets/generated/hud-profile.webp', quality=88, method=6)
-im.save(ROOT/'scripts/hosting-art/hud-profile.avif', quality=40, speed=4)
+im = Image.fromarray(a); im = im.crop(im.getbbox()); W = 1024; im = im.resize((W, round(im.height*W/im.width)), Image.Resampling.LANCZOS)
+im.save(ROOT/'src/assets/generated/hud-profile.webp', quality=95, method=6)
+im.save(ROOT/'scripts/hosting-art/hud-profile.avif', quality=60, speed=4)
 a = np.array(im).astype(int); h, w = a.shape[:2]; pct = lambda x, y: (round(100*x/w, 1), round(100*y/h, 1))
 # portrait hole: transparent pixels not connected to the border
 lab, n = label(a[..., 3] < 40); border = set(lab[0]) | set(lab[-1]) | set(lab[:, 0]) | set(lab[:, -1])
