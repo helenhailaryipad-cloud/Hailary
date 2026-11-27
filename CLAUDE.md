@@ -1198,6 +1198,9 @@ packs[], day, hide, shop{week,b}}` (`Patron.valid`). Placeholders.
   realmBuy (`Realms.freeOf/maxBuy(id,s)`), sweep (`sweepLimit`). Per level an "Exclusive Benefits" pack for prisms at a
   deep discount, once (`buyPack`); Daily Pack (`dailyClaim`); SVIP Shop with weekly limits (`shopBuy`); Must-buy tab
   links the existing privileges (Sweep Privilege, Blessing Pass, Clear Battle Pass, Top-up Fest).
+- Labels (user: "unclear which SVIP is where"): a strip of levels 1-10 over the card (`ptStrip`: the viewed level
+  highlighted, her level with a crown, done ones ticked), a level pill "SVIP n · your level" over the tier name, and a
+  NEW tag on perks that rise at that level. Her photos covered SVIP 1-6; levels 7-10 are our own extrapolation.
 - Art (image model): `art-source/patron/{banner,badge}.webp` (original star priestess, purple-gold diamond crest) ->
   `patron-banner`, `patron-badge` by `scripts/build-patron-art.py`; chat preview packs `patron-*` into pack-realms.
 

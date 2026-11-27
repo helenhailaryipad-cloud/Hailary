@@ -55,7 +55,7 @@ const Patron = {
   level(s) { const x = Patron.xp(s); return Patron.svipSteps.filter(n => x >= n).length; },
   next(s) { return Patron.svipSteps[Patron.level(s)] || null; },
   perk(s, key) { const p = Patron.perks[key]; return p ? p.v[Patron.level(s)] : 0; },
-  perkList(lv) { return Object.entries(Patron.perks).filter(([, p]) => p.v[lv] !== p.v[0]).map(([k, p]) => p.text(p.v[lv])); },
+  perkList(lv) { return Object.entries(Patron.perks).filter(([, p]) => p.v[lv] !== p.v[0]).map(([k, p]) => ({ text: p.text(p.v[lv]), up: lv > 0 && p.v[lv] !== p.v[lv - 1] })); },
   addEur(s, eur) { const p = Patron.raw(s); p.xp = Math.min(1e7, p.xp + Math.round(eur * Patron.perEur)); },
   vipLevel(s) { const n = s.exploreCleared || 0; return Patron.vipSteps.filter(x => n >= x).length; },
   vipClaim(s, lv) {
@@ -94,6 +94,8 @@ function patronBadge(cls = '') {
   const lv = Patron.level(S); if (!lv || S.patron?.hide) return '';
   return `<span class="pt-badge ${cls}" role="button" onclick="event.stopPropagation();go('patron')"><img src="${artPath('patron-badge')}" alt=""><b>${lv}</b><i>SVIP</i></span>`;
 }
+// Level strip 1-10: which level the card shows, the player's own level (crown) and what is done (tick).
+function ptStrip(view, mine, label, done) { return `<div class="pt-strip">${Array.from({ length: 10 }, (_, i) => i + 1).map(i => `<button class="${i === view ? 'on' : ''} ${i <= mine ? 'got' : ''}" onclick="patronView=${i};showPatron()">${denPlain}${i === mine ? '<i>♛</i>' : done(i) ? '<i>✓</i>' : ''}<small>${label}</small><b>${i}</b></button>`).join('')}</div>`; }
 function ptTiles(g) { let h = ''; if (g.gold) h += `<span class="tp-tile">${uiIcon('gold')}<b>${fmt(g.gold)}</b></span>`; if (g.pearls) h += `<span class="tp-tile">${pearlIcon()}<b>${fmt(g.pearls)}</b></span>`; for (const [i, n] of Object.entries(g.items || {})) h += `<span class="tp-tile">${bagIcon(i)}<b>${n}</b></span>`; return h; }
 function showPatron() {
   if (typeof bagArtVars === 'function') bagArtVars();
@@ -105,9 +107,10 @@ function showPatron() {
       head = `<div class="pt-head"><div class="pt-emb"><img src="${artPath('patron-badge')}" alt=""><b>${lv}</b><i>SVIP</i></div><label class="pt-hide"><input type="checkbox" ${p.hide ? 'checked' : ''} onchange="Patron.raw(S).hide=this.checked;save();showPatron()">Hide SVIP badge</label></div>`;
       body = `<p class="pt-rule">Every €1 of top-up gives ${Patron.perEur} SVIP points</p>
        <div class="pt-bar"><i style="width:${next ? Math.min(100, Patron.xp(S) / next * 100) : 100}%"></i><span>${fmt(Patron.xp(S))}/${next ? fmt(next) : 'max'}</span><button class="pt-go" onclick="topupTab='prisms';go('topup')">${denPlain}Top-up</button></div>
+       ${ptStrip(view, lv, 'SVIP', i => (p.packs || []).includes(i))}
        <div class="pt-card"><button class="pt-arr" ${view > 1 ? '' : 'disabled'} onclick="patronView=${view - 1};showPatron()">${denPlain}‹</button><button class="pt-arr r" ${view < 10 ? '' : 'disabled'} onclick="patronView=${view + 1};showPatron()">${denPlain}›</button>
-        <h3>${Patron.svipNames[view - 1]} <small>SVIP ${view}</small></h3><ul>${Patron.perkList(view).map(t => `<li>◆ ${t}</li>`).join('')}</ul>
-        <p class="pt-sub">Exclusive Benefits</p><div class="tp-ctiles pt-tiles">${ptTiles(pk)}</div>
+        <p class="pt-lvl">SVIP ${view}${view === lv ? ' · your level' : view < lv ? ' · reached' : ''}</p><h3>${Patron.svipNames[view - 1]}</h3><ul>${Patron.perkList(view).map(t => `<li class="${t.up ? 'up' : ''}">◆ ${t.text}${t.up ? '<em>NEW</em>' : ''}</li>`).join('')}</ul>
+        <p class="pt-sub">SVIP ${view} Exclusive Benefits</p><div class="tp-ctiles pt-tiles">${ptTiles(pk)}</div>
         ${bought ? `<b class="pt-stamp">Bought</b>` : `<s>${prismIcon()} ${fmt(pk.was)}</s><button class="pt-buy" ${lv >= view && (S.scales || 0) >= pk.price ? '' : 'disabled'} onclick="patronPack(${view})">${denPlain}${prismIcon()} ${fmt(pk.price)}</button>${lv < view ? `<p class="pt-why">Reach SVIP ${view}</p>` : ''}`}
         <button class="pt-daily ${Patron.dailyReady(S) ? 'on' : ''}" onclick="patronDaily()">${denPlain}<i>🎁</i><span>Daily Pack</span></button></div>`;
     } else {
@@ -115,9 +118,10 @@ function showPatron() {
       head = `<div class="pt-head"><div class="pt-emb vip"><img src="${artPath('patron-badge')}" alt=""><b>${vlv}</b><i>VIP</i></div></div>`;
       body = `<p class="pt-rule">VIP rises with Challenge stages cleared${vlv >= 10 ? ' · VIP level maxed' : ''}</p>
        <div class="pt-bar"><i style="width:${next ? Math.min(100, (S.exploreCleared || 0) / next * 100) : 100}%"></i><span>${fmt(S.exploreCleared || 0)}/${next || Patron.vipSteps[9]}</span><button class="pt-go" onclick="go('cityExplore')">${denPlain}Go challenge</button></div>
+       ${ptStrip(view, vlv, 'VIP', i => (p.vip || []).includes(i))}
        <div class="pt-card"><button class="pt-arr" ${view > 1 ? '' : 'disabled'} onclick="patronView=${view - 1};showPatron()">${denPlain}‹</button><button class="pt-arr r" ${view < 10 ? '' : 'disabled'} onclick="patronView=${view + 1};showPatron()">${denPlain}›</button>
-        <h3 class="pt-title">${Patron.vipTitles[view - 1]}</h3><ul>${Object.entries(st).map(([k, n]) => `<li>◆ ${WonderGear.labels[k] || k} <b>+${n}${WonderGear.percentKeys.has(k) ? '%' : ''}</b></li>`).join('')}</ul>
-        <p class="pt-sub">VIP ${view}</p><div class="tp-ctiles pt-tiles">${ptTiles(Patron.vipGift(view))}</div>
+        <p class="pt-lvl vip">VIP ${view}${view === vlv ? ' · your level' : view < vlv ? ' · reached' : ''}</p><h3 class="pt-title">${Patron.vipTitles[view - 1]}</h3><ul>${Object.entries(st).map(([k, n]) => `<li>◆ ${WonderGear.labels[k] || k} <b>+${n}${WonderGear.percentKeys.has(k) ? '%' : ''}</b></li>`).join('')}</ul>
+        <p class="pt-sub">VIP ${view} gift</p><div class="tp-ctiles pt-tiles">${ptTiles(Patron.vipGift(view))}</div>
         ${got ? '<b class="pt-stamp">Claimed</b>' : `<button class="pt-buy" ${view <= vlv ? '' : 'disabled'} onclick="patronVip(${view})">${denPlain}${view <= vlv ? 'Claim' : 'Reach VIP ' + view}</button>`}</div>`;
     }
     body += `<div class="pt-seg">${[['vip', 'VIP'], ['svip', 'SVIP']].map(([k, n]) => `<button class="${k === patronTab ? 'on' : ''}" onclick="patronTab='${k}';patronView=0;showPatron()">${denPlain}${n}</button>`).join('')}</div>`;
