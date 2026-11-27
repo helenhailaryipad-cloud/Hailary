@@ -458,14 +458,11 @@ below `TOPUP_UI`), screen `topup`, opened by the home "Top-up" promo icon.
   weekly limits 4/4/2/1/1, Monday 00:00 UTC), Triple Treat (`caches`: Bubble / Frame / Mount Cache with a random chat
   bubble, avatar frame or a mount she lacks, "Rebate 1000%", once a week each; all three = Grand Rebate items;
   "all three" bundle `cacheAll`), Tickets (pearls -> rite tickets, link to the Secret Shop ticket packs).
-- Bazaar Coupons (user photos of the reference's Universal Ticket tab, "I did not understand what this is"): a prepaid
-  real-money balance, `S.coupons` (1 coupon = 1 euro cent; packs `couponPacks` 549 ... 10,499 for EUR 5.49 ... 104.99, each
-  with a prism rebate 30 ... 648). Coupons pay any store pack instead of money (`payCoupons`, the pack card offers
-  "Pay N coupons" when the balance is enough), count like cash in `S.topup.spent` (cents, for future top-up events);
-  buying coupons does not count; bound to the save, never expire. The tab is called Coupons (not Tickets) so it is not
-  confused with gacha tickets; the pearls -> rite tickets swap moved to the bottom of the Prisms tab. Art
-  `topup-coupon`, `topup-coupons-1..6` (same build script).
-- Optional save `S.topup {week, bought{id:n}, first[], rebate, spent}` (`Topup.valid`), `S.coupons`.
+- Bazaar Coupons (a prepaid real-money balance like the reference's Universal Ticket tab) were built and REMOVED the same
+  day (user: "I don't think we need these; why would we?"): they only serve the store's payment fees. `S.coupons` and
+  `S.topup.spent` still validate for saves from that build. The pearls -> rite tickets swap sits at the bottom of the
+  Prisms tab; the store has three tabs.
+- Optional save `S.topup {week, bought{id:n}, first[], rebate}` (`Topup.valid`).
 - Art (image model): `art-source/topup/` (pearl, seven prism piles, three caches, banner with an original arctic-fox
   shopkeeper girl) -> `ui-pearl`, `topup-pile-1..7`, `topup-cache-*`, `topup-banner` by `scripts/build-topup-art.py`;
   the chat preview packs `topup-*` into pack-realms. All numbers are placeholders.

@@ -42,7 +42,6 @@ vm.runInContext(`{const T=Topup,s=defaults(),t=Date.UTC(2026,10,27,10);s.scales=
  for(let n=0;n<4;n++)if(!T.grant(s,'w1',Math.random,t))throw Error('Weekly pack');if(T.grant(s,'w1',Math.random,t)||T.left(s,'w1',t)!==0||T.left(s,'w1',t+7*864e5)!==4)throw Error('Weekly limit');
  const bag0=WonderGear.bagCount(s,'chest3');T.grant(s,'bubble',()=>.1,t);T.grant(s,'frame',()=>.1,t);o=T.grant(s,'mount',()=>.1,t);if(!o.rebate||WonderGear.bagCount(s,'chest3')!==bag0+1||!(s.mountsOwned||[]).length||T.grant(s,'all',Math.random,t))throw Error('Caches and Grand Rebate');
  const tk=Rites.tickets(s,Rites.rite(Rites.period(t)).id),p0=s.pearls;if(!T.pearlSwap(s,3,t)||s.pearls!==p0-300||Rites.tickets(s,Rites.rite(Rites.period(t)).id)!==tk+3)throw Error('Pearls to tickets');
- const sc=s.scales;T.grant(s,'c1',Math.random,t);if(s.coupons!==549||s.scales!==sc+30||T.payCoupons(s,'c1',Math.random,t))throw Error('Coupons');const w2=T.left(s,'w2',t);if(!T.payCoupons(s,'w2',Math.random,t)||s.coupons!==0||T.left(s,'w2',t)!==w2-1||s.topup.spent!==549||T.payCoupons(s,'w2',Math.random,t))throw Error('Pay with coupons');
  if(!T.valid(s.topup)||!valid(JSON.parse(JSON.stringify(s)))||T.valid({week:1,bought:{nope:1}}))throw Error('Topup save');}`,context);
 vm.runInContext(`{const R=Realms,s=defaults(),t=Date.UTC(2026,10,27,10);
  if(R.run(s,'gold',2,0,99999,1,t))throw Error('Realm floor 2 before 1');
