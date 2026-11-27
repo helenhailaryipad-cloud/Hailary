@@ -1094,6 +1094,9 @@ unchanged), Warehouse (`cityVault`), Devour (`cityDevour`). Rules in `gear-data.
     Relic, Rainbow, Divine Rainbow. A piece keeps its place in the optional field `rank` (validated against `stars`);
     pieces from before the ladder are read from their stars (`gearRank`, `legacyRanks`) and keep the same stat bonus
     (`bonus`, used in `detail()`). Tile frame and plate colour = quality (`--rarity`, class `q-<id>`), not tier.
+  - Guardian gear odds (user 2026-11-27): `bossDropCount` 3 pieces, each rolls `bossDropTable`: Purple 80%, 1-Star
+    Orange 9.5%, Orange 9.5%, 2-Star Red 1% (`bossDropRank`); no Blue, never 3-Star Red. The notes below about fixed
+    Orange / Purple / Blue drops and a separate 2-Star Red roll are outdated.
   - Guardians drop three pieces of one tier (`bossDropRanks` = Orange, Purple, Blue; `bossLoot` returns `entries`).
     Rare drops on top (user: "dungeons sometimes also give 2-star red, and promise all sorts of things but never
     give them"): `bossRare` = a 2-Star Red piece 3% (user 2026-11-27: "very rarely; 3-Star Red never from dungeons, only crafting"), Jewel Box 10%, Pet Egg 5%, Winged Chest 2%, each rolled on its
@@ -1110,8 +1113,7 @@ unchanged), Warehouse (`cityVault`), Devour (`cityDevour`). Rules in `gear-data.
     material tiles, input places (tap + to pick, tap a piece to remove), Batch (2-Star Red only) / Add / Synthesize,
     then one tile per slot of the family with the number of usable pieces; family tabs at the bottom; `?` = ladder.
   - 1-Star Orange (user 2026-11-27, photo of the reference's Devour Gear window): `gearRanks[10]` `orange1` (appended so
-    saved rank numbers stay; `order` 1.5, `food`), drops from every guardian (`bossDropRanks` = Orange, 1-Star Orange,
-    Purple, Blue), never a crafting input, Maw food (`gearFood`, `gearOrder`). Devour Gear pop-up `devourPop(tier)`
+    saved rank numbers stay; `order` 1.5, `food`), drops from guardians, never a crafting input, Maw food (`gearFood`, `gearOrder`). Devour Gear pop-up `devourPop(tier)`
     (`.dv-pop`): tier select, every spare piece, food ticked at first, Devour EXP, Start to Devour (`devourGo`).
   - Devour: the quick button picks only Blue and Purple; Relic and finer cannot be devoured (`gearNoDevour`);
     Auto devour (optional `S.autoDevour`) feeds Blue and Purple drops to the Maw as they drop.
