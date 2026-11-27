@@ -284,6 +284,15 @@ The old v301 profile page (`heroProfile`, blue card with party heroes, Fashion /
 this? my eyes rolled up") is retired: `go('profile')` and a saved `screen==='profile'` open `character` instead; the
 plate and the Character page no longer link to it; the city skill "Companion" opens `cityCompanion`.
 
+## Home Claim / Power Up tools (2026-11-27)
+User photos of the reference's two round icons above the quest line ("change these 2 icons like the photo"). The two
+round tools above the Quest Board (`cityTool` in `app.js`, art `tool-rewards` / `tool-upgrade`, rebuilt at 384 px q95 by
+`build-home-tools.py`) open light pop-over cards `homeMenu(kind,btn)` (`.hm-pop`, closes on a tap outside):
+- Claim (`homeClaims()`): only what waits right now (Daily Blessings, Wayfarer Quests, Quest Journal, Challenge, Boss
+  Roulette, Wishwell, Star Rites free pull, Mail, Guild sign-in, Titles); each row jumps there. Its "!" = list not empty.
+- Power Up (`homePowers()`): Enhance Equipment, Gear Crafting, Star Talents, Pet Feeding, Devour, Guild Academy, Upgrade
+  Frame / Bubble, Companions (red dot where something can be done now) and a blue "Guardian Hunt" button (dungeons).
+
 ## Boss Roulette (2026-11-26)
 User: "prisms also come from the roulette: 88, three times a day, if all fields are open", then five photos of the
 reference's boss roulette. The boss wheel is a full-screen light room, screen `bossWheel` (`showBossWheel` in
