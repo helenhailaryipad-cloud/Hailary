@@ -248,7 +248,7 @@ function cityBagPick(mode){
 }
 // ---- Bag contents: stacks, materials and pet items next to the equipment -------------------------------------------
 function bagArtVars(){const root=document.documentElement;if(!root?.style?.setProperty||root.style.getPropertyValue('--bag-items'))return;root.style.setProperty('--bag-items','url("'+artPath('comp-bag-items')+'")')}
-const bagIcon=id=>{const n=WonderGear.bagItems.findIndex(i=>i.id===id);return '<i class="bag-ico" style="background-position:'+(n%4)/3*100+'% '+Math.floor(n/4)/3*100+'%"></i>'};
+const bagIcon=id=>{if(WonderGear.bagItemById[id]?.art)return '<img class="bag-ico bag-art" src="'+artPath('forge-'+id)+'" alt="">';const n=WonderGear.bagItems.findIndex(i=>i.id===id);return '<i class="bag-ico" style="background-position:'+(n%4)/3*100+'% '+Math.floor(n/4)/3*100+'%"></i>'};
 const bagHue=k=>WonderGear.bagRarity[k][1];
 const bagNum=n=>n>=1e4?new Intl.NumberFormat('en',{notation:'compact',maximumFractionDigits:1}).format(n):String(n);
 const bagNotes={stone:'Used to enhance equipment. Earn crystals in dungeons and mini-games.',shard:'Used to add stars to equipment and pets. Earn shards from dungeon and Castle Defense victories.',gem:'Socket into equipment for attack, piercing, health or defense. Earn gems by clearing dungeons.',synthesis:'Needed to craft the next equipment tier. Earn up to two per day from the Forge keeper, or buy one in Gear Crafting.',essence:'Crafts the next equipment tier while keeping all upgrades. Earn essence from dungeon bosses.'};
@@ -259,11 +259,12 @@ function bagThings(tab,where='bag',petTab=true,order='slot'){
  const stack=(key,icon,n,hue,name,rank=0)=>out.push({key,n,hue,name,rank,html:icon+'<b>'+bagNum(n)+'</b>'});
  const items=want=>{for(const i of r.bagItems){const n=vault?r.vaultCount(S,'i:'+i.id):r.bagCount(S,i.id);if(n&&want(i))stack('i:'+i.id,bagIcon(i.id),n,bagHue(i.rarity),i.name,'bpor'.indexOf(i.rarity))}};
  if(tab==='Common'||all){
-  items(i=>all||!petTab||!i.pet);
+  items(i=>all||(!petTab||!i.pet)&&!i.mat);
   const gear=eq.items.filter(e=>vault?e.stored:!e.stored&&!r.equipped(eq,e.uid)).sort((a,b)=>order==='power'?r.detail(b).power-r.detail(a).power:r.slots.findIndex(s=>s.id===r.catalog[a.template].slot)-r.slots.findIndex(s=>s.id===r.catalog[b.template].slot)||a.uid-b.uid);
   for(const e of gear)out.push({key:'g:'+e.uid,gear:e,name:r.catalog[e.template].name,rank:r.catalog[e.template].grade});
  }
  if(tab==='Materials'||all){
+  if(!all)items(i=>i.mat);
   for(const m of r.materialDefs){const n=vault?r.vaultCount(S,'m:'+m.id):eq.materials[m.id];if(n>0)stack('m:'+m.id,equipmentIcon(m.icon),n,m.color,m.name,1)}
   if(!vault){const t=r.talentState(S);if(t.seals>0)stack('t:seals',denIcon('misc',0,4,1),t.seals,bagHue('p'),'Talent Seal',1);if(t.books>0)stack('t:books',denIcon('misc',1,4,1),t.books,bagHue('o'),'Prophecy Book',2)}
  }
@@ -285,7 +286,7 @@ function bagCard(icon,hue,name,type,have,text,buttons=''){
 function bagOpen(key){
  const r=WonderGear,id=key.slice(2),gold=(label,action)=>'<button class="den-gold" onclick="'+action+'">'+denPlain+label+'</button>';
  if(key[0]==='i'){const i=r.bagItemById[id],n=r.bagCount(S,id);if(!i||!n)return;const many=Math.min(n,bagUseMany);
-  bagCard(bagIcon(id),bagHue(i.rarity),i.name,i.kind,n,i.text,gold('Use',"bagUse('"+id+"',1)")+(many>1?gold('Use '+many,"bagUse('"+id+"',"+many+")"):''))}
+  bagCard(bagIcon(id),bagHue(i.rarity),i.name,i.kind,n,i.text,i.mat?gold('Forge',"$('#modal').close();forgeGo('"+(id==='awakenCore'?'Awaken':'Set')+"','"+(id==='awakenCore'?'Awaken':'Aurora Set')+"')"):gold('Use',"bagUse('"+id+"',1)")+(many>1?gold('Use '+many,"bagUse('"+id+"',"+many+")"):''))}
  else if(key[0]==='m'){const m=r.materialDefs.find(m=>m.id===id);if(m)bagCard(equipmentIcon(m.icon),m.color,m.name,'Material',r.state(S).materials[id],bagNotes[id])}
  else if(key==='t:seals')bagCard(denIcon('misc',0,4,1),bagHue('p'),'Talent Seal','Pet material',r.talentState(S).seals,'Pays for learning pet talents and for scrolls in the Talent Shop. Dungeon guardians and Jungle Trek chests give seals.',gold('Pet Talent',"$('#modal').close();go('cityPet');talentGo(0)"));
  else if(key==='t:books')bagCard(denIcon('misc',1,4,1),bagHue('o'),'Prophecy Book','Pet material',r.talentState(S).books,'Shows which talent Learn would inscribe before you decide to keep it.',gold('Pet Talent',"$('#modal').close();go('cityPet');talentGo(0)"));
@@ -1573,6 +1574,7 @@ function smithTab(page,mode){
  smithPage=page;smithMode=mode||smithPages[page][0];cityForge();
 }
 function cityForge(){
+ if(typeof Forge!=='undefined'){if(smithPage==='Set'){fgSet=Math.max(0,Forge.sets.findIndex(x=>x.name+' Set'===smithMode));forgeSetView();return}if(smithPage==='Awaken'&&smithMode==='Awaken'){forgeAwakenView();return}}
  const r=eqRules(),eq=r.state(S),pieces=eq.items.filter(e=>!e.stored);
  const e=pieces.find(x=>x.uid===smithUid)||pieces.find(x=>x.uid===eq.equipped.bow)||pieces[0];
  const sub=smithMode,page=smithPage;

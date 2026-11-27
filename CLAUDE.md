@@ -1150,6 +1150,20 @@ unchanged), Warehouse (`cityVault`), Devour (`cityDevour`). Rules in `gear-data.
   capacity limits, Convert in bulk. Hosted bundle headroom is about 0.14 MB after the Summon room: add AVIF
   copies of older art (or lower their quality) before adding more pictures.
 
+## Forge: Set and Awaken (2026-11-27)
+User photos of the reference's Forge (Set tab Aurora / Star / Moon / Sun, Awaken tab; also Gear Evolution, Enchant, Deify
+NOT built yet). `src/forge.js` (rules `Forge`, UI below `FORGE_UI`), shown inside the old `cityForge` room when
+`smithPage` is Set, or Awaken with mode Awaken (other pages still the old placeholder). Open with `forgeGo(page,mode)`
+(`go()` resets the Forge to its first page). Both belong to the equipment SLOT, so new gear keeps them. Optional save
+`S.forge {set:{slot:0-4}, aw:{slot:0-20}}` (`Forge.valid`), stats through `Forge.bonus` in `stats()`. Placeholders.
+- Sets chain Aurora (T5) -> Star (T8) -> Moon (T13) -> Sun (T17); a slot counts only while its piece is Orange (2★) or
+  finer and of that tier (`fits`); bonuses at 2 / 4 / 6 pieces (`setBonus` x `scale`). Stones are bag items
+  (`setAurora` ... `setSun`, `mat:true`, never "used"; the item card's button opens the Forge).
+- Awaken: `awakenCore` crystals, cost 3 + 2 x level, cap tier + 2 (max 20), ATK / ARP or HP / DEF by slot and tier.
+- Sources: every guardian 2 Aurora stones + 2 crystals (`bossBag`); Star 25%, Moon 6%, Sun 2% rare rolls.
+- Art (image model): `art-source/forge/*.webp` -> `forge-<id>` 384 px q95 by `scripts/build-forge-art.py`; `bagIcon`
+  uses them for items with `art:true`. Chat preview packs `forge-*` into pack-realms. Home Power Up: Set Forge, Awaken.
+
 ## Summon room (2026-11-21)
 User sent nine reference photos (no text): a Summon icon on the home screen, Basic Summon, Advanced Summon, a shop
 for summon by-products, and an event that pays advanced tickets for basic summons. Home -> Summon now opens
