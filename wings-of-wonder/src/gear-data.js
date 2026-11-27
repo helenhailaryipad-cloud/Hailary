@@ -452,6 +452,7 @@ function stats(save){const b=bonuses(save);
  if(typeof Rites!=='undefined')for(const [key,n] of Object.entries(Rites.bonus(save)))b[key]=(b[key]||0)+n;
  if(typeof Titles!=='undefined')for(const [key,n] of Object.entries(Titles.bonus(save)))b[key]=(b[key]||0)+n;
  if(typeof Forge!=='undefined')for(const [key,n] of Object.entries(Forge.bonus(save)))b[key]=(b[key]||0)+n;
+ if(typeof Patron!=='undefined')for(const [key,n] of Object.entries(Patron.bonus(save)))b[key]=(b[key]||0)+n;
  if(typeof Vow!=='undefined')for(const [key,n] of Object.entries(Vow.bonus(save)))b[key]=(b[key]||0)+n;
  if(typeof Talents!=='undefined')for(const [key,n] of Object.entries(Talents.bonus(save)))b[key]=(b[key]||0)+n;
  const cards=globalThis.MoonwaterFish.totals(save.fishCards);
@@ -657,6 +658,7 @@ function devourGear(s,uids){
  if(!ids.length||!ids.every(id=>ok.has(id)))return {ok:false,error:'Only spare equipment from the bag can be devoured.'};
  const before=devourState(s);let gained=0;
  for(const e of eq.items.filter(e=>ids.includes(e.uid))){gained+=devourWorth(e);eq.materials.shard+=e.stars;eq.materials.gem+=e.gems}
+ if(typeof Patron!=='undefined')gained=Math.round(gained*(1+Patron.perk(s,'devour')/100));
  eq.items=eq.items.filter(e=>!ids.includes(e.uid));s.equipment=eq;s.devour=before.total+gained;
  return {ok:true,gained,levels:devourState(s).level-before.level};
 }

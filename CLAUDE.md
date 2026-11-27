@@ -1185,6 +1185,22 @@ NOT built yet). `src/forge.js` (rules `Forge`, UI below `FORGE_UI`), shown insid
 - Art (image model): `art-source/forge/*.webp` -> `forge-<id>` 384 px q95 by `scripts/build-forge-art.py`; `bagIcon`
   uses them for items with `art:true`. Chat preview packs `forge-*` into pack-realms. Home Power Up: Set Forge, Awaken.
 
+## VIP and SVIP (2026-11-27)
+User: "the game treats free and paying players the same; reward those who invest", then 13 photos of the reference's VIP
+room. `src/patron.js` (rules `Patron`, UI below `PATRON_UI`), screen `patron`: home promo "VIP" (`goldpass` key, red
+dot `Patron.due`) and the SVIP badge on the home profile plate (`patronBadge`, hideable). Optional `S.patron {xp, vip[],
+packs[], day, hide, shop{week,b}}` (`Patron.valid`). Placeholders.
+- VIP 1-10 is FREE: rises with Challenge stages cleared (`vipSteps`, 144 = max, "Go challenge"); each level is a title
+  with lasting stats (`vipTitles`, `vipStats` through `Patron.bonus` in stats()) and a one-time gift (`vipClaim`).
+- SVIP 1-10 for paying players: EUR 1 = 100 points (`addEur` from `Topup.grant`; payment NOT connected), `svipSteps`.
+  Privileges `perks` (value per level, `perk(s,key)`), all WIRED: exp (gain()), devour (devourGear), checkin (Blessings
+  claim multiplier), chests (Oak Chests per guardian win / sweep), energy (boss energy cap, `energyCap`), realmFree /
+  realmBuy (`Realms.freeOf/maxBuy(id,s)`), sweep (`sweepLimit`). Per level an "Exclusive Benefits" pack for prisms at a
+  deep discount, once (`buyPack`); Daily Pack (`dailyClaim`); SVIP Shop with weekly limits (`shopBuy`); Must-buy tab
+  links the existing privileges (Sweep Privilege, Blessing Pass, Clear Battle Pass, Top-up Fest).
+- Art (image model): `art-source/patron/{banner,badge}.webp` (original star priestess, purple-gold diamond crest) ->
+  `patron-banner`, `patron-badge` by `scripts/build-patron-art.py`; chat preview packs `patron-*` into pack-realms.
+
 ## Summon room (2026-11-21)
 User sent nine reference photos (no text): a Summon icon on the home screen, Basic Summon, Advanced Summon, a shop
 for summon by-products, and an event that pays advanced tickets for basic summons. Home -> Summon now opens
