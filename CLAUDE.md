@@ -28,6 +28,12 @@ Build the SKELETON of the game first: screens, systems and flows that exist and 
 numbers will be tuned together later, so do not spend time balancing now and do not report balance caveats at length;
 pick sensible placeholder numbers, keep them in named constants, and move on.
 
+## Balance targets (user, 2026-11-27, for the later tuning pass)
+- A full day in the reference is 6-8 hours of tapping: Cloud War 2-3 h, all dungeons 2-3 h, other activities ~2 h
+  (ours is about 2 h, and our dungeon fights are manual; auto-fight was offered).
+- Power growth: at ~7 billion power she gains ~50 million a day WITH spending (~0.7% of power a day); without spending
+  it is slower. Use this as the target daily growth when numbers are tuned.
+
 ## Layout
 - `wings-of-wonder/` — the game (imported from backup v301 with full Git history, commit 1468d48). Run commands from there: `npm ci`, `node scripts/test.mjs`, `node scripts/test-jungle.mjs`, `node scripts/preview.mjs --port 4173`.
 - `docs/backup-v301/` — original handover, file inventory, function index, captured test output.
