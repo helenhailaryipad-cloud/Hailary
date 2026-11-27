@@ -87,7 +87,7 @@ function art(it){return it.type==='dragon'?dragonSVG(it):wingArt(it)}
 const sectionPages={
 home:[['home','City'],['profile','Profile'],['attributes','Attributes'],['fashion','Fashion']],
 bag:[['bag','Loadout'],['inventory','Bag'],['forge','Crafting'],['warehouse','Warehouse']],
-dungeons:[['dungeons','Bosses'],['expLobby','EXP Dungeon']],
+dungeons:[['dungeons','Bosses'],['realms','Realms'],['expLobby','EXP Dungeon']],
 games:[['games','All games'],['defense','Castle Defense'],['merge','Dragon Merge'],['vale','Crownfall Vale'],['jungle','Jungle Trek'],['pairs','Harvest Pairs'],['burrow','Burrow Blitz'],['cascade','Crystal Cascade'],['party','Lagoon Gala']],
 collection:[['collection','Pets'],['wings','Wings'],['wish','Wishes']],
 cards:[['cards','Fish Journal']],
@@ -1153,7 +1153,7 @@ function homeClaims(){
 function homePowers(){
  const r=WonderGear;
  return [
-  ['Resource Realms',"realmPick=null;go('realms')",()=>Realms.list.some(r=>Realms.left(S,r.id)>0)],
+  ['Resource Realms',"realmFrom='home';go('realms')",()=>Realms.list.some(r=>Realms.left(S,r.id)>0)],
   ['Enhance Equipment',"go('forge')",()=>cityDue('upgrade')],
   ['Gear Crafting',"go('cityCraft')",()=>false],
   ['Star Talents',"go('citySkill')",()=>Talents.left(S)>0],
