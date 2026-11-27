@@ -7,6 +7,11 @@ Read `docs/WINGS-OF-WONDER-HANDOVER.md` before any game work.
 - Preserve save compatibility (`wow-save-v1`, version 1), item instance IDs, existing art and project identity.
 - `mcp/gpt_image_mcp.py` is an image-generation MCP server (default model gpt-image-2.6-sunburst); the OpenAI key is injected by the session proxy, never committed.
 
+## No button shimmer (user, 2026-11-27)
+"What is this vibration ... the bottom icons flicker": the running light around every button (`button-edge-light`) and the
+sheen across it (`button-face-light`) read as shaking on the iPad. Both keyframes are redefined at the end of `stage.css`
+to stay invisible. Do not add looping shimmer, pulsing scale or bobbing to buttons and icons again.
+
 ## Visual style rule (user, 2026-11-25)
 "Try not to put everything into black frames": no dark boxes, dark bars or dark framed panels around content by
 default. Prefer light, airy surfaces (sky-blue / ivory cards, soft gradients), content floating on the art, icons

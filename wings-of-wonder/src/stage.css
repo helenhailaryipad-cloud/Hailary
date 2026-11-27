@@ -11852,3 +11852,8 @@ html body #stage .city-hud .city-rank.pt-home{display:grid;justify-items:center;
 #stage .pt-daily.on i{animation:none!important;box-shadow:0 0 0 2px #ffd860,0 0 10px #ffd86099}
 #stage #main .pt-room .pt-strip button.on{transform:none}
 html body #stage .city-hud .city-rank.pt-home::before,html body #stage .city-hud .city-rank.pt-home::after{content:none!important;animation:none!important}
+/* User 2026-11-27: "the bottom icons flicker" - the running light around every button and the sheen across it read as
+   shaking on the iPad. Both keyframes now keep the effect invisible everywhere (the animation names stay so every rule
+   that uses them simply shows nothing). */
+@keyframes button-edge-light { from, to { opacity: 0; } }
+@keyframes button-face-light { from, to { opacity: 0; } }
