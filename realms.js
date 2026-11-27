@@ -10,7 +10,7 @@
 // Optional save field S.realms {day, used{id:n}, bought{id:n}, best{id:floor}, beat{id:{floor:mask}},
 // dead{id:{"f.b":time}}, focus["id:f.b"], log[{t,id,f,k,m,r}]}. All numbers are placeholders.
 const Realms = {
-  free: 2, buyMax: 3, buyPrice: 30, floors: 10, bosses: 4, rage: 25, respawnMs: 10 * 60e3, logMax: 20, focusMax: 12,
+  free: 2, buyMax: 3, buyPrice: 30, paidMax: 10, floors: 10, bosses: 4, rage: 25, respawnMs: 10 * 60e3, logMax: 20, focusMax: 12,
   share: [.2, .25, .25, .3],
   list: [
     { id: 'gold', name: 'Gold Vault', gives: 'Gold', base: 1200, art: 'guardian-t9', reward: f => ({ gold: 1500 + 700 * f }) },
@@ -20,7 +20,7 @@ const Realms = {
     { id: 'shard', name: 'Starfall Ruins', gives: 'Star shards', base: 1700, art: 'guardian-t21', reward: f => ({ shard: 3 + 2 * f }) },
     { id: 'seal', name: 'Seal Sanctum', gives: 'Talent seals', base: 1800, art: 'guardian-t24', reward: f => ({ seals: 40 + 20 * f }) },
     { id: 'beast', name: 'Beast Lair', gives: 'Pet eggs', base: 2000, art: 'guardian-t27', reward: f => ({ gold: 300 * f, items: { petegg: f >= 6 ? 2 : 1 } }) },
-    { id: 'wish', name: 'Wish Garden', gives: 'Wishes', base: 2200, art: 'guardian-t30', reward: f => ({ tickets: 30 + 15 * f }) },
+    { id: 'wish', name: 'Wish Garden', gives: 'Wishes', base: 2200, paid: 4000, art: 'guardian-t30', reward: f => ({ tickets: 30 + 15 * f }) },
   ],
   // the boss pictures the game already has; realms draw their floor bosses from them in turn
   pool: [['mistwood', 'Thornwing Guardian'], ['guardian-t7', 'Jade Antlerwolf'], ['moonfall', 'The Hollow Moon'], ['guardian-t8', 'Sapphire Bastion'],
@@ -48,9 +48,18 @@ const Realms = {
     for (const [id, m] of Object.entries(v.dead)) { for (const [k, t] of Object.entries(m)) if (now - t >= Realms.respawnMs || t > now + 6e4) delete m[k]; if (!Object.keys(m).length) delete v.dead[id]; }
     return v;
   },
-  left(s, id, now) { const v = Realms.state(s, now); return Realms.free + (v.bought[id] || 0) - (v.used[id] || 0); },
-  total(s, id, now) { return Realms.free + (Realms.state(s, now).bought[id] || 0); },
-  buy(s, id, now) { const v = Realms.state(s, now); if (!Realms.get(id) || (v.bought[id] || 0) >= Realms.buyMax || (s.scales || 0) < Realms.buyPrice) return false; s.scales -= Realms.buyPrice; v.bought[id] = (v.bought[id] || 0) + 1; return true; },
+  // the last realm of the progression has no free entries: each entry of the day costs gold, doubling (4,000, 8,000,
+  // 16,000, 32,000 ...; user 2026-11-27); the others have `free` entries + `buyMax` bought for `buyPrice` prisms
+  freeOf(id) { return Realms.get(id)?.paid ? 0 : Realms.free; },
+  maxBuy(id) { return Realms.get(id)?.paid ? Realms.paidMax : Realms.buyMax; },
+  price(s, id, now) { const R = Realms.get(id), n = Realms.state(s, now).bought[id] || 0; return R?.paid ? R.paid * 2 ** n : Realms.buyPrice; },
+  left(s, id, now) { const v = Realms.state(s, now); return Realms.freeOf(id) + (v.bought[id] || 0) - (v.used[id] || 0); },
+  total(s, id, now) { return Realms.freeOf(id) + (Realms.state(s, now).bought[id] || 0); },
+  buy(s, id, now) {
+    const v = Realms.state(s, now), R = Realms.get(id); if (!R || (v.bought[id] || 0) >= Realms.maxBuy(id)) return false;
+    const p = Realms.price(s, id, now), k = R.paid ? 'gold' : 'scales'; if ((s[k] || 0) < p) return false;
+    s[k] -= p; v.bought[id] = (v.bought[id] || 0) + 1; return true;
+  },
   open(s, id, f) { return f >= 1 && f <= Realms.floors && f <= (Realms.raw(s).best[id] || 0) + 1; },
   mask(s, id, f) { const v = Realms.raw(s); return f <= (v.best[id] || 0) ? 15 : (v.beat[id]?.[f] || 0); },
   respawn(s, id, f, b, now = Date.now()) { const t = Realms.state(s, now).dead[id]?.[f + '.' + b]; return t ? t + Realms.respawnMs : 0; },
@@ -120,7 +129,7 @@ const Realms = {
     const map = (m, max) => m === undefined || (obj(m) && Object.entries(m).every(([k, n]) => !!Realms.get(k) && int(n) && n <= max));
     const nested = (m, ok) => m === undefined || (obj(m) && Object.entries(m).every(([k, x]) => !!Realms.get(k) && obj(x) && Object.entries(x).every(ok)));
     const rew = r => obj(r) && Object.entries(r).every(([k, n]) => k === 'items' ? obj(n) && Object.values(n).every(int) : ['gold', 'stone', 'gem', 'essence', 'synthesis', 'shard', 'seals', 'tickets'].includes(k) && int(n));
-    return v === undefined || (obj(v) && (v.day === undefined || /^\d{4}-\d{2}-\d{2}$/.test(v.day)) && map(v.used, 99) && map(v.bought, Realms.buyMax) && map(v.best, Realms.floors)
+    return v === undefined || (obj(v) && (v.day === undefined || /^\d{4}-\d{2}-\d{2}$/.test(v.day)) && map(v.used, 99) && map(v.bought, Realms.paidMax) && map(v.best, Realms.floors)
       && nested(v.beat, ([f, m]) => /^\d+$/.test(f) && +f >= 1 && +f <= Realms.floors && int(m) && m <= 15)
       && nested(v.dead, ([k, t]) => /^\d+\.[0-3]$/.test(k) && Number.isFinite(t) && t >= 0 && t <= 1e15)
       && (v.focus === undefined || Array.isArray(v.focus) && v.focus.length <= Realms.focusMax && v.focus.every(k => typeof k === 'string' && /^[a-z]+:\d+\.[0-3]$/.test(k) && !!Realms.get(k.split(':')[0])))
@@ -182,7 +191,7 @@ function showRealm(id) {
     <div class="rl-floors">${floors}</div>
     <div class="rl-cards">${cards}</div>
     <div class="rl-line"><span>${uiIcon('party')} Adventurers here: <b>${Realms.crowd(id, now)}</b> <small>AI</small></span>
-     <span>◆ Entries: <b class="${left ? '' : 'none'}">${left}</b>/${tot}<button class="rl-plus" onclick="realmNotice('${id}')" aria-label="More entries">${denPlain}+</button></span>
+     <span>◆ Entries: <b class="${left ? '' : 'none'}">${left}</b>/${tot}<button class="rl-plus" onclick="realmNotice('${id}')" aria-label="More entries">${denPlain}+</button>${R.paid && (v.bought[id] || 0) < Realms.paidMax ? `<small class="rl-price">${uiIcon('gold')}${fmt(Realms.price(S, id))}</small>` : ''}</span>
      <span class="rl-merge">Merge<button onclick="realmMergeStep(-1)" ${realmMerge > 1 ? '' : 'disabled'}>${denPlain}−</button><b>${realmMerge}</b><button onclick="realmMergeStep(1)" ${realmMerge < left ? '' : 'disabled'}>${denPlain}+</button></span></div>
     <div class="rl-act"><span></span>${goBtn}<button class="rl-sweep" ${best ? '' : 'disabled'} onclick="realmSweep('${id}')">${denPlain}<i>${uiIcon('attack')}</i><span>Sweep${best ? ' ' + best + 'F' : ''}</span></button><button class="rl-help" onclick="realmRules()" aria-label="Rules">${denPlain}?</button></div>
    </div>
@@ -200,13 +209,15 @@ function realmFocus(id) { Realms.toggleFocus(S, id, realmFloor, realmBoss); save
 function realmMergeStep(d) { realmMerge = Math.max(1, Math.min(Realms.left(S, realmPick), realmMerge + d)); showRealm(realmPick); }
 function rlPop(html) { popup(`<div class="gd-pop rl-pop">${html}</div>`); $('#modal').classList.add('bw-pop'); }
 function realmNotice(id) {
-  const R = Realms.get(id), v = Realms.state(S), can = Realms.buyMax - (v.bought[id] || 0), left = Realms.left(S, id);
+  const R = Realms.get(id), v = Realms.state(S), max = Realms.maxBuy(id), can = max - (v.bought[id] || 0), left = Realms.left(S, id), p = Realms.price(S, id);
+  const cur = R.paid ? `${uiIcon('gold')}` : `<img src="${artPath('ui-prism')}" alt="">`, curName = R.paid ? 'gold' : 'prisms';
   rlPop(`<h2>Notice</h2><div class="rl-key" style="--art:url('${rlArt(id)}')"><b>${R.name}</b></div>
    <p>${left ? `You have <b>${left}</b> ${left === 1 ? 'entry' : 'entries'} left today.` : 'Today’s free entries are used.'}</p>
-   ${can > 0 ? `<p>One more entry costs <b class="ok">${Realms.buyPrice}</b> prisms (${can} of ${Realms.buyMax} left today).</p><button class="gd-big" onclick="realmBuyGo('${id}')">${denPlain}Confirm · <img src="${artPath('ui-prism')}" alt=""> ${Realms.buyPrice}</button>` : '<p>No more entries can be bought today. New entries at 00:00 UTC.</p>'}`);
+   ${R.paid ? `<p>The last realm has no free entries. Each entry today costs twice the one before: ${[0, 1, 2, 3].map(i => fmt(R.paid * 2 ** i)).join(' → ')} … gold.</p>` : ''}
+   ${can > 0 ? `<p>${R.paid ? 'Next' : 'One more'} entry costs <b class="ok">${fmt(p)}</b> ${curName} (${can} of ${max} left today).</p><button class="gd-big" onclick="realmBuyGo('${id}')">${denPlain}Confirm · ${cur} ${fmt(p)}</button>` : '<p>No more entries can be bought today. New entries at 00:00 UTC.</p>'}`);
 }
 function realmBuy(id) { realmNotice(id); }
-function realmBuyGo(id) { if (!Realms.buy(S, id)) { toast('Not enough prisms'); return; } save(); wallet(); $('#modal').close(); showRealm(id); toast('+1 entry'); }
+function realmBuyGo(id) { if (!Realms.buy(S, id)) { toast(Realms.get(id).paid ? 'Not enough gold' : 'Not enough prisms'); return; } save(); wallet(); $('#modal').close(); showRealm(id); toast('+1 entry'); }
 function realmStats(id) {
   const B = Realms.boss(id, realmFloor, realmBoss), mask = Realms.mask(S, id, realmFloor), first = !(mask & (1 << realmBoss));
   rlPop(`<h2>${B.name}</h2><p class="rl-sub">${Realms.get(id).name} · ${realmFloor}F · Lv. ${B.lv}</p>
@@ -230,7 +241,7 @@ function realmRules() {
    <li>A defeated boss respawns after ${Realms.respawnMs / 6e4} minutes. Bosses above your power are skipped; a run that defeats nobody keeps its entry.</li>
    <li>The first defeat of every boss pays double. Defeat all four once to open the next floor.</li>
    <li>Merge spends several entries on one run for that many times the loot. Sweep repeats your best cleared floor without a fight.</li>
-   <li>${Realms.free} free entries per realm a day (00:00 UTC), up to ${Realms.buyMax} more for ${Realms.buyPrice} prisms each.</li></ul>`);
+   <li>${Realms.free} free entries per realm a day (00:00 UTC), up to ${Realms.buyMax} more for ${Realms.buyPrice} prisms each.</li><li>The last realm, ${Realms.list.find(r => r.paid).name}, has no free entries: entries cost ${fmt(Realms.list.find(r => r.paid).paid)} gold, then 8,000, 16,000, 32,000 … (doubling, reset at 00:00 UTC).</li></ul>`);
 }
 function realmSweep(id) { const out = Realms.sweep(S, id, realmMerge); if (!out) return; save(); wallet(); realmMerge = 1; showRealm(id); resultShow({ title: 'Swept!', kicker: Realms.get(id).name + ' · ' + out.floor + 'F' + (out.merge > 1 ? ' · Merge ×' + out.merge : ''), win: true, body: `<div class="bag-gains">${rlGains(out.reward)}</div>`, buttons: [['Lovely', 'gold', '']] }); }
 function realmGo(id) {
