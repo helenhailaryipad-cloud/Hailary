@@ -375,6 +375,15 @@ Claim menu). Optional save field `S.garden {open, plots[6]{seed,at,set,w}, exp, 
   Hens eat wheat, cows carrots, sheep potatoes (`animals[].eat`). After a collect an animal is hungry (`at` 0) until
   fed one portion (`feed`, tap "Feed", or Collect all feeds automatically); a new animal's first meal is free. Barn
   chips over the pens; hungry animals show their food and a Feed / Hungry tag. Save `S.garden.farm [{k,at}]` in buying order (validated), `goods`.
+- Workshops and Order Board (user: "like FarmVille, lots to craft so the player stays busy"): tabs Garden / Farm /
+  Workshop / Orders. Animal goods (egg, milk, wool, truffle; `animals[].prod`) now also go to the barn `S.garden.store`;
+  crops stay in `feed`; `have` / `take` / `put` read both. Five workshops (`shopsList`: Mill, Bakery, Dairy, Weaver,
+  Kitchen; Garden Lv. 1-5, 800 ... 12,000 gold, `buyShop`), two recipes each (flour, cornmeal, bread, carrot cake, butter,
+  cheese, yarn, scarf, potato pie, truffle soup), a queue of 3 jobs that run one after another (`make`, `collectShop`).
+  Order Board (`board`, 6 slots): orders built from what she can make (`known`, `newOrder` deterministic by `oseq`),
+  pay gold ~1.6x the goods' worth + Garden EXP, every 5th order 10 prisms; a delivered or swapped slot refills after 2 min
+  (`deliver`, `skipOrder`). Barn pop-up sells anything (`goods[].sell`, `sell`). Save adds `store`, `shops{id:{jobs}}`,
+  `orders`, `oseq`, `odone` (validated). Art: `garden-work-bg`, buildings and ten product icons, `garden-board`.
 - Art (image model): `art-source/garden/` -> `garden-*` by `scripts/build-garden-art.py` (bg 1024 x 1536 q92, the rest
   384-512 px q95). Chat preview packs `garden-*` into pack-minis. Tests in `scripts/test.mjs`.
 

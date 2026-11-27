@@ -45,6 +45,17 @@ vm.runInContext(`{const G=Garden,s=defaults(),t=Date.UTC(2026,10,27,8);s.gold=10
  const v=s.garden,h=v.farm[0];if(!G.hungry(h)||G.feed(s,0,t))throw Error('Farm hungry without wheat');
  v.plots[1]=null;s.gold+=100;if(!G.plant(s,1,'wheat',t)||G.harvest(s,1,t+30e3))throw Error('Wheat plant');G.harvest(s,1,t+6*60e3);if(v.feed.wheat!==3)throw Error('Wheat to barn');if(!v.plots[1]||v.plots[1].seed!=='wheat'||v.plots[1].at!==t+7*60e3)throw Error('Wheat regrows by itself');G.harvest(s,1,t+12*60e3);if(v.feed.wheat!==6)throw Error('Wheat second crop');
  if(!G.feed(s,0,t+13*60e3)||v.feed.wheat!==5||h.at!==t+73*60e3)throw Error('Feed hen');
+ {const w=defaults(),t0=Date.UTC(2026,10,27,9);w.gold=10**6;const v=G.state(w,t0);v.feed={wheat:9};v.store={egg:2};
+ if(G.make(w,'mill',0,t0))throw Error('Workshop before building');if(!G.buyShop(w,'mill')||G.buyShop(w,'mill'))throw Error('Build mill');
+ if(!G.make(w,'mill',0,t0)||!G.make(w,'mill',0,t0)||!G.make(w,'mill',0,t0)||G.make(w,'mill',0,t0)||v.feed.wheat!==0)throw Error('Mill queue of three');
+ if(v.shops.mill.jobs[2].at!==t0+6*60e3)throw Error('Jobs run one after another');
+ if(G.collectShop(w,'mill',t0+3*60e3).length!==1||G.have(w,'flour')!==1)throw Error('Collect finished job');
+ G.collectShop(w,'mill',t0+7*60e3);if(G.have(w,'flour')!==3)throw Error('Collect rest');
+ if(G.buyShop(w,'bakery'))throw Error('Bakery needs garden level');v.exp=200;if(!G.buyShop(w,'bakery')||!G.make(w,'bakery',0,t0))throw Error('Bread');
+ const b=G.board(w,t0);if(b.length!==6||b.some(o=>!Object.keys(o.need).length))throw Error('Order board');
+ v.store.egg=50;v.store.flour=50;v.feed.wheat=50;const o=b.find(x=>G.canDeliver(w,x,t0));if(o){const g0=w.gold,i=b.indexOf(o);if(!G.deliver(w,i,t0)||w.gold!==g0+o.gold||v.orders[i].at!==t0+120e3)throw Error('Deliver')}
+ const g1=w.gold;if(G.sell(w,'flour',2)!==24||w.gold!==g1+24)throw Error('Sell');
+ if(!G.valid(v)||G.valid({...v,store:{nope:1}})||!valid(JSON.parse(JSON.stringify(w))))throw Error('Workshop save');}
  if(!G.valid(s.garden)||G.valid({...s.garden,farm:[{k:'cow',at:1}]}))throw Error('Farm save order');
  if(!G.valid(s.garden)||G.valid({...s.garden,open:9})||!valid(JSON.parse(JSON.stringify(s))))throw Error('Garden save');}`,context);
 
