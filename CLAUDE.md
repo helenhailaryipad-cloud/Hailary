@@ -403,7 +403,7 @@ the mode strip at the bottom of every boss hall.
   x2; all four once -> next floor (`beat` masks, `best`). A run that defeats nobody keeps its entries. Sweep (`sweep`)
   repeats the best cleared floor. 2 free entries a realm a UTC day, up to 3 more for 30 prisms (Notice pop-up).
   The LAST realm of the progression (Wish Garden, `paid: 4000`) has no free entries (user): each entry of the UTC day
-  costs gold, doubling 4,000 / 8,000 / 16,000 / 32,000 ... (`price`, `freeOf`, `maxBuy` = `paidMax` 10). Gold stands in
+  costs gold, doubling 4,000 / 8,000 / 16,000 / 32,000 ... (`price`, `freeOf`, `maxBuy` = `paidMax` 5 a day, user). Gold stands in
   for the reference's diamonds.
 - Optional save `S.realms {day, used, bought, best, beat{id:{f:mask}}, dead{id:{"f.b":time}}, focus[], log[]}`.
 - Hall (`showRealm`, `.rl-v2`, light): ribbon + wallet, boss on the realm picture, name + Recommended Power, left icons

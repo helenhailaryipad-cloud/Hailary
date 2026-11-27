@@ -10,7 +10,7 @@
 // Optional save field S.realms {day, used{id:n}, bought{id:n}, best{id:floor}, beat{id:{floor:mask}},
 // dead{id:{"f.b":time}}, focus["id:f.b"], log[{t,id,f,k,m,r}]}. All numbers are placeholders.
 const Realms = {
-  free: 2, buyMax: 3, buyPrice: 30, paidMax: 10, floors: 10, bosses: 4, rage: 25, respawnMs: 10 * 60e3, logMax: 20, focusMax: 12,
+  free: 2, buyMax: 3, buyPrice: 30, paidMax: 5, floors: 10, bosses: 4, rage: 25, respawnMs: 10 * 60e3, logMax: 20, focusMax: 12,
   share: [.2, .25, .25, .3],
   list: [
     { id: 'gold', name: 'Gold Vault', gives: 'Gold', base: 1200, art: 'guardian-t9', reward: f => ({ gold: 1500 + 700 * f }) },
@@ -129,7 +129,7 @@ const Realms = {
     const map = (m, max) => m === undefined || (obj(m) && Object.entries(m).every(([k, n]) => !!Realms.get(k) && int(n) && n <= max));
     const nested = (m, ok) => m === undefined || (obj(m) && Object.entries(m).every(([k, x]) => !!Realms.get(k) && obj(x) && Object.entries(x).every(ok)));
     const rew = r => obj(r) && Object.entries(r).every(([k, n]) => k === 'items' ? obj(n) && Object.values(n).every(int) : ['gold', 'stone', 'gem', 'essence', 'synthesis', 'shard', 'seals', 'tickets'].includes(k) && int(n));
-    return v === undefined || (obj(v) && (v.day === undefined || /^\d{4}-\d{2}-\d{2}$/.test(v.day)) && map(v.used, 99) && map(v.bought, Realms.paidMax) && map(v.best, Realms.floors)
+    return v === undefined || (obj(v) && (v.day === undefined || /^\d{4}-\d{2}-\d{2}$/.test(v.day)) && map(v.used, 99) && map(v.bought, 10) && map(v.best, Realms.floors)
       && nested(v.beat, ([f, m]) => /^\d+$/.test(f) && +f >= 1 && +f <= Realms.floors && int(m) && m <= 15)
       && nested(v.dead, ([k, t]) => /^\d+\.[0-3]$/.test(k) && Number.isFinite(t) && t >= 0 && t <= 1e15)
       && (v.focus === undefined || Array.isArray(v.focus) && v.focus.length <= Realms.focusMax && v.focus.every(k => typeof k === 'string' && /^[a-z]+:\d+\.[0-3]$/.test(k) && !!Realms.get(k.split(':')[0])))
