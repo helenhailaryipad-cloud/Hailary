@@ -27,8 +27,20 @@ vm.runInContext(fs.readFileSync('src/wishwell.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/checkin.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/titles.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/challenge.js','utf8'),context);
+
 vm.runInContext(fs.readFileSync('src/trail.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/app.js','utf8'),context);
+vm.runInContext(fs.readFileSync('src/garden.js','utf8'),context);
+vm.runInContext(`{const G=Garden,s=defaults(),t=Date.UTC(2026,10,27,8);s.gold=1000;
+ if(G.plant(s,3,'sunpetal',t)||G.plant(s,0,'dewleaf',t))throw Error('Garden: locked bed or seed planted');
+ if(!G.plant(s,0,'sunpetal',t)||s.gold!==950||G.plant(s,0,'sunpetal',t))throw Error('Garden plant');
+ if(G.harvest(s,0,t+60e3))throw Error('Garden harvest before ripe');
+ const cut=G.water(s,0,t);if(cut!==10*60e3||G.water(s,0,t))throw Error('Garden water once, at least 10 min');
+ const g0=s.gold,r=G.harvest(s,0,t+20*60e3);if(!r||s.gold!==g0+180||s.garden.plots[0]||s.garden.harvests!==1)throw Error('Garden harvest');
+ s.gold=1500;if(G.buyBed(s))throw Error('Garden bed without gold');s.gold=2500;if(!G.buyBed(s)||s.garden.open!==4)throw Error('Garden bed');
+ for(const id of ['nyra','kael','pip','vesper','briar'])G.friendWater(s,id,t);if(G.friendWater(s,'orin',t)||G.friendWater(s,'nyra',t))throw Error('Garden friend limit');
+ if(!G.valid(s.garden)||G.valid({...s.garden,open:9})||!valid(JSON.parse(JSON.stringify(s))))throw Error('Garden save');}`,context);
+
 vm.runInContext(`{const C=Challenge,s=defaults(),t0=Date.UTC(2026,10,27,8);s.exploreCleared=0;C.state(s,t0);
  if(C.claimIdle(s,t0+30e3))throw Error('Idle loot before a minute');
  const g0=s.gold,g=C.claimIdle(s,t0+30*3600e3);if(!g||g.ms!==24*3600e3||s.gold!==g0+120*24)throw Error('Idle loot capped at 24 h');

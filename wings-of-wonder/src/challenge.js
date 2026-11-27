@@ -133,6 +133,8 @@ function chGains(r) {
   if (r.gold) h += `<span class="bag-gain" style="--rarity:#f0b848">${uiIcon('gold')}<b>+${fmt(r.gold)}</b><small>Gold</small></span>`;
   if (r.prisms) h += `<span class="bag-gain" style="--rarity:#b06af0"><img class="bag-ico" src="${artPath('ui-prism')}" alt=""><b>+${fmt(r.prisms)}</b><small>Prisms</small></span>`;
   if (r.xp) h += `<span class="bag-gain">${uiIcon('exp')}<b>+${fmt(r.xp)}</b><small>XP</small></span>`;
+  if (r.gem) h += `<span class="bag-gain" style="--rarity:#e05a8a">${uiIcon('gem')}<b>+${fmt(r.gem)}</b><small>Gems</small></span>`;
+  if (r.essence) h += `<span class="bag-gain" style="--rarity:#8a6af0">${uiIcon('crystals')}<b>+${fmt(r.essence)}</b><small>Essence</small></span>`;
   if (r.stone) h += `<span class="bag-gain" style="--rarity:#5ac8c0">${uiIcon('crystals')}<b>+${fmt(r.stone)}</b><small>Crystals</small></span>`;
   if (r.items && Object.keys(r.items).length) h += cloudItems(r.items);
   return h;

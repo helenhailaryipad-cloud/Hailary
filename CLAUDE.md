@@ -347,6 +347,20 @@ obj[], day{d,clears,idles,got[]}, skip}` (`Challenge.valid` in `valid()`). Place
 - Art (image model): `art-source/challenge/` -> `challenge-*` by `scripts/build-challenge-art.py` (backgrounds
   1024 x 1536 q92, icons 320-512 px q95). Chat preview packs `challenge-*` into pack-minis.
 
+## Sky Garden (2026-11-27)
+User: "let's make a garden", then "do it your way" (no reference photos). `src/garden.js` (rules `Garden`, UI below
+`GARDEN_UI`), screen `garden`, home icon `.city-garden` above Challenge (red "!" from `Garden.due`; also in the home
+Claim menu). Optional save field `S.garden {open, plots[6]{seed,at,set,w}, exp, harvests, got[], today{d,water,friends[]}}`
+(`Garden.valid`). Placeholders throughout.
+- Six beds (`beds`), three open; bed 4/5/6 for 2,000 / 5,000 / 10,000 gold (`bedPrice`, `buyBed`, in order).
+- Eight seeds for gold (`seeds`: Sunpetal 30 min ... Wishblossom / Goldmelon 8 h) grow on the real clock (`plot.at`);
+  stages sprout -> young -> ripe plant picture; harvest (`harvest`) pays gold / XP / crystals / gems / essence / bag
+  items (+ a rare item chance) and Garden EXP; Garden level (`level`, 60 x lv) opens seeds (`seedLevel`).
+- Watering (`water`): once per planting, 25% of the time left (at least 10 min), 5 a UTC day. Friends' gardens
+  (`friendWater`): water up to 5 AI friends a day for 60 gold + Garden EXP. Harvest chests at 5 / 15 / 30 / 60 / 100.
+- Art (image model): `art-source/garden/` -> `garden-*` by `scripts/build-garden-art.py` (bg 1024 x 1536 q92, the rest
+  384-512 px q95). Chat preview packs `garden-*` into pack-minis. Tests in `scripts/test.mjs`.
+
 ## Mini Games hub (2026-11-23)
 User: "all games in one place, names on the main field, not hunted through sub-tabs". The bottom-nav tab is called
 Mini Games; `games()` in `app.js` draws `.mg-hub`: one tile per game from `MINI_GAMES` (cover, name, line, best
