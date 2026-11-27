@@ -12,6 +12,15 @@ Read `docs/WINGS-OF-WONDER-HANDOVER.md` before any game work.
 default. Prefer light, airy surfaces (sky-blue / ivory cards, soft gradients), content floating on the art, icons
 without dark discs, gold accents. Use a dark panel only where text would otherwise be unreadable, and keep it small.
 
+## Image quality rule (user, 2026-11-27)
+"Everything is squeezed and muddy; add anti-aliasing and higher quality; you have no limits, do not invent them."
+Build art at the source's full resolution (or at least 2x its largest on-screen size) with WebP quality 92-95; never
+shrink pictures or lower quality to fit the old hosted-bundle budget (that bundle is not where she plays; ignore it).
+The only real limits are the chat artifact's (16 MB per file, 511 files): split a pack when it grows. First pass:
+Star Rites / Secret Shop art (`build-rites-art.py`: icons 256 px cells, banner 1536 x 1024, backgrounds 1024 x 1536,
+auras 1024, voucher 384) and the shared UI plates (`build-ui-icons.py`: gold / violet buttons 720 px, back 384,
+ribbon 1024, burst 1024). Secret Shop list and the rites bottom bar are light now; prisms there use `ui-prism`.
+
 ## Current priority (user, 2026-11-20)
 Build the SKELETON of the game first: screens, systems and flows that exist and work. Prices, bonuses and all stat
 numbers will be tuned together later, so do not spend time balancing now and do not report balance caveats at length;
