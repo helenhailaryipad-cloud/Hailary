@@ -244,6 +244,7 @@ for(const id of DUNGEONS.map(d=>d.id)){const sample=defaults(),r=globalThis.Wond
  // Auto devour: the Maw eats Blue and Purple drops at once, Orange stays; Relic and finer are never food.
  const auto=defaults();auto.autoDevour=true;const fed=r.bossLoot(auto,'mistwood',()=>.5);if(fed.entries.length!==1||r.gearRank(fed.entry)!==2||!(fed.devoured>0)||auto.devour!==fed.devoured||!valid(auto)||valid({...auto,autoDevour:1}))throw Error('Auto devour');
  // Rare drops are rolled after the sure ones: a 2-Star Red piece and bag items, each with its own chance.
+ if(Math.max(...r.bossDropRanks)!==2||r.bossRare.some(x=>x.kind==='gear'&&(x.rank>3||x.chance>.05)))throw Error('Dungeons never drop 3-Star Red; 2-Star Red is rare');
  const lucky2=defaults(),eggs=r.bagCount(lucky2,'petegg'),all=r.bossLoot(lucky2,'mistwood',()=>0);if(all.rare.length!==r.bossRare.length||r.gearRank(all.entry)!==3||all.entries.length!==4||r.bagCount(lucky2,'petegg')!==eggs+1||r.bagCount(lucky2,'chest3')!==1||!valid(lucky2))throw Error('Rare drops');
  if(r.bossLoot(defaults(),'mistwood',()=>.99).rare.length)throw Error('Rare drops must be rare');
  S=lucky2;dungeonLoot();if(!document.querySelector('#modalBody').innerHTML.includes('2-Star Red piece')||!document.querySelector('#modalBody').innerHTML.includes('8%')||!bossDropMarkup(all).includes('Rare drop: 2-Star Red piece'))throw Error('Rare drop windows');

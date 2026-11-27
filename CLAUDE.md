@@ -1096,7 +1096,7 @@ unchanged), Warehouse (`cityVault`), Devour (`cityDevour`). Rules in `gear-data.
     (`bonus`, used in `detail()`). Tile frame and plate colour = quality (`--rarity`, class `q-<id>`), not tier.
   - Guardians drop three pieces of one tier (`bossDropRanks` = Orange, Purple, Blue; `bossLoot` returns `entries`).
     Rare drops on top (user: "dungeons sometimes also give 2-star red, and promise all sorts of things but never
-    give them"): `bossRare` = a 2-Star Red piece 8%, Jewel Box 10%, Pet Egg 5%, Winged Chest 2%, each rolled on its
+    give them"): `bossRare` = a 2-Star Red piece 3% (user 2026-11-27: "very rarely; 3-Star Red never from dungeons, only crafting"), Jewel Box 10%, Pet Egg 5%, Winged Chest 2%, each rolled on its
     own; `bossLoot` returns `rare`. The lobby's Rewards column has "Rare drops" (`dungeonLoot()`: every drop with its
     REAL chance; never list a reward that cannot drop), and the victory window names what dropped.
   - `craftGear(save,slot,tier,rank,uids,rng)`: `need` spare pieces of the quality below, same tier and family
