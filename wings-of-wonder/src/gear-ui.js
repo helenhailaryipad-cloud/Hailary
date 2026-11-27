@@ -166,7 +166,7 @@ function dungeonLoot(){
 }
 function bossDropMarkup(reward){
  const rare=(reward.rare||[]).map(x=>x.kind==='gear'?eqRules().gearRanks[x.rank].name+' piece':eqRules().bagItemById[x.id].name);
- const fed=(rare.length?`<p class="boss-rare">Rare drop: ${rare.join(', ')}!</p>`:'')+(reward.devoured?`<p>The Glimmer Maw ate the Blue and Purple pieces: +${fmt(reward.devoured)} essence.</p>`:'');
+ const fed=(rare.length?`<p class="boss-rare">Rare drop: ${rare.join(', ')}!</p>`:'')+(reward.devoured?`<p>The Glimmer Maw ate the Blue and Purple pieces: +${fmt(reward.devoured)} Maw EXP.</p>`:'');
  if(!reward.entry)return fed;
  const r=eqRules(),eq=r.state(S),e=reward.entry,t=r.catalog[e.template],q=r.gearRanks[r.gearRank(e)],power=stats().power,next=r.stats({...S,equipment:{...eq,equipped:{...eq.equipped,[t.slot]:e.uid}}}).power,diff=next-power;
  return `<section class="boss-drop-card" style="--loot-color:${q.color}"><p class="eyebrow">BOSS EQUIPMENT FOUND</p><div class="boss-drop-row">${(reward.entries||[e]).map(x=>equipmentCell(x,{compact:true})).join('')}</div><div class="boss-drop-heading"><div><h3>${t.name}</h3><strong>${q.name} · T${t.tier}</strong><p class="loot-power">${diff>0?'+'+fmt(diff)+' hero power if equipped':diff<0?'Your equipped item is stronger.':'Same hero power. Compare its attributes.'}</p></div></div>${fed}<div class="row"><button class="primary" onclick="openEquipment(${e.uid})">Compare / Equip / Enhance</button><button onclick="$('#modal').close();openScreen('cityCraft')">Gear Crafting</button></div><small>Five Orange pieces make a 2-Star Red · Blue and Purple feed the Glimmer Maw</small></section>`;
@@ -288,7 +288,7 @@ function bagOpen(key){
  else if(key[0]==='m'){const m=r.materialDefs.find(m=>m.id===id);if(m)bagCard(equipmentIcon(m.icon),m.color,m.name,'Material',r.state(S).materials[id],bagNotes[id])}
  else if(key==='t:seals')bagCard(denIcon('misc',0,4,1),bagHue('p'),'Talent Seal','Pet material',r.talentState(S).seals,'Pays for learning pet talents and for scrolls in the Talent Shop. Dungeon guardians and Jungle Trek chests give seals.',gold('Pet Talent',"$('#modal').close();go('cityPet');talentGo(0)"));
  else if(key==='t:books')bagCard(denIcon('misc',1,4,1),bagHue('o'),'Prophecy Book','Pet material',r.talentState(S).books,'Shows which talent Learn would inscribe before you decide to keep it.',gold('Pet Talent',"$('#modal').close();go('cityPet');talentGo(0)"));
- else if(key==='t:ember')bagCard(uiIcon('gem'),bagHue('r'),'Ember Shard','Pet material',S.emberShards||0,'Raises the stars of the Ember Drake. Every dungeon victory gives ten.');
+ else if(key==='t:ember')bagCard(uiIcon('gem'),bagHue('r'),'Ember Shard','Pet material',S.emberShards||0,'Raises the stars of the Ember Drake. Every dungeon victory gives ten; once the Drake has 6 stars, victories give 5 star shards instead.');
  else if(key[0]==='p'){const p=r.familiars.find(p=>p.id===id);if(p)bagCard('<img src="'+petPicture(p)+'" alt="">',bagHue({Common:'b',Rare:'p',Epic:'o'}[p.rarity]||'r'),p.name,p.rarity+' pet copy',r.petSpares(S,id),'A spare copy of a pet Reina already has. Six copies of one rarity can be synthesized into a pet of the next rarity.',gold('Synthesize',"$('#modal').close();go('cityPet');petTab('Synthesize')"))}
 }
 function bagGain(g){
@@ -360,9 +360,9 @@ function devourFeed(){
  const r=WonderGear,result=r.devourGear(S,devourPicks);
  if(!result.ok){toast(result.error);return}
  devourPicks=[];save();cityDevour();document.querySelector('.maw-pic')?.classList.add('chomp');
- toast('+'+fmt(result.gained)+' essence'+(result.levels?' · Glimmer Maw is now Lv. '+r.devourState(S).level:''));
+ toast('+'+fmt(result.gained)+' Maw EXP'+(result.levels?' · Glimmer Maw is now Lv. '+r.devourState(S).level:''));
 }
-function devourInfo(){const r=WonderGear;popup('<h2>Devour</h2><p>The Glimmer Maw eats spare equipment from the bag. Every piece gives essence: more for a higher tier, rarity, stars and enhancement.</p><p>Each Maw level gives Reina +'+r.devourStep.attack+' ATK, +'+r.devourStep.health+' HP and +'+r.devourStep.defense+' DEF for good. Stars and gems on a devoured piece come back as star shards and sky gems.</p><p>Blue and Purple pieces are its usual food: the quick button picks only those, and with Auto devour on they are eaten as soon as a guardian drops them. Orange and finer pieces are crafting stock; Relic and above cannot be devoured.</p><p>Equipped pieces, the basic set and pieces in the warehouse are never eaten.</p>')}
+function devourInfo(){const r=WonderGear;popup('<h2>Devour</h2><p>The Glimmer Maw eats spare equipment from the bag. Every piece gives Maw EXP: more for a higher tier, rarity, stars and enhancement.</p><p>Each Maw level gives Reina +'+r.devourStep.attack+' ATK, +'+r.devourStep.health+' HP and +'+r.devourStep.defense+' DEF for good. Stars and gems on a devoured piece come back as star shards and sky gems.</p><p>Blue and Purple pieces are its usual food: the quick button picks only those, and with Auto devour on they are eaten as soon as a guardian drops them. Orange and finer pieces are crafting stock; Relic and above cannot be devoured.</p><p>Equipped pieces, the basic set and pieces in the warehouse are never eaten.</p>')}
 function cityDevour(){
  const r=WonderGear,st=r.devourState(S),bonus=r.devourBonus(S),spare=r.devourable(S),food=devourFood();
  devourPicks=devourPicks.filter(id=>spare.some(e=>e.uid===id));
@@ -371,7 +371,7 @@ function cityDevour(){
  $('#main').innerHTML=`<section class="satchel maw-room"><div class="satchel-top"><strong>Devour</strong>${satchelWallet()}</div>
  <div class="maw-stage"><button class="maw-help" aria-label="How Devour works" onclick="devourInfo()">${denPlain}?</button><img class="maw-pic" src="${artPath('comp-bag-maw')}" alt="Glimmer Maw"><div class="maw-info"><h2>Glimmer Maw <b>Lv. ${st.level}${after>st.level?' → '+after:''}</b></h2><div class="maw-bar"><i style="width:${st.need?Math.min(100,st.into/st.need*100):100}%"></i>${gain&&st.need?`<u style="width:${Math.min(100,(st.into+gain)/st.need*100)}%"></u>`:''}<span>${st.need?fmt(st.into)+(gain?' + '+fmt(gain):'')+' / '+fmt(st.need):'Highest level'}</span></div><div class="maw-stats">${stat('attack','ATK',bonus.attack,r.devourStep.attack)}${stat('health','HP',bonus.health,r.devourStep.health)}${stat('defense','DEF',bonus.defense,r.devourStep.defense)}</div><button class="maw-auto" aria-pressed="${!!S.autoDevour}" onclick="devourAuto()">${denPlain}<i></i>Auto devour</button></div></div>
  <div class="satchel-scroll">${spare.length?`<div class="satchel-grid">${bagPad(spare.map(e=>equipmentCell(e,{act:'devourToggle('+e.uid+')',pressed:devourPicks.includes(e.uid)})),12)}</div>`:'<p class="maw-none">No spare equipment in the bag. Dungeon guardians and chests drop more.</p>'}</div>
- <div class="satchel-foot"><span>Chosen: ${devourPicks.length} · +${fmt(gain)} essence</span><button onclick="devourAll()" ${food.length?'':'disabled'}>${food.length&&food.length===devourPicks.length&&food.every(id=>devourPicks.includes(id))?'Clear':'Blue & Purple'}</button><button onclick="devourFeed()" ${devourPicks.length?'':'disabled'}>Devour</button></div>
+ <div class="satchel-foot"><span>Chosen: ${devourPicks.length} · +${fmt(gain)} Maw EXP</span><button onclick="devourAll()" ${food.length?'':'disabled'}>${food.length&&food.length===devourPicks.length&&food.every(id=>devourPicks.includes(id))?'Clear':'Blue & Purple'}</button><button onclick="devourFeed()" ${devourPicks.length?'':'disabled'}>Devour</button></div>
  ${satchelNav('Devour')}</section>`;
 }
 
@@ -463,6 +463,7 @@ const sumIcon=n=>'<i class="sum-ico" style="background-position:'+(n%3)/2*100+'%
 const markIcon=key=>sumIcon(1+'res'.indexOf(key));
 const sumChip=(icon,n,label)=>'<span title="'+label+'">'+icon+bagNum(n)+'</span>';
 function summonGo(page){summonPage=page;if(screen==='citySummon')citySummon();else go('citySummon')}
+function markTrade(key){if(!WonderGear.markToOrb(S,key)){toast('Not enough marks');return}save();citySummon();toast('+1 Star Orb')}
 function summonLeave(){if(summonPage==='Shop')summonGo('Advanced');else go('home')}
 // The result window. Cards turn up one after another unless Skip is ticked.
 function summonShow(title,results,note=''){
@@ -534,7 +535,7 @@ function citySummon(){
   $('#main').innerHTML=`<section class="satchel well well-mart">
   ${top('Mark Shop',[...r.markKinds].reverse().map(([,key,name])=>sumChip(markIcon(key),v.marks[key],name)).join(''))}
   <div class="mart-banner" style="background-image:url('${artPath('comp-summon-stall')}')"><h2>Spirit Mark Shop</h2><p>Summoning Rare and finer pets leaves Spirit Marks</p><em>Restock every Monday at 00:00 UTC</em></div>
-  <div class="satchel-scroll"><p class="mart-note">Summon Level <b>${lv.level}</b> · Rare from Lv. ${r.markNeed.Rare}, Epic from Lv. ${r.markNeed.Epic}, Super Rare from Lv. ${r.markNeed['Super Rare']}</p><div class="mart-grid">${cards.join('')}</div></div>
+  <div class="satchel-scroll"><div class="mart-trade"><span>Spare marks → Star Orb</span>${[...r.markKinds].reverse().map(([,key,name])=>`<button ${v.marks[key]<r.markOrbRate[key]?'disabled':''} onclick="markTrade('${key}')">${denPlain}${markIcon(key)}${r.markOrbRate[key]} → ${sumIcon(0)}1</button>`).join('')}</div><p class="mart-note">Summon Level <b>${lv.level}</b> · Rare from Lv. ${r.markNeed.Rare}, Epic from Lv. ${r.markNeed.Epic}, Super Rare from Lv. ${r.markNeed['Super Rare']}</p><div class="mart-grid">${cards.join('')}</div></div>
   <div class="mart-filters">${['All','Super Rare','Epic','Rare'].map(f=>`<button aria-pressed="${f===markFilter}" onclick="markFilter='${f}';citySummon()">${denPlain}${f}</button>`).join('')}</div>
   ${nav}</section>`;
   return;

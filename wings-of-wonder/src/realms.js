@@ -10,7 +10,7 @@
 // Optional save field S.realms {day, used{id:n}, bought{id:n}, best{id:floor}, beat{id:{floor:mask}},
 // dead{id:{"f.b":time}}, focus["id:f.b"], log[{t,id,f,k,m,r}]}. All numbers are placeholders.
 const Realms = {
-  free: 2, buyMax: 3, buyPrice: 30, paidMax: 5, floors: 10, bosses: 4, rage: 25, respawnMs: 10 * 60e3, logMax: 20, focusMax: 12,
+  free: 2, buyMax: 3, buyPrice: 30, paidMax: 6, floors: 10, bosses: 4, rage: 25, respawnMs: 10 * 60e3, logMax: 20, focusMax: 12,
   share: [.2, .25, .25, .3],
   list: [
     { id: 'gold', name: 'Gold Vault', gives: 'Gold', base: 1200, art: 'guardian-t9', reward: f => ({ gold: 1500 + 700 * f }) },
@@ -20,7 +20,7 @@ const Realms = {
     { id: 'shard', name: 'Starfall Ruins', gives: 'Star shards', base: 1700, art: 'guardian-t21', reward: f => ({ shard: 3 + 2 * f }) },
     { id: 'seal', name: 'Seal Sanctum', gives: 'Talent seals', base: 1800, art: 'guardian-t24', reward: f => ({ seals: 40 + 20 * f }) },
     { id: 'beast', name: 'Beast Lair', gives: 'Pet eggs', base: 2000, art: 'guardian-t27', reward: f => ({ gold: 300 * f, items: { petegg: f >= 6 ? 2 : 1 } }) },
-    { id: 'wish', name: 'Wish Garden', gives: 'Wishes', base: 2200, paid: 4000, art: 'guardian-t30', reward: f => ({ tickets: 30 + 15 * f }) },
+    { id: 'wish', name: 'Wish Garden', gives: 'Wishes', base: 2200, paid: 2000, art: 'guardian-t30', reward: f => ({ tickets: 30 + 15 * f }) },
   ],
   // the boss pictures the game already has; realms draw their floor bosses from them in turn
   pool: [['mistwood', 'Thornwing Guardian'], ['guardian-t7', 'Jade Antlerwolf'], ['moonfall', 'The Hollow Moon'], ['guardian-t8', 'Sapphire Bastion'],
@@ -48,7 +48,7 @@ const Realms = {
     for (const [id, m] of Object.entries(v.dead)) { for (const [k, t] of Object.entries(m)) if (now - t >= Realms.respawnMs || t > now + 6e4) delete m[k]; if (!Object.keys(m).length) delete v.dead[id]; }
     return v;
   },
-  // the last realm of the progression has no free entries: each entry of the day costs gold, doubling (4,000, 8,000,
+  // the last realm of the progression has no free entries: each entry of the day costs gold, doubling (2,000, 4,000,
   // 16,000, 32,000 ...; user 2026-11-27); the others have `free` entries + `buyMax` bought for `buyPrice` prisms
   freeOf(id) { return Realms.get(id)?.paid ? 0 : Realms.free; },
   maxBuy(id) { return Realms.get(id)?.paid ? Realms.paidMax : Realms.buyMax; },
@@ -213,7 +213,7 @@ function realmNotice(id) {
   const cur = R.paid ? `${uiIcon('gold')}` : `<img src="${artPath('ui-prism')}" alt="">`, curName = R.paid ? 'gold' : 'prisms';
   rlPop(`<h2>Notice</h2><div class="rl-key" style="--art:url('${rlArt(id)}')"><b>${R.name}</b></div>
    <p>${left ? `You have <b>${left}</b> ${left === 1 ? 'entry' : 'entries'} left today.` : 'Today’s free entries are used.'}</p>
-   ${R.paid ? `<p>The last realm has no free entries. Each entry today costs twice the one before: ${[0, 1, 2, 3].map(i => fmt(R.paid * 2 ** i)).join(' → ')} … gold.</p>` : ''}
+   ${R.paid ? `<p>The last realm has no free entries. Each entry today costs twice the one before: ${Array.from({ length: Realms.paidMax }, (_, i) => fmt(R.paid * 2 ** i)).join(' → ')} gold, at most ${Realms.paidMax} a day.</p>` : ''}
    ${can > 0 ? `<p>${R.paid ? 'Next' : 'One more'} entry costs <b class="ok">${fmt(p)}</b> ${curName} (${can} of ${max} left today).</p><button class="gd-big" onclick="realmBuyGo('${id}')">${denPlain}Confirm · ${cur} ${fmt(p)}</button>` : '<p>No more entries can be bought today. New entries at 00:00 UTC.</p>'}`);
 }
 function realmBuy(id) { realmNotice(id); }
@@ -241,7 +241,7 @@ function realmRules() {
    <li>A defeated boss respawns after ${Realms.respawnMs / 6e4} minutes. Bosses above your power are skipped; a run that defeats nobody keeps its entry.</li>
    <li>The first defeat of every boss pays double. Defeat all four once to open the next floor.</li>
    <li>Merge spends several entries on one run for that many times the loot. Sweep repeats your best cleared floor without a fight.</li>
-   <li>${Realms.free} free entries per realm a day (00:00 UTC), up to ${Realms.buyMax} more for ${Realms.buyPrice} prisms each.</li><li>The last realm, ${Realms.list.find(r => r.paid).name}, has no free entries: entries cost ${fmt(Realms.list.find(r => r.paid).paid)} gold, then 8,000, 16,000, 32,000 … (doubling, reset at 00:00 UTC).</li></ul>`);
+   <li>${Realms.free} free entries per realm a day (00:00 UTC), up to ${Realms.buyMax} more for ${Realms.buyPrice} prisms each.</li><li>The last realm, ${Realms.list.find(r => r.paid).name}, has no free entries: entries cost ${fmt(Realms.list.find(r => r.paid).paid)} gold, then each entry doubles, up to ${Realms.paidMax} a day (reset at 00:00 UTC).</li></ul>`);
 }
 function realmSweep(id) { const out = Realms.sweep(S, id, realmMerge); if (!out) return; save(); wallet(); realmMerge = 1; showRealm(id); resultShow({ title: 'Swept!', kicker: Realms.get(id).name + ' · ' + out.floor + 'F' + (out.merge > 1 ? ' · Merge ×' + out.merge : ''), win: true, body: `<div class="bag-gains">${rlGains(out.reward)}</div>`, buttons: [['Lovely', 'gold', '']] }); }
 function realmGo(id) {

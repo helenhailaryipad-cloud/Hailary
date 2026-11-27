@@ -403,7 +403,7 @@ the mode strip at the bottom of every boss hall.
   x2; all four once -> next floor (`beat` masks, `best`). A run that defeats nobody keeps its entries. Sweep (`sweep`)
   repeats the best cleared floor. 2 free entries a realm a UTC day, up to 3 more for 30 prisms (Notice pop-up).
   The LAST realm of the progression (Wish Garden, `paid: 4000`) has no free entries (user): each entry of the UTC day
-  costs gold, doubling 4,000 / 8,000 / 16,000 / 32,000 ... (`price`, `freeOf`, `maxBuy` = `paidMax` 5 a day, user). Gold stands in
+  costs gold, doubling 2,000 / 4,000 / 8,000 / 16,000 / 32,000 / 64,000 (`price`, `freeOf`, `maxBuy` = `paidMax` 6 a day, user). Gold stands in
   for the reference's diamonds.
 - Optional save `S.realms {day, used, bought, best, beat{id:{f:mask}}, dead{id:{"f.b":time}}, focus[], log[]}`.
 - Hall (`showRealm`, `.rl-v2`, light): ribbon + wallet, boss on the realm picture, name + Recommended Power, left icons
@@ -418,6 +418,24 @@ the mode strip at the bottom of every boss hall.
 - Art (image model): `art-source/realms/` -> `realm-<id>` banners 1536 x 1024 and `realm-hub` by
   `scripts/build-realm-art.py`; chat preview packs `realm-*` into pack-realms. Not built: Home Chest (VIP-bound in the
   reference), cross-server tab, shared rewards. Placeholders throughout.
+
+## Economy map and first fixes (2026-11-27)
+User: "the hardest part is tying all the updates into a system". A read-only audit of every resource (sources, sinks,
+gaps) is published as https://claude.ai/artifact/EjJqhiY7XAFDo6CbmJowst (page source in session scratch). Fixed after it:
+- Bugs: Wishing Tree pulls no longer give +10 prisms (`roll` in app.js; its 2,000 exchange now reads "prisms"); guild
+  red envelopes of kind wishes pay `S.tickets` (was a dead `s.wishes`); Devour texts say "Maw EXP" (it never paid forge
+  essence); Wayfarer's last chest is at 5,500 EXP (the most a day can give; was 6,000); the Dust Shop sells only orbs she
+  does not own; the Wish Orb "Star Orb" is now "Comet Orb" (id `star` unchanged; the summon currency keeps "Star Orb").
+  The test gift is debug-only (`?debug=1`), as before.
+- Daily rewarded runs: Castle Defense, Dragon Merge, AI Spar, Crownfall Vale and Jungle Trek pay only `RUN_DAILY` 2 runs a
+  UTC day each (`runTake(game)`, `runsLeft`, optional save `S.runs {day, n{}}`, `validRuns`); later runs are practice
+  (`PRACTICE_NOTE` in the result). A Crownfall level won for the first time always pays.
+- Sinks: every Gear Crafting step also takes enhancement crystals (`gearRanks[].mats.stone` 30 ... 500); a guardian win
+  pays `EMBER_TO_STAR` 5 star shards instead of 10 ember shards once the Ember Drake has 6 stars (`victory`); spare
+  Spirit Marks trade for Star Orbs in the Mark Shop (`markOrbRate` r 10 / e 4 / s 2, `markToOrb`, `markTrade`).
+- Still open from the map (step 4-5): synthesis stones and Orange pieces are scarce, five shop currencies sell the same
+  wares at very different prices, festival tokens / Garden EXP / Lagoon points only open thresholds.
+- `scripts/test-trail.mjs` was already failing before these changes (welcome tickets assertion); not investigated.
 
 ## Mini Games hub (2026-11-23)
 User: "all games in one place, names on the main field, not hunted through sub-tabs". The bottom-nav tab is called

@@ -37,10 +37,10 @@ const Trail = {
     { id: 'g', name: 'Gold', give: { exp: 150, coins: 30, rite: 50, prisms: 20, gold: 1500 } },
     { id: 'd', name: 'Diamond', give: { exp: 200, coins: 40, rite: 80, prisms: 40, gold: 2000, items: { stonebag: 1 } } }
   ],
-  // Daily Wayfarer EXP chests (Silver alone is 1,500 a day; all three tabs about 5,000).
+  // Daily Wayfarer EXP chests (Silver alone is 1,500 a day; every task of all three tabs = 5,500, the last chest).
   track: [[300, { voucher: 20 }], [600, { items: { chest1: 1 } }], [1000, { gold: 2000 }], [1500, { rite: 60 }], [2000, { items: { stonebag: 1 } }],
     [2500, { prisms: 30 }], [3000, { items: { chest2: 1 } }], [3500, { voucher: 50 }], [4000, { items: { shardbag: 1 } }], [4500, { rite: 120 }],
-    [5000, { items: { gembox: 1 } }], [6000, { prisms: 60, items: { chest3: 1 } }]],
+    [5000, { items: { gembox: 1 } }], [5500, { prisms: 60, items: { chest3: 1 } }]],
   dungeonTickets: 20,
   // Wayfarer Shop (user photo of the reference's Adventure Shop: six wares for adventure coins, one at -30%, "automatically
   // refreshes when all items are sold out", manual refresh 100). Coins come from every claim (give.coins) and are kept

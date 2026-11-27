@@ -17,7 +17,7 @@ const Rites = {
   ],
   auras: { moon: 'Moonveil Halo', ember: 'Dragonfire Ring', star: 'Starfall Circle', bloom: 'Bloom Garden' },
   orbs: [['flame', 'Flame Orb'], ['tide', 'Tide Orb'], ['leaf', 'Leaf Orb'], ['storm', 'Storm Orb'], ['frost', 'Frost Orb'],
-    ['sun', 'Sun Orb'], ['moon', 'Moon Orb'], ['star', 'Star Orb'], ['bloom', 'Bloom Orb'], ['shadow', 'Shadow Orb']],
+    ['sun', 'Sun Orb'], ['moon', 'Moon Orb'], ['star', 'Comet Orb'], ['bloom', 'Bloom Orb'], ['shadow', 'Shadow Orb']],
   // Chance of each tier for one pull; the rest is a common item.
   odds: { ultra: .00005, wings: .0005, aura: .003, orb: .05, rare: .25 },
   pct(x) { return String(+(x * 100).toFixed(3)) + '%'; },
@@ -241,7 +241,7 @@ const Rites = {
   dustBuy(s, what, id, now = Date.now()) {
     const v = this.state(s, now), rite = this.rite(v.ev.period);
     if (what === 'pull') { if (v.dust < this.dust.pull) return null; v.dust -= this.dust.pull; v.t[rite.id] = (v.t[rite.id] || 0) + this.cost; return { tickets: this.cost }; }
-    if (what === 'orb') { if (v.dust < this.dust.orbBuy || !this.orbs.some(o => o[0] === id)) return null; v.dust -= this.dust.orbBuy; return this.give(s, v, { kind: 'orb', id, name: this.orbName(id), rarity: 'epic' }); }
+    if (what === 'orb') { if (v.dust < this.dust.orbBuy || !this.orbs.some(o => o[0] === id) || v.orbs[id]) return null; v.dust -= this.dust.orbBuy; return this.give(s, v, { kind: 'orb', id, name: this.orbName(id), rarity: 'epic' }); }
     return null;
   },
   // Starlit Vouchers: universal tickets (boss wheel, dungeon guardians) kept in v.v, swapped 1:1 for tickets of the
@@ -489,7 +489,7 @@ function riteRedeem() { const r = Rites.redeem(S, Rites.vouchers(S)); if (!r) re
 function riteBuyPack(i) { if (!Rites.buyPack(S, i)) return toast('Not enough prisms'); save(); if (screen === 'rites' && riteView === 'shop') riteSecret(); else riteMore(); showRitesKeep(); toast('+' + Rites.packTickets + ' tickets'); }
 function riteExchangeOnly(n) { if (!Rites.exchange(S, n)) return toast('Not enough prisms'); save(); riteMore(); showRitesKeep(); toast('+' + n + ' tickets'); }
 function riteDust(what) { if (!Rites.dustBuy(S, what)) return toast('Not enough stardust'); save(); riteMore(); showRitesKeep(); }
-function riteDustOrb() { popup(`<div class="rt-pop"><h2>Choose an orb</h2><div class="rt-pick orbs">${Rites.orbs.map(([id, name]) => `<button onclick="riteDustBuyOrb('${id}')">${denPlain}${riteOrbIcon(id)}<small>${name}${S.rites.orbs[id] ? ' ✓' : ''}</small></button>`).join('')}</div></div>`); }
+function riteDustOrb() { popup(`<div class="rt-pop"><h2>Choose an orb you do not have yet</h2><div class="rt-pick orbs">${Rites.orbs.map(([id, name]) => `<button ${S.rites.orbs[id] ? 'disabled' : ''} onclick="riteDustBuyOrb('${id}')">${denPlain}${riteOrbIcon(id)}<small>${name}${S.rites.orbs[id] ? ' ✓ owned' : ''}</small></button>`).join('')}</div></div>`); }
 function riteDustBuyOrb(id) { const r = Rites.dustBuy(S, 'orb', id); if (!r) return toast('Not enough stardust'); save(); showRites(); riteShow({ results: [r], paid: [], rite: Rites.rite(Rites.period()) }); }
 // Keeps the room behind a pop-up current without closing the pop-up.
 function showRitesKeep() { const top = document.querySelector('.rt-wallet'); if (top) top.innerHTML = riteWallet(); }

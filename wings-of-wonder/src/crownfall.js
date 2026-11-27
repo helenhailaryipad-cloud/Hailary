@@ -179,14 +179,15 @@ const VALE_STARS=[90,150];
 function endVale(won){
  const g=game;if(!g||g.kind!=='vale'||g.ended)return;
  g.running=false;g.ended=true;g.aim=null;
+ const first=won&&g.stage>=(S.valeChapter||0),paid=won&&(first||typeof runTake!=='function'||runTake('vale'));
  if(won)S.valeChapter=Math.max(S.valeChapter||0,Math.min(VALE_MAPS.length-1,g.stage+1));
- const xp=won?gain(450,85,70).xp:0,t=Math.round(g.clock),stars=won?(t<VALE_STARS[0]?3:t<VALE_STARS[1]?2:1):0;
+ const xp=paid?gain(450,85,70).xp:0,t=Math.round(g.clock),stars=won?(t<VALE_STARS[0]?3:t<VALE_STARS[1]?2:1):0;
  const held=g.keeps.filter(k=>k.side===1).length,tile=(icon,n,name,hue,i)=>`<span class="wr-prize" style="--rarity:${hue};--d:${1.4+i*.15}s">${icon}<b>${n}</b><small>${name}</small></span>`;
  const buttons=[];if(won&&g.stage+1<VALE_MAPS.length)buttons.push(['Next level','gold','replayVale('+(g.stage+1)+')']);
  buttons.push(['Replay',won&&buttons.length?'violet':'gold','replayVale('+g.stage+')'],['Mini Games','violet',"openScreen('games')"]);
  resultShow({win:won,title:won?'Victory!':'Defeat',kicker:'Level '+(g.stage+1)+' · '+VALE_MAPS[g.stage].name,stars,
   body:(won?artImage('vale-crown','Victory crown','wr-crown'):'')+`<p class="wr-line">Time ${Math.floor(t/60)}:${String(t%60).padStart(2,'0')} · Buildings held ${held} / ${g.keeps.length}${won?' · ★★★ under '+VALE_STARS[0]+' s':''}</p>`+
-   (won?`<div class="wr-prizes">${tile(uiIcon('gold'),'+450','Gold','#ffcf5a',0)}${tile(uiIcon('wishes'),'+85','Wishes','#ff9ad8',1)}${tile(uiIcon('exp'),'+'+xp,'XP','#8fd0ff',2)}</div>`:'<p class="wr-practice">The ruby army holds the vale. Try another route!</p>'),
+   (won&&!paid?PRACTICE_NOTE:won?`<div class="wr-prizes">${tile(uiIcon('gold'),'+450','Gold','#ffcf5a',0)}${tile(uiIcon('wishes'),'+85','Wishes','#ff9ad8',1)}${tile(uiIcon('exp'),'+'+xp,'XP','#8fd0ff',2)}</div>`:'<p class="wr-practice">The ruby army holds the vale. Try another route!</p>'),
   buttons});
 }
 function replayVale(stage){valeReplay=stage;$('#modal').close?.();openScreen('vale');}

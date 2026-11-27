@@ -32,6 +32,9 @@ vm.runInContext(fs.readFileSync('src/trail.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/app.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/garden.js','utf8'),context);
 vm.runInContext(fs.readFileSync('src/realms.js','utf8'),context);
+vm.runInContext(`{const E=defaults(),id=DUNGEONS[0].id;WonderAdventure.victory(E,id);if(E.emberShards!==10)throw Error('Ember shards');E.emberStars=6;const sh=WonderGear.state(E).materials.shard;WonderAdventure.victory(E,id);if(E.emberShards!==10||WonderGear.state(E).materials.shard!==sh+5)throw Error('Ember at max gives star shards');}`,context);
+vm.runInContext(`{const r=WonderGear,T=defaults();if(r.markToOrb(T,'r'))throw Error('Marks needed');const v=r.summonState(T);v.marks.r=25;T.summon=v;if(!r.markToOrb(T,'r')||!r.markToOrb(T,'r')||r.markToOrb(T,'r')||r.summonState(T).orbs!==2||r.summonState(T).marks.r!==5)throw Error('Marks to Star Orb');if(r.craftRecipe(3).mats.stone!==30)throw Error('Craft takes crystals');}`,context);
+vm.runInContext(`{S=defaults();const t=Date.UTC(2026,10,27,10);if(!runTake('defense',t)||!runTake('defense',t)||runTake('defense',t)||runsLeft('merge',t)!==2||!runTake('defense',t+864e5))throw Error('Daily rewarded runs');if(!valid(JSON.parse(JSON.stringify(S)))||validRuns({day:'x',n:{}})||validRuns({day:'2026-11-27',n:{nope:1}}))throw Error('Runs save');}`,context);
 vm.runInContext(`{const R=Realms,s=defaults(),t=Date.UTC(2026,10,27,10);
  if(R.run(s,'gold',2,0,99999,1,t))throw Error('Realm floor 2 before 1');
  if(R.run(s,'gold',1,0,10,1,t).win!==false||R.left(s,'gold',t)!==2)throw Error('Realm loss keeps the entry');
@@ -45,7 +48,7 @@ vm.runInContext(`{const R=Realms,s=defaults(),t=Date.UTC(2026,10,27,10);
  g=s.gold;a=R.run(s,'gold',2,0,99999,2,t2);if(s.gold!==g+11600||R.left(s,'gold',t2)!==0||a.merge!==2)throw Error('Realm merge');
  R.toggleFocus(s,'gem',1,3);if(R.order(s,'gem',1,1,t2).join()!=='1,3,0,2'||!R.focused(s,'gem',1,3))throw Error('Realm focus order');
  const st=WonderGear.state(s).materials.stone;R.run(s,'crystal',1,0,99999,1,t2);if(WonderGear.state(s).materials.stone!==st+62)throw Error('Crystal realm');
- {const w=defaults();w.gold=1e6;if(R.left(w,'wish',t)!==0||R.price(w,'wish',t)!==4000||!R.buy(w,'wish',t)||w.gold!==996000||R.price(w,'wish',t)!==8000||!R.buy(w,'wish',t)||R.price(w,'wish',t)!==16000||R.left(w,'wish',t)!==2||R.price(w,'wish',t+864e5)!==4000)throw Error('Last realm doubling gold price');}
+ {const w=defaults();w.gold=1e6;if(R.left(w,'wish',t)!==0||R.price(w,'wish',t)!==2000||!R.buy(w,'wish',t)||w.gold!==998000||R.price(w,'wish',t)!==4000||!R.buy(w,'wish',t)||R.price(w,'wish',t)!==8000||R.left(w,'wish',t)!==2||R.price(w,'wish',t+864e5)!==2000)throw Error('Last realm doubling gold price');}
  if(!R.valid(s.realms)||R.valid({...s.realms,best:{gold:11}})||R.valid({...s.realms,dead:{gold:{'x':1}}})||!valid(JSON.parse(JSON.stringify(s))))throw Error('Realm save');}`,context);
 
 
@@ -147,9 +150,9 @@ const namedLegacy={...defaults(),name:'Reyna',gold:1234,xp:456};const legacyBefo
 S=defaults();home();const progressBeforeIntro=JSON.stringify(S);const introPrefs=new Map(),originalGet=localStorage.getItem,originalSet=localStorage.setItem;localStorage.getItem=k=>introPrefs.get(k)||null;localStorage.setItem=(k,v)=>introPrefs.set(k,String(v));chooseIntro('2d');if(storedIntroStyle()!=='2d'||screen!=='home'||document.querySelector('#main').innerHTML.includes('id="intro3d"')||JSON.stringify(S)!==progressBeforeIntro)throw Error('2D return preserves adventure');openScreen('intro');chooseIntro('3d');if(storedIntroStyle()!=='2d'||screen!=='home'||document.querySelector('#main').innerHTML.includes('id="intro3d"')||JSON.stringify(S)!==progressBeforeIntro)throw Error('Retired 3D preference must return to 2D and preserve adventure');localStorage.getItem=originalGet;localStorage.setItem=originalSet;
 S=defaults();S.tickets=100000;const initial=S.tickets;
 for(let i=0;i<30;i++)roll(10);
-if(S.rolls!==300||S.scales!==3000||S.guarantees!==1||S.claimed.length!==5)throw Error('Gacha thresholds');
+if(S.rolls!==300||S.scales!==0||S.guarantees!==1||S.claimed.length!==5)throw Error('Gacha thresholds');
 const ret=400+740+1240+1240+1240;if(S.tickets<initial-15000+ret)throw Error('Milestone return');
-const before=S.scales;const candidate=ITEMS.find(i=>!S.owned.includes(i.id));if(candidate){claimReward('scales',candidate.id);if(S.scales!==before-2000||!S.owned.includes(candidate.id))throw Error('Exchange');const after=S.scales;claimReward('scales',candidate.id);if(S.scales!==after)throw Error('Duplicate exchange');}
+S.scales=3000;const before=S.scales;const candidate=ITEMS.find(i=>!S.owned.includes(i.id));if(candidate){claimReward('scales',candidate.id);if(S.scales!==before-2000||!S.owned.includes(candidate.id))throw Error('Exchange');const after=S.scales;claimReward('scales',candidate.id);if(S.scales!==after)throw Error('Duplicate exchange');}
 if(!valid(S))throw Error('Generated save invalid');
 S=defaults();openScreen('defense');game.cleared=3;const goldBefore=S.gold;endDefense(false);endDefense(false);if(S.gold!==goldBefore+210)throw Error('Defense reward duplicated');
 openScreen('defense');nextWave();for(let i=0;i<300;i++)updateDefense(1/60);if(!game.enemies.length)throw Error('Defense spawning');
@@ -211,7 +214,7 @@ vm.runInContext(`
 for(const id of DUNGEONS.map(d=>d.id)){const sample=defaults(),r=globalThis.WonderGear,eq=r.state(sample);sample.equipment=eq;const before=JSON.parse(JSON.stringify(eq)),t=r.bossLootTables[id],reward=r.bossLoot(sample,id,()=>.99);if(!reward.entry||eq.items.length!==before.items.length+3||reward.entries.map(e=>r.gearRank(e)).join()!==r.bossDropRanks.join()||reward.entries.map(e=>e.stars).join()!=='2,1,0'||reward.entries.some(e=>r.catalog[e.template].tier!==r.bossGearTier(sample)||e.enhance!==0))throw Error('Boss item quality');if(reward.entries.some(e=>!t.slots.includes(r.catalog[e.template].slot))||JSON.stringify(eq.equipped)!==JSON.stringify(before.equipped))throw Error('Boss pool or automatic replacement');for(const m of r.materialDefs)if(eq.materials[m.id]!==before.materials[m.id]+(t[m.id]||0))throw Error('Boss materials doubled');if(!valid(sample))throw Error('Boss gear not saveable');for(const [lvl,tier] of [[44,1],[45,2],[49,2],[50,3],[95,3],[100,4],[1500,31]]){const hero=defaults();hero.xp=(lvl-1)*WonderProgress.xpPerLevel;const prize=r.bossLoot(hero,id,()=>.7);if(r.catalog[prize.entry.template].tier!==tier)throw Error('Boss reward level band '+id+' at '+lvl);}}
 {const hero=defaults(),r=WonderGear;hero.xp=1499*WonderProgress.xpPerLevel;const rolls=[.95,1/30,0];const reward=r.bossLoot(hero,'mistwood',()=>rolls.shift());if(r.catalog[reward.entry.template].tier!==3)throw Error('T3 must remain available at level cap');
  // Quality ladder: five Orange pieces of one tier and family make a 2-Star Red of the chosen slot.
- hero.xp=49*WonderProgress.xpPerLevel;const orange=Array.from({length:5},(_,i)=>r.addDrop(hero,2,['boots','crown','armor','bow','bracers'][i],2));orange[2].enhance=6;orange[4].gems=2;
+ hero.xp=49*WonderProgress.xpPerLevel;r.state(hero).materials.stone=99999;const orange=Array.from({length:5},(_,i)=>r.addDrop(hero,2,['boots','crown','armor','bow','bracers'][i],2));orange[2].enhance=6;orange[4].gems=2;
  const ids=orange.map(e=>e.uid),ring=r.addDrop(hero,2,'spiritluck',2).uid,purple=r.addDrop(hero,2,'bow',1).uid,low=r.addDrop(hero,1,'bow',2).uid,before=JSON.stringify(hero);
  for(const bad of [[...ids.slice(1),ring],[...ids.slice(1),purple],[...ids.slice(1),low],[...ids.slice(1),ids[1]],[...ids,ids[0]],[],[hero.equipment.equipped.bow]])if(r.craftGear(hero,'bow',2,3,bad).ok||JSON.stringify(hero)!==before)throw Error('Invalid craft spent pieces '+bad);
  if(r.craftGear(hero,'bow',2,2,ids).ok||r.craftGear(hero,'nope',2,3,ids).ok||r.craftChance(3,5)!==1||r.craftChance(3,2)!==.4||r.craftChance(4,4)!==0||r.perform(hero,ids[0],'star').ok)throw Error('Recipe rules');
@@ -708,7 +711,7 @@ vm.runInContext(`
  cityBagFilter='Pet';cityBag();if(!document.querySelector('#main').innerHTML.includes('2/'+r.synthNeed))throw Error('Pet copies in the bag');
  if(bagTabs.join()!=='Common,Materials,Pet,ALL'||!bagThings('Common').some(t=>t.gear))throw Error('The bag has four tabs; spare equipment is in Common');
  // Gear Crafting keeps Equipment, Necklace & Amulet and Rings apart, and its screen crafts by taps.
- {const T=defaults();T.equipment=r.state(T);const add=(slot,rank=2)=>r.addDrop(T,1,slot,rank).uid;
+ {const T=defaults();T.equipment=r.state(T);T.equipment.materials.stone=99999;const add=(slot,rank=2)=>r.addDrop(T,1,slot,rank).uid;
   const armour=[add('crown'),add('armor'),add('boots'),add('bow'),add('bracers')],neck=[add('necklace'),add('amulet'),add('necklace'),add('amulet'),add('amulet')],rings=[add('spiritluck'),add('spiritguard')];
   if(r.gearGroups.length!==3||r.craftInputs(T,'Equipment',1,3).map(e=>e.uid).join()!==armour.join()||r.craftInputs(T,'Rings',1,3).length!==2||r.craftInputs(T,'Equipment',1,4).length)throw Error('Craft pool by family');
   if(r.craftGear(T,'bow',1,3,[...armour.slice(0,4),neck[0]]).ok||r.craftGear(T,'necklace',1,3,armour).ok)throw Error('Families must not mix');
@@ -987,7 +990,7 @@ vm.runInContext(`
  if(!r.guildState(S,end+day).reserved===false||r.guildState(S,end+day).hits)throw Error('Next day beast');
  // Red envelopes in an AI guild: claim a share once; send her own bag for prisms.
  const keep=S;S=defaults();r.guildJoin(S,'dawn');const envs=r.guildEnvelopes(S,T0);if(envs.length<2||envs.some(e=>e.own||e.claimed))throw Error('Envelopes');
- const e=envs[0],g0=S.gold,w0=S.wishes||0,got=r.guildEnvClaim(S,e.id,T0);if(!got||got.amount!==e.mineShare||(e.kind==='gold'?S.gold-g0:S.wishes-w0)!==got.amount||r.guildEnvClaim(S,e.id,T0))throw Error('Claim envelope');
+ const e=envs[0],g0=S.gold,w0=S.tickets||0,got=r.guildEnvClaim(S,e.id,T0);if(!got||got.amount!==e.mineShare||(e.kind==='gold'?S.gold-g0:S.tickets-w0)!==got.amount||r.guildEnvClaim(S,e.id,T0))throw Error('Claim envelope');
  if(!r.guildEnvelopes(S,T0)[0].claimed||r.guildEnvelopes(S,T0)[0].takers.length!==R.envShares)throw Error('Envelope luck');
  S.scales=1000;for(let i=0;i<R.envSendMax;i++)if(!r.guildEnvSend(S,T0))throw Error('Send bag');
  if(r.guildEnvSend(S,T0)||r.guildEnvelopes(S,T0).filter(x=>x.own).length!==R.envSendMax||S.scales!==1000-R.envSendMax*R.envCost||!valid(S))throw Error('Send limit');
