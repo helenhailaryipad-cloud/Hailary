@@ -1188,7 +1188,8 @@ NOT built yet). `src/forge.js` (rules `Forge`, UI below `FORGE_UI`), shown insid
 ## VIP and SVIP (2026-11-27)
 User: "the game treats free and paying players the same; reward those who invest", then 13 photos of the reference's VIP
 room. `src/patron.js` (rules `Patron`, UI below `PATRON_UI`), screen `patron`: home promo "VIP" (`goldpass` key, red
-dot `Patron.due`) and the SVIP badge on the home profile plate (`patronBadge`, hideable). Optional `S.patron {xp, vip[],
+dot `Patron.due`) and the SVIP emblem in the old Rank spot right of the power plate (`patronHome`, user circled the
+spot; number hidden with "Hide SVIP badge"; Rankings stay in the city drawer and the More menu). Optional `S.patron {xp, vip[],
 packs[], day, hide, shop{week,b}}` (`Patron.valid`). Placeholders.
 - VIP 1-10 is FREE: rises with Challenge stages cleared (`vipSteps`, 144 = max, "Go challenge"); each level is a title
   with lasting stats (`vipTitles`, `vipStats` through `Patron.bonus` in stats()) and a one-time gift (`vipClaim`).
