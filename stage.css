@@ -10983,3 +10983,15 @@ html body #stage .city-hud .pf2 .pf2-band>span{font-size:clamp(8px,1.75cqw,15px)
 html body #stage .city-hud .pf2 .pf2-band>span i{font-family:"Segoe UI Symbol","Apple Symbols",Arial,sans-serif;color:#ffd24a}
 html body #stage .city-hud .pf2 .pf2-xp{position:static;display:block;width:88%;height:clamp(3px,.5cqw,5px);margin-top:2px;border-radius:3px;background:#ffffff30;box-shadow:inset 0 0 0 1px #0004}
 html body #stage .city-hud .pf2 .pf2-band{top:33%;height:35%}
+/* Prize tiles everywhere: light, no dark box (user: "no black frames") */
+.bag-gain{--rarity:#e2c47a;border:1.5px solid color-mix(in srgb,var(--rarity) 70%,#fff)!important;background:radial-gradient(circle at 50% 32%,#fff,color-mix(in srgb,var(--rarity) 22%,#fffaf0))!important;box-shadow:0 2px 6px #8a6a4a22}
+.bag-gain b{color:#2e7a3a!important;text-shadow:none!important}
+.bag-gain small{color:#5a4a30!important;text-shadow:none!important}
+/* Shared result window: light card instead of the dark violet box (user: "no black frames") */
+.wr-end{background:radial-gradient(ellipse at 50% 40%,#fff8e8cc,#3a2a5a99 75%)}
+.wr-card{background:linear-gradient(170deg,#fffdf6,#fbf3ff 55%,#f3e8ff)!important;box-shadow:0 0 0 2.5px #e2c47a,0 0 40px #ffd76a88,0 18px 40px #3a2a5a55!important;color:#3a2a20}
+.wr-kicker{color:#9a5a12;text-shadow:none}
+.wr-score small{color:#8a6ab0}
+.wr-score b{filter:drop-shadow(0 2px 0 #b0702a)}
+#resultCard .wr-body .wr-note,#resultCard .wr-body p{color:#5a4a30;text-shadow:none}
+#resultCard .wr-body{color:#3a2a20}
