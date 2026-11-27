@@ -130,7 +130,7 @@ function gdBed(i, v, now) {
   return `<button class="gd-bed ${ripe ? 'ripe' : ''}" onclick="gardenTap(${i})">${denPlain}<img class="gd-soil" src="${gdArt('plot')}" alt=""><img class="gd-plant" src="${gdStage(p, now)}" alt="${sd.name}">${ripe ? '<small class="gd-tag ready">Harvest!</small>' : `<small class="gd-tag" data-left="${i}">${gdClock(Garden.left(p, now))}</small>${p.w ? '<i class="gd-wet">💧</i>' : ''}`}</button>`;
 }
 function showGarden() {
-  clearInterval(gardenTimer);
+  clearInterval(gardenTimer); const keep = document.querySelector('.gd-farmscroll')?.scrollTop;
   const v = Garden.state(S), now = Date.now(), L = Garden.level(S), chest = Garden.chests.find((c, i) => !v.got.includes(i));
   const ci = Garden.chests.indexOf(chest), chestReady = chest && v.harvests >= chest.at;
   $('#main').innerHTML = `<section class="gd-room ${gardenTab === 'farm' ? 'farm' : ''}" style="--gdbg:url('${gdArt(gardenTab === 'farm' ? 'farm-bg' : 'bg')}');--gdfence:url('${gdArt('farm-fence')}')">
@@ -144,7 +144,7 @@ function showGarden() {
     <button class="gd-help" onclick="gardenRules()">${denPlain}?</button>
    </div>
   </section>`;
-  bagArtVars();
+  bagArtVars(); if (keep != null) { const sc = document.querySelector('.gd-farmscroll'); if (sc) sc.scrollTop = keep; }
   gardenTimer = setInterval(() => {
     if (screen !== 'garden' || !document.querySelector('.gd-room')) { clearInterval(gardenTimer); return; }
     const v2 = Garden.state(S), t = Date.now(); let redo = false;
@@ -199,6 +199,8 @@ function gardenRules() {
   popup(`<div class="gd-pop"><h2>Sky Garden</h2><p>Tap an empty bed and plant a seed bought with gold. Seeds grow on the real clock, even while you play elsewhere or are away.</p><p>Water a growing plant once to make it ripen 25% sooner (at least 10 minutes). You have ${Garden.waterDaily} waterings a day; they refill at 00:00 UTC.</p><p>Harvest gives gold, XP, crystals, gems and bag items, and raises your Garden level, which opens new seeds. Every few harvests a chest waits for you.</p><p>Water up to ${Garden.friendDaily} friends' gardens a day for a small gift.</p></div>`); $('#modal').classList.add('bw-pop');
 }
 
+// Farm view: pens on the painted terraces of a tall map that scrolls (user: "not all on one page, let it scroll").
+const GD_PENS = [[17.5, 13], [31.5, 14], [47.5, 15], [64.5, 17]];
 // Farm view: three pens (hens, cows, sheep), six places each, opened in order.
 function gdFarm(v, now) {
   const next = Garden.nextAnimal(S), ready = v.farm.filter(f => f.at ? now >= f.at : v.feed[Garden.animal(f.k).eat] > 0).length;
@@ -211,10 +213,10 @@ function gdFarm(v, now) {
       if (next && idx === v.farm.length) return `<button class="gd-ani buy" onclick="gardenBuyAnimal()">${denPlain}<img class="gd-beast ghost" src="${gdArt(a.k)}" alt=""><small class="gd-tag">+ ${fmt(next.cost)}</small></button>`;
       return `<span class="gd-ani empty"></span>`;
     }).join('');
-    return `<div class="gd-pen ${open ? '' : 'shut'}"><div class="gd-pen-head"><b>${a.k === 'sheep' ? 'Sheep' : a.name + 's'}</b><small>${have.length}/${Garden.perKind} · eats ${a.eat} · ${a.good} every ${a.min >= 60 ? a.min / 60 + ' h' : a.min + ' min'}</small></div><div class="gd-pen-row">${slots}</div>${open ? '' : `<p class="gd-shut">🔒 Opens after 6 ${Garden.animals[ai - 1].k === 'sheep' ? 'sheep' : Garden.animals[ai - 1].name.toLowerCase() + 's'}</p>`}</div>`;
+    return `<div class="gd-pen ${open ? '' : 'shut'}" style="top:${GD_PENS[ai][0]}%;height:${GD_PENS[ai][1]}%"><div class="gd-pen-head"><b>${a.k === 'sheep' ? 'Sheep' : a.name + 's'}</b><small>${have.length}/${Garden.perKind} · eats ${a.eat} · ${a.good} every ${a.min >= 60 ? a.min / 60 + ' h' : a.min + ' min'}</small></div><div class="gd-pen-row">${slots}</div>${open ? '' : `<p class="gd-shut">🔒 Opens after 6 ${Garden.animals[ai - 1].k === 'sheep' ? 'sheep' : Garden.animals[ai - 1].name.toLowerCase() + 's'}</p>`}</div>`;
   }).join('');
   const barn = `<div class="gd-barn">${Garden.feeds.map(x => `<button class="gd-feedchip" onclick="gardenTab='beds';showGarden()" title="Grow ${x.name} in the Garden">${denPlain}<img src="${gdArt('i-' + x.id)}" alt="">${v.feed[x.id] || 0}</button>`).join('')}</div>`;
-  return `${barn}<div class="gd-farm">${pens}${ready ? `<button class="gd-collect" onclick="gardenCollectAll()">${denPlain}Collect all · ${ready}</button>` : ''}</div>`;
+  return `${barn}<div class="gd-farmwrap"><div class="gd-farmscroll"><div class="gd-farmmap" style="--gdfarm:url('${gdArt('farm-bg')}')">${pens}</div></div>${ready ? `<button class="gd-collect" onclick="gardenCollectAll()">${denPlain}Collect all · ${ready}</button>` : ''}</div>`;
 }
 function gardenBuyAnimal() {
   const a = Garden.nextAnimal(S); if (!a) return;
