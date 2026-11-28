@@ -420,8 +420,10 @@ function drawJungle(c,g){
       c.save();c.translate(wx+ww/2,wy+wh*.56);c.scale(1+beat*.06,1-beat*.035);picture(wingArt,-ww/2,-wh*.56,ww,wh);c.restore()}
     picture(look,x0-(iw-500)/2*u,-h-(ih-800+40)*u,iw*u,ih*u);
     if(parts){const gx=x0+390*u,gy=y0+375*u,raise=firing?1:0;   // the grip: the bow turns about her hand
-      c.save();c.translate(gx,gy);c.rotate(-.3*raise+kick*.13);c.translate(-kick*1.6,kick*2.2);picture(parts.bow,x0-gx,y0-gy,w,800*u);c.restore();
-      picture(parts.fingers,x0,y0,w,800*u);
+      // the three layers share one canvas size (padding for wings or a big bow): draw each over the same box
+      const pw=(parts.bow.width||1000)/2,ph=(parts.bow.height||1600)/2,bx=x0-(pw-500)/2*u,by=y0-(ph-800)*u,bw=pw*u,bh=ph*u;
+      c.save();c.translate(gx,gy);c.rotate(-.3*raise+kick*.13);c.translate(-kick*1.6,kick*2.2);picture(parts.bow,bx-gx,by-gy,bw,bh);c.restore();
+      picture(parts.fingers,bx,by,bw,bh);
       const flash=ready('trek-shot');
       if(flash&&kick>.02){const n=Math.min(3,Math.floor((1-kick)*4)),size=[30,46,58,50][n],m=trekMip(flash,size*4*K),cell=(m.naturalWidth||m.width)/4;c.save();c.globalCompositeOperation='lighter';c.globalAlpha=n<3?1:.7;c.drawImage(m,n*cell,0,cell,m.naturalHeight||m.height,gx-size/2-2,gy-size/2-18-(1-kick)*10,size,size);c.restore()}}}
   else sprite('reina-t3',0,0,110,160);

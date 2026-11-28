@@ -1415,8 +1415,10 @@ Retired for good (2026-11-27, user: "this bow is with her again, remove it"): `r
 `normalizeAdventure` and on the default save) moves anyone wearing weapon 0 / 11 to the Frostglass bow (legacy, bit 4,
 owned for free); the Leaflight Set button keeps Frostglass. The mounted pose still shows the Leafwind bow.
 Bigger bow everywhere (2026-11-28, user: "I said the bow is very small, make it bigger everywhere"): every bow in her hand
-is drawn `WARDROBE_BOW_SCALE` 1.3x its old fit (standing look: home, Fashion, Character, battles, Jungle Trek), and
-`SHOOT_BOW_SCALE` is 1.55 in the shooting pose (`SHOOT_TOP` 90, `SHOOT_PAD` 110). The mounted bow is painted in the art.
+is drawn `WARDROBE_BOW_SCALE` 1.85x its old fit, nearly upright (`WARDROBE_BOW_TURN` .08), almost her height like the
+reference photos (standing look: home, Fashion, Character, battles, Jungle Trek); a portrait with a bow is padded
+`WARDROBE_BOW_PAD` 100 on each side so the string is not cut (consumers read the padding from the canvas size; Jungle
+Trek's bow / fingers layers now do too). `SHOOT_BOW_SCALE` is 1.9 in the shooting pose (`SHOOT_TOP` 130, `SHOOT_PAD` 120). The mounted bow is painted in the art.
 Cloud War fight: her arrows leave from the bow (`drawGoldenArrow` from x 196, y 236), not from her right hand.
 Tabs like notebook index tabs (user): all seven in one fixed row (grid, no scrolling), short labels (Garment, Bow,
 Avatar, Bubble, Hair, Wings, Mounts), the chosen tab taller, in the colour of the card sheet and joined to it; the
