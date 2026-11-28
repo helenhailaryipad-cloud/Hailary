@@ -1419,6 +1419,12 @@ is drawn `WARDROBE_BOW_SCALE` 1.85x its old fit, nearly upright (`WARDROBE_BOW_T
 reference photos (standing look: home, Fashion, Character, battles, Jungle Trek); a portrait with a bow is padded
 `WARDROBE_BOW_PAD` 100 on each side so the string is not cut (consumers read the padding from the canvas size; Jungle
 Trek's bow / fingers layers now do too). `SHOOT_BOW_SCALE` is 1.9 in the shooting pose (`SHOOT_TOP` 130, `SHOOT_PAD` 120). The mounted bow is painted in the art.
+Glowing bow (same day, user: "and animated, glowing all over"): `bowGlow(canvas)` takes the bow's own colour (hue of its
+saturated pixels, `hsl(h,100%,58%)`) and makes a blurred halo picture of it. Home: `heroLiveLayers` renders the bow
+(+ fingers) as its own layer: `.hl-glow` halo pulses (`bow-glow`), `.hl-sweep` runs a band of light along the bow
+(masked to the bow's shape). Battles: `registeredShootBitmap` keeps `glow` and `drawReina` pulses it behind the figure.
+Found on the way: `wardrobe-engine.js` built the outside of an `exclude` mask as the 500 x 800 frame only, so everything
+in the padding (a big bow in the shooting pose) was clipped; `full` now reaches far past the frame.
 Cloud War fight: her arrows leave from the bow (`drawGoldenArrow` from x 196, y 236), not from her right hand.
 Tabs like notebook index tabs (user): all seven in one fixed row (grid, no scrolling), short labels (Garment, Bow,
 Avatar, Bubble, Hair, Wings, Mounts), the chosen tab taller, in the colour of the card sheet and joined to it; the

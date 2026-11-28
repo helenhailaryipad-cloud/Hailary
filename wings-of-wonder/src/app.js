@@ -772,7 +772,7 @@ function registeredShootBitmap(){
  const weapon=S.atelier?.weapon||((S.reinaFashion?.equipped&4)?12:13),wings=fashionWing()?.id||'',tag=wardrobeExtrasTag(),key=[dress,hair,weapon,wings,tag].join('/');
  if(!registeredShootCache.has(key)){
   const entry={image:null};registeredShootCache.set(key,entry);
-  Promise.resolve(globalThis.wowArtLazy?.(['fit-shoot-body','fit-shoot-'+dress])).then(()=>composeWardrobeCanvas(dress,hair,weapon,wings,tag,null,'shoot')).then(c=>{entry.image=c;entry.geom=shootBowGeom(dress,weapon)}).catch(()=>registeredShootCache.delete(key));
+  Promise.resolve(globalThis.wowArtLazy?.(['fit-shoot-body','fit-shoot-'+dress])).then(()=>Promise.all([composeWardrobeCanvas(dress,hair,weapon,wings,tag,null,'shoot'),composeWardrobeCanvas(dress,hair,weapon,wings,tag,['weapon'],'shoot')])).then(([c,bow])=>{entry.glow=bowGlow(bow).glowCanvas;entry.image=c;entry.geom=shootBowGeom(dress,weapon)}).catch(()=>registeredShootCache.delete(key));
  }
  const e=registeredShootCache.get(key);return e?.image?e:null;
 }
@@ -973,15 +973,27 @@ function heroLiveLayers(){
  const {dress,hair}=registeredLook(),weapon=S.atelier?.weapon||((S.reinaFashion?.equipped&4)?12:13),wings=fashionWing()?.id||'',tag=wardrobeExtrasTag(),key=[dress,hair,weapon,wings,tag].join('/');
  if(!heroLiveCache.has(key)){
   const entry={};heroLiveCache.set(key,entry);ensureWardrobeCatalog();
-  const rest=WonderWardrobe.slots.filter(slot=>slot!=='wingsBack');
-  Promise.all([composeWardrobeCanvas(dress,hair,weapon,wings,tag,rest),wings?composeWardrobeCanvas(dress,hair,weapon,wings,tag,['wingsBack']):null])
-   .then(([body,wing])=>{entry.body=body.toDataURL('image/png');entry.wings=wing?wing.toDataURL('image/png'):'';entry.ready=true;
+  const hand=['wingsBack','weapon','gripFingers'],rest=WonderWardrobe.slots.filter(slot=>!hand.includes(slot));
+  Promise.all([composeWardrobeCanvas(dress,hair,weapon,wings,tag,rest),wings?composeWardrobeCanvas(dress,hair,weapon,wings,tag,['wingsBack']):null,composeWardrobeCanvas(dress,hair,weapon,wings,tag,['weapon','gripFingers'])])
+   .then(([body,wing,bow])=>{entry.body=body.toDataURL('image/png');entry.wings=wing?wing.toDataURL('image/png'):'';entry.bow=bow.toDataURL('image/png');Object.assign(entry,bowGlow(bow));entry.ready=true;
     const old=screen==='home'&&document.querySelector('.city-hero:not(.riding) img.winged-portrait');if(old)old.outerHTML=heroLiveHtml(entry)})
    .catch(()=>heroLiveCache.delete(key));
  }
  const e=heroLiveCache.get(key);return e?.ready?e:null;
 }
-function heroLiveHtml(e){return `<div class="hero-live">${e.wings?`<img class="hl-wings" src="${e.wings}" alt="" draggable="false">`:''}<img class="hl-body" src="${e.body}" alt="Reina" draggable="false"></div>`}
+// The bow glows (user: "and animated, glowing all over", photos of the reference's flaming bows): from a canvas holding
+// the bow alone, its own colour (mean of its brightest, most saturated pixels) and a soft halo picture of that colour.
+function bowGlow(bow){
+ const w=bow.width,h=bow.height,k=Math.min(1,320/Math.max(w,h)),sw=Math.round(w*k),sh=Math.round(h*k),t=document.createElement('canvas');t.width=sw;t.height=sh;
+ const x=t.getContext('2d',{willReadFrequently:true});x.drawImage(bow,0,0,sw,sh);const d=x.getImageData(0,0,sw,sh).data;let r=0,g=0,b=0,n=0;
+ for(let i=0;i<d.length;i+=4){if(d[i+3]<160)continue;const mx=Math.max(d[i],d[i+1],d[i+2]),mn=Math.min(d[i],d[i+1],d[i+2]),wgt=(mx-mn)*mx/255;r+=d[i]*wgt;g+=d[i+1]*wgt;b+=d[i+2]*wgt;n+=wgt}
+ const [R,G,B]=n?[r/n/255,g/n/255,b/n/255]:[1,.82,.47],mx=Math.max(R,G,B),mn=Math.min(R,G,B),dd=mx-mn||1e-6;
+ const hue=Math.round(60*(mx===R?((G-B)/dd+6)%6:mx===G?(B-R)/dd+2:(R-G)/dd+4));
+ const color=`hsl(${hue},100%,58%)`,o=document.createElement('canvas');o.width=w;o.height=h;const y=o.getContext('2d');
+ for(const [blur,times] of [[w/28,3],[w/70,2]]){y.filter=`blur(${Math.round(blur)}px)`;for(let i=0;i<times;i++)y.drawImage(bow,0,0)}y.filter='none';y.globalCompositeOperation='source-in';y.fillStyle=color;y.fillRect(0,0,w,h);
+ return {glow:o.toDataURL('image/png'),glowColor:color,glowCanvas:o};
+}
+function heroLiveHtml(e){return `<div class="hero-live" style="--bow-glow:${e.glowColor||'#ffd36a'}">${e.wings?`<img class="hl-wings" src="${e.wings}" alt="" draggable="false">`:''}<img class="hl-body" src="${e.body}" alt="Reina" draggable="false">${e.bow?`<img class="hl-glow" src="${e.glow}" alt="" draggable="false"><img class="hl-bow" src="${e.bow}" alt="" draggable="false"><i class="hl-sweep" style="-webkit-mask-image:url(${e.bow});mask-image:url(${e.bow})"></i>`:''}</div>`}
 function reinaWorldLookPath(){
  return registeredLookPath(undefined,undefined,S.atelier?.weapon||((S.reinaFashion?.equipped&4)?12:13),fashionWing().id);
 }

@@ -88,6 +88,7 @@ function drawReina(c,g,x,floor,width,height){const pose=reinaFrame(g),costume=eq
   // the arrow is gone for a moment. Outside a fight she stands as painted, the bow lowered.
   const age=(g.clock||0)-(g.heroShotAt??-100),fight=age>=0&&age<REINA_AIM_HOLD,shoot=fight&&typeof registeredShootBitmap==='function'?registeredShootBitmap():null;
   if(shoot){const im=shoot.image,sw=im.width/2,sh=im.height/2,sside=(sw-500)/2,stop=sh-800,ox=-w/2,oy=-h-40*v,P=([fx,fy])=>[ox+fx*u,oy+fy*v];
+   if(shoot.glow){c.save();c.globalAlpha=.6+.4*Math.sin((g.clock||0)*2.6);c.drawImage(shoot.glow,ox-sside*u,oy-stop*v,sw*u,sh*v);c.restore()}   // the bow glows, pulsing
    c.drawImage(im,ox-sside*u,oy-stop*v,sw*u,sh*v);
    const geo=shoot.geom,[t0,t1]=geo.tips.map(P),hand=P(geo.hand),grip=P([geo.gx,geo.gy]),snap=age<REINA_SNAP,shake=snap?Math.sin(age*120)*(1-age/REINA_SNAP)*3*u:0;
    const nock=snap?[(t0[0]+t1[0])/2+shake,(t0[1]+t1[1])/2]:hand;
