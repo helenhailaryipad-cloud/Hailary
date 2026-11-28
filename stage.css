@@ -11886,3 +11886,18 @@ html body #stage .city-hud .city-rank.pt-home::before,html body #stage .city-hud
 .city-hud .city-hero .hero-live{animation:hero-sway 5.4s ease-in-out infinite}
 @keyframes hero-sway{0%,100%{transform:scale(1.125) rotate(0deg)}50%{transform:scale(1.125) rotate(.7deg)}}
 @media (prefers-reduced-motion:reduce){.city-hud .city-hero .hero-live{animation:none}}
+
+/* Supreme Set: title and power under the figure, not over it (user circled the ribbon over the dress and the power over
+   the ribbon; reference: a small red title badge under the feet, the power on its own line below). */
+#stage #main .sup-room .sup-center{display:flex!important;flex-direction:column;align-items:center;justify-content:flex-end;gap:.4cqh}
+#stage #main .sup-room .sup-center>:first-child{flex:1 1 auto;min-height:0;max-height:none}
+#stage #main .sup-room .sup-center>img:first-child{height:auto;width:auto;max-width:100%;object-fit:contain}
+#stage #main .sup-room .sup-center .sup-ribbon{position:static;flex:none;display:inline-flex;align-items:center;gap:.35em;
+ padding:.18em 1.1em .18em .8em;border-radius:999px;font:800 min(2.7cqw,2.1cqh)/1.25 Georgia,serif;letter-spacing:.02em;
+ color:#fff7e0;text-shadow:0 1px 2px #5a0a0a;background:linear-gradient(90deg,#9a1a22,#d8443a 50%,#9a1a22)!important;
+ border:1px solid #ffd98a;box-shadow:0 2px 6px #0006,inset 0 1px 0 #ffffff55}
+#stage #main .sup-room .sup-center .sup-ribbon::before{content:"✦";color:#ffe27a;font-size:.9em}
+#stage #main .sup-room .sup-center .sup-cp{position:static;transform:none;flex:none;padding:0 1.2em;background:none;
+ font:900 min(4.2cqw,3.2cqh)/1.1 Georgia,serif;color:#ffe27a;letter-spacing:.03em;
+ background:radial-gradient(closest-side,#1a1450aa,transparent);text-shadow:0 0 8px #ffcf5a88,0 2px 2px #2a1a00}
+#stage #main .sup-room .sup-center::before{inset:4% 15% 18%}
