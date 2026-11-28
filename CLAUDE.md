@@ -109,8 +109,13 @@ string is cut out using `SHOOT_BOWS` = art aspect, string x, nock ys, measured f
 after a shot): the string is drawn back to her hand with a nocked arrow, snaps straight at a release
 (`REINA_SNAP`), the next arrow appears after `REINA_RELOAD`. `reinaBowPoint()` = where arrows leave the bow (Cloud War).
 Outside fights she stands as painted. Jungle Trek keeps its own three-layer bow. A new dress needs its shooting
-painting + a `build-shoot.py <id>` run. Chat preview: `fit-shoot-*` go into lazy packs `pack-shoot-N.js` (about 12
-dresses each), loaded by `wowArtLazy` only when that dress fights.
+painting + a `build-shoot.py <id>` run. Chat preview: dynamically added `<script>` packs did NOT load in the artifact (she
+saw the old pose), so each dress is one picture `shoot-<id>.webp` (garment | hands | erase, 3000 x 1600) that
+`wowArtLazy` loads like any image and cuts into WOW_PACK data URLs; hud-/left-/hair-style- icons went into `pack-small`
+to make room under 511 files. Second look (user: "bows bigger, a weapon should look threatening; Reina and the boss
+blend into the background"): `SHOOT_BOW_SCALE` 1.35 (`SHOOT_TOP` / `SHOOT_PAD` room), a charged glow on the arrowhead
+while she aims; in the Cloud War fight both figures get a white rim and richer colour and the hall behind them is
+softened (blur, less saturation, `.cf2 .cloud-battlefield::before`).
 
 ## Second fashion collection (fifth pass, 2026-11-18)
 10 dresses, 10 hairstyles, 10 wings, 10 bows, all original designs painted by the image model, in Fashion:

@@ -23,7 +23,8 @@ PACKS = {'gear': re.compile(r'^assets/generated/gear-'), 'familiar': re.compile(
          'guardian': re.compile(r'^assets/generated/guardian-t'), 'fish': re.compile(r'^assets/moonwater/'),
          'icons': re.compile(r'^assets/generated/(?:fit-icon-|atelier-icon-|mount-icon-|fashion-cards\.|fashion-bows\.)'), 'bows': re.compile(r'^assets/generated/weapon-style-'), 'wings': re.compile(r'^assets/generated/fashion-wing-'), 'rites': re.compile(r'^assets/generated/comp-(?:rites-|secret-|trail-)'), 'garden': re.compile(r'^assets/generated/garden-'), 'realms': re.compile(r'^assets/generated/(?:realm-|topup-|forge-|patron-)'), 'comp': re.compile(r'^assets/generated/(?:comp-|explore-marker-)'),
          'erase': re.compile(r'^assets/generated/fit-control-[a-z]+-erase\.'), 'minis': re.compile(r'^assets/generated/(?:trek-pickup-|pairs-tile-|pairs-sprout\.|pairs-lobby\.|cascade-fx\.|cascade-pad\.|cascade-cover\.|td-|burrow-|talent-|wishwell-|blessings-|scene-ranking\.|tool-|drawer-|title-|challenge-)'),
-         'hairs': re.compile(r'^assets/generated/fit-control-(?:mount)?hair-')}
+         'hairs': re.compile(r'^assets/generated/fit-control-(?:mount)?hair-'),
+         'small': re.compile(r'^assets/generated/(?:hud-(?!bag\.|isle-skyship\.)|left-(?!fold\.|explore\.)|hair-style-)')}
 packed = {k: {} for k in PACKS}
 lazy = {}
 tracked = subprocess.run(['git', 'ls-files', 'src'], cwd=ROOT, capture_output=True, text=True, check=True).stdout.split('\n')
@@ -34,7 +35,7 @@ for f in filter(None, tracked):
     data = (SRC/rel).read_bytes()
     shoot = re.match(r'^assets/generated/fit-shoot-([a-z]+)', rel)
     if shoot:
-        lazy.setdefault(shoot.group(1), {})[rel] = 'data:image/webp;base64,' + base64.b64encode(data).decode()
+        lazy.setdefault(shoot.group(1), {})[rel] = data
         continue
     if group:
         mime = 'image/avif' if rel.endswith('.avif') else 'image/webp'
@@ -43,20 +44,29 @@ for f in filter(None, tracked):
     (files/rel).parent.mkdir(parents=True, exist_ok=True); (files/rel).write_bytes(data)
 for k, m in packed.items():
     (files/f'pack-{k}.js').write_text('(globalThis.WOW_PACK??={});Object.assign(WOW_PACK,' + json.dumps(m, separators=(',', ':')) + ');')
-# Lazy packs: loaded only when the game asks for one of their pictures (wowArtLazy in generated-art.js), so the shooting
-# pose of 69 dresses (several MB) is not held in memory: one chunk holds about 24 dresses.
-lazy_map, chunks = {}, []
-for i, d in enumerate(sorted(lazy)):
-    if i % 24 == 0: chunks.append({})
-    for rel, data in lazy[d].items():
-        chunks[-1][rel] = data; lazy_map[rel[len('assets/generated/'):-5]] = len(chunks)-1
-for n, m in enumerate(chunks):
-    (files/f'pack-shoot-{n}.js').write_text('(globalThis.WOW_PACK??={});Object.assign(WOW_PACK,' + json.dumps(m, separators=(',', ':')) + ');')
+# Shooting pose (fit-shoot-<dress>, -hands, -erase): one atlas picture per dress, 3000 x 1600 (garment | hands |
+# erase), loaded as an ordinary image only when that dress fights and cut apart by wowArtLazy (generated-art.js).
+# Dynamically added <script> packs did not load in the artifact, pictures always do.
+from PIL import Image
+import io
+for d, parts in sorted(lazy.items()):
+    if d == 'body': continue
+    sheet = Image.new('RGBA', (3000, 1600))
+    for k, suffix in enumerate(['', '-hands', '-erase']):
+        sheet.alpha_composite(Image.open(io.BytesIO(parts[f'assets/generated/fit-shoot-{d}{suffix}.webp'])).convert('RGBA'), (k*1000, 0))
+    (files/'assets/generated').mkdir(parents=True, exist_ok=True)
+    sheet.save(files/f'assets/generated/shoot-{d}.webp', quality=93, alpha_quality=100, method=4)
+(files/'assets/generated/fit-shoot-body.webp').write_bytes(lazy['body']['assets/generated/fit-shoot-body.webp'])
 
 def patch(rel, old, new):
     p = files/rel; s = p.read_text()
     assert old in s, (rel, old); p.write_text(s.replace(old, new))
-(files/'generated-art.js').write_text((files/'generated-art.js').read_text() + '\nconst WOW_LAZY=' + json.dumps(lazy_map, separators=(',', ':')) + ',wowLazyLoaded={};\nglobalThis.wowArtLazy=ids=>Promise.all([].concat(ids).map(id=>WOW_LAZY[id]).filter(n=>n!=null).map(n=>wowLazyLoaded[n]??=new Promise((ok,no)=>{const s=document.createElement(\'script\');s.src=\'pack-shoot-\'+n+\'.js\';s.onload=ok;s.onerror=()=>{delete wowLazyLoaded[n];no()};document.head.appendChild(s)})));\n')
+(files/'generated-art.js').write_text((files/'generated-art.js').read_text() + r'''
+const wowShootDone={};
+globalThis.wowArtLazy=ids=>Promise.all([].concat(ids).map(id=>/^fit-shoot-([a-z]+)$/.exec(id)?.[1]).filter(d=>d&&d!=='body').map(d=>wowShootDone[d]??=new Promise((ok,no)=>{
+ const im=new Image();im.onload=()=>{const P=globalThis.WOW_PACK??={};['','-hands','-erase'].forEach((suffix,k)=>{const c=document.createElement('canvas');c.width=1000;c.height=1600;c.getContext('2d').drawImage(im,k*1000,0,1000,1600,0,0,1000,1600);P['assets/generated/fit-shoot-'+d+suffix+'.webp']=c.toDataURL('image/png')});ok()};
+ im.onerror=()=>{delete wowShootDone[d];no()};im.src='assets/generated/shoot-'+d+'.webp'})));
+''')
 patch('generated-art.js', 'function artPath(id){', "function artPath(id){const packedArt=globalThis.WOW_PACK?.['assets/generated/'+id+'.webp'];if(packedArt)return packedArt;")
 patch('gear-ui.js', 'src="assets/generated/gear-${template.slot}-t${eqRules().artTier(template.tier)}.webp?v=4">', 'src="${artPath(\'gear-\'+template.slot+\'-t\'+eqRules().artTier(template.tier))}">')
 patch('gear-data.js', "portrait:'assets/generated/familiar-'+index+'.webp?v=sharp3'", "portrait:globalThis.WOW_PACK?.['assets/generated/familiar-'+index+'.webp']||'assets/generated/familiar-'+index+'.webp?v=fullbody2'")
