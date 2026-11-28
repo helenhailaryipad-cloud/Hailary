@@ -1414,6 +1414,9 @@ still wears it. The bow itself still works (default look, mounted bow).
 Retired for good (2026-11-27, user: "this bow is with her again, remove it"): `retireLeaflightBow(s)` (in
 `normalizeAdventure` and on the default save) moves anyone wearing weapon 0 / 11 to the Frostglass bow (legacy, bit 4,
 owned for free); the Leaflight Set button keeps Frostglass. The mounted pose still shows the Leafwind bow.
+Bigger bow everywhere (2026-11-28, user: "I said the bow is very small, make it bigger everywhere"): every bow in her hand
+is drawn `WARDROBE_BOW_SCALE` 1.3x its old fit (standing look: home, Fashion, Character, battles, Jungle Trek), and
+`SHOOT_BOW_SCALE` is 1.55 in the shooting pose (`SHOOT_TOP` 90, `SHOOT_PAD` 110). The mounted bow is painted in the art.
 Cloud War fight: her arrows leave from the bow (`drawGoldenArrow` from x 196, y 236), not from her right hand.
 Tabs like notebook index tabs (user): all seven in one fixed row (grid, no scrolling), short labels (Garment, Bow,
 Avatar, Bubble, Hair, Wings, Mounts), the chosen tab taller, in the colour of the card sheet and joined to it; the
