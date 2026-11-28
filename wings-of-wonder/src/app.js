@@ -963,6 +963,23 @@ function registeredCombatLayers(withWings){
  const entry=registeredCombatParts.get(key);
  return entry?.ready?entry:null;
 }
+// Home Reina is alive (user: "she stands like a statue"): the worn look as two layers of the same size (everything but
+// the wings, and the wings alone), stacked in .hero-live and animated in CSS: she breathes, the wings beat slowly.
+const heroLiveCache=new Map();
+function heroLiveLayers(){
+ if(typeof document==='undefined'||typeof WonderWardrobe==='undefined')return null;
+ const {dress,hair}=registeredLook(),weapon=S.atelier?.weapon||((S.reinaFashion?.equipped&4)?12:13),wings=fashionWing()?.id||'',tag=wardrobeExtrasTag(),key=[dress,hair,weapon,wings,tag].join('/');
+ if(!heroLiveCache.has(key)){
+  const entry={};heroLiveCache.set(key,entry);ensureWardrobeCatalog();
+  const rest=WonderWardrobe.slots.filter(slot=>slot!=='wingsBack');
+  Promise.all([composeWardrobeCanvas(dress,hair,weapon,wings,tag,rest),wings?composeWardrobeCanvas(dress,hair,weapon,wings,tag,['wingsBack']):null])
+   .then(([body,wing])=>{entry.body=body.toDataURL('image/png');entry.wings=wing?wing.toDataURL('image/png'):'';entry.ready=true;
+    const old=screen==='home'&&document.querySelector('.city-hero:not(.riding) img.winged-portrait');if(old)old.outerHTML=heroLiveHtml(entry)})
+   .catch(()=>heroLiveCache.delete(key));
+ }
+ const e=heroLiveCache.get(key);return e?.ready?e:null;
+}
+function heroLiveHtml(e){return `<div class="hero-live">${e.wings?`<img class="hl-wings" src="${e.wings}" alt="" draggable="false">`:''}<img class="hl-body" src="${e.body}" alt="Reina" draggable="false"></div>`}
 function reinaWorldLookPath(){
  return registeredLookPath(undefined,undefined,S.atelier?.weapon||((S.reinaFashion?.equipped&4)?12:13),fashionWing().id);
 }
@@ -1253,7 +1270,7 @@ function home(){
  <div id="city-promotions" class="city-promos">${cityGroups[1].map(item=>cityIcon(item,'left-')).join('')}</div></div>
  ${homeGacha()}
  <button class="city-reinforce" onclick="go('forge')"><span>Reinforce<small>Gear upgrades</small></span><img src="${artPath('hud-reinforce')}"></button><div class="city-extra"><button class="city-icon city-minigames" onclick="go('games')" aria-label="Mini Games"><span class="city-glyph"><img src="${artPath('comp-minigames-icon')}" alt=""></span><span class="city-caption">Mini Games</span></button><button class="city-icon" onclick="go('fishing')" aria-label="Fishing"><span class="city-glyph"><img class="city-fish" src="assets/generated/fishing-crowned-goldfish.webp" alt=""></span><span class="city-caption">Fishing</span></button>${[['isle-skyship','Isle Expedition','isleArena'],['cloud-war-citadel','Cloud War','cloudWar']].map(item=>cityIcon(item)).join('')}</div>
- ${mount?`<div class="city-wings riding">${artImage(fashionWing().id,'Reina’s wings')}</div>`:''}${typeof titleHome==='function'&&S.titles?.worn?titleHome():`<div class="city-aura"><img src="${artPath('hud-aura')}" alt="Overlord’s Aura"></div>`}${cityCompanionEffects(['footprint'])}${pets.map(pet=>`<div class="city-pet city-pet-${pet.slot}" title="${esc(pet.name)}">${typeof petAnimSvg==='function'&&PET_ANIM_IDS.has(petArtId(pet.id))?petAnimSvg(pet.id,pet.slot*1.9):`<img src="${pet.portrait||artPath(pet.id)}" alt="${esc(pet.name)}" draggable="false">`}</div>`).join('')}<div class="city-hero${mount?' riding':''}">${S.rites?.aura&&!mount?`<img class="rite-aura" src="${artPath('comp-rites-aura-'+S.rites.aura)}" alt="${Rites.auras[S.rites.aura]}">`:''}<b>${esc(S.name)}</b><img${mount?'':' class="winged-portrait"'} src="${mount?reinaLookPath(true):reinaWorldLookPath()}" alt="Reina"></div>${cityCompanionEffects(['elf'])}
+ ${mount?`<div class="city-wings riding">${artImage(fashionWing().id,'Reina’s wings')}</div>`:''}${typeof titleHome==='function'&&S.titles?.worn?titleHome():`<div class="city-aura"><img src="${artPath('hud-aura')}" alt="Overlord’s Aura"></div>`}${cityCompanionEffects(['footprint'])}${pets.map(pet=>`<div class="city-pet city-pet-${pet.slot}" title="${esc(pet.name)}">${typeof petAnimSvg==='function'&&PET_ANIM_IDS.has(petArtId(pet.id))?petAnimSvg(pet.id,pet.slot*1.9):`<img src="${pet.portrait||artPath(pet.id)}" alt="${esc(pet.name)}" draggable="false">`}</div>`).join('')}<div class="city-hero${mount?' riding':''}">${S.rites?.aura&&!mount?`<img class="rite-aura" src="${artPath('comp-rites-aura-'+S.rites.aura)}" alt="${Rites.auras[S.rites.aura]}">`:''}<b>${esc(S.name)}</b>${mount?`<img src="${reinaLookPath(true)}" alt="Reina">`:(heroLive=>heroLive?heroLiveHtml(heroLive):`<img class="winged-portrait" src="${reinaWorldLookPath()}" alt="Reina">`)(heroLiveLayers())}</div>${cityCompanionEffects(['elf'])}
  <div class="city-jobs">${[['Daily','cityTrail'],['Gameplay','cityGameplay'],['Bounty','cityBounty'],['Hunting','cityHunting']].map(([name,id])=>`<button onclick="go('${id}')"><img src="${artPath('wing-menu-'+name.toLowerCase())}" alt="">${name}</button>`).join('')}</div>
  <div class="city-tools">${[['broadcast','Elf Broadcast']].map(item=>cityIcon(item)).join('')}</div>
  <div class="city-skills">${[['move','Realm',"go('world')"],['ally1','Pet',"chooseSectionPage('collection')"],['combat','Combat',"go('dungeons')"],['ally2','Companion',"go('cityCompanion')"],['ride','Ride','toggleMount()'],['ally3','Wardrobe',"go('fashion')"],['travel','Travel',"go('world')"]].map(a=>cityTool(...a)).join('')}</div>

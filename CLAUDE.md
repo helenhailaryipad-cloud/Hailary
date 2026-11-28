@@ -330,6 +330,13 @@ The old v301 profile page (`heroProfile`, blue card with party heroes, Fashion /
 this? my eyes rolled up") is retired: `go('profile')` and a saved `screen==='profile'` open `character` instead; the
 plate and the Character page no longer link to it; the city skill "Companion" opens `cityCompanion`.
 
+## Home Reina alive (2026-11-28)
+User: "animate Reina too, she stands like a statue". `heroLiveLayers()` in `app.js` composes the worn look twice at the
+same size (every slot but `wingsBack`, and `wingsBack` alone) and `home()` stacks them in `.hero-live` (falls back to the
+single `winged-portrait` until ready, then swaps it in place). CSS at the end of `stage.css`: `hero-breathe` (body,
+3.6 s, from the feet), `hero-wings` (slow beat about the shoulder blades), `hero-sway` (whole figure +-0.7 deg, 5.4 s);
+the riding wings beat too; all off under prefers-reduced-motion. No new art: arms and hair do not move.
+
 ## Home Claim / Power Up tools (2026-11-27)
 User photos of the reference's two round icons above the quest line ("change these 2 icons like the photo"). The two
 round tools above the Quest Board (`cityTool` in `app.js`, art `tool-rewards` / `tool-upgrade`, rebuilt at 384 px q95 by
