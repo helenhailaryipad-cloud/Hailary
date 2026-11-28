@@ -680,7 +680,7 @@ function wearLeaflightSet(){
  save();reinaAtelier();toast('Leaflight set equipped');
 }
 
-let wardrobeCatalogReady=false;
+let wardrobeCatalogReady=false,wardrobeBowFit=null;
 // Hair layers rebuilt by scripts/build-fitting-v2.py; the others still use the shared front/back split.
 const wardrobePixelHairs=new Set([3,9,10,11]);
 // Second collection (painted on the bald body): these hang down her back, behind body and clothes.
@@ -726,6 +726,7 @@ function ensureWardrobeCatalog(){
   }
   WonderWardrobe.register({id:'weapon:'+id,kind:'weapon',layers});
  }
+ wardrobeBowFit={grip:bowGrip,height:bowHeight};
  wardrobeCatalogReady=true;
 }
 // Convert authored atlas paths into the canonical frame once, without moving anatomy.
@@ -734,6 +735,44 @@ function wardrobeLeafPath(slot){
 }
 // Large wings reach past the 500-wide figure frame; portraits with wings are this much wider on each side.
 const wardrobeWingPad=140,wardrobeWingTop=100;
+// Shooting pose for battles (user: "is that how you hold a bow when you shoot?"). Built by scripts/build-shoot.py:
+// its own bald body with the bow arm stretched toward the foe and the other hand drawn back to her cheek, one garment
+// layer per dress (painted on that pose by the image model), the standing hair. SHOOT_META = [grip x, grip y, string
+// hand x, y] in frame units. SHOOT_BOWS = [width / height of the bow art, string x, top and bottom nock y] as
+// fractions of the art: the painted straight string is cut out and drawn pulled back to her hand instead.
+const SHOOT_META={"aurora":[467.3,181.6,224.6,149.4],"autumn":[467.8,182.6,224.6,146.7],"coral":[475.1,182.4,224.6,147.7],"dawnpetal":[467.3,181.4,224.6,148.9],"emberveil":[467.3,181.8,224.6,146.7],"frostlace":[467.3,181.1,221.2,148.6],"frostqueen":[467.8,183.3,224.6,148.6],"galaxy":[476.1,182.3,221.2,149.4],"grove":[467.3,182.6,224.6,146.7],"icequeen":[468.3,182.3,224.6,145.7],"jade":[467.3,179.6,224.6,147.9],"leaflight":[459.5,181.6,217.8,144.5],"mermaid":[467.3,181.6,217.3,149.4],"nightbloom":[467.3,182.3,224.6,146.9],"peacock":[468.3,182.1,217.8,148.6],"pearl":[476.1,181.5,224.6,148.4],"phoenix":[468.8,182.3,217.3,147.9],"ravenwing":[466.8,181.8,224.6,146.9],"rosethorn":[467.8,181.1,224.6,146.9],"sapphire":[467.3,181.3,219.7,146.7],"seafoam":[472.2,181.9,224.6,147.9],"snowqueen":[472.2,182.3,221.2,148.4],"stardust":[467.8,182.3,224.6,146.4],"starlit":[470.2,181.6,224.6,148.9],"sunflower":[467.3,181.6,224.6,149.4],"sunweave":[467.8,180.7,224.6,148.9],"sweetheart":[467.3,181.4,217.8,148.6],"tharcade":[467.3,181.8,224.6,149.1],"thbunny":[481.9,181.3,218.8,145.7],"thcandy":[467.8,181.8,224.6,146.7],"thcarnival":[467.8,181.8,224.6,146.4],"thclockwork":[467.3,182.1,220.2,146.4],"thdragonling":[467.8,182.1,224.6,146.7],"thfairy":[467.3,181.6,216.8,143.5],"thfoxwood":[466.8,182.6,224.6,146.7],"thgem":[467.8,180.6,224.6,146.7],"thgothic":[467.3,182.3,224.6,148.9],"thharvest":[467.8,181.8,219.7,146.7],"thholly":[467.8,181.8,217.8,148.4],"thhoney":[467.8,181.1,224.6,148.9],"thhourglass":[467.8,181.8,224.6,148.4],"thidol":[469.2,182.1,224.6,146.7],"thinferno":[467.8,182.1,217.3,148.9],"thkitty":[467.3,182.3,224.6,148.4],"thknight":[469.2,181.8,224.6,149.4],"thlantern":[467.3,180.9,224.6,148.4],"thlibrary":[467.3,181.1,224.6,147.7],"thlotus":[467.8,182.3,224.6,149.4],"thmeadow":[467.3,182.6,219.7,148.4],"thmelody":[467.3,181.8,218.3,145.7],"thnorthlight":[467.8,181.1,218.3,146.7],"thoasis":[467.3,181.8,224.6,146.7],"thocean":[472.7,182.1,219.7,143.3],"thowl":[467.3,181.6,224.6,149.1],"thpapillon":[468.3,181.6,217.3,149.1],"thpirate":[467.3,181.4,224.6,146.7],"thpumpkin":[467.8,182.1,224.6,145.7],"thrainbow":[467.8,181.9,217.8,147.4],"throse":[467.3,182.1,218.8,146.9],"throyal":[467.8,181.4,224.6,149.1],"thsakura":[467.8,181.8,224.6,146.4],"thseaside":[469.2,180.6,217.8,149.4],"thsnowfall":[468.8,180.6,224.6,146.7],"thstarmoon":[467.8,182.1,224.6,149.4],"thstorm":[467.3,182.1,224.6,146.9],"thteaparty":[467.3,181.8,224.6,146.9],"thtropic":[467.3,181.8,221.7,149.4],"tidal":[474.1,181.8,224.6,147.9],"willow":[468.8,182.1,224.6,146.7]};
+const SHOOT_BOWS={1:[0.397,0.104,0.011,0.985],2:[0.352,0.064,0.011,0.951],3:[0.333,0.067,0.022,0.993],4:[0.393,0.048,0.022,0.985],5:[0.397,0.057,0.037,0.955],6:[0.352,0.064,0.056,0.966],7:[0.378,0.129,0.026,0.944],8:[0.401,0.121,0.019,0.970],9:[0.416,0.090,0.007,0.948],10:[0.382,0.049,0.020,0.925],14:[0.382,0.061,0.004,0.996],15:[0.388,0.069,0.002,0.995],16:[0.420,0.077,0.034,0.961],17:[0.386,0.083,0.100,0.970],18:[0.379,0.061,0.002,0.996],19:[0.386,0.069,0.004,0.995],20:[0.375,0.062,0.004,0.995],21:[0.412,0.121,0.125,0.891],22:[0.405,0.057,0.002,0.996],23:[0.398,0.103,0.027,0.968],24:[0.343,0.083,0.027,0.927],25:[0.386,0.130,0.016,0.982],26:[0.362,0.079,0.055,0.970],27:[0.373,0.096,0.029,0.948],28:[0.373,0.081,0.098,0.895],29:[0.370,0.077,0.007,0.995],30:[0.398,0.094,0.002,0.996],31:[0.373,0.067,0.004,0.996],32:[0.379,0.071,0.004,0.996],33:[0.377,0.076,0.004,0.984],34:[0.379,0.080,0.005,0.995],35:[0.370,0.072,0.004,0.995],36:[0.380,0.070,0.005,0.970],37:[0.375,0.076,0.037,0.966],38:[0.370,0.077,0.009,0.995],39:[0.379,0.075,0.005,0.993],40:[0.379,0.071,0.039,0.955],41:[0.384,0.070,0.005,0.995],42:[0.393,0.073,0.002,0.996],43:[0.386,0.060,0.057,0.995],44:[0.373,0.091,0.004,0.996],45:[0.388,0.083,0.007,0.996],46:[0.346,0.088,0.004,0.993],47:[0.371,0.058,0.023,0.995],48:[0.438,0.237,0.034,0.998],49:[0.391,0.073,0.005,0.970],50:[0.384,0.065,0.005,0.995],51:[0.404,0.058,0.007,0.963],52:[0.362,0.094,0.005,0.980],53:[0.445,0.205,0.034,0.977],54:[0.400,0.121,0.037,0.996],55:[0.377,0.062,0.005,0.980],56:[0.361,0.084,0.004,0.963],57:[0.352,0.076,0.005,0.988],58:[0.384,0.074,0.009,0.996],59:[0.386,0.074,0.007,0.988],60:[0.388,0.065,0.007,0.995],61:[0.379,0.080,0.005,0.971],62:[0.388,0.083,0.005,0.993],63:[0.388,0.078,0.005,0.957]};
+const SHOOT_PAD=60,SHOOT_BOW_SCALE=1;
+const shootBowSource=w=>!w||w===11||w===12||w===13?2:w;
+function shootRegister(d){
+ const id='shoot:'+d;
+ if(!WonderWardrobe.get(id))WonderWardrobe.register({id,kind:'dress',bodyErase:'fit-shoot-'+d+'-erase',layers:[{slot:'garmentFront',asset:'fit-shoot-'+d},{slot:'accessoriesFront',asset:'fit-shoot-'+d+'-hands'}]});
+ return id;
+}
+// The bow stands upright in her fist, string toward her, belly toward the foe; returns the item id.
+function shootBowGeom(d,weapon){
+ const src=shootBowSource(weapon),b=SHOOT_BOWS[src]||SHOOT_BOWS[2],[gx,gy,hx,hy]=SHOOT_META[d],grip=wardrobeBowFit?.grip?.[src]??.6,h=(wardrobeBowFit?.height?.[src]||312)*SHOOT_BOW_SCALE,w=h*b[0],left=gx-w*grip,top=gy-h/2,sx=left+w*b[1];
+ return {src,grip,h,gx,gy,hand:[hx,hy],string:sx,tips:[[sx,top+h*b[2]],[sx,top+h*b[3]]],cut:[top+h*(b[2]+.05),top+h*(b[3]-.05)]};
+}
+function shootBowRegister(d,weapon){
+ const g=shootBowGeom(d,weapon),id='shootbow:'+d+':'+g.src;
+ if(!WonderWardrobe.get(id))WonderWardrobe.register({id,kind:'weapon',layers:[{slot:'weapon',asset:'weapon-style-'+g.src,handle:{x:g.grip,y:.5,height:g.h},transform:{x:g.gx,y:g.gy,rotation:0},
+  exclude:[`M${(g.string-5).toFixed(1)} ${g.cut[0].toFixed(1)} H${(g.string+5).toFixed(1)} V${g.cut[1].toFixed(1)} H${(g.string-5).toFixed(1)} Z`]}]});
+ return id;
+}
+// The worn look in the shooting pose, with wings, at 2x; null until painted (or for a dress without the pose).
+let registeredShootCache=null;
+function registeredShootBitmap(){
+ if(typeof document==='undefined'||typeof WonderWardrobe==='undefined')return null;
+ registeredShootCache??=new WardrobeCache(4);
+ const {dress,hair}=registeredLook();if(!SHOOT_META[dress])return null;
+ const weapon=S.atelier?.weapon||((S.reinaFashion?.equipped&4)?12:13),wings=fashionWing()?.id||'',tag=wardrobeExtrasTag(),key=[dress,hair,weapon,wings,tag].join('/');
+ if(!registeredShootCache.has(key)){
+  const entry={image:null};registeredShootCache.set(key,entry);
+  Promise.resolve(globalThis.wowArtLazy?.(['fit-shoot-body','fit-shoot-'+dress])).then(()=>composeWardrobeCanvas(dress,hair,weapon,wings,tag,null,'shoot')).then(c=>{entry.image=c;entry.geom=shootBowGeom(dress,weapon)}).catch(()=>registeredShootCache.delete(key));
+ }
+ const e=registeredShootCache.get(key);return e?.image?e:null;
+}
 const WING_ROOT={w0:[490,68],w1:[517,9],w2:[453,4],w3:[494,4]};// [root y, top of the art] in the 700 px starter wing pictures
 // Cloak, back accessory and tail worn behind Reina (Companion screen). The tag "cloak.back.tail"
 // travels inside portrait keys so cached portraits never show a stale accessory.
@@ -745,8 +784,9 @@ function wardrobeExtrasTag(override){
  });
  return ids.some(Boolean)?ids.join('.'):'';
 }
-async function composeWardrobeCanvas(dress,hair,weapon=0,wings='',tag=wardrobeExtrasTag(),only=null){
+async function composeWardrobeCanvas(dress,hair,weapon=0,wings='',tag=wardrobeExtrasTag(),only=null,pose=''){
  ensureWardrobeCatalog();
+ const shoot=pose==='shoot'&&SHOOT_META[fittedDressId(dress)]?fittedDressId(dress):'';
  const extras=(tag||'').split('.').map((id,i)=>{
   const kind=wardrobeExtraKinds[i];if(!id||!WonderGear.companionSkins[kind]?.some(skin=>skin.id===id))return null;
   const key='extra:'+kind+':'+id;
@@ -759,7 +799,7 @@ async function composeWardrobeCanvas(dress,hair,weapon=0,wings='',tag=wardrobeEx
  // the picture (WING_ROOT, y of 700) and are scaled so the root sits at y 210 and the tips stay inside the top padding.
  if(wings&&!WonderWardrobe.get('wings:'+wings)){const r=WING_ROOT[wings];const layer=r?{slot:'wingsBack',asset:wings,rect:(k=>[228-350*k,232-r[0]*k,700*k,700*k])(Math.min(.75,(232+wardrobeWingTop-2)/(r[0]-r[1])))}:{slot:'wingsBack',asset:wings,fit:[-135,-140,720,600],minTop:2-wardrobeWingTop};
   WonderWardrobe.register({id:'wings:'+wings,kind:'wings',layers:[layer]})}
- return WonderWardrobe.render({dress:'dress:'+fittedDressId(dress),hair:'hair:'+fittedHairId(hair),weapon:weapon?'weapon:'+weapon:null,wings:wings?'wings:'+wings:null,extras,body,only,pad:wings?wardrobeWingPad:0,padTop:wings?wardrobeWingTop:0,
+ return WonderWardrobe.render({dress:shoot?shootRegister(shoot):'dress:'+fittedDressId(dress),hair:'hair:'+fittedHairId(hair),weapon:shoot?shootBowRegister(shoot,weapon):weapon?'weapon:'+weapon:null,wings:wings?'wings:'+wings:null,extras,body:shoot?'fit-shoot-body':body,only,pad:Math.max(wings?wardrobeWingPad:0,shoot?SHOOT_PAD:0),padTop:wings?wardrobeWingTop:0,
   createCanvas:(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;},load:id=>styleImage(artPath(id))});
 }
 async function composeRegisteredReina(dress,hair){
@@ -910,13 +950,13 @@ function registeredCombatBitmap(noWings){
 // Jungle Trek animates the shot: it needs the figure without her bow, the bow alone, and the fingers that close over
 // the grip, all in the same 500 x 800 frame (canvases at 2x, no wings). Null until all three are painted.
 const registeredCombatParts=new WardrobeCache(4);
-function registeredCombatLayers(){
+function registeredCombatLayers(withWings){
  if(typeof document==='undefined'||typeof WonderWardrobe==='undefined')return null;
- const {dress,hair}=registeredLook(),weapon=S.atelier?.weapon||((S.reinaFashion?.equipped&4)?12:13),tag=wardrobeExtrasTag(),key=dress+'/'+hair+'/'+weapon+'/'+tag;
+ const {dress,hair}=registeredLook(),weapon=S.atelier?.weapon||((S.reinaFashion?.equipped&4)?12:13),tag=wardrobeExtrasTag(),wings=withWings&&fashionWing()?.id||'',key=dress+'/'+hair+'/'+weapon+'/'+tag+'/'+wings;
  if(!registeredCombatParts.has(key)){
   const entry={ready:false};registeredCombatParts.set(key,entry);
   const hand=['weapon','gripFingers'],rest=WonderWardrobe.slots.filter(slot=>!hand.includes(slot));
-  Promise.all([rest,['weapon'],['gripFingers']].map(only=>composeWardrobeCanvas(dress,hair,weapon,'',tag,only)))
+  Promise.all([rest,['weapon'],['gripFingers']].map(only=>composeWardrobeCanvas(dress,hair,weapon,wings,tag,only)))
    .then(([figure,bow,fingers])=>Object.assign(entry,{figure,bow,fingers,ready:true})).catch(()=>registeredCombatParts.delete(key));
  }
  const entry=registeredCombatParts.get(key);
