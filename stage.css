@@ -11862,3 +11862,9 @@ html body #stage .city-hud .city-rank.pt-home::before,html body #stage .city-hud
 #stage .cf2 .cloud-battlefield{position:relative;isolation:isolate}
 #stage .cf2 .cloud-battlefield::before{content:'';position:absolute;inset:-8px;z-index:-1;background:var(--arena-art) center/100% 100% no-repeat;filter:blur(2px) saturate(.72) brightness(1.08)}
 #stage .cf2 .cloud-battlefield canvas{background:linear-gradient(#fffaf02e,#fffaf04a)!important}
+
+/* Mounts a little smaller (user: "make all mounts a bit smaller"): the rider on the home screen (wings scaled with her,
+   both about her feet) and on the Cloud War ride between defenders. */
+.city-hud .city-hero.riding{left:35.1%;top:44.6%;width:29.8%;height:20.4%}
+.city-hud .city-wings.riding{left:28.75%;top:41.2%;width:42.5%;height:17%}
+#stage .cf2 .cloud-path img{width:34%}
