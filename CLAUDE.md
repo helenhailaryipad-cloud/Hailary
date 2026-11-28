@@ -1044,6 +1044,15 @@ of d0-d3 say what the paintings show (Grove Dragonling, Ember Drake, Moon Dragon
   `scripts/build-familiars.py` (takes about 5 minutes; run it in the background). Cache tag `?v=sharp3` in
   `gear-data.js` (the chat builder patches that exact string). Hosted bundle headroom about 1.13 MB.
 
+- Animated pets (2026-11-28, user: "animate the three pets beside her"): every pet (d0-d3, familiars 4-53) has two
+  image-model frames (idle breath, attack with a burst of magic; `art-source/pet-anim/<id>-<f>.webp`, WebP q95). 
+  `scripts/build-pet-anim.py` aligns them on the ground line with the SAME square as the game picture (familiars: the
+  bbox square of build-familiars.py) into `pet-anim-<id>` (3 cells of 640, the picture square at 74..566 of a cell, 15%
+  pad for lunges). `drawPetAnim` (dungeon-crawl.js) is used by the crawl halls and the Cloud War fight (breath every
+  0.65 s, attack frame while it fires, `PET_ANIM_*`); the home pets are `petAnimSvg` (an SVG whose picture steps
+  through the cells with SMIL, an attack pose every ~6 s, the three out of step). Chat preview: `party-*`, `cloud-sky-*`
+  and the small Cloud War place icons went into `pack-small` to make room for the 54 sheets under 511 files (the map
+  draws them through `artPath` now).
 - Pet Gear and Pet Talent (user sent 15 reference photos, no text; original names, icons and numbers, similar
   mechanics). Formation sub-tabs are now Pet Feeding / Pet Gear / Pet Talent (`petModes`; Star-up stays in Gallery,
   the badge forge in the Badge tab). Both systems belong to the Primary Pet SLOT (0-2), stay when the pet is replaced,

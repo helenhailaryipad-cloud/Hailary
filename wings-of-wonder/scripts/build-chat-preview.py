@@ -24,7 +24,7 @@ PACKS = {'gear': re.compile(r'^assets/generated/gear-'), 'familiar': re.compile(
          'icons': re.compile(r'^assets/generated/(?:fit-icon-|atelier-icon-|mount-icon-|fashion-cards\.|fashion-bows\.)'), 'bows': re.compile(r'^assets/generated/weapon-style-'), 'wings': re.compile(r'^assets/generated/fashion-wing-'), 'rites': re.compile(r'^assets/generated/comp-(?:rites-|secret-|trail-)'), 'garden': re.compile(r'^assets/generated/garden-'), 'realms': re.compile(r'^assets/generated/(?:realm-|topup-|forge-|patron-)'), 'comp': re.compile(r'^assets/generated/(?:comp-|explore-marker-)'),
          'erase': re.compile(r'^assets/generated/fit-control-[a-z]+-erase\.'), 'minis': re.compile(r'^assets/generated/(?:trek-pickup-|pairs-tile-|pairs-sprout\.|pairs-lobby\.|cascade-fx\.|cascade-pad\.|cascade-cover\.|td-|burrow-|talent-|wishwell-|blessings-|scene-ranking\.|tool-|drawer-|title-|challenge-)'),
          'hairs': re.compile(r'^assets/generated/fit-control-(?:mount)?hair-'),
-         'small': re.compile(r'^assets/generated/(?:hud-(?!bag\.|isle-skyship\.)|left-(?!fold\.|explore\.)|hair-style-)')}
+         'small': re.compile(r'^assets/generated/(?:hud-(?!bag\.|isle-skyship\.)|left-(?!fold\.|explore\.)|hair-style-|party-|cloud-sky-|cloud-(?:galewing|embercrest|moonveil|thornhart)-)')}
 packed = {k: {} for k in PACKS}
 lazy = {}
 tracked = subprocess.run(['git', 'ls-files', 'src'], cwd=ROOT, capture_output=True, text=True, check=True).stdout.split('\n')
