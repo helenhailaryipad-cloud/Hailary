@@ -1554,6 +1554,14 @@ territory windows with ten defenders and the fight; defenders never came back an
   1280 x 840 with `setTransform(2,...)`), HP pill and status float on the picture; painted gold Celestial Arrow, a light
   Auto next toggle with a tick, violet Stop; the hall is an ivory card (chips Carnage / Territory / Holy Land, segmented
   tabs, light rows) that fills the rest and scrolls. The Menu pill is hidden. CSS "Cloud War fight, second look".
+- Animated defenders (2026-11-28, user: "the enemies are static; animate them with the image model"): the eight
+  defender paintings (tier guardians t7, t8, t9, t10, t12, t13, t14, t16) each got three image-model frames (idle
+  breath, wind-up with magic gathering, attack lunge; `art-source/cloud/foes/t<n>-<f>.webp`), built by
+  `scripts/build-cloud-foes.py` into `cloud-foe-t<n>` (4 cells of 640, aligned on the ground line; writes
+  `CLOUD_FOE_META`). `drawCloudFoe` plays them in the fight: breathing 0 <-> 1 (`CLOUD_FOE_IDLE`, short cross-fade),
+  wind-up before each orb (`CLOUD_FOE_WIND`), lunge as it throws (`CLOUD_FOE_LUNGE`), recoil + squash when hit; the old
+  static sprite until the sheet is loaded. Reina's release flashes at the bow (`REINA_FLASH`). Her pets are not
+  animated (54 of them).
 - Not done: Cloud Hunt, buying extra Carnage, Bizarre Lands, other players' damage shares on the boss bar.
 
 ## Social room: chat, friends, mail (2026-11-21)
