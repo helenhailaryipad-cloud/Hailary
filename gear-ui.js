@@ -2377,7 +2377,8 @@ function eliteStore(){
  const left=Math.max(0,sale.end-Date.now()),d=Math.floor(left/864e5),h=Math.floor(left%864e5/36e5),m=Math.floor(left%36e5/6e4);
  const packs=r.supremePieces.filter(p=>p.tab===eliteTab);
  const figure=piece=>piece==='weapon'?`<div class="el-bow"><img src="${artPath('weapon-style-'+set.bow)}" alt="${set.name} bow"></div>`
-  :piece==='wings'?`<img class="el-fig" src="${registeredLookPath(set.dress,set.hair,0,set.wings,'')}" alt="${set.name} wings">`
+  :piece==='wings'?`<div class="el-wings"><img src="${artPath(set.wings)}" alt="${set.name} wings"></div>`
+  :piece==='hair'?`<div class="el-head"><img src="${registeredLookPath(set.dress,set.hair,0,'','')}" alt="${set.name} hairstyle"></div>`
   :piece==='bubble'||piece==='frame'?`<div class="el-deco">${supPieceArt(set,piece,true)}</div>`:`<img class="el-fig" src="${registeredLookPath(set.dress,set.hair,piece==='outfit'?set.bow:0,piece==='outfit'?set.wings:'','')}" alt="${set.name}">`;
  const card=p=>{const out=false;
   return `<div class="el-col">${figure(p.id)}<div class="el-tag"><b>UR</b><span>Exclusive<br>${set.name}</span></div><div class="el-cp">⚔ ${fmt(supremeCp(set.id,p.id))}</div>
