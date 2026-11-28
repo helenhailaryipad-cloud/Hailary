@@ -67,7 +67,7 @@ function drawAimedRanger(c,image,rect,w,h){
  c.drawImage(frame.canvas,-w/2,-h,w,h);
 }
 // Shooting pose in fights: seconds it stays after a shot, the string's snap after a release, until the next arrow is nocked.
-const REINA_AIM_HOLD=1.4,REINA_SNAP=.09,REINA_RELOAD=.22;
+const REINA_AIM_HOLD=1.4,REINA_SNAP=.09,REINA_RELOAD=.22,REINA_FLASH=.16;
 // Where her arrows leave the bow for a figure drawn by drawReina(c,g,x,floor,width,height): the grip of the shooting pose.
 function reinaBowPoint(x,floor,width,height){const k=Math.min(width/450,height/740),geo=typeof registeredShootBitmap==='function'?registeredShootBitmap()?.geom:null,[fx,fy]=geo?[geo.gx+12,geo.gy]:[420,330];return [x-250*k+fx*k,floor-740*k-40*k+fy*k]}
 function drawReina(c,g,x,floor,width,height){const pose=reinaFrame(g),costume=equippedRanger(),aim=pose.shooting&&g.crawl?.enemy&&motionAllowed()?dungeonBowAim(g):null;
@@ -91,6 +91,9 @@ function drawReina(c,g,x,floor,width,height){const pose=reinaFrame(g),costume=eq
    c.drawImage(im,ox-sside*u,oy-stop*v,sw*u,sh*v);
    const geo=shoot.geom,[t0,t1]=geo.tips.map(P),hand=P(geo.hand),grip=P([geo.gx,geo.gy]),snap=age<REINA_SNAP,shake=snap?Math.sin(age*120)*(1-age/REINA_SNAP)*3*u:0;
    const nock=snap?[(t0[0]+t1[0])/2+shake,(t0[1]+t1[1])/2]:hand;
+   // The release: a flash at the bow and a short light burst along the line of flight.
+   if(age<REINA_FLASH){const k=age/REINA_FLASH,fl=c.createRadialGradient(grip[0]+8*u,grip[1],0,grip[0]+8*u,grip[1],34*u*(.6+k));fl.addColorStop(0,'#ffffff');fl.addColorStop(.3,'#fff3b0cc');fl.addColorStop(1,'#ffd36a00');
+    c.save();c.globalCompositeOperation='lighter';c.globalAlpha=1-k;c.fillStyle=fl;c.beginPath();c.arc(grip[0]+8*u,grip[1],40*u,0,7);c.fill();c.restore()}
    c.save();c.lineCap='round';c.strokeStyle='#f3ead2';c.lineWidth=Math.max(1,1.6*u);c.shadowColor='#0006';c.shadowBlur=1.5*u;
    c.beginPath();c.moveTo(...t0);c.lineTo(...nock);c.lineTo(...t1);c.stroke();c.shadowBlur=0;
    if(age>REINA_RELOAD){const dx=grip[0]-hand[0],dy=grip[1]-hand[1],len=Math.hypot(dx,dy),ux=dx/len,uy=dy/len,tip=[hand[0]+ux*(len+30*u),hand[1]+uy*(len+30*u)];

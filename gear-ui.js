@@ -2004,6 +2004,24 @@ function startCloudPatrol(){
 function cloudArenaStyle(slot){
  return "--arena-art:url('assets/generated/cloud-arena-"+slot+".webp')";
 }
+// Cloud War defenders move (user: "the enemies are static, animate them"): four painted frames per defender
+// (scripts/build-cloud-foes.py writes CLOUD_FOE_META = frame 0's box in a cell): breathing 0 <-> 1, wind-up 2 before it
+// throws its orb, the lunge 3 as it throws, and a recoil with a squash when an arrow lands.
+const CLOUD_FOE_META={"7":[52,107,552,525],"8":[54,155,534,477],"9":[49,123,547,509],"10":[47,98,551,534],"12":[51,130,540,502],"13":[45,148,549,484],"14":[50,158,541,474],"16":[52,142,542,490]};
+const CLOUD_FOE_IDLE=1.6,CLOUD_FOE_WIND=.5,CLOUD_FOE_LUNGE=.42,CLOUD_FOE_HIT=.2;
+function drawCloudFoe(ctx,art,x,floor,width,height,t,nextOrb,orbAt,hurtAt){
+ const m=CLOUD_FOE_META[art],im=m?artBitmap('cloud-foe-t'+art):null;
+ if(!im?.complete||!im.naturalWidth)return drawArtSprite(ctx,'guardian-t'+art,x,floor,width,height);
+ const cell=im.naturalHeight,k=Math.min(width/m[2],height/m[3]),size=cell*k,ox=x-(m[0]+m[2]/2)*k,oy=floor-(m[1]+m[3])*k;
+ const lungeK=orbAt!=null?(t-orbAt)/CLOUD_FOE_LUNGE:9,lunge=lungeK>=0&&lungeK<1,wind=!lunge&&nextOrb-t<CLOUD_FOE_WIND&&nextOrb>t,hitK=(t-hurtAt)/CLOUD_FOE_HIT;
+ let a,b=null,mix=0;
+ if(lunge)a=3;else if(wind)a=2;else{const p=(t%CLOUD_FOE_IDLE)/CLOUD_FOE_IDLE;a=p<.5?0:1;b=1-a;const edge=Math.min(Math.abs(p-.5),p,1-p);mix=edge<.035?.5-edge/.07:0}
+ const breath=Math.sin(t*Math.PI*2/CLOUD_FOE_IDLE),dx=(lunge?-16*Math.sin(Math.PI*lungeK):0)+(hitK>=0&&hitK<1?9*(1-hitK):0)+(wind?4:0),sq=hitK>=0&&hitK<1?.05*(1-hitK):0;
+ ctx.save();ctx.translate(x+dx,floor);ctx.scale(1+sq+breath*.006,1-sq+breath*.012);ctx.translate(-x,-floor);
+ ctx.drawImage(im,a*cell,0,cell,cell,ox,oy,size,size);
+ if(mix>0&&b!==null){ctx.globalAlpha*=mix;ctx.drawImage(im,b*cell,0,cell,cell,ox,oy,size,size)}
+ ctx.restore();return true;
+}
 function cloudArenaFloor(ctx){
  ctx.save();
  for(const x of [140,486]){
@@ -2130,7 +2148,7 @@ function cloudBattleView(){
   // Figures stand out from the painted hall (user: "Reina and the boss blend into the background"): a white rim and richer colour.
   ctx.save();ctx.shadowColor='#ffffffe6';ctx.shadowBlur=9;ctx.filter='saturate(1.18) contrast(1.06)';drawReina(ctx,actor,140,368,155,220);ctx.restore();const bowAt=reinaBowPoint(140,368,155,220);
   pets.forEach(p=>{const x=[70,205,110][p.i],y=[392,396,330][p.i],hop=Math.sin(t*3+p.i)*3+p.kick*6;ctx.save();ctx.globalAlpha=riding?.35:1;drawArtSprite(ctx,petArtId(p.id),x,y-hop,72,72);ctx.restore()});
-  if(!c.done||wall-c.doneAt<600){ctx.save();ctx.filter='saturate(1.2) contrast(1.08)';if(role==='Boss'){ctx.shadowColor='#ffd361';ctx.shadowBlur=14}else{ctx.shadowColor='#ffffffe6';ctx.shadowBlur=10}if(t-hurt<.12)ctx.filter='brightness(1.8)';ctx.globalAlpha=c.done?Math.max(0,1-(wall-c.doneAt)/600):riding?.4:1;drawArtSprite(ctx,'guardian-t'+art,486,369,200,245);ctx.restore()}
+  if(!c.done||wall-c.doneAt<600){ctx.save();ctx.filter='saturate(1.2) contrast(1.08)';if(role==='Boss'){ctx.shadowColor='#ffd361';ctx.shadowBlur=14}else{ctx.shadowColor='#ffffffe6';ctx.shadowBlur=10}if(t-hurt<.12)ctx.filter='brightness(1.8)';ctx.globalAlpha=c.done?Math.max(0,1-(wall-c.doneAt)/600):riding?.4:1;drawCloudFoe(ctx,art,486,369,200,245,t,nextOrb,orb,hurt);ctx.restore()}
   for(let i=shots.length-1;i>=0;i--){const k=(t-shots[i].at)/.3;if(k>=1){const n=dmg(shots[i].big);nums.push({at:t,n,big:shots[i].big,x:470+Math.random()*40,y:200});addImpact(g,480,232,shots[i].big?'#ffe27a':'#fff0c0');hurt=t;shots.splice(i,1)}else drawGoldenArrow(ctx,bowAt[0]+(470-bowAt[0])*k,bowAt[1]+(236-bowAt[1])*k,shots[i].big?80:54,.02)}
   for(let i=bolts.length-1;i>=0;i--){const k=(t-bolts[i].at)/.45,sx=[90,225,130][bolts[i].from],sy=[350,354,290][bolts[i].from];if(k>=1){nums.push({at:t,n:Math.round(dmg(false)*.35),x:460+Math.random()*50,y:250,pet:true});addImpact(g,478,250,'#9ff0ff','fire');bolts.splice(i,1)}else{const x=sx+(470-sx)*k,y=sy+(250-sy)*k-40*Math.sin(Math.PI*k);softLight(ctx,x,y,12,'150,230,255',.9)}}
   if(orb!==null){const k=(t-orb)/.8;if(k>=1){orb=null;nums.push({at:t,n:'−'+Math.round(dmg(false)*.2),x:120,y:170,foe:true});addImpact(g,150,240,'#d08aff')}else{const x=458-314*k,y=226+28*k-26*Math.sin(Math.PI*k);ctx.save();ctx.fillStyle='#ffdbff';ctx.shadowColor='#b65fff';ctx.shadowBlur=14;ctx.beginPath();ctx.arc(x,y,8,0,2*Math.PI);ctx.fill();ctx.restore()}}
