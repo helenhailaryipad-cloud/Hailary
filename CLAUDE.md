@@ -1562,6 +1562,8 @@ territory windows with ten defenders and the fight; defenders never came back an
   wind-up before each orb (`CLOUD_FOE_WIND`), lunge as it throws (`CLOUD_FOE_LUNGE`), recoil + squash when hit; the old
   static sprite until the sheet is loaded. Reina's release flashes at the bow (`REINA_FLASH`). Her pets are not
   animated (54 of them).
+  Ground shadows fade with their figure (`cloudArenaFloor(ctx,heroA,foeA)`: no shadow under a defeated boss), and while she
+  rides to the next defender the standing Reina, her pets and her shadow are hidden (user: "why two Reinas").
 - Not done: Cloud Hunt, buying extra Carnage, Bizarre Lands, other players' damage shares on the boss bar.
 
 ## Social room: chat, friends, mail (2026-11-21)

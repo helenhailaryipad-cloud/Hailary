@@ -2022,11 +2022,11 @@ function drawCloudFoe(ctx,art,x,floor,width,height,t,nextOrb,orbAt,hurtAt){
  if(mix>0&&b!==null){ctx.globalAlpha*=mix;ctx.drawImage(im,b*cell,0,cell,cell,ox,oy,size,size)}
  ctx.restore();return true;
 }
-function cloudArenaFloor(ctx){
- ctx.save();
- for(const x of [140,486]){
-  ctx.beginPath();ctx.ellipse(x,366,x===486?77:40,9,0,0,Math.PI*2);
-  ctx.fillStyle='#1e292ead';ctx.fill();
+// Ground shadows; each fades with its figure (user: "remove the shadow of a defeated boss").
+function cloudArenaFloor(ctx,heroA=1,foeA=1){
+ ctx.save();ctx.fillStyle='#1e292ead';
+ for(const [x,a] of [[140,heroA],[486,foeA]]){
+  if(a<=0)continue;ctx.globalAlpha=a;ctx.beginPath();ctx.ellipse(x,366,x===486?77:40,9,0,0,Math.PI*2);ctx.fill();
  }
  ctx.restore();
 }
@@ -2135,7 +2135,9 @@ function cloudBattleView(){
   const c=cloudBattle;if(!c){return}
   const dt=Math.min(.1,(now-last)/1000);last=now;t+=dt;actor.clock=t;tickImpacts(g,dt);
   const wall=Date.now(),riding=wall<c.start,hp=c.done?0:cloudFightHp(c,wall);
-  ctx.setTransform(2,0,0,2,0,0);ctx.clearRect(0,0,640,420);cloudArenaFloor(ctx);
+  ctx.setTransform(2,0,0,2,0,0);ctx.clearRect(0,0,640,420);
+  // While she rides to the next defender only the rider is shown (user: "why two Reinas, one standing, one on the mount").
+  const foeA=c.done?Math.max(0,1-(wall-c.doneAt)/600):riding?.4:1;cloudArenaFloor(ctx,riding?0:1,c.done&&wall-c.doneAt>=600?0:foeA);
   // Pathfinding overlay while she rides to this defender.
   let path=canvas.parentElement.querySelector('.cloud-path');
   if(riding&&!path){canvas.parentElement.insertAdjacentHTML('beforeend',`<div class="cloud-path" role="status"><img src="${reinaLookPath(true)}" alt="Reina riding"><strong>⚔ Pathfinding</strong><small>to ${cloudBossName(slot)}</small></div>`)}
@@ -2146,9 +2148,9 @@ function cloudBattleView(){
    if(!c.done&&t>=nextOrb){orb=t;nextOrb=t+3.2}
   }
   // Figures stand out from the painted hall (user: "Reina and the boss blend into the background"): a white rim and richer colour.
-  ctx.save();ctx.shadowColor='#ffffffe6';ctx.shadowBlur=9;ctx.filter='saturate(1.18) contrast(1.06)';drawReina(ctx,actor,140,368,155,220);ctx.restore();const bowAt=reinaBowPoint(140,368,155,220);
-  pets.forEach(p=>{const x=[70,205,110][p.i],y=[392,396,330][p.i],hop=Math.sin(t*3+p.i)*3+p.kick*6;ctx.save();ctx.globalAlpha=riding?.35:1;drawArtSprite(ctx,petArtId(p.id),x,y-hop,72,72);ctx.restore()});
-  if(!c.done||wall-c.doneAt<600){ctx.save();ctx.filter='saturate(1.2) contrast(1.08)';if(role==='Boss'){ctx.shadowColor='#ffd361';ctx.shadowBlur=14}else{ctx.shadowColor='#ffffffe6';ctx.shadowBlur=10}if(t-hurt<.12)ctx.filter='brightness(1.8)';ctx.globalAlpha=c.done?Math.max(0,1-(wall-c.doneAt)/600):riding?.4:1;drawCloudFoe(ctx,art,486,369,200,245,t,nextOrb,orb,hurt);ctx.restore()}
+  if(!riding){ctx.save();ctx.shadowColor='#ffffffe6';ctx.shadowBlur=9;ctx.filter='saturate(1.18) contrast(1.06)';drawReina(ctx,actor,140,368,155,220);ctx.restore()}const bowAt=reinaBowPoint(140,368,155,220);
+  if(!riding)pets.forEach(p=>{const x=[70,205,110][p.i],y=[392,396,330][p.i],hop=Math.sin(t*3+p.i)*3+p.kick*6;ctx.save();ctx.globalAlpha=riding?.35:1;drawArtSprite(ctx,petArtId(p.id),x,y-hop,72,72);ctx.restore()});
+  if(!c.done||wall-c.doneAt<600){ctx.save();ctx.filter='saturate(1.2) contrast(1.08)';if(role==='Boss'){ctx.shadowColor='#ffd361';ctx.shadowBlur=14}else{ctx.shadowColor='#ffffffe6';ctx.shadowBlur=10}if(t-hurt<.12)ctx.filter='brightness(1.8)';ctx.globalAlpha=foeA;drawCloudFoe(ctx,art,486,369,200,245,t,nextOrb,orb,hurt);ctx.restore()}
   for(let i=shots.length-1;i>=0;i--){const k=(t-shots[i].at)/.3;if(k>=1){const n=dmg(shots[i].big);nums.push({at:t,n,big:shots[i].big,x:470+Math.random()*40,y:200});addImpact(g,480,232,shots[i].big?'#ffe27a':'#fff0c0');hurt=t;shots.splice(i,1)}else drawGoldenArrow(ctx,bowAt[0]+(470-bowAt[0])*k,bowAt[1]+(236-bowAt[1])*k,shots[i].big?80:54,.02)}
   for(let i=bolts.length-1;i>=0;i--){const k=(t-bolts[i].at)/.45,sx=[90,225,130][bolts[i].from],sy=[350,354,290][bolts[i].from];if(k>=1){nums.push({at:t,n:Math.round(dmg(false)*.35),x:460+Math.random()*50,y:250,pet:true});addImpact(g,478,250,'#9ff0ff','fire');bolts.splice(i,1)}else{const x=sx+(470-sx)*k,y=sy+(250-sy)*k-40*Math.sin(Math.PI*k);softLight(ctx,x,y,12,'150,230,255',.9)}}
   if(orb!==null){const k=(t-orb)/.8;if(k>=1){orb=null;nums.push({at:t,n:'−'+Math.round(dmg(false)*.2),x:120,y:170,foe:true});addImpact(g,150,240,'#d08aff')}else{const x=458-314*k,y=226+28*k-26*Math.sin(Math.PI*k);ctx.save();ctx.fillStyle='#ffdbff';ctx.shadowColor='#b65fff';ctx.shadowBlur=14;ctx.beginPath();ctx.arc(x,y,8,0,2*Math.PI);ctx.fill();ctx.restore()}}
