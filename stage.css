@@ -11857,3 +11857,8 @@ html body #stage .city-hud .city-rank.pt-home::before,html body #stage .city-hud
    that uses them simply shows nothing). */
 @keyframes button-edge-light { from, to { opacity: 0; } }
 @keyframes button-face-light { from, to { opacity: 0; } }
+
+/* Cloud War fight: the hall softer behind the figures (user: "Reina and the boss blend into the background"). */
+#stage .cf2 .cloud-battlefield{position:relative;isolation:isolate}
+#stage .cf2 .cloud-battlefield::before{content:'';position:absolute;inset:-8px;z-index:-1;background:var(--arena-art) center/100% 100% no-repeat;filter:blur(2px) saturate(.72) brightness(1.08)}
+#stage .cf2 .cloud-battlefield canvas{background:linear-gradient(#fffaf02e,#fffaf04a)!important}

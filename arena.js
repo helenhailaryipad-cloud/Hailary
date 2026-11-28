@@ -96,6 +96,10 @@ function drawReina(c,g,x,floor,width,height){const pose=reinaFrame(g),costume=eq
    if(age>REINA_RELOAD){const dx=grip[0]-hand[0],dy=grip[1]-hand[1],len=Math.hypot(dx,dy),ux=dx/len,uy=dy/len,tip=[hand[0]+ux*(len+30*u),hand[1]+uy*(len+30*u)];
     c.strokeStyle='#c9a25a';c.lineWidth=Math.max(1.2,2.2*u);c.beginPath();c.moveTo(hand[0]-ux*6*u,hand[1]-uy*6*u);c.lineTo(...tip);c.stroke();
     c.fillStyle='#e9f6ff';c.beginPath();c.moveTo(tip[0]+ux*11*u,tip[1]+uy*11*u);c.lineTo(tip[0]-uy*4*u,tip[1]+ux*4*u);c.lineTo(tip[0]+uy*4*u,tip[1]-ux*4*u);c.closePath();c.fill();
+    // A charged arrow: light gathers at the head while she aims, so the bow reads as a weapon.
+    const charge=Math.min(1,(age-REINA_RELOAD)/.35),gl=c.createRadialGradient(tip[0],tip[1],0,tip[0],tip[1],22*u*(.6+charge*.6));gl.addColorStop(0,'#ffffffee');gl.addColorStop(.35,'#8fe3ffaa');gl.addColorStop(1,'#4aa8ff00');
+    c.save();c.globalCompositeOperation='lighter';c.globalAlpha=.55+charge*.45;c.fillStyle=gl;c.beginPath();c.arc(tip[0],tip[1],24*u,0,7);c.fill();
+    c.strokeStyle='#bfefff';c.lineWidth=Math.max(1,1.2*u);c.globalAlpha=.35*charge;c.beginPath();c.moveTo(...hand);c.lineTo(...tip);c.stroke();c.restore();
     c.fillStyle='#7fd3a8';for(const k of [-1,1]){c.beginPath();c.moveTo(hand[0]+ux*2*u,hand[1]+uy*2*u);c.lineTo(hand[0]+ux*14*u-uy*k*5*u,hand[1]+uy*14*u+ux*k*5*u);c.lineTo(hand[0]+ux*18*u,hand[1]+uy*18*u);c.closePath();c.fill()}}
    c.restore();c.restore();return true}
   c.drawImage(registered,-w/2-side*u,-h-(top+40)*v,iw*u,ih*v);c.restore();return true;
