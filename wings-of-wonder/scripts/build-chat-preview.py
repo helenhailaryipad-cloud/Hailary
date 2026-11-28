@@ -44,10 +44,10 @@ for f in filter(None, tracked):
 for k, m in packed.items():
     (files/f'pack-{k}.js').write_text('(globalThis.WOW_PACK??={});Object.assign(WOW_PACK,' + json.dumps(m, separators=(',', ':')) + ');')
 # Lazy packs: loaded only when the game asks for one of their pictures (wowArtLazy in generated-art.js), so the shooting
-# pose of 69 dresses (several MB) is not held in memory: one chunk holds about 12 dresses.
+# pose of 69 dresses (several MB) is not held in memory: one chunk holds about 24 dresses.
 lazy_map, chunks = {}, []
 for i, d in enumerate(sorted(lazy)):
-    if i % 12 == 0: chunks.append({})
+    if i % 24 == 0: chunks.append({})
     for rel, data in lazy[d].items():
         chunks[-1][rel] = data; lazy_map[rel[len('assets/generated/'):-5]] = len(chunks)-1
 for n, m in enumerate(chunks):
