@@ -1459,6 +1459,9 @@ field `S.supreme {own{"set:piece":copies}, bubble, frame, sale{period,bought}}`.
   Set room: tap a piece to select it (`supremeSel`, `supTap`): title "<set> (<piece>)" with its 5 stars, the piece
   large in the centre, a panel with stats now and ▲ after the next star, the copies owned and Activate / Star-up
   (`supremeGet` buys one more copy when the set is on sale), Details opens the item card. Tap again for the set view.
+- Title and power under the figure (2026-11-28, user circled the ribbon over the dress and the power over the ribbon;
+  reference photo: small red title badge under the feet, power on its own line): `.sup-center` is a flex column
+  (figure, `.sup-ribbon` badge with a ✦, `.sup-cp` gold line), nothing overlaps; CSS at the end of `stage.css`.
 - Not done: Relic tab, Apparel Records, fashion Tier-up, male sets.
 
 ## Cloud War second pass (2026-11-21)
