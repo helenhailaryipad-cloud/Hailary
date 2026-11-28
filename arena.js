@@ -67,7 +67,7 @@ function drawAimedRanger(c,image,rect,w,h){
  c.drawImage(frame.canvas,-w/2,-h,w,h);
 }
 // Shooting pose in fights: seconds it stays after a shot, the string's snap after a release, until the next arrow is nocked.
-const REINA_AIM_HOLD=1.4,REINA_SNAP=.09,REINA_RELOAD=.22,REINA_FLASH=.16;
+const REINA_AIM_HOLD=1.4,REINA_SNAP=.09,REINA_RELOAD=.22,REINA_FLASH=.16,REINA_SPARKS=10;
 // Where her arrows leave the bow for a figure drawn by drawReina(c,g,x,floor,width,height): the grip of the shooting pose.
 function reinaBowPoint(x,floor,width,height){const k=Math.min(width/450,height/740),geo=typeof registeredShootBitmap==='function'?registeredShootBitmap()?.geom:null,[fx,fy]=geo?[geo.gx+12,geo.gy]:[420,330];return [x-250*k+fx*k,floor-740*k-40*k+fy*k]}
 function drawReina(c,g,x,floor,width,height){const pose=reinaFrame(g),costume=equippedRanger(),aim=pose.shooting&&g.crawl?.enemy&&motionAllowed()?dungeonBowAim(g):null;
@@ -89,6 +89,9 @@ function drawReina(c,g,x,floor,width,height){const pose=reinaFrame(g),costume=eq
   const age=(g.clock||0)-(g.heroShotAt??-100),fight=age>=0&&age<REINA_AIM_HOLD,shoot=fight&&typeof registeredShootBitmap==='function'?registeredShootBitmap():null;
   if(shoot){const im=shoot.image,sw=im.width/2,sh=im.height/2,sside=(sw-500)/2,stop=sh-800,ox=-w/2,oy=-h-40*v,P=([fx,fy])=>[ox+fx*u,oy+fy*v];
    if(shoot.glow){c.save();c.globalAlpha=.6+.4*Math.sin((g.clock||0)*2.6);c.drawImage(shoot.glow,ox-sside*u,oy-stop*v,sw*u,sh*v);c.restore()}   // the bow glows, pulsing
+   if(shoot.glow&&shoot.box){const [bx,by,bw,bh]=shoot.box,X=ox-sside*u,Y=oy-stop*v,W=sw*u,H=sh*v,T=g.clock||0;   // sparks rising off the bow
+    c.save();c.globalCompositeOperation='lighter';for(let i=0;i<REINA_SPARKS;i++){const life=1.6+(i%4)*.3,p=((T+i*.37)/life)%1,fx=bx+bw*(.15+.7*((i*.37)%1)),fy=by+bh*((i*.618)%1),x=X+fx*W+p*6,y=Y+fy*H-p*34,r=(i%3?1.6:2.6)*(1-p*.5);
+     const gr=c.createRadialGradient(x,y,0,x,y,r*3);gr.addColorStop(0,'#ffffff');gr.addColorStop(.35,shoot.color||'#bfe8ff');gr.addColorStop(1,'#0000');c.globalAlpha=Math.sin(Math.PI*p);c.fillStyle=gr;c.beginPath();c.arc(x,y,r*3,0,7);c.fill()}c.restore()}
    c.drawImage(im,ox-sside*u,oy-stop*v,sw*u,sh*v);
    const geo=shoot.geom,[t0,t1]=geo.tips.map(P),hand=P(geo.hand),grip=P([geo.gx,geo.gy]),snap=age<REINA_SNAP,shake=snap?Math.sin(age*120)*(1-age/REINA_SNAP)*3*u:0;
    const nock=snap?[(t0[0]+t1[0])/2+shake,(t0[1]+t1[1])/2]:hand;

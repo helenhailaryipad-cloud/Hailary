@@ -11960,3 +11960,15 @@ html body #stage .city-hud .city-rank.pt-home::before,html body #stage .city-hud
 #stage .city-hud button.city-reward small,#stage .city-hud button.city-minigames.corner .city-caption{font-size:clamp(11px,2.5vw,18px)!important;white-space:nowrap}
 #stage .city-hud button.city-minigames.corner .city-glyph{height:100%!important;overflow:hidden}
 #stage .city-hud button.city-minigames.corner .city-glyph img{height:100%!important;max-height:100%!important}
+
+/* Sparks rising from the bow (bowSparks), in the bow's glow colour. */
+.city-hud .city-hero .hl-sparks{position:absolute;inset:0;pointer-events:none;transform-origin:50% 100%;animation:hero-breathe 3.6s ease-in-out infinite}
+.city-hud .city-hero .hl-spark{position:absolute;width:1.6%;aspect-ratio:1;border-radius:50%;background:radial-gradient(#fff 0,#fff 25%,var(--bow-glow) 55%,transparent 72%);
+ box-shadow:0 0 6px 2px var(--bow-glow);opacity:0;animation:bow-spark 2.4s ease-out infinite}
+.city-hud .city-hero .hl-spark.big{width:2.4%}
+.city-hud .city-hero .hl-spark.big::after{content:"";position:absolute;inset:-120%;background:conic-gradient(from 45deg,transparent 0 10%,#fff 12%,transparent 14% 35%,#fff 37%,transparent 39% 60%,#fff 62%,transparent 64% 85%,#fff 87%,transparent 89%);
+ -webkit-mask:radial-gradient(closest-side,#000,transparent);mask:radial-gradient(closest-side,#000,transparent);opacity:.8}
+@keyframes bow-spark{0%{opacity:0;transform:translate(0,0) scale(.4)}15%{opacity:1;transform:translate(0,-4px) scale(1)}100%{opacity:0;transform:translate(6px,-46px) scale(.3)}}
+@media (prefers-reduced-motion:reduce){.city-hud .city-hero .hl-spark{animation:none;display:none}}
+.city-hud .city-hero .hl-spark{width:3%}.city-hud .city-hero .hl-spark.big{width:4.6%}
+@keyframes bow-spark{0%{opacity:0;transform:translate(0,0) scale(.4)}15%{opacity:1;transform:translate(0,-6px) scale(1)}100%{opacity:0;transform:translate(10px,-70px) scale(.3)}}
