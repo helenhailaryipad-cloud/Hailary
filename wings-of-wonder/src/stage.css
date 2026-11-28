@@ -11912,3 +11912,15 @@ html body #stage .city-hud .city-rank.pt-home::before,html body #stage .city-hud
 .reina-display .reina-figure{transform-origin:50% 100%;animation:reina-alive 4.2s ease-in-out infinite}
 .reina-display .reina-sheet-wings img{transform-origin:50% 60%;animation:reina-wingbeat 3.6s ease-in-out infinite}
 @media (prefers-reduced-motion:reduce){.fx-room .fx-stage .fashion-model img,#stage #main .sup-room .sup-center>img:first-child,.reina-display .reina-figure,.reina-display .reina-sheet-wings img{animation:none}}
+
+/* Elite Sale shows only what the pack sells (user: "hair: only the head with the hair; wings: only the wings, not the
+   whole Reina"): the wings picture alone, and a head-and-shoulders close-up of the look without wings. */
+#stage #main .elite-sale .el-wings{height:34cqh;width:100%;display:grid;place-items:center}
+#stage #main .elite-sale .el-wings img{height:100%!important;width:auto!important;max-width:100%!important;object-fit:contain;filter:drop-shadow(0 0 14px #c8b4ff) drop-shadow(0 10px 8px #2a1a5a66)}
+#stage #main .elite-sale .el-head{position:relative;height:30cqh;aspect-ratio:1;max-width:100%;overflow:hidden;border-radius:50%;
+ background:radial-gradient(#fff8 0,#c9b8ff66 45%,transparent 70%);
+ -webkit-mask-image:radial-gradient(closest-side,#000 82%,transparent);mask-image:radial-gradient(closest-side,#000 82%,transparent)}
+#stage #main .elite-sale .el-head img{position:absolute;width:208%!important;height:auto!important;max-width:none!important;max-height:none!important;left:-54%;top:-6%;filter:drop-shadow(0 6px 8px #2a1a5a55)}
+/* The bow of the Weapon Pack covered its power line: smaller, and the power always on top. */
+#stage #main .elite-sale .el-t1 .el-bow img,#stage #main .elite-sale .el-bow img{height:min(40cqw,30cqh)!important}
+#stage #main .elite-sale .el-cp{position:relative;z-index:3}
