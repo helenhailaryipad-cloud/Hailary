@@ -7,6 +7,24 @@ const BOSS_LANE = {right:520, top:358, bottom:390};
 // enemy is engaged, each sends a bolt every 2.4 s for 35% of its own ATK. This is on top of the ATK they lend Reina.
 const PET_SPOTS=[[-66,12],[-120,-24],[-140,40]],PET_HIT=.35,PET_PACE=2.4;
 function petArtId(id){return Number(id.slice(1))>3?'familiar-'+id.slice(1):id}
+// Pet animation (user: "animate the three pets beside her"): sheets `pet-anim-<art>` from scripts/build-pet-anim.py hold
+// three cells (painting, breath, attack); the pet's picture square sits at PET_ANIM_PAD..+PET_ANIM_SQ of a cell, so a
+// frame lines up with the plain picture. Idle = breath every half PET_ANIM_IDLE, attack frame while it strikes.
+const PET_ANIM_CELL=640,PET_ANIM_SQ=492,PET_ANIM_PAD=74,PET_ANIM_IDLE=1.3;
+const PET_ANIM_IDS=new Set(['d0','d1','d2','d3',...Array.from({length:50},(_,i)=>'familiar-'+(i+4))]);
+function drawPetAnim(c,id,x,floor,w,h,t,attacking){
+ const art=petArtId(id),im=typeof artBitmap==='function'?artBitmap('pet-anim-'+art):null;
+ if(!im?.complete||!im.naturalWidth)return drawArtSprite(c,art,x,floor,w,h);
+ const size=Math.min(w,h),k=size/PET_ANIM_SQ,cell=im.naturalHeight,frame=attacking?2:Math.floor(t/(PET_ANIM_IDLE/2))%2;
+ c.drawImage(im,frame*cell,0,cell,cell,x-size/2-PET_ANIM_PAD*k,floor-size-PET_ANIM_PAD*k,PET_ANIM_CELL*k,PET_ANIM_CELL*k);return true;
+}
+// The same on the home screen, without a canvas: an SVG whose picture steps through the cells (SMIL, discrete), with
+// an attack pose now and then; `delay` keeps the three pets out of step.
+function petAnimSvg(id,delay=0){
+ const art=petArtId(id),C=PET_ANIM_CELL,steps=[0,1,0,1,0,1,0,1,2],len=[.65,.65,.65,.65,.65,.65,.65,.65,.7],total=len.reduce((a,b)=>a+b,0);
+ let acc=0;const times=steps.map((_,i)=>{const v=acc/total;acc+=len[i];return v.toFixed(4)});
+ return `<svg class="pet-anim" viewBox="${PET_ANIM_PAD} ${PET_ANIM_PAD} ${PET_ANIM_SQ} ${PET_ANIM_SQ}" preserveAspectRatio="xMidYMax meet" aria-hidden="true"><clipPath id="petAnimCell"><rect width="${C}" height="${C}"/></clipPath><g clip-path="url(#petAnimCell)"><image href="${artPath('pet-anim-'+art)}" width="${C*3}" height="${C}"><animate attributeName="x" dur="${total}s" begin="-${delay}s" repeatCount="indefinite" calcMode="discrete" keyTimes="${times.join(';')}" values="${steps.map(f=>-f*C).join(';')}"/></image></g></svg>`;
+}
 function crawlPets(g){
  const a=g.crawl;if(a.pets)return a.pets;
  // `slot` is the pet's Primary Pet slot (its talents and gear live there); `i` is its place in the line behind Reina.
@@ -75,7 +93,7 @@ function petSupport(g,dt){
 function drawCrawlPet(c,g,p){
  const still=!motionAllowed(),hop=still?0:p.moving?Math.abs(Math.sin(g.clock*9+p.i*1.7))*7:Math.sin(g.clock*2.6+p.i*2)*2+2,lunge=still?0:p.kick*46;
  c.save();c.fillStyle='rgba(20,28,40,.34)';c.beginPath();c.ellipse(p.x,p.y+6,28-hop*.6,7,0,0,Math.PI*2);c.fill();
- drawArtSprite(c,petArtId(p.id),p.x+lunge,p.y+7-hop,76,76);c.restore();
+ drawPetAnim(c,p.id,p.x+lunge,p.y+7-hop,76,76,(g.clock||0)+p.i*.37,p.kick>.3);c.restore();
 }
 function setupCrawl(g){g.crawl={hero:{x:118,y:330,tx:285,ty:310},enemy:{x:520,y:300},engaged:false,exitReady:false,shots:[],danger:null,roomTime:0};}
 function crawlRoom(g){const a=g.crawl;a.hero={x:118,y:330,tx:285,ty:310};a.enemy={x:520,y:g.stage===2?BOSS_LANE.top:300};a.engaged=false;a.exitReady=false;a.shots=[];a.danger=null;a.roomTime=0;g.transition=0;if(a.pets){for(const p of a.pets){p.x=a.hero.x+PET_SPOTS[p.i][0];p.y=a.hero.y+PET_SPOTS[p.i][1];p.cd=1.2+p.i*.8;p.kick=0;p.fired=false}a.petShots=[]}}
