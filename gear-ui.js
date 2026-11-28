@@ -2421,6 +2421,7 @@ function supremeGet(setId,piece){
  save();if(screen==='citySupreme')citySupreme();else if(typeof reinaAtelier==='function')reinaAtelier();toast(got.first?'Activated!':'Tier-up! T'+r.supremePieceStars(S,setId,piece));
 }
 function citySupreme(){
+ const keepSets=document.querySelector('.sup-sets')?.scrollLeft;
  const r=WonderGear,sale=r.supremeSale();if(!supremePick||!supSet(supremePick))supremePick=sale.set.id;
  const set=supSet(supremePick),stars=r.supremeStars(S,set.id),n=r.supremeCount(S,set.id),sel=supremeSel?r.supremePieces.find(p=>p.id===supremeSel):null,selStars=sel?r.supremePieceStars(S,set.id,sel.id):0;
  const total={};for(const p of r.supremePieceIds)if(r.supremeCopies(S,set.id,p))for(const [k,x] of Object.entries(r.supremePieceStats(set.id,p,r.supremePieceStars(S,set.id,p))))total[k]=Math.round(((total[k]||0)+x)*100)/100;
@@ -2437,6 +2438,8 @@ function citySupreme(){
   ${sel?supremePiecePanel(set,sel,selStars):`<div class="sup-stats"><div class="sup-rows">${rows}</div><button class="den-gold sup-wear" onclick="supremeWearSet('${set.id}')">${denPlain}Wear set</button></div>`}
   <div class="sup-sets">${r.supremeSets.map(x=>`<button class="${x.id===set.id?'on':''} ${r.supremeCount(S,x.id)?'':'none'}" style="--hue:${x.hue}" onclick="supremePick='${x.id}';supremeSel=null;citySupreme()">${denPlain}<img src="${artPath('fit-icon-'+x.dress)}" alt=""><b>${x.name}</b><small>${r.supremeCount(S,x.id)}/${r.supremePieceIds.length}${x.id===sale.set.id?' · on sale':''}</small></button>`).join('')}</div>
   <div class="satchel-nav well-nav sup-nav"><button data-back aria-label="Back to Fashion" onclick="go('fashion')">‹</button><button onclick="go('fashion')">${denPlain}Wardrobe</button><button onclick="go('eliteSale')">${denPlain}Elite Sale</button><button aria-current="page">${denPlain}Supreme Set</button></div></section>`;
+ // The set strip keeps its place, and the chosen set stays in view (user: tapping Sweetheart / Ice Queen jumped the strip back to the start).
+ {const strip=document.querySelector('.sup-sets');if(strip){if(keepSets!=null)strip.scrollLeft=keepSets;const on=strip.querySelector('button.on');if(on){const l=on.offsetLeft-strip.offsetLeft,r=l+on.offsetWidth;if(l<strip.scrollLeft||r>strip.scrollLeft+strip.clientWidth)strip.scrollLeft=Math.max(0,l-(strip.clientWidth-on.offsetWidth)/2)}}}
 }
 
 const isleGuilds=['Dawnwing','Moonveil','Embercrest'];
