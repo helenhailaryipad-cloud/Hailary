@@ -772,7 +772,7 @@ function registeredShootBitmap(){
  const weapon=S.atelier?.weapon||((S.reinaFashion?.equipped&4)?12:13),wings=fashionWing()?.id||'',tag=wardrobeExtrasTag(),key=[dress,hair,weapon,wings,tag].join('/');
  if(!registeredShootCache.has(key)){
   const entry={image:null};registeredShootCache.set(key,entry);
-  Promise.resolve(globalThis.wowArtLazy?.(['fit-shoot-body','fit-shoot-'+dress])).then(()=>Promise.all([composeWardrobeCanvas(dress,hair,weapon,wings,tag,null,'shoot'),composeWardrobeCanvas(dress,hair,weapon,wings,tag,['weapon'],'shoot')])).then(([c,bow])=>{entry.glow=bowGlow(bow).glowCanvas;entry.image=c;entry.geom=shootBowGeom(dress,weapon)}).catch(()=>registeredShootCache.delete(key));
+  Promise.resolve(globalThis.wowArtLazy?.(['fit-shoot-body','fit-shoot-'+dress])).then(()=>Promise.all([composeWardrobeCanvas(dress,hair,weapon,wings,tag,null,'shoot'),composeWardrobeCanvas(dress,hair,weapon,wings,tag,['weapon'],'shoot')])).then(([c,bow])=>{{const gl=bowGlow(bow);entry.glow=gl.glowCanvas;entry.box=gl.bowBox;entry.color=gl.glowColor}entry.image=c;entry.geom=shootBowGeom(dress,weapon)}).catch(()=>registeredShootCache.delete(key));
  }
  const e=registeredShootCache.get(key);return e?.image?e:null;
 }
@@ -991,9 +991,15 @@ function bowGlow(bow){
  const hue=Math.round(60*(mx===R?((G-B)/dd+6)%6:mx===G?(B-R)/dd+2:(R-G)/dd+4));
  const color=`hsl(${hue},100%,58%)`,o=document.createElement('canvas');o.width=w;o.height=h;const y=o.getContext('2d');
  for(const [blur,times] of [[w/28,3],[w/70,2]]){y.filter=`blur(${Math.round(blur)}px)`;for(let i=0;i<times;i++)y.drawImage(bow,0,0)}y.filter='none';y.globalCompositeOperation='source-in';y.fillStyle=color;y.fillRect(0,0,w,h);
- return {glow:o.toDataURL('image/png'),glowColor:color,glowCanvas:o};
+ // where the bow is (fractions of the picture), for the sparks that rise from it
+ let x0=sw,y0=sh,x1=0,y1=0;for(let yy=0;yy<sh;yy+=2)for(let xx=0;xx<sw;xx+=2)if(d[(yy*sw+xx)*4+3]>120){if(xx<x0)x0=xx;if(xx>x1)x1=xx;if(yy<y0)y0=yy;if(yy>y1)y1=yy}
+ const box=x1>x0?[x0/sw,y0/sh,(x1-x0)/sw,(y1-y0)/sh]:[.6,.3,.3,.4];
+ return {glow:o.toDataURL('image/png'),glowColor:color,glowCanvas:o,bowBox:box};
 }
-function heroLiveHtml(e){return `<div class="hero-live" style="--bow-glow:${e.glowColor||'#ffd36a'}">${e.wings?`<img class="hl-wings" src="${e.wings}" alt="" draggable="false">`:''}<img class="hl-body" src="${e.body}" alt="Reina" draggable="false">${e.bow?`<img class="hl-glow" src="${e.glow}" alt="" draggable="false"><img class="hl-bow" src="${e.bow}" alt="" draggable="false"><i class="hl-sweep" style="-webkit-mask-image:url(${e.bow});mask-image:url(${e.bow})"></i>`:''}</div>`}
+function heroLiveHtml(e){return `<div class="hero-live" style="--bow-glow:${e.glowColor||'#ffd36a'}">${e.wings?`<img class="hl-wings" src="${e.wings}" alt="" draggable="false">`:''}<img class="hl-body" src="${e.body}" alt="Reina" draggable="false">${e.bow?`<img class="hl-glow" src="${e.glow}" alt="" draggable="false"><img class="hl-bow" src="${e.bow}" alt="" draggable="false"><i class="hl-sweep" style="-webkit-mask-image:url(${e.bow});mask-image:url(${e.bow})"></i>${bowSparks(e.bowBox)}`:''}</div>`}
+// Sparks of the bow's colour rise from along the bow, each on its own delay (CSS `bow-spark`).
+function bowSparks(b){if(!b)return '';let h='';for(let i=0;i<BOW_SPARKS;i++){const t=(i*0.618)%1,x=(b[0]+b[2]*(.15+.7*((i*0.37)%1)))*100,y=(b[1]+b[3]*t)*100;h+=`<i class="hl-spark${i%3?'':' big'}" style="left:${x.toFixed(1)}%;top:${y.toFixed(1)}%;animation-delay:-${(i*0.43%2.6).toFixed(2)}s;animation-duration:${(2.2+(i%4)*.35).toFixed(2)}s"></i>`}return `<span class="hl-sparks">${h}</span>`}
+const BOW_SPARKS=14;
 function reinaWorldLookPath(){
  return registeredLookPath(undefined,undefined,S.atelier?.weapon||((S.reinaFashion?.equipped&4)?12:13),fashionWing().id);
 }

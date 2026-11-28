@@ -1425,6 +1425,9 @@ Glowing bow (same day, user: "and animated, glowing all over"): `bowGlow(canvas)
 saturated pixels, `hsl(h,100%,58%)`) and makes a blurred halo picture of it. Home: `heroLiveLayers` renders the bow
 (+ fingers) as its own layer: `.hl-glow` halo pulses (`bow-glow`), `.hl-sweep` runs a band of light along the bow
 (masked to the bow's shape). Battles: `registeredShootBitmap` keeps `glow` and `drawReina` pulses it behind the figure.
+Sparks (user: "more animation, better visually"): `bowSparks(bowBox)` on the home screen (14 sparks of the bow's colour rise
+from along the bow, CSS `bow-spark`), `REINA_SPARKS` in battles (drawn in `drawReina` from `shoot.box` / `shoot.color`);
+Cloud War arrows leave a glowing trail of the bow's colour (longer for Celestial Arrow).
 Found on the way: `wardrobe-engine.js` built the outside of an `exclude` mask as the 500 x 800 frame only, so everything
 in the padding (a big bow in the shooting pose) was clipped; `full` now reaches far past the frame.
 Cloud War fight: her arrows leave from the bow (`drawGoldenArrow` from x 196, y 236), not from her right hand.
