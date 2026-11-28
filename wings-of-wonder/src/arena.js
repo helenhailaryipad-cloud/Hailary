@@ -66,6 +66,10 @@ function drawAimedRanger(c,image,rect,w,h){
  }
  c.drawImage(frame.canvas,-w/2,-h,w,h);
 }
+// Shooting pose in fights: seconds it stays after a shot, the string's snap after a release, until the next arrow is nocked.
+const REINA_AIM_HOLD=1.4,REINA_SNAP=.09,REINA_RELOAD=.22;
+// Where her arrows leave the bow for a figure drawn by drawReina(c,g,x,floor,width,height): the grip of the shooting pose.
+function reinaBowPoint(x,floor,width,height){const k=Math.min(width/450,height/740),geo=typeof registeredShootBitmap==='function'?registeredShootBitmap()?.geom:null,[fx,fy]=geo?[geo.gx+12,geo.gy]:[420,330];return [x-250*k+fx*k,floor-740*k-40*k+fy*k]}
 function drawReina(c,g,x,floor,width,height){const pose=reinaFrame(g),costume=equippedRanger(),aim=pose.shooting&&g.crawl?.enemy&&motionAllowed()?dungeonBowAim(g):null;
  const registered=typeof registeredCombatBitmap==='function'?registeredCombatBitmap():null;
  if(registered){
@@ -79,6 +83,21 @@ function drawReina(c,g,x,floor,width,height){const pose=reinaFrame(g),costume=eq
   // 500 x 740 figure area onto the sprite box and let the wings extend beyond it.
   const iw=(registered.naturalWidth||registered.width||1000)/2,ih=(registered.naturalHeight||registered.height||1600)/2;
   const side=(iw-500)/2,top=ih-800,u=w/500,v=h/740;
+  // In a fight she takes the shooting pose (registeredShootBitmap: bow arm toward the foe, the other hand at her
+  // cheek): the string is drawn back to that hand with an arrow on it; at each release the string snaps straight and
+  // the arrow is gone for a moment. Outside a fight she stands as painted, the bow lowered.
+  const age=(g.clock||0)-(g.heroShotAt??-100),fight=age>=0&&age<REINA_AIM_HOLD,shoot=fight&&typeof registeredShootBitmap==='function'?registeredShootBitmap():null;
+  if(shoot){const im=shoot.image,sw=im.width/2,sh=im.height/2,sside=(sw-500)/2,stop=sh-800,ox=-w/2,oy=-h-40*v,P=([fx,fy])=>[ox+fx*u,oy+fy*v];
+   c.drawImage(im,ox-sside*u,oy-stop*v,sw*u,sh*v);
+   const geo=shoot.geom,[t0,t1]=geo.tips.map(P),hand=P(geo.hand),grip=P([geo.gx,geo.gy]),snap=age<REINA_SNAP,shake=snap?Math.sin(age*120)*(1-age/REINA_SNAP)*3*u:0;
+   const nock=snap?[(t0[0]+t1[0])/2+shake,(t0[1]+t1[1])/2]:hand;
+   c.save();c.lineCap='round';c.strokeStyle='#f3ead2';c.lineWidth=Math.max(1,1.6*u);c.shadowColor='#0006';c.shadowBlur=1.5*u;
+   c.beginPath();c.moveTo(...t0);c.lineTo(...nock);c.lineTo(...t1);c.stroke();c.shadowBlur=0;
+   if(age>REINA_RELOAD){const dx=grip[0]-hand[0],dy=grip[1]-hand[1],len=Math.hypot(dx,dy),ux=dx/len,uy=dy/len,tip=[hand[0]+ux*(len+30*u),hand[1]+uy*(len+30*u)];
+    c.strokeStyle='#c9a25a';c.lineWidth=Math.max(1.2,2.2*u);c.beginPath();c.moveTo(hand[0]-ux*6*u,hand[1]-uy*6*u);c.lineTo(...tip);c.stroke();
+    c.fillStyle='#e9f6ff';c.beginPath();c.moveTo(tip[0]+ux*11*u,tip[1]+uy*11*u);c.lineTo(tip[0]-uy*4*u,tip[1]+ux*4*u);c.lineTo(tip[0]+uy*4*u,tip[1]-ux*4*u);c.closePath();c.fill();
+    c.fillStyle='#7fd3a8';for(const k of [-1,1]){c.beginPath();c.moveTo(hand[0]+ux*2*u,hand[1]+uy*2*u);c.lineTo(hand[0]+ux*14*u-uy*k*5*u,hand[1]+uy*14*u+ux*k*5*u);c.lineTo(hand[0]+ux*18*u,hand[1]+uy*18*u);c.closePath();c.fill()}}
+   c.restore();c.restore();return true}
   c.drawImage(registered,-w/2-side*u,-h-(top+40)*v,iw*u,ih*v);c.restore();return true;
  }
  if(costume!=='reina'){

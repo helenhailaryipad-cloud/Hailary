@@ -95,6 +95,23 @@ render and LOOK at hand, neck, feet (`composeWardrobeCanvas` in the preview) bef
   (about 1.3 MB spare).
 - Sheets: `docs/wardrobe-review/fix5-*.png`.
 
+## Shooting pose in battles (2026-11-28)
+User (screenshot of the Cloud War fight, bow hanging at her hip): "is that how you hold a bow when you shoot?". Battles now
+use a SHOOTING POSE, built like the mounted pose: `art-source/shoot/base.webp` (bald base-v2 body, image-model edit: bow
+arm stretched out to the right at shoulder height, the other hand drawn back to her cheek; head, legs unchanged) and one
+painting per dress `shoot/dress-<id>.webp` (image model: base pose + the standing dress painting as references, all 69
+dresses). `scripts/build-shoot.py [ids]` extracts `fit-shoot-<id>` (garment), `-erase`, `-hands` (both fists, drawn over
+hair and bow) at 2x (1000 x 1600) and `fit-shoot-body`, and writes `SHOOT_META` (grip and string-hand points per dress)
+into `app.js`. Hair layers are the standing ones. `composeWardrobeCanvas(...,pose='shoot')` swaps body, dress
+(`shootRegister`) and bow (`shootBowRegister`: the bow upright in her fist, string toward her; the painted straight
+string is cut out using `SHOOT_BOWS` = art aspect, string x, nock ys, measured from every `weapon-style-N`).
+`registeredShootBitmap()` caches the look; `drawReina` (arena.js) uses it while she fights (`REINA_AIM_HOLD` 1.4 s
+after a shot): the string is drawn back to her hand with a nocked arrow, snaps straight at a release
+(`REINA_SNAP`), the next arrow appears after `REINA_RELOAD`. `reinaBowPoint()` = where arrows leave the bow (Cloud War).
+Outside fights she stands as painted. Jungle Trek keeps its own three-layer bow. A new dress needs its shooting
+painting + a `build-shoot.py <id>` run. Chat preview: `fit-shoot-*` go into lazy packs `pack-shoot-N.js` (about 12
+dresses each), loaded by `wowArtLazy` only when that dress fights.
+
 ## Second fashion collection (fifth pass, 2026-11-18)
 10 dresses, 10 hairstyles, 10 wings, 10 bows, all original designs painted by the image model, in Fashion:
 - Dresses `aurora rosethorn seafoam ravenwing sunflower frostqueen autumn starlit coral jade` (1200 gold): painted on

@@ -1230,3 +1230,12 @@ vm.runInContext(`
 }
 `,context);
 console.log('PASS: Supreme piece tiers: first copy activates, each further copy adds the full stats again, up to T5.');
+
+vm.runInContext(`
+{const ids=fittingDresses.map(([id])=>id),miss=ids.filter(id=>!SHOOT_META[id]);if(miss.length)throw Error('Shooting pose missing for '+miss.join(', '));
+ for(const id of ids){const m=SHOOT_META[id];if(m.length!==4||m[0]<430||m[0]>500||m[2]>260)throw Error('Shooting pose meta '+id);}
+ for(let w=1;w<=63;w++){if(w===11||w===12||w===13)continue;const b=SHOOT_BOWS[w];if(!b||b[1]>.3||b[2]>=b[3])throw Error('Bow string '+w);}
+ if(shootBowSource(0)!==2||shootBowSource(12)!==2||shootBowSource(40)!==40)throw Error('Shooting bow source');}
+`,context);
+for(const id of vm.runInContext('fittingDresses.map(([id])=>id)',context))for(const s of ['','-erase','-hands'])if(!fs.existsSync(`src/assets/generated/fit-shoot-${id}${s}.webp`))throw Error('Missing fit-shoot-'+id+s);
+console.log('PASS: Shooting pose: every dress has its layers, every bow its string.');

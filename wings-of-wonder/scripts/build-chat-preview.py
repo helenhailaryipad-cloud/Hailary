@@ -25,12 +25,17 @@ PACKS = {'gear': re.compile(r'^assets/generated/gear-'), 'familiar': re.compile(
          'erase': re.compile(r'^assets/generated/fit-control-[a-z]+-erase\.'), 'minis': re.compile(r'^assets/generated/(?:trek-pickup-|pairs-tile-|pairs-sprout\.|pairs-lobby\.|cascade-fx\.|cascade-pad\.|cascade-cover\.|td-|burrow-|talent-|wishwell-|blessings-|scene-ranking\.|tool-|drawer-|title-|challenge-)'),
          'hairs': re.compile(r'^assets/generated/fit-control-(?:mount)?hair-')}
 packed = {k: {} for k in PACKS}
+lazy = {}
 tracked = subprocess.run(['git', 'ls-files', 'src'], cwd=ROOT, capture_output=True, text=True, check=True).stdout.split('\n')
 for f in filter(None, tracked):
     rel = f[4:]
     if rel == 'server.js' or 'intro3d' in rel or rel.endswith('.glb') or UNUSED.match(rel) or rel == 'index.html': continue   # .glb is not a served type
     group = next((k for k, rx in PACKS.items() if rx.match(rel)), None)
     data = (SRC/rel).read_bytes()
+    shoot = re.match(r'^assets/generated/fit-shoot-([a-z]+)', rel)
+    if shoot:
+        lazy.setdefault(shoot.group(1), {})[rel] = 'data:image/webp;base64,' + base64.b64encode(data).decode()
+        continue
     if group:
         mime = 'image/avif' if rel.endswith('.avif') else 'image/webp'
         packed[group][rel] = f'data:{mime};base64,' + base64.b64encode(data).decode()
@@ -38,10 +43,20 @@ for f in filter(None, tracked):
     (files/rel).parent.mkdir(parents=True, exist_ok=True); (files/rel).write_bytes(data)
 for k, m in packed.items():
     (files/f'pack-{k}.js').write_text('(globalThis.WOW_PACK??={});Object.assign(WOW_PACK,' + json.dumps(m, separators=(',', ':')) + ');')
+# Lazy packs: loaded only when the game asks for one of their pictures (wowArtLazy in generated-art.js), so the shooting
+# pose of 69 dresses (several MB) is not held in memory: one chunk holds about 12 dresses.
+lazy_map, chunks = {}, []
+for i, d in enumerate(sorted(lazy)):
+    if i % 12 == 0: chunks.append({})
+    for rel, data in lazy[d].items():
+        chunks[-1][rel] = data; lazy_map[rel[len('assets/generated/'):-5]] = len(chunks)-1
+for n, m in enumerate(chunks):
+    (files/f'pack-shoot-{n}.js').write_text('(globalThis.WOW_PACK??={});Object.assign(WOW_PACK,' + json.dumps(m, separators=(',', ':')) + ');')
 
 def patch(rel, old, new):
     p = files/rel; s = p.read_text()
     assert old in s, (rel, old); p.write_text(s.replace(old, new))
+(files/'generated-art.js').write_text((files/'generated-art.js').read_text() + '\nconst WOW_LAZY=' + json.dumps(lazy_map, separators=(',', ':')) + ',wowLazyLoaded={};\nglobalThis.wowArtLazy=ids=>Promise.all([].concat(ids).map(id=>WOW_LAZY[id]).filter(n=>n!=null).map(n=>wowLazyLoaded[n]??=new Promise((ok,no)=>{const s=document.createElement(\'script\');s.src=\'pack-shoot-\'+n+\'.js\';s.onload=ok;s.onerror=()=>{delete wowLazyLoaded[n];no()};document.head.appendChild(s)})));\n')
 patch('generated-art.js', 'function artPath(id){', "function artPath(id){const packedArt=globalThis.WOW_PACK?.['assets/generated/'+id+'.webp'];if(packedArt)return packedArt;")
 patch('gear-ui.js', 'src="assets/generated/gear-${template.slot}-t${eqRules().artTier(template.tier)}.webp?v=4">', 'src="${artPath(\'gear-\'+template.slot+\'-t\'+eqRules().artTier(template.tier))}">')
 patch('gear-data.js', "portrait:'assets/generated/familiar-'+index+'.webp?v=sharp3'", "portrait:globalThis.WOW_PACK?.['assets/generated/familiar-'+index+'.webp']||'assets/generated/familiar-'+index+'.webp?v=fullbody2'")
