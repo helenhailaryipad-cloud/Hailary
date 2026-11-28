@@ -11924,3 +11924,19 @@ html body #stage .city-hud .city-rank.pt-home::before,html body #stage .city-hud
 /* The bow of the Weapon Pack covered its power line: smaller, and the power always on top. */
 #stage #main .elite-sale .el-t1 .el-bow img,#stage #main .elite-sale .el-bow img{height:min(40cqw,30cqh)!important}
 #stage #main .elite-sale .el-cp{position:relative;z-index:3}
+
+/* The bow glows and shimmers (bowGlow / heroLiveHtml): a halo of the bow's own colour that pulses, and a band of light
+   that runs along the bow (masked to the bow's shape). Both breathe with her. */
+.city-hud .city-hero .hl-bow{transform-origin:50% 100%;animation:hero-breathe 3.6s ease-in-out infinite}
+.city-hud .city-hero .hl-glow{transform-origin:50% 100%;mix-blend-mode:screen;animation:hero-breathe 3.6s ease-in-out infinite,bow-glow 2.4s ease-in-out infinite}
+.city-hud .city-hero .hl-sweep{position:absolute;inset:0;overflow:hidden;pointer-events:none;transform-origin:50% 100%;
+ -webkit-mask-size:contain;mask-size:contain;-webkit-mask-position:50% 100%;mask-position:50% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+ animation:hero-breathe 3.6s ease-in-out infinite;mix-blend-mode:screen}
+.city-hud .city-hero .hl-sweep::before{content:"";position:absolute;left:0;right:0;top:-40%;height:40%;
+ background:linear-gradient(transparent,#ffffff00 20%,#fffbe6cc 50%,#ffffff00 80%,transparent);animation:bow-sweep 2.8s linear infinite}
+@keyframes bow-glow{0%,100%{opacity:.45}50%{opacity:1}}
+@keyframes bow-sweep{0%{transform:translateY(0)}70%,100%{transform:translateY(350%)}}
+@media (prefers-reduced-motion:reduce){.city-hud .city-hero .hl-glow,.city-hud .city-hero .hl-sweep::before,.city-hud .city-hero .hl-bow{animation:none}}
+@keyframes bow-glow{0%,100%{opacity:.7}50%{opacity:1}}
+.city-hud .city-hero .hl-sweep::before{background:linear-gradient(transparent,#ffffff00 15%,#ffffffee 50%,#ffffff00 85%,transparent)}
+.city-hud .city-hero .hl-glow{mix-blend-mode:normal}

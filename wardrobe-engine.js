@@ -18,7 +18,8 @@
   function freeze(value){if(value&&typeof value==='object'){Object.values(value).forEach(freeze);Object.freeze(value);}return value;}
   items.set(item.id,freeze(copy));return items.get(item.id);
  }
- const full='M0 0 H500 V800 H0 Z';
+ // The 'outside' of an exclude mask reaches past the 500 x 800 frame (padding for wings and big bows must not be clipped).
+ const full='M-3000 -3000 H3500 V3800 H-3000 Z';
  function clip(ctx,value,inverse=false){
   if(!value)return;
   let p;
