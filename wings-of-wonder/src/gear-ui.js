@@ -2439,7 +2439,7 @@ function citySupreme(){
   <div class="sup-sets">${r.supremeSets.map(x=>`<button class="${x.id===set.id?'on':''} ${r.supremeCount(S,x.id)?'':'none'}" style="--hue:${x.hue}" onclick="supremePick='${x.id}';supremeSel=null;citySupreme()">${denPlain}<img src="${artPath('fit-icon-'+x.dress)}" alt=""><b>${x.name}</b><small>${r.supremeCount(S,x.id)}/${r.supremePieceIds.length}${x.id===sale.set.id?' · on sale':''}</small></button>`).join('')}</div>
   <div class="satchel-nav well-nav sup-nav"><button data-back aria-label="Back to Fashion" onclick="go('fashion')">‹</button><button onclick="go('fashion')">${denPlain}Wardrobe</button><button onclick="go('eliteSale')">${denPlain}Elite Sale</button><button aria-current="page">${denPlain}Supreme Set</button></div></section>`;
  // The set strip keeps its place, and the chosen set stays in view (user: tapping Sweetheart / Ice Queen jumped the strip back to the start).
- {const strip=document.querySelector('.sup-sets');if(strip){if(keepSets!=null)strip.scrollLeft=keepSets;const on=strip.querySelector('button.on');if(on){const l=on.offsetLeft-strip.offsetLeft,r=l+on.offsetWidth;if(l<strip.scrollLeft||r>strip.scrollLeft+strip.clientWidth)strip.scrollLeft=Math.max(0,l-(strip.clientWidth-on.offsetWidth)/2)}}}
+ {const strip=document.querySelector('.sup-sets');if(typeof strip?.querySelector==='function'){if(keepSets!=null)strip.scrollLeft=keepSets;const on=strip.querySelector('button.on');if(on){const l=on.offsetLeft-strip.offsetLeft,r=l+on.offsetWidth;if(l<strip.scrollLeft||r>strip.scrollLeft+strip.clientWidth)strip.scrollLeft=Math.max(0,l-(strip.clientWidth-on.offsetWidth)/2)}}}
 }
 
 const isleGuilds=['Dawnwing','Moonveil','Embercrest'];
