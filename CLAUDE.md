@@ -965,6 +965,8 @@ tide-turtle, thunder-tiger, snow-owl, rainbow-phoenix, midnight-steed, honey-bea
   `mount-icon-<id>`. All 22 dresses and 21 hairstyles therefore fit every mount with no extra art.
 - Dress/hair layers were painted on the tabby and carried re-drawn grey fur; `off_the_cat()` now strips neutral-grey
   pixels over the cat's fur and keeps only what hangs together with the rider. Check new dresses on a dark mount.
+- Smaller on screen (2026-11-28, user: "make all mounts a bit smaller"): the home rider (`.city-hero.riding`, wings scaled with
+  her about her feet) and the Cloud War ride (`.cf2 .cloud-path img` 34%) are about 15-20% smaller; rules at the end of `stage.css`.
 - UI: Fashion has a fifth tab, Mounts (`mountFittingRoom`, `rideFashionMount`). Optional save fields `S.mountsOwned`
   (ids) and `S.mountPick` (last chosen); `chosenMount()` is what the Ride button mounts. Mounted keys are
   `#mounted-<dress>-<hair>~<mount>` (no suffix for the tabby). Mounts are cosmetic: no stats.
