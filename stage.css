@@ -11872,3 +11872,17 @@ html body #stage .city-hud .city-rank.pt-home::before,html body #stage .city-hud
 /* Home pets animated (petAnimSvg): the SVG fills the pet box like the picture did (contain, feet on the bottom);
    the 15% pad around the pet's square may show past the box. */
 .city-hud .city-pet svg.pet-anim{display:block;width:100%;height:100%;overflow:visible;pointer-events:none}
+
+/* Home Reina breathes and her wings beat (heroLiveLayers): both layers are the same picture size, stacked exactly where
+   the single winged portrait was (same 1.125 scale from the feet). Slow and small: a living figure, not a bounce. */
+.city-hud .city-hero .hero-live{position:relative;width:100%;flex:1;min-height:0;transform:scale(1.125);transform-origin:50% 100%}
+.city-hud .city-hero .hero-live img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:50% 100%}
+.city-hud .city-hero .hl-body{transform-origin:50% 100%;animation:hero-breathe 3.6s ease-in-out infinite}
+.city-hud .city-hero .hl-wings{transform-origin:50% 36%;animation:hero-wings 3.6s ease-in-out infinite}
+@keyframes hero-breathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.006,1.014)}}
+@keyframes hero-wings{0%,100%{transform:scale(1,1) translateY(0)}50%{transform:scale(.9,1.03) translateY(-1.2%)}}
+.city-hud .city-wings.riding img{transform-origin:50% 60%;animation:hero-wings 3s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.city-hud .city-hero .hl-body,.city-hud .city-hero .hl-wings,.city-hud .city-wings.riding img{animation:none}}
+.city-hud .city-hero .hero-live{animation:hero-sway 5.4s ease-in-out infinite}
+@keyframes hero-sway{0%,100%{transform:scale(1.125) rotate(0deg)}50%{transform:scale(1.125) rotate(.7deg)}}
+@media (prefers-reduced-motion:reduce){.city-hud .city-hero .hero-live{animation:none}}
