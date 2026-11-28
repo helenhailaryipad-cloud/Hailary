@@ -11901,3 +11901,14 @@ html body #stage .city-hud .city-rank.pt-home::before,html body #stage .city-hud
  font:900 min(4.2cqw,3.2cqh)/1.1 Georgia,serif;color:#ffe27a;letter-spacing:.03em;
  background:radial-gradient(closest-side,#1a1450aa,transparent);text-shadow:0 0 8px #ffcf5a88,0 2px 2px #2a1a00}
 #stage #main .sup-room .sup-center::before{inset:4% 15% 18%}
+
+/* Reina alive outside the home screen too (user: "add animation to Reina as well"): Fashion stage, Supreme Set figure and
+   the Character page breathe and sway from the feet; the Character page wings (a separate picture) beat. Uses the
+   individual `scale` / `rotate` properties, so existing transforms on these pictures stay as they are. */
+@keyframes reina-alive{0%,100%{scale:1 1;rotate:0deg}50%{scale:1.006 1.014;rotate:.5deg}}
+@keyframes reina-wingbeat{0%,100%{scale:1 1;translate:0 0}50%{scale:.9 1.03;translate:0 -1.2%}}
+.fx-room:not([data-category=Hair]) .fx-stage .fashion-model img,
+#stage #main .sup-room .sup-center>img:first-child,
+.reina-display .reina-figure{transform-origin:50% 100%;animation:reina-alive 4.2s ease-in-out infinite}
+.reina-display .reina-sheet-wings img{transform-origin:50% 60%;animation:reina-wingbeat 3.6s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.fx-room .fx-stage .fashion-model img,#stage #main .sup-room .sup-center>img:first-child,.reina-display .reina-figure,.reina-display .reina-sheet-wings img{animation:none}}

@@ -336,6 +336,9 @@ same size (every slot but `wingsBack`, and `wingsBack` alone) and `home()` stack
 single `winged-portrait` until ready, then swaps it in place). CSS at the end of `stage.css`: `hero-breathe` (body,
 3.6 s, from the feet), `hero-wings` (slow beat about the shoulder blades), `hero-sway` (whole figure +-0.7 deg, 5.4 s);
 the riding wings beat too; all off under prefers-reduced-motion. No new art: arms and hair do not move.
+Then (user: "add animation to Reina as well"): the Fashion stage figure, the Supreme Set figure and the Character page
+figure breathe and sway too (`reina-alive`, individual `scale`/`rotate` properties so existing transforms stay), the
+Character page wings beat (`reina-wingbeat`); not in the Hair close-up.
 
 ## Home Claim / Power Up tools (2026-11-27)
 User photos of the reference's two round icons above the quest line ("change these 2 icons like the photo"). The two
