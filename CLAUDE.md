@@ -554,6 +554,8 @@ Pairs and Lagoon Gala icons are gone from `.city-extra`; one larger `.city-minig
 `art-source/ui/minigames.webp` -> `comp-minigames-icon` by `build-ui-icons.py`) opens the hub. Isle Expedition and
 Cloud War stay (not mini games). Fishing came back as its own icon (user: "it is daily, by time"); the four icons
 sit in one row (`.city-extra` 4 columns, 34% wide).
+Mini Games moved to the bottom-left corner beside the chat strip (2026-11-28, user; `.city-minigames.corner`, outside
+`.city-extra`, which has three icons again), and the Challenge icon (`.city-reward`) is bigger (17% x 10%).
 
 ## Fishing cleanup and anglers (2026-11-23)
 User circled the app's sub-tab strip and bottom nav on the fishing screen ("clutter, keep only the fishing; not just a

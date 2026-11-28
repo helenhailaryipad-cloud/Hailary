@@ -11940,3 +11940,23 @@ html body #stage .city-hud .city-rank.pt-home::before,html body #stage .city-hud
 @keyframes bow-glow{0%,100%{opacity:.7}50%{opacity:1}}
 .city-hud .city-hero .hl-sweep::before{background:linear-gradient(transparent,#ffffff00 15%,#ffffffee 50%,#ffffff00 85%,transparent)}
 .city-hud .city-hero .hl-glow{mix-blend-mode:normal}
+
+/* Mini Games in the bottom-left corner beside the chat strip (user: "move Mini Games to the bottom-left corner"), the
+   Challenge icon a little bigger; the right-hand icon row keeps three icons. */
+#stage .city-hud .city-extra{width:25.5%!important;grid-template-columns:repeat(3,1fr)!important}
+#stage .city-hud button.city-minigames.corner{position:absolute;left:.5%;bottom:.8%;width:14.5%;height:12.5%;display:grid;grid-template-rows:1fr auto;justify-items:center;align-items:end;padding:0;z-index:3}
+#stage .city-hud button.city-minigames.corner .city-glyph{width:100%;height:100%;transform:none!important;display:grid;place-items:end center}
+#stage .city-hud button.city-minigames.corner .city-glyph img{width:auto;height:100%;max-width:100%;object-fit:contain;filter:drop-shadow(0 0 6px #ffe27a) drop-shadow(0 3px 4px #0006)}
+#stage .city-hud button.city-minigames.corner .city-caption{margin:0!important;font:900 min(3cqw,19px)/1.05 Arial,sans-serif;color:#fff3c0;text-shadow:0 1px 2px #3a2400,0 0 3px #3a2400}
+#stage .city-hud .city-reward{width:16%!important;height:8.2%!important;bottom:14.5%!important;left:.5%!important}
+#stage .city-hud .city-reward img{height:78%!important}
+#stage .city-hud .city-reward small{font-size:min(3.3cqw,21px)!important}
+#stage .city-hud button.city-reward{width:17%!important;height:10%!important;bottom:13%!important;display:grid!important;grid-template-rows:1fr auto;justify-items:center;align-items:end;padding:0!important}
+#stage .city-hud button.city-reward img{width:auto!important;height:100%!important;max-height:none!important;max-width:100%!important;min-height:0;object-fit:contain;filter:drop-shadow(0 3px 4px #0005)}
+#stage .city-hud button.city-reward small{font:900 min(3cqw,20px)/1.05 Arial,sans-serif!important;color:#fff;text-shadow:0 1px 2px #2a3a20,0 0 3px #2a3a20}
+#stage .city-hud button.city-minigames.corner{bottom:1.2%;height:11.5%}
+#stage .city-hud button.city-reward,#stage .city-hud button.city-minigames.corner{grid-template-rows:minmax(0,1fr) auto!important}
+#stage .city-hud button.city-minigames.corner .city-glyph{height:auto;min-height:0;overflow:visible}
+#stage .city-hud button.city-reward small,#stage .city-hud button.city-minigames.corner .city-caption{font-size:clamp(11px,2.5vw,18px)!important;white-space:nowrap}
+#stage .city-hud button.city-minigames.corner .city-glyph{height:100%!important;overflow:hidden}
+#stage .city-hud button.city-minigames.corner .city-glyph img{height:100%!important;max-height:100%!important}
